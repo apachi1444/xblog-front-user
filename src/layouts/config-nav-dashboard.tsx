@@ -14,33 +14,41 @@ export const navData = [
     icon: icon('ic-analytics'),
   },
   {
-    title: 'User',
+    title: 'Generate',
     path: '/user',
     icon: icon('ic-user'),
   },
   {
-    title: 'Product',
-    path: '/products',
-    icon: icon('ic-cart'),
-    info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
-  },
-  {
-    title: 'Blog',
+    title: 'Blogs',
     path: '/blog',
     icon: icon('ic-blog'),
   },
   {
-    title: 'Sign in',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
+    title: 'Stores',
+    path: '/stores',  
+    icon: icon('ic-cart'),
+    info: (
+      <Label color="error" variant="inverted">
+        +1
+      </Label>
+    ),
+  },
+];
+
+export const bottomNavData = [
+  {
+    title: 'Profile',
+    path: '/profile',
+    icon: icon('ic-blog'),
   },
   {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic-disabled'),
+    title: 'Settings',
+    path: '/settings',
+    icon: icon('ic-blog'),
+  },
+  {
+    title: 'Upgrade your license',
+    path: '/upgrade',
+    icon: icon('ic-blog'),
   },
 ];

@@ -94,11 +94,11 @@ export function HeaderSection({
             {slots?.centerArea}
           </Box>
 
+          {slots?.bottomArea}
+
           {slots?.rightArea}
         </Container>
       </Toolbar>
-
-      {slots?.bottomArea}
     </AppBar>
   );
 }

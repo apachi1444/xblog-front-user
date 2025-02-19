@@ -3,6 +3,7 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import { useEffect } from 'react';
 
 import Box from '@mui/material/Box';
+import { Divider } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -29,6 +30,12 @@ export type NavContentProps = {
     title: string;
     icon: React.ReactNode;
     info?: React.ReactNode;
+  }[]; 
+  bottomNavData: {
+    path: string;
+    title: string;
+    icon: React.ReactNode;
+    info?: React.ReactNode;
   }[];
   slots?: {
     topArea?: React.ReactNode;
@@ -41,6 +48,7 @@ export type NavContentProps = {
 export function NavDesktop({
   sx,
   data,
+  bottomNavData,
   slots,
   workspaces,
   layoutQuery,
@@ -68,7 +76,7 @@ export function NavDesktop({
         ...sx,
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent data={data} slots={slots} workspaces={workspaces} bottomNavData={bottomNavData}/>
     </Box>
   );
 }
@@ -78,6 +86,7 @@ export function NavDesktop({
 export function NavMobile({
   sx,
   data,
+  bottomNavData,
   open,
   slots,
   onClose,
@@ -107,14 +116,14 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} />
+      <NavContent data={data} slots={slots} workspaces={workspaces} bottomNavData={bottomNavData} />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
+export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavContentProps) {
   const pathname = usePathname();
 
   return (
@@ -166,6 +175,49 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
                     </Box>
 
                     {item.info && item.info}
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+
+            <Divider />
+
+            {bottomNavData.map((item) => {
+              const isActived = item.path === pathname;
+
+              return (
+                <ListItem disableGutters disablePadding key={item.title}>
+                  <ListItemButton
+                    disableGutters
+                    component={RouterLink}
+                    href={item.path}
+                    sx={{
+                      pl: 2,
+                      py: 1,
+                      gap: 2,
+                      pr: 1.5,
+                      borderRadius: 0.75,
+                      typography: 'body2',
+                      fontWeight: 'fontWeightMedium',
+                      color: 'var(--layout-nav-item-color)',
+                      minHeight: 'var(--layout-nav-item-height)',
+                      ...(isActived && {
+                        fontWeight: 'fontWeightSemiBold',
+                        bgcolor: 'var(--layout-nav-item-active-bg)',
+                        color: 'var(--layout-nav-item-active-color)',
+                        '&:hover': {
+                          bgcolor: 'var(--layout-nav-item-hover-bg)',
+                        },
+                      }),
+                    }}
+                  >
+                    <Box component="span" sx={{ width: 24, height: 24 }}>
+                      {item.icon}
+                    </Box>
+
+                    <Box component="span" flexGrow={1}>
+                      {item.title}
+                    </Box>
                   </ListItemButton>
                 </ListItem>
               );

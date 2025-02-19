@@ -58,6 +58,7 @@ module.exports = {
     'jsx-a11y/control-has-associated-label': 0,
     // unused imports
     'unused-imports/no-unused-imports': 1,
+    'import/no-extraneous-dependencies': [0, {"devDependencies": true}],
     'unused-imports/no-unused-vars': [
       0,
       { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
