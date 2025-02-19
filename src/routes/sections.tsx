@@ -17,8 +17,11 @@ export const StoresPage = lazy(() => import('src/pages/stores'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const SignUpPage = lazy(() => import('src/pages/sign-up'));
+export const SettingsPage = lazy(() => import('src/pages/settings'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
+export const ProfilePage = lazy(() => import('src/pages/profile'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
+export const UpgradeLicense = lazy(() => import('src/pages/upgrade-license'));
 
 // ----------------------------------------------------------------------
 
@@ -53,6 +56,9 @@ export function Router() {
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'stores', element: <StoresPage /> },
+        { path: 'profile', element: <ProfilePage /> },
+        { path: 'settings', element: <SettingsPage /> },
+        { path: 'upgrade-license', element: <UpgradeLicense /> },
       ],
     },
     {

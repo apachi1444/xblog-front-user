@@ -48,7 +48,7 @@ export const bottomNavData = [
   },
   {
     title: 'Upgrade your license',
-    path: '/upgrade',
+    path: '/upgrade-license',
     icon: icon('ic-blog'),
   },
 ];

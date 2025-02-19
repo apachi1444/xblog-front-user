@@ -12,7 +12,7 @@ import { NotificationsForm } from 'src/components/profile/NotificationForm';
 
 // ----------------------------------------------------------------------
 
-export function BlogView() {
+export function ProfileView() {
   
   const [activeTab, setActiveTab] = useState("profile")
 
