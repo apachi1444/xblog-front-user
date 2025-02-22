@@ -26,7 +26,7 @@ export const navData = [
   {
     title: 'Calendar',
     path: '/blog',
-    icon: icon('ic-blog'),
+    icon: icon('ic-user'),
   },
   {
     title: 'Stores',
