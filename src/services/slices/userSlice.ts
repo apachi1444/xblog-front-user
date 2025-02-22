@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { getToken } from 'src/utils/auth';
+import { getToken, setToken } from 'src/utils/auth';
 
 import hostname from '../config';
 
@@ -55,8 +55,7 @@ export const authenticateWithGoogle = createAsyncThunk(
         access_token: accessToken
       });
       
-      // Store the token
-      localStorage.setItem('access_token', response.data.token);
+      setToken(response.data.token);
       
       return response.data.user;
     } catch (error: any) {
@@ -73,10 +72,12 @@ const userSlice = createSlice({
       state,
       action: PayloadAction<{ user: User; userToken: string }>
     ) => {
+      setToken("fakeToken");
       state.user = action.payload.user;
       state.userToken = action.payload.userToken;
     },
     logout: (state) => {
+      setToken(null)
       state.user = null;
       state.userToken = null;
     },

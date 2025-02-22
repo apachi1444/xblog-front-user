@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import GlobalConfig from 'global-config';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
 import { security } from '../internals/security';
 
 // API == Backend For Frontend

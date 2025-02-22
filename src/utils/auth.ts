@@ -1,7 +1,16 @@
-export const getToken = (): string => {
-  const token = localStorage.getItem('access_token');
-  if (!token) {
-    throw new Error("Access token not found in localStorage");
+export const getToken = () => {
+  try {
+    return sessionStorage.getItem('access_token');
+  } catch (error) {
+    console.error('Error retrieving token:', error);
+    return null;
   }
-  return token;
+};
+
+export const setToken = (access_token: string | null): void => {
+  try {
+    sessionStorage.setItem('access_token', access_token ?? "");
+  } catch (error) {
+    console.error('Error retrieving token:', error);
+  }
 };

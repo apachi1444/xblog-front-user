@@ -24,6 +24,11 @@ export const navData = [
     icon: icon('ic-blog'),
   },
   {
+    title: 'Calendar',
+    path: '/blog',
+    icon: icon('ic-blog'),
+  },
+  {
     title: 'Stores',
     path: '/stores',  
     icon: icon('ic-cart'),
@@ -37,17 +42,12 @@ export const navData = [
 
 export const bottomNavData = [
   {
-    title: 'Profile',
-    path: '/profile',
-    icon: icon('ic-blog'),
-  },
-  {
-    title: 'Settings',
-    path: '/settings',
-    icon: icon('ic-blog'),
-  },
-  {
     title: 'Upgrade your license',
+    path: '/upgrade-license',
+    icon: icon('ic-blog'),
+  },
+  {
+    title: 'Book Demo',
     path: '/upgrade-license',
     icon: icon('ic-blog'),
   },
