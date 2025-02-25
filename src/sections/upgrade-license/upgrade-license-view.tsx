@@ -1,13 +1,9 @@
-"use client"
-
-import { useState } from "react"
-import { Eye, Check, Filter, Download } from "lucide-react"
+import { Eye, Check, Download } from "lucide-react"
 
 import {
   Box,
   Card,
   Chip,
-  Input,
   Table,
   Button,
   TableRow,
@@ -16,167 +12,204 @@ import {
   TableCell,
   TableHead,
   Typography,
-  CardHeader,
   CardContent,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "@mui/material"
 
 import { DashboardContent } from "src/layouts/dashboard"
 
 const plans = [
   {
-    name: "Starter Plan",
-    price: "10.00",
-    period: "/month",
-    tag: "FREE",
-    tagColor: "warning",
+    name: "Basic Plan",
+    subtitle: "Suitable plan for starter business",
+    price: "99.99",
+    period: "/year",
     features: [
-      "Manage up to 1,000 contacts",
-      "Basic customer management tools",
-      "Task and workflow automation",
-      "Integration with third-party apps (limited)",
-      "Customizable dashboards",
+      "Customers Segmentations",
+      "Google Integrations",
+      "Activity Reminder"
     ],
-    current: true,
-  },
-  {
-    name: "Growth Plan",
-    price: "79.00",
-    period: "/month",
-    tag: "PRO",
-    tagColor: "primary",
-    features: [
-      "Manage up to 10,000 contacts",
-      "Advanced customer management",
-      "Full workflow automation",
-      "Real-time reporting and analytics",
-      "Collaborative team features",
-    ],
-    highlight: true,
+    current: false,
   },
   {
     name: "Enterprise Plan",
-    price: "Custom",
-    period: "/month",
-    tag: "ADVANCE",
-    tagColor: "success",
+    subtitle: "Best plan for mid-sized businesses",
+    price: "119.99",
+    period: "/year",
     features: [
-      "Unlimited contacts and data storage",
-      "Custom workflow and automation setups",
-      "Dedicated account manager",
-      "Advanced analytics and reporting",
-      "Full API access and custom integrations",
+      "Get a Basic Plans",
+      "Access All Feature",
+      "Get 1TB Cloud Storage"
     ],
+    current: false,
   },
+  {
+    name: "Professional Plan",
+    subtitle: "Suitable plan for starter",
+    price: "149.99",
+    period: "/year",
+    features: [
+      "Get Enterprise Plan",
+      "Access All Feature",
+      "Get 2TB Cloud Storage"
+    ],
+    current: true,
+    highlight: true,
+  }
 ]
 
 const billingHistory = [
   {
-    planName: "Starter Plan - Jun 2024",
-    amount: "10.00",
-    purchaseDate: "2024-06-01",
-    endDate: "2024-06-31",
-    status: "Processing",
-  },
-  {
-    planName: "Growth Plan - May 2024",
-    amount: "79.00",
-    purchaseDate: "2024-05-01",
-    endDate: "2024-05-31",
+    invoiceId: "Invoice #129810",
+    amount: "149.99",
+    purchaseDate: "25 Dec 2023",
+    plan: "Professional Plan",
     status: "Success",
   },
+  {
+    invoiceId: "Invoice #129810",
+    amount: "149.99",
+    purchaseDate: "05 Jul 2023",
+    plan: "Professional Plan",
+    status: "Success",
+  }
 ]
 
 export function UpgradeLicenseView() {
-  const [billingCycle, setBillingCycle] = useState("monthly")
-
   return (
     <DashboardContent>
       <Box p={4}>
         <Container maxWidth="lg">
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-            <div>
-              <Typography variant="h4">Billing & Subscription</Typography>
-              <Typography color="textSecondary">
-                Keep track of your subscription details, update your billing info, and manage payments.
-              </Typography>
-            </div>
-            <ToggleButtonGroup
-              value={billingCycle}
-              exclusive
-              onChange={(e, value) => value && setBillingCycle(value)}
-            >
-              <ToggleButton value="monthly">Monthly</ToggleButton>
-              <ToggleButton value="yearly">Yearly</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+          <Typography variant="h4" gutterBottom>
+            Billings
+          </Typography>
+          <Typography color="text.secondary" gutterBottom>
+            Pick a billing plan that suits you
+          </Typography>
 
-          <Box display="grid" gridTemplateColumns={{ md: "repeat(3, 1fr)" }} gap={3} mb={4}>
+          <Box 
+            display="grid" 
+            gridTemplateColumns={{ xs: "1fr", md: "repeat(3, 1fr)" }} 
+            gap={3} 
+            mb={4}
+            mt={4}
+          >
             {plans.map((plan) => (
-              <Card key={plan.name} variant="outlined">
-                <CardHeader
-                  title={plan.name}
-                />
-                <CardContent>
-                  <Typography variant="h4" gutterBottom>
-                    ${plan.price} <Typography component="span">{plan.period}</Typography>
+              <Card 
+                key={plan.name} 
+                variant="outlined"
+                sx={{
+                  bgcolor: plan.highlight ? 'primary.main' : 'background.paper',
+                  color: plan.highlight ? 'primary.contrastText' : 'text.primary',
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {plan.name}
                   </Typography>
-                  <ul>
+                  <Typography variant="body2" sx={{ mb: 3, opacity: 0.7 }}>
+                    {plan.subtitle}
+                  </Typography>
+                  
+                  <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'baseline' }}>
+                    ${plan.price}
+                    <Typography 
+                      component="span" 
+                      variant="body1" 
+                      sx={{ ml: 1, opacity: 0.7 }}
+                    >
+                      {plan.period}
+                    </Typography>
+                  </Typography>
+
+                  <Box sx={{ my: 3 }}>
                     {plan.features.map((feature) => (
-                      <li key={feature} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <Check size={16} color="green" /> {feature}
-                      </li>
+                      <Box 
+                        key={feature} 
+                        sx={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          gap: 1,
+                          mb: 1 
+                        }}
+                      >
+                        <Check 
+                          size={18} 
+                          color={plan.highlight ? "white" : "green"} 
+                        />
+                        <Typography variant="body2">
+                          {feature}
+                        </Typography>
+                      </Box>
                     ))}
-                  </ul>
-                </CardContent>
-                <Box p={2}>
-                  <Button fullWidth variant={plan.current ? "outlined" : "contained"}>
-                    {plan.current ? "Current Plan" : "Upgrade Plan"}
+                  </Box>
+
+                  <Button 
+                    fullWidth 
+                    variant={plan.highlight ? "contained" : "outlined"}
+                    color={plan.highlight ? "inherit" : "primary"}
+                    sx={{ 
+                      mt: 2,
+                      bgcolor: plan.highlight ? 'background.paper' : undefined,
+                      color: plan.highlight ? 'primary.main' : undefined,
+                      '&:hover': {
+                        bgcolor: plan.highlight ? 'background.paper' : undefined,
+                      }
+                    }}
+                  >
+                    {plan.current ? "Active plan" : "Choose Plan"}
                   </Button>
-                </Box>
+                </CardContent>
               </Card>
             ))}
           </Box>
 
-          <Box border={1} borderColor="divider" borderRadius={2}>
-            <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6">Billing History</Typography>
-              <Box display="flex" gap={1}>
-                <Input placeholder="Search..." />
-                <Button startIcon={<Filter />} variant="outlined" size="small">
-                  Filter
-                </Button>
-                <Button startIcon={<Download />} variant="outlined" size="small">
-                  Export
-                </Button>
-              </Box>
-            </Box>
-
+          <Box sx={{ mt: 6 }}>
+            <Typography variant="h6" gutterBottom>
+              Billing History
+            </Typography>
+            
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Plan Name</TableCell>
+                  <TableCell>No</TableCell>
+                  <TableCell>Invoices</TableCell>
+                  <TableCell>Created Date</TableCell>
                   <TableCell>Amount</TableCell>
-                  <TableCell>Purchase Date</TableCell>
-                  <TableCell>End Date</TableCell>
+                  <TableCell>Plan</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {billingHistory.map((item) => (
-                  <TableRow key={item.planName}>
-                    <TableCell>{item.planName}</TableCell>
-                    <TableCell>${item.amount}</TableCell>
+                {billingHistory.map((item, index) => (
+                  <TableRow key={item.invoiceId}>
+                    <TableCell>{String(index + 1).padStart(2, '0')}</TableCell>
+                    <TableCell>{item.invoiceId}</TableCell>
                     <TableCell>{item.purchaseDate}</TableCell>
-                    <TableCell>{item.endDate}</TableCell>
+                    <TableCell>${item.amount}</TableCell>
+                    <TableCell>{item.plan}</TableCell>
                     <TableCell>
-                      <Chip label={item.status} color={item.status === "Success" ? "success" : "warning"} size="small" />
+                      <Chip 
+                        label={item.status} 
+                        color={item.status === "Success" ? "success" : "warning"} 
+                        size="small" 
+                      />
                     </TableCell>
                     <TableCell>
-                      <Button size="small" variant="outlined" startIcon={<Download />} />
-                      <Button size="small" variant="outlined" startIcon={<Eye />} />
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          color="primary"
+                          startIcon={<Download />}
+                        />
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          color="primary"
+                          startIcon={<Eye />}
+                        />
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}

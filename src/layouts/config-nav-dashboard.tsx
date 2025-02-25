@@ -48,7 +48,7 @@ export const bottomNavData = [
   },
   {
     title: 'Book Demo',
-    path: '/upgrade-license',
-    icon: icon('ic-blog'),
+    path: '/book-demo',
+    icon: icon('ic-calendar'),
   },
 ];

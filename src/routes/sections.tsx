@@ -22,6 +22,7 @@ export const ProductsPage = lazy(() => import('src/pages/products'));
 export const ProfilePage = lazy(() => import('src/pages/profile'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const UpgradeLicense = lazy(() => import('src/pages/upgrade-license'));
+export const BookDemo = lazy(() => import('src/pages/book-demo'));
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +60,7 @@ export function Router() {
         { path: 'profile', element: <ProfilePage /> },
         { path: 'settings', element: <SettingsPage /> },
         { path: 'upgrade-license', element: <UpgradeLicense /> },
+        { path: 'book-demo', element: <BookDemo /> },
       ],
     },
     {
