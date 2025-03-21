@@ -101,6 +101,11 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                       href: '/settings',
                       icon: <Iconify width={22} icon="solar:settings-bold-duotone" />,
                     },
+                    {
+                      label: 'My Stores',
+                      href: '/my-stores',
+                      icon: <Iconify width={22} icon="solar:cart-bold-duotone" />,
+                    },
                   ]}
                 />
               </Box>

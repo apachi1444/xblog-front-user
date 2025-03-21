@@ -1,22 +1,19 @@
+import { Trash2 } from "lucide-react";
 import { useState, useCallback } from 'react'
 
-import {
-  Box,
-  Grid,
-  Card,
-  Badge,
-  Avatar,
-  Button,
-  Select,
+import { Box, Grid, Card, Table, Paper, Avatar, Button, Select, TableRow ,
   MenuItem,
+  TableBody,
+  TableCell,
+  TableHead,
   Container,
   TextField,
-  Typography,
   IconButton,
+  Typography,
   Pagination,
-  CardContent,
-  InputAdornment
-} from '@mui/material'
+  TableContainer,
+  InputAdornment,
+} from "@mui/material";
 
 import { Iconify } from 'src/components/iconify'
 
@@ -40,7 +37,10 @@ interface Store {
     publishedDate: string
     readTime: string
     views: number
-  }[]
+  }[],
+  platform?: string
+  business?: string
+  creationDate?: string
 }
 
 const demoStores: Store[] = [
@@ -57,6 +57,9 @@ const demoStores: Store[] = [
       sales: 500,
       revenue: 25000,
     },
+    business : "Technology",
+    creationDate : "2025-02-02",
+    platform : "WordPress",
     articles_list: [
       {
         id: "1",
@@ -66,10 +69,35 @@ const demoStores: Store[] = [
         readTime: "8 min read",
         views: 1200,
       },
-      // ... more articles
     ],
   },
-  // ... more stores
+  {
+    id: "2",
+    name: "WordPress",
+    url: "https://itclevers.com",
+    logo: "/placeholder.svg",
+    isConnected: true,
+    articlesCount: 42,
+    lastUpdated: "2023-05-15",
+    performance: {
+      visitors: 15000,
+      sales: 500,
+      revenue: 25000,
+    },
+    business : "Technology",
+    creationDate : "2025-02-02",
+    platform : "WordPress",
+    articles_list: [
+      {
+        id: "1",
+        title: "10 Must-Have WordPress Plugins for 2023",
+        description: "Discover the essential plugins that will enhance your WordPress site...",
+        publishedDate: "2023-05-10",
+        readTime: "8 min read",
+        views: 1200,
+      },
+    ],
+  },
 ]
 
 export function StoresView() {
@@ -161,6 +189,9 @@ export function StoresView() {
     )
   }
 
+  const handleDelete = (id: string) => {}
+  
+
   return (
     <Container>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
@@ -208,62 +239,53 @@ export function StoresView() {
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        {filteredStores.map((store) => (
-          <Grid item xs={12} md={viewMode === 'grid' ? 6 : 12} lg={viewMode === 'grid' ? 4 : 12} key={store.id}>
-            <Card 
-              variant="outlined" 
-              sx={{ cursor: 'pointer', '&:hover': { boxShadow: 6 } }}
-              onClick={() => setSelectedStore(store)}
-            >
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="start">
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar src={store.logo} sx={{ width: 48, height: 48 }} />
-                    <Box>
-                      <Typography variant="h6">{store.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {store.url}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Badge
-                    badgeContent={store.isConnected ? 'Online' : 'Offline'}
-                    color={store.isConnected ? 'success' : 'error'}
-                    sx={{
-                      '& .MuiBadge-badge': {
-                        right: -8,
-                        top: 16,
-                        border: `2px solid`,
-                        padding: '0 4px'
-                      }
-                    }}
-                  />
-                </Box>
-
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={6} md={3}>
-                    <Typography variant="body2" color="text.secondary">Articles</Typography>
-                    <Typography variant="subtitle1">{store.articlesCount}</Typography>
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <Typography variant="body2" color="text.secondary">Visitors</Typography>
-                    <Typography variant="subtitle1">{store.performance.visitors.toLocaleString()}</Typography>
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <Typography variant="body2" color="text.secondary">Revenue</Typography>
-                    <Typography variant="subtitle1">${store.performance.revenue.toLocaleString()}</Typography>
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <Typography variant="body2" color="text.secondary">Last Updated</Typography>
-                    <Typography variant="subtitle1">{store.lastUpdated}</Typography>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell><strong>Website</strong></TableCell>
+            <TableCell><strong>Platform</strong></TableCell>
+            <TableCell><strong>Business</strong></TableCell>
+            <TableCell><strong>Creation Date</strong></TableCell>
+            <TableCell><strong>Articles</strong></TableCell>
+            <TableCell><strong>Status</strong></TableCell>
+            <TableCell><strong>Actions</strong></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {demoStores.map((store) => (
+            <TableRow key={store.id}>
+              <TableCell>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <Avatar src={store.logo} alt={store.name} />
+                  <div>
+                    <p>{store.name}</p>
+                    <p style={{ color: "gray", fontSize: "0.875rem" }}>{store.url}</p>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>{store.platform}</TableCell>
+              <TableCell>{store.business}</TableCell>
+              <TableCell>{store.creationDate}</TableCell>
+              <TableCell>{store.articlesCount}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  color={store.isConnected ? "success" : "error"}
+                >
+                  {store.isConnected ? "Connected" : "Connect"}
+                </Button>
+              </TableCell>
+              <TableCell>
+                <IconButton onClick={() => handleDelete(store.id)} color="error">
+                  <Trash2 />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Pagination count={10} color="primary" />

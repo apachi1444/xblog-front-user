@@ -29,14 +29,16 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
-    title: 'Stores',
+    title: 'My Websites',
     path: '/stores',  
     icon: icon('ic-cart'),
+    /*
     info: (
       <Label color="error" variant="inverted">
         +1
       </Label>
     ),
+    */
   },
 ];
 
@@ -49,6 +51,6 @@ export const bottomNavData = [
   {
     title: 'Book Demo',
     path: '/book-demo',
-    icon: icon('ic-calendar'),
+    icon: icon('ic-blog'),
   },
 ];
