@@ -23,6 +23,9 @@ export const ProfilePage = lazy(() => import('src/pages/profile'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const UpgradeLicense = lazy(() => import('src/pages/upgrade-license'));
 export const BookDemo = lazy(() => import('src/pages/book-demo'));
+export const CalendarPage = lazy(() => import('src/pages/calendar'));
+export const StoresView = lazy(() => import('../sections/stores/stores-view').then(module => ({ default: module.StoresView })));
+export const AddStoreFlow = lazy(() => import('../sections/stores/add-store'));
 
 // ----------------------------------------------------------------------
 
@@ -40,7 +43,7 @@ const renderFallback = (
 );
 
 export function Router() {
-  return useRoutes([
+  const routes = useRoutes([
     {
       element: (
         <AuthGuard>
@@ -56,11 +59,13 @@ export function Router() {
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
-        { path: 'stores', element: <StoresPage /> },
         { path: 'profile', element: <ProfilePage /> },
         { path: 'settings', element: <SettingsPage /> },
         { path: 'upgrade-license', element: <UpgradeLicense /> },
         { path: 'book-demo', element: <BookDemo /> },
+        { path: 'stores', element: <StoresPage /> },
+        { path: 'stores/add', element: <AddStoreFlow /> },
+        { path: 'calendar', element: <CalendarPage /> },
       ],
     },
     {
@@ -88,4 +93,6 @@ export function Router() {
       element: <Navigate to="/404" replace />,
     },
   ]);
+
+  return routes;
 }

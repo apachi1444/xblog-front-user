@@ -1,8 +1,12 @@
 import { Trash2 } from "lucide-react";
+import { useSnackbar } from 'notistack';
 import { useState, useCallback } from 'react'
+import { useNavigate } from "react-router-dom";
 
-import { Box, Grid, Card, Table, Paper, Avatar, Button, Select, TableRow ,
+import { Box, Grid, Card, Table, Paper, Alert, Avatar, Button, Select ,
+  TableRow,
   MenuItem,
+  Snackbar,
   TableBody,
   TableCell,
   TableHead,
@@ -16,6 +20,8 @@ import { Box, Grid, Card, Table, Paper, Avatar, Button, Select, TableRow ,
 } from "@mui/material";
 
 import { Iconify } from 'src/components/iconify'
+
+import AddStoreModal from './add-store-modal';
 
 interface Store {
   id: string
@@ -101,14 +107,29 @@ const demoStores: Store[] = [
 ]
 
 export function StoresView() {
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [selectedStore, setSelectedStore] = useState<Store | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('latest')
+  const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort)
   }, [])
+
+  const handleDelete = useCallback((id: string) => {
+    // Handle store deletion logic
+    console.log('Deleting store with ID:', id);
+  }, [])
+
+  const handleAddStoreSuccess = useCallback(() => {
+    enqueueSnackbar('Store connected successfully!', { 
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' }
+    });
+  }, [enqueueSnackbar]);
 
   const filteredStores = demoStores.filter(store =>
     store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -189,9 +210,6 @@ export function StoresView() {
     )
   }
 
-  const handleDelete = (id: string) => {}
-  
-
   return (
     <Container>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
@@ -199,6 +217,9 @@ export function StoresView() {
         <Button
           variant="contained"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => {
+            navigate("/stores/add")
+          }}
         >
           New Store
         </Button>
@@ -253,7 +274,7 @@ export function StoresView() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {demoStores.map((store) => (
+          {filteredStores.map((store) => (
             <TableRow key={store.id}>
               <TableCell>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -290,6 +311,22 @@ export function StoresView() {
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Pagination count={10} color="primary" />
       </Box>
+
+      <AddStoreModal
+        open={isAddStoreModalOpen}
+        onClose={() => setIsAddStoreModalOpen(false)}
+        onSuccess={handleAddStoreSuccess}
+      />
+
+      <Snackbar 
+          open={isAddStoreModalOpen} 
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          autoHideDuration={3000}
+        >
+          <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
+            Store connected successfully!
+          </Alert>
+        </Snackbar>
     </Container>
   )
 }
