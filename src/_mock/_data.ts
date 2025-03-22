@@ -1,3 +1,6 @@
+import type { Store } from 'src/types/store';
+import type { StoreProps } from 'src/sections/stores/components/store-table-row';
+
 import {
   _id,
   _price,
@@ -185,5 +188,92 @@ export const _notifications = [
     type: 'order-shipped',
     postedAt: _times(5),
     isUnRead: false,
+  },
+];
+
+export const _stores: Store[] = [
+  {
+    id: "1",
+    name: "WordPress",
+    url: "https://itclevers.com",
+    logo: "/placeholder.svg",
+    isConnected: true,
+    articlesCount: 42,
+    lastUpdated: "2023-05-15",
+    performance: {
+      visitors: 15000,
+      sales: 500,
+      revenue: 25000,
+    },
+    business : "Technology",
+    creationDate : "2025-02-02",
+    platform : "WordPress",
+    articles_list: [
+      {
+        id: "1",
+        title: "10 Must-Have WordPress Plugins for 2023",
+        description: "Discover the essential plugins that will enhance your WordPress site...",
+        publishedDate: "2023-05-10",
+        readTime: "8 min read",
+        views: 1200,
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "WordPress",
+    url: "https://itclevers.com",
+    logo: "/placeholder.svg",
+    isConnected: true,
+    articlesCount: 42,
+    lastUpdated: "2023-05-15",
+    performance: {
+      visitors: 15000,
+      sales: 500,
+      revenue: 25000,
+    },
+    business : "Technology",
+    creationDate : "2025-02-02",
+    platform : "WordPress",
+    articles_list: [
+      {
+        id: "1",
+        title: "10 Must-Have WordPress Plugins for 2023",
+        description: "Discover the essential plugins that will enhance your WordPress site...",
+        publishedDate: "2023-05-10",
+        readTime: "8 min read",
+        views: 1200,
+      },
+    ],
+  },
+]
+
+export const fakeStores: StoreProps[] = [
+  {
+    id: '1',
+    name: 'Alpha Store',
+    role: 'admin',
+    status: 'active',
+    company: 'Alpha Corp',
+    avatarUrl: 'https://example.com/avatar1.png',
+    isVerified: true,
+  },
+  {
+    id: '2',
+    name: 'Beta Store',
+    role: 'user',
+    status: 'inactive',
+    company: 'Beta Ltd',
+    avatarUrl: 'https://example.com/avatar2.png',
+    isVerified: false,
+  },
+  {
+    id: '3',
+    name: 'Gamma Store',
+    role: 'manager',
+    status: 'active',
+    company: 'Gamma Inc',
+    avatarUrl: 'https://example.com/avatar3.png',
+    isVerified: true,
   },
 ];

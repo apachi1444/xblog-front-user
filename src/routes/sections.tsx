@@ -25,8 +25,8 @@ export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const UpgradeLicense = lazy(() => import('src/pages/upgrade-license'));
 export const BookDemo = lazy(() => import('src/pages/book-demo'));
 export const CalendarPage = lazy(() => import('src/pages/calendar'));
-export const StoresView = lazy(() => import('../sections/stores/stores-view').then(module => ({ default: module.StoresView })));
-export const AddStoreFlow = lazy(() => import('../sections/stores/add-store'));
+export const StoresView = lazy(() => import('../sections/stores/view/stores-view').then(module => ({ default: module.StoresView })));
+export const AddStoreFlow = lazy(() => import('../sections/add-store/view'));
 
 // ----------------------------------------------------------------------
 

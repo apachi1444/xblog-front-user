@@ -1,14 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { 
-  Step, 
-  Stepper,
-  StepLabel,
-  Typography
-} from '@mui/material';
-
 import { DashboardContent } from 'src/layouts/dashboard';
+
+import { FormStepper } from 'src/components/stepper/FormStepper';
 
 import SelectPlatform from './SelectPlatform';
 import WebsiteDetails from './WebsiteDetails';
@@ -137,19 +132,12 @@ export default function AddStoreFlow() {
 
   return (
     <DashboardContent>
-        <Typography variant="h4" gutterBottom>
-          Add New Store
-        </Typography>
-        
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        
-        {renderStepContent()}
+      <FormStepper
+        steps={['Content Setup', 'Content Structuring', 'Publish']}
+        activeStep={activeStep}
+      />
+      
+      {renderStepContent()}
     </DashboardContent>
   );
-} 
+}

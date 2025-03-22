@@ -102,8 +102,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                       icon: <Iconify width={22} icon="solar:settings-bold-duotone" />,
                     },
                     {
-                      label: 'My Stores',
-                      href: '/my-stores',
+                      label: 'My websites',
+                      href: '/stores',
                       icon: <Iconify width={22} icon="solar:cart-bold-duotone" />,
                     },
                   ]}

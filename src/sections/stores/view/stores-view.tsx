@@ -1,41 +1,73 @@
+import type { Store } from "src/types/store";
+
+import { useSnackbar } from "notistack";
 import { useState, useCallback } from 'react';
+import { useNavigate } from "react-router-dom";
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import TableBody from '@mui/material/TableBody';
+import { Alert, Snackbar } from "@mui/material";
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { _users } from 'src/_mock';
+import { fakeStores } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { Iconify } from 'src/components/iconify';
+import { Iconify } from 'src/components/iconify'
 import { Scrollbar } from 'src/components/scrollbar';
 
-import { UserTableRow } from '../user-table-row';
-import { UserTableHead } from '../user-table-head';
-import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import AddStoreModal from '../../add-store/add-store-modal';
+import { StoreTableRow } from "../components/store-table-row";
+import { StoreTableHead } from "../components/store-table-head";
 import { TableNoData } from '../../../components/table/table-no-data';
+import { StoreTableToolbar } from "../components/store-table-toolbar";
+import { emptyRows, applyFilter, getComparator } from '../components/utils';
 import { TableEmptyRows } from '../../../components/table/table-empty-rows';
 
-import type { UserProps } from '../user-table-row';
+import type { StoreProps } from "../components/store-table-row";
+
 
 // ----------------------------------------------------------------------
 
-export function UserView() {
+export function StoresView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
+  const dataFiltered: StoreProps[] = applyFilter({
+    inputData: fakeStores,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
+
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate()
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('latest')
+  const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
+
+  const handleSort = useCallback((newSort: string) => {
+    setSortBy(newSort)
+  }, [])
+
+  const handleDelete = useCallback((id: string) => {
+    // Handle store deletion logic
+    console.log('Deleting store with ID:', id);
+  }, [])
+
+  const handleAddStoreSuccess = useCallback(() => {
+    enqueueSnackbar('Store connected successfully!', { 
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' }
+    });
+  }, [enqueueSnackbar]);
+
 
   const notFound = !dataFiltered.length && !!filterName;
 
@@ -43,19 +75,22 @@ export function UserView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users
+          Websites
         </Typography>
         <Button
           variant="contained"
           color="inherit"
+          onClick={() => {
+            navigate("/stores/add")
+          }}
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
-          New user
+          New website
         </Button>
       </Box>
 
       <Card>
-        <UserTableToolbar
+        <StoreTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
           onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,16 +102,16 @@ export function UserView() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
+              <StoreTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={fakeStores.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
-                onSelectAllRows={(checked) =>
+                onSelectAllRows={(checked: boolean) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    fakeStores.map((user) => user.id)
                   )
                 }
                 headLabel={[
@@ -95,7 +130,7 @@ export function UserView() {
                     table.page * table.rowsPerPage + table.rowsPerPage
                   )
                   .map((row) => (
-                    <UserTableRow
+                    <StoreTableRow
                       key={row.id}
                       row={row}
                       selected={table.selected.includes(row.id)}
@@ -105,7 +140,7 @@ export function UserView() {
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, fakeStores.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -117,13 +152,28 @@ export function UserView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={fakeStores.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+      <AddStoreModal
+        open={isAddStoreModalOpen}
+        onClose={() => setIsAddStoreModalOpen(false)}
+        onSuccess={handleAddStoreSuccess}
+      />
+
+      <Snackbar 
+          open={isAddStoreModalOpen} 
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          autoHideDuration={3000}
+        >
+          <Alert severity="success" variant="filled" sx={{ width: '100%' }}>
+            Store connected successfully!
+          </Alert>
+      </Snackbar>
     </DashboardContent>
   );
 }

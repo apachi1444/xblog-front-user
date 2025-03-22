@@ -19,21 +19,6 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
-    title: 'Generate Fake',
-    path: '/user',
-    icon: icon('ic-user'),
-  },
-  {
-    title: 'Blogs',
-    path: '/blog',
-    icon: icon('ic-blog'),
-  },
-  {
-    title: 'Calendar',
-    path: '/calendar',
-    icon: icon('ic-user'),
-  },
-  {
     title: 'My Websites',
     path: '/stores',  
     icon: icon('ic-cart'),
@@ -44,6 +29,16 @@ export const navData = [
       </Label>
     ),
     */
+  },
+  {
+    title: 'Blogs',
+    path: '/blog',
+    icon: icon('ic-blog'),
+  },
+  {
+    title: 'Calendar',
+    path: '/calendar',
+    icon: icon('ic-user'),
   },
 ];
 

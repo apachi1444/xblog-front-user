@@ -3,14 +3,25 @@ export interface Store {
   name: string
   url: string
   logo: string
+  isConnected: boolean
   articlesCount: number
   lastUpdated: string
-  isConnected: boolean // New field
   performance: {
     visitors: number
     sales: number
     revenue: number
   }
+  articles_list: {
+    id: string
+    title: string
+    description: string
+    publishedDate: string
+    readTime: string
+    views: number
+  }[],
+  platform?: string
+  business?: string
+  creationDate?: string
 }
 
   export interface Article {
