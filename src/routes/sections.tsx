@@ -12,6 +12,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
+export const GenerateFlow = lazy(() => import('src/pages/generate'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const StoresPage = lazy(() => import('src/pages/stores'));
 export const UserPage = lazy(() => import('src/pages/user'));
@@ -57,6 +58,7 @@ export function Router() {
       children: [
         { element: <HomePage />, index: true },
         { path: 'user', element: <UserPage /> },
+        { path: 'generate', element: <GenerateFlow /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'profile', element: <ProfilePage /> },

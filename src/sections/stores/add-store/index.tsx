@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { 
-  Box, 
   Step, 
-  Stepper, 
-  Container,
+  Stepper,
   StepLabel,
   Typography
 } from '@mui/material';
+
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import SelectPlatform from './SelectPlatform';
 import WebsiteDetails from './WebsiteDetails';
@@ -136,8 +136,7 @@ export default function AddStoreFlow() {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
+    <DashboardContent>
         <Typography variant="h4" gutterBottom>
           Add New Store
         </Typography>
@@ -151,7 +150,6 @@ export default function AddStoreFlow() {
         </Stepper>
         
         {renderStepContent()}
-      </Box>
-    </Container>
+    </DashboardContent>
   );
 } 

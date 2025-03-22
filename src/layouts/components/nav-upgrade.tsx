@@ -29,7 +29,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
   </Typography>
 
   <Button
-    href="https://material-ui.com/store/items/minimal-dashboard/"
+    href="https://xblog.ai/"
     target="_blank"
     variant="contained"
     color="primary"

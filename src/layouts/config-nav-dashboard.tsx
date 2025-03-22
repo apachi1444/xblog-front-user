@@ -15,6 +15,11 @@ export const navData = [
   },
   {
     title: 'Generate',
+    path: '/generate',
+    icon: icon('ic-user'),
+  },
+  {
+    title: 'Generate Fake',
     path: '/user',
     icon: icon('ic-user'),
   },

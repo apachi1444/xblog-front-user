@@ -9,18 +9,18 @@ import {
   List, 
   Paper, 
   Modal, 
+  Alert, 
   Button, 
-  Tooltip, 
   Divider, 
   ListItem, 
   Checkbox, 
-  Container, 
+  Snackbar,
+  Container,
   Typography,
   IconButton,
-  ListItemText,
-  Snackbar,
-  Alert
+  ListItemText
 } from '@mui/material';
+import { DashboardContent } from 'src/layouts/dashboard';
 
 // Mock data for scheduled articles
 const scheduledArticles = [
@@ -91,7 +91,7 @@ export default function CalendarPage() {
   };
   
   return (
-    <Container maxWidth={false} sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', p: 3 }}>
+    <DashboardContent>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" gutterBottom>
           Content Calendar
@@ -368,6 +368,6 @@ export default function CalendarPage() {
           Articles scheduled successfully!
         </Alert>
       </Snackbar>
-    </Container>
+    </DashboardContent>
   );
 } 
