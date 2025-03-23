@@ -18,18 +18,18 @@ export const navData = [
     path: '/generate',
     icon: icon('ic-user'),
   },
+  /*
   {
     title: 'My Websites',
     path: '/stores',  
     icon: icon('ic-cart'),
-    /*
     info: (
       <Label color="error" variant="inverted">
         +1
       </Label>
     ),
-    */
   },
+  */
   {
     title: 'Blogs',
     path: '/blog',
