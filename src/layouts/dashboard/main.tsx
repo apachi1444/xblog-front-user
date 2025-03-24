@@ -11,6 +11,8 @@ import { layoutClasses } from 'src/layouts/classes';
 // ----------------------------------------------------------------------
 
 export function Main({ children, sx, ...other }: BoxProps) {
+  const theme = useTheme();
+  
   return (
     <Box
       component="main"
@@ -19,6 +21,7 @@ export function Main({ children, sx, ...other }: BoxProps) {
         display: 'flex',
         flex: '1 1 auto',
         flexDirection: 'column',
+        bgcolor: theme.palette.background.default, // Add background color to main container
         ...sx,
       }}
       {...other}
@@ -55,6 +58,8 @@ export function DashboardContent({
         flexDirection: 'column',
         pt: 'var(--layout-dashboard-content-pt)',
         pb: 'var(--layout-dashboard-content-pb)',
+        bgcolor: theme.palette.background.paper, // Use theme background for content area
+        borderRadius: 1,
         [theme.breakpoints.up(layoutQuery)]: {
           px: 'var(--layout-dashboard-content-px)',
         },

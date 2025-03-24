@@ -43,13 +43,14 @@ export function LayoutSection({
     <>
       {inputGlobalStyles}
 
-      <Box id="root__layout" className={layoutClasses.root} sx={sx}>
+      <Box id="root__layout" className={layoutClasses.root} sx={{ bgcolor: theme.palette.background.default, ...sx }}>
         {sidebarSection}
         <Box
           display="flex"
           flex="1 1 auto"
           flexDirection="column"
           className={layoutClasses.hasSidebar}
+          sx={{ bgcolor: theme.palette.background.default }}
         >
           {headerSection}
           {children}

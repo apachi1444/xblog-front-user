@@ -1,57 +1,62 @@
-import {
-  TextField,
-  InputAdornment,
-  TextFieldProps,
-  styled
-} from '@mui/material';
-import { Iconify } from '../iconify';
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: theme.palette.background.neutral,
-    '& fieldset': {
-      borderColor: 'transparent',
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-  '& .MuiInputLabel-root': {
-    '&.Mui-focused': {
-      color: theme.palette.text.primary,
-    },
-  },
-}));
+import React from 'react';
+import { Box, TextField, Tooltip, Typography, TextFieldProps } from '@mui/material';
+import { HelpCircle } from 'lucide-react';
 
 interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
-  icon?: string;
-  placeholder?: string;
+  label: string;
+  tooltipText?: string;
+  icon?: React.ReactNode;
 }
 
-export function FormInput({ icon, placeholder, ...other }: FormInputProps) {
+export function FormInput({ 
+  label, 
+  tooltipText, 
+  icon,
+  ...textFieldProps 
+}: FormInputProps) {
   return (
-    <StyledTextField
-      fullWidth
-      placeholder={placeholder}
-      variant="outlined"
-      InputLabelProps={{ 
-        shrink: true,
-        sx: { 
-          backgroundColor: 'transparent',
-          px: 1,
-        }
-      }}
-      InputProps={{
-        startAdornment: icon ? (
-          <InputAdornment position="start">
-            <Iconify icon={icon} sx={{ color: 'text.secondary', width: 24, height: 24 }} />
-          </InputAdornment>
-        ) : null,
-      }}
-      {...other}
-    />
+    <Box sx={{ flex: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
+        <Typography 
+          sx={{ 
+            fontFamily: "'Poppins', Helvetica",
+            fontWeight: 500,
+            color: '#1f384c',
+            fontSize: '0.75rem',
+            letterSpacing: '0.5px',
+            lineHeight: '23px'
+          }}
+        >
+          {label}
+        </Typography>
+        {tooltipText && (
+          <Tooltip title={tooltipText}>
+            <Box component="span" sx={{ display: 'inline-flex', cursor: 'pointer' }}>
+              <HelpCircle size={16} color="#5969cf" />
+            </Box>
+          </Tooltip>
+        )}
+      </Box>
+
+      <TextField
+        fullWidth
+        size="small"
+        variant="outlined"
+        InputProps={{
+          startAdornment: icon,
+          sx: {
+            height: '32px',
+            bgcolor: '#f7f7fa',
+            borderRadius: '5px',
+            border: '0.5px solid #5969cf',
+            fontSize: '0.75rem',
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none'
+            }
+          }
+        }}
+        {...textFieldProps}
+      />
+    </Box>
   );
 }

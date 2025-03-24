@@ -77,7 +77,7 @@ const billingHistory = [
 export function UpgradeLicenseView() {
   return (
     <DashboardContent>
-      <Box p={4}>
+      <Box display="flex" alignItems="center" mb={5}>
         <Container maxWidth="lg">
           <Typography variant="h4" gutterBottom>
             Billings

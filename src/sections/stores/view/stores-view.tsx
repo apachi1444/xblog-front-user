@@ -59,7 +59,11 @@ export function StoresView() {
   const handleDelete = useCallback((id: string) => {
     // Handle store deletion logic
     console.log('Deleting store with ID:', id);
-  }, [])
+    enqueueSnackbar('Store deleted successfully!', { 
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' }
+    });
+  }, [enqueueSnackbar])
 
   const handleAddStoreSuccess = useCallback(() => {
     enqueueSnackbar('Store connected successfully!', { 
@@ -67,7 +71,6 @@ export function StoresView() {
       anchorOrigin: { vertical: 'top', horizontal: 'center' }
     });
   }, [enqueueSnackbar]);
-
 
   const notFound = !dataFiltered.length && !!filterName;
 
@@ -115,12 +118,13 @@ export function StoresView() {
                   )
                 }
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
+                  { id: 'name', label: 'Website', sort: true },
+                  { id: 'platform', label: 'Platform', sort: true },
+                  { id: 'business', label: 'Business', sort: true },
+                  { id: 'creationDate', label: 'Creation Date', sort: true },
+                  { id: 'articlesCount', label: 'Articles', align: 'center', sort: true },
+                  { id: 'isConnected', label: 'Status', sort: true },
+                  { id: '', label: 'Actions' },
                 ]}
               />
               <TableBody>
@@ -135,6 +139,7 @@ export function StoresView() {
                       row={row}
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
+                      onDelete={handleDelete}
                     />
                   ))}
 

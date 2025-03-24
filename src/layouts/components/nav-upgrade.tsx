@@ -3,11 +3,13 @@ import type { StackProps } from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { useNavigate } from 'react-router-dom';
 
 
 // ----------------------------------------------------------------------
 
 export function NavUpgrade({ sx, ...other }: StackProps) {
+  const navigate = useNavigate()
   return (
     <Box
   display="flex"
@@ -29,8 +31,10 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
   </Typography>
 
   <Button
-    href="https://xblog.ai/"
-    target="_blank"
+    // Remove href and target attributes to prevent opening in new tab
+    onClick={() => {
+      navigate("/upgrade-license")
+    }}
     variant="contained"
     color="primary"
     sx={(theme) => ({
