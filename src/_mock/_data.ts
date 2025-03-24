@@ -248,32 +248,14 @@ export const _stores: Store[] = [
   },
 ]
 
-export const fakeStores: StoreProps[] = [
-  {
-    id: '1',
-    name: 'Alpha Store',
-    role: 'admin',
-    status: 'active',
-    company: 'Alpha Corp',
-    avatarUrl: 'https://example.com/avatar1.png',
-    isVerified: true,
-  },
-  {
-    id: '2',
-    name: 'Beta Store',
-    role: 'user',
-    status: 'inactive',
-    company: 'Beta Ltd',
-    avatarUrl: 'https://example.com/avatar2.png',
-    isVerified: false,
-  },
-  {
-    id: '3',
-    name: 'Gamma Store',
-    role: 'manager',
-    status: 'active',
-    company: 'Gamma Inc',
-    avatarUrl: 'https://example.com/avatar3.png',
-    isVerified: true,
-  },
-];
+export const fakeStores = [...Array(12)].map((_, index) => ({
+  id: _id(index),
+  name: _company(index),
+  url: `https://${_company(index).toLowerCase().replace(/\s+/g, '-')}.com`,
+  logo: `/assets/images/logo/logo_${(index % 10) + 1}.png`,
+  platform: ['Shopify', 'WordPress', 'Wix'][index % 3],
+  business: ['Retail', 'Technology', 'Food & Beverage', 'Fashion', 'Health & Beauty'][index % 5],
+  creationDate: '11/08/2023',
+  articlesCount: Math.floor(Math.random() * 50),
+  isConnected: _boolean(index),
+}));
