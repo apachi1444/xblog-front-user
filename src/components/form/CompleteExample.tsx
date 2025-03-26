@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { Box, Button, Chip, TextField, Typography, Grid } from '@mui/material';
-import { Plus, X, HelpCircle } from 'lucide-react';
+
+import { Box, Grid, Stack, Button } from '@mui/material';
+
+import { Iconify } from 'src/components/iconify';
 
 import { SEODashboard } from './SEODashboard';
-import { FormInput } from './FormInput';
-import { FormDropdown } from './FormDropdown';
-import { FormContainer } from './FormContainer';
+import { StepperComponent } from './FormStepper';
+import { Step3Publish } from './steps/Step3Publish';
+import { Step1ContentSetup } from './steps/Step1ContentSetup';
+import { Step2ContentStructuring } from './steps/Step2ContentStructuring';
 
 export function CompleteExample() {
+  const [activeStep, setActiveStep] = useState(0);
+  
+  // Form state
   const [targetCountry, setTargetCountry] = useState('us');
   const [language, setLanguage] = useState('en-us');
   const [title, setTitle] = useState('');
@@ -15,18 +21,11 @@ export function CompleteExample() {
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [contentDescription, setContentDescription] = useState('');
 
-  // Data for country options
-  const countries = [
-    { value: "us", label: "English (US)", icon: "🇺🇸" },
-    { value: "uk", label: "English (UK)", icon: "🇬🇧" },
-    { value: "fr", label: "French", icon: "🇫🇷" }
-  ];
-
-  // Data for language options
-  const languages = [
-    { value: "en-us", label: "English (US)", icon: "🇺🇸" },
-    { value: "en-gb", label: "English (UK)", icon: "🇬🇧" },
-    { value: "fr-fr", label: "French", icon: "🇫🇷" }
+  // Steps configuration
+  const steps = [
+    { id: 1, label: "Content Setup" },
+    { id: 2, label: "Content Structuring" },
+    { id: 3, label: "Publish" }
   ];
 
   // Handle adding a secondary keyword
@@ -50,149 +49,190 @@ export function CompleteExample() {
     }
   };
 
+  // Navigation handlers
+  const handleNext = () => {
+    setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => Math.max(prevStep - 1, 0));
+  };
+
+  
+  // New state variables for generation features
+  const [isTitleGenerated, setIsTitleGenerated] = useState(false);
+  const [isMetaGenerated, setIsMetaGenerated] = useState(false);
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
+  const [primaryKeyword, setPrimaryKeyword] = useState('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [urlSlug, setUrlSlug] = useState('');
+  
+  // Generate title handler
+  const handleGenerateTitle = () => {
+    setIsGeneratingTitle(true);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      setTitle('How to Optimize Your Website for Better SEO Performance');
+      setIsGeneratingTitle(false);
+      setIsTitleGenerated(true);
+    }, 1500);
+  };
+  
+  // Generate meta information handler
+  const handleGenerateMeta = () => {
+    setIsGeneratingMeta(true);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      setMetaTitle('SEO Optimization Guide: Boost Your Website Performance');
+      setMetaDescription('Learn proven strategies to optimize your website for search engines and improve your rankings with our comprehensive SEO guide.');
+      setUrlSlug('seo-optimization-guide');
+      setIsGeneratingMeta(false);
+      setIsMetaGenerated(true);
+    }, 2000);
+  };
+  
+  // Regenerate title handler
+  const handleRegenerateTitle = () => {
+    setIsGeneratingTitle(true);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      setTitle('10 Effective SEO Strategies to Improve Your Website Ranking');
+      setIsGeneratingTitle(false);
+    }, 1500);
+  };
+  
+  // Regenerate meta information handler
+  const handleRegenerateMeta = () => {
+    setIsGeneratingMeta(true);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      setMetaTitle('SEO Guide: 10 Ways to Boost Your Website Rankings');
+      setMetaDescription('Discover 10 proven SEO techniques to improve your website visibility, drive more traffic, and achieve higher search engine rankings.');
+      setUrlSlug('seo-guide-boost-rankings');
+      setIsGeneratingMeta(false);
+    }, 2000);
+  };
+
+  // Render the current step content
+  const renderStepContent = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <Step1ContentSetup
+            primaryKeyword={primaryKeyword}
+            setPrimaryKeyword={setPrimaryKeyword}
+            title={title}
+            setTitle={setTitle}
+            secondaryKeyword={secondaryKeyword}
+            setSecondaryKeyword={setSecondaryKeyword}
+            secondaryKeywords={secondaryKeywords}
+            setSecondaryKeywords={setSecondaryKeywords}
+            targetCountry={targetCountry}
+            setTargetCountry={setTargetCountry}
+            language={language}
+            setLanguage={setLanguage}
+            handleAddKeyword={handleAddKeyword}
+            handleRemoveKeyword={handleRemoveKeyword}
+            handleKeyPress={handleKeyPress}
+            handleGenerateMeta={handleGenerateMeta}
+            handleGenerateTitle={handleGenerateTitle}
+            handleRegenerateMeta={handleRegenerateMeta}
+            handleRegenerateTitle={handleRegenerateTitle}
+            isGeneratingMeta={isGeneratingMeta}
+            isGeneratingTitle={isGeneratingTitle}
+            isMetaGenerated={isMetaGenerated}
+            isTitleGenerated={isTitleGenerated}
+            metaDescription={metaDescription}
+            metaTitle={metaTitle}
+            setMetaDescription={setMetaDescription}
+            setMetaTitle={setMetaTitle}
+            setUrlSlug={setUrlSlug}
+            urlSlug={urlSlug}
+          />
+        );
+      case 1:
+        return (
+          <Step2ContentStructuring
+            contentDescription={contentDescription}
+            setContentDescription={setContentDescription}
+          />
+        );
+      case 2:
+        return <Step3Publish />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <Box>
+      {/* Stepper */}
+      <StepperComponent steps={steps} activeStep={activeStep} />
+      
       <Grid container spacing={3}>
-        
         {/* Forms on the left */}
         <Grid item xs={12} md={7} lg={8}>
-          <FormContainer title="Keywords" layout="column">
-            {/* Primary Keyword */}
-            <Box sx={{ width: '100%' }}>
-              <FormInput
-                label="Primary Keyword"
-                tooltipText="Enter the title of your content"
-                placeholder="Enter primary keyword"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                fullWidth
-              />
-            </Box>
-            
-            {/* Secondary Keywords */}
-            <Box sx={{ width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
-                <Typography 
-                  sx={{ 
-                    fontFamily: "'Poppins', Helvetica",
-                    fontWeight: 500,
-                    color: '#1f384c',
-                    fontSize: '0.75rem',
-                    letterSpacing: '0.5px',
-                    lineHeight: '23px'
-                  }}
-                >
-                  Secondary Keywords
-                </Typography>
-                <Box component="span" sx={{ display: 'inline-flex', cursor: 'pointer' }}>
-                  <HelpCircle size={16} color="#5969cf" />
-                </Box>
-              </Box>
+          {/* Navigation buttons at the top of the form section */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+            <Stack direction="row" spacing={2}>
+              <Button
+                onClick={handleBack}
+                disabled={activeStep === 0}
+                startIcon={<Iconify icon="eva:arrow-back-fill" />}
+                sx={{
+                  minWidth: 100,
+                  bgcolor: 'primary.lighter',
+                  color: 'primary.main',
+                  borderRadius: '24px',
+                  py: 1,
+                  px: 3,
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                  },
+                  '&:disabled': {
+                    bgcolor: 'grey.200',
+                    color: 'grey.500'
+                  }
+                }}
+              >
+                Back
+              </Button>
               
-              <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Enter secondary keywords..."
-                  value={secondaryKeyword}
-                  onChange={(e) => setSecondaryKeyword(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      height: '32px',
-                      bgcolor: '#f7f7fa',
-                      borderRadius: '5px',
-                      border: '0.5px solid #5969cf',
-                      fontSize: '0.75rem',
-                      '& fieldset': { border: 'none' }
-                    }
-                  }}
-                />
-                <Button 
-                  variant="contained" 
-                  color="primary"
-                  onClick={handleAddKeyword}
-                  sx={{ 
-                    height: '32px', 
-                    minWidth: 'auto',
-                    px: 1.5,
-                    bgcolor: '#919eff',
-                    borderRadius: '5px',
-                    whiteSpace: 'nowrap',
-                    '&:hover': {
-                      bgcolor: '#7a8bff'
-                    }
-                  }}
-                  endIcon={<Plus size={16} />}
-                >
-                  Add keyword
-                </Button>
-              </Box>
-              
-              {/* Keyword chips */}
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                {secondaryKeywords.map((keyword, index) => (
-                  <Chip
-                    key={index}
-                    label={keyword}
-                    onDelete={() => handleRemoveKeyword(keyword)}
-                    deleteIcon={<X size={14} />}
-                    sx={{
-                      height: '24px',
-                      bgcolor: '#f0f0ff',
-                      color: '#5969cf',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      '& .MuiChip-deleteIcon': {
-                        color: '#5969cf',
-                        fontSize: '0.75rem',
-                        '&:hover': {
-                          color: '#3a4db1'
-                        }
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-            
-            {/* Content Description */}
-            <Box sx={{ width: '100%' }}>
-              <FormInput
-                fullWidth
-                multiline
-                rows={4}
-                label="Content Description"
-                tooltipText="Describe your content"
-                placeholder="Content Description..."
-                value={contentDescription}
-                onChange={(e) => setContentDescription(e.target.value)}
-              />
-            </Box>
-          </FormContainer>
+              <Button
+                onClick={handleNext}
+                disabled={activeStep === steps.length - 1}
+                endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+                sx={{
+                  minWidth: 100,
+                  bgcolor: 'primary.lighter',
+                  color: 'primary.main',
+                  borderRadius: '24px',
+                  py: 1,
+                  px: 3,
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                  },
+                  '&:disabled': {
+                    bgcolor: 'grey.200',
+                    color: 'grey.500'
+                  }
+                }}
+              >
+                Next
+              </Button>
+            </Stack>
+          </Box>
           
-          <FormContainer title="Language">
-            <FormDropdown
-              label="Target Country"
-              tooltipText="Select your target country"
-              options={countries}
-              value={targetCountry}
-              onChange={(e) => setTargetCountry(e.target.value as string)}
-              placeholder="Select country"
-            />
-            
-            <FormDropdown
-              label="Language"
-              tooltipText="Select your preferred language"
-              options={languages}
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as string)}
-              placeholder="Select language"
-            />
-          </FormContainer>
+          {renderStepContent()}
         </Grid>
-
-        {/* SEODashboard on the right */}
+        
+        {/* SEO Dashboard on the right */}
         <Grid item xs={12} md={5} lg={4}>
           <SEODashboard />
         </Grid>

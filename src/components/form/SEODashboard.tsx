@@ -432,3 +432,11 @@ export const SEODashboard = () => {
     </Box>
   );
 };
+
+
+interface SEODashboardProps {
+  title?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  urlSlug?: string;
+}
