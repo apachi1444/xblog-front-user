@@ -20,7 +20,23 @@ import {
   LinearProgress,
 } from "@mui/material";
 
-export const SEODashboard = () => {
+interface SEODashboardProps {
+  title?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  urlSlug?: string;
+  currentStep?: number; // Add current step prop
+  isVisible?: boolean; // Add visibility control
+}
+
+export function SEODashboard({ 
+  title, 
+  metaTitle, 
+  metaDescription, 
+  urlSlug,
+  currentStep = 0,
+  isVisible = true
+}: SEODashboardProps) {
   const [tabValue, setTabValue] = React.useState(0);
 
   const handleTabChange = (event: any, newValue: React.SetStateAction<number>) => {
@@ -32,6 +48,16 @@ export const SEODashboard = () => {
   const handleToggle = () => {
     setExpanded(!expanded);
   };
+
+  // Determine dashboard features based on current step
+  const isPreviewEnabled = currentStep !== 1; // Disable preview in Article Settings step
+  const isPreviewSEOEnabled = currentStep === 0 || currentStep === 3; // Enable in Content Setup and Publish steps
+  const isRealTimeScoringEnabled = currentStep === 2 || currentStep === 3; // Enable in Content Structuring and Publish steps
+
+  // If not visible, return null
+  if (!isVisible) {
+    return null;
+  }
 
   // Data for notification items
   const notificationItems = [
@@ -81,7 +107,7 @@ export const SEODashboard = () => {
   ];
 
   return (
-    <Box sx={{ width: "408px", height: "756px", position: "relative" }}>
+    <Box sx={{ width: "100%", height: "100%", position: "relative" }}>
       <Card
         sx={{
           width: "100%",
@@ -432,11 +458,3 @@ export const SEODashboard = () => {
     </Box>
   );
 };
-
-
-interface SEODashboardProps {
-  title?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  urlSlug?: string;
-}

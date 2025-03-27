@@ -12,7 +12,7 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
   const theme = useTheme();
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 506, mb: 4 }}>
+    <Box sx={{ width: "100%", maxWidth: 700, mb: 4 }}>
       <Stack direction="row" alignItems="center" spacing={1}>
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>

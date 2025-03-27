@@ -8,7 +8,8 @@ import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
 import { Step3Publish } from './steps/Step3Publish';
 import { Step1ContentSetup } from './steps/Step1ContentSetup';
-import { Step2ContentStructuring } from './steps/Step2ContentStructuring';
+import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
+import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
 
 export function CompleteExample() {
   const [activeStep, setActiveStep] = useState(0);
@@ -21,11 +22,12 @@ export function CompleteExample() {
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [contentDescription, setContentDescription] = useState('');
 
-  // Steps configuration
+  // Steps configuration - Updated to 4 steps
   const steps = [
     { id: 1, label: "Content Setup" },
-    { id: 2, label: "Content Structuring" },
-    { id: 3, label: "Publish" }
+    { id: 2, label: "Article Settings" },
+    { id: 3, label: "Content Structuring" },
+    { id: 4, label: "Publish" }
   ];
 
   // Handle adding a secondary keyword
@@ -119,7 +121,7 @@ export function CompleteExample() {
     }, 2000);
   };
 
-  // Render the current step content
+  // Render the current step content - Updated to include the new step
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
@@ -158,17 +160,24 @@ export function CompleteExample() {
         );
       case 1:
         return (
-          <Step2ContentStructuring
+          <Step2ArticleSettings />
+        );
+      case 2:
+        return (
+          <Step3ContentStructuring
             contentDescription={contentDescription}
             setContentDescription={setContentDescription}
           />
         );
-      case 2:
+      case 3:
         return <Step3Publish />;
       default:
         return null;
     }
   };
+
+  // Determine if SEO Dashboard should be visible based on current step
+  const isSEODashboardVisible = activeStep !== 1; // Hide in Article Settings step
 
   return (
     <Box>
@@ -177,7 +186,7 @@ export function CompleteExample() {
       
       <Grid container spacing={3}>
         {/* Forms on the left */}
-        <Grid item xs={12} md={7} lg={8}>
+        <Grid item xs={12} md={isSEODashboardVisible ? 7 : 12} lg={isSEODashboardVisible ? 8 : 12}>
           {/* Navigation buttons at the top of the form section */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
             <Stack direction="row" spacing={2}>
@@ -193,7 +202,7 @@ export function CompleteExample() {
                   py: 1,
                   px: 3,
                   '&:hover': {
-                    bgcolor: 'primary.light',
+                    bgcolor: 'primary.lighter',
                   },
                   '&:disabled': {
                     bgcolor: 'grey.200',
@@ -229,13 +238,24 @@ export function CompleteExample() {
             </Stack>
           </Box>
           
-          {renderStepContent()}
+          <Box sx={{ width: '100%' }}>
+            {renderStepContent()}
+          </Box>
         </Grid>
         
-        {/* SEO Dashboard on the right */}
-        <Grid item xs={12} md={5} lg={4}>
-          <SEODashboard />
-        </Grid>
+        {/* SEO Dashboard on the right - only visible on certain steps */}
+        {isSEODashboardVisible && (
+          <Grid item xs={12} md={5} lg={4}>
+            <SEODashboard 
+              title={title}
+              metaTitle={metaTitle}
+              metaDescription={metaDescription}
+              urlSlug={urlSlug}
+              currentStep={activeStep}
+              isVisible={isSEODashboardVisible}
+            />
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

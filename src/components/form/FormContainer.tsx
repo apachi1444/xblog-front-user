@@ -11,8 +11,8 @@ interface FormContainerProps {
 export function FormContainer({ 
   title, 
   children, 
-  maxWidth = '800px',
-  layout = 'row' // Default to row layout for backward compatibility
+  maxWidth = '100%', // Changed from '800px' to '100%' to fill available space
+  layout = 'column' // Changed default to column layout
 }: FormContainerProps) {
   return (
     <Card sx={{ width: '100%', maxWidth, border: 0, boxShadow: 'none', mb: 3 }}>
@@ -27,6 +27,7 @@ export function FormContainer({
             pb: 2,
             px: 2,
             mt: 2.5,
+            width: '100%', // Ensure full width
           }} 
         >
           {/* Title badge */}
@@ -58,7 +59,7 @@ export function FormContainer({
             display: 'flex', 
             flexDirection: layout === 'column' ? 'column' : 'row',
             gap: 2,
-            width: '100%'
+            width: '100%' // Ensure full width
           }}>
             {children}
           </Box>
