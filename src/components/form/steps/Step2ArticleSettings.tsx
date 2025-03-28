@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 
-import { Box , Grid, Button, Switch, Divider, Typography, FormControlLabel } from '@mui/material';
+import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
 import { FormDropdown } from '../FormDropdown';
 import { FormContainer } from '../FormContainer';
 
+// Add a new prop to receive the function that will set the table of contents
+// Update the interface to include the onGenerateTableOfContents prop
 interface Step2ArticleSettingsProps {
-  // Props will be added as needed in the future
+  onNextStep?: () => void;
+  onGenerateTableOfContents?: (tableOfContents: any) => void;
 }
 
-export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
+export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: Step2ArticleSettingsProps) {
   // State for form values
   const [articleType, setArticleType] = useState('');
   const [articleSize, setArticleSize] = useState('');
@@ -29,7 +32,11 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
   const [internalLinking, setInternalLinking] = useState('');
   const [externalLinking, setExternalLinking] = useState('');
 
-  // Options for dropdowns
+  // Add the missing isGenerated state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
+
+  // Options for dropdowns remain the same
   const articleTypeOptions = [
     { value: "how-to", label: "How-to guide" },
     { value: "listicle", label: "Listicle" },
@@ -114,6 +121,83 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
     { value: "news", label: "News Sources" }
   ];
 
+  // Handle generate table of contents
+  const handleGenerateTableOfContents = async () => {
+    setIsGenerating(true);
+    
+    try {
+      // Simulate API call with a timeout
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Generate fake table of contents data
+      const generatedTableOfContents = {
+        title: "How to Optimize Your Website for Better SEO Performance",
+        sections: [
+          {
+            id: 1,
+            title: "Introduction to SEO Optimization",
+            content: "Brief overview of SEO and why it matters for website performance."
+          },
+          {
+            id: 2,
+            title: "Understanding Search Engine Algorithms",
+            content: "Explanation of how search engines rank websites and what factors influence rankings."
+          },
+          {
+            id: 3,
+            title: "On-Page SEO Techniques",
+            subsections: [
+              { id: 3.1, title: "Keyword Research and Implementation", content: "How to find and use the right keywords." },
+              { id: 3.2, title: "Content Optimization", content: "Creating content that ranks well in search engines." },
+              { id: 3.3, title: "Meta Tags and Descriptions", content: "Optimizing HTML elements for better SEO." }
+            ]
+          },
+          {
+            id: 4,
+            title: "Off-Page SEO Strategies",
+            content: "Building backlinks and improving domain authority."
+          },
+          {
+            id: 5,
+            title: "Technical SEO Improvements",
+            subsections: [
+              { id: 5.1, title: "Site Speed Optimization", content: "Making your website load faster." },
+              { id: 5.2, title: "Mobile Responsiveness", content: "Ensuring your site works well on all devices." },
+              { id: 5.3, title: "URL Structure and Site Architecture", content: "Creating a logical site structure." }
+            ]
+          },
+          {
+            id: 6,
+            title: "Measuring SEO Success",
+            content: "Tools and metrics to track your SEO performance."
+          },
+          {
+            id: 7,
+            title: "Conclusion",
+            content: "Summary of key points and next steps for improving your website's SEO."
+          }
+        ]
+      };
+      
+      // Pass the generated data to the parent component
+      if (onGenerateTableOfContents) {
+        onGenerateTableOfContents(generatedTableOfContents);
+      }
+      
+      // Set generated to true
+      setIsGenerated(true);
+      
+      // After successful API call, navigate to next step
+      if (onNextStep) {
+        onNextStep();
+      }
+    } catch (error) {
+      console.error('Error generating table of contents:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -189,7 +273,7 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
             </Grid>
           </Box>
           
-          <Divider sx={{ my: 3, width: '100%' }} />
+          <Divider sx={{ my: 1, width: '100%' }} />
           
           {/* Media Settings Section - Grid of 4 */}
           <Box sx={{ width: '100%', mb: 4 }}>
@@ -264,7 +348,7 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
                 />
               </Grid>
               
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid item xs={12} sm={1} md={3}>
                 <FormDropdown
                   label="Number of Videos"
                   options={videoNumberOptions}
@@ -277,7 +361,7 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
             </Grid>
           </Box>
           
-          <Divider sx={{ my: 3, width: '100%' }} />
+          <Divider sx={{ my: 1, width: '100%' }} />
           
           {/* Linking Settings Section - Grid of 2 */}
           <Box sx={{ width: '100%', mb: 4 }}>
@@ -325,7 +409,9 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
             <Button
               variant="contained"
               color="primary"
-              startIcon={<Iconify icon="mdi:table-of-contents" />}
+              startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
+              onClick={handleGenerateTableOfContents}
+              disabled={isGenerating || isGenerated}
               sx={{
                 borderRadius: '24px',
                 px: 4,
@@ -333,9 +419,70 @@ export function Step2ArticleSettings(props: Step2ArticleSettingsProps = {}) {
                 fontWeight: 600
               }}
             >
-              Generate Table of Contents
+              {isGenerating ? 'Generating...' : isGenerated ? 'Generated!' : 'Generate Table of Contents'}
             </Button>
           </Box>
+          
+          {/* Loading overlay for better UX */}
+          {isGenerating && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                zIndex: 9999,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  p: 4,
+                  borderRadius: 2,
+                  bgcolor: 'background.paper',
+                  boxShadow: 3,
+                  maxWidth: 400,
+                }}
+              >
+                <CircularProgress 
+                  size={80} 
+                  thickness={4} 
+                  sx={{ 
+                    color: '#5969cf',
+                    mb: 3
+                  }} 
+                />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mb: 1,
+                    fontWeight: 600,
+                    color: '#5969cf',
+                    textAlign: 'center'
+                  }}
+                >
+                  Generating your content outline...
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    textAlign: 'center'
+                  }}
+                >
+                  We re analyzing your inputs and creating the perfect structure for your content.
+                </Typography>
+              </Box>
+            </Box>
+          )}
         </FormContainer>
       </Grid>
     </Grid>

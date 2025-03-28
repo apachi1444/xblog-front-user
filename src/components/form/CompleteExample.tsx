@@ -6,10 +6,11 @@ import { Iconify } from 'src/components/iconify';
 
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
-import { Step3Publish } from './steps/Step3Publish';
+import { Step3Publish } from './steps/Step4Publish';
 import { Step1ContentSetup } from './steps/Step1ContentSetup';
 import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
 import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
+import { SectionItem } from './DraggableSectionList';
 
 export function CompleteExample() {
   const [activeStep, setActiveStep] = useState(0);
@@ -121,6 +122,31 @@ export function CompleteExample() {
     }, 2000);
   };
 
+    // Add state for storing the generated table of contents
+    const [generatedSections, setGeneratedSections] = useState<SectionItem[]>([]);
+  
+    // Handle table of contents generation
+    const handleGenerateTableOfContents = (tableOfContents: any) => {
+      // Convert the table of contents format to the SectionItem format
+      const sections = tableOfContents.sections.map((section: any, index: number) => ({
+        id: section.id.toString(),
+        title: section.title,
+        content: section.content || '',
+        status: 'Not Started',
+        subsections: section.subsections 
+          ? section.subsections.map((sub: any) => ({
+              id: sub.id.toString(),
+              title: sub.title,
+              content: sub.content || '',
+              status: 'Not Started'
+            }))
+          : []
+      }));
+      
+      setGeneratedSections(sections);
+    };
+    
+
   // Render the current step content - Updated to include the new step
   const renderStepContent = () => {
     switch (activeStep) {
@@ -158,15 +184,18 @@ export function CompleteExample() {
             urlSlug={urlSlug}
           />
         );
+      // In the renderStepContent function, update the Step2ArticleSettings and Step3ContentStructuring components
       case 1:
         return (
-          <Step2ArticleSettings />
+          <Step2ArticleSettings 
+            onNextStep={handleNext}
+            onGenerateTableOfContents={handleGenerateTableOfContents}
+          />
         );
       case 2:
         return (
-          <Step3ContentStructuring
-            contentDescription={contentDescription}
-            setContentDescription={setContentDescription}
+          <Step3ContentStructuring 
+            generatedSections={generatedSections}
           />
         );
       case 3:
@@ -177,7 +206,7 @@ export function CompleteExample() {
   };
 
   // Determine if SEO Dashboard should be visible based on current step
-  const isSEODashboardVisible = activeStep !== 1; // Hide in Article Settings step
+  const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
 
   return (
     <Box>
@@ -213,28 +242,30 @@ export function CompleteExample() {
                 Back
               </Button>
               
-              <Button
-                onClick={handleNext}
-                disabled={activeStep === steps.length - 1}
-                endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-                sx={{
-                  minWidth: 100,
-                  bgcolor: 'primary.lighter',
-                  color: 'primary.main',
-                  borderRadius: '24px',
-                  py: 1,
-                  px: 3,
-                  '&:hover': {
-                    bgcolor: 'primary.light',
-                  },
-                  '&:disabled': {
-                    bgcolor: 'grey.200',
-                    color: 'grey.500'
-                  }
-                }}
-              >
-                Next
-              </Button>
+              {activeStep !== steps.length - 1 && (
+                <Button
+                  onClick={handleNext}
+                  disabled={activeStep === steps.length - 1}
+                  endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+                  sx={{
+                    minWidth: 100,
+                    bgcolor: 'primary.lighter',
+                    color: 'primary.main',
+                    borderRadius: '24px',
+                    py: 1,
+                    px: 3,
+                    '&:hover': {
+                      bgcolor: 'primary.light',
+                    },
+                    '&:disabled': {
+                      bgcolor: 'grey.200',
+                      color: 'grey.500'
+                    }
+                  }}
+                >
+                  Next
+                </Button>
+              )}
             </Stack>
           </Box>
           

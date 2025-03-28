@@ -1,63 +1,81 @@
-import React from 'react';
-import { Box, Grid, Typography, TextField } from '@mui/material';
+import type { SectionItem } from 'src/components/form/DraggableSectionList';
+
+import React, { useState, useEffect } from 'react';
+
+import { Box, Grid, Button, Typography } from '@mui/material';
+
+import { Iconify } from 'src/components/iconify';
+import { DraggableSectionList } from 'src/components/form/DraggableSectionList';
+
 import { FormContainer } from '../FormContainer';
 
 interface Step3Props {
-  contentDescription: string;
-  setContentDescription: (value: string) => void;
+  generatedSections?: SectionItem[];
 }
 
-export function Step3ContentStructuring({ contentDescription, setContentDescription }: Step3Props) {
+export function Step3ContentStructuring({ 
+  generatedSections = []
+}: Step3Props) {
+  const [sections, setSections] = useState<SectionItem[]>(generatedSections);
+
+  // Update sections when generatedSections prop changes
+  useEffect(() => {
+    if (generatedSections.length > 0) {
+      setSections(generatedSections);
+    }
+  }, [generatedSections]);
+
+  const handleSectionsChange = (newSections: SectionItem[]) => {
+    setSections(newSections);
+  };
+
+  const handleAddSection = () => {
+    const newId = (sections.length + 1).toString();
+    setSections([
+      ...sections,
+      { 
+        id: newId, 
+        title: `Section ${newId}: New Section`, 
+        status: 'Not Started' 
+      }
+    ]);
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <FormContainer title="Content Structure">
-          <Box sx={{ width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
-              <Typography 
-                sx={{ 
-                  fontWeight: 500,
-                  color: 'text.primary',
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.5px',
-                  lineHeight: '23px'
-                }}
-              >
-                Content Description
+        <FormContainer title="Content Outline">
+          {sections.length > 0 ? (
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Drag and drop sections to reorder them. Click on the edit icon to modify section details.
+                </Typography>
+              </Box>
+              
+              <DraggableSectionList 
+                sections={sections} 
+                onSectionsChange={handleSectionsChange} 
+              />
+              
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Iconify icon="mdi:plus" />}
+                  onClick={handleAddSection}
+                  sx={{ borderRadius: '20px' }}
+                >
+                  Add Section
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ p: 3, bgcolor: 'background.neutral', borderRadius: 1 }}>
+              <Typography variant="body2" color="text.secondary" align="center">
+                No content outline has been generated yet. Please go back to the previous step and generate a table of contents.
               </Typography>
             </Box>
-            
-            <TextField
-              multiline
-              rows={4}
-              fullWidth
-              placeholder="Describe what you want in your content..."
-              value={contentDescription}
-              onChange={(e) => setContentDescription(e.target.value)}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: '#f7f7fa',
-                  borderRadius: '5px',
-                  border: '0.5px solid',
-                  borderColor: 'primary.main',
-                  fontSize: '0.875rem',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  }
-                }
-              }}
-            />
-          </Box>
-        </FormContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
-        <FormContainer title="Content Outline">
-          <Box sx={{ p: 3, bgcolor: 'background.neutral', borderRadius: 1 }}>
-            <Typography variant="body2" color="text.secondary" align="center">
-              Your content outline will be generated here after you provide the necessary information.
-            </Typography>
-          </Box>
+          )}
         </FormContainer>
       </Grid>
     </Grid>
