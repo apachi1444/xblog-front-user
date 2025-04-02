@@ -1,6 +1,9 @@
+import type { SelectProps} from '@mui/material';
+
 import React from 'react';
-import { Box, Select, Tooltip, MenuItem, Typography, FormControl, SelectProps } from '@mui/material';
 import { HelpCircle } from 'lucide-react';
+
+import { Box, Select, Tooltip, MenuItem, useTheme, Typography, FormControl } from '@mui/material';
 
 interface DropdownOption {
   value: string;
@@ -24,17 +27,18 @@ export function FormDropdown({
   placeholder,
   ...selectProps 
 }: FormDropdownProps) {
+  const theme = useTheme();
+  
   return (
     <Box sx={{ flex: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <Typography 
+          variant="caption"
           sx={{ 
-            fontFamily: "'Poppins', Helvetica",
             fontWeight: 500,
-            color: '#1f384c',
-            fontSize: '0.75rem',
+            color: theme.palette.text.primary,
             letterSpacing: '0.5px',
-            lineHeight: '23px'
+            lineHeight: 1.5
           }}
         >
           {label}
@@ -42,7 +46,7 @@ export function FormDropdown({
         {tooltipText && (
           <Tooltip title={tooltipText}>
             <Box component="span" sx={{ display: 'inline-flex', cursor: 'pointer' }}>
-              <HelpCircle size={16} color="#5969cf" />
+              <HelpCircle size={16} color={theme.palette.primary.main} />
             </Box>
           </Tooltip>
         )}
@@ -52,22 +56,27 @@ export function FormDropdown({
         <Select
           displayEmpty
           sx={{
-            height: '32px',
-            bgcolor: '#f7f7fa',
-            borderRadius: '5px',
-            border: '0.5px solid #5969cf',
-            fontSize: '0.75rem',
+            height: theme.spacing(6.25),
+            bgcolor: theme.palette.background.paper,
+            borderRadius: theme.shape.borderRadius / 6,
+            border: `0.5px solid ${theme.palette.primary.main}`,
+            fontSize: theme.typography.button.fontSize,
             '& .MuiSelect-select': {
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: theme.spacing(1),
               py: 0.5
             }
           }}
           renderValue={(selected) => {
             if (!selected) {
               return (
-                <Typography sx={{ opacity: 0.3, fontSize: '0.75rem' }}>
+                <Typography 
+                  sx={{ 
+                    opacity: 0.3, 
+                    fontSize: theme.typography.caption.fontSize 
+                  }}
+                >
                   {placeholder || 'Select an option'}
                 </Typography>
               );

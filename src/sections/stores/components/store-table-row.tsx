@@ -35,10 +35,13 @@ type StoreTableRowProps = {
   selected: boolean;
   onSelectRow: () => void;
   onDelete?: (id: string) => void;
+  isDeleting?: boolean;
 };
 
-export function StoreTableRow({ row, selected, onSelectRow, onDelete }: StoreTableRowProps) {
+export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting }: StoreTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [isDeleteHovered, setIsDeleteHovered] = useState(false);
+
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);

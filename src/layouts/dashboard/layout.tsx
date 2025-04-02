@@ -8,6 +8,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { _langs, _notifications } from 'src/_mock';
 
+import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
 
 import { Main } from './main';
@@ -51,7 +52,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           slotProps={{
             container: {
               maxWidth: false,
-              sx: { px: { [layoutQuery]: 5 } },
+              sx: { px: { [layoutQuery]: 5 }, backgroundColor: 'none' },
             },
           }}
           sx={header?.sx}
@@ -61,6 +62,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                 This is an info Alert.
               </Alert>
             ),
+            // Update the leftArea in the HeaderSection to use the Logo component
             leftArea: (
               <>
                 <MenuButton
@@ -127,8 +129,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Style
        *************************************** */
       cssVars={{
-        '--layout-nav-vertical-width': '250px',
-        '--layout-dashboard-content-pt': theme.spacing(1),
+        '--layout-nav-vertical-width': '245px',
+        '--layout-dashboard-content-pt': theme.spacing(5),
         '--layout-dashboard-content-pb': theme.spacing(8),
         '--layout-dashboard-content-px': theme.spacing(5),
       }}
@@ -141,7 +143,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         ...sx,
       }}
     >
-      <Main>{children}</Main>
+      <Main sx={{}}>{children}</Main>
     </LayoutSection>
   );
 }

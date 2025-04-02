@@ -1,21 +1,76 @@
-import GlobalConfig from 'global-config';
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { AxiosError, AxiosRequestConfig } from 'axios';
 
-import { security } from '../internals/security';
+import { createApi } from '@reduxjs/toolkit/query/react';
 
-// API == Backend For Frontend
-export const api = createApi({
-  // fetchBaseQuery uses fetch; baseQuery could be changed if Axios is wanted
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${window.location.origin}${GlobalConfig.api.BACKEND_BASE_URL}`,
-    prepareHeaders: async (headers) => {
-      const accessToken = await security.getAccessTokenFunction()?.();
-      if (accessToken != null) {
-        headers.set('authorization', `Bearer ${accessToken}`);
+import customRequest from './axios';
+
+const getRequestConfig = (
+  args: string | (AxiosRequestConfig & { body?: AxiosRequestConfig['data'] }),
+): AxiosRequestConfig & { body?: AxiosRequestConfig['data'] } => {
+  if (typeof args === 'string') {
+    return { url: args };
+  }
+
+  return args;
+};
+const axiosBaseQuery =
+  (): BaseQueryFn<
+    | {
+        url: string;
+        method?: AxiosRequestConfig['method'];
+        body?: AxiosRequestConfig['data'];
+        params?: AxiosRequestConfig['params'];
+        headers?: AxiosRequestConfig['headers'];
+        responseType?: AxiosRequestConfig['responseType'];
+        paramsSerializer?: AxiosRequestConfig['paramsSerializer'];
       }
-      return headers;
-    },
-  }),
+    | string,
+    unknown,
+    unknown
+  > =>
+  async (requestConfig) => {
+    const {
+      url,
+      method = 'GET',
+      body,
+      params,
+      headers,
+      responseType,
+    } = getRequestConfig(requestConfig);
+
+    try {
+      const result = await customRequest({
+        url,
+        method,
+        data: body,
+        params,
+        headers,
+        responseType,
+      });
+      return { data: result.data };
+    } catch (axiosError) {
+      const err = axiosError as AxiosError;
+      return {
+        error: {
+          status: err.response?.status,
+          data: err?.response?.data !== undefined ? err?.response?.data : err.message,
+        },
+      };
+    }
+  };
+
+export const api = createApi({
+  baseQuery: axiosBaseQuery(),
   tagTypes: [],
   endpoints: () => ({}),
 });
+
+export interface Page<T> {
+  getTotalPages: number;
+  getTotalElements: number;
+  number: number;
+  size: number;
+  numberOfElements: number;
+  content: T[];
+}

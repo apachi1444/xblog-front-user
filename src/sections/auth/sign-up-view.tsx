@@ -11,11 +11,19 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
+import { useDispatch } from 'react-redux';
 
 export function SignUpView() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch()
+
+  const handleSignIn = useCallback(() => {
+    router.push('/');
+  }, [router]);
 
   const handleSignUp = useCallback(() => {
     router.push('/sign-up');
@@ -135,8 +143,17 @@ export function SignUpView() {
   );
 
   return (
-    <>
+    <Box
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        boxShadow: (theme) => theme.customShadows.z16,
+        bgcolor: 'background.paper'
+      }}
+    >
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
+        <Logo sx={{ mb: 5 }} variant="full" />
+        
         <Typography variant="h3" sx={{ mb: 1 }}>
           Join Our Creative Community
         </Typography>
@@ -146,7 +163,16 @@ export function SignUpView() {
         
         <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
           Already have an account?
-          <Link variant="subtitle2" sx={{ ml: 0.5 }} onClick={handleNavigateToSignIn}>
+          <Link variant="subtitle2" 
+            sx={{ 
+              ml: 0.5,
+              cursor: 'pointer',
+              '&:hover': {
+                textDecoration: 'underline',
+                opacity: 'revert'
+              } 
+            }} 
+            onClick={handleNavigateToSignIn}>
             Sign In
           </Link>
         </Typography>
@@ -164,19 +190,28 @@ export function SignUpView() {
       </Divider>
 
       <Box gap={1} display="flex" justifyContent="center">
-        <IconButton color="inherit">
-          <Iconify icon="logos:google-icon" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="eva:github-fill" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="ri:twitter-x-fill" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify icon="ic:baseline-facebook" />
-        </IconButton>
+        <LoadingButton 
+          fullWidth
+          size="large"
+          variant="outlined"
+          color="primary"
+          onClick={() => handleSignIn()}
+          disabled={loading}
+          startIcon={<Iconify icon="logos:google-icon" />}
+          sx={{
+            borderRadius: '8px',
+            py: 1.5,
+            justifyContent: 'center',
+            borderColor: 'primary.main',
+            '&:hover': {
+              borderColor: 'primary.dark',
+              opacity: 'revert'
+            }
+          }}
+        >
+          Sign up with Google
+        </LoadingButton>
       </Box>
-    </>
+    </Box>
   );
 }

@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
+
 import { Navigate } from 'react-router-dom';
+
 import { useAuthRedirect } from 'src/hooks/useAuthRedirect';
-import { getToken } from 'src/utils/auth';
+
 
 interface AuthGuardProps {
   children: ReactNode;

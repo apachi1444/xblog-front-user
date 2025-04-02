@@ -1,16 +1,21 @@
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
+export type GoogleAuthResponse = {
+  success: boolean;
+  error?: string;
+};
 
 export const useGoogleAuth = () => {
   const login = useGoogleLogin({
     onSuccess: async (response) => {
       try {
         // await dispatch(authenticateWithGoogle(response.access_token)).unwrap();
+        // This function should be implemented elsewhere to handle the token
         return { success: true };
       } catch (error) {
-        return { 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Authentication failed' 
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Authentication failed'
         };
       }
     },
@@ -21,8 +26,12 @@ export const useGoogleAuth = () => {
   });
 
   const logOut = () => {
-    googleLogout()
-  }
+    googleLogout();
+    return { success: true };
+  };
 
-  return { login , logOut};
-}; 
+  return { 
+    login: () => login(), // Return the function to be executed when needed
+    logOut 
+  };
+};

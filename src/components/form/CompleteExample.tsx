@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Box, Grid, Stack, Button } from '@mui/material';
+import { Box, Stack, Button } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -10,10 +10,13 @@ import { Step3Publish } from './steps/Step4Publish';
 import { Step1ContentSetup } from './steps/Step1ContentSetup';
 import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
 import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
-import { SectionItem } from './DraggableSectionList';
+
+import type { SectionItem } from './DraggableSectionList';
 
 export function CompleteExample() {
   const [activeStep, setActiveStep] = useState(0);
+  // Add state for SEO dashboard collapse
+  const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
   
   // Form state
   const [targetCountry, setTargetCountry] = useState('us');
@@ -153,6 +156,8 @@ export function CompleteExample() {
       case 0:
         return (
           <Step1ContentSetup
+            contentDescription={contentDescription}
+            setContentDescription={setContentDescription}
             primaryKeyword={primaryKeyword}
             setPrimaryKeyword={setPrimaryKeyword}
             title={title}
@@ -208,39 +213,57 @@ export function CompleteExample() {
   // Determine if SEO Dashboard should be visible based on current step
   const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
 
+  // Handle SEO dashboard collapse state change
+  const handleSEODashboardCollapseChange = (collapsed: boolean) => {
+    setIsSEODashboardCollapsed(!collapsed);
+  };
+
   return (
     <Box>
       {/* Stepper */}
       <StepperComponent steps={steps} activeStep={activeStep} />
       
-      <Grid container spacing={3}>
-        {/* Forms on the left */}
-        <Grid item xs={12} md={isSEODashboardVisible ? 7 : 12} lg={isSEODashboardVisible ? 8 : 12}>
+      <Box sx={{ display: 'flex', width: '100%' }}>
+        {/* Forms on the left - adjust width based on SEO dashboard visibility and collapse state */}
+        <Box 
+          sx={{ 
+            flexGrow: 1,
+            width: isSEODashboardVisible ? 
+              (isSEODashboardCollapsed ? 'calc(100% - 40px)' : '70%') : 
+              '100%',
+            transition: (theme) => theme.transitions.create(['width'], {
+              duration: theme.transitions.duration.standard,
+            }),
+            pr: isSEODashboardVisible ? 2 : 0
+          }}
+        >
           {/* Navigation buttons at the top of the form section */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
             <Stack direction="row" spacing={2}>
-              <Button
-                onClick={handleBack}
-                disabled={activeStep === 0}
-                startIcon={<Iconify icon="eva:arrow-back-fill" />}
-                sx={{
-                  minWidth: 100,
-                  bgcolor: 'primary.lighter',
-                  color: 'primary.main',
-                  borderRadius: '24px',
-                  py: 1,
-                  px: 3,
-                  '&:hover': {
+              {activeStep !== 0 && ( 
+                <Button
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                  startIcon={<Iconify icon="eva:arrow-back-fill" />}
+                  sx={{
+                    minWidth: 100,
                     bgcolor: 'primary.lighter',
-                  },
-                  '&:disabled': {
-                    bgcolor: 'grey.200',
-                    color: 'grey.500'
-                  }
-                }}
-              >
-                Back
-              </Button>
+                    color: 'primary.main',
+                    borderRadius: '24px',
+                    py: 1,
+                    px: 3,
+                    '&:hover': {
+                      bgcolor: 'primary.lighter',
+                    },
+                    '&:disabled': {
+                      bgcolor: 'grey.200',
+                      color: 'grey.500'
+                    }
+                  }}
+                >
+                  Back
+                </Button>
+              )}
               
               {activeStep !== steps.length - 1 && (
                 <Button
@@ -272,22 +295,30 @@ export function CompleteExample() {
           <Box sx={{ width: '100%' }}>
             {renderStepContent()}
           </Box>
-        </Grid>
+        </Box>
         
         {/* SEO Dashboard on the right - only visible on certain steps */}
         {isSEODashboardVisible && (
-          <Grid item xs={12} md={5} lg={4}>
+          <Box 
+            sx={{ 
+              width: isSEODashboardCollapsed ? '40px' : '30%',
+              transition: (theme) => theme.transitions.create(['width'], {
+                duration: theme.transitions.duration.standard,
+              }),
+            }}
+          >
             <SEODashboard 
               title={title}
               metaTitle={metaTitle}
               metaDescription={metaDescription}
               urlSlug={urlSlug}
               currentStep={activeStep}
-              isVisible={isSEODashboardVisible}
+              isVisible
+              onCollapseChange={handleSEODashboardCollapseChange}
             />
-          </Grid>
+          </Box>
         )}
-      </Grid>
+      </Box>
     </Box>
   );
 }

@@ -24,6 +24,9 @@ import { store } from './services/store';
 import { ToastProvider } from './contexts/ToastContext';
 import { setThemeMode } from './services/slices/globalSlice';
 
+// Get Google OAuth client ID from environment variables
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 export default function App() {
   const dispatch = useDispatch();
   const { t, i18n: { changeLanguage, language } } = useTranslation();
@@ -47,7 +50,7 @@ export default function App() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="qsdfsqdf">
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <ThemeProvider>
         <ToastProvider>
             <Router />

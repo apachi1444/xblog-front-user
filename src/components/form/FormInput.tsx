@@ -1,6 +1,9 @@
+import type { TextFieldProps } from '@mui/material';
+
 import React from 'react';
-import { Box, TextField, Tooltip, Typography, TextFieldProps } from '@mui/material';
 import { HelpCircle } from 'lucide-react';
+
+import { Box, Tooltip, TextField, Typography, useTheme } from '@mui/material';
 
 interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
   label: string;
@@ -14,17 +17,18 @@ export function FormInput({
   icon,
   ...textFieldProps 
 }: FormInputProps) {
+  const theme = useTheme();
+  
   return (
     <Box sx={{ flex: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
         <Typography 
+          variant="caption"
           sx={{ 
-            fontFamily: "'Poppins', Helvetica",
             fontWeight: 500,
-            color: '#1f384c',
-            fontSize: '0.75rem',
+            color: theme.palette.text.primary,
             letterSpacing: '0.5px',
-            lineHeight: '23px'
+            lineHeight: 1.5
           }}
         >
           {label}
@@ -32,7 +36,7 @@ export function FormInput({
         {tooltipText && (
           <Tooltip title={tooltipText}>
             <Box component="span" sx={{ display: 'inline-flex', cursor: 'pointer' }}>
-              <HelpCircle size={16} color="#5969cf" />
+              <HelpCircle size={16} color={theme.palette.primary.main} />
             </Box>
           </Tooltip>
         )}
@@ -45,11 +49,11 @@ export function FormInput({
         InputProps={{
           startAdornment: icon,
           sx: {
-            height: '32px',
-            bgcolor: '#f7f7fa',
-            borderRadius: '5px',
-            border: '0.5px solid #5969cf',
-            fontSize: '0.75rem',
+            minHeight: theme.spacing(6.25), // 50px equivalent using theme spacing
+            bgcolor: theme.palette.background.paper,
+            borderRadius: theme.shape.borderRadius / 8,
+            border: `0.5px solid ${theme.palette.primary.main}`,
+            fontSize: theme.typography.button.fontSize,
             '& .MuiOutlinedInput-notchedOutline': {
               border: 'none'
             }

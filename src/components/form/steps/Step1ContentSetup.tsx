@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Box, Grid, Stack, Button, TextField, Typography, CircularProgress } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { Box, Grid, Stack, Button, Typography, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -39,6 +40,8 @@ interface Step1Props {
   handleGenerateMeta: () => void;
   handleRegenerateTitle: () => void;
   handleRegenerateMeta: () => void;
+  contentDescription: string;
+  setContentDescription: (value: string) => void;
 }
 
 export function Step1ContentSetup({
@@ -71,8 +74,13 @@ export function Step1ContentSetup({
   handleGenerateTitle,
   handleGenerateMeta,
   handleRegenerateTitle,
-  handleRegenerateMeta
+  handleRegenerateMeta,
+  // Added props
+  contentDescription,
+  setContentDescription
 }: Step1Props) {
+  const theme = useTheme();
+  
   // Data for country options
   const countries = [
     { value: "us", label: "English (US)", icon: "🇺🇸" },
@@ -89,10 +97,57 @@ export function Step1ContentSetup({
 
   return (
     <Grid container spacing={3}>
+      {/* Language & Region section - Moved to the top */}
+      <Grid item xs={12}>
+        <FormContainer title="Language & Region">
+          <FormDropdown
+            label="Language"
+            options={languages}
+            tooltipText="Select the language for your content"
+            placeholder="Select language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as string)}
+          />
+          
+          <FormDropdown
+            label="Target Country"
+            options={countries}
+            tooltipText="Select the target country for your content"
+            placeholder="Select country"
+            value={targetCountry}
+            onChange={(e) => setTargetCountry(e.target.value as string)}
+          />
+        </FormContainer>
+      </Grid>
+      
+      {/* Content Description - New section */}
+      <Grid item xs={12}>
+        <FormContainer title="Content Description">
+          <Box sx={{ width: '100%' }}>
+            <FormInput
+              label="Content Description"
+              tooltipText="Describe what your content is about"
+              placeholder="Enter a detailed description of your content"
+              value={contentDescription}
+              onChange={(e) => setContentDescription(e.target.value)}
+              multiline
+              rows={4}
+              fullWidth
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: theme.palette.background.paper,
+                  borderRadius: theme.shape.borderRadius / 6,
+                }
+              }}
+            />
+          </Box>
+        </FormContainer>
+      </Grid>
+
+      {/* Keywords section */}
       <Grid item xs={12}>
         <FormContainer title="Keywords" layout="column">
-          
-        <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: '100%' }}>
             <FormInput
               label="Primary Keyword"
               tooltipText="Enter the main keyword for your content"
@@ -104,25 +159,12 @@ export function Step1ContentSetup({
           </Box>
           
           {/* Secondary Keywords */}
-          <Box sx={{ width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mb: 0.5 }}>
-              <Typography 
-                sx={{ 
-                  fontWeight: 500,
-                  color: 'text.primary',
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.5px',
-                  lineHeight: '23px'
-                }}
-              >
-                Secondary Keywords
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ width: '100%' }}>  
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <FormInput
-                label=""
+                label='Secondary Keywords'
                 placeholder="Add secondary keywords"
+                tooltipText='Secondary keywords'
                 value={secondaryKeyword}
                 onChange={(e) => setSecondaryKeyword(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -134,18 +176,19 @@ export function Step1ContentSetup({
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  width: 32,
-                  height: 32,
-                  borderRadius: '5px',
+                  mt: 2.5,
+                  bgcolor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  width: theme.spacing(6.25),
+                  height: theme.spacing(6.25),
+                  borderRadius: theme.shape.borderRadius / 6,
                   cursor: 'pointer',
                   '&:hover': {
-                    bgcolor: 'primary.dark',
+                    bgcolor: theme.palette.primary.dark,
                   }
                 }}
               >
-                <Box component="span" sx={{ fontSize: 18, fontWeight: 'bold' }}>+</Box>
+                <Box component="span" sx={{ fontSize: theme.typography.pxToRem(18), fontWeight: 'bold' }}>+</Box>
               </Box>
             </Box>
             
@@ -157,12 +200,12 @@ export function Step1ContentSetup({
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    bgcolor: 'primary.lighter',
-                    color: 'primary.dark',
-                    borderRadius: '16px',
+                    bgcolor: theme.palette.primary.lighter,
+                    color: theme.palette.primary.dark,
+                    borderRadius: theme.shape.borderRadius * 2,
                     py: 0.5,
                     px: 1.5,
-                    fontSize: '0.75rem',
+                    fontSize: theme.typography.pxToRem(12),
                   }}
                 >
                   {keyword}
@@ -188,49 +231,27 @@ export function Step1ContentSetup({
       </Grid>
 
       <Grid item xs={12}>
-        <FormContainer title="Language & Region">
-          <FormDropdown
-            label="Target Country"
-            options={countries}
-            tooltipText="Select the target country for your content"
-            placeholder="Select country"
-            value={targetCountry}
-            onChange={(e) => setTargetCountry(e.target.value as string)}
-          />
-          
-          <FormDropdown
-            label="Language"
-            options={languages}
-            tooltipText="Select the language for your content"
-            placeholder="Select language"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as string)}
-          />
-        </FormContainer>
-      </Grid>
-
-      <Grid item xs={12}>
-
-      {!isTitleGenerated ? (
+        {/* Title generation section */}
+        {!isTitleGenerated ? (
             <Box 
               sx={{ 
                 width: '100%', 
-                height: 150, 
-                borderRadius: 2, 
+                height: theme.spacing(18.75), 
+                borderRadius: theme.shape.borderRadius / 6, 
                 position: 'relative',
                 overflow: 'hidden',
                 mb: 3,
-                bgcolor: 'background.neutral',
+                bgcolor: theme.palette.background.neutral,
                 backdropFilter: 'blur(8px)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 border: '1px dashed',
-                borderColor: 'primary.main',
+                borderColor: theme.palette.primary.main,
               }}
             >
-              <Typography variant="subtitle1" sx={{ mb: 2, color: 'text.secondary' }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.secondary }}>
                 Generate a compelling title for your content
               </Typography>
               
@@ -241,7 +262,7 @@ export function Step1ContentSetup({
                 disabled={isGeneratingTitle}
                 startIcon={isGeneratingTitle ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />}
                 sx={{ 
-                  borderRadius: '24px',
+                  borderRadius: theme.spacing(3),
                   px: 3,
                 }}
               >
@@ -252,59 +273,52 @@ export function Step1ContentSetup({
             <Box sx={{ width: '100%', mb: 3 }}>
               <FormContainer title="Generated Title">
                 <Box sx={{ position: 'relative', width: '100%' }}>
-                  <TextField
-                    fullWidth
+                  <FormInput
+                    tooltipText="Article Title"
+                    label="Article Title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        bgcolor: '#f7f7fa',
-                      }
-                    }}
+                    fullWidth  
                   />
-                  <Button
-                    onClick={handleRegenerateTitle}
-                    disabled={isGeneratingTitle}
-                    sx={{
-                      position: 'absolute',
-                      right: 8,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      minWidth: 'auto',
-                      p: 1,
-                    }}
-                  >
-                    {isGeneratingTitle ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      <Iconify icon="eva:refresh-fill" />
-                    )}
-                  </Button>
+                  {/* Regenerate Button */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                      onClick={handleRegenerateTitle}
+                      disabled={isGeneratingTitle}
+                      startIcon={isGeneratingTitle ? <CircularProgress size={20} /> : <Iconify icon="eva:refresh-fill" />}
+                      sx={{
+                        borderRadius: theme.spacing(3),
+                      }}
+                    >
+                      {isGeneratingTitle ? 'Regenerating...' : 'Regenerate Article Title'}
+                    </Button>
+                  </Box>
                 </Box>
               </FormContainer>
             </Box>
           )}
 
+        {/* Meta information generation section */}
         {!isMetaGenerated ? (
           <Box 
             sx={{ 
               width: '100%', 
-              height: 180, 
-              borderRadius: 2, 
+              height: theme.spacing(22.5), 
+              borderRadius: theme.shape.borderRadius / 6, 
               position: 'relative',
               overflow: 'hidden',
               mb: 3,
-              bgcolor: 'background.neutral',
+              bgcolor: theme.palette.background.neutral,
               backdropFilter: 'blur(8px)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               border: '1px dashed',
-              borderColor: 'primary.main',
+              borderColor: theme.palette.primary.main,
             }}
           >
-            <Typography variant="subtitle1" sx={{ mb: 2, color: 'text.secondary' }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.secondary }}>
               Generate SEO meta information for your content
             </Typography>
             
@@ -315,7 +329,7 @@ export function Step1ContentSetup({
               disabled={isGeneratingMeta}
               startIcon={isGeneratingMeta ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />}
               sx={{ 
-                borderRadius: '24px',
+                borderRadius: theme.spacing(3),
                 px: 3,
               }}
             >
@@ -326,64 +340,33 @@ export function Step1ContentSetup({
           <FormContainer title="SEO Meta Information">
             <Stack spacing={2} sx={{ width: '100%' }}>
               {/* Meta Title */}
-              <Box sx={{ position: 'relative', width: '100%' }}>
-                <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
-                  Meta Title
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={metaTitle}
-                  onChange={(e) => setMetaTitle(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: '#f7f7fa',
-                    }
-                  }}
-                />
-              </Box>
+              <FormInput
+                tooltipText='Meta title'
+                label="Meta Title"
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                fullWidth
+              />
               
               {/* Meta Description */}
-              <Box sx={{ position: 'relative', width: '100%' }}>
-                <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
-                  Meta Description
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: '#f7f7fa',
-                    }
-                  }}
-                />
-              </Box>
+              <FormInput
+                tooltipText='Meta Description'
+                label="Meta Description"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                fullWidth
+                multiline
+                rows={3}
+              />
               
               {/* URL Slug */}
-              <Box sx={{ position: 'relative', width: '100%' }}>
-                <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
-                  URL Slug
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={urlSlug}
-                  onChange={(e) => setUrlSlug(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <Box component="span" sx={{ color: 'text.disabled', mr: 0.5 }}>
-                        /
-                      </Box>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      bgcolor: '#f7f7fa',
-                    }
-                  }}
-                />
-              </Box>
+              <FormInput
+                tooltipText='URL Slug'
+                label="URL Slug"
+                value={urlSlug}
+                onChange={(e) => setUrlSlug(e.target.value)}
+                fullWidth
+              />
               
               {/* Regenerate Button */}
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -392,7 +375,7 @@ export function Step1ContentSetup({
                   disabled={isGeneratingMeta}
                   startIcon={isGeneratingMeta ? <CircularProgress size={20} /> : <Iconify icon="eva:refresh-fill" />}
                   sx={{
-                    borderRadius: '24px',
+                    borderRadius: theme.spacing(3),
                   }}
                 >
                   {isGeneratingMeta ? 'Regenerating...' : 'Regenerate All'}

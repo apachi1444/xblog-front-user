@@ -44,7 +44,7 @@ export const navData = [
 
 export const bottomNavData = [
   {
-    title: 'Upgrade your license',
+    title: 'Upgrade license',
     path: '/upgrade-license',
     icon: icon('ic-blog'),
   },
