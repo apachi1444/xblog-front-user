@@ -1,8 +1,8 @@
 import 'src/global.css';
 
 import { useState } from "react";
+import { useDispatch } from 'react-redux';
 import { useTranslation } from "react-i18next";
-import { Provider, useDispatch } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Fab from '@mui/material/Fab';
@@ -20,7 +20,6 @@ import { ThemeProvider } from 'src/theme/theme-provider';
 
 import { Iconify } from 'src/components/iconify';
 
-import { store } from './services/store';
 import { ToastProvider } from './contexts/ToastContext';
 import { setThemeMode } from './services/slices/globalSlice';
 
@@ -50,7 +49,7 @@ export default function App() {
   };
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId="test">
       <ThemeProvider>
         <ToastProvider>
             <Router />
