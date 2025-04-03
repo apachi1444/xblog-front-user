@@ -5,6 +5,7 @@ import userReducer from './slices/userSlice';
 import globalReducer from './slices/globalSlice';
 import articleReducer from './slices/articleSlice';
 import storesReducer from './slices/stores/storeSlice';
+import articlesReducer from './slices/articles/articleSlice';
 import userDashboardReducer from './slices/userDashboardSlice';
 
 const rootReducer = combineReducers({
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   userDashboard: userDashboardReducer,
   global: globalReducer,
   stores: storesReducer,
+  articles: articlesReducer,
   [api.reducerPath]: api.reducer,
 });
 

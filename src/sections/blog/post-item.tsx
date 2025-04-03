@@ -1,3 +1,4 @@
+import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
 import Box from '@mui/material/Box';
@@ -16,19 +17,31 @@ import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
 
+// Legacy type kept for backward compatibility
 export type PostItemProps = {
   id: string;
   title: string;
-  coverUrl: string;
-  totalViews: number;
   description: string;
-  totalShares: number;
-  totalComments: number;
-  totalFavorites: number;
-  postedAt: string | number | null;
+  slug?: string;
+  coverImage: string; // Changed from coverUrl
+  status?: 'published' | 'draft' | 'scheduled';
+  createdAt: string; // Changed from postedAt
+  updatedAt?: string;
+  publishedAt?: string | null;
   author: {
+    id?: string;
     name: string;
-    avatarUrl: string;
+    avatar: string; // Changed from avatarUrl
+  };
+  storeId?: string;
+  keywords?: {
+    primary: string;
+    secondary?: string[];
+  };
+  meta?: {
+    title: string;
+    description: string;
+    url: string;
   };
 };
 
@@ -39,14 +52,14 @@ export function PostItem({
   latestPostLarge,
   ...other
 }: CardProps & {
-  post: PostItemProps;
+  post: Article;
   latestPost: boolean;
   latestPostLarge: boolean;
 }) {
   const renderAvatar = (
     <Avatar
-      alt={post.author.name}
-      src={post.author.avatarUrl}
+      alt={post.author?.name || 'Unknown'}
+      src={post.author?.avatar || '/assets/images/avatars/avatar_default.jpg'}
       sx={{
         left: 24,
         zIndex: 9,
@@ -92,9 +105,7 @@ export function PostItem({
       }}
     >
       {[
-        { number: post.totalComments, icon: 'solar:chat-round-dots-bold' },
-        { number: post.totalViews, icon: 'solar:eye-bold' },
-        { number: post.totalShares, icon: 'solar:share-bold' },
+        { number: 0, icon: 'solar:chat-round-dots-bold' },
       ].map((info, _index) => (
         <Box
           key={_index}
@@ -117,7 +128,7 @@ export function PostItem({
     <Box
       component="img"
       alt={post.title}
-      src={post.coverUrl}
+      src={post.coverImage || '/assets/images/covers/cover_placeholder.jpg'}
       sx={{
         top: 0,
         width: 1,
@@ -141,7 +152,7 @@ export function PostItem({
         }),
       }}
     >
-      {fDate(post.postedAt)}
+      {fDate(post.publishedAt || post.createdAt)}
     </Typography>
   );
 

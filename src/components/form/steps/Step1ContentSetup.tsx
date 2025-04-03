@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import { Box, Grid, Stack, Button, Typography, CircularProgress } from '@mui/material';
@@ -81,6 +81,62 @@ export function Step1ContentSetup({
 }: Step1Props) {
   const theme = useTheme();
   
+  // Add state for field validation errors
+  const [errors, setErrors] = useState({
+    contentDescription: false,
+    primaryKeyword: false,
+    secondaryKeywords: false
+  });
+  
+  // Update error states when input values change
+  React.useEffect(() => {
+    setErrors(prev => ({
+      ...prev,
+      contentDescription: contentDescription ? false : prev.contentDescription
+    }));
+  }, [contentDescription]);
+  
+  React.useEffect(() => {
+    setErrors(prev => ({
+      ...prev,
+      primaryKeyword: primaryKeyword ? false : prev.primaryKeyword
+    }));
+  }, [primaryKeyword]);
+  
+  React.useEffect(() => {
+    setErrors(prev => ({
+      ...prev,
+      secondaryKeywords: secondaryKeywords.length > 0 ? false : prev.secondaryKeywords
+    }));
+  }, [secondaryKeywords]);
+  
+  // Validation function
+  const validateFields = () => {
+    const newErrors = {
+      contentDescription: !contentDescription,
+      primaryKeyword: !primaryKeyword,
+      secondaryKeywords: secondaryKeywords.length === 0
+    };
+    
+    setErrors(newErrors);
+    
+    // Return true if all fields are valid
+    return !Object.values(newErrors).some(error => error);
+  };
+  
+  // Wrap the generate handlers with validation
+  const handleGenerateTitleWithValidation = () => {
+    if (validateFields()) {
+      handleGenerateTitle();
+    }
+  };
+  
+  const handleGenerateMetaWithValidation = () => {
+    if (validateFields()) {
+      handleGenerateMeta();
+    }
+  };
+  
   // Data for country options
   const countries = [
     { value: "us", label: "English (US)", icon: "🇺🇸" },
@@ -133,6 +189,8 @@ export function Step1ContentSetup({
               multiline
               rows={4}
               fullWidth
+              error={errors.contentDescription}
+              helperText={errors.contentDescription ? "Content description is required" : ""}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   bgcolor: theme.palette.background.paper,
@@ -155,6 +213,8 @@ export function Step1ContentSetup({
               value={primaryKeyword}
               onChange={(e) => setPrimaryKeyword(e.target.value)}
               fullWidth
+              error={errors.primaryKeyword}
+              helperText={errors.primaryKeyword ? "Primary keyword is required" : ""}
             />
           </Box>
           
@@ -169,6 +229,8 @@ export function Step1ContentSetup({
                 onChange={(e) => setSecondaryKeyword(e.target.value)}
                 onKeyPress={handleKeyPress}
                 fullWidth
+                error={errors.secondaryKeywords}
+                helperText={errors.secondaryKeywords ? "At least one secondary keyword is required" : ""}
               />
               <Box 
                 onClick={handleAddKeyword}
@@ -258,7 +320,7 @@ export function Step1ContentSetup({
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleGenerateTitle}
+                onClick={handleGenerateTitleWithValidation}
                 disabled={isGeneratingTitle}
                 startIcon={isGeneratingTitle ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />}
                 sx={{ 
@@ -325,7 +387,7 @@ export function Step1ContentSetup({
             <Button
               variant="contained"
               color="primary"
-              onClick={handleGenerateMeta}
+              onClick={handleGenerateMetaWithValidation}
               disabled={isGeneratingMeta}
               startIcon={isGeneratingMeta ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />}
               sx={{ 

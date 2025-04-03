@@ -14,6 +14,7 @@ interface Step2ArticleSettingsProps {
   onGenerateTableOfContents?: (tableOfContents: any) => void;
 }
 
+
 export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: Step2ArticleSettingsProps) {
   // State for form values
   const [articleType, setArticleType] = useState('');
@@ -120,6 +121,190 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
     { value: "authority", label: "Authority Sites" },
     { value: "news", label: "News Sources" }
   ];
+
+  
+// Add error state
+const [errors, setErrors] = useState({
+  articleType: false,
+  articleSize: false,
+  toneOfVoice: false,
+  pointOfView: false,
+  aiContentCleaning: false,
+  imageQuality: false,
+  imagePlacement: false,
+  imageStyle: false,
+  numberOfImages: false,
+  internalLinking: false,
+  externalLinking: false,
+});
+
+// Update error states when input values change
+React.useEffect(() => {
+  if (articleType) {
+    setErrors(prev => ({ ...prev, articleType: false }));
+  }
+}, [articleType]);
+
+React.useEffect(() => {
+  if (articleSize) {
+    setErrors(prev => ({ ...prev, articleSize: false }));
+  }
+}, [articleSize]);
+
+React.useEffect(() => {
+  if (toneOfVoice) {
+    setErrors(prev => ({ ...prev, toneOfVoice: false }));
+  }
+}, [toneOfVoice]);
+
+React.useEffect(() => {
+  if (pointOfView) {
+    setErrors(prev => ({ ...prev, pointOfView: false }));
+  }
+}, [pointOfView]);
+
+React.useEffect(() => {
+  if (aiContentCleaning) {
+    setErrors(prev => ({ ...prev, aiContentCleaning: false }));
+  }
+}, [aiContentCleaning]);
+
+React.useEffect(() => {
+  if (imageQuality) {
+    setErrors(prev => ({ ...prev, imageQuality: false }));
+  }
+}, [imageQuality]);
+
+React.useEffect(() => {
+  if (imagePlacement) {
+    setErrors(prev => ({ ...prev, imagePlacement: false }));
+  }
+}, [imagePlacement]);
+
+React.useEffect(() => {
+  if (imageStyle) {
+    setErrors(prev => ({ ...prev, imageStyle: false }));
+  }
+}, [imageStyle]);
+
+React.useEffect(() => {
+  if (numberOfImages) {
+    setErrors(prev => ({ ...prev, numberOfImages: false }));
+  }
+}, [numberOfImages]);
+
+React.useEffect(() => {
+  if (internalLinking) {
+    setErrors(prev => ({ ...prev, internalLinking: false }));
+  }
+}, [internalLinking]);
+
+React.useEffect(() => {
+  if (externalLinking) {
+    setErrors(prev => ({ ...prev, externalLinking: false }));
+  }
+}, [externalLinking]);
+
+// Validation function
+const validateFields = () => {
+  const newErrors = {
+    articleType: !articleType,
+    articleSize: !articleSize,
+    toneOfVoice: !toneOfVoice,
+    pointOfView: !pointOfView,
+    aiContentCleaning: !aiContentCleaning,
+    imageQuality: !imageQuality,
+    imagePlacement: !imagePlacement,
+    imageStyle: !imageStyle,
+    numberOfImages: !numberOfImages,
+    internalLinking: !internalLinking,
+    externalLinking: !externalLinking,
+  };
+  
+  setErrors(newErrors);
+  
+  // Return true if all fields are valid
+  return !Object.values(newErrors).some(error => error);
+};
+
+// Handle generate table of contents with validation
+const handleGenerateTableOfContentsWithValidation = async () => {
+  if (validateFields()) {
+    setIsGenerating(true);
+    
+    try {
+      // Simulate API call with a timeout
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Generate fake table of contents data
+      const generatedTableOfContents = {
+        title: "How to Optimize Your Website for Better SEO Performance",
+        sections: [
+          {
+            id: 1,
+            title: "Introduction to SEO Optimization",
+            content: "Brief overview of SEO and why it matters for website performance."
+          },
+          {
+            id: 2,
+            title: "Understanding Search Engine Algorithms",
+            content: "Explanation of how search engines rank websites and what factors influence rankings."
+          },
+          {
+            id: 3,
+            title: "On-Page SEO Techniques",
+            subsections: [
+              { id: 3.1, title: "Keyword Research and Implementation", content: "How to find and use the right keywords." },
+              { id: 3.2, title: "Content Optimization", content: "Creating content that ranks well in search engines." },
+              { id: 3.3, title: "Meta Tags and Descriptions", content: "Optimizing HTML elements for better SEO." }
+            ]
+          },
+          {
+            id: 4,
+            title: "Off-Page SEO Strategies",
+            content: "Building backlinks and improving domain authority."
+          },
+          {
+            id: 5,
+            title: "Technical SEO Improvements",
+            subsections: [
+              { id: 5.1, title: "Site Speed Optimization", content: "Making your website load faster." },
+              { id: 5.2, title: "Mobile Responsiveness", content: "Ensuring your site works well on all devices." },
+              { id: 5.3, title: "URL Structure and Site Architecture", content: "Creating a logical site structure." }
+            ]
+          },
+          {
+            id: 6,
+            title: "Measuring SEO Success",
+            content: "Tools and metrics to track your SEO performance."
+          },
+          {
+            id: 7,
+            title: "Conclusion",
+            content: "Summary of key points and next steps for improving your website's SEO."
+          }
+        ]
+      };
+      
+      // Pass the generated data to the parent component
+      if (onGenerateTableOfContents) {
+        onGenerateTableOfContents(generatedTableOfContents);
+      }
+      
+      // Set generated to true
+      setIsGenerated(true);
+      
+      // After successful API call, navigate to next step
+      if (onNextStep) {
+        onNextStep();
+      }
+    } catch (error) {
+      console.error('Error generating table of contents:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+};
 
   // Handle generate table of contents
   const handleGenerateTableOfContents = async () => {
@@ -228,6 +413,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={articleType}
                   onChange={(e) => setArticleType(e.target.value as string)}
                   placeholder="Select article type"
+                  error={errors.articleType}
+                  helperText={errors.articleType ? "Required field" : ""}
                 />
               </Grid>
               
@@ -238,6 +425,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={articleSize}
                   onChange={(e) => setArticleSize(e.target.value as string)}
                   placeholder="Select article size"
+                  error={errors.articleSize}
+                  helperText={errors.articleSize ? "Required field" : ""}
                 />
               </Grid>
               
@@ -248,6 +437,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={toneOfVoice}
                   onChange={(e) => setToneOfVoice(e.target.value as string)}
                   placeholder="Select tone"
+                  error={errors.toneOfVoice}
+                  helperText={errors.toneOfVoice ? "Required field" : ""}
                 />
               </Grid>
               
@@ -258,6 +449,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={pointOfView}
                   onChange={(e) => setPointOfView(e.target.value as string)}
                   placeholder="Select point of view"
+                  error={errors.pointOfView}
+                  helperText={errors.pointOfView ? "Required field" : ""}
                 />
               </Grid>
               
@@ -268,6 +461,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={aiContentCleaning}
                   onChange={(e) => setAiContentCleaning(e.target.value as string)}
                   placeholder="Select cleaning level"
+                  error={errors.aiContentCleaning}
+                  helperText={errors.aiContentCleaning ? "Required field" : ""}
                 />
               </Grid>
             </Grid>
@@ -301,6 +496,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={imageQuality}
                   onChange={(e) => setImageQuality(e.target.value as string)}
                   placeholder="Select image quality"
+                  error={errors.imageQuality}
+                  helperText={errors.imageQuality ? "Required field" : ""}
                 />
               </Grid>
               
@@ -311,6 +508,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={imagePlacement}
                   onChange={(e) => setImagePlacement(e.target.value as string)}
                   placeholder="Select image placement"
+                  error={errors.imagePlacement}
+                  helperText={errors.imagePlacement ? "Required field" : ""}
                 />
               </Grid>
               
@@ -321,6 +520,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={imageStyle}
                   onChange={(e) => setImageStyle(e.target.value as string)}
                   placeholder="Select image style"
+                  error={errors.imageStyle}
+                  helperText={errors.imageStyle ? "Required field" : ""}
                 />
               </Grid>
               
@@ -331,6 +532,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={numberOfImages}
                   onChange={(e) => setNumberOfImages(e.target.value as string)}
                   placeholder="Select number"
+                  error={errors.numberOfImages}
+                  helperText={errors.numberOfImages ? "Required field" : ""}
                 />
               </Grid>
               
@@ -389,6 +592,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={internalLinking}
                   onChange={(e) => setInternalLinking(e.target.value as string)}
                   placeholder="Select internal linking"
+                  error={errors.internalLinking}
+                  helperText={errors.internalLinking ? "Required field" : ""}
                 />
               </Grid>
               
@@ -399,6 +604,8 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
                   value={externalLinking}
                   onChange={(e) => setExternalLinking(e.target.value as string)}
                   placeholder="Select external linking"
+                  error={errors.externalLinking}
+                  helperText={errors.externalLinking ? "Required field" : ""}
                 />
               </Grid>
             </Grid>
@@ -410,7 +617,7 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
               variant="contained"
               color="primary"
               startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
-              onClick={handleGenerateTableOfContents}
+              onClick={handleGenerateTableOfContentsWithValidation}
               disabled={isGenerating || isGenerated}
               sx={{
                 borderRadius: '24px',

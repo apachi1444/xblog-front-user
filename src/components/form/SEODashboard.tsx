@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Icons
 import Add from "@mui/icons-material/Add";
@@ -34,6 +35,7 @@ interface SEODashboardProps {
   currentStep?: number;
   isVisible?: boolean;
   onCollapseChange?: (collapsed: boolean) => void;
+  onGenerateMeta?: () => void; // Add this prop for generating meta
 }
 
 // Constants
@@ -69,7 +71,8 @@ export function SEODashboard({
   urlSlug,
   currentStep = 0,
   isVisible = true,
-  onCollapseChange
+  onCollapseChange,
+  onGenerateMeta
 }: SEODashboardProps) {
   const theme = useTheme();
   
@@ -239,6 +242,7 @@ export function SEODashboard({
                     borderRadius: 28,
                     px: 3
                   }}
+                  onClick={onGenerateMeta}
                 >
                   Generate now !
                 </Button>

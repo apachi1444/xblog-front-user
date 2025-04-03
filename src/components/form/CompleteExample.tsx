@@ -311,6 +311,7 @@ export function CompleteExample() {
               title={title}
               metaTitle={metaTitle}
               metaDescription={metaDescription}
+              onGenerateMeta={handleGenerateMeta}
               urlSlug={urlSlug}
               currentStep={activeStep}
               isVisible

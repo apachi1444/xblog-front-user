@@ -1,5 +1,6 @@
 import type { Store } from 'src/types/store';
 import type { StoreProps } from 'src/sections/stores/components/store-table-row';
+import type { Article } from 'src/types/article';
 
 import {
   _id,
@@ -48,20 +49,37 @@ export const _users = [...Array(24)].map((_, index) => ({
 
 // ----------------------------------------------------------------------
 
-export const _posts = [...Array(23)].map((_, index) => ({
+export const _posts: Article[] = [...Array(23)].map((_, index) => ({
   id: _id(index),
   title: _postTitles(index),
   description: _description(index),
-  coverUrl: `/assets/images/cover/cover-${index + 1}.webp`,
-  totalViews: 8829,
-  totalComments: 7977,
-  totalShares: 8556,
-  totalFavorites: 8870,
-  postedAt: _times(index),
+  slug: _postTitles(index).toLowerCase().replace(/\s+/g, '-'),
+  coverImage: `/assets/images/cover/cover-${index + 1}.webp`,
+  status: ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
+  createdAt: _times(index),
+  updatedAt: _times(index),
+  publishedAt: _times(index),
   author: {
+    id: _id(index),
     name: _fullName(index),
-    avatarUrl: `/assets/images/avatar/avatar-${index + 1}.webp`,
+    avatar: `/assets/images/avatar/avatar-${index + 1}.webp`,
   },
+  storeId: index % 4 === 0 ? undefined : _id(Math.floor(index / 3)), // Changed null to undefined
+  keywords: {
+    primary: ['WordPress', 'SEO', 'Marketing', 'Design', 'Development'][index % 5],
+    secondary: [
+      'Plugin', 
+      'Theme', 
+      'Performance', 
+      'Security', 
+      'Analytics'
+    ].slice(0, (index % 5) + 1)
+  },
+  meta: {
+    title: `SEO Title for ${_postTitles(index)}`,
+    description: _description(index).substring(0, 160),
+    url: `https://example.com/blog/${_postTitles(index).toLowerCase().replace(/\s+/g, '-')}`,
+  }
 }));
 
 // ----------------------------------------------------------------------

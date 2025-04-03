@@ -1,5 +1,4 @@
 import { useSnackbar } from "notistack";
-import { useDispatch  } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
@@ -10,12 +9,13 @@ import Button from '@mui/material/Button';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
-import { Backdrop, CircularProgress } from "@mui/material";
 import TablePagination from '@mui/material/TablePagination';
 
 import { _stores } from "src/_mock";
 import { DashboardContent } from "src/layouts/dashboard";
 import { useLazyGetStoresQuery } from "src/services/apis/storesApi";
+
+import { FullPageLoader } from "src/components/loader"; // Add this import
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -54,7 +54,6 @@ export function StoresView() {
   const table = useTable();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const dispatch = useDispatch()
   const [stores, setStores] = useState<any[]>([]);
 
   const [filterName, setFilterName] = useState('');
@@ -168,12 +167,7 @@ export function StoresView() {
   return (
     <DashboardContent>
       {/* Global loading indicator */}
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <FullPageLoader open={isLoading} />
 
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>

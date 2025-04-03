@@ -152,7 +152,7 @@ export function SignUpView() {
       }}
     >
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Logo sx={{ mb: 5 }} variant="full" />
+        <Logo />
         
         <Typography variant="h3" sx={{ mb: 1 }}>
           Join Our Creative Community

@@ -6,25 +6,22 @@ import {
   Card,
   Stack,
   Button,
-  Select,
   Stepper,
-  MenuItem,
   Container,
   StepLabel,
-  TextField,
   Typography,
-  InputLabel,
-  FormControl,
   CardContent,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { FormInput } from 'src/components/form/FormInput';
+import { FormDropdown } from 'src/components/form/FormDropdown';
+
 const steps = ['Basic Information', 'Choose Time', 'Confirmation'];
 
 type BookDemoFormData = {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   company: string;
   teamSize: string;
@@ -35,8 +32,7 @@ type BookDemoFormData = {
 type BookDemoFormErrors = Partial<Record<keyof BookDemoFormData, string>>;
 
 const initialFormData: BookDemoFormData = {
-  firstName: '',
-  lastName: '',
+  fullName: '',
   email: '',
   company: '',
   teamSize: '',
@@ -52,8 +48,7 @@ export function BookDemoView() {
   const validateStep = (step: number): boolean => {
     const newErrors: BookDemoFormErrors = {};
     if (step === 0) {
-      if (!formData.firstName) newErrors.firstName = 'First Name is required';
-      if (!formData.lastName) newErrors.lastName = 'Last Name is required';
+      if (!formData.fullName) newErrors.fullName = 'Full Name is required';
       if (!formData.email) {
         newErrors.email = 'Email is required';
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -91,25 +86,15 @@ export function BookDemoView() {
           <Card variant="outlined">
             <CardContent>
               <Stack spacing={3}>
-                <Box display="flex" gap={2}>
-                  <TextField
-                    fullWidth
-                    label="First Name"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    error={!!errors.firstName}
-                    helperText={errors.firstName}
-                  />
-                  <TextField
-                    fullWidth
-                    label="Last Name"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    error={!!errors.lastName}
-                    helperText={errors.lastName}
-                  />
-                </Box>
-                <TextField
+                <FormInput
+                  fullWidth
+                  label="Full Name"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  error={!!errors.fullName}
+                  helperText={errors.fullName}
+                />
+                <FormInput
                   fullWidth
                   label="Email"
                   type="email"
@@ -118,7 +103,7 @@ export function BookDemoView() {
                   error={!!errors.email}
                   helperText={errors.email}
                 />
-                <TextField
+                <FormInput
                   fullWidth
                   label="Company"
                   value={formData.company}
@@ -126,19 +111,20 @@ export function BookDemoView() {
                   error={!!errors.company}
                   helperText={errors.company}
                 />
-                <FormControl fullWidth error={!!errors.teamSize}>
-                  <InputLabel>Team Size</InputLabel>
-                  <Select
-                    value={formData.teamSize}
-                    onChange={(e) => setFormData({ ...formData, teamSize: e.target.value })}
-                  >
-                    <MenuItem value="1-10">1-10 employees</MenuItem>
-                    <MenuItem value="11-50">11-50 employees</MenuItem>
-                    <MenuItem value="51-200">51-200 employees</MenuItem>
-                    <MenuItem value="201+">201+ employees</MenuItem>
-                  </Select>
-                  {errors.teamSize && <Typography color="error">{errors.teamSize}</Typography>}
-                </FormControl>
+                <FormDropdown
+                  label="Team Size"
+                  options={[
+                    { value: "1-10", label: "1-10 employees" },
+                    { value: "11-50", label: "11-50 employees" },
+                    { value: "51-200", label: "51-200 employees" },
+                    { value: "201+", label: "201+ employees" }
+                  ]}
+                  value={formData.teamSize}
+                  onChange={(e) => setFormData({ ...formData, teamSize: e.target.value as string })}
+                  error={!!errors.teamSize}
+                  helperText={errors.teamSize}
+                  placeholder="Select team size"
+                />
               </Stack>
             </CardContent>
           </Card>
@@ -149,8 +135,8 @@ export function BookDemoView() {
           <Card variant="outlined">
             <CardContent>
               <Stack spacing={3}>
-                {errors.dateTime && <Typography color="error">{errors.dateTime}</Typography>}
-                <TextField
+                {/* Date picker would go here */}
+                <FormInput
                   fullWidth
                   multiline
                   rows={4}
