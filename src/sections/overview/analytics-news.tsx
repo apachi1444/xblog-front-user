@@ -65,12 +65,6 @@ function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][numbe
       }}
       {...other}
     >
-      <Avatar
-        variant="rounded"
-        alt={item.title}
-        src={item.coverUrl}
-        sx={{ width: 48, height: 48, flexShrink: 0 }}
-      />
 
       <ListItemText
         primary={item.title}
@@ -78,10 +72,6 @@ function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][numbe
         primaryTypographyProps={{ noWrap: true, typography: 'subtitle2' }}
         secondaryTypographyProps={{ mt: 0.5, noWrap: true, component: 'span' }}
       />
-
-      <Box sx={{ flexShrink: 0, color: 'text.disabled', typography: 'caption' }}>
-        {fToNow(item.postedAt)}
-      </Box>
     </Box>
   );
 }
