@@ -127,7 +127,6 @@ export function BlogView() {
       </Box>
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
-        <PostSearch onSearch={handleSearch} />
         <PostSort
           sortBy={sortBy}
           onSort={handleSort}
