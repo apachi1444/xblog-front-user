@@ -18,7 +18,8 @@ import {
   FormControl,
   Chip,
   FormControlLabel,
-  Switch
+  Switch,
+  useTheme
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -298,7 +299,9 @@ const ExportModal = ({ open, onClose }: ExportModalProps) => {
   );
 };
 
-export function Step3Publish() {
+export function Step4Publish() {
+  const theme = useTheme();
+  
   // State for modals
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -320,322 +323,357 @@ export function Step3Publish() {
   };
 
   return (
-    <Grid container spacing={3}>
-      {/* Article Preview */}
-      <Grid item xs={12}>
-        <FormContainer title="Article Preview">
-          <Box sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 1, mb: 3 }}>
-            {/* Article Title */}
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
-              How to Optimize Your Website for Better SEO Performance
-            </Typography>
-            
-            {/* Article Meta */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, color: 'text.secondary' }}>
-              <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
-              <Typography variant="body2" sx={{ mr: 3 }}>
-                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+    <Box sx={{ position: 'relative', pb: 8 }}>
+      <Grid container spacing={2}>
+        {/* Article Preview */}
+        <Grid item xs={12}>
+          <FormContainer 
+            title="Article Preview"
+          >
+            <Box sx={{ 
+              p: { xs: 2, md: 3 }, 
+              bgcolor: 'background.paper', 
+              borderRadius: 1, 
+              mb: 2,
+              boxShadow: '0 0 10px rgba(0,0,0,0.05)'
+            }}>
+              {/* Article Title */}
+              <Typography variant="h4" gutterBottom sx={{ 
+                fontWeight: 700, 
+                color: 'text.primary',
+                fontSize: { xs: '1.5rem', md: '2rem' }
+              }}>
+                How to Optimize Your Website for Better SEO Performance
               </Typography>
-              <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
-              <Typography variant="body2">
-                AI Generated
-              </Typography>
-            </Box>
-            
-            {/* Featured Image Placeholder */}
-            <Paper 
-              sx={{ 
-                height: 300, 
-                width: '100%', 
-                bgcolor: 'background.neutral', 
+              
+              {/* Article Meta */}
+              <Box sx={{ 
                 display: 'flex', 
+                flexWrap: 'wrap',
                 alignItems: 'center', 
-                justifyContent: 'center',
-                mb: 3,
-                borderRadius: 2,
-                backgroundImage: 'url(https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-             />
-            
-            {/* Article Content */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                Introduction to SEO Optimization
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Search Engine Optimization (SEO) is crucial for any website looking to increase visibility and attract organic traffic. In today s digital landscape, having a well-optimized website can make the difference between success and failure online. This comprehensive guide will walk you through proven strategies to improve your website s SEO performance and achieve higher rankings in search engine results pages (SERPs).
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Whether you re a small business owner, a content creator, or a marketing professional, understanding the fundamentals of SEO is essential for growing your online presence. Let s dive into the key aspects of SEO optimization and explore actionable techniques you can implement right away.
-              </Typography>
-            </Box>
-            
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                Understanding Search Engine Algorithms
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Search engines like Google use complex algorithms to determine which websites should rank for specific search queries. These algorithms consider hundreds of factors, including content relevance, website authority, user experience, and technical performance.
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Google regularly updates its algorithms to provide better search results for users. Staying informed about these updates is important for maintaining and improving your rankings. Some of the most significant algorithm updates include:
-              </Typography>
-              <ul>
-                <li>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    <strong>Core Web Vitals:</strong> Focuses on page experience metrics like loading performance, interactivity, and visual stability.
+                mb: 3, 
+                color: 'text.secondary' 
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
+                  <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
+                  <Typography variant="body2">
+                    {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </Typography>
-                </li>
-                <li>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    <strong>BERT:</strong> Improves understanding of natural language and search context.
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
+                  <Typography variant="body2">
+                    AI Generated
                   </Typography>
-                </li>
-                <li>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    <strong>Mobile-First Indexing:</strong> Prioritizes the mobile version of websites for indexing and ranking.
-                  </Typography>
-                </li>
-              </ul>
-            </Box>
-            
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                On-Page SEO Techniques
-              </Typography>
-              <Typography variant="body1" paragraph>
-                On-page SEO refers to the optimization of elements on your website that you can directly control. These include:
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
-                Keyword Research and Implementation
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Effective keyword research is the foundation of successful SEO. Identify relevant keywords that your target audience is searching for and strategically incorporate them into your content. Use tools like Google Keyword Planner, Ahrefs, or SEMrush to discover valuable keywords with good search volume and manageable competition.
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
-                Content Optimization
-              </Typography>
-              <Typography variant="body1" paragraph>
-                High-quality, relevant content is essential for SEO success. Create comprehensive, well-structured content that addresses user intent and provides value. Include your target keywords naturally throughout your content, especially in important elements like headings, introductions, and conclusions.
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
-                Meta Tags and Descriptions
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Optimize your HTML elements to improve how search engines understand and display your content. This includes crafting compelling title tags, meta descriptions, and header tags (H1, H2, H3, etc.) that incorporate your target keywords while accurately describing your content.
-              </Typography>
-            </Box>
-            
-            {/* More sections would continue here... */}
-            <Box sx={{ textAlign: 'center', color: 'text.secondary', my: 4 }}>
-              <Typography variant="body2">
-                [Preview truncated for brevity]
-              </Typography>
-            </Box>
-          </Box>
-          
-          {/* Action Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="mdi:content-copy" />}
-              onClick={handleOpenCopyModal}
-              sx={{ borderRadius: '24px', px: 3 }}
-            >
-              Copy
-            </Button>
-            
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="mdi:export" />}
-              onClick={handleOpenExportModal}
-              sx={{ borderRadius: '24px', px: 3 }}
-            >
-              Export
-            </Button>
-            
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Iconify icon="mdi:publish" />}
-              sx={{ 
-                borderRadius: '24px', 
-                px: 3,
-                bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                }
-              }}
-            >
-              Publish
-            </Button>
-          </Box>
-        </FormContainer>
-      </Grid>
-      
-      {/* Article Information */}
-      <Grid item xs={12} md={6}>
-        <FormContainer title="Article Information">
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Article Title"
-                value="How to Optimize Your Website for Better SEO Performance"
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Meta Title"
-                value="SEO Optimization Guide: Boost Your Website Performance"
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Meta Description"
-                value="Learn proven strategies to optimize your website for search engines and improve your rankings with our comprehensive SEO guide."
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="URL Slug"
-                value="seo-optimization-guide"
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {['SEO', 'Website Optimization', 'Search Engine', 'Digital Marketing'].map((tag) => (
-                  <Chip 
-                    key={tag} 
-                    label={tag} 
-                    sx={{ 
-                      bgcolor: 'primary.lighter', 
-                      color: 'primary.main',
-                      borderRadius: '16px'
-                    }} 
-                  />
-                ))}
+                </Box>
               </Box>
-            </Grid>
-          </Grid>
-        </FormContainer>
-      </Grid>
-      
-      {/* Distribution Options */}
-      <Grid item xs={12} md={6}>
-        <FormContainer title="Distribution Options">
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Select Store</InputLabel>
-                <Select
-                  value={selectedStore}
-                  label="Select Store"
-                  onChange={(e) => setSelectedStore(e.target.value)}
-                >
-                  <MenuItem value="store1">My WordPress Blog</MenuItem>
-                  <MenuItem value="store2">Company Website</MenuItem>
-                  <MenuItem value="store3">Personal Portfolio</MenuItem>
-                  <MenuItem value="new">+ Create New Store</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Publishing Schedule</InputLabel>
-                <Select
-                  value="now"
-                  label="Publishing Schedule"
-                >
-                  <MenuItem value="now">Publish Now</MenuItem>
-                  <MenuItem value="schedule">Schedule for Later</MenuItem>
-                  <MenuItem value="draft">Save as Draft</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Content Category</InputLabel>
-                <Select
-                  value="digital-marketing"
-                  label="Content Category"
-                >
-                  <MenuItem value="digital-marketing">Digital Marketing</MenuItem>
-                  <MenuItem value="seo">SEO</MenuItem>
-                  <MenuItem value="web-development">Web Development</MenuItem>
-                  <MenuItem value="content-strategy">Content Strategy</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="Allow Comments"
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="Share on Social Media"
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <Button
-                fullWidth
-                variant="contained"
-                color="success"
-                startIcon={<Iconify icon="mdi:rocket-launch" />}
-                onClick={handlePublish}
+              
+              {/* Featured Image Placeholder */}
+              <Paper 
                 sx={{ 
-                  borderRadius: '24px',
-                  py: 1.5,
-                  bgcolor: 'success.main',
+                  height: { xs: 200, sm: 250, md: 300 }, 
+                  width: '100%', 
+                  bgcolor: 'background.neutral', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  mb: 3,
+                  borderRadius: 2,
+                  backgroundImage: 'url(https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  transition: 'transform 0.3s ease',
                   '&:hover': {
-                    bgcolor: 'success.dark',
+                    transform: 'scale(1.01)',
+                  }
+                }}
+              />
+              
+              {/* Article Content - Simplified for better readability */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                  Introduction to SEO Optimization
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Search Engine Optimization (SEO) is crucial for any website looking to increase visibility and attract organic traffic. In today s digital landscape, having a well-optimized website can make the difference between success and failure online.
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Whether you re a small business owner, a content creator, or a marketing professional, understanding the fundamentals of SEO is essential for growing your online presence.
+                </Typography>
+              </Box>
+              
+              {/* More sections would continue here... */}
+              <Box sx={{ 
+                textAlign: 'center', 
+                color: 'text.secondary', 
+                my: 3,
+                p: 2,
+                bgcolor: 'background.neutral',
+                borderRadius: 1
+              }}>
+                <Typography variant="body2">
+                  [Preview truncated for brevity]
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* Action Buttons */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              flexWrap: 'wrap',
+              gap: 2, 
+              mb: 2 
+            }}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="mdi:content-copy" />}
+                onClick={handleOpenCopyModal}
+                sx={{ 
+                  borderRadius: '24px', 
+                  px: 3,
+                  mb: { xs: 1, sm: 0 }
+                }}
+              >
+                Copy
+              </Button>
+              
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="mdi:export" />}
+                onClick={handleOpenExportModal}
+                sx={{ 
+                  borderRadius: '24px', 
+                  px: 3,
+                  mb: { xs: 1, sm: 0 }
+                }}
+              >
+                Export
+              </Button>
+              
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Iconify icon="mdi:publish" />}
+                sx={{ 
+                  borderRadius: '24px', 
+                  px: 3,
+                  mb: { xs: 1, sm: 0 },
+                  bgcolor: 'primary.main',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
                   }
                 }}
               >
-                Publish Content
+                Publish
               </Button>
+            </Box>
+          </FormContainer>
+        </Grid>
+        
+        {/* Article Information and Distribution Options in a responsive grid */}
+        <Grid item xs={12} md={6}>
+          <FormContainer title="Article Information">
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Article Title"
+                  value="How to Optimize Your Website for Better SEO Performance"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Meta Title"
+                  value="SEO Optimization Guide: Boost Your Website Performance"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Meta Description"
+                  value="Learn proven strategies to optimize your website for search engines and improve your rankings with our comprehensive SEO guide."
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="URL Slug"
+                  value="seo-optimization-guide"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Keywords
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {['SEO', 'Website Optimization', 'Search Engine', 'Digital Marketing'].map((tag) => (
+                    <Chip 
+                      key={tag} 
+                      label={tag} 
+                      sx={{ 
+                        bgcolor: 'primary.lighter', 
+                        color: 'primary.main',
+                        borderRadius: '16px',
+                        mb: 0.5
+                      }} 
+                    />
+                  ))}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </FormContainer>
+          </FormContainer>
+        </Grid>
+        
+        {/* Distribution Options */}
+        <Grid item xs={12} md={6}>
+          <FormContainer title="Distribution Options">
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Select Store</InputLabel>
+                  <Select
+                    value={selectedStore}
+                    label="Select Store"
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                  >
+                    <MenuItem value="store1">My WordPress Blog</MenuItem>
+                    <MenuItem value="store2">Company Website</MenuItem>
+                    <MenuItem value="store3">Personal Portfolio</MenuItem>
+                    <MenuItem value="new">+ Create New Store</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Publishing Schedule</InputLabel>
+                  <Select
+                    value="now"
+                    label="Publishing Schedule"
+                  >
+                    <MenuItem value="now">Publish Now</MenuItem>
+                    <MenuItem value="schedule">Schedule for Later</MenuItem>
+                    <MenuItem value="draft">Save as Draft</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Content Category</InputLabel>
+                  <Select
+                    value="digital-marketing"
+                    label="Content Category"
+                  >
+                    <MenuItem value="digital-marketing">Digital Marketing</MenuItem>
+                    <MenuItem value="seo">SEO</MenuItem>
+                    <MenuItem value="web-development">Web Development</MenuItem>
+                    <MenuItem value="content-strategy">Content Strategy</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch defaultChecked />}
+                  label="Allow Comments"
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={<Switch defaultChecked />}
+                  label="Share on Social Media"
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="success"
+                  startIcon={<Iconify icon="mdi:rocket-launch" />}
+                  onClick={handlePublish}
+                  sx={{ 
+                    borderRadius: '24px',
+                    py: 1.5,
+                    bgcolor: 'success.main',
+                    '&:hover': {
+                      bgcolor: 'success.dark',
+                    }
+                  }}
+                >
+                  Publish Content
+                </Button>
+              </Grid>
+            </Grid>
+          </FormContainer>
+        </Grid>
       </Grid>
+      
+      {/* Fixed Next Button at the bottom */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          py: 2,
+          px: 3,
+          bgcolor: 'background.paper',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Button
+          variant="outlined"
+          startIcon={<Iconify icon="eva:arrow-back-fill" />}
+          sx={{ borderRadius: '24px' }}
+        >
+          Previous
+        </Button>
+        
+        <Button
+          variant="contained"
+          endIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+          sx={{ 
+            borderRadius: '24px',
+            bgcolor: 'success.main',
+            '&:hover': {
+              bgcolor: 'success.dark',
+            }
+          }}
+          onClick={handlePublish}
+        >
+          Finish & Publish
+        </Button>
+      </Box>
       
       {/* Modals */}
       <CopyModal open={copyModalOpen} onClose={handleCloseCopyModal} />
       <ExportModal open={exportModalOpen} onClose={handleCloseExportModal} />
-    </Grid>
+    </Box>
   );
 }

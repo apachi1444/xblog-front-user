@@ -55,6 +55,10 @@ export function SignInView() {
     router.push('/sign-up');
   }, [router]);
 
+  const handleNavigateToForgotPassword = useCallback(() => {
+    router.push('/forgot-password');
+  }, [router]);
+
   const handleLogin = () => {
     loginWithProvider('google');
     
@@ -90,7 +94,19 @@ export function SignInView() {
         sx={{ mb: 3 }}
       />
 
-      <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+      <Link 
+        variant="body2" 
+        color="inherit" 
+        sx={{ 
+          mb: 1.5,
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline',
+            opacity: 'revert'
+          } 
+        }}
+        onClick={handleNavigateToForgotPassword}
+      >
         Forgot password?
       </Link>
 

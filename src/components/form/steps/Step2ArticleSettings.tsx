@@ -409,6 +409,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Article Type"
+                  tooltipText="Choose the type of article that best fits your content goals"
                   options={articleTypeOptions}
                   value={articleType}
                   onChange={(e) => setArticleType(e.target.value as string)}
@@ -421,6 +422,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Article Size"
+                  tooltipText="Determines the length and depth of your article"
                   options={articleSizeOptions}
                   value={articleSize}
                   onChange={(e) => setArticleSize(e.target.value as string)}
@@ -433,6 +435,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Tone of Voice"
+                  tooltipText="Sets the overall tone and style of writing for your article"
                   options={toneOptions}
                   value={toneOfVoice}
                   onChange={(e) => setToneOfVoice(e.target.value as string)}
@@ -445,6 +448,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Point of View"
+                  tooltipText="Determines the perspective from which your article is written"
                   options={povOptions}
                   value={pointOfView}
                   onChange={(e) => setPointOfView(e.target.value as string)}
@@ -457,6 +461,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="AI Content Cleaning"
+                  tooltipText="Controls how AI-generated text is processed to sound more natural"
                   options={aiCleaningOptions}
                   value={aiContentCleaning}
                   onChange={(e) => setAiContentCleaning(e.target.value as string)}
@@ -492,6 +497,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Image Quality"
+                  tooltipText="Sets the resolution and quality of generated images"
                   options={imageQualityOptions}
                   value={imageQuality}
                   onChange={(e) => setImageQuality(e.target.value as string)}
@@ -504,6 +510,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Image Placement"
+                  tooltipText="Determines where images will be placed within your article"
                   options={imagePlacementOptions}
                   value={imagePlacement}
                   onChange={(e) => setImagePlacement(e.target.value as string)}
@@ -516,6 +523,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Image Style"
+                  tooltipText="Sets the visual style for generated images"
                   options={imageStyleOptions}
                   value={imageStyle}
                   onChange={(e) => setImageStyle(e.target.value as string)}
@@ -528,6 +536,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Number of Images"
+                  tooltipText="Total number of images to include in your article"
                   options={numberOptions}
                   value={numberOfImages}
                   onChange={(e) => setNumberOfImages(e.target.value as string)}
@@ -537,23 +546,25 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                 />
               </Grid>
               
-              <Grid item xs={12} sm={6} md={3}>
-                <FormControlLabel
-                  control={
-                    <Switch 
-                      checked={includeVideos}
-                      onChange={(e) => setIncludeVideos(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label="Include Videos"
-                  sx={{ ml: 0 }}
-                />
+              <Grid item xs={12} sm={6} md={6}>
+                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={includeVideos}
+                        onChange={(e) => setIncludeVideos(e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label="Include Videos"
+                  />
+                </Box>
               </Grid>
               
-              <Grid item xs={12} sm={1} md={3}>
+              <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Number of Videos"
+                  tooltipText="Specify how many videos should be embedded in your article"
                   options={videoNumberOptions}
                   value={numberOfVideos}
                   onChange={(e) => setNumberOfVideos(e.target.value as string)}
@@ -588,6 +599,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6}>
                 <FormDropdown
                   label="Internal Linking"
+                  tooltipText="Select which of your websites to link to within the article"
                   options={linkingOptions}
                   value={internalLinking}
                   onChange={(e) => setInternalLinking(e.target.value as string)}
@@ -600,6 +612,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Grid item xs={12} sm={6}>
                 <FormDropdown
                   label="External Linking"
+                  tooltipText="Choose which external sources to reference in your article"
                   options={externalLinkingOptions}
                   value={externalLinking}
                   onChange={(e) => setExternalLinking(e.target.value as string)}
@@ -611,85 +624,36 @@ const handleGenerateTableOfContentsWithValidation = async () => {
             </Grid>
           </Box>
           
-          {/* Action Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, width: '100%' }}>
+          {/* Generate Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <Button
               variant="contained"
               color="primary"
-              startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
+              size="large"
               onClick={handleGenerateTableOfContentsWithValidation}
-              disabled={isGenerating || isGenerated}
-              sx={{
-                borderRadius: '24px',
-                px: 4,
-                py: 1,
-                fontWeight: 600
+              disabled={isGenerating}
+              startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
+              sx={{ 
+                borderRadius: '28px',
+                px: 4
               }}
             >
-              {isGenerating ? 'Generating...' : isGenerated ? 'Generated!' : 'Generate Table of Contents'}
+              {isGenerating ? 'Generating...' : 'Generate Table of Contents'}
             </Button>
           </Box>
           
-          {/* Loading overlay for better UX */}
-          {isGenerating && (
-            <Box
-              sx={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                zIndex: 9999,
-              }}
+          {/* Next Step Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={onNextStep}
+              disabled={!isGenerated}
+              endIcon={<Iconify icon="mdi:arrow-right" />}
             >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  p: 4,
-                  borderRadius: 2,
-                  bgcolor: 'background.paper',
-                  boxShadow: 3,
-                  maxWidth: 400,
-                }}
-              >
-                <CircularProgress 
-                  size={80} 
-                  thickness={4} 
-                  sx={{ 
-                    color: '#5969cf',
-                    mb: 3
-                  }} 
-                />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    mb: 1,
-                    fontWeight: 600,
-                    color: '#5969cf',
-                    textAlign: 'center'
-                  }}
-                >
-                  Generating your content outline...
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'text.secondary',
-                    textAlign: 'center'
-                  }}
-                >
-                  We re analyzing your inputs and creating the perfect structure for your content.
-                </Typography>
-              </Box>
-            </Box>
-          )}
+              Next Step
+            </Button>
+          </Box>
         </FormContainer>
       </Grid>
     </Grid>

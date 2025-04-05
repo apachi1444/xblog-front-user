@@ -33,122 +33,14 @@ export function SignUpView() {
     router.push('/sign-in');
   }, [router]);
 
-  const renderForm = (
-    <Box display="flex" flexDirection="column" gap={3}>
-      <Box display="flex" gap={2}>
-        <TextField
-          fullWidth
-          name="firstName"
-          label="First Name"
-          placeholder="John"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="ic:round-person" />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          fullWidth
-          name="lastName"
-          label="Last Name"
-          placeholder="Doe"
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="ic:round-person" />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      <TextField
-        fullWidth
-        name="email"
-        label="Email Address"
-        placeholder="john.doe@creative.com"
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Iconify icon="ic:round-email" />
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      <TextField
-        fullWidth
-        name="password"
-        label="Create Password"
-        type={showPassword ? 'text' : 'password'}
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Iconify icon="mdi:password-outline" />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      <TextField
-        fullWidth
-        name="confirmPassword"
-        label="Confirm Password"
-        type={showPassword ? 'text' : 'password'}
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Iconify icon="mdi:password-check" />
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        onClick={handleSignUp}
-        sx={{ mt: 2 }}
-      >
-        Create Account
-      </LoadingButton>
-
-      <Typography variant="body2" color="text.secondary" align="center">
-        By signing up, you agree to our{' '}
-        <Link href="#" variant="subtitle2">
-          Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link href="#" variant="subtitle2">
-          Privacy Policy
-        </Link>
-      </Typography>
-    </Box>
-  );
-
   return (
     <Box
       sx={{
         p: 3,
         borderRadius: 2,
         boxShadow: (theme) => theme.customShadows.z16,
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
+        minWidth : '600px',
       }}
     >
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
@@ -178,7 +70,97 @@ export function SignUpView() {
         </Typography>
       </Box>
 
-      {renderForm}
+      {/* Updated form with simplified fields */}
+      <Box display="flex" flexDirection="column" gap={3} sx={{ width: '100%' }}>
+        <TextField
+          fullWidth
+          name="fullName"
+          label="Full Name"
+          placeholder="John Doe"
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="ic:round-person" />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <TextField
+          fullWidth
+          name="email"
+          label="Email Address"
+          placeholder="john.doe@creative.com"
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="ic:round-email" />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <TextField
+          fullWidth
+          name="password"
+          label="Create Password"
+          type={showPassword ? 'text' : 'password'}
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="mdi:password-outline" />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <TextField
+          fullWidth
+          name="confirmPassword"
+          label="Confirm Password"
+          type={showPassword ? 'text' : 'password'}
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="mdi:password-check" />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          onClick={handleSignUp}
+          sx={{ mt: 2 }}
+        >
+          Create Account
+        </LoadingButton>
+
+        <Typography variant="body2" color="text.secondary" align="center">
+          By signing up, you agree to our{' '}
+          <Link href="#" variant="subtitle2">
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="#" variant="subtitle2">
+            Privacy Policy
+          </Link>
+        </Typography>
+      </Box>
 
       <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
         <Typography

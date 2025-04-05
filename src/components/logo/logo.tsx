@@ -17,13 +17,6 @@ export interface LogoProps {
 
 export const Logo = forwardRef<HTMLDivElement, LogoProps>(
   ({ disabledLink = false, sx, variant = 'full', ...other }, ref) => {
-    const theme = useTheme();
-    const isLight = theme.palette.mode === 'light';
-
-    const PRIMARY_LIGHT = theme.palette.primary.light;
-    const PRIMARY_MAIN = theme.palette.primary.main;
-    const PRIMARY_DARK = theme.palette.primary.dark;
-
     // Use the new XBlog logo
     const logo = (
       <Box

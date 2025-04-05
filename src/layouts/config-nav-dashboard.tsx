@@ -1,4 +1,3 @@
-import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -11,12 +10,12 @@ export const navData = [
   {
     title: 'Dashboard',
     path: '/',
-    icon: icon('ic-analytics'),
+    icon: icon('ic-home'),
   },
   {
     title: 'Generate',
     path: '/generate',
-    icon: icon('ic-user'),
+    icon: icon('ic-generate'),
   },
   /*
   {
@@ -33,12 +32,12 @@ export const navData = [
   {
     title: 'Blogs',
     path: '/blog',
-    icon: icon('ic-blog'),
+    icon: icon('ic-blogs'),
   },
   {
     title: 'Calendar',
     path: '/calendar',
-    icon: icon('ic-user'),
+    icon: icon('ic-calendar'),
   },
 ];
 
@@ -46,11 +45,11 @@ export const bottomNavData = [
   {
     title: 'Upgrade license',
     path: '/upgrade-license',
-    icon: icon('ic-blog'),
+    icon: icon('ic-upgrade'),
   },
   {
     title: 'Book Demo',
     path: '/book-demo',
-    icon: icon('ic-blog'),
+    icon: icon('ic-book-demo'),
   },
 ];

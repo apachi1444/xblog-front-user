@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-import { Box, Stack, Button } from '@mui/material';
+import { Box, Stack, Button, Paper } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
-import { Step3Publish } from './steps/Step4Publish';
+import { Step4Publish } from './steps/Step4Publish';
 import { Step1ContentSetup } from './steps/Step1ContentSetup';
 import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
 import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
@@ -55,6 +55,14 @@ export function CompleteExample() {
     }
   };
 
+  // Define button placement configuration for each step
+  const stepButtonsConfig = [
+    { position: 'bottom' }, // Step 1: Content Setup
+    { position: 'top' },    // Step 2: Article Settings
+    { position: 'top' },    // Step 3: Content Structuring
+    { position: 'top' }     // Step 4: Publish
+  ];
+  
   // Navigation handlers
   const handleNext = () => {
     setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
@@ -63,7 +71,59 @@ export function CompleteExample() {
   const handleBack = () => {
     setActiveStep((prevStep) => Math.max(prevStep - 1, 0));
   };
+  
+  // Render navigation buttons based on position
+  const renderNavigationButtons = (position: string) => {
+    // Only render if current step's button position matches
+    if (stepButtonsConfig[activeStep].position !== position) {
+      return null;
+    }
 
+    const isNextButtonDisabled = activeStep === steps.length - 1
+    const isPreviousButtonDisabled = activeStep === 0
+    
+    return (
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          mt: position === 'bottom' ? 4 : 0,
+          mb: position === 'top' ? 4 : 0,
+          pt: position === 'bottom' ? 3 : 0,
+          pb: position === 'top' ? 3 : 0,
+          borderTop: position === 'bottom' ? '1px solid' : 'none',
+          borderBottom: position === 'top' ? '1px solid' : 'none',
+          borderColor: 'divider',
+        }}
+      >
+        <Box>
+          {!isPreviousButtonDisabled && (
+            <Button
+              variant="outlined"
+              onClick={handleBack}
+              startIcon={<Iconify icon="eva:arrow-back-fill" />}
+              sx={{ px: 3 }}
+            >
+              Back
+            </Button>
+          )}
+        </Box>
+
+        <Box>
+          {!isNextButtonDisabled && (
+            <Button
+              variant="contained"
+              onClick={handleNext}
+              endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+              sx={{ px: 3 }}
+            >
+              {activeStep === steps.length - 2 ? 'Finish' : 'Next'}
+            </Button>
+          )}
+        </Box>
+      </Box>
+    );
+  };
   
   // New state variables for generation features
   const [isTitleGenerated, setIsTitleGenerated] = useState(false);
@@ -204,7 +264,7 @@ export function CompleteExample() {
           />
         );
       case 3:
-        return <Step3Publish />;
+        return <Step4Publish />;
       default:
         return null;
     }
@@ -218,10 +278,29 @@ export function CompleteExample() {
     setIsSEODashboardCollapsed(!collapsed);
   };
 
+  // Determine button position based on current step
+  const getButtonPosition = () => {
+    switch (activeStep) {
+      case 0: // Content Setup
+        return 'bottom';
+      case 1: // Article Settings
+        return 'top';
+      case 2: // Content Structuring
+        return 'bottom';
+      case 3: // Publish
+        return 'top';
+      default:
+        return 'bottom';
+    }
+  };
+
   return (
     <Box>
       {/* Stepper */}
       <StepperComponent steps={steps} activeStep={activeStep} />
+      
+      {/* Top Navigation Buttons (if configured for this step) */}
+      {getButtonPosition() === 'top' && renderNavigationButtons('top')}
       
       <Box sx={{ display: 'flex', width: '100%' }}>
         {/* Forms on the left - adjust width based on SEO dashboard visibility and collapse state */}
@@ -237,64 +316,14 @@ export function CompleteExample() {
             pr: isSEODashboardVisible ? 2 : 0
           }}
         >
-          {/* Navigation buttons at the top of the form section */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-            <Stack direction="row" spacing={2}>
-              {activeStep !== 0 && ( 
-                <Button
-                  onClick={handleBack}
-                  disabled={activeStep === 0}
-                  startIcon={<Iconify icon="eva:arrow-back-fill" />}
-                  sx={{
-                    minWidth: 100,
-                    bgcolor: 'primary.lighter',
-                    color: 'primary.main',
-                    borderRadius: '24px',
-                    py: 1,
-                    px: 3,
-                    '&:hover': {
-                      bgcolor: 'primary.lighter',
-                    },
-                    '&:disabled': {
-                      bgcolor: 'grey.200',
-                      color: 'grey.500'
-                    }
-                  }}
-                >
-                  Back
-                </Button>
-              )}
-              
-              {activeStep !== steps.length - 1 && (
-                <Button
-                  onClick={handleNext}
-                  disabled={activeStep === steps.length - 1}
-                  endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-                  sx={{
-                    minWidth: 100,
-                    bgcolor: 'primary.lighter',
-                    color: 'primary.main',
-                    borderRadius: '24px',
-                    py: 1,
-                    px: 3,
-                    '&:hover': {
-                      bgcolor: 'primary.light',
-                    },
-                    '&:disabled': {
-                      bgcolor: 'grey.200',
-                      color: 'grey.500'
-                    }
-                  }}
-                >
-                  Next
-                </Button>
-              )}
-            </Stack>
-          </Box>
+          {/* Remove the existing navigation buttons here since we're using renderNavigationButtons */}
           
           <Box sx={{ width: '100%' }}>
             {renderStepContent()}
           </Box>
+          
+          {/* Bottom Navigation Buttons (if configured for this step) */}
+          {getButtonPosition() === 'bottom' && renderNavigationButtons('bottom')}
         </Box>
         
         {/* SEO Dashboard on the right - only visible on certain steps */}

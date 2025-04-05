@@ -152,8 +152,10 @@ export function Step1ContentSetup({
   ];
 
   return (
-    <Grid container spacing={3}>
-      {/* Language & Region section - Moved to the top */}
+    <Grid container spacing={1}>
+      {/* Reduced spacing from 2 to 1 in the container */}
+      
+      {/* Language & Region section */}
       <Grid item xs={12}>
         <FormContainer title="Language & Region">
           <FormDropdown
@@ -176,34 +178,9 @@ export function Step1ContentSetup({
         </FormContainer>
       </Grid>
       
-      {/* Content Description - New section */}
-      <Grid item xs={12}>
-        <FormContainer title="Content Description">
-          <Box sx={{ width: '100%' }}>
-            <FormInput
-              label="Content Description"
-              tooltipText="Describe what your content is about"
-              placeholder="Enter a detailed description of your content"
-              value={contentDescription}
-              onChange={(e) => setContentDescription(e.target.value)}
-              multiline
-              rows={4}
-              fullWidth
-              error={errors.contentDescription}
-              helperText={errors.contentDescription ? "Content description is required" : ""}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: theme.palette.background.paper,
-                  borderRadius: theme.shape.borderRadius / 6,
-                }
-              }}
-            />
-          </Box>
-        </FormContainer>
-      </Grid>
-
       {/* Keywords section */}
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ mt: -2 }}>
+        {/* Increased negative margin from -1 to -2 */}
         <FormContainer title="Keywords" layout="column">
           <Box sx={{ width: '100%' }}>
             <FormInput
@@ -291,18 +268,47 @@ export function Step1ContentSetup({
           </Box>
         </FormContainer>
       </Grid>
+      
+      {/* Content Description */}
+      <Grid item xs={12} sx={{ mt: -2 }}>
+        {/* Increased negative margin from -1 to -2 */}
+        <FormContainer title="Content Description">
+          <Box sx={{ width: '100%' }}>
+            <FormInput
+              label="Content Description"
+              tooltipText="Describe what your content is about"
+              placeholder="Enter a detailed description of your content"
+              value={contentDescription}
+              onChange={(e) => setContentDescription(e.target.value)}
+              multiline
+              rows={4}
+              fullWidth
+              error={errors.contentDescription}
+              helperText={errors.contentDescription ? "Content description is required" : ""}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: theme.palette.background.paper,
+                  borderRadius: theme.shape.borderRadius / 6,
+                }
+              }}
+            />
+          </Box>
+        </FormContainer>
+      </Grid>
 
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ mt: -2 }}>
+        {/* Increased negative margin from -1 to -2 */}
+        
         {/* Title generation section */}
         {!isTitleGenerated ? (
             <Box 
               sx={{ 
                 width: '100%', 
-                height: theme.spacing(18.75), 
+                height: theme.spacing(14), // Further reduced height from 16 to 14
                 borderRadius: theme.shape.borderRadius / 6, 
                 position: 'relative',
                 overflow: 'hidden',
-                mb: 3,
+                mb: 5, // Reduced margin bottom from 2 to 1
                 bgcolor: theme.palette.background.neutral,
                 backdropFilter: 'blur(8px)',
                 display: 'flex',
@@ -313,7 +319,7 @@ export function Step1ContentSetup({
                 borderColor: theme.palette.primary.main,
               }}
             >
-              <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.secondary }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.secondary }}>
                 Generate a compelling title for your content
               </Typography>
               
@@ -332,7 +338,8 @@ export function Step1ContentSetup({
               </Button>
             </Box>
           ) : (
-            <Box sx={{ width: '100%', mb: 3 }}>
+            <Box sx={{ width: '100%', mb: 1 }}>
+              {/* Reduced margin bottom from 2 to 1 */}
               <FormContainer title="Generated Title">
                 <Box sx={{ position: 'relative', width: '100%' }}>
                   <FormInput
@@ -365,11 +372,11 @@ export function Step1ContentSetup({
           <Box 
             sx={{ 
               width: '100%', 
-              height: theme.spacing(22.5), 
+              height: theme.spacing(16), // Reduced height from 18 to 16
               borderRadius: theme.shape.borderRadius / 6, 
               position: 'relative',
               overflow: 'hidden',
-              mb: 3,
+              mb: 1, // Reduced margin bottom from 2 to 1
               bgcolor: theme.palette.background.neutral,
               backdropFilter: 'blur(8px)',
               display: 'flex',
@@ -380,7 +387,7 @@ export function Step1ContentSetup({
               borderColor: theme.palette.primary.main,
             }}
           >
-            <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.secondary }}>
+            <Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.text.secondary }}>
               Generate SEO meta information for your content
             </Typography>
             
@@ -400,7 +407,9 @@ export function Step1ContentSetup({
           </Box>
         ) : (
           <FormContainer title="SEO Meta Information">
-            <Stack spacing={2} sx={{ width: '100%' }}>
+            <Stack spacing={1} sx={{ width: '100%' }}>
+              {/* Reduced spacing from 1.5 to 1 */}
+              
               {/* Meta Title */}
               <FormInput
                 tooltipText='Meta title'

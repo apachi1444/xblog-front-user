@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
-import { useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 
@@ -73,6 +73,7 @@ export function NavDesktop({
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
+        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.lighter, 0.4)} 0%, ${alpha(theme.palette.secondary.lighter, 0.3)} 100%)`,
         ...sx,
       }}
     >
@@ -128,7 +129,9 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
 
   return (
     <>
-      <Logo />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+        <Logo />
+      </Box>
 
       {slots?.topArea}
 
@@ -156,6 +159,9 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
                       fontWeight: 'fontWeightMedium',
                       color: 'var(--layout-nav-item-color)',
                       minHeight: 'var(--layout-nav-item-height)',
+                      '&:hover': {
+                          bgcolor: 'var(--layout-nav-item-hover-bg)',
+                      },
                       ...(isActived && {
                         fontWeight: 'fontWeightSemiBold',
                         bgcolor: 'var(--layout-nav-item-active-bg)',
@@ -201,6 +207,9 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
                       fontWeight: 'fontWeightMedium',
                       color: 'var(--layout-nav-item-color)',
                       minHeight: 'var(--layout-nav-item-height)',
+                      '&:hover': {
+                        bgcolor: 'var(--layout-nav-item-hover-bg)',
+                      },
                       ...(isActived && {
                         fontWeight: 'fontWeightSemiBold',
                         bgcolor: 'var(--layout-nav-item-active-bg)',
