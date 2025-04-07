@@ -295,7 +295,13 @@ export function CompleteExample() {
   };
 
   return (
-    <Box>
+    <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
       {/* Stepper */}
       <StepperComponent steps={steps} activeStep={activeStep} />
       

@@ -1,4 +1,6 @@
+import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -13,9 +15,10 @@ import { useRouter } from 'src/routes/hooks';
 
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
-import { useDispatch } from 'react-redux';
+import { LanguageSwitcher } from 'src/components/language-switcher/LanguageSwitcher';
 
 export function SignUpView() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,25 +39,44 @@ export function SignUpView() {
   return (
     <Box
       sx={{
-        p: 3,
-        borderRadius: 2,
-        boxShadow: (theme) => theme.customShadows.z16,
-        bgcolor: 'background.paper',
-        minWidth : '600px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        width: '100%',
+        padding: 2,
+        overflow: 'auto',
+        position: 'relative',
       }}
     >
-      <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Logo />
-        
-        <Typography variant="h3" sx={{ mb: 1 }}>
-          Join Our Creative Community
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Start your creative journey with exclusive features
-        </Typography>
+      {/* Add language switcher in the top-right corner */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <LanguageSwitcher />
+      </Box>
+      
+      <Box
+        sx={{
+          p: { xs: 2, sm: 3 },
+          borderRadius: 2,
+          boxShadow: (theme) => theme.customShadows.z16,
+          bgcolor: 'background.paper',
+          width: '1000px',
+          maxHeight: '90vh',
+          mx: 'auto',
+        }}
+      >
+        <Box gap={1} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 3 }}>
+          <Logo />
+          
+          <Typography variant="h4" sx={{ mb: 0.5 }}>
+            {t('auth.signup.title')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {t('auth.signup.subtitle')}
+          </Typography>
         
         <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
-          Already have an account?
+          {t('auth.signup.haveAccount')}
           <Link variant="subtitle2" 
             sx={{ 
               ml: 0.5,
@@ -65,7 +87,7 @@ export function SignUpView() {
               } 
             }} 
             onClick={handleNavigateToSignIn}>
-            Sign In
+            {t('auth.signin.title')}
           </Link>
         </Typography>
       </Box>
@@ -75,8 +97,8 @@ export function SignUpView() {
         <TextField
           fullWidth
           name="fullName"
-          label="Full Name"
-          placeholder="John Doe"
+          label={t('auth.signup.fullName')}
+          placeholder={t('auth.signup.fullNamePlaceholder')}
           InputLabelProps={{ shrink: true }}
           InputProps={{
             startAdornment: (
@@ -90,8 +112,8 @@ export function SignUpView() {
         <TextField
           fullWidth
           name="email"
-          label="Email Address"
-          placeholder="john.doe@creative.com"
+          label={t('auth.signup.email')}
+          placeholder={t('auth.signup.emailPlaceholder')}
           InputLabelProps={{ shrink: true }}
           InputProps={{
             startAdornment: (
@@ -105,7 +127,7 @@ export function SignUpView() {
         <TextField
           fullWidth
           name="password"
-          label="Create Password"
+          label={t('auth.signup.password')}
           type={showPassword ? 'text' : 'password'}
           InputLabelProps={{ shrink: true }}
           InputProps={{
@@ -127,7 +149,7 @@ export function SignUpView() {
         <TextField
           fullWidth
           name="confirmPassword"
-          label="Confirm Password"
+          label={t('auth.signup.confirmPassword')}
           type={showPassword ? 'text' : 'password'}
           InputLabelProps={{ shrink: true }}
           InputProps={{
@@ -147,17 +169,17 @@ export function SignUpView() {
           onClick={handleSignUp}
           sx={{ mt: 2 }}
         >
-          Create Account
+          {t('auth.signup.createAccount')}
         </LoadingButton>
 
         <Typography variant="body2" color="text.secondary" align="center">
-          By signing up, you agree to our{' '}
+          {t('auth.signup.termsPrefix')}{' '}
           <Link href="#" variant="subtitle2">
-            Terms of Service
+            {t('auth.signup.termsOfService')}
           </Link>{' '}
-          and{' '}
+          {t('auth.signup.and')}{' '}
           <Link href="#" variant="subtitle2">
-            Privacy Policy
+            {t('auth.signup.privacyPolicy')}
           </Link>
         </Typography>
       </Box>
@@ -167,7 +189,7 @@ export function SignUpView() {
           variant="overline"
           sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
         >
-          OR CONTINUE WITH
+          {t('auth.signup.orContinueWith')}
         </Typography>
       </Divider>
 
@@ -191,9 +213,10 @@ export function SignUpView() {
             }
           }}
         >
-          Sign up with Google
+          {t('auth.signup.signupWithGoogle')}
         </LoadingButton>
       </Box>
+    </Box>
     </Box>
   );
 }

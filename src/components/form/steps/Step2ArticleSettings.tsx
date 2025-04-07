@@ -641,19 +641,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               {isGenerating ? 'Generating...' : 'Generate Table of Contents'}
             </Button>
           </Box>
-          
-          {/* Next Step Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onNextStep}
-              disabled={!isGenerated}
-              endIcon={<Iconify icon="mdi:arrow-right" />}
-            >
-              Next Step
-            </Button>
-          </Box>
+        
         </FormContainer>
       </Grid>
     </Grid>

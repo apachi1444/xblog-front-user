@@ -1,0 +1,33 @@
+{
+  "translation": {
+    "auth": {
+      "signup": {
+        "title": "Rejoignez Notre Communauté Créative",
+        "subtitle": "Commencez votre voyage créatif avec des fonctionnalités exclusives",
+        "haveAccount": "Vous avez déjà un compte?",
+        "fullName": "Nom Complet",
+        "fullNamePlaceholder": "Jean Dupont",
+        "email": "Adresse Email",
+        "emailPlaceholder": "jean.dupont@creative.com",
+        "password": "Créer un Mot de Passe",
+        "confirmPassword": "Confirmer le Mot de Passe",
+        "createAccount": "Créer un Compte",
+        "termsPrefix": "En vous inscrivant, vous acceptez nos",
+        "termsOfService": "Conditions d'Utilisation",
+        "and": "et",
+        "privacyPolicy": "Politique de Confidentialité",
+        "orContinueWith": "OU CONTINUER AVEC",
+        "signupWithGoogle": "S'inscrire avec Google"
+      },
+      "signin": {
+        "title": "Se Connecter"
+      }
+    },
+    "common": {
+      "dashboard": "Tableau de Bord",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    }
+  }
+}

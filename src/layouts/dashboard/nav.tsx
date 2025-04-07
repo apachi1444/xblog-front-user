@@ -73,7 +73,7 @@ export function NavDesktop({
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
-        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.lighter, 0.4)} 0%, ${alpha(theme.palette.secondary.lighter, 0.3)} 100%)`,
+        background: `white;`,
         ...sx,
       }}
     >
@@ -220,11 +220,11 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
                       }),
                     }}
                   >
-                    <Box component="span" sx={{ width: 24, height: 24 }}>
+                    <Box component="span" sx={{ width: 24, height: 24}}>
                       {item.icon}
                     </Box>
 
-                    <Box component="span" flexGrow={1}>
+                    <Box component="span" flexGrow={1} sx={{fontWeight: 'fontWeightSemiBold',}}>
                       {item.title}
                     </Box>
                   </ListItemButton>

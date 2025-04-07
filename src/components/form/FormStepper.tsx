@@ -12,18 +12,20 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
   const theme = useTheme();
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 700, mb: 4 }}>
-      <Stack direction="row" alignItems="center" spacing={1}>
+    <Box sx={{ width: "100%", maxWidth: theme.breakpoints.values.md, mb: theme.spacing(4) }}>
+      <Stack direction="row" alignItems="center" spacing={theme.spacing(1)}>
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
             {/* Step circle with number */}
             <Stack direction="row" alignItems="center">
               <Box
                 sx={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  backgroundColor: index <= activeStep ? theme.palette.primary.main : "#E5E7EB",
+                  width: theme.spacing(3),
+                  height: theme.spacing(3),
+                  borderRadius: '50%',
+                  backgroundColor: index <= activeStep 
+                    ? theme.palette.primary.main 
+                    : theme.palette.grey[200],
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
@@ -32,10 +34,10 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
                 <Typography
                   variant="body2"
                   sx={{
-                    fontWeight: "bold",
-                    color: "white",
-                    fontSize: 11,
-                    lineHeight: "11px",
+                    fontWeight: theme.typography.fontWeightBold,
+                    color: theme.palette.common.white,
+                    fontSize: theme.typography.pxToRem(11),
+                    lineHeight: theme.typography.pxToRem(11),
                   }}
                 >
                   {step.id}
@@ -46,12 +48,14 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
               <Typography
                 variant="body1"
                 sx={{
-                  ml: 1,
-                  fontWeight: 500,
-                  color: index <= activeStep ? theme.palette.text.primary : "#9CA3AF",
-                  fontSize: 16,
-                  letterSpacing: "0.5px",
-                  lineHeight: "28px",
+                  ml: theme.spacing(1),
+                  fontWeight: theme.typography.fontWeightMedium,
+                  color: index <= activeStep 
+                    ? theme.palette.text.primary 
+                    : theme.palette.text.secondary,
+                  fontSize: theme.typography.pxToRem(16),
+                  letterSpacing: '0.5px',
+                  lineHeight: theme.typography.pxToRem(28),
                 }}
               >
                 {step.label}
@@ -62,9 +66,11 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
             {index < steps.length - 1 && (
               <ArrowForwardIosIcon
                 sx={{
-                  fontSize: 13,
-                  color: index < activeStep ? theme.palette.primary.main : "#9CA3AF",
-                  mx: 1,
+                  fontSize: theme.typography.pxToRem(13),
+                  color: index < activeStep 
+                    ? theme.palette.primary.main 
+                    : theme.palette.text.secondary,
+                  mx: theme.spacing(1),
                 }}
               />
             )}

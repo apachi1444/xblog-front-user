@@ -137,19 +137,19 @@ export function SEODashboard({
   const progressSections: ProgressSection[] = [
     {
       id: 1,
-      title: "Title Readability",
+      title: "Title Optimization",
       progress: 20,
       type: "error",
     },
     {
       id: 2,
-      title: "Content Readability",
+      title: "Content Presentation Quality",
       progress: 50,
       type: "warning",
     },
     {
       id: 3,
-      title: "Image Optimization",
+      title: "Additional SEO Factors",
       progress: 0,
       type: "inactive",
     },
@@ -566,7 +566,7 @@ export function SEODashboard({
                       color: theme.palette.text.secondary,
                     }}
                   >
-                    Basic SEO
+                    Primary SEO Checklist
                   </Typography>
                 </Box>
                 <Box sx={{ flexGrow: 1 }} />
@@ -598,6 +598,79 @@ export function SEODashboard({
 
             {expanded && (
               <Stack spacing={2} sx={{ mb: 3 }}>
+                {/* Title Optimization Section */}
+                <Box sx={{ pl: 2, pt: 1 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1.5, fontSize: '13px' }}>
+                    Title Optimization
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Primary keyword appears at the start of the title
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Title evokes emotional sentiment (positive or negative)
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Includes at least 2 power words to drive engagement
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Focus keyword included in SEO title
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+                
+                {/* Content Optimization Section */}
+                <Box sx={{ pl: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1.5, fontSize: '13px' }}>
+                    Content Optimization
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Focus keyword added to meta description
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Focus keyword present in the URL
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Focus keyword appears within the first 10% of content
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Focus keyword used throughout the content
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                        Content length: 970 words – Good job!
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+
+                {/* Notification Items */}
                 {notificationItems.map((item) => {
                   const { icon, color } = getNotificationDetails(item.type);
                   return (
@@ -724,6 +797,108 @@ export function SEODashboard({
                       },
                     }}
                   />
+                  
+                  {/* Title Optimization expanded section */}
+                  {expandedSections[section.id] && section.title === "Title Optimization" && (
+                    <Box sx={{ pl: 2, pt: 2 }}>
+                      <Stack spacing={1}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Title is too short (only 24 characters)
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Title doesn&apos;t include numbers or brackets
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Title doesn&apos;t include a call-to-action
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  )}
+                  
+                  {/* Content Presentation Quality expanded section */}
+                  {expandedSections[section.id] && section.title === "Content Presentation Quality" && (
+                    <Box sx={{ pl: 2, pt: 2 }}>
+                      <Stack spacing={1}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Content uses short, easy-to-read paragraphs
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Content includes media (images and/or videos)
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.warning, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Proper use of headings and subheadings
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.warning, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Content includes bullet points or numbered lists
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  )}
+                  
+                  {/* Additional SEO Factors expanded section */}
+                  {expandedSections[section.id] && section.title === "Additional SEO Factors" && (
+                    <Box sx={{ pl: 2, pt: 2 }}>
+                      <Stack spacing={1}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Focus keyword found in subheadings (H2, H3, etc.)
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Keyword density is balanced (e.g. 2.47%) with 24 mentions
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            URL length is optimal (e.g. 47 characters)
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            You&apos;re linking to high-quality external resources
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Includes at least one external DoFollow link
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
+                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                            Internal links to related content on your website
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
               ))}
             </Stack>
@@ -804,7 +979,6 @@ export function SEODashboard({
           )}
         </Box>
 
-        {/* Content area */}
         {showContent && (
           <Box 
             sx={{ 
@@ -821,7 +995,6 @@ export function SEODashboard({
           </Box>
         )}
         
-        {/* Collapsed view */}
         {!showContent && (
           <Box 
             sx={{ 

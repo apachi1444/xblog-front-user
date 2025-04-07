@@ -1,5 +1,27 @@
 {
     "translation": {
-      "headerTitle": "My {{appName}} Header Title"
+      "auth": {
+        "signup": {
+          "title": "Join Our Creative Community",
+          "subtitle": "Start your creative journey with exclusive features",
+          "haveAccount": "Already have an account?",
+          "fullName": "Full Name",
+          "fullNamePlaceholder": "John Doe",
+          "email": "Email Address",
+          "emailPlaceholder": "john.doe@creative.com",
+          "password": "Create Password",
+          "confirmPassword": "Confirm Password",
+          "createAccount": "Create Account",
+          "termsPrefix": "By signing up, you agree to our",
+          "termsOfService": "Terms of Service",
+          "and": "and",
+          "privacyPolicy": "Privacy Policy",
+          "orContinueWith": "OR CONTINUE WITH",
+          "signupWithGoogle": "Sign up with Google"
+        },
+        "signin": {
+          "title": "Sign In"
+        }
+      }
     }
 }

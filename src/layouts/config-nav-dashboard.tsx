@@ -1,27 +1,27 @@
-import { SvgColor } from 'src/components/svg-color';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
 const icon = (name: string) => (
-  <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
+  <Iconify icon={name} width={24} height={24} />
 );
 
 export const navData = [
   {
     title: 'Dashboard',
     path: '/',
-    icon: icon('ic-home'),
+    icon: icon('mdi:view-dashboard'),
   },
   {
     title: 'Generate',
     path: '/generate',
-    icon: icon('ic-generate'),
+    icon: icon('mdi:rocket-launch'),
   },
   /*
   {
     title: 'My Websites',
     path: '/stores',  
-    icon: icon('ic-cart'),
+    icon: icon('mdi:web'),
     info: (
       <Label color="error" variant="inverted">
         +1
@@ -32,12 +32,12 @@ export const navData = [
   {
     title: 'Blogs',
     path: '/blog',
-    icon: icon('ic-blogs'),
+    icon: icon('mdi:blog'),
   },
   {
     title: 'Calendar',
     path: '/calendar',
-    icon: icon('ic-calendar'),
+    icon: icon('mdi:calendar'),
   },
 ];
 
@@ -45,11 +45,11 @@ export const bottomNavData = [
   {
     title: 'Upgrade license',
     path: '/upgrade-license',
-    icon: icon('ic-upgrade'),
+    icon: icon('mdi:license'),
   },
   {
     title: 'Book Demo',
     path: '/book-demo',
-    icon: icon('ic-book-demo'),
+    icon: icon('mdi:book-open'),
   },
 ];
