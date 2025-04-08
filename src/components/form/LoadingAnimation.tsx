@@ -18,6 +18,15 @@ const pulse = keyframes`
   }
 `;
 
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
 interface LoadingAnimationProps {
   message?: string;
 }
@@ -25,62 +34,58 @@ interface LoadingAnimationProps {
 export const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ 
   message = "Generating your content outline..." 
 }) => (
+  <Box
+    sx={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      zIndex: 9999,
+      animation: `${fadeIn} 0.3s ease-in-out`,
+    }}
+  >
     <Box
       sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        zIndex: 9999,
+        p: 4,
+        borderRadius: 2,
+        maxWidth: 400,
+        textAlign: 'center',
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+      <CircularProgress 
+        size={60} 
+        thickness={4} 
+        color="primary" 
+        sx={{ mb: 3 }}
+      />
+      
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          mb: 2,
           animation: `${pulse} 2s infinite ease-in-out`,
-          p: 4,
-          borderRadius: 2,
-          bgcolor: 'background.paper',
-          boxShadow: 3,
-          maxWidth: 400,
+          fontWeight: 600,
         }}
       >
-        <CircularProgress 
-          size={80} 
-          thickness={4} 
-          sx={{ 
-            color: '#5969cf',
-            mb: 3
-          }} 
-        />
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            mb: 1,
-            fontWeight: 600,
-            color: '#5969cf',
-            textAlign: 'center'
-          }}
-        >
-          {message}
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            color: 'text.secondary',
-            textAlign: 'center'
-          }}
-        >
-          We re analyzing your inputs and creating the perfect structure for your content.
-        </Typography>
-      </Box>
+        {message}
+      </Typography>
+      
+      <Typography 
+        variant="body2" 
+        color="text.secondary"
+      >
+        Please wait while we prepare your content for publishing...
+      </Typography>
     </Box>
-  );
+  </Box>
+);

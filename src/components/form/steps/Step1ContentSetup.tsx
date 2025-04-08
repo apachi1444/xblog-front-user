@@ -42,6 +42,7 @@ interface Step1Props {
   handleRegenerateMeta: () => void;
   contentDescription: string;
   setContentDescription: (value: string) => void;
+  onNextStep?: () => void;
 }
 
 export function Step1ContentSetup({
@@ -77,7 +78,8 @@ export function Step1ContentSetup({
   handleRegenerateMeta,
   // Added props
   contentDescription,
-  setContentDescription
+  setContentDescription,
+  onNextStep,
 }: Step1Props) {
   const theme = useTheme();
   
@@ -153,8 +155,7 @@ export function Step1ContentSetup({
 
   return (
     <Grid container spacing={1}>
-      {/* Reduced spacing from 2 to 1 in the container */}
-      
+    
       {/* Language & Region section */}
       <Grid item xs={12}>
         <FormContainer title="Language & Region">

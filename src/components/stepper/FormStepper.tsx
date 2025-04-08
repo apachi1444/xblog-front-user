@@ -1,10 +1,14 @@
-import { Box, useTheme, Typography, useMediaQuery, Stepper, Step, StepLabel, styled } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+import { Box, Step, styled, Stepper, useTheme, StepLabel, Typography, useMediaQuery } from '@mui/material';
+
 import { Iconify } from '../iconify';
 
 interface FormStepperProps {
   steps: string[];
   activeStep: number;
   title?: string;
+  baseUrl?: string; // Base URL for the stepper routes
 }
 
 // Custom styling for the stepper
@@ -34,6 +38,7 @@ const CustomStepIconRoot = styled("div")<{ ownerState: { completed?: boolean; ac
     borderRadius: "50%",
     justifyContent: "center",
     alignItems: "center",
+    cursor: "pointer", // Add cursor pointer to indicate clickable
   }),
 );
 
@@ -42,11 +47,15 @@ function CustomStepIcon(props: {
   active: boolean;
   completed: boolean;
   icon: React.ReactNode;
+  onClick?: () => void;
 }) {
-  const { active, completed, icon } = props;
+  const { active, completed, icon, onClick } = props;
 
   return (
-    <CustomStepIconRoot ownerState={{ completed, active }}>
+    <CustomStepIconRoot 
+      ownerState={{ completed, active }}
+      onClick={onClick}
+    >
       {completed || active ? (
         <Iconify icon="eva:checkmark-fill" sx={{ width: 16, height: 16 }} />
       ) : (
@@ -64,6 +73,7 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
     marginTop: 8,
     fontSize: 14,
     fontWeight: 500,
+    cursor: "pointer", // Add cursor pointer to indicate clickable
   },
   "& .MuiStepLabel-label.Mui-active": {
     color: theme.palette.primary.main,
@@ -73,9 +83,20 @@ const CustomStepLabel = styled(StepLabel)(({ theme }) => ({
   },
 }));
 
-export function FormStepper({ steps, activeStep, title }: FormStepperProps) {
+export function FormStepper({ steps, activeStep, title, baseUrl = '/generate' }: FormStepperProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Function to navigate to a specific step - improved logic
+  const navigateToStep = (stepIndex: number) => {
+    // Only allow navigation to completed steps or the next available step
+    if (stepIndex <= activeStep || stepIndex === activeStep + 1) {
+      // Use the correct path format and ensure we're navigating
+      navigate(`${baseUrl}/step/${stepIndex + 1}`);
+    }
+  };
 
   return (
     <Box sx={{ 
@@ -112,19 +133,23 @@ export function FormStepper({ steps, activeStep, title }: FormStepperProps) {
             return (
               <Step key={label} {...stepProps}>
                 <CustomStepLabel
+                  onClick={() => navigateToStep(index)}
                   StepIconComponent={(iconProps) =>
                     CustomStepIcon({
                       ...iconProps,
                       active: index === activeStep,
                       completed: index < activeStep,
+                      onClick: () => navigateToStep(index),
                     })
                   }
                 >
                   <Typography
                     variant="body2"
+                    onClick={() => navigateToStep(index)}
                     sx={{
                       color: index <= activeStep ? theme.palette.primary.main : theme.palette.text.secondary,
                       fontWeight: index <= activeStep ? 500 : 400,
+                      cursor: index <= activeStep || index === activeStep + 1 ? 'pointer' : 'not-allowed',
                     }}
                   >
                     {label}

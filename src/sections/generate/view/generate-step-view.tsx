@@ -1,29 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { SectionItem } from 'src/components/form/DraggableSectionList';
 
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
+import { Box, Button } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
-import { LoadingAnimation } from './LoadingAnimation';
+import { SEODashboard } from 'src/components/form/SEODashboard';
+import { FormStepper } from 'src/components/stepper/FormStepper';
+import { Step4Publish } from 'src/components/form/steps/Step4Publish';
+import { Step1ContentSetup } from 'src/components/form/steps/Step1ContentSetup';
+import { Step2ArticleSettings } from 'src/components/form/steps/Step2ArticleSettings';
+import { Step3ContentStructuring } from 'src/components/form/steps/Step3ContentStructuring';
 
-import { SEODashboard } from './SEODashboard';
-import { StepperComponent } from './FormStepper';
-import { Step4Publish } from './steps/Step4Publish';
-import { Step1ContentSetup } from './steps/Step1ContentSetup';
-import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
-import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
-
-import type { SectionItem } from './DraggableSectionList';
-
-export function GeneratingView() {
+export function GenerateStepView() {
+  const { stepId } = useParams();
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
+  
   // Add state for SEO dashboard collapse
   const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
-  const theme = useTheme(); // Add theme hook
-  const navigate = useNavigate(); // Add navigation hook
-  
-  // Add state for publishing animation
-  const [isPublishing, setIsPublishing] = useState(false);
   
   // Form state
   const [targetCountry, setTargetCountry] = useState('us');
@@ -32,14 +28,42 @@ export function GeneratingView() {
   const [secondaryKeyword, setSecondaryKeyword] = useState('');
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [contentDescription, setContentDescription] = useState('');
+  
+  // New state variables for generation features
+  const [isTitleGenerated, setIsTitleGenerated] = useState(false);
+  const [isMetaGenerated, setIsMetaGenerated] = useState(false);
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
+  const [primaryKeyword, setPrimaryKeyword] = useState('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [urlSlug, setUrlSlug] = useState('');
+  
+  // Add state for storing the generated table of contents
+  const [generatedSections, setGeneratedSections] = useState<SectionItem[]>([]);
 
-  // Steps configuration - Updated to 4 steps
+  // Steps configuration
   const steps = [
     { id: 1, label: "Content Setup" },
     { id: 2, label: "Article Settings" },
     { id: 3, label: "Content Structuring" },
     { id: 4, label: "Publish" }
   ];
+
+  // Parse step ID from URL and set active step - improved validation
+  useEffect(() => {
+    const parsedStepId = parseInt(stepId || '1', 10);
+    
+    // Validate step ID with proper error handling
+    if (parsedStepId < 1 || parsedStepId > steps.length || Number.isNaN(parsedStepId)) {
+      // If invalid, redirect to the first step
+      navigate('/generate/step/1', { replace: true });
+      return;
+    }
+    
+    // Set the active step (0-based index)
+    setActiveStep(parsedStepId - 1);
+  }, [stepId, navigate, steps.length]);
 
   // Handle adding a secondary keyword
   const handleAddKeyword = () => {
@@ -68,38 +92,75 @@ export function GeneratingView() {
     { position: 'top' },    // Step 2: Article Settings
     { position: 'top' },    // Step 3: Content Structuring
     { position: 'top' }     // Step 4: Publish
-  ];  
+  ];
   
-  // Navigation handlers
+  // Navigation handlers with route-based navigation
   const handleNext = () => {
-    // If we're on the last step, show publishing animation and redirect
-    if (activeStep === steps.length - 1) {
-      setIsPublishing(true);
-      
-      // Simulate API call with timeout
-      setTimeout(() => {
-        // Navigate to blog page after publishing
-        navigate('/blog');
-      }, 3000); // 3 seconds for the animation to show
-    } else {
-      // Otherwise, just go to the next step
-      setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
+    const nextStep = activeStep + 1;
+    if (nextStep < steps.length) {
+      navigate(`/generate/step/${nextStep + 1}`);
     }
   };
 
   const handleBack = () => {
-    setActiveStep((prevStep) => Math.max(prevStep - 1, 0));
+    const prevStep = activeStep - 1;
+    if (prevStep >= 0) {
+      navigate(`/generate/step/${prevStep + 1}`);
+    }
   };
   
-  // New state variables for generation features
-  const [isTitleGenerated, setIsTitleGenerated] = useState(false);
-  const [isMetaGenerated, setIsMetaGenerated] = useState(false);
-  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
-  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
-  const [primaryKeyword, setPrimaryKeyword] = useState('');
-  const [metaTitle, setMetaTitle] = useState('');
-  const [metaDescription, setMetaDescription] = useState('');
-  const [urlSlug, setUrlSlug] = useState('');
+  // Render navigation buttons based on position
+  const renderNavigationButtons = (position: string) => {
+    // Only render if current step's button position matches
+    if (stepButtonsConfig[activeStep].position !== position) {
+      return null;
+    }
+
+    const isNextButtonDisabled = activeStep === steps.length - 1;
+    const isPreviousButtonDisabled = activeStep === 0;
+    
+    return (
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          mt: position === 'bottom' ? 4 : 0,
+          mb: position === 'top' ? 4 : 0,
+          pt: position === 'bottom' ? 3 : 0,
+          pb: position === 'top' ? 3 : 0,
+          borderTop: position === 'bottom' ? '1px solid' : 'none',
+          borderBottom: position === 'top' ? '1px solid' : 'none',
+          borderColor: 'divider',
+        }}
+      >
+        <Box>
+          {!isPreviousButtonDisabled && (
+            <Button
+              variant="outlined"
+              onClick={handleBack}
+              startIcon={<Iconify icon="eva:arrow-back-fill" />}
+              sx={{ px: 3 }}
+            >
+              Back
+            </Button>
+          )}
+        </Box>
+
+        <Box>
+          {!isNextButtonDisabled && (
+            <Button
+              variant="contained"
+              onClick={handleNext}
+              endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+              sx={{ px: 3 }}
+            >
+              {activeStep === steps.length - 2 ? 'Finish' : 'Next'}
+            </Button>
+          )}
+        </Box>
+      </Box>
+    );
+  };
   
   // Generate title handler
   const handleGenerateTitle = () => {
@@ -151,32 +212,28 @@ export function GeneratingView() {
     }, 2000);
   };
 
-    // Add state for storing the generated table of contents
-    const [generatedSections, setGeneratedSections] = useState<SectionItem[]>([]);
-  
-    // Handle table of contents generation
-    const handleGenerateTableOfContents = (tableOfContents: any) => {
-      // Convert the table of contents format to the SectionItem format
-      const sections = tableOfContents.sections.map((section: any, index: number) => ({
-        id: section.id.toString(),
-        title: section.title,
-        content: section.content || '',
-        status: 'Not Started',
-        subsections: section.subsections 
-          ? section.subsections.map((sub: any) => ({
-              id: sub.id.toString(),
-              title: sub.title,
-              content: sub.content || '',
-              status: 'Not Started'
-            }))
-          : []
-      }));
-      
-      setGeneratedSections(sections);
-    };
+  // Handle table of contents generation
+  const handleGenerateTableOfContents = (tableOfContents: any) => {
+    // Convert the table of contents format to the SectionItem format
+    const sections = tableOfContents.sections.map((section: any, index: number) => ({
+      id: section.id.toString(),
+      title: section.title,
+      content: section.content || '',
+      status: 'Not Started',
+      subsections: section.subsections 
+        ? section.subsections.map((sub: any) => ({
+            id: sub.id.toString(),
+            title: sub.title,
+            content: sub.content || '',
+            status: 'Not Started'
+          }))
+        : []
+    }));
     
+    setGeneratedSections(sections);
+  };
 
-  // Render the current step content - Updated to include the new step
+  // Render the appropriate step content
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
@@ -213,9 +270,9 @@ export function GeneratingView() {
             setMetaTitle={setMetaTitle}
             setUrlSlug={setUrlSlug}
             urlSlug={urlSlug}
+            onNextStep={handleNext}
           />
         );
-      // In the renderStepContent function, update the Step2ArticleSettings and Step3ContentStructuring components
       case 1:
         return (
           <Step2ArticleSettings 
@@ -227,12 +284,13 @@ export function GeneratingView() {
         return (
           <Step3ContentStructuring 
             generatedSections={generatedSections}
+            onNextStep={handleNext}
           />
         );
       case 3:
         return <Step4Publish />;
       default:
-        return null;
+        return <div>Unknown step</div>;
     }
   };
 
@@ -252,7 +310,7 @@ export function GeneratingView() {
       case 1: // Article Settings
         return 'top';
       case 2: // Content Structuring
-        return 'top';
+        return 'bottom';
       case 3: // Publish
         return 'top';
       default:
@@ -262,82 +320,22 @@ export function GeneratingView() {
 
   return (
     <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          pb: 8, // Add padding to prevent content from being hidden behind fixed bar
-        }}
-      >
-      {/* Publishing animation overlay */}
-      {isPublishing && (
-        <LoadingAnimation message="Publishing your content..." />
-      )}
-      
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       {/* Stepper */}
-      <StepperComponent steps={steps} activeStep={activeStep} />
-
-      {/* Fixed Next Button at the bottom */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          py: 2,
-          px: 3,
-          bgcolor: 'background.paper',
-          borderTop: `1px solid ${theme.palette.divider}`,
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: 'calc(100% - 245px)',
-          ml: '245px',
-        }}
-      >
-        <Box>
-          {activeStep > 0 ? (
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="eva:arrow-back-fill" />}
-              sx={{ borderRadius: '24px' }}
-              onClick={handleBack}
-            >
-              Previous
-            </Button>
-          ) : (
-            null
-          )}
-        </Box>
-        
-        <Box>
-          {activeStep === steps.length - 1 ? (
-            <Button
-              variant="contained"
-              endIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-              sx={{ 
-                borderRadius: '24px',
-                bgcolor: 'success.main',
-                '&:hover': {
-                  bgcolor: 'success.dark',
-                }
-              }}
-              onClick={handleNext}
-            >
-              Finish & Publish
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-              sx={{ borderRadius: '24px' }}
-              onClick={handleNext}
-            >
-              Next
-            </Button>
-          )}
-        </Box>
-      </Box>
+      <FormStepper 
+        steps={steps.map(step => step.label)} 
+        activeStep={activeStep} 
+        title="Create Your Article" 
+        baseUrl="/generate"
+      />
+      
+      {/* Top Navigation Buttons (if configured for this step) */}
+      {getButtonPosition() === 'top' && renderNavigationButtons('top')}
       
       <Box sx={{ display: 'flex', width: '100%' }}>
         {/* Forms on the left - adjust width based on SEO dashboard visibility and collapse state */}
@@ -347,15 +345,18 @@ export function GeneratingView() {
             width: isSEODashboardVisible ? 
               (isSEODashboardCollapsed ? 'calc(100% - 40px)' : '70%') : 
               '100%',
-            transition: () => theme.transitions.create(['width'], {
+            transition: (theme) => theme.transitions.create(['width'], {
               duration: theme.transitions.duration.standard,
             }),
             pr: isSEODashboardVisible ? 2 : 0
           }}
-        >          
+        >
           <Box sx={{ width: '100%' }}>
             {renderStepContent()}
           </Box>
+          
+          {/* Bottom Navigation Buttons (if configured for this step) */}
+          {getButtonPosition() === 'bottom' && renderNavigationButtons('bottom')}
         </Box>
         
         {/* SEO Dashboard on the right - only visible on certain steps */}
@@ -363,7 +364,7 @@ export function GeneratingView() {
           <Box 
             sx={{ 
               width: isSEODashboardCollapsed ? '40px' : '30%',
-              transition: () => theme.transitions.create(['width'], {
+              transition: (theme) => theme.transitions.create(['width'], {
                 duration: theme.transitions.duration.standard,
               }),
             }}

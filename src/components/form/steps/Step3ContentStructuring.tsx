@@ -19,10 +19,12 @@ import { FormContainer } from '../FormContainer';
 
 interface Step3Props {
   generatedSections?: SectionItem[];
+  onNextStep?: () => void;
 }
 
 export function Step3ContentStructuring({ 
-  generatedSections = []
+  generatedSections = [],
+  onNextStep,
 }: Step3Props) {
   const [sections, setSections] = useState<SectionItem[]>(generatedSections);
   const [editDialogOpen, setEditDialogOpen] = useState(false);

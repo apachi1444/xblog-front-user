@@ -631,46 +631,6 @@ export function Step4Publish() {
         </Grid>
       </Grid>
       
-      {/* Fixed Next Button at the bottom */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          py: 2,
-          px: 3,
-          bgcolor: 'background.paper',
-          borderTop: `1px solid ${theme.palette.divider}`,
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Button
-          variant="outlined"
-          startIcon={<Iconify icon="eva:arrow-back-fill" />}
-          sx={{ borderRadius: '24px' }}
-        >
-          Previous
-        </Button>
-        
-        <Button
-          variant="contained"
-          endIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-          sx={{ 
-            borderRadius: '24px',
-            bgcolor: 'success.main',
-            '&:hover': {
-              bgcolor: 'success.dark',
-            }
-          }}
-          onClick={handlePublish}
-        >
-          Finish & Publish
-        </Button>
-      </Box>
-      
       {/* Modals */}
       <CopyModal open={copyModalOpen} onClose={handleCloseCopyModal} />
       <ExportModal open={exportModalOpen} onClose={handleCloseExportModal} />
