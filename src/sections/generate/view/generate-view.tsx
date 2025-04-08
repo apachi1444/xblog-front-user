@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { CompleteExample } from 'src/components/form/CompleteExample';
+import { GeneratingView } from 'src/components/form/GeneratingView';
 
 export function GenerateView() {
   return (
@@ -16,7 +16,7 @@ export function GenerateView() {
         </Typography>
       </Box>
 
-      <CompleteExample />
+      <GeneratingView />
 
     </DashboardContent>
   );

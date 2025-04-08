@@ -1,8 +1,11 @@
 import React from "react";
+
 import EditIcon from "@mui/icons-material/Edit";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+
+import type { SectionItem } from "./DraggableSectionList";
 
 type Status = "Not Started" | "In Progress" | "Completed";
 
@@ -13,13 +16,15 @@ interface StatusStyle {
 }
 
 interface SectionBoxProps {
-  sectionTitle?: string;
-  status?: Status;
+  section: SectionItem;
+  onEditSection?: (section: SectionItem) => void;
+  onDeleteSection?: (sectionId: string) => void;
 }
 
 export const SectionBox: React.FC<SectionBoxProps> = ({
-  sectionTitle = "Untitled Section",
-  status = "Not Started",
+  section,
+  onEditSection,
+  onDeleteSection
 }) => {
   const statusStyles: Record<Status, StatusStyle> = {
     "Not Started": {
@@ -39,7 +44,7 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
     },
   };
 
-  const currentStyle = statusStyles[status];
+  const currentStyle = statusStyles[section.status];
 
   return (
     <Box sx={{ width: '100%', position: "relative" }}>
@@ -78,13 +83,13 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
             }}
             noWrap
           >
-            {sectionTitle}
+            {section.title}
           </Typography>
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
           <Chip
-            label={status}
+            label={section.status}
             sx={{
               bgcolor: currentStyle.bgcolor,
               color: currentStyle.color,
@@ -98,20 +103,28 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
             }}
           />
           <Stack direction="row" spacing={1}>
-            <EditIcon 
-              sx={{ 
-                width: "18px", 
-                height: "18px", 
-                color: '#5969cf',
-              }} 
-            />
-            <DeleteOutlineIcon 
-              sx={{ 
-                width: "20px", 
-                height: "20px", 
-                color: '#D32F2F',
-              }} 
-            />
+            {onEditSection && (
+              <EditIcon 
+                onClick={() => onEditSection(section)}
+                sx={{ 
+                  width: "18px", 
+                  height: "18px", 
+                  color: '#5969cf',
+                  cursor: 'pointer',
+                }} 
+              />
+            )}
+            {onDeleteSection && (
+              <DeleteOutlineIcon 
+                onClick={() => onDeleteSection(section.id)}
+                sx={{ 
+                  width: "20px", 
+                  height: "20px", 
+                  color: '#D32F2F',
+                  cursor: 'pointer',
+                }} 
+              />
+            )}
           </Stack>
         </Stack>
       </Box>

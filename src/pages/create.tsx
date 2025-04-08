@@ -2,19 +2,19 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import CalendarPage from 'src/sections/calendar/calendar-view';
+import { CreateView } from 'src/sections/create/view';
 
 
 // ----------------------------------------------------------------------
 
-export default function Page() {
+export default function CreatePage() {
   return (
     <>
       <Helmet>
-        <title> {`Calendar - ${CONFIG.appName}`}</title>
+        <title> {`Create Content - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <CalendarPage />
+      <CreateView />
     </>
   );
 }

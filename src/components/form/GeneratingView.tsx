@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 
-import { Box, Stack, Button, Paper } from '@mui/material';
+import { Box, Button } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+
+import { RecentPromptsAndDrafts } from 'src/sections/generate/view/RecentPromptsAndDrafts';
 
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
@@ -13,7 +15,7 @@ import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
 
 import type { SectionItem } from './DraggableSectionList';
 
-export function CompleteExample() {
+export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   // Add state for SEO dashboard collapse
   const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
@@ -294,6 +296,16 @@ export function CompleteExample() {
     }
   };
 
+  const mockPrompts = [
+    { id: '1', title: 'Presentation of React Native', timestamp: '1 minute ago' },
+    { id: '2', title: 'SEO Optimization Tips', timestamp: '2 days ago' },
+  ];
+  
+  const mockDrafts = [
+    { id: '1', title: 'React Native vs React', status: 'Draft' },
+    { id: '2', title: 'Understanding SEO', status: 'Draft' },
+  ];
+
   return (
     <Box
         sx={{
@@ -355,6 +367,7 @@ export function CompleteExample() {
           </Box>
         )}
       </Box>
+      <RecentPromptsAndDrafts prompts={mockPrompts} drafts={mockDrafts} />
     </Box>
   );
 }

@@ -50,7 +50,13 @@ export function SignUpView() {
       }}
     >
       {/* Add language switcher in the top-right corner */}
-      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+      <Box
+        sx={{
+          position: 'absolute', 
+          top: 16, 
+          right: 16
+        }}
+      >
         <LanguageSwitcher />
       </Box>
       
@@ -60,7 +66,8 @@ export function SignUpView() {
           borderRadius: 2,
           boxShadow: (theme) => theme.customShadows.z16,
           bgcolor: 'background.paper',
-          width: '1000px',
+          width: { xs: '100%', sm: '600px', md: '800px', lg: '1000px' }, // Responsive width
+          maxWidth: '95vw', // Ensure it doesn't overflow on small screens
           maxHeight: '90vh',
           mx: 'auto',
         }}
