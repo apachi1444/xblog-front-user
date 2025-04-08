@@ -4,8 +4,6 @@ import { Box, Button } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
-import { RecentPromptsAndDrafts } from 'src/sections/generate/view/RecentPromptsAndDrafts';
-
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
 import { Step4Publish } from './steps/Step4Publish';
@@ -367,7 +365,6 @@ export function GeneratingView() {
           </Box>
         )}
       </Box>
-      <RecentPromptsAndDrafts prompts={mockPrompts} drafts={mockDrafts} />
     </Box>
   );
 }
