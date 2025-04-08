@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { Box, Button, useTheme } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
-import { LoadingAnimation } from './LoadingAnimation';
 
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
 import { Step4Publish } from './steps/Step4Publish';
+import { LoadingAnimation } from './LoadingAnimation';
 import { Step1ContentSetup } from './steps/Step1ContentSetup';
 import { Step2ArticleSettings } from './steps/Step2ArticleSettings';
 import { Step3ContentStructuring } from './steps/Step3ContentStructuring';
