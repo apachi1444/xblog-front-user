@@ -49,7 +49,7 @@ export default function App() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="116914976486-bkkcrqu1202aau2g8s1pcfbdq59066uj.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="test">
       <ThemeProvider>
         <ToastProvider>
             <Router />

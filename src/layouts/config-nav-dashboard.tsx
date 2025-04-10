@@ -14,7 +14,7 @@ export const navData = [
   },
   {
     title: 'Generate',
-    path: '/generate',
+    path: '/create',
     icon: icon('mdi:rocket-launch'),
   },
   /*

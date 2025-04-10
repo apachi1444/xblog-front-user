@@ -20,13 +20,6 @@ export function CreateView() {
 
   const createOptions = [
     {
-      id: 'paste',
-      title: 'Paste in text',
-      description: 'Create from notes, an outline, or existing content',
-      icon: 'mdi:content-paste',
-      color: '#F8BBD0'
-    },
-    {
       id: 'generate',
       title: 'Generate',
       description: 'Create from a one-line prompt in a few seconds',
@@ -35,12 +28,12 @@ export function CreateView() {
       popular: true
     },
     {
-      id: 'import',
-      title: 'Import file or URL',
-      description: 'Enhance existing docs, presentations, or webpages',
-      icon: 'mdi:file-import',
-      color: '#D1C4E9'
-    }
+      id: 'template',
+      title: 'Use Built In Template',
+      description: 'Create an article from an existing template',
+      icon: 'mdi:content-paste',
+      color: '#F8BBD0'
+    },
   ];
 
   const handleOptionSelect = (optionId: string) => {
@@ -102,7 +95,19 @@ export function CreateView() {
               )}
               <CardActionArea 
                 onClick={() => handleOptionSelect(option.id)}
-                sx={{ height: '100%', p: 2 }}
+                sx={{ 
+                  height: '100%', 
+                  p: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    bgcolor: 'primary.lighter',
+                    transform: 'translateY(-3px)',
+                    boxShadow: (theme) => theme.shadows[4],
+                    '& .option-icon': {
+                      transform: 'scale(1.1)',
+                    }
+                  }
+                }}
               >
                 <CardContent>
                   <Box 
@@ -110,34 +115,34 @@ export function CreateView() {
                       mb: 3, 
                       p: 3, 
                       borderRadius: 2,
-                      bgcolor: `${option.color  }40`,
+                      bgcolor: `${option.color}40`,
                       width: '100%',
                       height: 140,
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      transition: 'all 0.3s ease',
                     }}
                   >
-                    <Iconify icon={option.icon} width={80} height={80} sx={{ color: option.color }} />
+                    <Iconify 
+                      icon={option.icon} 
+                      width={80} 
+                      height={80} 
+                      className="option-icon"
+                      sx={{ 
+                        color: option.color,
+                        transition: 'transform 0.3s ease'
+                      }} 
+                    />
                   </Box>
                   <Typography variant="h6" gutterBottom>
                     {option.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2">
                     {option.description}
                   </Typography>
                 </CardContent>
               </CardActionArea>
-              <Box sx={{ p: 2, pt: 0 }}>
-                <Button 
-                  fullWidth 
-                  variant="text" 
-                  endIcon={<Iconify icon="mdi:arrow-right" />}
-                  onClick={() => handleOptionSelect(option.id)}
-                >
-                  Continue
-                </Button>
-              </Box>
             </Card>
           </Grid>
         ))}
@@ -153,19 +158,38 @@ export function CreateView() {
               key={prompt.id} 
               sx={{ 
                 bgcolor: 'background.paper',
-                '&:hover': { bgcolor: 'action.hover' },
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  bgcolor: 'primary.lighter',
+                  transform: 'translateY(-2px)',
+                  boxShadow: (theme) => theme.shadows[4]
+                },
                 cursor: 'pointer'
               }}
               onClick={() => navigate('/generate')}
             >
-              <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <CardContent sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  '& .chevron-icon': {
+                    transform: 'translateX(4px)',
+                  }
+                }
+              }}>
                 <Box>
                   <Typography variant="subtitle1">{prompt.title}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Generate · {prompt.timestamp} · DRAFT
                   </Typography>
                 </Box>
-                <Iconify icon="mdi:chevron-right" />
+                <Iconify 
+                  icon="mdi:chevron-right" 
+                  className="chevron-icon"
+                  sx={{ transition: 'transform 0.3s ease' }}
+                />
               </CardContent>
             </Card>
           ))}
