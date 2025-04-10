@@ -5,21 +5,21 @@ import {
   Tab, 
   Grid, 
   Tabs, 
+  Chip, 
   Modal, 
   Paper, 
   Button, 
   Select, 
+  Switch, 
   Divider, 
   MenuItem, 
-  TextField, 
-  Typography, 
-  InputLabel, 
+  useTheme, 
+  TextField,
+  Typography,
+  InputLabel,
   IconButton,
   FormControl,
-  Chip,
-  FormControlLabel,
-  Switch,
-  useTheme
+  FormControlLabel
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -328,6 +328,7 @@ export function Step4Publish() {
         {/* Article Preview */}
         <Grid item xs={12}>
           <FormContainer 
+            isCollapsible
             title="Article Preview"
           >
             <Box sx={{ 

@@ -8,7 +8,6 @@ import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { AuthGuard } from 'src/guards/AuthGuard';
 import { DashboardLayout } from 'src/layouts/dashboard';
-import { GenerateStepView } from 'src/sections/generate/view/generate-step-view';
 
 // ----------------------------------------------------------------------
 
@@ -61,14 +60,7 @@ export function Router() {
       children: [
         { element: <HomePage />, index: true },
         { path: 'user', element: <UserPage /> },
-        { 
-          path: 'generate', 
-          element: <GenerateFlow />,
-          children: [
-            { path: '', element: <Navigate to="step/1" replace /> },
-            { path: 'step/:stepId', element: <GenerateStepView /> }
-          ]
-        },
+        { path: 'generate', element: <GenerateFlow />},
         { path: 'create', element: <CreatePage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
@@ -84,9 +76,9 @@ export function Router() {
     {
       path: 'sign-in',
       element: (
-        <AuthLayout>
-          <SignInPage />
-        </AuthLayout>
+          <AuthLayout>
+            <SignInPage />
+          </AuthLayout>
       ),
     },
     {

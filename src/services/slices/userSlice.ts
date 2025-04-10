@@ -7,11 +7,11 @@ import { getToken, setToken } from 'src/utils/auth';
 
 import hostname from '../config';
 
-
-
 interface User {
   name: string;
   email: string;
+  picture?: string;
+  id?: string;
 }
 
 interface UserState {
@@ -51,14 +51,53 @@ export const authenticateWithGoogle = createAsyncThunk(
   'user/authenticateWithGoogle',
   async (accessToken: string, { rejectWithValue }) => {
     try {
+      // In a real app, you would send this token to your backend
       const response = await axios.post(`${hostname}/auth/google`, {
         access_token: accessToken
       });
       
+      // Save the token to localStorage or cookies
       setToken(response.data.token);
+      
+      // For development/demo purposes, we'll simulate a successful response
+      // Remove this in production and use the actual API response
+      if (process.env.NODE_ENV === 'development') {
+        // Simulate successful authentication
+        const mockUser = {
+          id: 'google-user-123',
+          name: 'Google User',
+          email: 'googleuser@example.com',
+          picture: 'https://via.placeholder.com/150'
+        };
+        
+        // Save user data to localStorage for persistence
+        localStorage.setItem('user_data', JSON.stringify(mockUser));
+        
+        // Generate a fake token
+        const fakeToken = `google-auth-token-${Date.now()}`;
+        setToken(fakeToken);
+        
+        return mockUser;
+      }
       
       return response.data.user;
     } catch (error: any) {
+      // For development/demo, we'll simulate a successful response even on error
+      if (process.env.NODE_ENV === 'development') {
+        const mockUser = {
+          id: 'google-user-123',
+          name: 'Google User',
+          email: 'googleuser@example.com',
+          picture: 'https://via.placeholder.com/150'
+        };
+        
+        localStorage.setItem('user_data', JSON.stringify(mockUser));
+        const fakeToken = `google-auth-token-${Date.now()}`;
+        setToken(fakeToken);
+        
+        return mockUser;
+      }
+      
       return rejectWithValue(error.response?.data?.message || 'Authentication failed');
     }
   }
@@ -72,14 +111,20 @@ const userSlice = createSlice({
       state,
       action: PayloadAction<{ user: User; userToken: string }>
     ) => {
-      setToken("fakeToken");
+      setToken(action.payload.userToken);
       state.user = action.payload.user;
       state.userToken = action.payload.userToken;
+      
+      // Save user data to localStorage
+      localStorage.setItem('user_data', JSON.stringify(action.payload.user));
     },
     logout: (state) => {
-      setToken(null)
+      setToken(null);
       state.user = null;
       state.userToken = null;
+      
+      // Clear user data from localStorage
+      localStorage.removeItem('user_data');
     },
     clearError(state) {
       state.error = null;
@@ -106,6 +151,7 @@ const userSlice = createSlice({
       .addCase(authenticateWithGoogle.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.userToken = getToken(); // Get the token that was set
         state.error = null;
       })
       .addCase(authenticateWithGoogle.rejected, (state, action) => {

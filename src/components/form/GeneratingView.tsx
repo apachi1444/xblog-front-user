@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { Box, Button, useTheme } from '@mui/material';
 
+import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Iconify } from 'src/components/iconify';
 
 import { SEODashboard } from './SEODashboard';
@@ -244,31 +246,8 @@ export function GeneratingView() {
     setIsSEODashboardCollapsed(!collapsed);
   };
 
-  // Determine button position based on current step
-  const getButtonPosition = () => {
-    switch (activeStep) {
-      case 0: // Content Setup
-        return 'bottom';
-      case 1: // Article Settings
-        return 'top';
-      case 2: // Content Structuring
-        return 'top';
-      case 3: // Publish
-        return 'top';
-      default:
-        return 'bottom';
-    }
-  };
-
   return (
-    <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          pb: 8, // Add padding to prevent content from being hidden behind fixed bar
-        }}
-      >
+    <DashboardContent>
       {/* Publishing animation overlay */}
       {isPublishing && (
         <LoadingAnimation message="Publishing your content..." />
@@ -381,6 +360,5 @@ export function GeneratingView() {
           </Box>
         )}
       </Box>
-    </Box>
-  );
-}
+    </DashboardContent>
+  );}

@@ -60,9 +60,7 @@ export function StoresView() {
   const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
   const [deletingStoreIds, setDeletingStoreIds] = useState<string[]>([]);
 
-  const[ doGetStores] = useLazyGetStoresQuery(
-
-  );
+  const[ doGetStores] = useLazyGetStoresQuery();
   const [isLoading , setIsLoading] = useState(false)
 
   useEffect(() => {

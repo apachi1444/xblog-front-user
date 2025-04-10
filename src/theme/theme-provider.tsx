@@ -12,6 +12,13 @@ type Props = {
   children: React.ReactNode;
 };
 
+
+export enum ThemeVariantsProps {
+  light = 'light',
+  dark = 'dark',
+}
+
+
 export function ThemeProvider({ children }: Props) {
   const theme = createTheme();
 

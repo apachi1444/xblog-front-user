@@ -201,14 +201,18 @@ export function UpgradeLicenseView() {
                           size="small" 
                           variant="outlined" 
                           color="primary"
-                          startIcon={<Download />}
-                        />
+                          sx={{ padding: '4px 8px' }}
+                        >
+                          <Download size={18} />
+                        </Button>
                         <Button 
                           size="small" 
                           variant="outlined" 
                           color="primary"
-                          startIcon={<Eye />}
-                        />
+                          sx={{ padding: '4px 8px' }}
+                        >
+                          <Eye size={18} />
+                        </Button>
                       </Box>
                     </TableCell>
                   </TableRow>

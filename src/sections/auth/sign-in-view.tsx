@@ -1,7 +1,8 @@
 
-import { useDispatch } from 'react-redux';
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from "notistack";
+import { useGoogleLogin } from '@react-oauth/google';
+import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -15,11 +16,11 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
 
-import { useAuthRedirect } from 'src/hooks/useAuthRedirect';
-
-import { useToast } from 'src/contexts/ToastContext';
-import { login } from 'src/services/slices/userSlice';
-import { useAuthService } from 'src/services/auth/auth-service';
+import { setCredentials } from "src/services/slices/auth/authSlice";
+// Import auth selectors and actions
+import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
+// Import auth API
+import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
@@ -27,29 +28,151 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 export function SignInView() {
-  const { loginWithProvider, logoutFromProvider } = useAuthService();
   const router = useRouter();
-  const { showToast } = useToast();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const dispatch = useDispatch();  
   
-  useAuthRedirect(false);
+  // Local state
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // Get auth state from Redux
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  
+  // Google auth mutation
+  const [googleAuth, { isLoading: isGoogleAuthLoading, error: googleAuthError }] = useGoogleAuthMutation();
+  
+  // Email/password login mutation
+  const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
+  
+  // Effect to handle successful authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      // User is authenticated, redirect to home
+      enqueueSnackbar("Successfully signed in!", {
+        variant: "success",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+      });
+      
+      // Use setTimeout to ensure the state update has completed
+      setTimeout(() => {
+        router.push('/');
+      }, 100);
+    }
+  }, [isAuthenticated, router, enqueueSnackbar]);
 
-  const handleSignIn = useCallback(() => {
-    dispatch(
-      login({
-        user: {
-          name: "result.user.name",
-          email: "result.user.email",
-        },
-        userToken: "result.token",
-      })
-    );
-    router.push('/');
-  }, [dispatch, router]);
+  // Handle email/password sign in
+  const handleSignIn = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      enqueueSnackbar("Please enter both email and password", {
+        variant: "error",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+      });
+      return;
+    }
+    
+    try {
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create fake user data
+      const fakeUser = {
+        id: '123456',
+        name: email.split('@')[0], // Use part of email as name
+        email,
+        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(email.split('@')[0])}`,
+      };
+      
+      // Create fake tokens
+      const fakeTokens = {
+        accessToken: `fake-jwt-token-${Math.random().toString(36).substring(2)}`,
+        refreshToken: `fake-refresh-token-${Math.random().toString(36).substring(2)}`,
+      };
+      
+      // Set credentials in Redux store
+      dispatch(setCredentials({
+        user: fakeUser,
+        accessToken: fakeTokens.accessToken,
+        refreshToken: fakeTokens.refreshToken,
+      }));
+      
+      // Log the authentication state for debugging
+      console.log('Authentication credentials set:', {
+        user: fakeUser,
+        accessToken: fakeTokens.accessToken,
+      });
+      
+      // Manual redirect in case the useEffect doesn't trigger
+      if (!isAuthenticated) {
+        enqueueSnackbar("Successfully signed in!", {
+          variant: "success",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        });
+        
+        // Force navigation after a short delay
+        setTimeout(() => {
+          router.push('/');
+        }, 300);
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      enqueueSnackbar("Login failed. Please check your credentials and try again.", {
+        variant: "error",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+      });
+    }
+  }, [email, password, dispatch, enqueueSnackbar, router, isAuthenticated]);
+
+  // Handle Google login
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (response) => {
+      try {
+        // Call the Google auth API with the access token
+        const result = await googleAuth(response.access_token).unwrap();
+        
+        if (!result || !result.user || !result.tokens || !result.tokens.accessToken) {
+          throw new Error('Invalid authentication response');
+        }
+        
+        dispatch(setCredentials({
+          user: result.user,
+          accessToken: result.tokens.accessToken,
+          refreshToken: result.tokens.refreshToken,
+        }));
+        
+      } catch (err) {
+        console.error('Google auth error:', err);
+        enqueueSnackbar("Failed to authenticate with Google. Please try again.", {
+          variant: "error",
+          anchorOrigin: { vertical: "top", horizontal: "center" },
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('Google Login Failed:', error);
+      enqueueSnackbar("Google login failed. Please try again.", {
+        variant: "error",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+      });
+    }
+  });
+
+  const handleGoogleLogin = () => {
+    try {
+      googleLogin();
+    } catch (err) {
+      enqueueSnackbar("Failed to initialize Google login. Please try again.", {
+        variant: "error",
+        anchorOrigin: { vertical: "top", horizontal: "center" },
+      });
+    }
+  };
 
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
@@ -59,93 +182,12 @@ export function SignInView() {
     router.push('/forgot-password');
   }, [router]);
 
-  const handleLogin = () => {
-    loginWithProvider('google');
-    
-    // Note: Since the login process is handled through callbacks in the Google provider,
-    // you would typically update the login state elsewhere, such as in a global state 
-    // manager or through a useEffect that checks authentication status
-  };
-
-  const handleLogout = () => {
-    const response = logoutFromProvider('google');
-    if (response.success) {
-      console.log(response.success);
-      } else {
-      console.error('Logout failed:', response.error);
-    }
-  };
-
-
-  const renderForm = (
-    <Box display="flex" flexDirection="column" alignItems="flex-end">
-      {error && (
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      
-      <TextField
-        fullWidth
-        name="email"
-        label="Email address"
-        defaultValue="hello@gmail.com"
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 3 }}
-      />
-
-      <Link 
-        variant="body2" 
-        color="inherit" 
-        sx={{ 
-          mb: 1.5,
-          cursor: 'pointer',
-          '&:hover': {
-            textDecoration: 'underline',
-            opacity: 'revert'
-          } 
-        }}
-        onClick={handleNavigateToForgotPassword}
-      >
-        Forgot password?
-      </Link>
-
-      <TextField
-        fullWidth
-        name="password"
-        label="Password"
-        defaultValue="@demo1234"
-        InputLabelProps={{ shrink: true }}
-        type={showPassword ? 'text' : 'password'}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 3 }}
-      />
-
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        color="primary"
-        variant="contained"
-        onClick={handleSignIn}
-        sx={{
-          borderRadius: '8px',
-          py: 1.5,
-          opacity: 'revert-layer'
-        }}
-      >
-        Sign in
-      </LoadingButton>
-    </Box>
-  );
+  // Determine if there's any error to display
+  const errorMessage = googleAuthError 
+    ? 'Failed to authenticate with Google. Please try again.' 
+    : loginError 
+      ? 'Login failed. Please check your credentials and try again.'
+      : null;
 
   return (
     <Box
@@ -156,35 +198,80 @@ export function SignInView() {
         bgcolor: 'background.paper'
       }}
     >
-      <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
+      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Logo />
-        <Typography variant="h5" sx={{pt: 2}}>Sign in</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Dont have an account?
-          <Link 
-            variant="subtitle2" 
-            sx={{ 
-              ml: 0.5,
-              cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-                opacity: 'revert'
-              } 
-            }} 
-            onClick={handleNavigateToSignUp}
-          >
-            Get started
-          </Link>
-        </Typography>
       </Box>
 
-      {renderForm}
+      <Typography variant="h4" sx={{ mb: 3, textAlign: 'center' }}>
+        Sign in to XBlog
+      </Typography>
 
-      <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {errorMessage}
+        </Alert>
+      )}
+
+      <form onSubmit={handleSignIn}>
+        <TextField
+          fullWidth
+          label="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type={showPassword ? 'text' : 'password'}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{ mb: 2 }}
+        />
+
+        <Box
+          sx={{
+            my: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
+          <Link
+            component="button"
+            variant="subtitle2"
+            onClick={handleNavigateToForgotPassword}
+            sx={{ textDecoration: 'none' }}
+          >
+            Forgot password?
+          </Link>
+        </Box>
+
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          color="primary"
+          loading={isLoginLoading}
+          sx={{ mb: 2 }}
+        >
+          Sign In
+        </LoadingButton>
+      </form>
+
+      <Divider sx={{ my: 3 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           OR
         </Typography>
       </Divider>
@@ -195,8 +282,8 @@ export function SignInView() {
           size="large"
           variant="outlined"
           color="primary"
-          onClick={handleLogin}
-          disabled={loading}
+          onClick={handleGoogleLogin}
+          loading={isGoogleAuthLoading}
           startIcon={<Iconify icon="logos:google-icon" />}
           sx={{
             borderRadius: '8px',
@@ -212,6 +299,18 @@ export function SignInView() {
           Sign in with Google
         </LoadingButton>
       </Box>
+
+      <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+        Don&apos;t have an account?{' '}
+        <Link
+          variant="subtitle2"
+          component="button"
+          onClick={handleNavigateToSignUp}
+          sx={{ textDecoration: 'none' }}
+        >
+          Sign up
+        </Link>
+      </Typography>
     </Box>
   );
 }

@@ -2,7 +2,8 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { GenerateView } from 'src/sections/generate/view'
+import { GeneratingView } from 'src/components/form/GeneratingView';
+
 
 // ----------------------------------------------------------------------
 
@@ -13,7 +14,7 @@ export default function Page() {
         <title> {`Generate Article - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <GenerateView />
+      <GeneratingView />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
+import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
 
@@ -17,6 +18,7 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/userSlice';
+import { clearCredentials } from 'src/services/slices/auth/authSlice';
 
 // ----------------------------------------------------------------------
 
@@ -31,10 +33,9 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
-
-  const dispatch = useDispatch()
-
+  const dispatch = useDispatch();
   const pathname = usePathname();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -55,8 +56,29 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   );
 
   const handleLogOut = useCallback(() => {
-    dispatch(logout())
-  } , [dispatch])
+    // Close the popover first
+    handleClosePopover();
+    
+    // Clear user data from Redux store
+    dispatch(logout());
+    
+    // Clear authentication credentials
+    dispatch(clearCredentials());
+    
+    // Show success notification
+    enqueueSnackbar('You have been successfully logged out', {
+      variant: 'success',
+      anchorOrigin: { vertical: 'top', horizontal: 'center' },
+    });
+    
+    // Redirect to sign-in page
+    router.push('/sign-in');
+    
+    // Optional: Clear any local storage items if needed
+    localStorage.removeItem('auth');
+    sessionStorage.removeItem('access_token');
+    
+  }, [dispatch, router, handleClosePopover, enqueueSnackbar]);
 
   return (
     <>
