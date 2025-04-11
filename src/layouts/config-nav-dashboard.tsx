@@ -17,18 +17,6 @@ export const navData = [
     path: '/create',
     icon: icon('mdi:rocket-launch'),
   },
-  /*
-  {
-    title: 'My Websites',
-    path: '/stores',  
-    icon: icon('mdi:web'),
-    info: (
-      <Label color="error" variant="inverted">
-        +1
-      </Label>
-    ),
-  },
-  */
   {
     title: 'Blogs',
     path: '/blog',
