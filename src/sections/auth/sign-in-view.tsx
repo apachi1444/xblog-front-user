@@ -24,6 +24,9 @@ import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authA
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
+import { Fade, Snackbar } from "@mui/material";
+import { setLoading } from "src/services/slices/articles/articleSlice";
+import axios from "axios";
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +39,14 @@ export function SignInView() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  // Add these to your state declarations
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const handleCloseSnackbar = () => {
+    setShowSuccessAlert(false);
+    setShowErrorAlert(false);
+  };
   
   // Get auth state from Redux
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -45,20 +56,17 @@ export function SignInView() {
   
   // Email/password login mutation
   const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
+
+  const loading = isGoogleAuthLoading || isLoginLoading
   
   // Effect to handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      // User is authenticated, redirect to home
-      enqueueSnackbar("Successfully signed in!", {
-        variant: "success",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
       
       // Use setTimeout to ensure the state update has completed
       setTimeout(() => {
         router.push('/');
-      }, 100);
+      }, 1000);
     }
   }, [isAuthenticated, router, enqueueSnackbar]);
 
@@ -68,10 +76,6 @@ export function SignInView() {
     
     // Basic validation
     if (!email.trim() || !password.trim()) {
-      enqueueSnackbar("Please enter both email and password", {
-        variant: "error",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
       return;
     }
     
@@ -107,71 +111,63 @@ export function SignInView() {
         accessToken: fakeTokens.accessToken,
       });
       
-      // Manual redirect in case the useEffect doesn't trigger
-      if (!isAuthenticated) {
-        enqueueSnackbar("Successfully signed in!", {
-          variant: "success",
-          anchorOrigin: { vertical: "top", horizontal: "center" },
-        });
-        
-        // Force navigation after a short delay
-        setTimeout(() => {
-          router.push('/');
-        }, 300);
-      }
+      setAlertMessage('Successfully signed in!');
+      setShowSuccessAlert(true);
       
     } catch (error) {
       console.error('Login error:', error);
-      enqueueSnackbar("Login failed. Please check your credentials and try again.", {
-        variant: "error",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
+      setAlertMessage('Login failed. Please check your credentials and try again.');
+      setShowErrorAlert(true);
     }
-  }, [email, password, dispatch, enqueueSnackbar, router, isAuthenticated]);
+  }, [email, password, dispatch]);
 
-  // Handle Google login
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       try {
+        console.log(response);
+        setAlertMessage('Successfully signed in with Google!');
+        setShowSuccessAlert(true)  
         // Call the Google auth API with the access token
         const result = await googleAuth(response.access_token).unwrap();
         
         if (!result || !result.user || !result.tokens || !result.tokens.accessToken) {
           throw new Error('Invalid authentication response');
         }
+        const userInfo = await axios
+        .get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${response.access_token}` },
+        })
+        .then(res => res.data)
+        .catch(err => console.log(err))
+
+        console.log(userInfo);
+        // Set credentials in Redux stor  e
         
+        /*
         dispatch(setCredentials({
           user: result.user,
           accessToken: result.tokens.accessToken,
           refreshToken: result.tokens.refreshToken,
         }));
+        */
         
       } catch (err) {
         console.error('Google auth error:', err);
-        enqueueSnackbar("Failed to authenticate with Google. Please try again.", {
-          variant: "error",
-          anchorOrigin: { vertical: "top", horizontal: "center" },
-        });
+        setAlertMessage('Failed to authenticate with Google. Please try again.');
+        setShowErrorAlert(true);
       }
     },
     onError: (error) => {
       console.error('Google Login Failed:', error);
-      enqueueSnackbar("Google login failed. Please try again.", {
-        variant: "error",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
+      setAlertMessage('Google login failed. Please try again.');
+      setShowErrorAlert(true);
     }
   });
 
   const handleGoogleLogin = () => {
     try {
       googleLogin();
-    } catch (err) {
-      enqueueSnackbar("Failed to initialize Google login. Please try again.", {
-        variant: "error",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
-    }
+    } catch (err) { /* empty */ }
   };
 
   const handleNavigateToSignUp = useCallback(() => {
@@ -198,9 +194,33 @@ export function SignInView() {
         bgcolor: 'background.paper'
       }}
     >
-      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Logo />
-      </Box>
+      <Snackbar
+          open={showSuccessAlert}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          TransitionComponent={Fade}
+        >
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity="success" 
+            variant="filled"
+            sx={{ 
+              width: '100%',
+              boxShadow: (theme) => theme.customShadows.z8,
+              fontWeight: 'medium',
+              '& .MuiAlert-icon': {
+                color: '#fff'
+              }
+            }}
+          >
+            Successfully signed in!
+          </Alert>
+        </Snackbar>
+        
+        <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Logo />
+        </Box>
 
       <Typography variant="h4" sx={{ mb: 3, textAlign: 'center' }}>
         Sign in to XBlog
@@ -283,7 +303,7 @@ export function SignInView() {
           variant="outlined"
           color="primary"
           onClick={handleGoogleLogin}
-          loading={isGoogleAuthLoading}
+          loading={loading}
           startIcon={<Iconify icon="logos:google-icon" />}
           sx={{
             borderRadius: '8px',
