@@ -1,14 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 
 // Icons
 import Add from "@mui/icons-material/Add";
 import Menu from "@mui/icons-material/Menu";
 import { useTheme } from "@mui/material/styles";
 import Remove from "@mui/icons-material/Remove";
-import Warning from "@mui/icons-material/Warning";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-import HelpOutline from "@mui/icons-material/HelpOutline";
 import ErrorOutline from "@mui/icons-material/ErrorOutline";
 // MUI Components
 import {
@@ -17,14 +14,17 @@ import {
   Card,
   Tabs,
   Stack,
+  Button,
   Divider,
   IconButton,
   Typography,
   CardContent,
   LinearProgress,
-  Button,
 } from "@mui/material";
+
 import { Iconify } from "src/components/iconify";
+import { PreviewSEOTab } from "./PreviewSEOTab";
+import { RealTimeScoringTab } from "./RealTimeScoringTab";
 
 // Types
 interface SEODashboardProps {
@@ -50,19 +50,8 @@ const COLORS = {
 };
 
 // Types for notification and progress sections
-interface NotificationItem {
-  id: number;
-  type: "error" | "warning" | "success";
-  text: string;
-  action: string | null;
-}
 
-interface ProgressSection {
-  id: number;
-  title: string;
-  progress: number;
-  type: "error" | "warning" | "success" | "inactive";
-}
+
 
 export function SEODashboard({
   title,
@@ -112,797 +101,219 @@ export function SEODashboard({
     return null;
   }
 
-  // Data
-  const notificationItems: NotificationItem[] = [
-    {
-      id: 1,
-      type: "error",
-      text: "You seem not to be using a table of contents",
-      action: "Fix",
-    },
-    {
-      id: 2,
-      type: "success",
-      text: "Meta description is well optimized",
-      action: null,
-    },
-    {
-      id: 3,
-      type: "warning",
-      text: "You seem not to be using header tags properly",
-      action: "Optimize",
-    },
-  ];
+  interface ChecklistItem {
+    id: number;
+    text: string;
+    status: "error" | "warning" | "success" | "inactive";
+    action?: string | null;
+  }
+
+  interface ProgressSection {
+    id: number;
+    title: string;
+    progress: number;
+    type: "error" | "warning" | "success" | "inactive";
+    items: ChecklistItem[];
+  }
+
+  if (!isVisible) {
+    return null;
+  }
 
   const progressSections: ProgressSection[] = [
     {
       id: 1,
-      title: "Title Optimization",
-      progress: 20,
-      type: "error",
+      title: "Primary SEO Checklist",
+      progress: 100,
+      type: "success",
+      items: [
+        {
+          id: 101,
+          text: "Focus keyword added to meta description",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 102,
+          text: "Focus keyword present in the URL",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 103,
+          text: "Focus keyword appears within the first 10% of content",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 104,
+          text: "Focus keyword used throughout the content",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 105,
+          text: "Content length: 970 words – Good job!",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 106,
+          text: "You seem not to be using a table of contents",
+          status: "error",
+          action: "Fix",
+        },
+        {
+          id: 107,
+          text: "Meta description is well optimized",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 108,
+          text: "You seem not to be using header tags properly",
+          status: "warning",
+          action: "Optimize",
+        },
+      ],
     },
     {
       id: 2,
-      title: "Content Presentation Quality",
-      progress: 50,
-      type: "warning",
+      title: "Title Optimization",
+      progress: 20,
+      type: "error",
+      items: [
+        {
+          id: 201,
+          text: "Primary keyword appears at the start of the title",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 202,
+          text: "Title evokes emotional sentiment (positive or negative)",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 203,
+          text: "Includes at least 2 power words to drive engagement",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 204,
+          text: "Focus keyword included in SEO title",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 205,
+          text: "Title is too short (only 24 characters)",
+          status: "error",
+          action: "Fix",
+        },
+      ],
     },
     {
       id: 3,
+      title: "Content Presentation Quality",
+      progress: 50,
+      type: "warning",
+      items: [
+        {
+          id: 301,
+          text: "Content uses short, easy-to-read paragraphs",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 302,
+          text: "Content includes media (images and/or videos)",
+          status: "success",
+          action: null,
+        },
+        {
+          id: 303,
+          text: "Proper use of headings and subheadings",
+          status: "warning",
+          action: "Optimize",
+        },
+        {
+          id: 304,
+          text: "Content includes bullet points or numbered lists",
+          status: "warning",
+          action: "Add",
+        },
+      ],
+    },
+    {
+      id: 4,
       title: "Additional SEO Factors",
       progress: 0,
       type: "inactive",
+      items: [
+        {
+          id: 401,
+          text: "Focus keyword found in subheadings (H2, H3, etc.)",
+          status: "inactive",
+          action: null,
+        },
+        {
+          id: 402,
+          text: "Keyword density is balanced (e.g. 2.47%) with 24 mentions",
+          status: "inactive",
+          action: null,
+        },
+        {
+          id: 403,
+          text: "URL length is optimal (e.g. 47 characters)",
+          status: "inactive",
+          action: null,
+        },
+        {
+          id: 404,
+          text: "You're linking to high-quality external resources",
+          status: "inactive",
+          action: null,
+        },
+        {
+          id: 405,
+          text: "Includes at least one external DoFollow link",
+          status: "inactive",
+          action: null,
+        },
+        {
+          id: 406,
+          text: "Internal links to related content on your website",
+          status: "inactive",
+          action: null,
+        },
+      ],
     },
   ];
 
-  // Get icon and color based on notification type
-  const getNotificationDetails = (type: "error" | "warning" | "success") => {
-    switch (type) {
-      case "error":
-        return {
-          icon: <ErrorOutline sx={{ color: "white" }} />,
-          color: COLORS.error,
-        };
-      case "warning":
-        return {
-          icon: <Warning sx={{ color: "white" }} />,
-          color: COLORS.warning,
-        };
-      case "success":
-        return {
-          icon: <CheckCircle sx={{ color: "white" }} />,
-          color: COLORS.success,
-        };
-      default:
-        return {
-          icon: <HelpOutline sx={{ color: "white" }} />,
-          color: COLORS.inactive,
-        };
-    }
-  };
 
   // Function to render SEO content based on tab value
   const renderTabContent = () => {
     switch (tabValue) {
-      case 0: // Preview SEO tab
+      case 0:
         return (
-          <CardContent sx={{ p: 2 }}>
-            {/* If meta information is not generated yet, show empty state */}
-            {!metaTitle && !metaDescription && !urlSlug ? (
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  py: 4,
-                  textAlign: 'center'
-                }}
-              >
-                {/* Empty state content */}
-                <Box 
-                  sx={{ 
-                    width: 120, 
-                    height: 120, 
-                    borderRadius: '50%',
-                    bgcolor: 'primary.lighter',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mb: 2
-                  }}
-                >
-                  <Iconify 
-                    icon="eva:alert-triangle-outline" 
-                    width={48} 
-                    height={48} 
-                    sx={{ color: 'primary.main' }} 
-                  />
-                </Box>
-                
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  You have to generate the SEO Meta information
-                </Typography>
-                
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'text.secondary',
-                    mb: 3
-                  }}
-                >
-                  to see the full preview!
-                </Typography>
-                
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  sx={{ 
-                    borderRadius: 28,
-                    px: 3
-                  }}
-                  onClick={onGenerateMeta}
-                >
-                  Generate now !
-                </Button>
-              </Box>
-            ) : (
-              // Show SEO preview when meta information is available
-              <Box sx={{ width: '100%' }}>
-                {/* Google Search Result Preview */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                    Google Search Result Preview
-                  </Typography>
-                  
-                  <Box 
-                    sx={{ 
-                      p: 2, 
-                      border: '1px solid', 
-                      borderColor: 'divider',
-                      borderRadius: 1,
-                      bgcolor: 'background.paper'
-                    }}
-                  >
-                    <Typography 
-                      variant="subtitle2" 
-                      sx={{ 
-                        color: '#1a0dab', 
-                        fontSize: '18px',
-                        mb: 0.5,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {metaTitle || title || 'Title not available'}
-                    </Typography>
-                    
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#006621', 
-                        fontSize: '14px',
-                        mb: 0.5 
-                      }}
-                    >
-                      yourdomain.com/{urlSlug || 'url-slug'}
-                    </Typography>
-                    
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: 'text.secondary',
-                        fontSize: '14px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {metaDescription || 'Meta description not available. Add a meta description to improve your SEO.'}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                {/* SEO Metadata Summary */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                    SEO Metadata
-                  </Typography>
-                  
-                  <Stack spacing={2}>
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                        Title
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          p: 1.5, 
-                          bgcolor: 'background.neutral',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {title || 'Not set'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                        Meta Title
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          p: 1.5, 
-                          bgcolor: 'background.neutral',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {metaTitle || 'Not set'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                        Meta Description
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          p: 1.5, 
-                          bgcolor: 'background.neutral',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {metaDescription || 'Not set'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                        URL Slug
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          p: 1.5, 
-                          bgcolor: 'background.neutral',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <Typography variant="body2">
-                          /{urlSlug || 'Not set'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Stack>
-                </Box>
-              </Box>
-            )}
-          </CardContent>
+            <PreviewSEOTab
+              title={title}
+              metaTitle={metaTitle}
+              metaDescription={metaDescription}
+              urlSlug={urlSlug}
+              onGenerateMeta={onGenerateMeta}
+            />
         );
       
       case 1:
         return (
-          <CardContent
-            sx={{
-              p: 2,
-              border: `0.5px solid ${COLORS.border}`,
-              borderTop: "none",
-              borderRadius: "0 0 10px 10px",
-              bgcolor: "white",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                mb: 4,
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  width: 164,
-                  height: 164,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {/* Gauge background circles */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    border: "1px solid #f0f0f0",
-                  }}
-                />
-
-                {/* Red gauge arc (35% filled) */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    clipPath: "polygon(50% 50%, 0 0, 0 50%, 0 100%, 50% 100%)",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      border: `10px solid ${COLORS.error}`,
-                    }}
-                  />
-                </Box>
-
-                {/* Inner white circle */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    width: "70%",
-                    height: "70%",
-                    borderRadius: "50%",
-                    bgcolor: "white",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {/* Gauge needle */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      width: "40%",
-                      height: "2px",
-                      bgcolor: "#333",
-                      transform: "rotate(125deg)",
-                      transformOrigin: "left center",
-                      left: "50%",
-                    }}
-                  />
-
-                  {/* Center dot */}
-                  <Box
-                    sx={{
-                      width: "4px",
-                      height: "4px",
-                      borderRadius: "50%",
-                      bgcolor: "#333",
-                    }}
-                  />
-                </Box>
-
-                {/* Min value */}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    position: "absolute",
-                    bottom: "15%",
-                    left: "30%",
-                    fontSize: "8px",
-                    color: theme.palette.text.secondary,
-                  }}
-                >
-                  00
-                </Typography>
-
-                {/* Max value */}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    position: "absolute",
-                    bottom: "15%",
-                    right: "30%",
-                    fontSize: "8px",
-                    color: theme.palette.text.secondary,
-                  }}
-                >
-                  100
-                </Typography>
-
-                {/* Percentage */}
-                <Typography
-                  sx={{
-                    position: "absolute",
-                    top: "10%",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                    color: COLORS.error,
-                  }}
-                >
-                  35%
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Basic SEO Section */}
-            <Box sx={{ mb: 3 }}>
-              <Box
-                sx={{ display: "flex", alignItems: "center", mb: 1 }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                  onClick={handleToggleBasicSEO}
-                >
-                  <IconButton size="small" sx={{ p: 0, mr: 1 }}>
-                    {expanded ? (
-                      <Remove fontSize="small" />
-                    ) : (
-                      <Add fontSize="small" />
-                    )}
-                  </IconButton>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    Primary SEO Checklist
-                  </Typography>
-                </Box>
-                <Box sx={{ flexGrow: 1 }} />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    color: theme.palette.text.secondary,
-                  }}
-                >
-                  Progress: 100%
-                </Typography>
-              </Box>
-              <LinearProgress
-                variant="determinate"
-                value={100}
-                sx={{
-                  height: 6,
-                  borderRadius: 2,
-                  bgcolor: COLORS.inactive,
-                  "& .MuiLinearProgress-bar": {
-                    bgcolor: COLORS.success,
-                    borderRadius: 2,
-                  },
-                }}
-              />
-            </Box>
-
-            {expanded && (
-              <Stack spacing={2} sx={{ mb: 3 }}>
-                {/* Title Optimization Section */}
-                <Box sx={{ pl: 2, pt: 1 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1.5, fontSize: '13px' }}>
-                    Title Optimization
-                  </Typography>
-                  <Stack spacing={1}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Primary keyword appears at the start of the title
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Title evokes emotional sentiment (positive or negative)
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Includes at least 2 power words to drive engagement
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Focus keyword included in SEO title
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-                
-                {/* Content Optimization Section */}
-                <Box sx={{ pl: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1.5, fontSize: '13px' }}>
-                    Content Optimization
-                  </Typography>
-                  <Stack spacing={1}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Focus keyword added to meta description
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Focus keyword present in the URL
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Focus keyword appears within the first 10% of content
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Focus keyword used throughout the content
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                      <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                        Content length: 970 words – Good job!
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
-
-                {/* Notification Items */}
-                {notificationItems.map((item) => {
-                  const { icon, color } = getNotificationDetails(item.type);
-                  return (
-                    <Box
-                      key={item.id}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          width: 36,
-                          height: 36,
-                          bgcolor: color,
-                          borderRadius: "4px 0 0 4px",
-                        }}
-                      >
-                        {icon}
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          flex: 1,
-                          p: 1.5,
-                          bgcolor: "white",
-                          borderRadius: "0 4px 4px 0",
-                          border: "1px solid #f0f0f0",
-                          borderLeft: "none",
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontSize: "12px",
-                            color: theme.palette.text.secondary,
-                          }}
-                        >
-                          {item.text}
-                        </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <IconButton size="small">
-                            <HelpOutline sx={{ fontSize: 12 }} />
-                          </IconButton>
-                          {item.action && (
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                ml: 1,
-                                fontSize: "12px",
-                                fontWeight: 500,
-                                color: theme.palette.text.primary,
-                              }}
-                            >
-                              {item.action}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-                    </Box>
-                  );
-                })}
-              </Stack>
-            )}
-
-            {/* Progress Sections */}
-            <Stack divider={<Divider />} spacing={2}>
-              {progressSections.map((section) => (
-                <Box key={section.id}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                    <Box 
-                      sx={{ 
-                        display: "flex", 
-                        alignItems: "center",
-                        cursor: "pointer" 
-                      }}
-                      onClick={() => handleToggleSection(section.id)}
-                    >
-                      <IconButton size="small" sx={{ p: 0, mr: 1 }}>
-                        {expandedSections[section.id] ? (
-                          <Remove fontSize="small" />
-                        ) : (
-                          <Add fontSize="small" />
-                        )}
-                      </IconButton>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: "12px",
-                          fontWeight: 500,
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        {section.title}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ flexGrow: 1 }} />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "12px",
-                        fontWeight: 500,
-                        color: theme.palette.text.secondary,
-                      }}
-                    >
-                      Progress: {section.progress}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={section.progress}
-                    sx={{
-                      height: 6,
-                      borderRadius: 2,
-                      bgcolor: COLORS.inactive,
-                      "& .MuiLinearProgress-bar": {
-                        bgcolor: COLORS[section.type],
-                        borderRadius: 2,
-                      },
-                    }}
-                  />
-                  
-                  {/* Title Optimization expanded section */}
-                  {expandedSections[section.id] && section.title === "Title Optimization" && (
-                    <Box sx={{ pl: 2, pt: 2 }}>
-                      <Stack spacing={1}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Title is too short (only 24 characters)
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Title doesn&apos;t include numbers or brackets
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.error, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Title doesn&apos;t include a call-to-action
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  )}
-                  
-                  {/* Content Presentation Quality expanded section */}
-                  {expandedSections[section.id] && section.title === "Content Presentation Quality" && (
-                    <Box sx={{ pl: 2, pt: 2 }}>
-                      <Stack spacing={1}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Content uses short, easy-to-read paragraphs
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <CheckCircle sx={{ color: COLORS.success, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Content includes media (images and/or videos)
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.warning, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Proper use of headings and subheadings
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.warning, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Content includes bullet points or numbered lists
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  )}
-                  
-                  {/* Additional SEO Factors expanded section */}
-                  {expandedSections[section.id] && section.title === "Additional SEO Factors" && (
-                    <Box sx={{ pl: 2, pt: 2 }}>
-                      <Stack spacing={1}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Focus keyword found in subheadings (H2, H3, etc.)
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Keyword density is balanced (e.g. 2.47%) with 24 mentions
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            URL length is optimal (e.g. 47 characters)
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            You&apos;re linking to high-quality external resources
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Includes at least one external DoFollow link
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <ErrorOutline sx={{ color: COLORS.inactive, fontSize: 16, mr: 1 }} />
-                          <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                            Internal links to related content on your website
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  )}
-                </Box>
-              ))}
-            </Stack>
-          </CardContent>
+          <RealTimeScoringTab 
+            progressSections={progressSections}
+            score={35} // You can make this dynamic based on actual calculations
+          />
         );
       
       default:

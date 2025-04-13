@@ -12,6 +12,16 @@ interface User {
   email: string;
   picture?: string;
   id?: string;
+  subscription?: {
+    plan: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+  };
+  credits?: {
+    used: number;
+    total: number;
+  };
 }
 
 interface UserState {
@@ -19,6 +29,16 @@ interface UserState {
   user: User | null;
   loading: boolean;
   error: string | null;
+  subscription?: {
+    plan: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+  };
+  credits?: {
+    used: number;
+    total: number;
+  };
 }
 
 export const fetchUser = createAsyncThunk<User, void, { rejectValue: string }>(
@@ -45,6 +65,13 @@ const initialState: UserState = {
   userToken: null,
   loading: false,
   error: null,
+  subscription: {
+    plan: 'Free'
+  },
+  credits: {
+    used: 0,
+    total: 100
+  }
 };
 
 export const authenticateWithGoogle = createAsyncThunk(

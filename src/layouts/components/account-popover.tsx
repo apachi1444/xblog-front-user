@@ -1,8 +1,9 @@
+import type { RootState } from 'src/services/store';
 import type { IconButtonProps } from '@mui/material/IconButton';
 
 import { useSnackbar } from 'notistack';
-import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -13,6 +14,7 @@ import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { useRouter, usePathname } from 'src/routes/hooks';
 
@@ -36,6 +38,14 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const dispatch = useDispatch();
   const pathname = usePathname();
   const { enqueueSnackbar } = useSnackbar();
+
+  // Get user subscription data from Redux store
+  const userPlan = useSelector((state: RootState) => state.user?.subscription?.plan || 'Free');
+  const creditsUsed = useSelector((state: RootState) => state.user?.credits?.used || 0);
+  const creditsTotal = useSelector((state: RootState) => state.user?.credits?.total || 100);
+  
+  // Calculate percentage of credits used
+  const creditsPercentage = Math.min((creditsUsed / creditsTotal) * 100, 100);
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -176,7 +186,67 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
               {_myAccount?.email}
             </Typography>
+            
+            {/* Plan Badge */}
+            <Box 
+              sx={{ 
+                display: 'inline-flex',
+                mt: 1,
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: (theme) => userPlan === 'Free' 
+                  ? alpha(theme.palette.grey[500], 0.16)
+                  : alpha(theme.palette.primary.main, 0.16),
+                color: (theme) => userPlan === 'Free' 
+                  ? theme.palette.text.primary 
+                  : theme.palette.primary.main,
+                fontWeight: 'medium',
+                fontSize: '0.75rem',
+              }}
+            >
+              {userPlan} Plan
+            </Box>
           </Box>
+        </Box>
+        
+        {/* Credits Section */}
+        <Box sx={{ px: 3, py: 2, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4) }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+            <Typography variant="body2" color="text.secondary">Credits Usage</Typography>
+            <Typography variant="body2" fontWeight="medium">{creditsUsed}/{creditsTotal}</Typography>
+          </Box>
+          <LinearProgress 
+            variant="determinate" 
+            value={creditsPercentage} 
+            sx={{ 
+              height: 6, 
+              borderRadius: 1,
+              bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
+              '& .MuiLinearProgress-bar': {
+                bgcolor: (theme) => 
+                  creditsPercentage > 90 
+                    ? theme.palette.error.main 
+                    : creditsPercentage > 70 
+                      ? theme.palette.warning.main 
+                      : theme.palette.success.main
+              }
+            }} 
+          />
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              display: 'block', 
+              mt: 0.5,
+              textAlign: 'right',
+              color: (theme) => 
+                creditsPercentage > 90 
+                  ? theme.palette.error.main 
+                  : 'text.secondary'
+            }}
+          >
+            {creditsTotal - creditsUsed} credits remaining
+          </Typography>
         </Box>
 
         <Box sx={{ p: 2 }}>

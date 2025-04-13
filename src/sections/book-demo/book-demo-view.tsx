@@ -175,34 +175,30 @@ export function BookDemoView() {
 
   return (
     <DashboardContent>
-      <Box p={4}>
-        <Container maxWidth="lg">
-          <Typography variant="h4" gutterBottom>
-            Book a Demo
-          </Typography>
-          <Typography color="text.secondary" gutterBottom mb={4}>
-            Schedule a personalized demo with our team
-          </Typography>
+      <Typography variant="h4" gutterBottom>
+        Book a Demo
+      </Typography>
+      <Typography color="text.secondary" gutterBottom mb={4}>
+        Schedule a personalized demo with our team
+      </Typography>
 
-          <Box sx={{ mb: 5 }}>
-            <Stepper activeStep={activeStep}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </Box>
+      <Box sx={{ mb: 5 }}>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
 
-          {renderStepContent(activeStep)}
+      {renderStepContent(activeStep)}
 
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            {activeStep > 0 && <Button onClick={handleBack} color="inherit">Back</Button>}
-            <Button onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext} variant="contained" color="primary">
-              {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
-            </Button>
-          </Box>
-        </Container>
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        {activeStep > 0 && <Button onClick={handleBack} color="inherit">Back</Button>}
+        <Button onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext} variant="contained" color="primary">
+          {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+        </Button>
       </Box>
     </DashboardContent>
   );

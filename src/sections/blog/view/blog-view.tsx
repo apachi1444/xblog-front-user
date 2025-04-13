@@ -111,7 +111,6 @@ export function BlogView() {
   return (
     <DashboardContent>
       <FullPageLoader open={isLoading} />
-      
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
           Blog
@@ -121,6 +120,10 @@ export function BlogView() {
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={handleNewArticle}
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'text.light',
+          }}
         >
           New article
         </Button>

@@ -1,12 +1,37 @@
+import type { RootState } from 'src/services/store';
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
+import { alpha } from '@mui/material/styles';
 import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+
+import { setLanguage } from 'src/services/slices/userDashboardSlice';
+
+// Default languages configuration
+const DEFAULT_LANGUAGES = [
+  {
+    value: 'en',
+    label: 'English',
+    icon: '/assets/icons/flags/ic_flag_en.svg',
+  },
+  {
+    value: 'fr',
+    label: 'Français',
+    icon: '/assets/icons/flags/ic_flag_fr.svg',
+  },
+  {
+    value: 'pt',
+    label: 'Português',
+    icon: '/assets/icons/flags/ic_flag_pt.svg',
+  },
+];
 
 // ----------------------------------------------------------------------
 
@@ -18,10 +43,24 @@ export type LanguagePopoverProps = IconButtonProps & {
   }[];
 };
 
-export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProps) {
-  const [locale, setLocale] = useState<string>(data[0].value);
-
+export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: LanguagePopoverProps) {
+  const dispatch = useDispatch();
+  const { i18n } = useTranslation();
+  
+  // Get language from Redux store
+  const storedLanguage = useSelector((state: RootState) => state.userDashboard.preferences.language);
+  
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+
+  // Initialize locale from Redux store or fallback to i18n current language
+  const [locale, setLocale] = useState<string>(storedLanguage || i18n.language || data[0].value);
+
+  // Sync Redux language with i18n when component mounts
+  useEffect(() => {
+    if (storedLanguage && storedLanguage !== i18n.language) {
+      i18n.changeLanguage(storedLanguage);
+    }
+  }, [storedLanguage, i18n]);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -34,12 +73,19 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
   const handleChangeLang = useCallback(
     (newLang: string) => {
       setLocale(newLang);
+      
+      // Update Redux store
+      dispatch(setLanguage(newLang));
+      
+      // Update i18n language
+      i18n.changeLanguage(newLang);
+      
       handleClosePopover();
     },
-    [handleClosePopover]
+    [handleClosePopover, dispatch, i18n]
   );
 
-  const currentLang = data.find((lang) => lang.value === locale);
+  const currentLang = data.find((lang) => lang.value === locale) || data[0];
 
   const renderFlag = (label?: string, icon?: string) => (
     <Box
@@ -57,7 +103,13 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
         sx={{
           width: 40,
           height: 40,
-          ...(openPopover && { bgcolor: 'action.selected' }),
+          transition: 'all 0.2s ease-in-out',
+          ...(openPopover && { 
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+          }),
+          '&:hover': { 
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+          },
           ...sx,
         }}
         {...other}
@@ -71,22 +123,40 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: { 
+              mt: 1.5,
+              overflow: 'hidden',
+              boxShadow: (theme) => theme.customShadows?.dropdown || '0 0 24px rgba(0,0,0,0.08)',
+              borderRadius: 1.5,
+            },
+          },
+        }}
       >
         <MenuList
           disablePadding
           sx={{
-            p: 0.5,
+            p: 1,
             gap: 0.5,
-            width: 160,
+            width: 180,
             display: 'flex',
             flexDirection: 'column',
             [`& .${menuItemClasses.root}`]: {
-              px: 1,
+              px: 1.5,
+              py: 1,
               gap: 2,
-              borderRadius: 0.75,
+              borderRadius: 1,
               [`&.${menuItemClasses.selected}`]: {
-                bgcolor: 'action.selected',
-                fontWeight: 'fontWeightSemiBold',
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                color: 'primary.main',
+                fontWeight: 'fontWeightMedium',
+                '&:hover': {
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                },
+              },
+              '&:hover': {
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
               },
             },
           }}

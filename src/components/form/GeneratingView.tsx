@@ -279,7 +279,10 @@ export function GeneratingView() {
             <Button
               variant="outlined"
               startIcon={<Iconify icon="eva:arrow-back-fill" />}
-              sx={{ borderRadius: '24px' }}
+              sx={{ 
+                borderRadius: '24px',
+                minWidth: '120px', // Increased width
+              }}
               onClick={handleBack}
             >
               Previous
@@ -297,6 +300,8 @@ export function GeneratingView() {
               sx={{ 
                 borderRadius: '24px',
                 bgcolor: 'success.main',
+                minWidth: '180px', // Increased width
+                px: 3, // Add more horizontal padding
                 '&:hover': {
                   bgcolor: 'success.dark',
                 }
@@ -309,7 +314,10 @@ export function GeneratingView() {
             <Button
               variant="contained"
               endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-              sx={{ borderRadius: '24px' }}
+              sx={{ 
+                borderRadius: '24px',
+                minWidth: '120px', // Increased width
+              }}
               onClick={handleNext}
             >
               Next

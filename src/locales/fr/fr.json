@@ -28,6 +28,75 @@
       "profile": "Profil",
       "settings": "Paramètres",
       "logout": "Déconnexion"
+    },
+    "analytics": {
+      "welcome": "Bonjour, Bon retour xBlogger👋",
+      "articlesGenerated": "Articles Générés",
+      "totalWebsites": "Total des Sites Web",
+      "purchaseOrders": "Commandes d'achat",
+      "messages": "Messages",
+      "currentVisits": "Visites actuelles",
+      "websiteVisits": "Visites du site web",
+      "websiteVisitsSubheader": "(+43%) par rapport à l'année dernière",
+      "conversionRates": "Taux de conversion",
+      "conversionRatesSubheader": "(+43%) par rapport à l'année dernière",
+      "orderTimeline": "Chronologie des commandes",
+      "trafficBySite": "Trafic par site",
+      "tasks": "Tâches",
+      "teamA": "Équipe A",
+      "teamB": "Équipe B"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fév",
+      "mar": "Mar",
+      "apr": "Avr",
+      "may": "Mai",
+      "jun": "Juin",
+      "jul": "Juil",
+      "aug": "Août",
+      "sep": "Sep"
+    },
+    "regions": {
+      "america": "Amérique",
+      "asia": "Asie",
+      "europe": "Europe",
+      "africa": "Afrique"
+    },
+    "countries": {
+      "italy": "Italie",
+      "japan": "Japon",
+      "china": "Chine",
+      "canada": "Canada",
+      "france": "France"
+    },
+    "create": {
+      "heading": "Créer avec l'IA",
+      "subheading": "Comment souhaitez-vous commencer?",
+      "popular": "Populaire",
+      "recentPromptsHeading": "Vos invites récentes",
+      "generateLabel": "Générer",
+      "draftLabel": "BROUILLON",
+      "options": {
+        "generate": {
+          "title": "Générer",
+          "description": "Créer à partir d'une invite en une ligne en quelques secondes"
+        },
+        "template": {
+          "title": "Utiliser un modèle intégré",
+          "description": "Créer un article à partir d'un modèle existant"
+        }
+      },
+      "recentPrompts": {
+        "prompt1": "Présentation de React Native et différence entre React et React Native",
+        "prompt2": "Conseils d'optimisation SEO pour les sites e-commerce",
+        "prompt3": "Comment implémenter l'authentification dans les applications Next.js"
+      },
+      "timeAgo": {
+        "minute": "il y a 1 minute",
+        "days": "il y a 2 jours",
+        "week": "il y a 1 semaine"
+      }
     }
   }
 }

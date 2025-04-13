@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
@@ -16,21 +16,22 @@ import { Iconify } from 'src/components/iconify';
 
 export function CreateView() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   const createOptions = [
     {
       id: 'generate',
-      title: 'Generate',
-      description: 'Create from a one-line prompt in a few seconds',
+      title: t('create.options.generate.title', 'Generate'),
+      description: t('create.options.generate.description', 'Create from a one-line prompt in a few seconds'),
       icon: 'mdi:lightning-bolt',
       color: '#BBDEFB',
       popular: true
     },
     {
       id: 'template',
-      title: 'Use Built In Template',
-      description: 'Create an article from an existing template',
+      title: t('create.options.template.title', 'Use Built In Template'),
+      description: t('create.options.template.description', 'Create an article from an existing template'),
       icon: 'mdi:content-paste',
       color: '#F8BBD0'
     },
@@ -48,19 +49,19 @@ export function CreateView() {
   };
 
   const recentPrompts = [
-    { id: '1', title: 'Presentation of React Native & difference between it and react native', timestamp: '1 minute ago' },
-    { id: '2', title: 'SEO Optimization Tips for E-commerce Websites', timestamp: '2 days ago' },
-    { id: '3', title: 'How to implement authentication in Next.js applications', timestamp: '1 week ago' },
+    { id: '1', title: t('create.recentPrompts.prompt1', 'Presentation of React Native & difference between it and react native'), timestamp: t('create.timeAgo.minute', '1 minute ago') },
+    { id: '2', title: t('create.recentPrompts.prompt2', 'SEO Optimization Tips for E-commerce Websites'), timestamp: t('create.timeAgo.days', '2 days ago') },
+    { id: '3', title: t('create.recentPrompts.prompt3', 'How to implement authentication in Next.js applications'), timestamp: t('create.timeAgo.week', '1 week ago') },
   ];
 
   return (
     <DashboardContent>
       <Box sx={{ textAlign: 'center', mb: 5 }}>
         <Typography variant="h3" sx={{ mb: 2 }}>
-          Create with AI
+          {t('create.heading', 'Create with AI')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          How would you like to get started?
+          {t('create.subheading', 'How would you like to get started?')}
         </Typography>
       </Box>
 
@@ -91,7 +92,7 @@ export function CreateView() {
                     zIndex: 1,
                   }}
                 >
-                  Popular
+                  {t('create.popular', 'Popular')}
                 </Box>
               )}
               <CardActionArea 
@@ -151,7 +152,7 @@ export function CreateView() {
 
       <Box sx={{ mb: 5 }}>
         <Typography variant="h5" sx={{ mb: 3 }}>
-          Your recent prompts
+          {t('create.recentPromptsHeading', 'Your recent prompts')}
         </Typography>
         <Stack spacing={2}>
           {recentPrompts.map(prompt => (
@@ -183,7 +184,7 @@ export function CreateView() {
                 <Box>
                   <Typography variant="subtitle1">{prompt.title}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Generate · {prompt.timestamp} · DRAFT
+                    {t('create.generateLabel', 'Generate')} · {prompt.timestamp} · {t('create.draftLabel', 'DRAFT')}
                   </Typography>
                 </Box>
                 <Iconify 

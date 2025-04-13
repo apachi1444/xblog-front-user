@@ -8,15 +8,17 @@ import { Router } from 'src/routes/sections';
 import { ThemeProvider } from 'src/theme/theme-provider';
 
 import i18n from './locales/i18n';
-import { AuthGuard } from './guards/AuthGuard';
 import { ToastProvider } from './contexts/ToastContext';
 
 // Get Google OAuth client ID from environment variables
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+console.log(GOOGLE_CLIENT_ID);
+
+
 export default function App() {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId="116914976486-bkkcrqu1202aau2g8s1pcfbdq59066uj.apps.googleusercontent.com">
       <I18nextProvider i18n={i18n}>  
         <ThemeProvider>
           <ToastProvider>

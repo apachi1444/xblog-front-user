@@ -1,12 +1,17 @@
+import type { RootState } from 'src/services/store';
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
 
 import { _langs, _notifications } from 'src/_mock';
+import { setThemeMode } from 'src/services/slices/globalSlice';
+import { toggleDarkMode } from 'src/services/slices/userDashboardSlice';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -34,10 +39,25 @@ export type DashboardLayoutProps = {
 
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
   const theme = useTheme();
-
+  const dispatch = useDispatch();
+  
+  // Get dark mode preference from Redux store
+  const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
+  
   const [navOpen, setNavOpen] = useState(false);
 
   const layoutQuery: Breakpoint = 'lg';
+  
+  // Handle theme mode toggle
+  const handleToggleTheme = () => {
+    dispatch(toggleDarkMode());
+    dispatch(setThemeMode(isDarkMode ? 'light' : 'dark'));
+  };
+  
+  // Sync theme mode with system on initial load
+  useEffect(() => {
+    dispatch(setThemeMode(isDarkMode ? 'dark' : 'light'));
+  }, [dispatch, isDarkMode]);
 
   return (
     <LayoutSection
@@ -81,6 +101,28 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             ),
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
+                <IconButton 
+                  onClick={handleToggleTheme}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': { 
+                      bgcolor: (themee) => theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  <Iconify 
+                    icon={isDarkMode ? 'solar:sun-bold-duotone' : 'solar:moon-bold-duotone'} 
+                    width={24} 
+                    height={24}
+                    sx={{
+                      color: isDarkMode ? 'warning.main' : 'text.primary',
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  />
+                </IconButton>
+             
                 <LanguagePopover data={_langs} />
                 <NotificationsPopover data={_notifications} />
                 <AccountPopover

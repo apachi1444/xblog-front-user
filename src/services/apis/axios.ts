@@ -3,7 +3,7 @@ import Axios from 'axios';
 import { security } from '../security';
 
 const customRequest = Axios.create({
-  baseURL: `${window.location.origin  }GlobalConfig.api.BACKEND_BASE_URL`,
+  baseURL: `https://lasting-bunny-selected.ngrok-free.app/api/v1`,
 });
 
 customRequest.interceptors.request.use(

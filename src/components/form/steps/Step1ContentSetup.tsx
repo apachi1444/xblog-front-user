@@ -141,16 +141,16 @@ export function Step1ContentSetup({
   
   // Data for country options
   const countries = [
-    { value: "us", label: "English (US)", icon: "🇺🇸" },
-    { value: "uk", label: "English (UK)", icon: "🇬🇧" },
-    { value: "fr", label: "French", icon: "🇫🇷" }
+    { value: "us", label: "English (US)" },
+    { value: "uk", label: "English (UK)"},
+    { value: "fr", label: "French" }
   ];
 
   // Data for language options
   const languages = [
-    { value: "en-us", label: "English (US)", icon: "🇺🇸" },
-    { value: "en-gb", label: "English (UK)", icon: "🇬🇧" },
-    { value: "fr-fr", label: "French", icon: "🇫🇷" }
+    { value: "en-us", label: "English (US)" },
+    { value: "en-gb", label: "English (UK)" },
+    { value: "fr-fr", label: "French"}
   ];
 
   return (
