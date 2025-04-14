@@ -1,4 +1,5 @@
 
+import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useGoogleLogin } from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,6 +9,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
+import { Fade, Snackbar } from "@mui/material";
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -24,9 +26,6 @@ import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authA
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
-import { Fade, Snackbar } from "@mui/material";
-import { setLoading } from "src/services/slices/articles/articleSlice";
-import axios from "axios";
 
 // ----------------------------------------------------------------------
 
@@ -122,34 +121,36 @@ export function SignInView() {
   }, [email, password, dispatch]);
 
   const googleLogin = useGoogleLogin({
+    flow: "implicit",
     onSuccess: async (response) => {
       try {
         console.log(response);
         setAlertMessage('Successfully signed in with Google!');
         setShowSuccessAlert(true)  
-        // Call the Google auth API with the access token
-        const result = await googleAuth(response.access_token).unwrap();
+
+        const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+        const payload = btoa(JSON.stringify({
+          googleToken: response.access_token
+        }));
+        const signature = btoa(`${header}.${payload}.secret`); // In a real app, use a proper signing method
+        const jwtToken = `${header}.${payload}.${signature}`;
+
+        console.log('JWT-like Token:', jwtToken);
+        
+        
+        // Now send this JWT-like token to your backend
+        const result = await googleAuth(jwtToken).unwrap();
         
         if (!result || !result.user || !result.tokens || !result.tokens.accessToken) {
           throw new Error('Invalid authentication response');
         }
-        const userInfo = await axios
-        .get('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${response.access_token}` },
-        })
-        .then(res => res.data)
-        .catch(err => console.log(err))
-
-        console.log(userInfo);
-        // Set credentials in Redux stor  e
         
-        /*
+        // Set credentials in Redux store
         dispatch(setCredentials({
           user: result.user,
           accessToken: result.tokens.accessToken,
           refreshToken: result.tokens.refreshToken,
         }));
-        */
         
       } catch (err) {
         console.error('Google auth error:', err);
