@@ -1,4 +1,3 @@
-import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
@@ -52,7 +51,6 @@ const fakeDeleteStoreAPI = (id: string): Promise<void> => new Promise((resolve) 
 
 export function StoresView() {
   const table = useTable();
-  const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const [stores, setStores] = useState<any[]>([]);
 
@@ -70,7 +68,8 @@ export function StoresView() {
       doGetStores()
         .unwrap()
         .then((result) => {
-          setStores(result);
+          console.log(result);
+          setStores(result.stores);
           setIsLoading(false);
         })
         .catch(() => {
@@ -111,40 +110,23 @@ export function StoresView() {
         if (table?.selected?.includes(id)) {
           table.onSelectRow?.(id);
         }
-  
-        // Show success message
-        enqueueSnackbar("Store deleted successfully!", {
-          variant: "success",
-          anchorOrigin: { vertical: "top", horizontal: "center" },
-        });
       } catch (error) {
         console.error("Error deleting store:", error);
-        enqueueSnackbar("Failed to delete store. Please try again.", {
-          variant: "error",
-          anchorOrigin: { vertical: "top", horizontal: "center" },
-        });
+    
       } finally {
         // Remove the store ID from deleting list
         setDeletingStoreIds((prev) => prev.filter((storeId) => storeId !== id));
       }
     },
-    [enqueueSnackbar, table, setDeletingStoreIds] // Added missing dependency
+    [table, setDeletingStoreIds] // Added missing dependency
   );
   
 
   const handleAddStoreSuccess = useCallback(() => {
-    // Add the new store to the local state
-    // setLocalStores(prev => [...prev, newStore]);
-    
-    // Show success message
-    enqueueSnackbar('Store connected successfully!', {
-      variant: 'success',
-      anchorOrigin: { vertical: 'top', horizontal: 'center' }
-    });
     
     // Close the modal
     setIsAddStoreModalOpen(false);
-  }, [enqueueSnackbar]);
+  }, []);
 
   const handleAddNewStore = useCallback(() => {
     navigate("/stores/add");

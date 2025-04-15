@@ -3,31 +3,16 @@ import { api } from '.';
 // Define the base URL for auth endpoints
 const AUTH_BASE_URL = '/auth';
 
-// Define response types
-interface GoogleAuthResponse {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    picture?: string;
-  };
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-}
-
 // New interface for email/password login response
 interface LoginResponse {
   user: {
-    id: string;
-    name: string;
     email: string;
-    picture?: string;
-  };
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
+    avatar?: string;
+    telephone: string;
+    name: string;
+    role?: string;
+    created_at?: string;
+    updated_at?: string;
   };
 }
 
@@ -45,6 +30,11 @@ interface VerifyTokenResponse {
     email: string;
     picture?: string;
   };
+}
+
+interface GoogleAuthResponse {
+  token_access: string;
+  token_type : string;
 }
 
 // RTK Query endpoints

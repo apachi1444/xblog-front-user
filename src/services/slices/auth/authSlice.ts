@@ -1,14 +1,6 @@
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { AuthUser } from 'src/types/user';
 
 import { createSlice } from '@reduxjs/toolkit';
-
-// Define user interface
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  picture?: string;
-}
 
 // Define auth state interface
 export interface AuthState {
@@ -16,6 +8,14 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  currentStore?: {
+    id: string;
+    name: string;
+    storesRemaining: number;
+    storesTotal: number;
+    articlesRemaining: number;
+    articlesTotal: number;
+  };
 }
 
 // Initial state
@@ -24,6 +24,14 @@ const initialState: AuthState = {
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  currentStore: {
+    id: '1',
+    name: 'My Store',
+    storesRemaining: 3,
+    storesTotal: 5,
+    articlesRemaining: 45,
+    articlesTotal: 100
+  }
 };
 
 const loadAuthState = () => {
@@ -42,10 +50,19 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: loadAuthState(),
   reducers: {
-    setCredentials: (state, action) => {
-      state.user = action.payload.user;
+    setCredentials: (
+      state, 
+      action: { 
+        payload: { 
+          user?: AuthUser | null; 
+          accessToken: string; 
+          refreshToken?: string | null;
+        } 
+      }
+    ) => {
+      state.user = action.payload.user || null;
       state.accessToken = action.payload.accessToken;
-      state.isAuthenticated = true;
+      state.isAuthenticated = !!action.payload.accessToken;
       
       // Save to localStorage
       localStorage.setItem('auth', JSON.stringify(state));

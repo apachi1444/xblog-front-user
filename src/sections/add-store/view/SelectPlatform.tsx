@@ -1,6 +1,18 @@
+import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { Check, ChevronRight } from 'lucide-react';
 
-import { Box, Grid, Card, Button, Typography } from '@mui/material';
+import { Box, Grid, Card, Paper, alpha, Button, useTheme, Container, Typography } from '@mui/material';
+
+// Real platform images
+const PLATFORM_IMAGES = {
+  wordpress: 'https://s.w.org/style/images/about/WordPress-logotype-standard.png',
+  shopify: 'https://cdn.shopify.com/s/files/1/0070/7032/files/shopify-logo-green.png',
+  woocommerce: 'https://woocommerce.com/wp-content/uploads/2023/10/woocommerce-logo.svg',
+  magento: '/assets/images/platforms/magento.png',
+  prestashop: '/assets/images/platforms/prestashop.png',
+  custom: '/assets/images/platforms/custom-website.png',
+};
 
 interface SelectPlatformProps {
   platforms: { id: string; name: string; icon: string; description: string }[];
@@ -17,103 +29,237 @@ export default function SelectPlatform({
   onBack,
   platforms
 }: SelectPlatformProps) {
+  const theme = useTheme();
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
   const handleNext = () => {
     if (selectedPlatform) {
       onNext();
     }
   };
 
+  // Get real platform image or fallback to the provided icon
+  const getPlatformImage = (platformId: string, providedIcon: string) => PLATFORM_IMAGES[platformId as keyof typeof PLATFORM_IMAGES] || providedIcon;
+
   return (
-    <Box>
-      <Typography variant="h6" align="center" sx={{ mb: 3 }}>
-        Select your platform
-      </Typography>
-      
-      <Grid container spacing={3} justifyContent="center" sx={{ mb: 5 }}>
-        {platforms.map((platform) => (
-          <Grid item xs={12} sm={4} key={platform.id}>
-            <Card
-              onClick={() => onSelectPlatform(platform.id)}
-              sx={{
-                p: 3,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease-in-out',
-                border: selectedPlatform === platform.id ? '2px solid' : '1px solid',
-                borderColor: selectedPlatform === platform.id ? 'primary.main' : 'divider',
-                boxShadow: selectedPlatform === platform.id ? 3 : 0,
-                '&:hover': {
-                  boxShadow: 2,
-                },
-              }}
+    <Container maxWidth="md" component={motion.div} 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Paper 
+        elevation={0}
+        sx={{ 
+          p: 4, 
+          borderRadius: 2,
+          background: theme.palette.background.paper,
+          boxShadow: theme.shadows[1],
+          mb: 4
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          align="center" 
+          sx={{ 
+            mb: 1,
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Select Your Platform
+        </Typography>
+        
+        <Typography 
+          variant="body1" 
+          align="center" 
+          color="text.secondary" 
+          sx={{ mb: 4 }}
+        >
+          Choose the platform your website is built on to optimize integration
+        </Typography>
+        
+        <Grid container spacing={3} justifyContent="center" sx={{ mb: 4 }}>
+          {platforms.map((platform, index) => (
+            <Grid item xs={12} sm={6} md={4} key={platform.id} component={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Box
-                component="img"
-                src={platform.icon}
-                alt={platform.name}
+              <Card
+                onClick={() => onSelectPlatform(platform.id)}
                 sx={{
-                  width: 64,
-                  height: 64,
-                  mb: 2,
-                  opacity: selectedPlatform === platform.id ? 1 : 0.7,
+                  p: 3,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: selectedPlatform === platform.id 
+                    ? theme.palette.primary.main 
+                    : alpha(theme.palette.divider, 0.1),
+                  boxShadow: selectedPlatform === platform.id 
+                    ? `0 8px 16px ${alpha(theme.palette.primary.main, 0.2)}` 
+                    : 'none',
+                  backgroundColor: selectedPlatform === platform.id 
+                    ? alpha(theme.palette.primary.main, 0.05) 
+                    : theme.palette.background.paper,
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: `0 12px 20px ${alpha(theme.palette.grey[500], 0.2)}`,
+                    borderColor: alpha(theme.palette.primary.main, 0.5),
+                  },
                 }}
-              />
-              <Typography variant="subtitle1" fontWeight="bold">
-                {platform.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                {platform.description}
-              </Typography>
-              
-              {selectedPlatform === platform.id && (
+              >
                 <Box
+                  component="img"
+                  src={getPlatformImage(platform.id, platform.icon)}
+                  alt={platform.name}
                   sx={{
-                    mt: 2,
-                    width: 24,
-                    height: 24,
-                    display: 'flex',
-                    borderRadius: '50%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
+                    width: 80,
+                    height: 80,
+                    mb: 2.5,
+                    objectFit: 'contain',
+                    transition: 'all 0.3s ease',
+                    filter: selectedPlatform === platform.id ? 'none' : 'grayscale(30%)',
+                    opacity: selectedPlatform === platform.id ? 1 : 0.8,
+                  }}
+                />
+                <Typography 
+                  variant="h6" 
+                  fontWeight="bold"
+                  sx={{ 
+                    mb: 1,
+                    color: selectedPlatform === platform.id 
+                      ? theme.palette.primary.main 
+                      : theme.palette.text.primary
                   }}
                 >
-                  <Check size={16} />
-                </Box>
-              )}
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      
-      {!selectedPlatform && (
-        <Typography color="error" variant="body2" align="center" sx={{ mb: 2 }}>
-          Please select a platform to continue
-        </Typography>
-      )}
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button
-          variant="outlined"
-          onClick={onBack}
-        >
-          Back to Stores
-        </Button>
+                  {platform.name}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  align="center"
+                  sx={{ 
+                    mb: 2,
+                    color: selectedPlatform === platform.id 
+                      ? theme.palette.text.primary 
+                      : theme.palette.text.secondary
+                  }}
+                >
+                  {platform.description}
+                </Typography>
+                
+                {selectedPlatform === platform.id && (
+                  <Box
+                    component={motion.div}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    sx={{
+                      mt: 1,
+                      width: 28,
+                      height: 28,
+                      display: 'flex',
+                      borderRadius: '50%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      boxShadow: `0 4px 8px ${alpha(theme.palette.primary.main, 0.4)}`,
+                    }}
+                  >
+                    <Check size={16} />
+                  </Box>
+                )}
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
         
-        <Button
-          variant="contained"
-          onClick={handleNext}
-          endIcon={<ChevronRight size={16} />}
-          disabled={!selectedPlatform}
+        {!selectedPlatform && (
+          <Typography 
+            color="error" 
+            variant="body2" 
+            align="center" 
+            sx={{ 
+              mb: 3,
+              fontWeight: 500,
+              opacity: 0.9,
+              animation: !selectedPlatform ? 'pulse 1.5s infinite' : 'none',
+              '@keyframes pulse': {
+                '0%': { opacity: 0.6 },
+                '50%': { opacity: 1 },
+                '100%': { opacity: 0.6 },
+              },
+            }}
+          >
+            Please select a platform to continue
+          </Typography>
+        )}
+        
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            mt: 2,
+            pt: 3,
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+          }}
         >
-          Next
-        </Button>
-      </Box>
-    </Box>
+          <Button
+            variant="outlined"
+            onClick={onBack}
+            size="large"
+            sx={{
+              borderRadius: 1.5,
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: theme.shadows[1],
+              },
+            }}
+          >
+            Back to Stores
+          </Button>
+          
+          <Button
+            variant="contained"
+            onClick={handleNext}
+            endIcon={<ChevronRight size={18} />}
+            disabled={!selectedPlatform}
+            size="large"
+            sx={{
+              borderRadius: 1.5,
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              background: selectedPlatform 
+                ? `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+                : undefined,
+              boxShadow: selectedPlatform ? theme.shadows[3] : 'none',
+              '&:hover': {
+                boxShadow: selectedPlatform ? theme.shadows[5] : 'none',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Next
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
-} 
+}

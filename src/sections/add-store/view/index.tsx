@@ -52,6 +52,13 @@ export interface StoreFormData {
   appId: string;
   appPassword: string;
   acceptTerms: boolean;
+  // Additional platform-specific fields
+  adminUrl?: string;
+  apiKey?: string;
+  apiSecret?: string;
+  shopifyStore?: string;
+  consumerKey?: string;
+  consumerSecret?: string;
 }
 
 export default function AddStoreFlow() {
@@ -122,7 +129,8 @@ export default function AddStoreFlow() {
             onUpdateFormData={handleUpdateFormData}
             onSubmit={handleSubmit}
             onBack={handleBack}
-            businessTypes={businessTypes}
+            isLoading={false}
+            error={null}
           />
         );
       default:
@@ -133,7 +141,7 @@ export default function AddStoreFlow() {
   return (
     <DashboardContent>
       <FormStepper
-        steps={['Content Setup', 'Content Structuring', 'Publish']}
+        steps={['Content Setup', 'Content Structuring']}
         activeStep={activeStep}
       />
       

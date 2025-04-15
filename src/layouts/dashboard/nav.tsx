@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
-import { useTheme, alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 
@@ -16,6 +16,7 @@ import { varAlpha } from 'src/theme/styles';
 
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
+import { ResourceUsage } from 'src/components/resource-usage';
 
 import { NavUpgrade } from '../components/nav-upgrade';
 import { WorkspacesPopover } from '../components/workspaces-popover';
@@ -42,6 +43,7 @@ export type NavContentProps = {
     bottomArea?: React.ReactNode;
   };
   workspaces: WorkspacesPopoverProps['data'];
+  emptyStoresAction?: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
@@ -52,7 +54,11 @@ export function NavDesktop({
   slots,
   workspaces,
   layoutQuery,
-}: NavContentProps & { layoutQuery: Breakpoint }) {
+  emptyStoresAction,
+}: NavContentProps & { 
+  layoutQuery: Breakpoint;
+  emptyStoresAction?: React.ReactNode;
+}) {
   const theme = useTheme();
 
   return (
@@ -77,7 +83,13 @@ export function NavDesktop({
         ...sx,
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} bottomNavData={bottomNavData}/>
+      <NavContent 
+        data={data} 
+        slots={slots} 
+        workspaces={workspaces} 
+        bottomNavData={bottomNavData}
+        emptyStoresAction={emptyStoresAction}
+      />
     </Box>
   );
 }
@@ -92,7 +104,12 @@ export function NavMobile({
   slots,
   onClose,
   workspaces,
-}: NavContentProps & { open: boolean; onClose: () => void }) {
+  emptyStoresAction,
+}: NavContentProps & { 
+  open: boolean; 
+  onClose: () => void;
+  emptyStoresAction?: React.ReactNode;
+}) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -117,15 +134,23 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent data={data} slots={slots} workspaces={workspaces} bottomNavData={bottomNavData} />
+      <NavContent 
+        data={data} 
+        slots={slots} 
+        workspaces={workspaces} 
+        bottomNavData={bottomNavData} 
+        emptyStoresAction={emptyStoresAction}
+      />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavContentProps) {
+export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptyStoresAction }: NavContentProps) {
   const pathname = usePathname();
+
+  const websitesLength = workspaces?.length ?? 0
 
   return (
     <>
@@ -135,7 +160,11 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
 
       {slots?.topArea}
 
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      {websitesLength > 0 ? (
+        <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      ) : (
+        emptyStoresAction
+      )}
 
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
@@ -237,6 +266,7 @@ export function NavContent({ data, slots, workspaces, sx , bottomNavData }: NavC
 
       {slots?.bottomArea}
 
+      <ResourceUsage />
       <NavUpgrade />
     </>
   );

@@ -1,7 +1,8 @@
 
-import axios from "axios";
+import type { CredentialResponse} from '@react-oauth/google';
+
 import { useSnackbar } from "notistack";
-import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 
@@ -83,15 +84,6 @@ export function SignInView() {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Create fake user data
-      const fakeUser = {
-        id: '123456',
-        name: email.split('@')[0], // Use part of email as name
-        email,
-        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(email.split('@')[0])}`,
-      };
-      
-      // Create fake tokens
       const fakeTokens = {
         accessToken: `fake-jwt-token-${Math.random().toString(36).substring(2)}`,
         refreshToken: `fake-refresh-token-${Math.random().toString(36).substring(2)}`,
@@ -99,16 +91,9 @@ export function SignInView() {
       
       // Set credentials in Redux store
       dispatch(setCredentials({
-        user: fakeUser,
         accessToken: fakeTokens.accessToken,
         refreshToken: fakeTokens.refreshToken,
       }));
-      
-      // Log the authentication state for debugging
-      console.log('Authentication credentials set:', {
-        user: fakeUser,
-        accessToken: fakeTokens.accessToken,
-      });
       
       setAlertMessage('Successfully signed in!');
       setShowSuccessAlert(true);
@@ -120,57 +105,6 @@ export function SignInView() {
     }
   }, [email, password, dispatch]);
 
-  const googleLogin = useGoogleLogin({
-    flow: "implicit",
-    onSuccess: async (response) => {
-      try {
-        console.log(response);
-        setAlertMessage('Successfully signed in with Google!');
-        setShowSuccessAlert(true)  
-
-        const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-        const payload = btoa(JSON.stringify({
-          googleToken: response.access_token
-        }));
-        const signature = btoa(`${header}.${payload}.secret`); // In a real app, use a proper signing method
-        const jwtToken = `${header}.${payload}.${signature}`;
-
-        console.log('JWT-like Token:', jwtToken);
-        
-        
-        // Now send this JWT-like token to your backend
-        const result = await googleAuth(jwtToken).unwrap();
-        
-        if (!result || !result.user || !result.tokens || !result.tokens.accessToken) {
-          throw new Error('Invalid authentication response');
-        }
-        
-        // Set credentials in Redux store
-        dispatch(setCredentials({
-          user: result.user,
-          accessToken: result.tokens.accessToken,
-          refreshToken: result.tokens.refreshToken,
-        }));
-        
-      } catch (err) {
-        console.error('Google auth error:', err);
-        setAlertMessage('Failed to authenticate with Google. Please try again.');
-        setShowErrorAlert(true);
-      }
-    },
-    onError: (error) => {
-      console.error('Google Login Failed:', error);
-      setAlertMessage('Google login failed. Please try again.');
-      setShowErrorAlert(true);
-    }
-  });
-
-  const handleGoogleLogin = () => {
-    try {
-      googleLogin();
-    } catch (err) { /* empty */ }
-  };
-
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
   }, [router]);
@@ -178,7 +112,31 @@ export function SignInView() {
   const handleNavigateToForgotPassword = useCallback(() => {
     router.push('/forgot-password');
   }, [router]);
-
+  
+  const handleGoogleSuccess = async (response: CredentialResponse) => {
+    try {
+      const jwtToken = response.credential || "";
+      const result = await googleAuth(jwtToken).unwrap();
+      
+      if (!result?.token_access) {
+        throw new Error('Invalid authentication response');
+      }
+      
+      // Set tokens first
+      const credentials = { accessToken: result.token_access };
+      dispatch(setCredentials(credentials));
+      
+      setAlertMessage('Successfully signed in with Google!');
+      setShowSuccessAlert(true);
+      
+      setTimeout(() => router.replace('/'), 1000);
+      
+    } catch (error) {
+      console.error('Google auth error:', error);
+      setAlertMessage('Failed to authenticate with Google. Please try again.');
+      setShowErrorAlert(true);
+    }
+  };
   // Determine if there's any error to display
   const errorMessage = googleAuthError 
     ? 'Failed to authenticate with Google. Please try again.' 
@@ -297,29 +255,36 @@ export function SignInView() {
         </Typography>
       </Divider>
 
-      <Box gap={1} display="flex" justifyContent="center">
-        <LoadingButton 
+      {loading ? (
+        <LoadingButton
           fullWidth
           size="large"
           variant="outlined"
           color="primary"
-          onClick={handleGoogleLogin}
-          loading={loading}
-          startIcon={<Iconify icon="logos:google-icon" />}
-          sx={{
+          sx={{ 
             borderRadius: '8px',
             py: 1.5,
             justifyContent: 'center',
             borderColor: 'primary.main',
-            '&:hover': {
-              borderColor: 'primary.dark',
-              opacity: 'revert'
-            }
           }}
         >
           Sign in with Google
         </LoadingButton>
-      </Box>
+      ) : (
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          text="signin_with"
+          type="standard"
+          theme="outline"
+          size="large"
+          logo_alignment="center"
+          width="100%"
+          shape="rectangular"
+          onError={() => console.error("Google Login Failed")}
+          useOneTap={false}
+          context="signin"
+        />
+      )}
 
       <Typography variant="body2" align="center" sx={{ mt: 3 }}>
         Don&apos;t have an account?{' '}

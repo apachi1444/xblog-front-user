@@ -49,10 +49,6 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     <Box component="img" alt={alt} src={src} sx={{ width: 24, height: 24, borderRadius: '50%' }} />
   );
 
-  const renderLabel = (plan: string) => (
-    <Label sx={{color : 'white'}}color={plan === 'Free' ? 'default' : 'info'}>{plan}</Label>
-  );
-
   return (
     <>
       <ButtonBase

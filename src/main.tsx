@@ -13,15 +13,13 @@ import { store } from './services/store';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
-  <StrictMode>
-    <HelmetProvider>
-      <Provider store={store}>
-        <BrowserRouter>
-          <Suspense>
-            <App />
-          </Suspense>
-        </BrowserRouter>
-      </Provider>
-    </HelmetProvider>
-  </StrictMode>
+  <HelmetProvider>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Suspense>
+          <App />
+        </Suspense>
+      </BrowserRouter>
+    </Provider>
+  </HelmetProvider>
 );

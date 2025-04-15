@@ -1,7 +1,6 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 
 import { api } from './apis';
-import userReducer from './slices/userSlice';
 import globalReducer from './slices/globalSlice';
 import authReducer from './slices/auth/authSlice';
 import articleReducer from './slices/articleSlice';
@@ -11,7 +10,6 @@ import userDashboardReducer  from './slices/userDashboardSlice';
 
 export const store = configureStore({
   reducer: {
-    user: userReducer,
     article: articleReducer,
     userDashboard: userDashboardReducer,
     global: globalReducer,

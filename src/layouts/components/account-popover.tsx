@@ -19,8 +19,11 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
-import { logout } from 'src/services/slices/userSlice';
+import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { clearCredentials } from 'src/services/slices/auth/authSlice';
+
+import { ResourceUsage } from 'src/components/resource-usage';
+import { Divider } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -39,10 +42,21 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const pathname = usePathname();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Get user subscription data from Redux store
-  const userPlan = useSelector((state: RootState) => state.user?.subscription?.plan || 'Free');
-  const creditsUsed = useSelector((state: RootState) => state.user?.credits?.used || 0);
-  const creditsTotal = useSelector((state: RootState) => state.user?.credits?.total || 100);
+  // Get user and store data from Auth Redux store
+  const user = useSelector(selectAuthUser);
+  const currentStore = useSelector((state: RootState) => state.auth.currentStore);
+  const userPlan = user?.subscription?.plan || 'Free';
+  
+  // Calculate percentages
+  const storesPercentage = currentStore 
+    ? Math.min(((currentStore.storesTotal - currentStore.storesRemaining) / currentStore.storesTotal) * 100, 100)
+    : 0;
+    
+  const articlesPercentage = currentStore 
+    ? Math.min(((currentStore.articlesTotal - currentStore.articlesRemaining) / currentStore.articlesTotal) * 100, 100)
+    : 0;
+  const creditsUsed = user?.credits?.used || 0;
+  const creditsTotal = user?.credits?.total || 100;
   
   // Calculate percentage of credits used
   const creditsPercentage = Math.min((creditsUsed / creditsTotal) * 100, 100);
@@ -68,27 +82,15 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const handleLogOut = useCallback(() => {
     // Close the popover first
     handleClosePopover();
-    
-    // Clear user data from Redux store
-    dispatch(logout());
-    
-    // Clear authentication credentials
     dispatch(clearCredentials());
-    
-    // Show success notification
-    enqueueSnackbar('You have been successfully logged out', {
-      variant: 'success',
-      anchorOrigin: { vertical: 'top', horizontal: 'center' },
-    });
-    
-    // Redirect to sign-in page
     router.push('/sign-in');
-    
-    // Optional: Clear any local storage items if needed
     localStorage.removeItem('auth');
     sessionStorage.removeItem('access_token');
     
-  }, [dispatch, router, handleClosePopover, enqueueSnackbar]);
+  }, [dispatch, router, handleClosePopover]);
+
+  console.log(user);
+  
 
   return (
     <>
@@ -111,7 +113,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         {...other}
       >
         <Avatar 
-          src={_myAccount.photoURL} 
+          src={user?.avatar || _myAccount.photoURL} 
           alt={_myAccount.displayName} 
           sx={{ 
             width: 40, 
@@ -163,7 +165,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           }}
         >
           <Avatar 
-            src={_myAccount.photoURL} 
+            src={user?.avatar || _myAccount.photoURL} 
             alt={_myAccount.displayName} 
             sx={{ 
               width: 80, 
@@ -178,13 +180,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             {_myAccount.displayName.charAt(0).toUpperCase()}
           </Avatar>
           
-          <Box sx={{ position: 'relative', zIndex: 1, mt: 2 }}>
+          <Box sx={{ position: 'relative', zIndex: 1, mt: 2, px: 3 }}>
             <Typography variant="h6" fontWeight="bold">
-              {_myAccount?.displayName}
+              {user?.name || _myAccount?.displayName}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-              {_myAccount?.email}
+              {user?.email || _myAccount?.email}
             </Typography>
             
             {/* Plan Badge */}
@@ -210,44 +212,12 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Box>
         </Box>
         
-        {/* Credits Section */}
-        <Box sx={{ px: 3, py: 2, bgcolor: (theme) => alpha(theme.palette.background.neutral, 0.4) }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-            <Typography variant="body2" color="text.secondary">Credits Usage</Typography>
-            <Typography variant="body2" fontWeight="medium">{creditsUsed}/{creditsTotal}</Typography>
-          </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={creditsPercentage} 
-            sx={{ 
-              height: 6, 
-              borderRadius: 1,
-              bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
-              '& .MuiLinearProgress-bar': {
-                bgcolor: (theme) => 
-                  creditsPercentage > 90 
-                    ? theme.palette.error.main 
-                    : creditsPercentage > 70 
-                      ? theme.palette.warning.main 
-                      : theme.palette.success.main
-              }
-            }} 
-          />
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              display: 'block', 
-              mt: 0.5,
-              textAlign: 'right',
-              color: (theme) => 
-                creditsPercentage > 90 
-                  ? theme.palette.error.main 
-                  : 'text.secondary'
-            }}
-          >
-            {creditsTotal - creditsUsed} credits remaining
-          </Typography>
+        {/* Resource Usage Stats */}
+        <Box sx={{ px: 3, py: 2 }}>
+          <ResourceUsage compact />
         </Box>
+        
+        <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
 
         <Box sx={{ p: 2 }}>
           <MenuList
