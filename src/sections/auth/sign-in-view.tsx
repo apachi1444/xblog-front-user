@@ -76,34 +76,38 @@ export function SignInView() {
     
     // Basic validation
     if (!email.trim() || !password.trim()) {
+      setAlertMessage('Please enter both email and password');
+      setShowErrorAlert(true);
       return;
     }
     
     try {
+      // Call the real login API with email and password
+      const result = await login({ 
+        email: email.trim(), 
+        password: password.trim() 
+      }).unwrap();
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const fakeTokens = {
-        accessToken: `fake-jwt-token-${Math.random().toString(36).substring(2)}`,
-        refreshToken: `fake-refresh-token-${Math.random().toString(36).substring(2)}`,
-      };
+      // Check if we have a valid user response
+      if (!result?.token_access) {
+        throw new Error('Invalid login response');
+      }
       
       // Set credentials in Redux store
       dispatch(setCredentials({
-        accessToken: fakeTokens.accessToken,
-        refreshToken: fakeTokens.refreshToken,
+        accessToken: result.token_access || 'default-token',
       }));
       
+      // Show success message
       setAlertMessage('Successfully signed in!');
       setShowSuccessAlert(true);
-      
+          
     } catch (error) {
       console.error('Login error:', error);
       setAlertMessage('Login failed. Please check your credentials and try again.');
       setShowErrorAlert(true);
     }
-  }, [email, password, dispatch]);
+  }, [email, password, dispatch, login]);
 
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
@@ -173,7 +177,7 @@ export function SignInView() {
               }
             }}
           >
-            Successfully signed in!
+            {alertMessage}
           </Alert>
         </Snackbar>
         

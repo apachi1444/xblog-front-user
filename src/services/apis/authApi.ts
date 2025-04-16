@@ -5,15 +5,8 @@ const AUTH_BASE_URL = '/auth';
 
 // New interface for email/password login response
 interface LoginResponse {
-  user: {
-    email: string;
-    avatar?: string;
-    telephone: string;
-    name: string;
-    role?: string;
-    created_at?: string;
-    updated_at?: string;
-  };
+  token_access: string;
+  token_type: string;
 }
 
 // New interface for login credentials
@@ -22,19 +15,27 @@ interface LoginCredentials {
   password: string;
 }
 
-interface VerifyTokenResponse {
-  valid: boolean;
-  user?: {
-    id: string;
-    name: string;
+// Interface for sign up request
+interface SignUpRequest {
+  name: string;
+  email: string;
+  avatar: string;
+  password: string;
+}
+
+// Interface for sign up response
+interface SignUpResponse {
+  user: {
     email: string;
-    picture?: string;
+    avatar?: string;
+    name: string;
+    created_at?: string;
   };
 }
 
 interface GoogleAuthResponse {
   token_access: string;
-  token_type : string;
+  token_type: string;
 }
 
 // RTK Query endpoints
@@ -51,21 +52,21 @@ export const authApi = api.injectEndpoints({
     // New email/password login endpoint
     login: builder.mutation<LoginResponse, LoginCredentials>({
       query: (credentials) => ({
-        url: `${AUTH_BASE_URL}/auth/login`,
+        url: `${AUTH_BASE_URL}/login`,
         method: 'POST',
         body: credentials,
       }),
     }),
-    
-    // Verify token endpoint
-    verifyToken: builder.query<VerifyTokenResponse, string>({
-      query: (token) => ({
-        url: `${AUTH_BASE_URL}/auth/verify`,
+  
+    // Sign up endpoint
+    signUp: builder.mutation<SignUpResponse, SignUpRequest>({
+      query: (userData) => ({
+        url: `${AUTH_BASE_URL}/register`,
         method: 'POST',
-        body: { token },
+        body: userData,
       }),
     }),
-    
+
     // Logout endpoint
     logout: builder.mutation<void, void>({
       query: () => ({
@@ -80,6 +81,6 @@ export const authApi = api.injectEndpoints({
 export const {
   useGoogleAuthMutation,
   useLoginMutation,
-  useVerifyTokenQuery,
+  useSignUpMutation,
   useLogoutMutation,
 } = authApi;

@@ -3,7 +3,7 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import { useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import { Divider } from '@mui/material';
+import { Divider, useThemeProps } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -75,11 +75,10 @@ export function NavDesktop({
         bgcolor: 'var(--layout-nav-bg)',
         zIndex: 'var(--layout-nav-zIndex)',
         width: 'var(--layout-nav-vertical-width)',
-        borderRight: `1px solid var(--layout-nav-border-color, ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)})`,
+        borderRight: `2px solid ${theme.palette.divider}`,
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
-        background: `white;`,
         ...sx,
       }}
     >
@@ -119,6 +118,8 @@ export function NavMobile({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  const theme = useTheme();
+
   return (
     <Drawer
       open={open}
@@ -130,6 +131,7 @@ export function NavMobile({
           overflow: 'unset',
           bgcolor: 'var(--layout-nav-bg)',
           width: 'var(--layout-nav-mobile-width)',
+          borderRight: `2px solid ${theme.palette.divider}`,
           ...sx,
         },
       }}

@@ -42,7 +42,6 @@ export function FormContainer({
             px: 2,
             mt: 2.5,
             width: '100%',
-            cursor: 'pointer', // Add cursor pointer to indicate clickability
           }}
           onClick={toggleExpand} // Make the entire box clickable
         >
@@ -57,18 +56,14 @@ export function FormContainer({
                 height: '39px',
                 px: 2,
                 py: 1.5,
-                bgcolor: theme.palette.primary.lighter || '#cfcff9',
-                color: theme.palette.primary.dark || '#5969cf',
+                bgcolor: theme.palette.secondary.lighter || '#cfcff9',
+                color: theme.palette.primary.main || '#5969cf',
                 borderRadius: '20px',
-                border: `1px solid ${theme.palette.primary.light || '#abb8f8'}`,
+                border: `0.3px solid ${theme.palette.primary.lighter}`,
                 fontWeight: 'bold',
                 fontSize: '13px',
                 letterSpacing: '0.5px',
                 fontFamily: theme.typography.fontFamily,
-                '& .MuiChip-label': {
-                  px: 1
-                },
-                zIndex: 1, // Ensure chip stays above the clickable area
               }}
               onClick={(e) => e.stopPropagation()} // Prevent chip clicks from toggling
             />
@@ -88,9 +83,6 @@ export function FormContainer({
                 border: `1px solid ${theme.palette.primary.light || '#abb8f8'}`,
                 width: '39px',
                 height: '39px',
-                '&:hover': {
-                  bgcolor: theme.palette.primary.light || '#bbbdf8'
-                },
                 zIndex: 1, // Ensure button stays above the clickable area
               }}
             >
@@ -104,9 +96,6 @@ export function FormContainer({
               sx={{ 
                 py: 2, 
                 textAlign: 'center',
-                '&:hover': {
-                  bgcolor: `${theme.palette.primary.lighter}20` || 'rgba(171, 184, 248, 0.1)', // Subtle hover effect with opacity
-                },
                 transition: 'background-color 0.2s',
               }}
             >
@@ -116,7 +105,7 @@ export function FormContainer({
                   color: theme.palette.primary.dark || '#5969cf',
                   fontFamily: theme.typography.fontFamily,
                   fontStyle: 'italic',
-                  cursor: 'pointer', // Add cursor pointer to indicate clickability
+                  cursor: 'pointer'
                 }}
               >
                 {collapsedMessage}

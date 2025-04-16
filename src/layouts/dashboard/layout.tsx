@@ -57,8 +57,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const [getCurrentUser] = useLazyGetCurrentUserQuery();
   const [doGetStores] = useLazyGetStoresQuery();
   
-  // State for stores data
-  const [storesData, setStoresData] = useState<{ count: number, stores: any[] }>({ count: 0, stores: [] });
+  const storesData = useSelector((state: RootState) => state.stores);
+
+  console.log(storesData);
+  
   
   // Fetch user data when component mounts or token changes
   useEffect(() => {
@@ -81,11 +83,9 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     const fetchStoresData = async () => {
       try {
         const result = await doGetStores().unwrap();
-          setStoresData({ count: result.count, stores: result.stores });
           dispatch(getStores(result.stores));
         } catch (error) {
           console.error('Failed to fetch stores data:', error);
-          setStoresData({ count: 0, stores: [] });
         }
     };
     
@@ -118,7 +118,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         id: store.id,
         name: store.name,
         logo: store.logo || `/assets/icons/workspaces/logo-1.webp`,
-        plan: store.plan || 'Free',
+        plan: 'Free',
       }))
     : [];
 
@@ -133,7 +133,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           slotProps={{
             container: {
               maxWidth: false,
-              sx: { px: { [layoutQuery]: 5 }, backgroundColor: 'none' },
+              sx: { px: { [layoutQuery]: 5 }, backgroundColor: '#c8dcfd' , borderRadius : 40 , marginTop : 3,marginX : 10, paddingY : 2 },
             },
           }}
           sx={header?.sx}
@@ -274,7 +274,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         ...sx,
       }}
     >
-      <Main>{children}</Main>
+      <Main sx={{bgcolor : 'var(--layout-nav-bg)'}}>{children}</Main>
     </LayoutSection>
   );
 }

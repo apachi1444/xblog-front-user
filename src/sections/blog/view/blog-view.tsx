@@ -8,18 +8,16 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
 
-import { _posts } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
-import { setError, setLoading, setArticles } from 'src/services/slices/articles/articleSlice';
-import { selectAllArticles, selectArticlesLoading } from 'src/services/slices/articles/selectors';
+import { setArticles } from 'src/services/slices/articles/articleSlice';
+import { selectAllArticles } from 'src/services/slices/articles/selectors';
 
 import { Iconify } from 'src/components/iconify';
 import { FullPageLoader } from 'src/components/loader';
 
 import { PostItem } from '../post-item';
 import { PostSort } from '../post-sort';
-import { PostSearch } from '../post-search';
 
 // ----------------------------------------------------------------------
 
@@ -38,25 +36,16 @@ export function BlogView() {
   
   useEffect(() => {
     setIsLoading(true);
-    dispatch(setLoading(true));
-
-    const timeoutId = setTimeout(() => {
-      doGetArticles()
+    doGetArticles()
         .unwrap()
         .then((result) => {
-          dispatch(setArticles(result));
+          const articlesFromApi = result.drafts_articles.concat(result.published_articles);
+          dispatch(setArticles(articlesFromApi));
           setIsLoading(false);
-          dispatch(setLoading(false));
         })
         .catch((err) => {
-          dispatch(setArticles(_posts));
-          dispatch(setError(err.toString()));
-          setIsLoading(false);
-          dispatch(setLoading(false));
+          console.error(err);
         });
-    }, 2000);
-
-    return () => clearTimeout(timeoutId);
   }, [doGetArticles, dispatch]);
   
   useEffect(() => {

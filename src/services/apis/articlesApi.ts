@@ -4,26 +4,39 @@ import { api } from '.';
 
 const ARTICLES_BASE_URL = '/articles';
 
+// Interface for article query parameters
+interface ArticleQueryParams {
+  store_id?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+// Updated response interface to match the API
+interface ArticlesResponse {
+  count: number;
+  drafts_articles: Article[];
+  published_articles: Article[];
+}
+
 export const articlesApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getArticles: builder.query<Article[], void>({
-      query: () => ({
-        url: `${ARTICLES_BASE_URL}/`,
+    // Get all articles with optional filtering by store_id
+    getArticles: builder.query<ArticlesResponse, ArticleQueryParams | void>({
+      query: (params) => ({
+        url: `/all${ARTICLES_BASE_URL}/${params?.store_id ?? 1}`,
         method: 'GET',
+        params: params || {},
       }),
     }),
-    getArticlesByStore: builder.query<Article[], string>({
-      query: (storeId) => ({
-        url: `${ARTICLES_BASE_URL}/store/${storeId}`,
-        method: 'GET',
-      }),
-    }),
+    
     getArticleById: builder.query<Article, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'GET',
       }),
     }),
+    
     createArticle: builder.mutation<Article, Partial<Article>>({
       query: (article) => ({
         url: ARTICLES_BASE_URL,
@@ -31,6 +44,7 @@ export const articlesApi = api.injectEndpoints({
         body: article,
       }),
     }),
+    
     updateArticle: builder.mutation<Article, Partial<Article> & { id: string }>({
       query: ({ id, ...article }) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
@@ -38,6 +52,7 @@ export const articlesApi = api.injectEndpoints({
         body: article,
       }),
     }),
+    
     deleteArticle: builder.mutation<void, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
@@ -50,7 +65,6 @@ export const articlesApi = api.injectEndpoints({
 export const {
   useGetArticlesQuery,
   useLazyGetArticlesQuery,
-  useGetArticlesByStoreQuery,
   useGetArticleByIdQuery,
   useCreateArticleMutation,
   useUpdateArticleMutation,

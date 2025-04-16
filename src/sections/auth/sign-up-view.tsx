@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
+import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
@@ -13,24 +14,77 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { useSignUpMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
+
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { LanguageSwitcher } from 'src/components/language-switcher/LanguageSwitcher';
+import { GoogleLogin } from '@react-oauth/google';
 
 export function SignUpView() {
   const { t } = useTranslation();
   const router = useRouter();
+  const dispatch = useDispatch();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=default', // Default avatar
+  });
+  
+  // UI state
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch()
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+  const [alertMessage, setAlertMessage] = useState('');
+  
+  // RTK Query hook for sign up
+  const [signUp, { isLoading }] = useSignUpMutation();
 
-  const handleSignIn = useCallback(() => {
-    router.push('/');
-  }, [router]);
+  // Add Google auth mutation
+  const [googleAuth, { isLoading: isGoogleLoading }] = useGoogleAuthMutation();
+  
+  // Update loading state to include Google loading
+  const loading = isLoading || isGoogleLoading;
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-  const handleSignUp = useCallback(() => {
-    router.push('/sign-up');
-  }, [router]);
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.password) {
+      setAlertType('error');
+      setAlertMessage('Please fill in all required fields');
+      setShowAlert(true);
+      return;
+    }
+    
+    try {
+      // Call the sign up API
+      await signUp(formData).unwrap();
+      
+      // Show success message
+      setAlertType('success');
+      setAlertMessage('Account created successfully! Redirecting to login...');
+      setShowAlert(true);
+      
+      // Redirect to sign in page after a delay
+      setTimeout(() => {
+        router.push('/sign-in');
+      }, 2000);
+    } catch (error) {
+      console.error('Sign up error:', error);
+      setAlertType('error');
+      setAlertMessage('Failed to create account. Please try again.');
+      setShowAlert(true);
+    }
+  };
 
   const handleNavigateToSignIn = useCallback(() => {
     router.push('/sign-in');
@@ -82,148 +136,180 @@ export function SignUpView() {
             {t('auth.signup.subtitle')}
           </Typography>
         
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
-          {t('auth.signup.haveAccount')}
-          <Link variant="subtitle2" 
-            sx={{ 
-              ml: 0.5,
-              cursor: 'pointer',
-              '&:hover': {
-                textDecoration: 'underline',
-                opacity: 'revert'
-              } 
-            }} 
-            onClick={handleNavigateToSignIn}>
-            {t('auth.signin.title')}
-          </Link>
-        </Typography>
-      </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+            {t('auth.signup.haveAccount')}
+            <Link variant="subtitle2" 
+              sx={{ 
+                ml: 0.5,
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                  opacity: 'revert'
+                } 
+              }} 
+              onClick={handleNavigateToSignIn}>
+              {t('auth.signin.title')}
+            </Link>
+          </Typography>
+        </Box>
 
-      {/* Updated form with simplified fields */}
-      <Box display="flex" flexDirection="column" gap={3} sx={{ width: '100%' }}>
-        <TextField
-          fullWidth
-          name="fullName"
-          label={t('auth.signup.fullName')}
-          placeholder={t('auth.signup.fullNamePlaceholder')}
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="ic:round-person" />
-              </InputAdornment>
-            ),
-          }}
-        />
+        {/* Alert for success/error messages */}
+        {showAlert && (
+          <Alert 
+            severity={alertType} 
+            sx={{ mb: 3 }}
+            onClose={() => setShowAlert(false)}
+          >
+            {alertMessage}
+          </Alert>
+        )}
 
-        <TextField
-          fullWidth
-          name="email"
-          label={t('auth.signup.email')}
-          placeholder={t('auth.signup.emailPlaceholder')}
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="ic:round-email" />
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <TextField
-          fullWidth
-          name="password"
-          label={t('auth.signup.password')}
-          type={showPassword ? 'text' : 'password'}
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="mdi:password-outline" />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <TextField
-          fullWidth
-          name="confirmPassword"
-          label={t('auth.signup.confirmPassword')}
-          type={showPassword ? 'text' : 'password'}
-          InputLabelProps={{ shrink: true }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="mdi:password-check" />
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <LoadingButton
-          fullWidth
-          size="large"
-          type="submit"
-          variant="contained"
-          onClick={handleSignUp}
-          sx={{ mt: 2 }}
+        {/* Updated form with simplified fields */}
+        <Box 
+          component="form" 
+          onSubmit={handleSignUp}
+          display="flex" 
+          flexDirection="column" 
+          gap={3} 
+          sx={{ width: '100%' }}
         >
-          {t('auth.signup.createAccount')}
-        </LoadingButton>
+          <TextField
+            fullWidth
+            name="name"
+            label={t('auth.signup.fullName')}
+            placeholder={t('auth.signup.fullNamePlaceholder')}
+            value={formData.name}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="ic:round-person" />
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        <Typography variant="body2" color="text.secondary" align="center">
-          {t('auth.signup.termsPrefix')}{' '}
-          <Link href="#" variant="subtitle2">
-            {t('auth.signup.termsOfService')}
-          </Link>{' '}
-          {t('auth.signup.and')}{' '}
-          <Link href="#" variant="subtitle2">
-            {t('auth.signup.privacyPolicy')}
-          </Link>
-        </Typography>
+          <TextField
+            fullWidth
+            name="email"
+            label={t('auth.signup.email')}
+            placeholder={t('auth.signup.emailPlaceholder')}
+            value={formData.email}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="ic:round-email" />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <TextField
+            fullWidth
+            name="password"
+            label={t('auth.signup.password')}
+            placeholder="*******"
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="ic:round-lock" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                    <Iconify icon={showPassword ? 'ic:round-visibility' : 'ic:round-visibility-off'} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <LoadingButton
+            fullWidth
+            size="large"
+            type="submit"
+            variant="contained"
+            color="primary"
+            loading={isLoading}
+            sx={{ mt: 2 }}
+          >
+            {t('auth.signup.createAccount')}
+          </LoadingButton>
+
+          <Divider sx={{ my: 2 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {t('auth.signup.or')}
+            </Typography>
+          </Divider>
+
+          {/* Google Sign Up Button */}
+          <Box sx={{ width: '100%' }}>
+            <LoadingButton
+              fullWidth
+              size="large"
+              variant="outlined"
+              color="inherit"
+              startIcon={<Iconify icon="flat-color-icons:google" />}
+              onClick={() => {
+                // This will be handled by the GoogleLogin component
+              }}
+              sx={{
+                borderColor: (theme) => theme.palette.divider,
+                '&:hover': {
+                  bgcolor: 'background.neutral',
+                },
+              }}
+            >
+              {t('auth.signup.signupWithGoogle')}
+            </LoadingButton>
+            
+            {/* Google OAuth Component (hidden but functional) */}
+            <Box sx={{ position: 'absolute', visibility: 'hidden' }}>
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    // Call the Google auth endpoint with the token
+                    googleAuth(credentialResponse.credential)
+                      .unwrap()
+                      .then((response) => {
+                        // Show success message
+                        setAlertType('success');
+                        setAlertMessage('Account created successfully! Redirecting...');
+                        setShowAlert(true);
+                        
+                        // Redirect to dashboard after a delay
+                        setTimeout(() => {
+                          router.push('/');
+                        }, 2000);
+                      })
+                      .catch((error) => {
+                        console.error('Google sign up error:', error);
+                        setAlertType('error');
+                        setAlertMessage('Failed to sign up with Google. Please try again.');
+                        setShowAlert(true);
+                      });
+                  }
+                }}
+                onError={() => {
+                  setAlertType('error');
+                  setAlertMessage('Google sign up failed. Please try again.');
+                  setShowAlert(true);
+                }}
+              />
+            </Box>
+          </Box>
+          
+          {/* Social login buttons can be added here */}
+        </Box>
       </Box>
-
-      <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
-        >
-          {t('auth.signup.orContinueWith')}
-        </Typography>
-      </Divider>
-
-      <Box gap={1} display="flex" justifyContent="center">
-        <LoadingButton 
-          fullWidth
-          size="large"
-          variant="outlined"
-          color="primary"
-          onClick={() => handleSignIn()}
-          disabled={loading}
-          startIcon={<Iconify icon="logos:google-icon" />}
-          sx={{
-            borderRadius: '8px',
-            py: 1.5,
-            justifyContent: 'center',
-            borderColor: 'primary.main',
-            '&:hover': {
-              borderColor: 'primary.dark',
-              opacity: 'revert'
-            }
-          }}
-        >
-          {t('auth.signup.signupWithGoogle')}
-        </LoadingButton>
-      </Box>
-    </Box>
     </Box>
   );
 }

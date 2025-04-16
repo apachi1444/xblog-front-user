@@ -8,9 +8,9 @@
     "contrastText": "#FFFFFF"
   },
   "secondary": {
-    "lighter": "#A5C8FD",
-    "light": "#66A4FA",
-    "main": "#3B82F7",
+    "lighter": "#c8dcfd",
+    "light": "#c8dcfd",
+    "main": "#c8dcfd",
     "dark": "#2A65C4",
     "darker": "#1E4A8F",
     "contrastText": "#FFFFFF"

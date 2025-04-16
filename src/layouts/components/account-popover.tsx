@@ -89,9 +89,6 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     
   }, [dispatch, router, handleClosePopover]);
 
-  console.log(user);
-  
-
   return (
     <>
       <IconButton

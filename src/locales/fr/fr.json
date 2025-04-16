@@ -9,7 +9,7 @@
         "fullNamePlaceholder": "Jean Dupont",
         "email": "Adresse Email",
         "emailPlaceholder": "jean.dupont@creative.com",
-        "password": "Créer un Mot de Passe",
+        "password": "Mot de Passe",
         "confirmPassword": "Confirmer le Mot de Passe",
         "createAccount": "Créer un Compte",
         "termsPrefix": "En vous inscrivant, vous acceptez nos",

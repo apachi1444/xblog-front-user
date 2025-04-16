@@ -354,7 +354,11 @@ export function SEODashboard({
             sx={{ ml: showContent ? 0.5 : 0 }}
             onClick={handleToggleContent}
           >
-            <Menu fontSize="small" />
+            {showContent ? (
+              <Iconify icon="material-symbols:zoom-in-map-rounded" fontSize="medium" />
+            ) : (
+              <Iconify icon="material-symbols:zoom-out-map-rounded" fontSize="medium" />
+            )}
           </IconButton>
           
           {showContent && (

@@ -9,7 +9,7 @@
           "fullNamePlaceholder": "John Doe",
           "email": "Email Address",
           "emailPlaceholder": "john.doe@creative.com",
-          "password": "Create Password",
+          "password": "Password",
           "confirmPassword": "Confirm Password",
           "createAccount": "Create Account",
           "termsPrefix": "By signing up, you agree to our",
@@ -17,7 +17,8 @@
           "and": "and",
           "privacyPolicy": "Privacy Policy",
           "orContinueWith": "OR CONTINUE WITH",
-          "signupWithGoogle": "Sign up with Google"
+          "signupWithGoogle": "Sign up with Google",
+          "or":"OR"
         },
         "signin": {
           "title": "Sign In"
