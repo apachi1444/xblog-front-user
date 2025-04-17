@@ -178,7 +178,8 @@ export function Step1ContentSetup({
           keywords = response.data;
         } else if (response.data.keywords && Array.isArray(response.data.keywords)) {
           // If response.data has a keywords property that is an array
-          keywords = response.data.keywords;
+          const { keywords: extractedKeywords } = response.data;
+          keywords = extractedKeywords;
         } else if (typeof response.data === 'object') {
           // If response.data is an object with other structure
           // Try to extract any array or convert object values to array
@@ -193,12 +194,11 @@ export function Step1ContentSetup({
           }
         }
         
-        // Filter out any empty strings and ensure unique values
-        const validKeywords = [...new Set(keywords.filter(k => k && typeof k === 'string' && k.trim() !== ''))];
+        const validKeywords = [...new Set(keywords.filter((k: unknown) => k && typeof k === 'string' && k.trim() !== ''))];
         
         if (validKeywords.length > 0) {
           // Use the setter function to update the state
-          setSecondaryKeywords(validKeywords);
+          setSecondaryKeywords(validKeywords as string[]);
         } else {
           // Fallback with some default keywords based on the primary keyword
           const fallbackKeywords = [
