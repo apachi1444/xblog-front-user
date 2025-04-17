@@ -16,7 +16,9 @@ import {
 interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
   label: string;
   tooltipText?: string;
+  tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end';
   icon?: React.ReactNode;
+  endComponent?: React.ReactNode;
   error?: boolean;
   helperText?: React.ReactNode;
 }
@@ -24,7 +26,9 @@ interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
 export function FormInput({ 
   label, 
   tooltipText, 
+  tooltipPlacement = 'top',
   icon,
+  endComponent,
   error,
   helperText,
   ...textFieldProps 
@@ -47,7 +51,7 @@ export function FormInput({
             {label}
           </Typography>
           {tooltipText && (
-            <Tooltip title={tooltipText}>
+            <Tooltip title={tooltipText} placement={tooltipPlacement}>
               <Box component="span" sx={{ display: 'inline-flex', cursor: 'pointer' }}>
                 <HelpCircle size={16} color={error ? theme.palette.error.main : theme.palette.primary.main} />
               </Box>
@@ -55,26 +59,33 @@ export function FormInput({
           )}
         </Box>
 
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          error={error}
-          InputProps={{
-            startAdornment: icon,
-            sx: {
-              minHeight: theme.spacing(6.25), // 50px equivalent using theme spacing
-              bgcolor: theme.palette.background.paper,
-              borderRadius: theme.shape.borderRadius / 8,
-              border: `0.5px solid ${error ? theme.palette.error.main : theme.palette.primary.main}`,
-              fontSize: theme.typography.button.fontSize,
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: 'none'
+        {/* Input field with end component layout */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            variant="outlined"
+            error={error}
+            InputProps={{
+              startAdornment: icon,
+              sx: {
+                minHeight: theme.spacing(6.25), // 50px equivalent using theme spacing
+                bgcolor: theme.palette.background.paper,
+                borderRadius: theme.shape.borderRadius / 8,
+                border: `0.5px solid ${error ? theme.palette.error.main : theme.palette.primary.main}`,
+                fontSize: theme.typography.button.fontSize,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  border: 'none'
+                }
               }
-            }
-          }}
-          {...textFieldProps}
-        />
+            }}
+            {...textFieldProps}
+          />
+          
+          {/* End component positioned outside the TextField */}
+          {endComponent}
+        </Box>
+        
         {helperText && (
           <FormHelperText>{helperText}</FormHelperText>
         )}

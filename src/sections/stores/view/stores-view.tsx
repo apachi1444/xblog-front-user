@@ -158,6 +158,10 @@ export function StoresView() {
           color="inherit"
           onClick={handleAddNewStore}
           startIcon={<Iconify icon="mingcute:add-line" />}
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'text.light',
+          }}
         >
           New website
         </Button>

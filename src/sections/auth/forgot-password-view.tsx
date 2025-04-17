@@ -45,6 +45,7 @@ export function ForgotPasswordView() {
     <Box
       sx={{
         p: 3,
+        mx: 'auto',
         borderRadius: 2,
         boxShadow: (theme) => theme.customShadows.z16,
         bgcolor: 'background.paper'

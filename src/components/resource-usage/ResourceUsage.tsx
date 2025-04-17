@@ -48,7 +48,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
               fontWeight: 500,
             }}
           >
-            Stores
+            Websites
           </Typography>
           <Typography 
             variant={compact ? "caption" : "body2"} 
@@ -94,7 +94,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
             fontSize: compact ? '0.7rem' : '0.75rem'
           }}
         >
-          {storesRemaining} stores remaining
+          {storesRemaining} websites remaining
         </Typography>
       </Box>
       

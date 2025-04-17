@@ -10,12 +10,12 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
-import { Fade, Snackbar } from "@mui/material";
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { Fade, Snackbar, CircularProgress } from "@mui/material";
 
 import { useRouter } from 'src/routes/hooks';
 
@@ -152,6 +152,7 @@ export function SignInView() {
     <Box
       sx={{
         p: 3,
+        mx : 'auto',
         borderRadius: 2,
         boxShadow: (theme) => theme.customShadows.z16,
         bgcolor: 'background.paper'
@@ -246,7 +247,7 @@ export function SignInView() {
           type="submit"
           variant="contained"
           color="primary"
-          loading={isLoginLoading}
+          loading={loading}
           sx={{ mb: 2 }}
         >
           Sign In
@@ -260,20 +261,15 @@ export function SignInView() {
       </Divider>
 
       {loading ? (
-        <LoadingButton
-          fullWidth
-          size="large"
-          variant="outlined"
-          color="primary"
-          sx={{ 
-            borderRadius: '8px',
-            py: 1.5,
-            justifyContent: 'center',
-            borderColor: 'primary.main',
-          }}
-        >
-          Sign in with Google
-        </LoadingButton>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: 48,
+          width: '100%'
+        }}>
+          <CircularProgress size={24} color="primary" />
+        </Box>
       ) : (
         <GoogleLogin
           onSuccess={handleGoogleSuccess}

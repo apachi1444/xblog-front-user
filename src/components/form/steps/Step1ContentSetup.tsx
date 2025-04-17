@@ -1,13 +1,13 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
-import { Box, Grid, Stack, Button, Typography, CircularProgress } from '@mui/material';
+import { Box , Grid, Stack, Button, Tooltip, Typography, CircularProgress } from '@mui/material';
 
-import { Iconify } from 'src/components/iconify';
-
+import { Iconify } from 'src/components/iconify'; // Add axios import for API calls
 import { FormInput } from '../FormInput';
 import { FormDropdown } from '../FormDropdown';
-import { FormContainer } from '../FormContainer';
+import { FormContainer } from '../FormContainer'; // Import Tooltip
 
 interface Step1Props {
   primaryKeyword: string;
@@ -43,6 +43,8 @@ interface Step1Props {
   contentDescription: string;
   setContentDescription: (value: string) => void;
   onNextStep?: () => void;
+  handleGenerateSecondaryKeywords?: () => void; // Make this optional since we'll implement it internally
+  isGeneratingSecondaryKeywords?: boolean; // Make this optional since we'll track it internally
 }
 
 export function Step1ContentSetup({
@@ -80,6 +82,8 @@ export function Step1ContentSetup({
   contentDescription,
   setContentDescription,
   onNextStep,
+  handleGenerateSecondaryKeywords, // Keep this prop for backward compatibility
+  isGeneratingSecondaryKeywords: externalIsGeneratingSecondaryKeywords, // Rename to avoid conflict
 }: Step1Props) {
   const theme = useTheme();
   
@@ -89,6 +93,9 @@ export function Step1ContentSetup({
     primaryKeyword: false,
     secondaryKeywords: false
   });
+  
+  // Add internal state for secondary keywords generation
+  const [isGeneratingSecondaryKeywords, setIsGeneratingSecondaryKeywords] = useState(false);
   
   // Update error states when input values change
   React.useEffect(() => {
@@ -139,6 +146,112 @@ export function Step1ContentSetup({
     }
   };
   
+  // Implement the secondary keywords generation function
+  const generateSecondaryKeywords = async () => {
+    // Use the external handler if provided
+    if (handleGenerateSecondaryKeywords) {
+      handleGenerateSecondaryKeywords();
+      return;
+    }
+    
+    // Otherwise, implement our own logic
+    setIsGeneratingSecondaryKeywords(true);
+    
+    try {
+      // Simulate a slight delay for smoother animation (remove if using real API)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Example API call - replace with your actual API endpoint
+      const response = await axios.post('/api/generate-keywords', {
+        primaryKeyword,
+        language,
+        targetCountry
+      });
+      
+      // Update the secondary keywords with the response
+      if (response.data) {
+        // Handle different possible response structures
+        let keywords = [];
+        
+        if (Array.isArray(response.data)) {
+          // If response.data is directly an array
+          keywords = response.data;
+        } else if (response.data.keywords && Array.isArray(response.data.keywords)) {
+          // If response.data has a keywords property that is an array
+          keywords = response.data.keywords;
+        } else if (typeof response.data === 'object') {
+          // If response.data is an object with other structure
+          // Try to extract any array or convert object values to array
+          const possibleKeywords = Object.values(response.data).find(val => Array.isArray(val));
+          if (possibleKeywords) {
+            keywords = possibleKeywords;
+          } else {
+            // As a fallback, if we can't find an array, create one from the response
+            keywords = Object.values(response.data)
+              .filter(val => typeof val === 'string')
+              .map(val => val.toString());
+          }
+        }
+        
+        // Filter out any empty strings and ensure unique values
+        const validKeywords = [...new Set(keywords.filter(k => k && typeof k === 'string' && k.trim() !== ''))];
+        
+        if (validKeywords.length > 0) {
+          // Use the setter function to update the state
+          setSecondaryKeywords(validKeywords);
+        } else {
+          // Fallback with some default keywords based on the primary keyword
+          const fallbackKeywords = [
+            `${primaryKeyword} guide`, 
+            `best ${primaryKeyword}`, 
+            `${primaryKeyword} tips`,
+            `${primaryKeyword} tutorial`,
+            `${primaryKeyword} examples`
+          ];
+          setSecondaryKeywords(fallbackKeywords);
+        }
+      } else {
+        // If no data is returned, use fallback keywords
+        const fallbackKeywords = [
+          `${primaryKeyword} guide`, 
+          `best ${primaryKeyword}`, 
+          `${primaryKeyword} tips`,
+          `${primaryKeyword} tutorial`,
+          `${primaryKeyword} examples`
+        ];
+        setSecondaryKeywords(fallbackKeywords);
+      }
+    } catch (error) {
+      console.error('Error generating secondary keywords:', error);
+      // Fallback with some default keywords based on the primary keyword
+      const fallbackKeywords = [
+        `${primaryKeyword} guide`, 
+        `best ${primaryKeyword}`, 
+        `${primaryKeyword} tips`,
+        `${primaryKeyword} tutorial`,
+        `${primaryKeyword} examples`
+      ];
+      setSecondaryKeywords(fallbackKeywords);
+    } finally {
+      // Add a small delay before removing the loading state for smoother transition
+      setTimeout(() => {
+        setIsGeneratingSecondaryKeywords(false);
+      }, 300);
+    }
+  };
+  
+  // New handler for generating secondary keywords with validation
+  const handleGenerateSecondaryKeywordsWithValidation = () => {
+    // Only need primary keyword for this action
+    const primaryKeywordValid = !!primaryKeyword;
+    setErrors(prev => ({ ...prev, primaryKeyword: !primaryKeywordValid }));
+
+    if (primaryKeywordValid) {
+      console.log('Generating secondary keywords for:', primaryKeyword);
+      generateSecondaryKeywords();
+    }
+  };
+  
   // Data for country options
   const countries = [
     { value: "us", label: "English (US)" },
@@ -152,6 +265,9 @@ export function Step1ContentSetup({
     { value: "en-gb", label: "English (UK)" },
     { value: "fr-fr", label: "French"}
   ];
+
+  // Determine which loading state to use
+  const isLoadingSecondaryKeywords = externalIsGeneratingSecondaryKeywords || isGeneratingSecondaryKeywords;
 
   return (
     <Grid container spacing={1}>
@@ -198,42 +314,109 @@ export function Step1ContentSetup({
           
           {/* Secondary Keywords */}
           <Box sx={{ width: '100%' }}>  
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}> {/* Changed alignItems */}
               <FormInput
                 label='Secondary Keywords'
-                placeholder="Add secondary keywords"
-                tooltipText='Secondary keywords'
+                placeholder="Add secondary keywords manually or generate with AI" // Updated placeholder
+                tooltipText='Add relevant secondary keywords to improve SEO ranking' // Updated tooltip
                 value={secondaryKeyword}
                 onChange={(e) => setSecondaryKeyword(e.target.value)}
                 onKeyPress={handleKeyPress}
                 fullWidth
-                error={errors.secondaryKeywords}
-                helperText={errors.secondaryKeywords ? "At least one secondary keyword is required" : ""}
+                error={errors.secondaryKeywords && secondaryKeywords.length === 0} // Show error only if empty and touched
+                helperText={errors.secondaryKeywords && secondaryKeywords.length === 0 ? "Add or generate at least one secondary keyword" : ""} // Updated helper text
+                sx={{ flexGrow: 1 }}
+                endComponent={
+                  <Tooltip title="Add keyword manually">
+                  <Box 
+                    onClick={handleAddKeyword}
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      width: theme.spacing(6.25),
+                      height: theme.spacing(6.25),
+                      borderRadius: theme.shape.borderRadius / 6,
+                      cursor: 'pointer',
+                      flexShrink: 0, // Prevent shrinking
+                      '&:hover': {
+                        bgcolor: theme.palette.primary.dark,
+                      }
+                    }}
+                  >
+                    <Box component="span" sx={{ fontSize: theme.typography.pxToRem(18), fontWeight: 'bold' }}>+</Box>
+                  </Box>
+                </Tooltip> 
+                }
               />
-              <Box 
-                onClick={handleAddKeyword}
-                sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  mt: 2.5,
-                  bgcolor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  width: theme.spacing(6.25),
-                  height: theme.spacing(6.25),
-                  borderRadius: theme.shape.borderRadius / 6,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: theme.palette.primary.dark,
-                  }
-                }}
-              >
-                <Box component="span" sx={{ fontSize: theme.typography.pxToRem(18), fontWeight: 'bold' }}>+</Box>
-              </Box>
             </Box>
+
+            {/* AI Suggestion Button - Conditionally Rendered */}
+            {primaryKeyword && (secondaryKeywords.length === 0 || isLoadingSecondaryKeywords) && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1, minHeight: theme.spacing(4) }}>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={handleGenerateSecondaryKeywordsWithValidation}
+                  disabled={isLoadingSecondaryKeywords}
+                  startIcon={
+                    isLoadingSecondaryKeywords ? 
+                    <CircularProgress 
+                      size={16} 
+                      color="inherit" 
+                      sx={{ 
+                        animation: 'spin 1.2s linear infinite',
+                        '@keyframes spin': {
+                          '0%': { transform: 'rotate(0deg)' },
+                          '100%': { transform: 'rotate(360deg)' }
+                        }
+                      }} 
+                    /> : 
+                    <Iconify icon="eva:sparkle-fill" width={16} />
+                  }
+                  sx={{ 
+                    borderRadius: theme.spacing(3),
+                    borderColor : theme.palette.secondary.dark,
+                    textTransform: 'none',
+                    fontSize: theme.typography.pxToRem(12),
+                    transition: 'all 0.3s ease',
+                    opacity: isLoadingSecondaryKeywords ? 0.8 : 1,
+                    color: theme.palette.secondary.dark,
+                    '&:hover': {
+                      color: theme.palette.secondary.dark,
+                    },
+                  }}
+                >
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'inherit',
+                      fontWeight: 500
+                    }}
+                  >
+                    {isLoadingSecondaryKeywords ? 'Generating Suggestions...' : 'Generate Suggestions with AI'}
+                  </Typography>
+                </Button>
+              </Box>
+            )}
             
             {/* Display secondary keywords as chips */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: 1, 
+                mt: 1.5,
+                minHeight: secondaryKeywords.length > 0 ? 'auto' : 0,
+                maxHeight: secondaryKeywords.length > 0 ? '200px' : 0,
+                opacity: secondaryKeywords.length > 0 ? 1 : 0,
+                overflow: 'auto',
+                transition: 'all 0.3s ease-in-out',
+              }}
+            >
               {secondaryKeywords.map((keyword, index) => (
                 <Box
                   key={index}
@@ -246,6 +429,11 @@ export function Step1ContentSetup({
                     py: 0.5,
                     px: 1.5,
                     fontSize: theme.typography.pxToRem(12),
+                    animation: `fadeIn 0.3s ease-in-out ${index * 0.05}s both`,
+                    '@keyframes fadeIn': {
+                      '0%': { opacity: 0, transform: 'translateY(5px)' },
+                      '100%': { opacity: 1, transform: 'translateY(0)' }
+                    }
                   }}
                 >
                   {keyword}
@@ -258,6 +446,9 @@ export function Step1ContentSetup({
                       justifyContent: 'center',
                       ml: 0.5,
                       cursor: 'pointer',
+                      fontSize: theme.typography.pxToRem(14), // Slightly larger close icon
+                      lineHeight: 1,
+                      transition: 'opacity 0.2s ease',
                       '&:hover': { opacity: 0.7 }
                     }}
                   >

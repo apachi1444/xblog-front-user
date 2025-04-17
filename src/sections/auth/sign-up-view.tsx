@@ -1,6 +1,7 @@
 import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GoogleLogin } from '@react-oauth/google';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -19,12 +20,10 @@ import { useSignUpMutation, useGoogleAuthMutation } from 'src/services/apis/auth
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { LanguageSwitcher } from 'src/components/language-switcher/LanguageSwitcher';
-import { GoogleLogin } from '@react-oauth/google';
 
 export function SignUpView() {
   const { t } = useTranslation();
   const router = useRouter();
-  const dispatch = useDispatch();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -96,24 +95,12 @@ export function SignUpView() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh',
         width: '100%',
         padding: 2,
         overflow: 'auto',
         position: 'relative',
       }}
-    >
-      {/* Add language switcher in the top-right corner */}
-      <Box
-        sx={{
-          position: 'absolute', 
-          top: 16, 
-          right: 16
-        }}
-      >
-        <LanguageSwitcher />
-      </Box>
-      
+    > 
       <Box
         sx={{
           p: { xs: 2, sm: 3 },
@@ -244,7 +231,7 @@ export function SignUpView() {
             {t('auth.signup.createAccount')}
           </LoadingButton>
 
-          <Divider sx={{ my: 2 }}>
+          <Divider>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {t('auth.signup.or')}
             </Typography>

@@ -176,7 +176,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 >
                   <Iconify 
-                    icon={isDarkMode ? 'solar:sun-bold-duotone' : 'solar:moon-bold-duotone'} 
+                    icon={isDarkMode ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'} 
                     width={24} 
                     height={24}
                     sx={{
@@ -193,22 +193,22 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     {
                       label: 'Home',
                       href: '/',
-                      icon: <Iconify width={22} icon="solar:home-angle-bold-duotone" />,
+                      icon: <Iconify width={22} icon="material-symbols:home-outline-rounded" />,
                     },
                     {
                       label: 'Profile',
                       href: '/profile',
-                      icon: <Iconify width={22} icon="solar:shield-keyhole-bold-duotone" />,
+                      icon: <Iconify width={22} icon="material-symbols:supervised-user-circle-outline" />,
                     },
                     {
                       label: 'Settings',
                       href: '/settings',
-                      icon: <Iconify width={22} icon="solar:settings-bold-duotone" />,
+                      icon: <Iconify width={22} icon="material-symbols:settings-outline" />,
                     },
                     {
                       label: 'My websites',
                       href: '/stores',
-                      icon: <Iconify width={22} icon="solar:cart-bold-duotone" />,
+                      icon: <Iconify width={22} icon="material-symbols:storefront-outline-sharp" />,
                     },
                   ]}
                 />
@@ -228,7 +228,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           bottomNavData={bottomNavData}
           emptyStoresAction={
             storesData.count === 0 ? (
-              <Box sx={{ p: 2 }}>
+              <Box>
                 <Button
                   fullWidth
                   variant="contained"
@@ -236,13 +236,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   startIcon={<Iconify icon="solar:add-circle-bold" />}
                   onClick={handleAddNewWebsite}
                   sx={{
-                    py: 1,
-                    mt: 1,
+                    py: 2,
+                    my: 2,
                     borderRadius: 1,
                     boxShadow: theme.shadows[3],
-                    '&:hover': {
-                      boxShadow: theme.shadows[6],
-                    },
                   }}
                 >
                   Add New Website

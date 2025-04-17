@@ -44,6 +44,7 @@ export function BlogView() {
           setIsLoading(false);
         })
         .catch((err) => {
+          setIsLoading(false);
           console.error(err);
         });
   }, [doGetArticles, dispatch]);
