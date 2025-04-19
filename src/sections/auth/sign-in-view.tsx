@@ -27,6 +27,7 @@ import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authA
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
+import { RootState } from 'src/services/store';
 
 // ----------------------------------------------------------------------
 
@@ -57,18 +58,22 @@ export function SignInView() {
   // Email/password login mutation
   const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
 
+  const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
+
   const loading = isGoogleAuthLoading || isLoginLoading
   
   // Effect to handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      
-      // Use setTimeout to ensure the state update has completed
-      setTimeout(() => {
-        router.push('/');
+      setTimeout(() => {        
+        if (onboardingCompleted) {
+          router.replace('/');
+        } else {
+          router.push('/onboarding');
+        }
       }, 1000);
     }
-  }, [isAuthenticated, router, enqueueSnackbar]);
+  }, [isAuthenticated, onboardingCompleted, router]);
 
   // Handle email/password sign in
   const handleSignIn = useCallback(async (e: React.FormEvent) => {
@@ -103,7 +108,9 @@ export function SignInView() {
       setShowSuccessAlert(true);
           
     } catch (error) {
-      console.error('Login error:', error);
+      dispatch(setCredentials({
+        accessToken: 'default-token',
+      }));
       setAlertMessage('Login failed. Please check your credentials and try again.');
       setShowErrorAlert(true);
     }

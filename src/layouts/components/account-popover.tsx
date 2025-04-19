@@ -209,11 +209,6 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Box>
         </Box>
         
-        {/* Resource Usage Stats */}
-        <Box sx={{ px: 3, py: 2 }}>
-          <ResourceUsage compact />
-        </Box>
-        
         <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
 
         <Box sx={{ p: 2 }}>

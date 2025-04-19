@@ -1,6 +1,7 @@
 import type { ColorSystemOptions } from '@mui/material/styles';
 
 import COLORS from './colors.json';
+import DARK_COLORS from './dark-colors.json';
 import { varAlpha, createPaletteChannel } from '../styles';
 
 // ----------------------------------------------------------------------
@@ -58,27 +59,35 @@ export type ColorType = 'primary' | 'secondary' | 'info' | 'success' | 'warning'
 
 // Grey
 export const grey = createPaletteChannel(COLORS.grey);
+export const darkGrey = createPaletteChannel(DARK_COLORS.grey);
 
 // Primary
 export const primary = createPaletteChannel(COLORS.primary);
+export const darkPrimary = createPaletteChannel(DARK_COLORS.primary);
 
 // Secondary
 export const secondary = createPaletteChannel(COLORS.secondary);
+export const darkSecondary = createPaletteChannel(DARK_COLORS.secondary);
 
 // Info
 export const info = createPaletteChannel(COLORS.info);
+export const darkInfo = createPaletteChannel(DARK_COLORS.info);
 
 // Success
 export const success = createPaletteChannel(COLORS.success);
+export const darkSuccess = createPaletteChannel(DARK_COLORS.success);
 
 // Warning
 export const warning = createPaletteChannel(COLORS.warning);
+export const darkWarning = createPaletteChannel(DARK_COLORS.warning);
 
 // Error
 export const error = createPaletteChannel(COLORS.error);
+export const darkError = createPaletteChannel(DARK_COLORS.error);
 
 // Common
 export const common = createPaletteChannel(COLORS.common);
+export const darkCommon = createPaletteChannel(DARK_COLORS.common);
 
 // Text
 export const text = {
@@ -86,6 +95,11 @@ export const text = {
     primary: grey[800],
     secondary: grey[600],
     disabled: grey[500],
+  }),
+  dark: createPaletteChannel({
+    primary: '#FFFFFF',
+    secondary: '#A0A0A0',
+    disabled: '#6B7280',
   }),
 };
 
@@ -95,6 +109,11 @@ export const background = {
     paper: '#FFFFFF',
     default: grey[100],
     neutral: grey[200],
+  }),
+  dark: createPaletteChannel({
+    paper: '#18191A',  // Dark color for paper in dark mode
+    default: '#0A0A0A',
+    neutral: '#212223',
   }),
 };
 
@@ -111,6 +130,7 @@ export const baseAction = {
 
 export const action = {
   light: { ...baseAction, active: grey[600] },
+  dark: { ...baseAction, active: grey[300] },
 };
 
 /*
@@ -129,6 +149,18 @@ export const basePalette = {
   action,
 };
 
+export const baseDarkPalette = {
+  primary: darkPrimary,
+  secondary: darkSecondary,
+  info: darkInfo,
+  success: darkSuccess,
+  warning: darkWarning,
+  error: darkError,
+  grey: darkGrey,
+  common: darkCommon,
+  divider: varAlpha(darkGrey['500Channel'], 0.2), 
+}
+
 export const lightPalette = {
   ...basePalette,
   text: text.light,
@@ -136,8 +168,16 @@ export const lightPalette = {
   action: action.light,
 };
 
+export const darkPalette = {
+  ...baseDarkPalette,
+  text: text.dark,
+  background: background.dark,
+  action: action.dark,
+};
+
 // ----------------------------------------------------------------------
 
-export const colorSchemes: Partial<Record<'light', ColorSystemOptions>> = {
+export const colorSchemes: Partial<Record<'light' | 'dark', ColorSystemOptions>> = {
   light: { palette: lightPalette },
+  dark: { palette: darkPalette },
 };

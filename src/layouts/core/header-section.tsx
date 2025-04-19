@@ -41,7 +41,7 @@ export function HeaderSection({
 
   const toolbarStyles = {
     default: {
-      bgcolor :'var(--layout-nav-bg)',
+      bgcolor : `${theme.palette.background.paper}`,
       minHeight: 'auto',
       height: 'var(--layout-header-mobile-height)',
       transition: theme.transitions.create(['height', 'background-color'], {

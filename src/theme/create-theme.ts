@@ -1,27 +1,25 @@
 import type { Theme } from '@mui/material/styles';
 
-import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
-import { shadows, typography, components, colorSchemes, customShadows } from './core';
+import { shadows, typography, components, darkPalette, lightPalette, customShadows } from './core';
+
+import type { ThemeVariantsProps } from './theme-provider';
 
 // ----------------------------------------------------------------------
 
-export function createTheme(): Theme {
-  const initialTheme = {
-    colorSchemes,
-    shadows: shadows(),
-    customShadows: customShadows(),
-    shape: { borderRadius: 8 },
-    components,
-    typography,
-    cssVarPrefix: '',
-    shouldSkipGeneratingVar,
-  };
-
-  const theme = extendTheme(initialTheme);
-
-  return theme;
-}
+export const theme = ({ mode }: { mode: ThemeVariantsProps }): Theme =>
+  createTheme({
+      palette: {
+        mode,
+        ...(mode === 'light' ? lightPalette : darkPalette),
+      },
+      shadows: shadows(),
+      customShadows: customShadows(),
+      shape: { borderRadius: 8 },
+      components,
+      typography,
+    });
 
 // ----------------------------------------------------------------------
 

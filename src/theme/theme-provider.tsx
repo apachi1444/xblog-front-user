@@ -1,10 +1,14 @@
 import type {} from '@mui/lab/themeAugmentation';
+import type { RootState } from 'src/services/store';
 import type {} from '@mui/material/themeCssVarsAugmentation';
 
-import CssBaseline from '@mui/material/CssBaseline';
-import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { createTheme } from './create-theme';
+import { ThemeProvider } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+
+import { theme } from './create-theme';
 
 // ----------------------------------------------------------------------
 
@@ -19,13 +23,20 @@ export enum ThemeVariantsProps {
 }
 
 
-export function ThemeProvider({ children }: Props) {
-  const theme = createTheme();
+export function CustomThemeProvider({ children }: Props) {  
+  // Get dark mode preference from Redux store
+  const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
+  
+  // Set the mode based on isDarkMode value
+  const mode = isDarkMode ? ThemeVariantsProps.dark : ThemeVariantsProps.light;
+  
+  // Create theme with the appropriate mode and memoize it
+  const activeTheme = useMemo(() => theme({ mode }), [mode]);
 
   return (
-    <CssVarsProvider theme={theme}>
+    <ThemeProvider theme={activeTheme} >
       <CssBaseline />
       {children}
-    </CssVarsProvider>
+    </ThemeProvider>
   );
 }

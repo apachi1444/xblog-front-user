@@ -7,7 +7,7 @@ import { Router } from 'src/routes/sections';
 
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
 
-import { ThemeProvider } from 'src/theme/theme-provider';
+import { CustomThemeProvider } from 'src/theme/theme-provider';
 
 import i18n from './locales/i18n';
 import { ToastProvider } from './contexts/ToastContext';
@@ -22,11 +22,11 @@ export default function App() {
   return (
     <GoogleOAuthProvider clientId="116914976486-bkkcrqu1202aau2g8s1pcfbdq59066uj.apps.googleusercontent.com">
       <I18nextProvider i18n={i18n}>  
-        <ThemeProvider>
+        <CustomThemeProvider>
           <ToastProvider>
               <Router />
           </ToastProvider>
-        </ThemeProvider>
+        </CustomThemeProvider>
       </I18nextProvider>
     </GoogleOAuthProvider>
   );

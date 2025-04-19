@@ -11,6 +11,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 
+export const OnBoardingPage = lazy(() => import('src/pages/onboarding'));
 export const HomePage = lazy(() => import('src/pages/home'));
 export const GenerateFlow = lazy(() => import('src/pages/generate'));
 export const CreatePage = lazy(() => import('src/pages/create'));
@@ -38,7 +39,7 @@ const renderFallback = (
       sx={{
         width: 1,
         maxWidth: 320,
-        bgcolor: (theme) => varAlpha(theme.vars.palette.text.primaryChannel, 0.16),
+        bgcolor: (theme) => varAlpha(theme.palette.text.primaryChannel, 0.16),
         [`& .${linearProgressClasses.bar}`]: { bgcolor: 'text.primary' },
       }}
     />
@@ -48,37 +49,56 @@ const renderFallback = (
 export function Router() {
   const routes = useRoutes([
     {
+      path: 'onboarding',
       element: (
         <AuthGuard>
-          <DashboardLayout>
-            <Suspense fallback={renderFallback}>
-              <Outlet />
-            </Suspense>
-          </DashboardLayout>
+          <Suspense fallback={renderFallback}>
+            <OnBoardingPage />
+          </Suspense>
+        </AuthGuard>
+      ),
+    },
+    {
+      element: (
+        <AuthGuard>
+          <Suspense fallback={renderFallback}>
+            <Outlet />
+          </Suspense>
         </AuthGuard>
       ),
       children: [
-        { element: <HomePage />, index: true },
-        { path: 'user', element: <UserPage /> },
-        { path: 'generate', element: <GenerateFlow />},
-        { path: 'create', element: <CreatePage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
-        { path: 'profile', element: <ProfilePage /> },
-        { path: 'settings', element: <SettingsPage /> },
-        { path: 'upgrade-license', element: <UpgradeLicense /> },
-        { path: 'book-demo', element: <BookDemo /> },
-        { path: 'stores', element: <StoresPage /> },
-        { path: 'stores/add', element: <AddStoreFlow /> },
-        { path: 'calendar', element: <CalendarPage /> },
+        {
+          element: (
+            <DashboardLayout>
+              <Outlet />
+            </DashboardLayout>
+          ),
+          children: [
+            { index: true, element: <HomePage /> },
+            { path: 'user', element: <UserPage /> },
+            { path: 'generate', element: <GenerateFlow /> },
+            { path: 'create', element: <CreatePage /> },
+            { path: 'products', element: <ProductsPage /> },
+            { path: 'blog', element: <BlogPage /> },
+            { path: 'profile', element: <ProfilePage /> },
+            { path: 'settings', element: <SettingsPage /> },
+            { path: 'upgrade-license', element: <UpgradeLicense /> },
+            { path: 'book-demo', element: <BookDemo /> },
+            { path: 'stores', element: <StoresPage /> },
+            { path: 'stores/add', element: <AddStoreFlow /> },
+            { path: 'calendar', element: <CalendarPage /> },
+          ],
+        },
       ],
     },
+
+    // Public Routes
     {
       path: 'sign-in',
       element: (
-          <AuthLayout>
-            <SignInPage />
-          </AuthLayout>
+        <AuthLayout>
+          <SignInPage />
+        </AuthLayout>
       ),
     },
     {

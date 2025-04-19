@@ -50,19 +50,13 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const user = useSelector((state: RootState) => state.auth.user);
   
-  // Get dark mode preference from Redux store
   const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
   
   // Use lazy queries for more control
   const [getCurrentUser] = useLazyGetCurrentUserQuery();
   const [doGetStores] = useLazyGetStoresQuery();
   
-  const storesData = useSelector((state: RootState) => state.stores);
-
-  console.log(storesData);
-  
-  
-  // Fetch user data when component mounts or token changes
+  const storesData = useSelector((state: RootState) => state.stores);  
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
@@ -122,6 +116,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       }))
     : [];
 
+  console.log(theme.palette.background.paper , "test aa");
+
   return (
     <LayoutSection
       /** **************************************
@@ -133,7 +129,14 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           slotProps={{
             container: {
               maxWidth: false,
-              sx: { px: { [layoutQuery]: 5 }, backgroundColor: '#c8dcfd' , borderRadius : 40 , marginTop : 3,marginX : 10, paddingY : 2 },
+              sx: { 
+                px: { [layoutQuery]: 5 }, 
+                backgroundColor: `${theme.palette.secondary.lighter}`, 
+                borderRadius: 40, 
+                marginTop: 3,
+                marginX: 10, 
+                paddingY: 2 
+              },
             },
           }}
           sx={header?.sx}
@@ -171,7 +174,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     height: 40,
                     transition: 'all 0.2s ease-in-out',
                     '&:hover': { 
-                      bgcolor: (themee) => theme.palette.action.hover,
+                      bgcolor: (themee) => themee.palette.action.hover,
                     },
                   }}
                 >
@@ -271,7 +274,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         ...sx,
       }}
     >
-      <Main sx={{bgcolor : 'var(--layout-nav-bg)'}}>{children}</Main>
+      <Main sx={{bgcolor : `${theme.palette.background.paper}`}}>{children}</Main>
     </LayoutSection>
   );
 }

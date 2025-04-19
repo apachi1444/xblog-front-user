@@ -1,4 +1,5 @@
 import type { AuthUser } from 'src/types/user';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -8,6 +9,7 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  onboardingCompleted: boolean;
   currentStore?: {
     id: string;
     name: string;
@@ -24,13 +26,14 @@ const initialState: AuthState = {
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  onboardingCompleted: false,
   currentStore: {
-    id: '1',
+    id: '0',
     name: 'My Store',
-    storesRemaining: 3,
-    storesTotal: 5,
-    articlesRemaining: 45,
-    articlesTotal: 100
+    storesRemaining: 0,
+    storesTotal: 0,
+    articlesRemaining: 0,
+    articlesTotal: 0
   }
 };
 
@@ -46,9 +49,10 @@ const loadAuthState = () => {
   }
 };
 
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: loadAuthState(),
+  initialState : loadAuthState(),
   reducers: {
     setCredentials: (
       state, 
@@ -64,26 +68,35 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = !!action.payload.accessToken;
       
-      // Save to localStorage
-      localStorage.setItem('auth', JSON.stringify(state));
+      // Remove localStorage operations as Redux Persist handles this
     },
     clearCredentials: (state) => {
-      // Clear localStorage
-      localStorage.removeItem('auth');
+      // Remove localStorage operations
       
       // Reset state
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
-    }
-  }
+    },
+    
+    setOnboardingCompleted: (state, action: PayloadAction<boolean>) => {
+      state.onboardingCompleted = action.payload;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.isAuthenticated = false;
+      // Don't reset onboardingCompleted on logout
+    },
+  },
 });
 
 // Export actions
 export const {
   setCredentials,
+  setOnboardingCompleted,
   clearCredentials,
+  logout,
 } = authSlice.actions;
 
-// Export reducer
 export default authSlice.reducer;

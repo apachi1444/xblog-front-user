@@ -3,7 +3,7 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import { useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import { Divider, useThemeProps } from '@mui/material';
+import { Divider } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -11,8 +11,6 @@ import Drawer, { drawerClasses } from '@mui/material/Drawer';
 
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
-
-import { varAlpha } from 'src/theme/styles';
 
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -72,7 +70,7 @@ export function NavDesktop({
         display: 'none',
         position: 'fixed',
         flexDirection: 'column',
-        bgcolor: 'var(--layout-nav-bg)',
+        bgcolor: (customTheme) => customTheme.palette.background.paper,
         zIndex: 'var(--layout-nav-zIndex)',
         width: 'var(--layout-nav-vertical-width)',
         borderRight: `2px solid ${theme.palette.divider}`,
@@ -129,7 +127,7 @@ export function NavMobile({
           pt: 2.5,
           px: 2.5,
           overflow: 'unset',
-          bgcolor: 'var(--layout-nav-bg)',
+          bgcolor: (customTheme) => customTheme.palette.background.paper,
           width: 'var(--layout-nav-mobile-width)',
           borderRight: `2px solid ${theme.palette.divider}`,
           ...sx,
@@ -239,7 +237,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                       color: 'var(--layout-nav-item-color)',
                       minHeight: 'var(--layout-nav-item-height)',
                       '&:hover': {
-                        bgcolor: 'var(--layout-nav-item-hover-bg)',
+                          bgcolor: 'var(--layout-nav-item-hover-bg)',
                       },
                       ...(isActived && {
                         fontWeight: 'fontWeightSemiBold',
