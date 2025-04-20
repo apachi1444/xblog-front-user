@@ -69,7 +69,7 @@ export function SignInView() {
         if (onboardingCompleted) {
           router.replace('/');
         } else {
-          router.push('/onboarding');
+          router.replace('/onboarding');
         }
       }, 1000);
     }

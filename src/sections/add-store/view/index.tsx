@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useConnectWordPressMutation } from 'src/services/apis/integrations/wordPressApi';
 
 import { FormStepper } from 'src/components/stepper/FormStepper';
 
 import SelectPlatform from './SelectPlatform';
 import WebsiteDetails from './WebsiteDetails';
 
-// Platform options
 export const platforms = [
   {
     id: 'wordpress',
@@ -23,27 +23,12 @@ export const platforms = [
     description: 'Connect your Shopify store',
   },
   {
-    id: 'woocommerce',
-    name: 'WooCommerce',
+    id: 'wix',
+    name: 'Wix',
     icon: '/assets/icons/platforms/woocommerce.svg',
-    description: 'Connect your WooCommerce store',
+    description: 'Connect your Wix store',
   },
 ];
-
-// Business type options
-export const businessTypes = [
-  'E-commerce',
-  'Blog',
-  'Technology',
-  'Health & Wellness',
-  'Finance',
-  'Education',
-  'Entertainment',
-  'Food & Beverage',
-  'Travel',
-  'Other',
-];
-
 export interface StoreFormData {
   platform: string;
   name: string;
@@ -59,6 +44,10 @@ export interface StoreFormData {
   shopifyStore?: string;
   consumerKey?: string;
   consumerSecret?: string;
+  // New WordPress fields
+  store_url?: string;
+  store_username?: string;
+  store_password?: string;
 }
 
 export default function AddStoreFlow() {
@@ -74,8 +63,11 @@ export default function AddStoreFlow() {
     acceptTerms: false,
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
-  const steps = ['Select Platform', 'Website Details'];
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // WordPress API mutation hook
+  const [connectWordPress] = useConnectWordPressMutation();
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
@@ -91,8 +83,25 @@ export default function AddStoreFlow() {
 
   const handleSubmit = async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsLoading(true);
+      setError(null);      
+      
+      if (formData.platform === 'wordpress') {
+        // Use the WordPress API
+        const response = await connectWordPress({
+          store_url: formData.store_url || '',
+          store_username: formData.store_username || '',
+          store_password: formData.store_password || '',
+          name: formData.name,
+          domain: formData.domain,
+        }).unwrap();
+        
+        // Handle successful response
+        console.log('WordPress store connected:', response);
+      } else {
+        // Handle other platforms (existing code)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
       
       // Show success alert
       setShowSuccessAlert(true);
@@ -101,8 +110,11 @@ export default function AddStoreFlow() {
       setTimeout(() => {
         navigate('/stores');
       }, 3000);
-    } catch (error) {
+    } catch (errore) {
       console.error('Error connecting store:', error);
+      setError('Failed to connect store. Please check your credentials and try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -129,7 +141,7 @@ export default function AddStoreFlow() {
             onUpdateFormData={handleUpdateFormData}
             onSubmit={handleSubmit}
             onBack={handleBack}
-            isLoading={false}
+            isLoading={isLoading}
             error={null}
           />
         );

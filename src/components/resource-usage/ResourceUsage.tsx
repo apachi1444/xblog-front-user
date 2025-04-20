@@ -32,7 +32,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
         p: compact ? 1.5 : 2,
         borderRadius: 2,
         bgcolor: 'var(--layout-nav-bg)',
-        border: (theme) => `2px solid ${alpha(theme.palette.secondary.main, 0.9)}`,
+        border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.9)}`,
         color: (theme) => theme.palette.text.primary,
         mb : compact? 1.5 : 2.5,
       }}
@@ -126,7 +126,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           sx={{ 
             height: compact ? 5 : 7, 
             borderRadius: 10,
-            bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.9),
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.9),
             '& .MuiLinearProgress-bar': {
               bgcolor: (theme) => 
                 articlesPercentage > 90 

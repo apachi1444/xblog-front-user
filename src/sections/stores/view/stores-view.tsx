@@ -146,9 +146,6 @@ export function StoresView() {
   );
   return (
     <DashboardContent>
-      {/* Global loading indicator */}
-      <FullPageLoader open={isLoading} />
-
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
           Websites

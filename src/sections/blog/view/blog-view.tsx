@@ -100,7 +100,6 @@ export function BlogView() {
 
   return (
     <DashboardContent>
-      <FullPageLoader open={isLoading} />
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
           Blog

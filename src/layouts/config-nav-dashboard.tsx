@@ -27,6 +27,11 @@ export const navData = [
     path: '/calendar',
     icon: icon('mdi:calendar'),
   },
+  {
+    title: 'Templates',
+    path: '/templates',
+    icon: icon('material-symbols:temple-buddhist-outline-sharp'),
+  },
 ];
 
 export const bottomNavData = [
