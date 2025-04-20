@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 
 import { Box, alpha, Typography, LinearProgress } from '@mui/material';
 
+import { selectAllArticles } from 'src/services/slices/articles/selectors';
+
 interface ResourceUsageProps {
   compact?: boolean;
 }
@@ -11,19 +13,34 @@ interface ResourceUsageProps {
 export function ResourceUsage({ compact = false }: ResourceUsageProps) {
   // Get store data from Auth Redux store
   const user = useSelector((state: RootState) => state.auth.user);
+  const articles = useSelector(selectAllArticles);
+
   const stores = useSelector((state: RootState) => state.stores.stores);
   
   // Articles usage data
-  const articlesUsed = user?.articles?.used || 0;
+  const articlesUsed = articles.length || 90;
   const articlesTotal = user?.articles?.total || 100;
   const articlesPercentage = Math.min((articlesUsed / articlesTotal) * 100, 100);
   const articlesRemaining = articlesTotal - articlesUsed;
   
   // Stores usage data - now using the actual stores count from the API
-  const storesUsed = stores?.length || 0;
+  const storesUsed = stores?.length || 3;
   const storesTotal = user?.stores?.total || 5;
   const storesPercentage = Math.min((storesUsed / storesTotal) * 100, 100);
   const storesRemaining = storesTotal - storesUsed;
+  
+  // Dynamic color calculation function based on percentage
+  const getProgressColor = (theme: any, percentage: number) => {
+    if (percentage <= 30) {
+      return theme.palette.secondary.main; // Green for low usage
+    } if (percentage <= 60) {
+      return theme.palette.info.main; // Blue for moderate usage
+    } if (percentage <= 85) {
+      return theme.palette.warning.main; // Orange/Yellow for high usage
+    } 
+      return theme.palette.primary.main; // Red for critical usage
+    
+  };
   
   return (
     <Box
@@ -53,7 +70,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           <Typography 
             variant={compact ? "caption" : "body2"} 
             sx={{ 
-              color: (theme) => theme.palette.text.primary,
+              color: (theme) => getProgressColor(theme, storesPercentage),
               fontWeight: 600,
             }}
           >
@@ -66,14 +83,9 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           sx={{ 
             height: compact ? 5 : 7, 
             borderRadius: 10,
-            bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.9),
+            bgcolor: (theme) => theme.palette.secondary.main,
             '& .MuiLinearProgress-bar': {
-              bgcolor: (theme) => 
-                storesPercentage > 90 
-                  ? theme.palette.error.main 
-                  : storesPercentage > 70
-                    ? theme.palette.warning.main
-                    : theme.palette.secondary.main,
+              bgcolor: (theme) => theme.palette.primary.main,
               borderRadius: 10,
               transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }
@@ -113,7 +125,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           <Typography 
             variant={compact ? "caption" : "body2"} 
             sx={{ 
-              color: (theme) => theme.palette.text.primary,
+              color: (theme) => getProgressColor(theme, articlesPercentage),
               fontWeight: 600,
             }}
           >
@@ -126,14 +138,9 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           sx={{ 
             height: compact ? 5 : 7, 
             borderRadius: 10,
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.9),
+            bgcolor: (theme) => theme.palette.secondary.main,
             '& .MuiLinearProgress-bar': {
-              bgcolor: (theme) => 
-                articlesPercentage > 90 
-                  ? theme.palette.error.main 
-                  : articlesPercentage > 70
-                    ? theme.palette.warning.main
-                    : theme.palette.secondary.main,
+              bgcolor: (theme) => theme.palette.primary.main,
               borderRadius: 10,
               transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }

@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
@@ -14,10 +15,9 @@ import { _stores } from "src/_mock";
 import { DashboardContent } from "src/layouts/dashboard";
 import { useLazyGetStoresQuery } from "src/services/apis/storesApi";
 
-import { FullPageLoader } from "src/components/loader"; // Add this import
-
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+import { LoadingSpinner } from "src/components/loading";
 
 import { useTable } from "src/sections/user/view";
 
@@ -58,7 +58,7 @@ export function StoresView() {
   const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
   const [deletingStoreIds, setDeletingStoreIds] = useState<string[]>([]);
 
-  const[ doGetStores] = useLazyGetStoresQuery();
+  const[doGetStores] = useLazyGetStoresQuery();
   const [isLoading , setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -68,7 +68,6 @@ export function StoresView() {
       doGetStores()
         .unwrap()
         .then((result) => {
-          console.log(result);
           setStores(result.stores);
           setIsLoading(false);
         })
@@ -129,6 +128,7 @@ export function StoresView() {
   }, []);
 
   const handleAddNewStore = useCallback(() => {
+    toast.error("tests")
     navigate("/stores/add");
   }, [navigate]);
 
@@ -152,7 +152,6 @@ export function StoresView() {
         </Typography>
         <Button
           variant="contained"
-          color="inherit"
           onClick={handleAddNewStore}
           startIcon={<Iconify icon="mingcute:add-line" />}
           sx={{
@@ -164,65 +163,72 @@ export function StoresView() {
         </Button>
       </Box>
 
-      <Card>
-        <StoreTableToolbar
-          numSelected={table.selected.length}
-          filterName={filterName}
-          onFilterName={handleFilterChange}
+      {isLoading ? (
+        <LoadingSpinner 
+          message="Loading your websites..." 
+          fullHeight 
         />
+      ) : (
+        <Card>
+          <StoreTableToolbar
+            numSelected={table.selected.length}
+            filterName={filterName}
+            onFilterName={handleFilterChange}
+          />
 
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <StoreTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={stores.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked: boolean) =>
-                  table.onSelectAllRows(
-                    checked,
-                    stores.map((store: { id: any; }) => store.id)
-                  )
-                }
-                headLabel={TABLE_HEAD}
-              />
-              <TableBody>
-                {paginatedData.map((row) => (
-                    <StoreTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onDelete={handleDelete}
-                      isDeleting={deletingStoreIds.includes(row.id)}
-                    />
-                ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, stores.length)}
+          <Scrollbar>
+            <TableContainer sx={{ overflow: 'unset' }}>
+              <Table sx={{ minWidth: 800 }}>
+                <StoreTableHead
+                  order={table.order}
+                  orderBy={table.orderBy}
+                  rowCount={stores.length}
+                  numSelected={table.selected.length}
+                  onSort={table.onSort}
+                  onSelectAllRows={(checked: boolean) =>
+                    table.onSelectAllRows(
+                      checked,
+                      stores.map((store: { id: any; }) => store.id)
+                    )
+                  }
+                  headLabel={TABLE_HEAD}
                 />
+                <TableBody>
+                  {paginatedData.map((row) => (
+                      <StoreTableRow
+                        key={row.id}
+                        row={row}
+                        selected={table.selected.includes(row.id)}
+                        onSelectRow={() => table.onSelectRow(row.id)}
+                        onDelete={handleDelete}
+                        isDeleting={deletingStoreIds.includes(row.id)}
+                      />
+                  ))}
 
-                {(notFound || isDataEmpty) && !isLoading && (
-                  <TableNoData searchQuery={filterName} />
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
+                  <TableEmptyRows
+                    height={68}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, stores.length)}
+                  />
 
-        <TablePagination
-          component="div"
-          page={table.page}
-          count={dataFiltered.length}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
-        />
-      </Card>
+                  {(notFound || isDataEmpty) && !isLoading && (
+                    <TableNoData searchQuery={filterName} />
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Scrollbar>
+
+          <TablePagination
+            component="div"
+            page={table.page}
+            count={dataFiltered.length}
+            rowsPerPage={table.rowsPerPage}
+            onPageChange={table.onChangePage}
+            rowsPerPageOptions={[5, 10, 25]}
+            onRowsPerPageChange={table.onChangeRowsPerPage}
+          />
+        </Card>
+      )}
       
       <AddStoreModal
         open={isAddStoreModalOpen}

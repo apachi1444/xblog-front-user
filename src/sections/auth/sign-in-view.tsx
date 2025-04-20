@@ -1,4 +1,5 @@
 
+import type { RootState } from 'src/services/store';
 import type { CredentialResponse} from '@react-oauth/google';
 
 import { useSnackbar } from "notistack";
@@ -27,7 +28,6 @@ import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authA
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
-import { RootState } from 'src/services/store';
 
 // ----------------------------------------------------------------------
 
@@ -58,10 +58,7 @@ export function SignInView() {
   // Email/password login mutation
   const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
 
-  const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
-
-  const loading = isGoogleAuthLoading || isLoginLoading
-  
+  const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);  
   // Effect to handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
@@ -254,7 +251,7 @@ export function SignInView() {
           type="submit"
           variant="contained"
           color="primary"
-          loading={loading}
+          loading={isLoginLoading}
           sx={{ mb: 2 }}
         >
           Sign In
@@ -267,7 +264,7 @@ export function SignInView() {
         </Typography>
       </Divider>
 
-      {loading ? (
+      {isGoogleAuthLoading ? (
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'center', 

@@ -11,7 +11,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 
-interface WooCommerceFormProps {
+interface WixFormProps {
   formData: {
     domain: string;
     name: string;
@@ -24,7 +24,7 @@ interface WooCommerceFormProps {
   setErrors: (errors: Record<string, string | null>) => void;
 }
 
-export default function WooCommerceForm({ formData, onUpdateField, errors, setErrors }: WooCommerceFormProps) {
+export default function WixForm({ formData, onUpdateField, errors, setErrors }: WixFormProps) {
   const theme = useTheme();
   
   const validateField = (field: string, value: string) => {
@@ -73,7 +73,7 @@ export default function WooCommerceForm({ formData, onUpdateField, errors, setEr
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <ShoppingCart size={24} color={theme.palette.primary.main} />
         <Typography variant="h6" sx={{ ml: 1.5, fontWeight: 600 }}>
-          WooCommerce Store Details
+          Wix Store Details
         </Typography>
       </Box>
       
@@ -113,7 +113,7 @@ export default function WooCommerceForm({ formData, onUpdateField, errors, setEr
             onChange={handleChange('name')}
             error={!!errors.name}
             helperText={errors.name}
-            placeholder="My WooCommerce Store"
+            placeholder="My Wix Store"
             InputProps={{
               sx: {
                 borderRadius: 1.5,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useConnectWordPressMutation } from 'src/services/apis/integrations/wordPressApi';
+import { useConnectWordPressMutation } from 'src/services/apis/integrations/wordpressApi';
 
 import { FormStepper } from 'src/components/stepper/FormStepper';
 
@@ -25,7 +25,7 @@ export const platforms = [
   {
     id: 'wix',
     name: 'Wix',
-    icon: '/assets/icons/platforms/woocommerce.svg',
+    icon: '/assets/icons/platforms/wix.svg',
     description: 'Connect your Wix store',
   },
 ];

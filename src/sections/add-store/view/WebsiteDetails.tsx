@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { 
@@ -13,10 +13,9 @@ import {
   CircularProgress
 } from '@mui/material';
 
+import WixForm from './platform-forms/WixForm';
 import ShopifyForm from './platform-forms/ShopifyForm';
-// Import platform-specific forms
 import WordPressForm from './platform-forms/WordPressForm';
-import WooCommerceForm from './platform-forms/WooCommerceForm';
 
 interface WebsiteDetailsProps {
   formData: {
@@ -87,7 +86,6 @@ export default function WebsiteDetails({
         break;
         
       case 'wix':
-        // Existing WooCommerce validations
         if (!formData.adminUrl) {
           newErrors.adminUrl = 'Admin URL is required';
           isValid = false;
@@ -137,7 +135,7 @@ export default function WebsiteDetails({
         );
       case 'wix':
         return (
-          <WooCommerceForm 
+          <WixForm 
             formData={formData} 
             onUpdateField={handleUpdateField} 
             errors={errors}
@@ -177,7 +175,7 @@ export default function WebsiteDetails({
               : formData.platform === 'shopify' 
                 ? 'Shopify Integration' 
                 : formData.platform === 'wix' 
-                  ? 'WooCommerce Integration' 
+                  ? 'Wix Integration' 
                   : 'Website Details'}
           </Typography>
           

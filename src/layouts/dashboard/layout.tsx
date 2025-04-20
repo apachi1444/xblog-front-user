@@ -1,6 +1,7 @@
 import type { RootState } from 'src/services/store';
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +19,8 @@ import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useLazyGetStoresQuery } from 'src/services/apis/storesApi';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { toggleDarkMode } from 'src/services/slices/userDashboardSlice';
+import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { setArticles } from 'src/services/slices/articles/articleSlice';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -57,9 +60,25 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const [doGetStores] = useLazyGetStoresQuery();
   
   const storesData = useSelector((state: RootState) => state.stores);  
+
+  const [doGetArticles , {isLoading}] = useLazyGetArticlesQuery();
+  
+  useEffect(() => {
+    doGetArticles()
+        .unwrap()
+        .then((result) => {
+          const articlesFromApi = result.drafts_articles.concat(result.published_articles);
+          dispatch(setArticles(articlesFromApi));
+        })
+        .catch((err) => {
+          toast.error(err.error.data.message);
+          console.error(err);
+        });
+  }, [doGetArticles, dispatch]);
+
   useEffect(() => {
     const fetchUserData = async () => {
-      if (user) {
+      if (!user) {
         try {
           const userData = await getCurrentUser().unwrap();
           dispatch(setCredentials({accessToken, user: userData}));
@@ -115,8 +134,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         plan: 'Free',
       }))
     : [];
-
-  console.log(theme.palette.background.paper , "test aa");
 
   return (
     <LayoutSection

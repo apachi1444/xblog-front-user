@@ -1,3 +1,4 @@
+import type { Store } from 'src/types/store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
@@ -17,6 +18,7 @@ interface RecentActivity {
 interface UserDashboardState {
   preferences: UserPreferences;
   recentActivities: RecentActivity[];
+  selectedStore: Store | null;
 }
 
 const initialState: UserDashboardState = {
@@ -24,7 +26,8 @@ const initialState: UserDashboardState = {
     darkMode: false,
     language: 'en'
   },
-  recentActivities: []
+  recentActivities: [],
+  selectedStore: null,
 };
 
 const userDashboardSlice = createSlice({
@@ -36,6 +39,10 @@ const userDashboardSlice = createSlice({
     },
     setLanguage: (state, action: PayloadAction<string>) => {
       state.preferences.language = action.payload;
+    },
+    // Simplified store selection action
+    setSelectedStore: (state, action: PayloadAction<Store>) => {
+      state.selectedStore = action.payload;
     },
     addActivity: (state, action: PayloadAction<Omit<RecentActivity, 'timestamp'>>) => {
       state.recentActivities.unshift({
@@ -54,6 +61,7 @@ const userDashboardSlice = createSlice({
 export const {
   toggleDarkMode,
   setLanguage,
+  setSelectedStore,
   addActivity,
   clearActivities
 } = userDashboardSlice.actions;

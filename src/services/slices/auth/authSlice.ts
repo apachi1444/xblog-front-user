@@ -67,13 +67,14 @@ const authSlice = createSlice({
       state.user = action.payload.user || null;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = !!action.payload.accessToken;
-      
-      // Remove localStorage operations as Redux Persist handles this
+
+      // Save to localStorage
+      localStorage.setItem('auth', JSON.stringify(state));
     },
     clearCredentials: (state) => {
-      // Remove localStorage operations
-      
-      // Reset state
+       // Clear localStorage
+       localStorage.removeItem('auth');
+
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
@@ -86,7 +87,6 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-      // Don't reset onboardingCompleted on logout
     },
   },
 });

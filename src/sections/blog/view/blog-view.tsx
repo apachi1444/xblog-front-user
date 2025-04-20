@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
@@ -14,7 +15,7 @@ import { setArticles } from 'src/services/slices/articles/articleSlice';
 import { selectAllArticles } from 'src/services/slices/articles/selectors';
 
 import { Iconify } from 'src/components/iconify';
-import { FullPageLoader } from 'src/components/loader';
+import { LoadingSpinner } from 'src/components/loading';
 
 import { PostItem } from '../post-item';
 import { PostSort } from '../post-sort';
@@ -28,32 +29,27 @@ export function BlogView() {
   const [page, setPage] = useState(1);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   
   const articles = useSelector(selectAllArticles);
   
-  const [doGetArticles] = useLazyGetArticlesQuery();
+  const [doGetArticles , {isLoading}] = useLazyGetArticlesQuery();
   
   useEffect(() => {
-    setIsLoading(true);
     doGetArticles()
         .unwrap()
         .then((result) => {
           const articlesFromApi = result.drafts_articles.concat(result.published_articles);
           dispatch(setArticles(articlesFromApi));
-          setIsLoading(false);
         })
         .catch((err) => {
-          setIsLoading(false);
+          toast.error(err.error.data.message);
           console.error(err);
         });
   }, [doGetArticles, dispatch]);
   
   useEffect(() => {
-    // Apply sorting and filtering
     let sorted = [...articles];
     
-    // Apply search filter
     if (searchQuery) {
       sorted = sorted.filter(post => 
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,11 +74,6 @@ export function BlogView() {
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort);
-  }, []);
-  
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    setPage(1); // Reset to first page on new search
   }, []);
   
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -117,6 +108,11 @@ export function BlogView() {
           New article
         </Button>
       </Box>
+
+      {isLoading && <LoadingSpinner 
+          message="Loading your blogs..." 
+          fullHeight 
+        />}
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
         <PostSort

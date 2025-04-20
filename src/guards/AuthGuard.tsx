@@ -13,8 +13,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   
   const accessToken = useSelector(selectAccessToken);
   const isAuthenticated = useSelector(selectIsAuthenticated);
-
-  
   
   // Skip verification if no token exists
   const skipVerification = !accessToken;

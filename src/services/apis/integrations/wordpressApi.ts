@@ -1,6 +1,6 @@
 import { api } from "..";
 
-const WORDPRESS_BASE_URL = '/wordpress';
+const WORDPRESS_BASE_URL = 'wordpress';
 
 // Interface for WordPress store connection request
 interface ConnectWordPressRequest {
@@ -25,7 +25,7 @@ export const wordpressApi = api.injectEndpoints({
     // Connect WordPress store
     connectWordPress: builder.mutation<ConnectWordPressResponse, ConnectWordPressRequest>({
       query: (storeData) => ({
-        url: `${WORDPRESS_BASE_URL}/connect`,
+        url: `/connect/${WORDPRESS_BASE_URL}`,
         method: 'POST',
         body: storeData,
       }),

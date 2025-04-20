@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import type { RootState } from 'src/services/store';
+
+import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 
@@ -17,48 +20,57 @@ import {
   useTheme, 
   Typography, 
   IconButton,
-  ListItemText
+  ListItemText,
+  CircularProgress
 } from '@mui/material';
 
+import { useToast } from 'src/contexts/ToastContext';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useScheduleArticleMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
-// Mock data for scheduled articles - updated with dates relative to today
-const getCurrentDateFormatted = () => {
-  const today = new Date();
-  return format(today, 'yyyy-MM-dd');
-};
-
-const getRelativeDateFormatted = (daysOffset: number) => {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  return format(date, 'yyyy-MM-dd');
-};
-
-// Mock data for scheduled articles
-const scheduledArticles = [
-  { id: '1', title: 'Tech Innovators Conference', date: getRelativeDateFormatted(-5), endDate: getRelativeDateFormatted(-3), color: '#90caf9', status: 'published' },
-  { id: '2', title: 'Charity Gala Dinner', date: getRelativeDateFormatted(-2), color: '#a5d6a7', status: 'published' },
-  { id: '3', title: 'Annual General Meeting', date: getCurrentDateFormatted(), color: '#ffcc80', status: 'upcoming' },
-  { id: '4', title: 'Summer Music Festival', date: getRelativeDateFormatted(3), color: '#ce93d8', status: 'upcoming' },
-  { id: '9', title: 'Product Launch', date: getRelativeDateFormatted(7), color: '#ffcc80', status: 'upcoming' },
-  { id: '10', title: 'Team Building Event', date: getRelativeDateFormatted(10), color: '#ffcc80', status: 'upcoming' },
-];
-
-// Mock data for available articles
-const availableArticles = [
-  { id: '5', title: 'How to Improve Your SEO Strategy' },
-  { id: '6', title: '10 Tips for Better Content Marketing' },
-  { id: '7', title: 'The Future of AI in Digital Marketing' },
-  { id: '8', title: 'Social Media Trends for 2023' },
-];
+import { FullPageLoader } from 'src/components/loader/FullPageLoader';
+import { LoadingSpinner } from 'src/components/loading';
 
 export default function CalendarPage() {
   const theme = useTheme();
-  const [currentDate, setCurrentDate] = useState(new Date()); // Set to today's date
+  const { showToast } = useToast();
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
+  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  
+  // Get current store ID from Redux store
+  const storeId = 1;
+  
+  // Fetch scheduled articles from API
+  const { 
+    data: calendarData, 
+    isLoading: isLoadingCalendar, 
+    error: calendarError,
+    refetch: refetchCalendar
+  } = useGetScheduledArticlesQuery();
+  
+  // Fetch available articles from API
+  const { 
+    data: articlesData, 
+    isLoading: isLoadingArticles,
+    error: articlesError
+  } = useGetArticlesQuery({ store_id: storeId.toString() });
+  
+  // Schedule article mutation
+  const [scheduleArticle, { isLoading: isScheduling }] = useScheduleArticleMutation();
+  
+  // Handle API errors
+  useEffect(() => {
+    if (calendarError) {
+      showToast('Failed to load scheduled articles. Please try again.', 'error');
+    }
+    if (articlesError) {
+      showToast('Failed to load available articles. Please try again.', 'error');
+    }
+  }, [calendarError, articlesError, showToast]);
   
   // Get days for the current month view
   const monthStart = startOfMonth(currentDate);
@@ -85,7 +97,7 @@ export default function CalendarPage() {
   };
   
   // Toggle article selection
-  const handleArticleToggle = (articleId: string) => {
+  const handleArticleToggle = (articleId: number) => {
     setSelectedArticles(prev => 
       prev.includes(articleId)
         ? prev.filter(id => id !== articleId)
@@ -94,20 +106,50 @@ export default function CalendarPage() {
   };
   
   // Submit scheduled articles
-  const handleScheduleSubmit = () => {
-    // Here you would implement the API call to schedule the articles
-    console.log('Scheduling articles:', selectedArticles, 'for date:', selectedDay);
-    setIsModalOpen(false);
-    setShowSuccessAlert(true);
+  const handleScheduleSubmit = async () => {
+    if (!selectedDay || selectedArticles.length === 0) return;
+    
+    try {
+      // Format date for API
+      const scheduledDate = format(selectedDay, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      
+      // Schedule each selected article
+      const promises = selectedArticles.map(articleId => 
+        scheduleArticle({
+          store_id: storeId,
+          article_id: articleId,
+          scheduled_date: scheduledDate
+        })
+      );
+      
+      await Promise.all(promises);
+      
+      setIsModalOpen(false);
+      showToast('Articles successfully scheduled!', 'success');
+      setShowSuccessAlert(true);
+      
+      // Refresh calendar data
+      refetchCalendar();
+      
+      // Auto-hide success alert after 3 seconds
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+      }, 3000);
+      
+    } catch (error) {
+      showToast('Failed to schedule articles. Please try again.', 'error');
+    }
   };
   
   // Get scheduled articles for a specific day
   const getScheduledArticlesForDay = (day: Date) => {
-    const dateString = format(day, 'yyyy-MM-dd');
-    return scheduledArticles.filter(article => {
-      const articleStart = new Date(article.date);
-      const articleEnd = article.endDate ? new Date(article.endDate) : articleStart;
-      return day >= articleStart && day <= articleEnd;
+    if (!calendarData?.calendars) return [];
+    
+    const formattedDay = format(day, 'yyyy-MM-dd');
+    
+    return calendarData.calendars.filter(article => {
+      const articleDate = article.scheduled_date.split('T')[0];
+      return articleDate === formattedDay;
     });
   };
   
@@ -124,211 +166,244 @@ export default function CalendarPage() {
     
     // Current or future days
     if (articles.length === 0) return 'empty';
-    if (articles.some(article => article.status === 'upcoming')) return 'upcoming';
+    if (articles.some(article => article.status === 'scheduled')) return 'upcoming';
     return 'published';
   };
 
   // Determine if a day is interactive (can schedule articles)
   const isDayInteractive = (day: Date) => !isBefore(day, new Date()) || isToday(day);
 
+  // Get available articles for scheduling
+  const getAvailableArticles = () => {
+    if (!articlesData) return [];
+    
+    // Combine draft and published articles
+    const allArticles = [
+      ...(articlesData.drafts_articles || []),
+      ...(articlesData.published_articles || [])
+    ];
+    
+    return allArticles;
+  };
+
   return (
     <DashboardContent>
-      {/* Success alert */}
-      {showSuccessAlert && (
-        <Fade in={showSuccessAlert}>
-          <Alert 
-            severity="success" 
-            sx={{ mb: 3 }}
-            onClose={() => setShowSuccessAlert(false)}
-          >
-            Articles successfully scheduled!
-          </Alert>
-        </Fade>
-      )}
-      
-      {/* Calendar header with navigation */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={prevMonth}><ChevronLeft /></IconButton>
-        <Typography variant="h5">{format(currentDate, 'MMMM yyyy')}</Typography>
-        <IconButton onClick={nextMonth}><ChevronRight /></IconButton>
-      </Box>
-
-      {/* Calendar grid - Updated to fill parent container */}
-      <Paper sx={{ 
-        overflow: 'hidden', 
-        borderRadius: 2,
-        height: 'calc(100vh - 200px)', // Adjust height to fill available space
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <Grid container>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-            <Grid item xs={12 / 7} key={index} sx={{ textAlign: 'center', p: 1 }}>
-              <Typography variant="subtitle2">{day}</Typography>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Grid container sx={{ flexGrow: 1 }}>
-          {daysInMonth.map((day, index) => {
-            const dayStatus = getDayStatus(day);
-            const isInteractive = isDayInteractive(day);
-            
-            // Determine background color based on status
-            let bgColor = 'transparent';
-            if (isToday(day)) {
-              bgColor = 'rgba(25, 118, 210, 0.08)';
-            } else if (dayStatus === 'published') {
-              bgColor = 'rgba(76, 175, 80, 0.08)'; // Light green for published
-            } else if (dayStatus === 'upcoming') {
-              bgColor = 'rgba(255, 152, 0, 0.08)'; // Light orange for upcoming
-            } else if (dayStatus === 'past-missed') {
-              bgColor = 'rgba(244, 67, 54, 0.08)'; // Light red for missed
-            } else if (dayStatus === 'past-empty') {
-              bgColor = 'rgba(158, 158, 158, 0.15)'; // Light grey for past empty days
-            }
-            
-            return (
-              <Grid 
-                item 
-                xs={12 / 7} 
-                key={index} 
-                sx={{ 
-                  border: '1px solid #ddd', 
-                  height: 'auto', 
-                  minHeight: 80,
-                  position: 'relative',
-                  bgcolor: bgColor,
-                  opacity: isInteractive ? 1 : 0.7,
-                  '&:hover': {
-                    bgcolor: isInteractive ? 'rgba(0, 0, 0, 0.04)' : bgColor,
-                    cursor: isInteractive ? 'pointer' : 'default'
-                  }
-                }}
-                onClick={() => isInteractive && handleDayClick(day)}
+      {isLoadingCalendar ? (
+        <LoadingSpinner 
+          message="Loading your calendar..." 
+          fullHeight 
+        />
+      ) : (
+        <>
+          {showSuccessAlert && (
+            <Fade in={showSuccessAlert}>
+              <Alert 
+                severity="success" 
+                sx={{ mb: 3 }}
+                onClose={() => setShowSuccessAlert(false)}
               >
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    left: 8,
-                    fontWeight: isToday(day) ? 'bold' : 'normal'
-                  }}
-                >
-                  {format(day, 'd')}
-                </Typography>
+                Articles successfully scheduled!
+              </Alert>
+            </Fade>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <IconButton onClick={prevMonth}><ChevronLeft /></IconButton>
+            <Typography variant="h5">{format(currentDate, 'MMMM yyyy')}</Typography>
+            <IconButton onClick={nextMonth}><ChevronRight /></IconButton>
+          </Box>
+    
+          {/* Calendar grid */}
+          <Paper sx={{ 
+            overflow: 'hidden', 
+            borderRadius: 2,
+            height: 'calc(100vh - 200px)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <Grid container>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                <Grid item xs={12 / 7} key={index} sx={{ textAlign: 'center', p: 1 }}>
+                  <Typography variant="subtitle2">{day}</Typography>
+                </Grid>
+              ))}
+            </Grid>
+  
+            <Grid container sx={{ flexGrow: 1 }}>
+              {daysInMonth.map((day, index) => {
+                const dayStatus = getDayStatus(day);
+                const isInteractive = isDayInteractive(day);
+                const scheduledArticles = getScheduledArticlesForDay(day);
                 
-                {/* Plus button for adding articles - only for interactive days */}
-                {isInteractive && (
-                  <IconButton 
-                    size="small" 
+                // Determine background color based on status
+                let bgColor = 'transparent';
+                if (isToday(day)) {
+                  bgColor = 'rgba(25, 118, 210, 0.08)';
+                } else if (dayStatus === 'published') {
+                  bgColor = 'rgba(76, 175, 80, 0.08)'; // Light green for published
+                } else if (dayStatus === 'upcoming') {
+                  bgColor = 'rgba(255, 152, 0, 0.08)'; // Light orange for upcoming
+                } else if (dayStatus === 'past-missed') {
+                  bgColor = 'rgba(244, 67, 54, 0.08)'; // Light red for missed
+                } else if (dayStatus === 'past-empty') {
+                  bgColor = 'rgba(158, 158, 158, 0.15)'; // Light grey for past empty days
+                }
+                
+                return (
+                  <Grid 
+                    item 
+                    xs={12 / 7} 
+                    key={index} 
                     sx={{ 
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: 32,
-                      height: 32,
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      border: '1px solid #ddd', 
+                      height: 'auto', 
+                      minHeight: 80,
+                      position: 'relative',
+                      bgcolor: bgColor,
+                      opacity: isInteractive ? 1 : 0.7,
                       '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        bgcolor: isInteractive ? 'rgba(0, 0, 0, 0.04)' : bgColor,
+                        cursor: isInteractive ? 'pointer' : 'default'
                       }
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDayClick(day);
-                    }}
+                    onClick={() => isInteractive && handleDayClick(day)}
                   >
-                    <Plus size={20} />
-                  </IconButton>
-                )}
-                
-                {/* Display scheduled articles */}
-                {getScheduledArticlesForDay(day).map((article, idx) => (
-                  <Box key={idx} sx={{
-                    position: 'absolute',
-                    top: 24 + idx * 20,
-                    left: 8,
-                    right: 8,
-                    bgcolor: article.status === 'published' ? theme.palette.success.main : article.color,
-                    color: '#fff',
-                    p: 0.5,
-                    borderRadius: 1,
-                    textAlign: 'center',
-                    fontSize: '0.75rem',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>
-                    {article.title}
-                  </Box>
-                ))}
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Paper>
-      
-      {/* Scheduling modal */}
-      <Modal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        aria-labelledby="schedule-modal-title"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2
-        }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography id="schedule-modal-title" variant="h6" component="h2">
-              Schedule Articles for {selectedDay ? format(selectedDay, 'MMMM d, yyyy') : ''}
-            </Typography>
-            <IconButton size="small" onClick={handleCloseModal}>
-              <X size={18} />
-            </IconButton>
-          </Box>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        position: 'absolute', 
+                        top: 8, 
+                        left: 8,
+                        fontWeight: isToday(day) ? 'bold' : 'normal'
+                      }}
+                    >
+                      {format(day, 'd')}
+                    </Typography>
+                    
+                    {/* Plus button for adding articles - only for interactive days */}
+                    {isInteractive && (
+                      <IconButton 
+                        size="small" 
+                        sx={{ 
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: 32,
+                          height: 32,
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          }
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDayClick(day);
+                        }}
+                      >
+                        <Plus size={20} />
+                      </IconButton>
+                    )}
+                    
+                    {/* Display scheduled articles */}
+                    {scheduledArticles.map((article, idx) => (
+                      <Box key={idx} sx={{
+                        position: 'absolute',
+                        top: 24 + idx * 20,
+                        left: 8,
+                        right: 8,
+                        bgcolor: article.status === 'published' ? theme.palette.success.main : article.color || theme.palette.warning.main,
+                        color: '#fff',
+                        p: 0.5,
+                        borderRadius: 1,
+                        textAlign: 'center',
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        {`Article #${article.article_id}`}
+                      </Box>
+                    ))}
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Paper>
           
-          <Divider sx={{ mb: 2 }} />
-          
-          <Typography variant="subtitle2" gutterBottom>
-            Select articles to schedule:
-          </Typography>
-          
-          <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-            {availableArticles.map((article) => (
-              <ListItem key={article.id} disablePadding>
-                <Checkbox
-                  edge="start"
-                  checked={selectedArticles.includes(article.id)}
-                  onChange={() => handleArticleToggle(article.id)}
-                />
-                <ListItemText primary={article.title} />
-              </ListItem>
-            ))}
-          </List>
-          
-          <Box display="flex" justifyContent="flex-end" mt={3} gap={1}>
-            <Button variant="outlined" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleScheduleSubmit}
-              disabled={selectedArticles.length === 0}
-            >
-              Schedule
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+          <Modal
+            open={isModalOpen}
+            onClose={handleCloseModal}
+            aria-labelledby="schedule-modal-title"
+          >
+            <Box sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2
+            }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography id="schedule-modal-title" variant="h6" component="h2">
+                  Schedule Articles for {selectedDay ? format(selectedDay, 'MMMM d, yyyy') : ''}
+                </Typography>
+                <IconButton size="small" onClick={handleCloseModal}>
+                  <X size={18} />
+                </IconButton>
+              </Box>
+              
+              <Divider sx={{ mb: 2 }} />
+              
+              {isLoadingArticles ? (
+                <Box display="flex" justifyContent="center" my={4}>
+                  <CircularProgress size={30} />
+                </Box>
+              ) : (
+                <>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Select articles to schedule:
+                  </Typography>
+                  
+                  <List sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    {getAvailableArticles().map((article) => (
+                      <ListItem key={article.id} disablePadding>
+                        <ListItemText 
+                          primary={article.title || `Article #${article.id}`} 
+                          secondary={article.status}
+                        />
+                      </ListItem>
+                    ))}
+                    
+                    {getAvailableArticles().length === 0 && (
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No articles available for scheduling
+                      </Typography>
+                    )}
+                  </List>
+                </>
+              )}
+              
+              <Box display="flex" justifyContent="flex-end" mt={3} gap={1}>
+                <Button variant="outlined" onClick={handleCloseModal} disabled={isScheduling}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="contained" 
+                  onClick={handleScheduleSubmit}
+                  disabled={selectedArticles.length === 0 || isScheduling}
+                  startIcon={isScheduling ? <CircularProgress size={20} color="inherit" /> : null}
+                >
+                  {isScheduling ? 'Scheduling...' : 'Schedule'}
+                </Button>
+              </Box>
+            </Box>
+          </Modal>
+          </>
+        )
+      } 
     </DashboardContent>
   );
 }

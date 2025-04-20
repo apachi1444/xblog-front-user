@@ -40,30 +40,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
-  const { enqueueSnackbar } = useSnackbar();
 
-  // Get user and store data from Auth Redux store
   const user = useSelector(selectAuthUser);
-  const currentStore = useSelector((state: RootState) => state.auth.currentStore);
   const userPlan = user?.subscription?.plan || 'Free';
   
-  // Calculate percentages
-  const storesPercentage = currentStore 
-    ? Math.min(((currentStore.storesTotal - currentStore.storesRemaining) / currentStore.storesTotal) * 100, 100)
-    : 0;
-    
-  const articlesPercentage = currentStore 
-    ? Math.min(((currentStore.articlesTotal - currentStore.articlesRemaining) / currentStore.articlesTotal) * 100, 100)
-    : 0;
-  const creditsUsed = user?.credits?.used || 0;
-  const creditsTotal = user?.credits?.total || 100;
-  
-  // Calculate percentage of credits used
-  const creditsPercentage = Math.min((creditsUsed / creditsTotal) * 100, 100);
-
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenPopover = useCallback((event: any) => {
     setOpenPopover(event.currentTarget);
   }, []);
 
@@ -73,10 +56,14 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const handleClickItem = useCallback(
     (path: string) => {
-      handleClosePopover();
-      router.push(path);
+      // Force close the popover immediately
+      setOpenPopover(null);
+      // Then navigate
+      setTimeout(() => {
+        router.push(path);
+      }, 10);
     },
-    [handleClosePopover, router]
+    [router]
   );
 
   const handleLogOut = useCallback(() => {

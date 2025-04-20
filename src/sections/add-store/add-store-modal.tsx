@@ -34,10 +34,10 @@ const platforms = [
     description: 'Connect your Shopify store',
   },
   {
-    id: 'woocommerce',
-    name: 'WooCommerce',
-    icon: '/assets/icons/platforms/woocommerce.svg',
-    description: 'Connect your WooCommerce store',
+    id: 'wix',
+    name: 'Wix',
+    icon: '/assets/icons/platforms/wix.svg',
+    description: 'Connect your Wix store',
   },
 ];
 
