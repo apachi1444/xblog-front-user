@@ -14,11 +14,21 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { setLanguage } from 'src/services/slices/userDashboardSlice';
 
-// Default languages configuration
+// Updated languages configuration with all requested languages
 const DEFAULT_LANGUAGES = [
   {
     value: 'en',
     label: 'English',
+    icon: '/assets/icons/flags/ic_flag_en.svg',
+  },
+  {
+    value: 'es',
+    label: 'Español',
+    icon: '/assets/icons/flags/ic_flag_en.svg',
+  },
+  {
+    value: 'ar',
+    label: 'العربية',
     icon: '/assets/icons/flags/ic_flag_en.svg',
   },
   {
@@ -29,7 +39,12 @@ const DEFAULT_LANGUAGES = [
   {
     value: 'pt',
     label: 'Português',
-    icon: '/assets/icons/flags/ic_flag_pt.svg',
+    icon: '/assets/icons/flags/ic_flag_en.svg',
+  },
+  {
+    value: 'ru',
+    label: 'Русский',
+    icon: '/assets/icons/flags/ic_flag_en.svg',
   },
 ];
 
@@ -62,7 +77,7 @@ export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: Lang
     }
   }, [storedLanguage, i18n]);
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenPopover = useCallback((event: any) => {
     setOpenPopover(event.currentTarget);
   }, []);
 
@@ -80,9 +95,10 @@ export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: Lang
       // Update i18n language
       i18n.changeLanguage(newLang);
       
-      handleClosePopover();
+      // Force close the popover immediately
+      setOpenPopover(null);
     },
-    [handleClosePopover, dispatch, i18n]
+    [dispatch, i18n]
   );
 
   const currentLang = data.find((lang) => lang.value === locale) || data[0];

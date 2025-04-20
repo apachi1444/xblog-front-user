@@ -1,5 +1,103 @@
 {
-    "translation": {
-      "headerTitle": "Meu Titulo do Cabecalho do {{appName}}"
+  "translation": {
+    "auth": {
+      "signup": {
+        "title": "Junte-se à Nossa Comunidade Criativa",
+        "subtitle": "Comece sua jornada criativa com recursos exclusivos",
+        "haveAccount": "Já tem uma conta?",
+        "fullName": "Nome Completo",
+        "fullNamePlaceholder": "João Silva",
+        "email": "Endereço de Email",
+        "emailPlaceholder": "joao.silva@creative.com",
+        "password": "Senha",
+        "confirmPassword": "Confirmar Senha",
+        "createAccount": "Criar Conta",
+        "termsPrefix": "Ao se inscrever, você concorda com nossos",
+        "termsOfService": "Termos de Serviço",
+        "and": "e",
+        "privacyPolicy": "Política de Privacidade",
+        "orContinueWith": "OU CONTINUE COM",
+        "signupWithGoogle": "Inscrever-se com Google",
+        "or": "OU"
+      },
+      "signin": {
+        "title": "Entrar"
+      }
+    },
+    "common": {
+      "dashboard": "Painel de Controle",
+      "profile": "Perfil",
+      "settings": "Configurações",
+      "logout": "Sair"
+    },
+    "analytics": {
+      "welcome": "Olá, Bem-vindo de volta xBlogger👋",
+      "articlesGenerated": "Artigos Gerados",
+      "totalWebsites": "Total de Sites",
+      "purchaseOrders": "Pedidos de compra",
+      "messages": "Mensagens",
+      "currentVisits": "Visitas atuais",
+      "websiteVisits": "Visitas ao site",
+      "websiteVisitsSubheader": "(+43%) em relação ao ano passado",
+      "conversionRates": "Taxas de conversão",
+      "conversionRatesSubheader": "(+43%) em relação ao ano passado",
+      "orderTimeline": "Linha do tempo de pedidos",
+      "trafficBySite": "Tráfego por site",
+      "tasks": "Tarefas",
+      "teamA": "Equipe A",
+      "teamB": "Equipe B"
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fev",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "Mai",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Ago",
+      "sep": "Set"
+    },
+    "regions": {
+      "america": "América",
+      "asia": "Ásia",
+      "europe": "Europa",
+      "africa": "África"
+    },
+    "countries": {
+      "italy": "Itália",
+      "japan": "Japão",
+      "china": "China",
+      "canada": "Canadá",
+      "france": "França"
+    },
+    "create": {
+      "heading": "Criar com IA",
+      "subheading": "Como você gostaria de começar?",
+      "popular": "Popular",
+      "recentPromptsHeading": "Seus prompts recentes",
+      "generateLabel": "Gerar",
+      "draftLabel": "RASCUNHO",
+      "options": {
+        "generate": {
+          "title": "Gerar",
+          "description": "Criar a partir de um prompt de uma linha em segundos"
+        },
+        "template": {
+          "title": "Usar Modelo Incorporado",
+          "description": "Criar um artigo a partir de um modelo existente"
+        }
+      },
+      "recentPrompts": {
+        "prompt1": "Apresentação do React Native e diferença entre React e React Native",
+        "prompt2": "Dicas de otimização de SEO para sites de e-commerce",
+        "prompt3": "Como implementar autenticação em aplicações Next.js"
+      },
+      "timeAgo": {
+        "minute": "há 1 minuto",
+        "days": "há 2 dias",
+        "week": "há 1 semana"
+      }
     }
+  }
 }

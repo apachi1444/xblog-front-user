@@ -1,0 +1,103 @@
+{
+  "translation": {
+    "auth": {
+      "signup": {
+        "title": "Únete a Nuestra Comunidad Creativa",
+        "subtitle": "Comienza tu viaje creativo con características exclusivas",
+        "haveAccount": "¿Ya tienes una cuenta?",
+        "fullName": "Nombre Completo",
+        "fullNamePlaceholder": "Juan Pérez",
+        "email": "Correo Electrónico",
+        "emailPlaceholder": "juan.perez@creative.com",
+        "password": "Contraseña",
+        "confirmPassword": "Confirmar Contraseña",
+        "createAccount": "Crear Cuenta",
+        "termsPrefix": "Al registrarte, aceptas nuestros",
+        "termsOfService": "Términos de Servicio",
+        "and": "y",
+        "privacyPolicy": "Política de Privacidad",
+        "orContinueWith": "O CONTINUAR CON",
+        "signupWithGoogle": "Registrarse con Google",
+        "or": "O"
+      },
+      "signin": {
+        "title": "Iniciar Sesión"
+      }
+    },
+    "common": {
+      "dashboard": "Panel de Control",
+      "profile": "Perfil",
+      "settings": "Configuración",
+      "logout": "Cerrar Sesión"
+    },
+    "analytics": {
+      "welcome": "Hola, Bienvenido de nuevo xBlogger👋",
+      "articlesGenerated": "Artículos Generados",
+      "totalWebsites": "Total de Sitios Web",
+      "purchaseOrders": "Órdenes de compra",
+      "messages": "Mensajes",
+      "currentVisits": "Visitas actuales",
+      "websiteVisits": "Visitas al sitio web",
+      "websiteVisitsSubheader": "(+43%) que el año pasado",
+      "conversionRates": "Tasas de conversión",
+      "conversionRatesSubheader": "(+43%) que el año pasado",
+      "orderTimeline": "Cronología de pedidos",
+      "trafficBySite": "Tráfico por sitio",
+      "tasks": "Tareas",
+      "teamA": "Equipo A",
+      "teamB": "Equipo B"
+    },
+    "months": {
+      "jan": "Ene",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Ago",
+      "sep": "Sep"
+    },
+    "regions": {
+      "america": "América",
+      "asia": "Asia",
+      "europe": "Europa",
+      "africa": "África"
+    },
+    "countries": {
+      "italy": "Italia",
+      "japan": "Japón",
+      "china": "China",
+      "canada": "Canadá",
+      "france": "Francia"
+    },
+    "create": {
+      "heading": "Crear con IA",
+      "subheading": "¿Cómo te gustaría empezar?",
+      "popular": "Popular",
+      "recentPromptsHeading": "Tus indicaciones recientes",
+      "generateLabel": "Generar",
+      "draftLabel": "BORRADOR",
+      "options": {
+        "generate": {
+          "title": "Generar",
+          "description": "Crear a partir de una indicación de una línea en segundos"
+        },
+        "template": {
+          "title": "Usar Plantilla Incorporada",
+          "description": "Crear un artículo a partir de una plantilla existente"
+        }
+      },
+      "recentPrompts": {
+        "prompt1": "Presentación de React Native y diferencia entre React y React Native",
+        "prompt2": "Consejos de optimización SEO para sitios de comercio electrónico",
+        "prompt3": "Cómo implementar la autenticación en aplicaciones Next.js"
+      },
+      "timeAgo": {
+        "minute": "hace 1 minuto",
+        "days": "hace 2 días",
+        "week": "hace 1 semana"
+      }
+    }
+  }
+}
