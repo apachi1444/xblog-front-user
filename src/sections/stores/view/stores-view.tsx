@@ -13,7 +13,7 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { _stores } from "src/_mock";
 import { DashboardContent } from "src/layouts/dashboard";
-import { useLazyGetStoresQuery } from "src/services/apis/storesApi";
+import { useLazyGetStoresQuery, useDeleteStoreMutation } from "src/services/apis/storesApi";
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -41,14 +41,6 @@ const TABLE_HEAD = [
   { id: '', label: 'Actions' },
 ];
 
-// Simulate a delete API call
-const fakeDeleteStoreAPI = (id: string): Promise<void> => new Promise((resolve) => {
-    // Simulate network delay
-    setTimeout(() => {
-      resolve();
-    }, 2000);
-  });
-
 export function StoresView() {
   const table = useTable();
   const navigate = useNavigate();
@@ -58,8 +50,10 @@ export function StoresView() {
   const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
   const [deletingStoreIds, setDeletingStoreIds] = useState<string[]>([]);
 
-  const[doGetStores] = useLazyGetStoresQuery();
-  const [isLoading , setIsLoading] = useState(false)
+  const [doGetStores] = useLazyGetStoresQuery();
+  // Add the delete store mutation hook
+  const [deleteStore, { isLoading: isDeleting }] = useDeleteStoreMutation();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -102,22 +96,29 @@ export function StoresView() {
         // Add store ID to the deleting list to show loading state
         setDeletingStoreIds((prev) => [...prev, id]);
   
-        // Call the fake API (replace with real API when URL is fixed)
-        await fakeDeleteStoreAPI(id);
+        // Call the real API instead of the fake one
+        await deleteStore(Number(id)).unwrap();
+        
+        // Show success toast
+        toast.success("Store deleted successfully");
   
         // Ensure table.selected exists before trying to remove selection
         if (table?.selected?.includes(id)) {
           table.onSelectRow?.(id);
         }
+        
+        // Update local state to remove the deleted store
+        setStores((prev) => prev.filter((store) => store.id !== id));
+        
       } catch (error) {
         console.error("Error deleting store:", error);
-    
+        toast.error("Failed to delete store. Please try again.");
       } finally {
         // Remove the store ID from deleting list
         setDeletingStoreIds((prev) => prev.filter((storeId) => storeId !== id));
       }
     },
-    [table, setDeletingStoreIds] // Added missing dependency
+    [table, deleteStore, setDeletingStoreIds]
   );
   
 
@@ -128,7 +129,7 @@ export function StoresView() {
   }, []);
 
   const handleAddNewStore = useCallback(() => {
-    toast.error("tests")
+    toast.success("tests")
     navigate("/stores/add");
   }, [navigate]);
 

@@ -1,6 +1,7 @@
 import type { StackProps } from '@mui/material/Stack';
 
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -11,7 +12,7 @@ import Typography from '@mui/material/Typography';
 
 export function NavUpgrade({ sx, ...other }: StackProps) {
   const navigate = useNavigate();
-  
+  const { t } = useTranslation();
   
   return (
     <>      
@@ -33,7 +34,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
             mb: 1,
           })}
         >
-          Want to unlock more features?
+          {t('upgrade.unlockFeatures', 'Want to unlock more features?')}
         </Typography>
 
         <Button
@@ -55,7 +56,7 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
             },
           })}
         >
-          Upgrade to Pro 🚀
+          {t('upgrade.upgradeToPro', 'Upgrade to Pro 🚀')}
         </Button>
       </Box>
     </>

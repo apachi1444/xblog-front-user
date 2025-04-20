@@ -1,5 +1,24 @@
 {
     "translation": {
+      "navigation": {
+        "dashboard": "Dashboard",
+        "generate": "Generate",
+        "blogs": "Blogs",
+        "calendar": "Calendar",
+        "templates": "Templates",
+        "upgrade_license": "Upgrade license",
+        "book_demo": "Book Demo"
+      },
+      "upgrade": {
+        "unlockFeatures": "Want to unlock more features?",
+        "upgradeToPro": "Upgrade to Pro 🚀"
+      },
+      "resources": {
+        "websites": "Websites",
+        "articles": "Articles",
+        "websitesRemaining": "{{count}} websites remaining",
+        "articlesRemaining": "{{count}} articles remaining"
+      },
       "auth": {
         "signup": {
           "title": "Join Our Creative Community",
@@ -92,6 +111,9 @@
           "days": "2 days ago",
           "week": "1 week ago"
         }
+      },
+      "websites": {
+        "addNew": "Add New Website"
       }
     }
 }

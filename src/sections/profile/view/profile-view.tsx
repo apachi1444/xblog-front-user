@@ -23,7 +23,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { ProfileForm } from 'src/components/profile/ProfileForm';
 import { SecurityForm } from 'src/components/profile/SecurityForm';
-import { NotificationsForm } from 'src/components/profile/NotificationForm';
 
 // Mock user data - in a real app, this would come from your API
 const USER = {
@@ -317,7 +316,6 @@ export function ProfileView() {
             <Tab label="Account Settings" />
             <Tab label="Subscription" />
             <Tab label="Security" />
-            <Tab label="Notifications" />
           </Tabs>
         </Box>
 
@@ -451,7 +449,6 @@ export function ProfileView() {
           )}
           
           {activeTab === 2 && <SecurityForm />}
-          {activeTab === 3 && <NotificationsForm />}
         </Box>
       </Container>
     </DashboardContent>

@@ -1,6 +1,7 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
@@ -152,6 +153,8 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
 
   const websitesLength = workspaces?.length ?? 0
 
+  const { t } = useTranslation();
+
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
@@ -206,7 +209,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                     </Box>
 
                     <Box component="span" flexGrow={1}>
-                      {item.title}
+                      {t(`navigation.${item.title.toLowerCase().replace(/\s+/g, '_')}`, item.title)}
                     </Box>
 
                     {item.info && item.info}
@@ -254,7 +257,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                     </Box>
 
                     <Box component="span" flexGrow={1} sx={{fontWeight: 'fontWeightSemiBold',}}>
-                      {item.title}
+                      {t(`navigation.${item.title.toLowerCase().replace(/\s+/g, '_')}`, item.title)}
                     </Box>
                   </ListItemButton>
                 </ListItem>

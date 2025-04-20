@@ -4,6 +4,7 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
@@ -49,6 +50,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -61,7 +63,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   
   const storesData = useSelector((state: RootState) => state.stores);  
 
-  const [doGetArticles , {isLoading}] = useLazyGetArticlesQuery();
+  const [doGetArticles] = useLazyGetArticlesQuery();
   
   useEffect(() => {
     doGetArticles()
@@ -78,13 +80,12 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!user) {
-        try {
-          const userData = await getCurrentUser().unwrap();
-          dispatch(setCredentials({accessToken, user: userData}));
-        } catch (error) {
-          console.error('Failed to fetch user data:', error);
-        }
+      try {
+        const userData = await getCurrentUser().unwrap();
+        dispatch(setCredentials({accessToken, user: userData}));
+      } catch (error) {
+        dispatch(setCredentials({accessToken, user: null}));
+        console.error('Failed to fetch user data:', error);
       }
     };
     
@@ -262,7 +263,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     boxShadow: theme.shadows[3],
                   }}
                 >
-                  Add New Website
+                  {t('websites.addNew', 'Add New Website')}
                 </Button>
               </Box>
             ) : undefined

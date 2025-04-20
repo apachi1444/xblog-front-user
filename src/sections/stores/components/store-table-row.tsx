@@ -2,19 +2,20 @@ import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import MenuList from '@mui/material/MenuList';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
-import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+
+import { fDate } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
-import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
 
@@ -40,7 +41,6 @@ type StoreTableRowProps = {
 
 export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting }: StoreTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-  const [isDeleteHovered, setIsDeleteHovered] = useState(false);
 
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {

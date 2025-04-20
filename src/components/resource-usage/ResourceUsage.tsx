@@ -1,6 +1,7 @@
 import type { RootState } from 'src/services/store';
 
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import { Box, alpha, Typography, LinearProgress } from '@mui/material';
 
@@ -11,6 +12,8 @@ interface ResourceUsageProps {
 }
 
 export function ResourceUsage({ compact = false }: ResourceUsageProps) {
+  const { t } = useTranslation();
+  
   // Get store data from Auth Redux store
   const user = useSelector((state: RootState) => state.auth.user);
   const articles = useSelector(selectAllArticles);
@@ -65,7 +68,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
               fontWeight: 500,
             }}
           >
-            Websites
+            {t('resources.websites', 'Websites')}
           </Typography>
           <Typography 
             variant={compact ? "caption" : "body2"} 
@@ -106,7 +109,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
             fontSize: compact ? '0.7rem' : '0.75rem'
           }}
         >
-          {storesRemaining} websites remaining
+          {t('resources.websitesRemaining', '{{count}} websites remaining', { count: storesRemaining })}
         </Typography>
       </Box>
       
@@ -120,7 +123,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
               fontWeight: 500,
             }}
           >
-            Articles
+            {t('resources.articles', 'Articles')}
           </Typography>
           <Typography 
             variant={compact ? "caption" : "body2"} 
@@ -161,7 +164,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
             fontSize: compact ? '0.7rem' : '0.75rem'
           }}
         >
-          {articlesRemaining} articles remaining
+          {t('resources.articlesRemaining', '{{count}} articles remaining', { count: articlesRemaining })}
         </Typography>
       </Box>
     </Box>
