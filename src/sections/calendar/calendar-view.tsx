@@ -1,6 +1,5 @@
-import type { RootState } from 'src/services/store';
 
-import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
@@ -16,7 +15,6 @@ import {
   Button, 
   Divider, 
   ListItem, 
-  Checkbox, 
   useTheme, 
   Typography, 
   IconButton,
@@ -29,7 +27,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { useScheduleArticleMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
-import { FullPageLoader } from 'src/components/loader/FullPageLoader';
 import { LoadingSpinner } from 'src/components/loading';
 
 export default function CalendarPage() {
@@ -56,8 +53,25 @@ export default function CalendarPage() {
   const { 
     data: articlesData, 
     isLoading: isLoadingArticles,
-    error: articlesError
+    error: articlesError,
+    isError,
+    isSuccess
   } = useGetArticlesQuery({ store_id: storeId.toString() });
+
+  
+  // Success effect
+  useEffect(() => {
+    if (isSuccess && articlesData) {
+      toast.success("Successfully loaded articles");
+    }
+  }, [isSuccess, articlesData]);
+
+  // Error effect
+  useEffect(() => {
+    if (isError && articlesError) {
+      toast.error("Successfully loaded articles");
+    }
+  }, [isError, articlesError]);
   
   // Schedule article mutation
   const [scheduleArticle, { isLoading: isScheduling }] = useScheduleArticleMutation();

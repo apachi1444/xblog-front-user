@@ -1,14 +1,11 @@
-import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
+import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
-import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
 
 import { Iconify } from 'src/components/iconify';
@@ -23,123 +20,123 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({ template, onSelect }: TemplateCardProps) {
-  const theme = useTheme();
-  const { t } = useTranslation();
-  
-  const { title, description, icon, category, popular, isNew, difficulty, estimatedTime } = template;
+  const { title, description, popular, isNew, locked } = template;
   
   return (
     <Card 
       sx={{ 
         height: '100%',
-        position: 'relative',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        transition: 'transform 0.3s, box-shadow 0.3s',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: theme.customShadows.z16,
+          boxShadow: (theme) => theme.shadows[10],
         },
       }}
     >
-      {/* Status badges */}
-      <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 9, display: 'flex', gap: 1 }}>
-        {isNew && (
-          <Chip 
-            label={t('templates.new', 'New')} 
-            size="small" 
-            color="info"
-            sx={{ fontWeight: 'bold' }}
-          />
-        )}
-        {popular && (
-          <Chip 
-            label={t('templates.popular', 'Popular')} 
-            size="small" 
-            color="error"
-            sx={{ fontWeight: 'bold' }}
-          />
-        )}
-      </Box>
-      
-      <CardActionArea sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-        <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Icon */}
-          <Box 
-            sx={{ 
-              mb: 2,
-              width: 48,
-              height: 48,
-              display: 'flex',
-              borderRadius: 1.5,
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: alpha(theme.palette.primary.main, 0.08),
-            }}
-          >
-            <Iconify icon={icon} width={24} height={24} sx={{ color: 'primary.main' }} />
-          </Box>
+      <CardActionArea 
+        onClick={onSelect}
+        sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+      >
+        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1}>
+              {popular && (
+                <Chip 
+                  size="small" 
+                  color="warning" 
+                  label="Popular"
+                  icon={<Iconify icon="mdi:fire" />} 
+                />
+              )}
+              
+              {isNew && (
+                <Chip 
+                  size="small" 
+                  color="info" 
+                  label="New"
+                  icon={<Iconify icon="mdi:star" />} 
+                />
+              )}
+            </Stack>
+            
+            {locked && (
+              <Box 
+                sx={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                }}
+              >
+                <Iconify 
+                  icon="mdi:lock" 
+                  sx={{ 
+                    color: 'primary.main',
+                    fontSize: 18,
+                  }} 
+                />
+              </Box>
+            )}
+          </Stack>
           
-          {/* Title and description */}
-          <Typography variant="h6" sx={{ mb: 1 }}>
+          <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
           
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              mb: 2,
+            }}
+          >
             {description}
           </Typography>
           
-          <Divider sx={{ my: 2 }} />
-          
-          {/* Metadata */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Iconify icon="mdi:clock-outline" width={16} height={16} sx={{ color: 'text.disabled' }} />
-              <Typography variant="caption" color="text.secondary">
-                {estimatedTime}
-              </Typography>
-            </Stack>
-            
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Iconify 
-                icon={
-                  difficulty === 'easy' 
-                    ? 'mdi:signal-cellular-1' 
-                    : difficulty === 'medium' 
-                      ? 'mdi:signal-cellular-2' 
-                      : 'mdi:signal-cellular-3'
-                } 
-                width={16} 
-                height={16} 
-                sx={{ 
-                  color: 
-                    difficulty === 'easy' 
-                      ? 'success.main' 
-                      : difficulty === 'medium' 
-                        ? 'warning.main' 
-                        : 'error.main' 
-                }} 
-              />
-              <Typography variant="caption" color="text.secondary">
-                {t(`templates.difficulty.${difficulty}`, difficulty)}
-              </Typography>
-            </Stack>
-          </Stack>
-        </CardContent>
-        
-        {/* Action button */}
-        <Box sx={{ p: 2, pt: 0 }}>
-          <Button 
-            fullWidth 
-            variant="contained" 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onSelect();
+          <Box 
+            sx={{ 
+              mt: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
-            endIcon={<Iconify icon="eva:arrow-forward-fill" />}
           >
-            {t('templates.useTemplate', 'Use Template')}
-          </Button>
-        </Box>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                display: 'flex',
+                alignItems: 'center',
+                color: 'text.secondary',
+              }}
+            >
+              <Iconify icon="mdi:clock-outline" sx={{ mr: 0.5 }} />
+              5 min
+            </Typography>
+            
+            {locked ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
+                <Typography variant="subtitle2" sx={{ mr: 0.5 }}>
+                  Premium
+                </Typography>
+                <Iconify icon="mdi:crown" />
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', color: 'success.main' }}>
+                <Typography variant="subtitle2" sx={{ mr: 0.5 }}>
+                  Free
+                </Typography>
+                <Iconify icon="mdi:check-circle" />
+              </Box>
+            )}
+          </Box>
+        </CardContent>
       </CardActionArea>
     </Card>
   );

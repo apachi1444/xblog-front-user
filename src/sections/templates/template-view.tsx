@@ -7,11 +7,15 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -19,6 +23,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
 import { TemplateCard } from './components/template-card';
+import { PricingPlans } from './components/pricing-plans';
 import { TemplateFilter } from './components/template-filter';
 import { TemplateEmptyState } from './components/template-empty-state';
 import { ARTICLE_TEMPLATES, TEMPLATE_CATEGORIES } from './template-data';
@@ -26,13 +31,15 @@ import { ARTICLE_TEMPLATES, TEMPLATE_CATEGORIES } from './template-data';
 // ----------------------------------------------------------------------
 
 export function TemplateView() {
-  const theme = useTheme();
   const navigate = useNavigate();
+  const theme = useTheme();
   const { t } = useTranslation();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentTab, setCurrentTab] = useState('all');
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   
   // Filter templates based on search query and selected category
   const filteredTemplates = ARTICLE_TEMPLATES.filter((template) => {
@@ -60,9 +67,26 @@ export function TemplateView() {
     setCurrentTab(newValue);
   };
   
-  const handleTemplateSelect = (templateId: string) => {
-    // Navigate to generate page with template ID
-    navigate(`/generate?template=${templateId}`);
+  const handleTemplateSelect = (template: any) => {
+    if (template.locked) {
+      // Open modal for locked templates
+      setSelectedTemplate(template);
+      setOpenModal(true);
+    } else {
+      // Navigate to generate page with template ID
+      navigate(`/generate?template=${template.id}`);
+    }
+  };
+  
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+  
+  const handleUpgrade = (planId: string) => {
+    // Handle upgrade logic here
+    console.log(`Upgrading to plan: ${planId}`);
+    setOpenModal(false);
+    navigate(`/upgrade-license?plan=${planId}&template=${selectedTemplate?.id}`);
   };
   
   return (
@@ -163,7 +187,7 @@ export function TemplateView() {
               <Grid key={template.id} xs={12} sm={6} md={4}>
                 <TemplateCard 
                   template={template} 
-                  onSelect={() => handleTemplateSelect(template.id)} 
+                  onSelect={() => handleTemplateSelect(template)} 
                 />
               </Grid>
             ))}
@@ -179,6 +203,137 @@ export function TemplateView() {
           />
         )}
       </Container>
+
+      {/* Premium Template Modal */}
+      <Dialog 
+        open={openModal} 
+        onClose={handleCloseModal}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedTemplate && (
+          <>
+            <DialogTitle>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="h5">
+                  {t('templates.premiumTemplate', 'Premium Template')}
+                </Typography>
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    bgcolor: 'primary.lighter', 
+                    color: 'primary.main',
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1,
+                  }}
+                >
+                  <Iconify icon="mdi:crown" sx={{ mr: 0.5 }} />
+                  <Typography variant="subtitle2">
+                    {t('templates.premiumOnly', 'Premium Only')}
+                  </Typography>
+                </Box>
+              </Stack>
+            </DialogTitle>
+            <DialogContent dividers>
+              <Grid container spacing={3}>
+                <Grid xs={12} md={5}>
+                  <Box 
+                    sx={{ 
+                      p: 3, 
+                      height: '100%',
+                      borderRadius: 2,
+                      bgcolor: 'background.neutral',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom>
+                      {selectedTemplate.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      {selectedTemplate.description}
+                    </Typography>
+                    
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        {t('templates.preview', 'Preview')}:
+                      </Typography>
+                      <Box 
+                        sx={{ 
+                          p: 2, 
+                          borderRadius: 1, 
+                          bgcolor: 'background.paper',
+                          border: `1px dashed ${theme.palette.divider}`,
+                          height: 200,
+                          overflow: 'hidden',
+                          position: 'relative',
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {selectedTemplate.previewContent || selectedTemplate.description}
+                        </Typography>
+                        
+                        {/* Blur overlay */}
+                        <Box 
+                          sx={{ 
+                            position: 'absolute', 
+                            bottom: 0, 
+                            left: 0, 
+                            right: 0, 
+                            height: '70%', 
+                            background: 'linear-gradient(transparent, rgba(255,255,255,0.9))',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Iconify icon="mdi:lock" sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
+                          <Typography variant="subtitle1" color="primary.main">
+                            {t('templates.unlockToAccess', 'Unlock to access')}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ mt: 'auto', pt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        {t('templates.benefits', 'Benefits')}:
+                      </Typography>
+                      <Stack spacing={1}>
+                        {['SEO-optimized', 'High conversion rate', 'Ready-to-use structure'].map((benefit, index) => (
+                          <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Iconify icon="mdi:check-circle" sx={{ color: 'success.main', mr: 1 }} />
+                            <Typography variant="body2">{benefit}</Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Box>
+                </Grid>
+                
+                <Grid xs={12} md={7}>
+                  <Typography variant="h6" gutterBottom>
+                    {t('templates.choosePlan', 'Choose a plan to unlock this template')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {t('templates.unlockAllTemplates', 'Upgrade your plan to unlock all premium templates and more features')}
+                  </Typography>
+                  
+                  <PricingPlans onSelectPlan={handleUpgrade} />
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseModal}>
+                {t('common.cancel', 'Cancel')}
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </DashboardContent>
   );
 }

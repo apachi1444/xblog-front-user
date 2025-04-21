@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 
 import { Iconify } from 'src/components/iconify';
-import { TemplateCategory } from '../template-types';
+
+import type { TemplateCategory } from '../template-types';
 
 // ----------------------------------------------------------------------
 

@@ -2,18 +2,20 @@ export interface ArticleTemplate {
   id: string;
   title: string;
   description: string;
-  icon: string;
   category: string;
   popular: boolean;
   isNew: boolean;
-  difficulty: 'easy' | 'medium' | 'hard';
-  estimatedTime: string;
-  structure: {
+  locked: boolean; // Add this property
+  icon?: string;
+  difficulty?: string;
+  estimatedTime?: string;
+  previewContent?: string;
+  structure?: {
     sections: {
       title: string;
-      description?: string;
+      description: string;
     }[];
-    seoTips: string[];
+    seoTips?: string[];
   };
 }
 

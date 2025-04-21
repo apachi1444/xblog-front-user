@@ -33,7 +33,26 @@ export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
   },
 ];
 
-export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
+export const ARTICLE_TEMPLATES : ArticleTemplate[] = [
+  {
+    id: 'template1',
+    title: 'Product Review',
+    description: 'A comprehensive review template for products with pros, cons, and detailed analysis.',
+    category: 'review',
+    popular: true,
+    isNew: false,
+    locked: false, // Free template
+  },
+  {
+    id: 'template2',
+    title: 'SEO Blog Post',
+    description: 'Optimized for search engines with proper heading structure and keyword placement.',
+    category: 'blog',
+    popular: true,
+    isNew: false,
+    locked: true, // Premium template
+    previewContent: 'This template helps you create SEO-optimized blog posts that rank well in search engines. It includes proper heading structure, keyword placement guidance, and meta description suggestions.\n\nThe template follows best practices for content structure with introduction, body sections, and conclusion. It also includes prompts for adding relevant images, internal links, and calls to action.'
+  },
   {
     id: 'ultimate-guide',
     title: 'Ultimate Guide Template',
@@ -42,6 +61,7 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
     category: 'howto',
     popular: true,
     isNew: false,
+    locked: true, // Premium template
     difficulty: 'medium',
     estimatedTime: '15-20 min',
     structure: {
@@ -149,6 +169,7 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
         'Use bullet points within list items for better readability',
       ],
     },
+    locked: false
   },
   {
     id: 'product-review',
@@ -215,6 +236,7 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
         'Include original product photos with descriptive alt text',
       ],
     },
+    locked: false
   },
   {
     id: 'how-to-guide',
@@ -269,6 +291,7 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
         'Include estimated time to complete in the introduction',
       ],
     },
+    locked: false
   },
   {
     id: 'comparison-post',
@@ -331,6 +354,7 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
         'Use product images with descriptive alt text',
       ],
     },
+    locked: false
   },
   {
     id: 'case-study',
@@ -393,5 +417,6 @@ export const ARTICLE_TEMPLATES: ArticleTemplate[] = [
         'Use charts and graphs to visualize results',
       ],
     },
+    locked: false
   },
 ];

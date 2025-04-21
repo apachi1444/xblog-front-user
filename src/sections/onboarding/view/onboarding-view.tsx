@@ -14,8 +14,6 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
 import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -151,13 +149,6 @@ export function OnBoardingView() {
   // Handle next step
   const handleNextStep = () => {
     setStep(2);
-  };
-  
-  // Handle skip to dashboard
-  const handleSkip = () => {
-    // Mark onboarding as completed
-    dispatch(setOnboardingCompleted(true));
-    navigate('/');
   };
   
   // Handle complete onboarding

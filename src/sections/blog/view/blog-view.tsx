@@ -109,10 +109,7 @@ export function BlogView() {
         </Button>
       </Box>
 
-      {isLoading && <LoadingSpinner 
-          message="Loading your blogs..." 
-          fullHeight 
-        />}
+      {isLoading && <LoadingSpinner message="Loading your blogs..." fullHeight />}
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
         <PostSort

@@ -40,6 +40,7 @@ const axiosBaseQuery =
     } = getRequestConfig(requestConfig);
 
     try {
+      console.log(headers);
       const result = await customRequest({
         url,
         method,
