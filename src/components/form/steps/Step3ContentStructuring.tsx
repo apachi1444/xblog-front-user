@@ -1,5 +1,6 @@
 import type { SectionItem } from 'src/components/form/DraggableSectionList';
 
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
 import { 
@@ -9,7 +10,13 @@ import {
   Paper, 
   Button, 
   Dialog, 
-  Typography
+  MenuItem,
+  useTheme,
+  TextField,
+  Typography,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -26,6 +33,8 @@ export function Step3ContentStructuring({
   generatedSections = [],
   onNextStep,
 }: Step3Props) {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const [sections, setSections] = useState<SectionItem[]>(generatedSections);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
@@ -104,6 +113,13 @@ export function Step3ContentStructuring({
     setEditDialogOpen(false);
   };
 
+  // Navigate to edit section page
+  const handleAdvancedEdit = () => {
+    if (!currentSection) return;
+    navigate(`/edit-section/${currentSection.id}`);
+    setEditDialogOpen(false);
+  };
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -163,14 +179,66 @@ export function Step3ContentStructuring({
         </FormContainer>
       </Grid>
 
-      {/* Section Edit Dialog remains unchanged */}
+      {/* Section Edit Dialog */}
       <Dialog 
         open={editDialogOpen} 
         onClose={handleCloseDialog}
         fullWidth
         maxWidth="sm"
       >
-        {/* Dialog content remains unchanged */}
+        <DialogTitle>
+          Edit Section
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Section Title"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              sx={{ mb: 3 }}
+            />
+            
+            <TextField
+              select
+              fullWidth
+              label="Status"
+              value={editStatus}
+              onChange={(e) => setEditStatus(e.target.value as "Not Started" | "In Progress" | "Completed")}
+              sx={{ mb: 3 }}
+            >
+              <MenuItem value="Not Started">Not Started</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+            </TextField>
+            
+            <TextField
+              fullWidth
+              label="Description"
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              multiline
+              rows={4}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={handleCloseDialog} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} variant="contained">
+            Save
+          </Button>
+          <Button 
+            onClick={handleAdvancedEdit} 
+            variant="outlined" 
+            color="primary"
+            startIcon={<Iconify icon="mdi:pencil" />}
+            sx={{ ml: 1 }}
+          >
+            Advanced Edit
+          </Button>
+        </DialogActions>
       </Dialog>
     </Grid>
   );

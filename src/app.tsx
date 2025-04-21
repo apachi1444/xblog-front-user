@@ -42,7 +42,7 @@ function ToasterWithTheme() {
   
   return (
     <Toaster
-      position="bottom-center"
+      position="top-center"
       reverseOrder={false}
       gutter={12}
       toastOptions={{

@@ -1,4 +1,6 @@
+import type { RootState } from 'src/services/store';
 
+import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -14,6 +16,7 @@ import {
   Alert, 
   Button, 
   Divider, 
+  Checkbox, 
   ListItem, 
   useTheme, 
   Typography, 
@@ -22,7 +25,6 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import { useToast } from 'src/contexts/ToastContext';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { useScheduleArticleMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
@@ -31,12 +33,10 @@ import { LoadingSpinner } from 'src/components/loading';
 
 export default function CalendarPage() {
   const theme = useTheme();
-  const { showToast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   
   // Get current store ID from Redux store
   const storeId = 1;
@@ -65,13 +65,6 @@ export default function CalendarPage() {
       toast.success("Successfully loaded articles");
     }
   }, [isSuccess, articlesData]);
-
-  // Error effect
-  useEffect(() => {
-    if (isError && articlesError) {
-      toast.error("Successfully loaded articles");
-    }
-  }, [isError, articlesError]);
   
   // Schedule article mutation
   const [scheduleArticle, { isLoading: isScheduling }] = useScheduleArticleMutation();
@@ -79,12 +72,12 @@ export default function CalendarPage() {
   // Handle API errors
   useEffect(() => {
     if (calendarError) {
-      showToast('Failed to load scheduled articles. Please try again.', 'error');
+      toast.error('Failed to load scheduled articles. Please try again.');
     }
     if (articlesError) {
-      showToast('Failed to load available articles. Please try again.', 'error');
+      toast.error('Failed to load available articles. Please try again.', );
     }
-  }, [calendarError, articlesError, showToast]);
+  }, [calendarError, articlesError]);
   
   // Get days for the current month view
   const monthStart = startOfMonth(currentDate);
@@ -111,7 +104,7 @@ export default function CalendarPage() {
   };
   
   // Toggle article selection
-  const handleArticleToggle = (articleId: number) => {
+  const handleArticleToggle = (articleId: string) => {
     setSelectedArticles(prev => 
       prev.includes(articleId)
         ? prev.filter(id => id !== articleId)
@@ -139,19 +132,12 @@ export default function CalendarPage() {
       await Promise.all(promises);
       
       setIsModalOpen(false);
-      showToast('Articles successfully scheduled!', 'success');
-      setShowSuccessAlert(true);
-      
+      toast.success('Articles scheduled successfully!');
       // Refresh calendar data
       refetchCalendar();
       
-      // Auto-hide success alert after 3 seconds
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-      }, 3000);
-      
     } catch (error) {
-      showToast('Failed to schedule articles. Please try again.', 'error');
+      toast.error('Failed to schedule articles. Please try again.');
     }
   };
   
@@ -209,17 +195,6 @@ export default function CalendarPage() {
         />
       ) : (
         <>
-          {showSuccessAlert && (
-            <Fade in={showSuccessAlert}>
-              <Alert 
-                severity="success" 
-                sx={{ mb: 3 }}
-                onClose={() => setShowSuccessAlert(false)}
-              >
-                Articles successfully scheduled!
-              </Alert>
-            </Fade>
-          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <IconButton onClick={prevMonth}><ChevronLeft /></IconButton>
             <Typography variant="h5">{format(currentDate, 'MMMM yyyy')}</Typography>
@@ -354,7 +329,8 @@ export default function CalendarPage() {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 400,
+              width: 500,
+              maxWidth: '90vw',
               bgcolor: 'background.paper',
               boxShadow: 24,
               p: 4,
@@ -381,27 +357,120 @@ export default function CalendarPage() {
                     Select articles to schedule:
                   </Typography>
                   
-                  <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {getAvailableArticles().map((article) => (
-                      <ListItem key={article.id} disablePadding>
-                        <ListItemText 
-                          primary={article.title || `Article #${article.id}`} 
-                          secondary={article.status}
-                        />
-                      </ListItem>
-                    ))}
-                    
-                    {getAvailableArticles().length === 0 && (
-                      <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                        No articles available for scheduling
+                  <Paper 
+                    variant="outlined" 
+                    sx={{ 
+                      maxHeight: 300, 
+                      overflow: 'auto',
+                      mt: 1,
+                      mb: 2
+                    }}
+                  >
+                    <List disablePadding>
+                      {getAvailableArticles().length > 0 ? (
+                        getAvailableArticles().map((article) => (
+                          <ListItem 
+                            key={article.id} 
+                            disablePadding
+                            divider
+                            secondaryAction={
+                              <Checkbox
+                                edge="end"
+                                checked={selectedArticles.includes(article.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation(); // Prevent ListItem click from triggering
+                                  handleArticleToggle(article.id);
+                                }}
+                                onClick={() => handleArticleToggle(article.id)}
+                                inputProps={{ 'aria-labelledby': `article-${article.id}` }}
+                              />
+                            }
+                            sx={{
+                              px: 2,
+                              py: 1,
+                              '&:hover': {
+                                bgcolor: 'action.hover',
+                              },
+                              ...(selectedArticles.includes(article.id) && {
+                                bgcolor: 'primary.lighter',
+                              }),
+                            }}
+                            onClick={() => handleArticleToggle(article.id)}
+                          >
+                            <ListItemText 
+                              id={`article-${article.id}`}
+                              primary={
+                                <Typography variant="body1" noWrap>
+                                  {article.title || `Article #${article.id}`}
+                                </Typography>
+                              }
+                              secondary={
+                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                  <Box
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: '50%',
+                                      bgcolor: article.status === 'published' ? 'success.main' : 'warning.main',
+                                      mr: 1,
+                                    }}
+                                  />
+                                  <Typography variant="caption" color="text.secondary">
+                                    {article.status === 'published' ? 'Published' : 'Draft'}
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                          </ListItem>
+                        ))
+                      ) : (
+                        <ListItem sx={{ py: 4 }}>
+                          <ListItemText 
+                            primary={
+                              <Typography variant="body2" color="text.secondary" align="center">
+                                No articles available for scheduling
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      )}
+                    </List>
+                  </Paper>
+                  
+                  {selectedArticles.length > 0 && (
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        p: 1.5,
+                        bgcolor: 'primary.lighter',
+                        borderRadius: 1,
+                        mb: 2
+                      }}
+                    >
+                      <Typography variant="body2">
+                        <strong>{selectedArticles.length}</strong> article{selectedArticles.length !== 1 ? 's' : ''} selected
                       </Typography>
-                    )}
-                  </List>
+                      <Button 
+                        size="small" 
+                        variant="text" 
+                        color="primary"
+                        onClick={() => setSelectedArticles([])}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                  )}
                 </>
               )}
               
               <Box display="flex" justifyContent="flex-end" mt={3} gap={1}>
-                <Button variant="outlined" onClick={handleCloseModal} disabled={isScheduling}>
+                <Button 
+                  variant="outlined" 
+                  onClick={handleCloseModal} 
+                  disabled={isScheduling}
+                >
                   Cancel
                 </Button>
                 <Button 

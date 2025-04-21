@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Box, Stack, Typography, useTheme } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
+import { Box, useTheme, Typography } from "@mui/material";
 
 interface StepperComponentProps {
   steps: { id: number; label: string }[];
@@ -10,6 +10,18 @@ interface StepperComponentProps {
 
 export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) => {
   const theme = useTheme();
+
+  // Calculate progress percentage - modified to include the current step
+  const calculateProgress = () => {
+    // If we're at the first step, show no progress
+    if (activeStep === 0) return 0;
+    
+    // Calculate the position of each step
+    const stepPositions = steps.map((_, index) => (index / (steps.length - 1)) * 100);
+    
+    // Return the position of the current step
+    return stepPositions[activeStep];
+  };
 
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", mb: theme.spacing(4), mt: 2 }}>
@@ -27,13 +39,13 @@ export const StepperComponent = ({ steps, activeStep }: StepperComponentProps) =
           }}
         />
         
-        {/* Active progress */}
+        {/* Active progress - modified to use the calculated progress */}
         <Box
           sx={{
             position: "absolute",
             top: theme.spacing(2),
             left: 0,
-            width: `${(activeStep / (steps.length - 1)) * 100}%`,
+            width: `${calculateProgress()}%`,
             height: 2,
             backgroundColor: theme.palette.primary.main,
             zIndex: 1,
