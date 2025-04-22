@@ -758,7 +758,7 @@
   resolved "https://registry.npmjs.org/@tiptap/extension-table-row/-/extension-table-row-2.11.7.tgz"
   integrity sha512-K254RiXWGXGjz5Cm835hqfQiwnYXm8aw6oOa3isDh4A1B+1Ev4DB2vEDKMrgaOor3nbTsSYmAx2iEMrZSbpaRg==
 
-"@tiptap/extension-table@^2.0.0-beta.210":
+"@tiptap/extension-table@^2.0.0-beta.210", "@tiptap/extension-table@^2.11.7":
   version "2.11.7"
   resolved "https://registry.npmjs.org/@tiptap/extension-table/-/extension-table-2.11.7.tgz"
   integrity sha512-rfwWkNXz/EZuhc8lylsCWPbx0Xr5FlIhreWFyeoXYrDEO3x4ytYcVOpNmbabJYP2semfM0PvPR5o84zfFkLZyg==

@@ -1,5 +1,3 @@
-"use client"
-
 import type { RootState } from "src/services/store";
 
 import { useState } from "react";
