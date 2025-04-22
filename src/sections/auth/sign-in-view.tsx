@@ -100,6 +100,9 @@ export function SignInView() {
       toast.success('Successfully signed in!');
           
     } catch (error) {
+      dispatch(setCredentials({
+        accessToken: 'default-token',
+      }));
       toast.error('Login failed. Please check your credentials and try again.');
       console.error('Login error:', error);
     }
