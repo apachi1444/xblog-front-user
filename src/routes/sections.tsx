@@ -14,7 +14,6 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 export const OnBoardingPage = lazy(() => import('src/pages/onboarding'));
 export const HomePage = lazy(() => import('src/pages/home'));
 export const GenerateFlow = lazy(() => import('src/pages/generate'));
-export const EditSectionPage = lazy(() => import('src/pages/edit-section'));
 export const CreatePage = lazy(() => import('src/pages/create'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const StoresPage = lazy(() => import('src/pages/stores'));
@@ -79,7 +78,6 @@ export function Router() {
             { index: true, element: <HomePage /> },
             { path: 'user', element: <UserPage /> },
             { path: 'generate', element: <GenerateFlow /> },
-            { path: 'edit-section/:sectionId', element: <EditSectionPage /> },
             { path: 'create', element: <CreatePage /> },
             { path: 'products', element: <ProductsPage /> },
             { path: 'blog', element: <BlogPage /> },

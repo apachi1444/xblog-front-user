@@ -26,17 +26,14 @@ import { FormContainer } from '../FormContainer';
 
 interface Step3Props {
   generatedSections?: SectionItem[];
-  onNextStep?: () => void;
+  onEditSection?: (section: SectionItem) => void; // Add this prop
 }
 
 export function Step3ContentStructuring({ 
   generatedSections = [],
-  onNextStep,
+  onEditSection, // Add this prop
 }: Step3Props) {
-  const theme = useTheme();
-  const navigate = useNavigate();
   const [sections, setSections] = useState<SectionItem[]>(generatedSections);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editStatus, setEditStatus] = useState<"Not Started" | "In Progress" | "Completed">("Not Started");
@@ -81,7 +78,13 @@ export function Step3ContentStructuring({
     setEditTitle(section.title);
     setEditStatus(section.status);
     setEditDescription(section.description || '');
-    setEditDialogOpen(true);
+
+    if (!currentSection) return;
+    
+    // Instead of navigating, call the parent's onEditSection handler
+    if (onEditSection) {
+      onEditSection(currentSection);
+    }
   };
 
   const handleDeleteSection = (sectionId: string) => {
@@ -101,23 +104,11 @@ export function Step3ContentStructuring({
     );
     
     setSections(updatedSections);
-    setEditDialogOpen(false);
     
     // Show success message
     setSuccessMessage('Section updated successfully!');
     setShowSuccessMessage(true);
     setTimeout(() => setShowSuccessMessage(false), 3000);
-  };
-
-  const handleCloseDialog = () => {
-    setEditDialogOpen(false);
-  };
-
-  // Navigate to edit section page
-  const handleAdvancedEdit = () => {
-    if (!currentSection) return;
-    navigate(`/edit-section/${currentSection.id}`);
-    setEditDialogOpen(false);
   };
 
   return (
@@ -178,68 +169,6 @@ export function Step3ContentStructuring({
           )}
         </FormContainer>
       </Grid>
-
-      {/* Section Edit Dialog */}
-      <Dialog 
-        open={editDialogOpen} 
-        onClose={handleCloseDialog}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>
-          Edit Section
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Section Title"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              sx={{ mb: 3 }}
-            />
-            
-            <TextField
-              select
-              fullWidth
-              label="Status"
-              value={editStatus}
-              onChange={(e) => setEditStatus(e.target.value as "Not Started" | "In Progress" | "Completed")}
-              sx={{ mb: 3 }}
-            >
-              <MenuItem value="Not Started">Not Started</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-            </TextField>
-            
-            <TextField
-              fullWidth
-              label="Description"
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              multiline
-              rows={4}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={handleCloseDialog} color="inherit">
-            Cancel
-          </Button>
-          <Button onClick={handleSaveEdit} variant="contained">
-            Save
-          </Button>
-          <Button 
-            onClick={handleAdvancedEdit} 
-            variant="outlined" 
-            color="primary"
-            startIcon={<Iconify icon="mdi:pencil" />}
-            sx={{ ml: 1 }}
-          >
-            Advanced Edit
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Grid>
   );
 }

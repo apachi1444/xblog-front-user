@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
 
 import { 
-  Box, 
-  useTheme
+  Box
 } from '@mui/material';
 
 import { SectionBox } from './SectionBox';
 
+// Add the content property to the SectionItem interface
 export interface SectionItem {
   id: string;
   title: string;
   status: "Not Started" | "In Progress" | "Completed";
   description?: string;
+  content?: string; // Add this line to include the content property
 }
 
 interface DraggableSectionListProps {
@@ -29,8 +29,6 @@ export const DraggableSectionList: React.FC<DraggableSectionListProps> = ({
   onEditSection,
   onDeleteSection
 }) => {
-  const theme = useTheme();
-  const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editStatus, setEditStatus] = useState<"Not Started" | "In Progress" | "Completed">("Not Started");
@@ -47,8 +45,6 @@ export const DraggableSectionList: React.FC<DraggableSectionListProps> = ({
   };
 
   const handleEditClick = (section: SectionItem) => {
-    // Navigate to the edit section page with the section ID
-    navigate(`/edit-section/${section.id}`);
     
     // We still set the current section in case we need it
     setCurrentSection(section);

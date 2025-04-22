@@ -16,28 +16,7 @@ interface Step2ArticleSettingsProps {
 
 
 export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: Step2ArticleSettingsProps) {
-  // State for form values
-  const [articleType, setArticleType] = useState('');
-  const [articleSize, setArticleSize] = useState('');
-  const [toneOfVoice, setToneOfVoice] = useState('');
-  const [pointOfView, setPointOfView] = useState('');
-  const [aiContentCleaning, setAiContentCleaning] = useState('');
-  
-  const [imageQuality, setImageQuality] = useState('');
-  const [imagePlacement, setImagePlacement] = useState('');
-  const [imageStyle, setImageStyle] = useState('');
-  const [numberOfImages, setNumberOfImages] = useState('');
-  const [includeVideos, setIncludeVideos] = useState(false);
-  const [numberOfVideos, setNumberOfVideos] = useState('');
-  
-  const [internalLinking, setInternalLinking] = useState('');
-  const [externalLinking, setExternalLinking] = useState('');
-
-  // Add the missing isGenerated state
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isGenerated, setIsGenerated] = useState(false);
-
-  // Options for dropdowns remain the same
+  // Options for dropdowns
   const articleTypeOptions = [
     { value: "how-to", label: "How-to guide" },
     { value: "listicle", label: "Listicle" },
@@ -122,8 +101,28 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
     { value: "news", label: "News Sources" }
   ];
 
+  // State for form values - set default values using the first option from each array
+  const [articleType, setArticleType] = useState(articleTypeOptions[0].value);
+  const [articleSize, setArticleSize] = useState(articleSizeOptions[0].value);
+  const [toneOfVoice, setToneOfVoice] = useState(toneOptions[0].value);
+  const [pointOfView, setPointOfView] = useState(povOptions[0].value);
+  const [aiContentCleaning, setAiContentCleaning] = useState(aiCleaningOptions[0].value);
   
-// Add error state
+  const [imageQuality, setImageQuality] = useState(imageQualityOptions[0].value);
+  const [imagePlacement, setImagePlacement] = useState(imagePlacementOptions[0].value);
+  const [imageStyle, setImageStyle] = useState(imageStyleOptions[0].value);
+  const [numberOfImages, setNumberOfImages] = useState(numberOptions[0].value);
+  const [includeVideos, setIncludeVideos] = useState(false);
+  const [numberOfVideos, setNumberOfVideos] = useState(videoNumberOptions[0].value);
+  
+  const [internalLinking, setInternalLinking] = useState(linkingOptions[0].value);
+  const [externalLinking, setExternalLinking] = useState(externalLinkingOptions[0].value);
+
+  // Add the missing isGenerated state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
+
+  // Add error state
 const [errors, setErrors] = useState({
   articleType: false,
   articleSize: false,
@@ -645,5 +644,5 @@ const handleGenerateTableOfContentsWithValidation = async () => {
         </FormContainer>
       </Grid>
     </Grid>
-  );
-}
+  )
+};

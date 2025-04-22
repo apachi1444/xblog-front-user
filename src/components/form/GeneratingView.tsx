@@ -7,6 +7,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
+import SectionEditor from 'src/sections/generate/edit-section/section-editor';
+
 import { SEODashboard } from './SEODashboard';
 import { StepperComponent } from './FormStepper';
 import { Step4Publish } from './steps/Step4Publish';
@@ -19,7 +21,6 @@ import type { SectionItem } from './DraggableSectionList';
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
-  // Add state for SEO dashboard collapse
   const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
   const theme = useTheme(); // Add theme hook
   const navigate = useNavigate(); // Add navigation hook
@@ -63,14 +64,6 @@ export function GeneratingView() {
       handleAddKeyword();
     }
   };
-
-  // Define button placement configuration for each step
-  const stepButtonsConfig = [
-    { position: 'bottom' }, // Step 1: Content Setup
-    { position: 'top' },    // Step 2: Article Settings
-    { position: 'top' },    // Step 3: Content Structuring
-    { position: 'top' }     // Step 4: Publish
-  ];  
   
   // Navigation handlers
   const handleNext = () => {
@@ -179,7 +172,25 @@ export function GeneratingView() {
     
 
   // Render the current step content - Updated to include the new step
+  // Add new state for section editing
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [currentEditSection, setCurrentEditSection] = useState<SectionItem | null>(null);
+  
+  // Add handler for section editing
+  const handleEditSection = (section: SectionItem) => {
+    setCurrentEditSection(section);
+    setIsEditingSection(true);
+  };
+  
+  // Add handler for returning from section editing
+  const handleReturnFromEditing = () => {
+    setCurrentEditSection(null);
+    setIsEditingSection(false);
+  };
+  
+  // Modify the renderStepContent function
   const renderStepContent = () => {
+    // Regular steps
     switch (activeStep) {
       case 0:
         return (
@@ -217,7 +228,6 @@ export function GeneratingView() {
             urlSlug={urlSlug}
           />
         );
-      // In the renderStepContent function, update the Step2ArticleSettings and Step3ContentStructuring components
       case 1:
         return (
           <Step2ArticleSettings 
@@ -226,9 +236,26 @@ export function GeneratingView() {
           />
         );
       case 2:
+        // Check if we're editing a section
+        if (isEditingSection && currentEditSection) {
+          return (
+            <Box>
+              <Button
+                startIcon={<Iconify icon="eva:arrow-back-fill" />}
+                onClick={handleReturnFromEditing}
+                sx={{ mb: 2 }}
+              >
+                Back to Sections
+              </Button>
+              
+              <SectionEditor />
+            </Box>
+          );
+        } 
         return (
           <Step3ContentStructuring 
             generatedSections={generatedSections}
+            onEditSection={handleEditSection}
           />
         );
       case 3:
