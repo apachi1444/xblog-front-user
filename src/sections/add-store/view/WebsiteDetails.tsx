@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { useRef , useState } from 'react';
 import { HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { 
@@ -117,22 +118,38 @@ export default function WebsiteDetails({
   setErrors(newErrors);
   return isValid;
 };
-
-  const handleSubmit = () => {
-    if (validateForm()) {
+  
+  // Update the renderPlatformForm function to include the form ref
+  const wordpressFormRef = useRef<{ validate: () => Promise<boolean> }>(null);
+  
+  // Update the handleSubmit function
+  const handleSubmit = async () => {
+    let isValid = true;
+    // Platform-specific validations using React Hook Form
+    if (formData.platform === 'wordpress' && wordpressFormRef.current) {
+      isValid = await wordpressFormRef.current.validate();
+    } else {
+      // Fall back to the old validation for other platforms
+      isValid = validateForm();
+    }
+    
+    if (isValid) {
       onSubmit();
+    } else {
+      toast.error('Please fix the form errors before submitting');
     }
   };
-
+  
+  // Update the renderPlatformForm function
   const renderPlatformForm = () => {
     switch (formData.platform) {
       case 'wordpress':
         return (
           <WordPressForm 
             formData={formData} 
-            onUpdateField={handleUpdateField} 
-            errors={errors}
-            setErrors={setErrors}
+            onUpdateField={handleUpdateField}
+            onTestConnection={() => Promise.resolve(true)} // Optional test connection
+            formRef={wordpressFormRef}
           />
         );
       case 'shopify':

@@ -23,7 +23,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
 import { TemplateCard } from './components/template-card';
-import { PricingPlans } from './components/pricing-plans';
 import { TemplateFilter } from './components/template-filter';
 import { TemplateEmptyState } from './components/template-empty-state';
 import { ARTICLE_TEMPLATES, TEMPLATE_CATEGORIES } from './template-data';
@@ -40,6 +39,7 @@ export function TemplateView() {
   const [currentTab, setCurrentTab] = useState('all');
   const [openModal, setOpenModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [showFullPreview, setShowFullPreview] = useState(false);
   
   // Filter templates based on search query and selected category
   const filteredTemplates = ARTICLE_TEMPLATES.filter((template) => {
@@ -80,6 +80,16 @@ export function TemplateView() {
   
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+  
+
+  const handlePreviewTemplate = () => {
+    // Toggle the full preview display
+    setShowFullPreview(true);
+  };
+  
+  const handleClosePreview = () => {
+    setShowFullPreview(false);
   };
   
   const handleUpgrade = (planId: string) => {
@@ -204,7 +214,7 @@ export function TemplateView() {
         )}
       </Container>
 
-      {/* Premium Template Modal */}
+      {/* Premium Template Modal - Updated UI */}
       <Dialog 
         open={openModal} 
         onClose={handleCloseModal}
@@ -216,7 +226,7 @@ export function TemplateView() {
             <DialogTitle>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Typography variant="h5">
-                  {t('templates.premiumTemplate', 'Premium Template')}
+                  {selectedTemplate.title}
                 </Typography>
                 <Box 
                   sx={{ 
@@ -237,52 +247,94 @@ export function TemplateView() {
               </Stack>
             </DialogTitle>
             <DialogContent dividers>
-              <Grid container spacing={3}>
-                <Grid xs={12} md={5}>
+              <Box sx={{ p: 2 }}>
+                <Typography variant="body1" color="text.secondary" paragraph>
+                  {selectedTemplate.description}
+                </Typography>
+                
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    {t('templates.preview', 'Preview')}:
+                  </Typography>
                   <Box 
                     sx={{ 
                       p: 3, 
-                      height: '100%',
-                      borderRadius: 2,
+                      borderRadius: 2, 
                       bgcolor: 'background.neutral',
-                      display: 'flex',
-                      flexDirection: 'column',
+                      border: `1px solid ${theme.palette.divider}`,
+                      minHeight: 300,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
                     }}
                   >
-                    <Typography variant="h6" gutterBottom>
-                      {selectedTemplate.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {selectedTemplate.description}
-                    </Typography>
-                    
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        {t('templates.preview', 'Preview')}:
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          p: 2, 
-                          borderRadius: 1, 
-                          bgcolor: 'background.paper',
-                          border: `1px dashed ${theme.palette.divider}`,
-                          height: 200,
-                          overflow: 'hidden',
-                          position: 'relative',
-                        }}
-                      >
+                    {showFullPreview ? (
+                      // Full preview content
+                      <Box>
+                        <Box sx={{ mb: 3, textAlign: 'right' }}>
+                          <Button
+                            size="small"
+                            color="primary"
+                            startIcon={<Iconify icon="mdi:close" />}
+                            onClick={handleClosePreview}
+                          >
+                            {t('common.close', 'Close Preview')}
+                          </Button>
+                        </Box>
+                        
+                        <Typography variant="h5" gutterBottom sx={{ color: 'primary.main' }}>
+                          {selectedTemplate.title}
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" gutterBottom>
+                          Introduction
+                        </Typography>
+                        <Typography variant="body2" paragraph>
+                          {selectedTemplate.previewContent || 
+                            `This is a comprehensive template that will help you create engaging content that ranks well in search engines. 
+                            The structure is designed to maximize reader engagement and conversion rates.`}
+                        </Typography>
+                        
+                        <Typography variant="subtitle1" gutterBottom>
+                          Main Sections
+                        </Typography>
+                        <Box component="ul" sx={{ pl: 2 }}>
+                          {['Problem Statement', 'Solution Overview', 'Key Benefits', 'Implementation Steps', 'Case Studies', 'Conclusion'].map((section, index) => (
+                            <Box component="li" key={index} sx={{ mb: 1 }}>
+                              <Typography variant="body2">
+                                <strong>{section}</strong>: {index % 2 === 0 ? 
+                                  'This section helps establish context and relevance for your readers.' : 
+                                  'This section provides valuable insights and actionable information.'}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                        
+                        <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: `1px dashed ${theme.palette.primary.main}` }}>
+                          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+                            <Iconify icon="mdi:lightbulb" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
+                            Pro Tip
+                          </Typography>
+                          <Typography variant="body2">
+                            This template includes SEO-optimized headings and content structure that has been proven to increase engagement by up to 43% in our tests.
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ) : (
+                      // Blurred preview with button
+                      <>
                         <Typography variant="body2">
                           {selectedTemplate.previewContent || selectedTemplate.description}
                         </Typography>
                         
-                        {/* Blur overlay */}
+                        {/* Blur overlay with eye icon */}
                         <Box 
                           sx={{ 
                             position: 'absolute', 
-                            bottom: 0, 
+                            top: 0, 
                             left: 0, 
-                            right: 0, 
-                            height: '70%', 
+                            right: 0,
+                            bottom: 0, 
                             background: 'linear-gradient(transparent, rgba(255,255,255,0.9))',
                             display: 'flex',
                             alignItems: 'center',
@@ -290,45 +342,66 @@ export function TemplateView() {
                             flexDirection: 'column',
                           }}
                         >
-                          <Iconify icon="mdi:lock" sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-                          <Typography variant="subtitle1" color="primary.main">
-                            {t('templates.unlockToAccess', 'Unlock to access')}
-                          </Typography>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Iconify icon="mdi:eye" />}
+                            onClick={handlePreviewTemplate}
+                            sx={{ 
+                              mb: 2,
+                              boxShadow: theme.customShadows.z8,
+                            }}
+                          >
+                            {t('templates.viewPreview', 'View Preview')}
+                          </Button>
                         </Box>
-                      </Box>
-                    </Box>
-                    
-                    <Box sx={{ mt: 'auto', pt: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        {t('templates.benefits', 'Benefits')}:
-                      </Typography>
-                      <Stack spacing={1}>
-                        {['SEO-optimized', 'High conversion rate', 'Ready-to-use structure'].map((benefit, index) => (
-                          <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Iconify icon="mdi:check-circle" sx={{ color: 'success.main', mr: 1 }} />
+                      </>
+                    )}
+                  </Box>
+                </Box>
+                
+                {!showFullPreview && (
+                  <Box sx={{ mt: 4 }}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      {t('templates.benefits', 'Benefits')}:
+                    </Typography>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                      {['SEO-optimized', 'High conversion rate', 'Ready-to-use structure', 'Time-saving'].map((benefit, index) => (
+                        <Grid key={index} xs={12} sm={6}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Iconify 
+                              icon="mdi:check-circle" 
+                              sx={{ 
+                                color: 'success.main', 
+                                mr: 1,
+                                fontSize: 20,
+                              }} 
+                            />
                             <Typography variant="body2">{benefit}</Typography>
                           </Box>
-                        ))}
-                      </Stack>
-                    </Box>
+                        </Grid>
+                      ))}
+                    </Grid>
                   </Box>
-                </Grid>
-                
-                <Grid xs={12} md={7}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('templates.choosePlan', 'Choose a plan to unlock this template')}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    {t('templates.unlockAllTemplates', 'Upgrade your plan to unlock all premium templates and more features')}
-                  </Typography>
-                  
-                  <PricingPlans onSelectPlan={handleUpgrade} />
-                </Grid>
-              </Grid>
+                )}
+              </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseModal}>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <Button 
+                onClick={handleCloseModal}
+                color="inherit"
+              >
                 {t('common.cancel', 'Cancel')}
+              </Button>
+              <Button 
+                variant="contained"
+                color="primary"
+                startIcon={<Iconify icon="mdi:shopping-cart" />}
+                onClick={() => {
+                  handleUpgrade('premium');
+                }}
+              >
+                {t('templates.continueToPurchase', 'Continue to Purchase')}
               </Button>
             </DialogActions>
           </>

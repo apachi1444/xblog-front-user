@@ -13,7 +13,6 @@ import { FormContainer, PasswordElement, TextFieldElement } from 'react-hook-for
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
 import { CircularProgress } from "@mui/material";
 import IconButton from '@mui/material/IconButton';
@@ -232,18 +231,13 @@ export function SignInView() {
         </Box>
       ) : (
         <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          text="signin_with"
-          type="standard"
-          theme="outline"
-          size="large"
-          logo_alignment="center"
-          width="100%"
-          shape="rectangular"
-          onError={() => console.error("Google Login Failed")}
-          useOneTap={false}
-          context="signin"
-        />
+            onSuccess={handleGoogleSuccess}
+            text="signin_with"
+            theme="filled_black"
+            onError={() => toast.error("Google Login Failed")}
+            useOneTap={false}
+            context="signin"
+          />
       )}
 
       <Typography variant="body2" align="center" sx={{ mt: 3 }}>

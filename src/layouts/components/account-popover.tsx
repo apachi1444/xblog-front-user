@@ -1,11 +1,10 @@
-import type { RootState } from 'src/services/store';
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useSnackbar } from 'notistack';
 import { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
+import { Divider } from '@mui/material';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
@@ -14,16 +13,12 @@ import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import LinearProgress from '@mui/material/LinearProgress';
 
 import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { clearCredentials } from 'src/services/slices/auth/authSlice';
-
-import { ResourceUsage } from 'src/components/resource-usage';
-import { Divider } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -46,7 +41,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
-  const handleOpenPopover = useCallback((event: any) => {
+  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
   }, []);
 
@@ -56,14 +51,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const handleClickItem = useCallback(
     (path: string) => {
-      // Force close the popover immediately
-      setOpenPopover(null);
+      handleClosePopover()
       // Then navigate
       setTimeout(() => {
         router.push(path);
       }, 10);
     },
-    [router]
+    [handleClosePopover, router]
   );
 
   const handleLogOut = useCallback(() => {
@@ -76,6 +70,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     
   }, [dispatch, router, handleClosePopover]);
 
+  console.log(openPopover);
   return (
     <>
       <IconButton
@@ -117,9 +112,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{
           paper: {
-            sx: { 
+            sx: {
               width: 300,
-              overflow: 'hidden',
               mt: 1.5,
               boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
               borderRadius: 3,
@@ -162,7 +156,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             }}
           >
             {_myAccount.displayName.charAt(0).toUpperCase()}
-          </Avatar>
+          </Avatar>          
           
           <Box sx={{ position: 'relative', zIndex: 1, mt: 2, px: 3 }}>
             <Typography variant="h6" fontWeight="bold">

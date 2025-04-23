@@ -1,4 +1,9 @@
-import { Globe, Link as LinkIcon, User, Lock } from 'lucide-react';
+import { z } from 'zod';
+import toast from 'react-hot-toast';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TextFieldElement } from 'react-hook-form-mui';
+import { useForm, FormProvider } from 'react-hook-form';
+import { User, Lock, Globe, Link as LinkIcon } from 'lucide-react';
 
 import { 
   Box, 
@@ -6,10 +11,19 @@ import {
   Card, 
   alpha, 
   useTheme,
-  TextField,
   Typography,
   InputAdornment,
 } from '@mui/material';
+
+// Define Zod schema for WordPress form
+const wordpressSchema = z.object({
+  store_url: z.string().min(1, 'Store URL is required').url('Please enter a valid URL'),
+  store_username: z.string().min(1, 'Username is required'),
+  store_password: z.string().min(1, 'Password is required'),
+});
+
+// Define type from schema
+type WordPressFormData = z.infer<typeof wordpressSchema>;
 
 interface WordPressFormProps {
   formData: {
@@ -20,38 +34,32 @@ interface WordPressFormProps {
     store_password?: string;
   };
   onUpdateField: (field: string, value: string) => void;
-  errors: Record<string, string | null>;
-  setErrors: (errors: Record<string, string | null>) => void;
+  onTestConnection?: () => Promise<boolean>;
+  formRef?: React.RefObject<{ validate: () => Promise<boolean> }>;
 }
 
-export default function WordPressForm({ formData, onUpdateField, errors, setErrors }: WordPressFormProps) {
+export default function WordPressForm({ 
+  formData, 
+  onUpdateField,
+  onTestConnection,
+  formRef
+}: WordPressFormProps) {
   const theme = useTheme();
   
-  const validateField = (field: string, value: string) => {
-    let error = null;
-    
-    switch (field) {
-      case 'store_url':
-        if (!value) error = 'Store URL is required';
-        break;
-      case 'store_username':
-        if (!value) error = 'Username is required';
-        break;
-      case 'store_password':
-        if (!value) error = 'Password is required';
-        break;
-       default:
-        return false;
-    }
-    
-    setErrors({ ...errors, [field]: error });
-    return !error;
-  };
-
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {value} = e.target;
+  // Setup form methods with react-hook-form
+  const methods = useForm<WordPressFormData>({
+    resolver: zodResolver(wordpressSchema),
+    defaultValues: {
+      store_url: formData.store_url || '',
+      store_username: formData.store_username || '',
+      store_password: formData.store_password || '',
+    },
+    mode: 'onBlur',
+  });
+  
+  // Handle field change and sync with parent component
+  const handleFieldChange = (field: string, value: string) => {
     onUpdateField(field, value);
-    if (errors[field]) validateField(field, value);
   };
 
   return (
@@ -71,84 +79,81 @@ export default function WordPressForm({ formData, onUpdateField, errors, setErro
         </Typography>
       </Box>
       
-      <Grid container spacing={3}>       
-        <Grid item xs={12}>
-          <TextField
-            fullWidth
-            label="Store URL"
-            variant="outlined"
-            value={formData.store_url || ''}
-            onChange={handleChange('store_url')}
-            error={!!errors.store_url}
-            helperText={errors.store_url || "The URL of your WordPress store"}
-            placeholder="https://example.com/store"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LinkIcon size={18} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-              sx: {
-                borderRadius: 1.5,
-                '&.Mui-focused': {
-                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-              }
-            }}
-          />
+      <FormProvider {...methods}>
+        <Grid container spacing={3}>       
+          <Grid item xs={12}>
+            <TextFieldElement
+              name="store_url"
+              label="WordPress URL"
+              fullWidth
+              required
+              placeholder="https://example.com/store"
+              onChange={(e) => handleFieldChange('store_url', e.target.value)}
+              helperText="The URL of your WordPress store"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LinkIcon size={18} color={theme.palette.text.secondary} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: 1.5,
+                  '&.Mui-focused': {
+                    boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+                  },
+                }
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            <TextFieldElement
+              name="store_username"
+              label="WordPress Username"
+              fullWidth
+              required
+              onChange={(e) => handleFieldChange('store_username', e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <User size={18} color={theme.palette.text.secondary} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: 1.5,
+                  '&.Mui-focused': {
+                    boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+                  },
+                }
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            <TextFieldElement
+              name="store_password"
+              label="WordPress Password"
+              fullWidth
+              required
+              type="password"
+              onChange={(e) => handleFieldChange('store_password', e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock size={18} color={theme.palette.text.secondary} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: 1.5,
+                  '&.Mui-focused': {
+                    boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+                  },
+                }
+              }}
+            />
+          </Grid>
         </Grid>
-        
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Store Username"
-            variant="outlined"
-            value={formData.store_username || ''}
-            onChange={handleChange('store_username')}
-            error={!!errors.store_username}
-            helperText={errors.store_username}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <User size={18} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-              sx: {
-                borderRadius: 1.5,
-                '&.Mui-focused': {
-                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-              }
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Store Password"
-            variant="outlined"
-            type="password"
-            value={formData.store_password || ''}
-            onChange={handleChange('store_password')}
-            error={!!errors.store_password}
-            helperText={errors.store_password}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Lock size={18} color={theme.palette.text.secondary} />
-                </InputAdornment>
-              ),
-              sx: {
-                borderRadius: 1.5,
-                '&.Mui-focused': {
-                  boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-              }
-            }}
-          />
-        </Grid>
-      </Grid>
+      </FormProvider>
     </Card>
   );
 }

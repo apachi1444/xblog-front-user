@@ -62,7 +62,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           width: 1,
           borderRadius: 1.5,
           textAlign: 'center',
-          justifyContent: 'center',
+          justifyContent: 'flex-start', // Changed from 'center' to 'flex-start'
           color : 'white',
           background: `linear-gradient(to left, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
           ...sx,
@@ -72,12 +72,17 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         {renderAvatar(workspace?.name, workspace?.logo)}
 
         <Box
-          gap={1}
           flexGrow={1}
           display="flex"
           alignItems="center"
-          justifyContent="center"
-          sx={{ typography: 'body2', fontWeight: 'fontWeightSemiBold' }}
+          sx={{ 
+            typography: 'body2', 
+            fontWeight: 'fontWeightSemiBold',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: 'calc(100% - 50px)' // Ensure text doesn't overflow
+          }}
         >
           {workspace?.name}
         </Box>
@@ -113,7 +118,15 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
             >
               {renderAvatar(option.name, option.logo)}
 
-              <Box component="span" sx={{ flexGrow: 1, bgcolor: 'theme.palette.primary.main' }}>
+              <Box 
+                component="span" 
+                sx={{ 
+                  flexGrow: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
                 {option.name}
               </Box>
             </MenuItem>

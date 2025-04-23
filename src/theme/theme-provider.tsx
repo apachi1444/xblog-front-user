@@ -33,6 +33,9 @@ export function CustomThemeProvider({ children }: Props) {
   // Create theme with the appropriate mode and memoize it
   const activeTheme = useMemo(() => theme({ mode }), [mode]);
 
+  console.log(activeTheme.breakpoints.values);
+  
+
   return (
     <ThemeProvider theme={activeTheme} >
       <CssBaseline />

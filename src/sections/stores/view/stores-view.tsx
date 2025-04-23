@@ -38,7 +38,7 @@ const TABLE_HEAD = [
   { id: 'creationDate', label: 'Creation Date', sort: true },
   { id: 'articlesCount', label: 'Articles', align: 'center', sort: true },
   { id: 'isConnected', label: 'Status', sort: true },
-  { id: '', label: 'Actions' },
+  { id: 'actions', label: 'Actions', align: 'center' },
 ];
 
 export function StoresView() {

@@ -1,5 +1,4 @@
 import type { Store } from 'src/types/store';
-import type { StoreProps } from 'src/sections/stores/components/store-table-row';
 import type { Article } from 'src/types/article';
 
 import {

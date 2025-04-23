@@ -1,163 +1,204 @@
-import { useState, useCallback } from 'react';
+import type { LabelColor } from 'src/components/label';
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
+import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Popover from '@mui/material/Popover';
-import TableRow from '@mui/material/TableRow';
+import Tooltip from '@mui/material/Tooltip';
 import Checkbox from '@mui/material/Checkbox';
-import MenuList from '@mui/material/MenuList';
+import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { fDate } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+import { ConfirmDialog } from 'src/components/confirm-dialog';
 
 // ----------------------------------------------------------------------
 
-export type StoreProps = {
+// Define and export the StoreProps interface
+export interface StoreProps {
   id: string;
   name: string;
-  url: string;
-  logo: string;
-  platform?: string;
-  business?: string;
-  creationDate?: string;
+  platform: string;
+  business: string;
+  creationDate: string | Date;
   articlesCount: number;
   isConnected: boolean;
-};
+}
 
-type StoreTableRowProps = {
+type Props = {
   row: StoreProps;
   selected: boolean;
-  onSelectRow: () => void;
-  onDelete?: (id: string) => void;
-  isDeleting?: boolean;
+  onSelectRow: VoidFunction;
+  onDelete: (id: string) => void;
+  isDeleting: boolean;
 };
 
-export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting }: StoreTableRowProps) {
-  const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting }: Props) {
+  const navigate = useNavigate();
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openStatusConfirm, setOpenStatusConfirm] = useState(false);
 
+  const { id, name, platform, business, creationDate, articlesCount, isConnected } = row;
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpenPopover(event.currentTarget);
-  }, []);
+  const handleOpenConfirm = () => {
+    setOpenConfirm(true);
+  };
 
-  const handleClosePopover = useCallback(() => {
-    setOpenPopover(null);
-  }, []);
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
 
-  const handleDelete = useCallback(() => {
-    if (onDelete) {
-      onDelete(row.id);
+  const handleOpenStatusConfirm = () => {
+    setOpenStatusConfirm(true);
+  };
+
+  const handleCloseStatusConfirm = () => {
+    setOpenStatusConfirm(false);
+  };
+
+  const handleDelete = () => {
+    onDelete(id);
+    handleCloseConfirm();
+  };
+
+  const handleStatusClick = () => {
+    // Only show confirmation if the store is disconnected
+    if (!isConnected) {
+      handleOpenStatusConfirm();
     }
-    handleClosePopover();
-  }, [onDelete, row.id, handleClosePopover]);
+  };
+
+  const handleStatusConfirm = () => {
+    // Use the same delete function for status confirmation
+    onDelete(id);
+    handleCloseStatusConfirm();
+  };
+
+  const handleViewDetails = () => {
+    navigate(`/stores/${id}`);
+  };
 
   return (
     <>
-      <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
+      <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
+          <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
 
-        {/* Website */}
-        <TableCell component="th" scope="row">
-          <Box gap={2} display="flex" alignItems="center">
-            <Avatar alt={row.name} src={row.logo} />
+        <TableCell>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Box component="img" 
+              src={`/assets/icons/platforms/${platform?.toLowerCase()}.png`} 
+              alt={platform}
+              sx={{ width: 28, height: 28, borderRadius: '8px' }}
+            />
+            
             <Box>
-              <Typography variant="body2" noWrap fontWeight="bold">
-                {row.name}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
-                {row.url}
+              <Link 
+                color="inherit" 
+                variant="subtitle2" 
+                onClick={handleViewDetails}
+                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+              >
+                {name}
+              </Link>
+              
+              <Typography variant="body2" color="text.secondary">
+                {`${business} business`}
               </Typography>
             </Box>
-          </Box>
+          </Stack>
         </TableCell>
 
-        {/* Platform */}
         <TableCell>
-          <Typography variant="body2">
-            {row.platform || '-'}
-          </Typography>
+          <Label variant="soft" color="primary">
+            {platform}
+          </Label>
         </TableCell>
 
-        {/* Business */}
+        <TableCell>{business}</TableCell>
+
+        <TableCell>{fDate(creationDate)}</TableCell>
+
+        <TableCell align="center">{articlesCount}</TableCell>
+
         <TableCell>
-          <Typography variant="body2">
-            {row.business || '-'}
-          </Typography>
+          <Label
+            variant="soft"
+            color={(isConnected ? 'success' : 'error') as LabelColor}
+            sx={{ 
+              cursor: !isConnected ? 'pointer' : 'default',
+              '&:hover': !isConnected ? { opacity: 0.8 } : {}
+            }}
+            onClick={!isConnected ? handleStatusClick : undefined}
+          >
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </Label>
         </TableCell>
 
-        {/* Creation Date */}
-        <TableCell>
-          <Typography variant="body2">
-            {row.creationDate ? fDate(row.creationDate) : '-'}
-          </Typography>
-        </TableCell>
-
-        {/* Articles */}
         <TableCell align="center">
-          <Typography variant="body2">
-            {row.articlesCount}
-          </Typography>
-        </TableCell>
-
-        {/* Status */}
-        <TableCell>
-          {row.isConnected ? (
-            <Label color="success">Connected</Label>
-          ) : (
-            <Button 
-              size="small" 
-              variant="outlined" 
-              color="primary"
-              sx={{ borderRadius: 1 }}
+          <Tooltip title="Delete">
+            <IconButton 
+              color="error" 
+              onClick={handleOpenConfirm}
+              disabled={isDeleting}
             >
-              Connect
-            </Button>
-          )}
-        </TableCell>
-
-        {/* Actions */}
-        <TableCell align="right">
-          <IconButton onClick={handleOpenPopover}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
+              {isDeleting ? (
+                <CircularProgress size={20} color="error" />
+              ) : (
+                <Iconify icon="eva:trash-2-outline" />
+              )}
+            </IconButton>
+          </Tooltip>
         </TableCell>
       </TableRow>
 
-      <Popover
-        open={!!openPopover}
-        anchorEl={openPopover}
-        onClose={handleClosePopover}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <MenuList
-          disablePadding
-          sx={{
-            p: 0.5,
-            gap: 0.5,
-            display: 'flex',
-            flexDirection: 'column',
-            [`& .${menuItemClasses.root}`]: {
-              px: 1,
-              borderRadius: 0.5,
-            },
-          }}
-        >
-          <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-            <Iconify icon="solar:trash-bin-trash-bold" />
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={openConfirm}
+        onClose={handleCloseConfirm}
+        title="Delete"
+        content="Are you sure you want to delete this website?"
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:trash-2-outline" />}
+          >
             Delete
-          </MenuItem>
-        </MenuList>
-      </Popover>
+          </Button>
+        }
+      />
+
+      {/* Status Confirmation Dialog */}
+      <ConfirmDialog
+        open={openStatusConfirm}
+        onClose={handleCloseStatusConfirm}
+        title="Remove Disconnected Website"
+        content="This website is disconnected. Would you like to remove it from your list?"
+        action={
+          <Button 
+            onClick={handleStatusConfirm} 
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            Remove
+          </Button>
+        }
+      />
     </>
   );
 }
