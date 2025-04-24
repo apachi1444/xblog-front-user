@@ -40,7 +40,39 @@
           "or":"OR"
         },
         "signin": {
-          "title": "Sign In"
+          "title": "Sign In",
+          "email": "Email Address",
+          "password": "Password",
+          "forgotPassword": "Forgot password?",
+          "signIn": "Sign In",
+          "or": "OR",
+          "noAccount": "Don't have an account?",
+          "signUp": "Sign up",
+          "enterTestMode": "Enter Test Mode"
+        },
+        "forgotPassword": {
+          "title": "Forgot Password",
+          "subtitle": "Enter your email address and we'll send you a link to reset your password",
+          "email": "Email Address",
+          "resetPassword": "Reset Password",
+          "backToSignIn": "Back to Sign In",
+          "checkEmail": "Check Your Email",
+          "emailSent": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions."
+        },
+        "resetPassword": {
+          "title": "Reset Password",
+          "subtitle": "Please set your new password",
+          "newPassword": "New Password",
+          "confirmPassword": "Confirm Password",
+          "submit": "Submit",
+          "success": "Password reset successful!",
+          "backToSignIn": "Back to Sign In"
+        },
+        "common": {
+          "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
+          "emailInvalid": "Please enter a valid email address",
+          "passwordsDoNotMatch": "Passwords do not match",
+          "fieldRequired": "This field is required"
         }
       },
       "analytics": {

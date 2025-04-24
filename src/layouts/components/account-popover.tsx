@@ -1,7 +1,7 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
@@ -35,11 +35,22 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
+  
 
   const user = useSelector(selectAuthUser);
   const userPlan = user?.subscription?.plan || 'Free';
   
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const isInitialMount = useRef(true);
+
+  // Close popover only on component mount
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // Only run this on initial mount
+      setOpenPopover(null);
+      isInitialMount.current = false;
+    }
+  }, []); // Empty dependency array ensures it only runs once on mount
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -50,7 +61,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   }, []);
 
   const handleClickItem = useCallback(
-    (path: string) => {
+    (path: string) => {      
       handleClosePopover()
       // Then navigate
       setTimeout(() => {
@@ -59,6 +70,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     },
     [handleClosePopover, router]
   );
+
 
   const handleLogOut = useCallback(() => {
     // Close the popover first

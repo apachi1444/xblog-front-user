@@ -16,9 +16,7 @@ import IconButton from '@mui/material/IconButton';
 import { _langs, _notifications } from 'src/_mock';
 import { setThemeMode } from 'src/services/slices/globalSlice';
 import { getStores } from 'src/services/slices/stores/storeSlice';
-import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useLazyGetStoresQuery } from 'src/services/apis/storesApi';
-import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { toggleDarkMode } from 'src/services/slices/userDashboardSlice';
 import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { setArticles } from 'src/services/slices/articles/articleSlice';
@@ -52,13 +50,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const navigate = useNavigate();
   const { t } = useTranslation();
   
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-  const user = useSelector((state: RootState) => state.auth.user);
-  
   const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
   
-  // Use lazy queries for more control
-  const [getCurrentUser] = useLazyGetCurrentUserQuery();
   const [doGetStores] = useLazyGetStoresQuery();
   
   const storesData = useSelector((state: RootState) => state.stores);  
@@ -77,20 +70,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           console.error(err);
         });
   }, [doGetArticles, dispatch]);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getCurrentUser().unwrap();
-        dispatch(setCredentials({accessToken, user: userData}));
-      } catch (error) {
-        dispatch(setCredentials({accessToken, user: null}));
-        console.error('Failed to fetch user data:', error);
-      }
-    };
-    
-    fetchUserData();
-  }, [accessToken, user, getCurrentUser, dispatch]);
   
   // Fetch stores data when component mounts
   useEffect(() => {

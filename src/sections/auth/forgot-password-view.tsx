@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -12,9 +13,11 @@ import { useRouter } from 'src/routes/hooks';
 
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
+import { LanguageSwitcher } from 'src/components/language/language-switcher';
 
 export function ForgotPasswordView() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -26,7 +29,7 @@ export function ForgotPasswordView() {
 
   const handleResetPassword = useCallback(() => {
     if (!email.trim()) {
-      setError('Please enter your email address');
+      setError(t('auth.common.fieldRequired', 'Please enter your email address'));
       return;
     }
 
@@ -39,7 +42,7 @@ export function ForgotPasswordView() {
       setSuccess(true);
       // In a real implementation, you would call your password reset API here
     }, 1500);
-  }, [email]);
+  }, [email, t]);
 
   return (
     <Box
@@ -48,14 +51,20 @@ export function ForgotPasswordView() {
         mx: 'auto',
         borderRadius: 2,
         boxShadow: (theme) => theme.customShadows.z16,
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
+        position: 'relative'
       }}
     >
+      {/* Add language switcher */}
+      <LanguageSwitcher />
+      
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
         <Logo />
-        <Typography variant="h5" sx={{ pt: 2 }}>Forgot Password</Typography>
+        <Typography variant="h5" sx={{ pt: 2 }}>
+          {t('auth.forgotPassword.title', 'Forgot Password')}
+        </Typography>
         <Typography variant="body2" color="text.secondary" textAlign="center">
-          Enter your email address and well send you a link to reset your password
+          {t('auth.forgotPassword.subtitle', 'Enter your email address and we\'ll send you a link to reset your password')}
         </Typography>
       </Box>
 
@@ -76,11 +85,12 @@ export function ForgotPasswordView() {
             <Iconify icon="eva:checkmark-fill" width={30} height={30} color="success.main" />
           </Box>
           
-          <Typography variant="h6">Check Your Email</Typography>
+          <Typography variant="h6">
+            {t('auth.forgotPassword.checkEmail', 'Check Your Email')}
+          </Typography>
           
           <Typography variant="body2" color="text.secondary" textAlign="center">
-            Weve sent a password reset link to your email address.
-            Please check your inbox and follow the instructions.
+            {t('auth.forgotPassword.emailSent', 'We\'ve sent a password reset link to your email address. Please check your inbox and follow the instructions.')}
           </Typography>
           
           <LoadingButton
@@ -94,7 +104,7 @@ export function ForgotPasswordView() {
               py: 1.5
             }}
           >
-            Back to Sign In
+            {t('auth.forgotPassword.backToSignIn', 'Back to Sign In')}
           </LoadingButton>
         </Box>
       ) : (
@@ -108,10 +118,10 @@ export function ForgotPasswordView() {
           <TextField
             fullWidth
             name="email"
-            label="Email Address"
+            label={t('auth.forgotPassword.email', 'Email Address')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder={t('auth.signin.email', 'Enter your email')}
             InputLabelProps={{ shrink: true }}
             InputProps={{
               startAdornment: (
@@ -134,11 +144,11 @@ export function ForgotPasswordView() {
               py: 1.5
             }}
           >
-            Reset Password
+            {t('auth.forgotPassword.resetPassword', 'Reset Password')}
           </LoadingButton>
           
           <Typography variant="body2" color="text.secondary" align="center">
-            Remember your password?{' '}
+            {t('auth.signin.haveAccount', 'Remember your password?')}{' '}
             <Link 
               variant="subtitle2" 
               sx={{ 
@@ -150,7 +160,7 @@ export function ForgotPasswordView() {
               }} 
               onClick={handleNavigateToSignIn}
             >
-              Sign In
+              {t('auth.signin.signIn', 'Sign In')}
             </Link>
           </Typography>
         </Box>

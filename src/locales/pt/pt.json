@@ -30,7 +30,39 @@
         "or": "OU"
       },
       "signin": {
-        "title": "Entrar"
+        "title": "Entrar",
+        "email": "Endereço de Email",
+        "password": "Senha",
+        "forgotPassword": "Esqueceu a senha?",
+        "signIn": "Entrar",
+        "or": "OU",
+        "noAccount": "Não tem uma conta?",
+        "signUp": "Inscrever-se",
+        "enterTestMode": "Entrar no Modo de Teste"
+      },
+      "forgotPassword": {
+        "title": "Esqueceu a Senha",
+        "subtitle": "Digite seu endereço de email e enviaremos um link para redefinir sua senha",
+        "email": "Endereço de Email",
+        "resetPassword": "Redefinir Senha",
+        "backToSignIn": "Voltar para Entrar",
+        "checkEmail": "Verifique Seu Email",
+        "emailSent": "Enviamos um link de redefinição de senha para seu endereço de email. Por favor, verifique sua caixa de entrada e siga as instruções."
+      },
+      "resetPassword": {
+        "title": "Redefinir Senha",
+        "subtitle": "Por favor, defina sua nova senha",
+        "newPassword": "Nova Senha",
+        "confirmPassword": "Confirmar Senha",
+        "submit": "Enviar",
+        "success": "Senha redefinida com sucesso!",
+        "backToSignIn": "Voltar para Entrar"
+      },
+      "common": {
+        "passwordRequirements": "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma letra minúscula e um número",
+        "emailInvalid": "Por favor, insira um endereço de email válido",
+        "passwordsDoNotMatch": "As senhas não coincidem",
+        "fieldRequired": "Este campo é obrigatório"
       }
     },
     "common": {

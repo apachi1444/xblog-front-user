@@ -29,7 +29,39 @@
         "signupWithGoogle": "S'inscrire avec Google"
       },
       "signin": {
-        "title": "Se Connecter"
+        "title": "Se Connecter",
+        "email": "Adresse Email",
+        "password": "Mot de Passe",
+        "forgotPassword": "Mot de passe oublié?",
+        "signIn": "Se Connecter",
+        "or": "OU",
+        "noAccount": "Vous n'avez pas de compte?",
+        "signUp": "S'inscrire",
+        "enterTestMode": "Entrer en Mode Test"
+      },
+      "forgotPassword": {
+        "title": "Mot de Passe Oublié",
+        "subtitle": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe",
+        "email": "Adresse Email",
+        "resetPassword": "Réinitialiser le Mot de Passe",
+        "backToSignIn": "Retour à la Connexion",
+        "checkEmail": "Vérifiez Votre Email",
+        "emailSent": "Nous avons envoyé un lien de réinitialisation de mot de passe à votre adresse email. Veuillez vérifier votre boîte de réception et suivre les instructions."
+      },
+      "resetPassword": {
+        "title": "Réinitialiser le Mot de Passe",
+        "subtitle": "Veuillez définir votre nouveau mot de passe",
+        "newPassword": "Nouveau Mot de Passe",
+        "confirmPassword": "Confirmer le Mot de Passe",
+        "submit": "Soumettre",
+        "success": "Mot de passe réinitialisé avec succès!",
+        "backToSignIn": "Retour à la Connexion"
+      },
+      "common": {
+        "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
+        "emailInvalid": "Veuillez entrer une adresse email valide",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "fieldRequired": "Ce champ est requis"
       }
     },
     "common": {

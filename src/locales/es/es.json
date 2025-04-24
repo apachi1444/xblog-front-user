@@ -30,7 +30,39 @@
         "or": "O"
       },
       "signin": {
-        "title": "Iniciar Sesión"
+        "title": "Iniciar Sesión",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "signIn": "Iniciar Sesión",
+        "or": "O",
+        "noAccount": "¿No tienes una cuenta?",
+        "signUp": "Regístrate",
+        "enterTestMode": "Entrar en Modo Prueba"
+      },
+      "forgotPassword": {
+        "title": "Contraseña Olvidada",
+        "subtitle": "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña",
+        "email": "Correo Electrónico",
+        "resetPassword": "Restablecer Contraseña",
+        "backToSignIn": "Volver a Iniciar Sesión",
+        "checkEmail": "Revisa Tu Correo",
+        "emailSent": "Hemos enviado un enlace para restablecer tu contraseña a tu correo electrónico. Por favor revisa tu bandeja de entrada y sigue las instrucciones."
+      },
+      "resetPassword": {
+        "title": "Restablecer Contraseña",
+        "subtitle": "Por favor establece tu nueva contraseña",
+        "newPassword": "Nueva Contraseña",
+        "confirmPassword": "Confirmar Contraseña",
+        "submit": "Enviar",
+        "success": "¡Contraseña restablecida con éxito!",
+        "backToSignIn": "Volver a Iniciar Sesión"
+      },
+      "common": {
+        "passwordRequirements": "La contraseña debe contener al menos 8 caracteres, una letra mayúscula, una letra minúscula y un número",
+        "emailInvalid": "Por favor ingresa una dirección de correo electrónico válida",
+        "passwordsDoNotMatch": "Las contraseñas no coinciden",
+        "fieldRequired": "Este campo es obligatorio"
       }
     },
     "common": {

@@ -7,6 +7,9 @@ export interface AuthUser {
     role?: string;
     created_at?: string;
     updated_at?: string;
+    is_completed_onboarding?: boolean;
+    interests?: string[] | null;
+    heard_about_us?: string | null;
     subscription?: {
       plan: string;
       startDate?: string;

@@ -1,10 +1,10 @@
-
 import type { RootState } from 'src/services/store';
 import type { CredentialResponse} from '@react-oauth/google';
 import type { SignInFormData} from 'src/validation/auth-schemas';
 
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,108 +14,147 @@ import { FormContainer, PasswordElement, TextFieldElement } from 'react-hook-for
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
-import { CircularProgress } from "@mui/material";
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { Switch, Tooltip, CircularProgress, FormControlLabel } from "@mui/material";
 
 import { useRouter } from 'src/routes/hooks';
 
-// Add this import
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
 import { signInSchema } from 'src/validation/auth-schemas';
-import { setCredentials } from "src/services/slices/auth/authSlice";
-// Import auth selectors and actions
+import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
+import { setCredentials, setOnboardingCompleted } from "src/services/slices/auth/authSlice";
 
 import { Logo } from 'src/components/logo/logo';
 import { Iconify } from 'src/components/iconify';
+// Import the centralized language switcher
+import { LanguageSwitcher } from 'src/components/language/language-switcher';
+
+// Mock data for test mode
+const MOCK_USER_DATA = {
+  id: 'test-user-id',
+  email: 'test@example.com',
+  name: 'Test User',
+  is_completed_onboarding: true,
+  // Add any other user properties your app needs
+};
+
+const MOCK_ACCESS_TOKEN = 'test-mode-access-token';
 
 export function SignInView() {
   const router = useRouter();
-  const dispatch = useDispatch();  
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
   
   // Local state
   const [showPassword, setShowPassword] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
   
-  const [googleAuth, { isLoading: isGoogleAuthLoading, error: googleAuthError }] = useGoogleAuthMutation();
-  
-  // Email/password login mutation
-  const [login, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
-
-  const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);  
+  const [googleAuth, { isLoading: isGoogleAuthLoading }] = useGoogleAuthMutation();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [getCurrentUser] = useLazyGetCurrentUserQuery();
   
   // Setup form with react-hook-form and zod validation
   const formMethods = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
     mode: 'onBlur',
   });
   
   // Add this line to use the error handler
   useFormErrorHandler(formMethods.formState.errors);
   
-  // Effect to handle successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      setTimeout(() => {        
-        if (onboardingCompleted) {
-          router.replace('/');
-        } else {
-          router.replace('/onboarding');
-        }
+      const redirectTimeout = setTimeout(() => {
+        router.replace(onboardingCompleted ? '/' : '/onboarding');
       }, 1000);
+      
+      return () => clearTimeout(redirectTimeout);
     }
+    
+    // Explicit return for when the condition isn't met
+    return undefined;
   }, [isAuthenticated, onboardingCompleted, router]);
-
+  
+  // Simulate login with mock data in test mode
+  const handleTestModeLogin = useCallback(() => {
+    dispatch(setCredentials({
+      accessToken: MOCK_ACCESS_TOKEN,
+      user: MOCK_USER_DATA
+    }));
+    dispatch(setOnboardingCompleted(true));
+    toast.success('Test mode enabled! Redirecting to dashboard...');
+    router.replace('/');
+  }, [dispatch, router]);
+  
+  // Centralized authentication success handler
+  const handleAuthSuccess = useCallback(async (accessToken: string) => {
+    // If in test mode, use mock data instead of API calls
+    if (testMode) {
+      handleTestModeLogin();
+      return;
+    }
+    
+    try {
+      const userData = await getCurrentUser().unwrap();
+      const isOnboardingCompleted = userData?.is_completed_onboarding ?? false;
+      
+      dispatch(setCredentials({accessToken, user: userData}));
+      dispatch(setOnboardingCompleted(isOnboardingCompleted));
+      
+      router.replace(isOnboardingCompleted ? '/' : '/onboarding');
+    } catch (error) {
+      if (testMode) {
+        handleTestModeLogin();
+      } else {
+        dispatch(setCredentials({accessToken, user: null}));
+        console.error('Failed to fetch user data:', error);
+      }
+    }
+  }, [dispatch, getCurrentUser, router, testMode, handleTestModeLogin]);
+  
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {
+    // If test mode is enabled, bypass API calls entirely
+    if (testMode) {
+      handleTestModeLogin();
+      return;
+    }
+    
     try {
-      // Call the real login API with email and password
       const result = await login({ 
         email: data.email.trim(), 
         password: data.password.trim() 
       }).unwrap();
       
-      // Check if we have a valid user response
       if (!result?.token_access) {
         throw new Error('Invalid login response');
       }
       
-      // Set credentials in Redux store
-      dispatch(setCredentials({
-        accessToken: result.token_access || 'default-token',
-      }));
-      
-      // Show success message
       toast.success('Successfully signed in!');
-          
+      await handleAuthSuccess(result.token_access);
     } catch (error) {
-      dispatch(setCredentials({
-        accessToken: 'default-token',
-      }));
       toast.error('Login failed. Please check your credentials and try again.');
-      console.error('Login error:', error);
     }
-  }, [dispatch, login]);
-
-  const handleNavigateToSignUp = useCallback(() => {
-    router.push('/sign-up');
-  }, [router]);
-
-  const handleNavigateToForgotPassword = useCallback(() => {
-    router.push('/forgot-password');
-  }, [router]);
+  }, [login, handleAuthSuccess, testMode, handleTestModeLogin]);
   
-  const handleGoogleSuccess = async (response: CredentialResponse) => {
+  // Handle Google authentication
+  const handleGoogleSuccess = useCallback(async (response: CredentialResponse) => {
+    // If test mode is enabled, bypass Google auth
+    if (testMode) {
+      handleTestModeLogin();
+      return;
+    }
+    
     try {
       const jwtToken = response.credential || "";
       const result = await googleAuth(jwtToken).unwrap();
@@ -124,17 +163,30 @@ export function SignInView() {
         throw new Error('Invalid authentication response');
       }
       
-      // Set tokens first
-      const credentials = { accessToken: result.token_access };
-      dispatch(setCredentials(credentials));
-      toast.success('Successfully signed in with Google!');      
-      setTimeout(() => router.replace('/'), 1000);
-      
+      toast.success('Successfully signed in with Google!');
+      await handleAuthSuccess(result.token_access);
     } catch (error) {
-      console.error('Google auth error:', error);
       toast.error('Failed to authenticate with Google. Please try again.');
     }
-  };
+  }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
+  
+  const handleToggleTestMode = useCallback(() => {
+    setTestMode(prevMode => !prevMode);
+    if (!testMode) {
+      toast.success('Test mode enabled. Authentication will be bypassed.');
+    } else {
+      toast.success('Test mode disabled. Real authentication will be used.');
+    }
+  }, [testMode]);
+  
+  const handleNavigateToSignUp = useCallback(() => {
+    router.push('/sign-up');
+  }, [router]);
+  
+  const handleNavigateToForgotPassword = useCallback(() => {
+    router.push('/forgot-password');
+  }, [router]);
+
 
   return (
     <Box
@@ -143,37 +195,92 @@ export function SignInView() {
         mx : 'auto',
         borderRadius: 2,
         boxShadow: (theme) => theme.customShadows.z16,
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
+        position: 'relative',
       }}
     >
-      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Top row with test mode toggle and language switcher */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        right: 12,
+        zIndex: 9
+      }}>
+        {/* Test Mode Toggle */}
+        <Tooltip title={testMode ? "Authentication will be bypassed" : "Use real authentication"}>
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={testMode}
+                onChange={handleToggleTestMode}
+                color="warning"
+              />
+            }
+            label={
+              <Typography variant="caption" color={testMode ? 'warning.main' : 'text.secondary'}>
+                Test Mode
+              </Typography>
+            }
+          />
+        </Tooltip>
+        
+        <LanguageSwitcher sx={{ position: 'relative', top: 0, right: 0 }} />
+      </Box>
+
+      <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 3 }}>
         <Logo />
       </Box>
 
+      {/* Rest of the component remains the same but with translations */}
       <Typography variant="h4" sx={{ mb: 3, textAlign: 'center' }}>
-        Sign in to XBlog
+        {t('auth.signin.title', 'Sign in to XBlog')}
       </Typography>
 
+      {testMode && (
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            mb: 2, 
+            textAlign: 'center', 
+            color: 'warning.main',
+            bgcolor: 'warning.lighter',
+            py: 1,
+            px: 2,
+            borderRadius: 1
+          }}
+        >
+          🔔 Test mode is active. Sign in will bypass authentication.
+        </Typography>
+      )}
+
+      {/* Update form labels with translations */}
       <FormContainer formContext={formMethods} onSuccess={handleSignIn}>
         <TextFieldElement
           name="email"
-          label="Email address"
+          label={t('auth.signin.email', 'Email address')}
           fullWidth
           margin="normal"
           autoComplete="email"
+          disabled={testMode}
         />
 
         <PasswordElement
           name="password"
-          label="Password"
+          label={t('auth.signin.password', 'Password')}
           fullWidth
           margin="normal"
           autoComplete="current-password"
           type={showPassword ? 'text' : 'password'}
+          disabled={testMode}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" disabled={testMode}>
                   <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
                 </IconButton>
               </InputAdornment>
@@ -195,8 +302,9 @@ export function SignInView() {
             onClick={handleNavigateToForgotPassword}
             sx={{ textDecoration: 'none' }}
             type="button"
+            disabled={testMode}
           >
-            Forgot password?
+            {t('auth.signin.forgotPassword', 'Forgot password?')}
           </Link>
         </Box>
 
@@ -205,53 +313,61 @@ export function SignInView() {
           size="large"
           type="submit"
           variant="contained"
-          color="primary"
-          loading={isLoginLoading}
+          color={testMode ? "warning" : "primary"}
+          loading={isLoginLoading && !testMode}
           sx={{ mb: 2 }}
         >
-          Sign In
+          {testMode 
+            ? t('auth.signin.enterTestMode', 'Enter Test Dashboard') 
+            : t('auth.signin.signIn', 'Sign In')}
         </LoadingButton>
       </FormContainer>
 
-      <Divider sx={{ my: 3 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          OR
-        </Typography>
-      </Divider>
+      {!testMode && (
+        <>
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {t('auth.signin.or', 'OR')}
+            </Typography>
+          </Divider>
 
-      {isGoogleAuthLoading ? (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: 48,
-          width: '100%'
-        }}>
-          <CircularProgress size={24} color="primary" />
-        </Box>
-      ) : (
-        <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            text="signin_with"
-            theme="filled_black"
-            onError={() => toast.error("Google Login Failed")}
-            useOneTap={false}
-            context="signin"
-          />
+          {isGoogleAuthLoading ? (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: 48,
+              width: '100%'
+            }}>
+              <CircularProgress size={24} color="primary" />
+            </Box>
+          ) : (
+            <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                text="signin_with"
+                theme="filled_black"
+                onError={() => toast.error("Google Login Failed")}
+                useOneTap={false}
+                context="signin"
+              />
+          )}
+        </>
       )}
 
-      <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-        Don&apos;t have an account?{' '}
-        <Link
-          variant="subtitle2"
-          component="button"
-          onClick={handleNavigateToSignUp}
-          sx={{ textDecoration: 'none' }}
-          type="button"
-        >
-          Sign up
-        </Link>
-      </Typography>
+      {!testMode && (
+        <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+          {t('auth.signin.noAccount', 'Don\'t have an account?')}{' '}
+          <Link
+            variant="subtitle2"
+            component="button"
+            onClick={handleNavigateToSignUp}
+            sx={{ textDecoration: 'none' }}
+            type="button"
+          >
+            {t('auth.signin.signUp', 'Sign up')}
+          </Link>
+        </Typography>
+      )}
     </Box>
   );
 }

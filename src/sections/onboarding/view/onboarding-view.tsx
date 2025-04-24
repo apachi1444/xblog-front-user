@@ -21,6 +21,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
+import { useUpdateUserMutation } from 'src/services/apis/userApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -95,6 +96,9 @@ export function OnBoardingView() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   
+  // Initialize the updateUser mutation
+  const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
+  
   // Check if onboarding is already completed
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,22 +156,36 @@ export function OnBoardingView() {
   };
   
   // Handle complete onboarding
-  const handleComplete = () => {
+  const handleComplete = async () => {
     // Save user preferences and mark onboarding as completed
     const userPreferences = {
       interests: selectedInterests,
-      referralSource,
-      plan: selectedPlan || 'free',
+      heard_about_us: referralSource,
+      is_completed_onboarding: true,
     };
     
-    // Here you would typically save the user preferences to your API
-    console.log('Saving user preferences:', userPreferences);
-    
-    // Mark onboarding as completed in Redux store
-    dispatch(setOnboardingCompleted(true));
-    
-    // Navigate to dashboard
-    navigate('/');
+    try {
+      // Send the user preferences to the API
+      await updateUser({
+        interests: selectedInterests,
+        heard_about_us: referralSource,
+        is_completed_onboarding: true,
+      }).unwrap();
+      
+      console.log('Saved user preferences:', userPreferences);
+      
+      // Mark onboarding as completed in Redux store
+      dispatch(setOnboardingCompleted(true));
+      
+      // Navigate to dashboard
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to save user preferences:', error);
+      // Still mark as completed in the local store and navigate
+      // to avoid blocking the user
+      dispatch(setOnboardingCompleted(true));
+      navigate('/');
+    }
   };
   
   // Show loading state

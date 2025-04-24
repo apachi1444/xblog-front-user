@@ -14,6 +14,9 @@ interface UpdateUserRequest {
   avatar?: string;
   telephone?: string;
   role?: string;
+  is_completed_onboarding?: boolean;
+  interests?: string[] | null;
+  heard_about_us?: string | null;
 }
 
 // RTK Query endpoints for user operations
@@ -31,7 +34,7 @@ export const userApi = api.injectEndpoints({
     updateUser: builder.mutation<AuthUser, UpdateUserRequest>({
       query: (userData) => ({
         url: `${USER_BASE_URL}/me`,
-        method: 'PATCH',
+        method: 'PUT',
         body: userData,
       }),
     }),

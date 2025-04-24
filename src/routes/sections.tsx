@@ -29,8 +29,7 @@ export const UpgradeLicense = lazy(() => import('src/pages/upgrade-license'));
 export const BookDemo = lazy(() => import('src/pages/book-demo'));
 export const CalendarPage = lazy(() => import('src/pages/calendar'));
 export const TemplatePage = lazy(() => import('src/pages/templates'));
-export const StoresView = lazy(() => import('../sections/stores/view/stores-view').then(module => ({ default: module.StoresView })));
-export const AddStoreFlow = lazy(() => import('../sections/add-store/view'));
+export const AddStorePage = lazy(() => import('src/pages/add-store'));
 
 // ----------------------------------------------------------------------
 
@@ -86,7 +85,7 @@ export function Router() {
             { path: 'upgrade-license', element: <UpgradeLicense /> },
             { path: 'book-demo', element: <BookDemo /> },
             { path: 'stores', element: <StoresPage /> },
-            { path: 'stores/add', element: <AddStoreFlow /> },
+            { path: 'stores/add', element: <AddStorePage /> },
             { path: 'calendar', element: <CalendarPage /> },
             { path: 'templates', element: <TemplatePage /> },
           ],
