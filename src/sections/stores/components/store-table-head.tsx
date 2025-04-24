@@ -46,7 +46,13 @@ export function StoreTableHead({
             key={headCell.id}
             align={headCell.align || 'left'}
             sortDirection={orderBy === headCell.id ? order : false}
-            sx={{ width: headCell.width, minWidth: headCell.minWidth }}
+            sx={{ 
+              width: headCell.width,
+              whiteSpace: 'nowrap',
+              ...(headCell.id === 'name' && {
+                paddingLeft: (theme) => theme.spacing(2)
+              })
+            }}
           >
             {headCell.sort ? (
               <TableSortLabel

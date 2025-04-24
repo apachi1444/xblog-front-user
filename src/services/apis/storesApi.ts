@@ -18,7 +18,7 @@ export const storesApi = api.injectEndpoints({
       }),
     }),
     
-    // New deleteStore mutation endpoint
+    // Delete store mutation endpoint
     deleteStore: builder.mutation<void, number>({
       query: (store_id) => ({
         url: `${STORES_BASE_URL}/${store_id}`,
@@ -41,11 +41,65 @@ export const storesApi = api.injectEndpoints({
         }
       },
     }),
+
+    // New disconnectStore mutation endpoint
+    disconnectStore: builder.mutation<void, number>({
+      query: (store_id) => ({
+        url: `${STORES_BASE_URL}/${store_id}/disconnect`,
+        method: 'POST',
+      }),
+      // Optimistically update the cache to change the store's connection status
+      async onQueryStarted(store_id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Update the store's connection status in the cache
+          dispatch(
+            storesApi.util.updateQueryData('getStores', undefined, (draft) => {
+              const storeToUpdate = draft.stores.find(store => store.id === store_id.toString());
+              if (storeToUpdate) {
+                storeToUpdate.isConnected = false;
+              }
+            })
+          );
+        } catch {
+          // If the disconnection fails, we don't need to do anything here
+          // The error will be handled by the component
+        }
+      },
+    }),
+
+    // New reconnectStore mutation endpoint
+    reconnectStore: builder.mutation<void, number>({
+      query: (store_id) => ({
+        url: `${STORES_BASE_URL}/${store_id}/connect`,
+        method: 'POST',
+      }),
+      // Optimistically update the cache to change the store's connection status
+      async onQueryStarted(store_id, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Update the store's connection status in the cache
+          dispatch(
+            storesApi.util.updateQueryData('getStores', undefined, (draft) => {
+              const storeToUpdate = draft.stores.find(store => store.id === store_id.toString());
+              if (storeToUpdate) {
+                storeToUpdate.isConnected = true;
+              }
+            })
+          );
+        } catch {
+          // If the reconnection fails, we don't need to do anything here
+          // The error will be handled by the component
+        }
+      },
+    }),
   }),
 });
 
 export const { 
   useGetStoresQuery, 
   useLazyGetStoresQuery,
-  useDeleteStoreMutation 
+  useDeleteStoreMutation,
+  useDisconnectStoreMutation,
+  useReconnectStoreMutation
 } = storesApi;

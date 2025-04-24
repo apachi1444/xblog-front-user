@@ -70,82 +70,125 @@
         },
         "common": {
           "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
-          "emailInvalid": "Please enter a valid email address",
-          "passwordsDoNotMatch": "Passwords do not match",
-          "fieldRequired": "This field is required"
+          "emailInvalid": "Please enter a valid email address"
         }
       },
-      "analytics": {
-        "welcome": "Hi, Welcome back xBlogger👋",
-        "articlesGenerated": "Articles Generated",
-        "totalWebsites": "Total Websites",
-        "purchaseOrders": "Purchase orders",
-        "messages": "Messages",
-        "currentVisits": "Current visits",
-        "websiteVisits": "Website visits",
-        "websiteVisitsSubheader": "(+43%) than last year",
-        "conversionRates": "Conversion rates",
-        "conversionRatesSubheader": "(+43%) than last year",
-        "orderTimeline": "Order timeline",
-        "trafficBySite": "Traffic by site",
-        "tasks": "Tasks",
-        "teamA": "Team A",
-        "teamB": "Team B"
-      },
-      "months": {
-        "jan": "Jan",
-        "feb": "Feb",
-        "mar": "Mar",
-        "apr": "Apr",
-        "may": "May",
-        "jun": "Jun",
-        "jul": "Jul",
-        "aug": "Aug",
-        "sep": "Sep"
-      },
-      "regions": {
-        "america": "America",
-        "asia": "Asia",
-        "europe": "Europe",
-        "africa": "Africa"
-      },
-      "countries": {
-        "italy": "Italy",
-        "japan": "Japan",
-        "china": "China",
-        "canada": "Canada",
-        "france": "France"
-      },
-      "create": {
-        "heading": "Create with AI",
-        "subheading": "How would you like to get started?",
-        "popular": "Popular",
-        "recentPromptsHeading": "Your recent prompts",
-        "generateLabel": "Generate",
-        "draftLabel": "DRAFT",
-        "options": {
-          "generate": {
-            "title": "Generate",
-            "description": "Create from a one-line prompt in a few seconds"
-          },
-          "template": {
-            "title": "Use Built In Template",
-            "description": "Create an article from an existing template"
-          }
+      "store": {
+        "title": "Connect Your Store",
+        "subtitle": "Choose your platform and connect your store",
+        "selectPlatform": "Select Platform",
+        "selectPlatformSubtitle": "Choose the platform your website is built on to optimize integration",
+        "selectPlatformRequired": "Please select a platform to continue",
+        "selectPlatformFirst": "Please select a platform first",
+        "next": "Next",
+        "back": "Back",
+        "backToStores": "Back to Stores",
+        "connect": "Connect Store",
+        "connecting": "Connecting...",
+        "success": "Store connected successfully!",
+        "error": "Failed to connect store. Please try again.",
+        "formErrors": "Please fix the form errors before submitting",
+        "integrationTitle": "{{platform}} Integration",
+        "integrationSubtitle": "Please provide the details for your {{platform}} website.",
+        
+        "platforms": {
+          "wordpress": "WordPress",
+          "shopify": "Shopify",
+          "wix": "Wix"
         },
-        "recentPrompts": {
-          "prompt1": "Presentation of React Native & difference between it and react native",
-          "prompt2": "SEO Optimization Tips for E-commerce Websites",
-          "prompt3": "How to implement authentication in Next.js applications"
+        "wordpress": {
+          "url": "WordPress URL",
+          "urlPlaceholder": "https://your-wordpress-site.com",
+          "username": "WordPress Username",
+          "usernamePlaceholder": "admin",
+          "password": "WordPress Password",
+          "passwordPlaceholder": "••••••••",
+          "description": "Connect your WordPress site"
         },
-        "timeAgo": {
-          "minute": "1 minute ago",
-          "days": "2 days ago",
-          "week": "1 week ago"
+        "shopify": {
+          "storeName": "Shopify Store Name",
+          "storeNamePlaceholder": "your-store",
+          "apiKey": "API Key",
+          "apiKeyPlaceholder": "Enter your API key",
+          "apiSecret": "API Secret",
+          "apiSecretPlaceholder": "Enter your API secret",
+          "description": "Connect your Shopify store"
+        },
+        "wix": {
+          "adminUrl": "Wix Admin URL",
+          "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+          "consumerKey": "Consumer Key",
+          "consumerKeyPlaceholder": "Enter your consumer key",
+          "consumerSecret": "Consumer Secret",
+          "consumerSecretPlaceholder": "Enter your consumer secret",
+          "description": "Connect your Wix store"
+        },
+        "terms": {
+          "accept": "I agree to the terms and conditions and authorize XBlog to access my store"
+        },
+        "guide": {
+          "title": "Integration Guide",
+          "description": "This video shows how to find and set up the required credentials for your {{platform}} store integration.",
+          "dialogDescription": "Follow this guide to find and set up the required credentials for your {{platform}} store integration.",
+          "watchButton": "Watch Integration Guide",
+          "watchTooltip": "Watch integration guide",
+          "videoTitle": "{{platform}} Integration Guide",
+          "dialogTitle": "How to Connect Your {{platform}} Store"
         }
       },
-      "websites": {
-        "addNew": "Add New Website"
+      "demo": {
+      "title": "Book a Demo",
+      "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",
+      "steps": {
+        "basicInfo": "Basic Information",
+        "chooseTime": "Choose Time",
+        "confirmation": "Confirmation"
+      },
+      "form": {
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "company": "Company Name",
+        "teamSize": "Team Size",
+        "teamSizePlaceholder": "Select team size",
+        "teamSizeOptions": {
+          "small": "1-10 employees",
+          "medium": "11-50 employees",
+          "large": "51-200 employees",
+          "enterprise": "201+ employees"
+        },
+        "dateTime": "Preferred Date & Time",
+        "message": "Additional Message",
+        "messagePlaceholder": "Tell us about your needs and what you'd like to learn in the demo..."
+      },
+      "buttons": {
+        "next": "Next",
+        "back": "Back",
+        "submit": "Schedule Demo",
+        "submitting": "Scheduling..."
+      },
+      "confirmation": {
+        "title": "Demo Scheduled Successfully!",
+        "message": "Thank you for scheduling a demo with us. We've sent a confirmation email with all the details.",
+        "nextSteps": "What happens next:",
+        "step1": "You'll receive a calendar invitation for the scheduled time",
+        "step2": "Our team will prepare a personalized demo based on your needs",
+        "step3": "We'll send you a reminder 1 hour before the scheduled demo",
+        "bookAnother": "Book Another Demo"
+      },
+      "video": {
+        "title": "Why Book a Demo?",
+        "description": "See how our team provides exceptional support and quick responses to help you maximize your results.",
+        "watchButton": "Watch Demo Video",
+        "watchFullScreen": "Watch in full screen",
+        "dialogTitle": "How Our Support Team Works",
+        "dialogDescription": "Our support team is available 24/7 to help you with any questions or issues you might have. We pride ourselves on quick response times and personalized solutions."
+      },
+      "benefits": {
+        "title": "Benefits of Booking a Demo",
+        "benefit1": "Get personalized guidance from our expert team",
+        "benefit2": "See real-time examples of how our platform can solve your specific challenges",
+        "benefit3": "Receive a custom implementation plan tailored to your business needs"
       }
+    }
     }
 }

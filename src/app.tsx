@@ -46,9 +46,7 @@ function ToasterWithTheme() {
       reverseOrder={false}
       gutter={12}
       toastOptions={{
-        // Define default options
-        className: '',
-        duration: 5000,
+        duration: 2000,
         removeDelay: 1000,
         style: {
           background: theme.palette.mode === 'dark' 

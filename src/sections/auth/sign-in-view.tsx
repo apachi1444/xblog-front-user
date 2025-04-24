@@ -72,6 +72,17 @@ export function SignInView() {
   // Add this line to use the error handler
   useFormErrorHandler(formMethods.formState.errors);
   
+  // Update form values when test mode changes
+  useEffect(() => {
+    if (testMode) {
+      formMethods.setValue('email', 'test@example.com');
+      formMethods.setValue('password', 'Test123!');
+    } else {
+      formMethods.setValue('email', '');
+      formMethods.setValue('password', '');
+    }
+  }, [testMode, formMethods]);
+  
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTimeout = setTimeout(() => {

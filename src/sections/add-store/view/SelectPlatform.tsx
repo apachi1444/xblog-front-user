@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, ChevronRight } from 'lucide-react';
 
 import { Box, Grid, Card, Paper, alpha, Button, useTheme, Container, Typography } from '@mui/material';
@@ -30,6 +31,7 @@ export default function SelectPlatform({
   platforms
 }: SelectPlatformProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function SelectPlatform({
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Select Your Platform
+          {t('store.selectPlatform')}
         </Typography>
         
         <Typography 
@@ -81,7 +83,7 @@ export default function SelectPlatform({
           color="text.secondary" 
           sx={{ mb: 4 }}
         >
-          Choose the platform your website is built on to optimize integration
+          {t('store.selectPlatformSubtitle')}
         </Typography>
         
         <Grid container spacing={3} justifyContent="center" sx={{ mb: 4 }}>
@@ -144,7 +146,7 @@ export default function SelectPlatform({
                       : theme.palette.text.primary
                   }}
                 >
-                  {platform.name}
+                  {t(`store.platforms.${platform.id}`)}
                 </Typography>
                 <Typography 
                   variant="body2" 
@@ -157,7 +159,7 @@ export default function SelectPlatform({
                       : theme.palette.text.secondary
                   }}
                 >
-                  {platform.description}
+                  {t(`store.${platform.id}.description`)}
                 </Typography>
                 
                 {selectedPlatform === platform.id && (
@@ -204,7 +206,7 @@ export default function SelectPlatform({
               },
             }}
           >
-            Please select a platform to continue
+            {t('store.selectPlatformRequired')}
           </Typography>
         )}
         
@@ -232,31 +234,16 @@ export default function SelectPlatform({
               },
             }}
           >
-            Back to Stores
+            {t('store.backToStores')}
           </Button>
-          
+
           <Button
             variant="contained"
             onClick={handleNext}
             endIcon={<ChevronRight size={18} />}
             disabled={!selectedPlatform}
-            size="large"
-            sx={{
-              borderRadius: 1.5,
-              px: 3,
-              py: 1,
-              fontWeight: 600,
-              background: selectedPlatform 
-                ? `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
-                : undefined,
-              boxShadow: selectedPlatform ? theme.shadows[3] : 'none',
-              '&:hover': {
-                boxShadow: selectedPlatform ? theme.shadows[5] : 'none',
-              },
-              transition: 'all 0.3s ease',
-            }}
           >
-            Next
+            {t('store.next')}
           </Button>
         </Box>
       </Paper>

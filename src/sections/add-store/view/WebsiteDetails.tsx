@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { useRef , useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { 
@@ -19,8 +20,6 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import WixForm from './platform-forms/WixForm';
-import ShopifyForm from './platform-forms/ShopifyForm';
 import WordPressForm from './platform-forms/WordPressForm';
 
 // Video mapping for each platform
@@ -31,112 +30,32 @@ const PLATFORM_VIDEOS = {
 };
 
 interface WebsiteDetailsProps {
-  formData: {
-    platform: string;
-    name: string;
-    domain: string;
-    [key: string]: any;
-  };
-  onUpdateFormData: (data: Record<string, any>) => void;
   onSubmit: () => void;
   onBack: () => void;
   isLoading?: boolean;
-  error?: string | null;
 }
 
 export default function WebsiteDetails({
-  formData,
-  onUpdateFormData,
   onSubmit,
   onBack,
   isLoading = false,
-  error = null,
 }: WebsiteDetailsProps) {
   const theme = useTheme();
-  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const { t } = useTranslation();
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
-  const handleUpdateField = (field: string, value: string) => {
-    onUpdateFormData({ ...formData, [field]: value });
+  const formData = {
+    platform: 'wordpress',
   };
-
-  // Update the validateForm function to include the new fields
-  const validateForm = () => {
-    const newErrors: Record<string, string | null> = {};
-    let isValid = true;
-    // Platform-specific validations
-    switch (formData.platform) {
-      case 'wordpress':
-        if (!formData.store_url) {
-          newErrors.store_url = 'Store URL is required';
-          isValid = false;
-        }
-        if (!formData.store_username) {
-          newErrors.store_username = 'Store username is required';
-          isValid = false;
-        }
-        if (!formData.store_password) {
-          newErrors.store_password = 'Store password is required';
-          isValid = false;
-        }
-        break;
-        
-      case 'shopify':
-        // Existing Shopify validations
-        if (!formData.shopifyStore) {
-          newErrors.shopifyStore = 'Shopify store name is required';
-          isValid = false;
-        }
-        if (!formData.appId) {
-          newErrors.appId = 'App ID is required';
-          isValid = false;
-        }
-        if (!formData.appPassword) {
-          newErrors.appPassword = 'App Password is required';
-          isValid = false;
-        }
-        break;
-        
-      case 'wix':
-        if (!formData.adminUrl) {
-          newErrors.adminUrl = 'Admin URL is required';
-          isValid = false;
-        }
-        if (!formData.consumerKey) {
-          newErrors.consumerKey = 'Consumer Key is required';
-          isValid = false;
-        }
-        if (!formData.consumerSecret) {
-          newErrors.consumerSecret = 'Consumer Secret is required';
-          isValid = false;
-        }
-        break;
-      default:
-        return false;
-  }
-  
-  setErrors(newErrors);
-  return isValid;
-};
-  
-  // Update the renderPlatformForm function to include the form ref
-  const wordpressFormRef = useRef<{ validate: () => Promise<boolean> }>(null);
   
   // Update the handleSubmit function
   const handleSubmit = async () => {
-    let isValid = true;
-    // Platform-specific validations using React Hook Form
-    if (formData.platform === 'wordpress' && wordpressFormRef.current) {
-      isValid = await wordpressFormRef.current.validate();
-    } else {
-      // Fall back to the old validation for other platforms
-      isValid = validateForm();
-    }
+    const isValid = true;
     
     if (isValid) {
       onSubmit();
     } else {
-      toast.error('Please fix the form errors before submitting');
+      toast.error(t('store.formErrors'));
     }
   };
   
@@ -145,35 +64,20 @@ export default function WebsiteDetails({
     switch (formData.platform) {
       case 'wordpress':
         return (
-          <WordPressForm 
-            formData={formData} 
-            onUpdateField={handleUpdateField}
-            onTestConnection={() => Promise.resolve(true)} // Optional test connection
-            formRef={wordpressFormRef}
-          />
+          <WordPressForm />
         );
       case 'shopify':
         return (
-          <ShopifyForm 
-            formData={formData} 
-            onUpdateField={handleUpdateField} 
-            errors={errors}
-            setErrors={setErrors}
-          />
+          <WordPressForm />
         );
       case 'wix':
         return (
-          <WixForm 
-            formData={formData} 
-            onUpdateField={handleUpdateField} 
-            errors={errors}
-            setErrors={setErrors}
-          />
+          <WordPressForm />
         );
       default:
         return (
           <Typography color="error" variant="body1" align="center">
-            Please select a platform first
+            {t('store.selectPlatformFirst')}
           </Typography>
         );
     }
@@ -181,6 +85,12 @@ export default function WebsiteDetails({
 
   // Get the appropriate video URL based on the selected platform
   const getVideoUrl = () => PLATFORM_VIDEOS[formData.platform as keyof typeof PLATFORM_VIDEOS] || '';
+
+  // Get platform display name
+  const getPlatformDisplayName = () => {
+    if (!formData.platform) return '';
+    return t(`store.platforms.${formData.platform}`);
+  };
 
   // Make sure we're actually rendering content
   return (
@@ -205,16 +115,10 @@ export default function WebsiteDetails({
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h5">
-                {formData.platform === 'wordpress' 
-                  ? 'WordPress Integration' 
-                  : formData.platform === 'shopify' 
-                    ? 'Shopify Integration' 
-                    : formData.platform === 'wix' 
-                      ? 'Wix Integration' 
-                      : 'Website Details'}
+                {t('store.integrationTitle', { platform: getPlatformDisplayName() })}
               </Typography>
               
-              <Tooltip title="Watch integration guide">
+              <Tooltip title={t('store.guide.watchTooltip')}>
                 <IconButton 
                   color="primary" 
                   onClick={() => setVideoDialogOpen(true)}
@@ -226,16 +130,10 @@ export default function WebsiteDetails({
             </Box>
             
             <Typography variant="body2" color="text.secondary" paragraph>
-              Please provide the details for your {formData.platform} website.
+              {t('store.integrationSubtitle', { platform: getPlatformDisplayName() })}
             </Typography>
             
             {renderPlatformForm()}
-            
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-                {error}
-              </Typography>
-            )}
             
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
               <Button
@@ -244,7 +142,7 @@ export default function WebsiteDetails({
                 startIcon={<ChevronLeft size={16} />}
                 disabled={isLoading}
               >
-                Back
+                {t('store.back')}
               </Button>
               
               <Button
@@ -256,10 +154,10 @@ export default function WebsiteDetails({
                 {isLoading ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Connecting...
+                    {t('store.connecting')}
                   </>
                 ) : (
-                  'Connect Store'
+                  t('store.connect')
                 )}
               </Button>
             </Box>
@@ -280,7 +178,7 @@ export default function WebsiteDetails({
               }}
             >
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Integration Guide
+                {t('store.guide.title')}
               </Typography>
               
               <Box sx={{ position: 'relative', paddingTop: '56.25%', width: '100%', mb: 2 }}>
@@ -297,12 +195,12 @@ export default function WebsiteDetails({
                   }}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  title={`${formData.platform} Integration Guide`}
+                  title={t('store.guide.videoTitle', { platform: getPlatformDisplayName() })}
                 />
               </Box>
               
               <Typography variant="body2" color="text.secondary">
-                This video shows how to find and set up the required credentials for your {formData.platform} store integration.
+                {t('store.guide.description', { platform: getPlatformDisplayName() })}
               </Typography>
               
               {/* Mobile-only button to open full-screen video */}
@@ -314,7 +212,7 @@ export default function WebsiteDetails({
                   startIcon={<HelpCircle size={16} />}
                   fullWidth
                 >
-                  Watch Integration Guide
+                  {t('store.guide.watchButton')}
                 </Button>
               </Box>
             </Paper>
@@ -331,13 +229,7 @@ export default function WebsiteDetails({
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">
-            How to Connect Your {formData.platform === 'wordpress' 
-              ? 'WordPress' 
-              : formData.platform === 'shopify' 
-                ? 'Shopify' 
-                : formData.platform === 'wix' 
-                  ? 'Wix' 
-                  : ''} Store
+            {t('store.guide.dialogTitle', { platform: getPlatformDisplayName() })}
           </Typography>
           <IconButton onClick={() => setVideoDialogOpen(false)} size="small">
             <Box component="span" sx={{ fontSize: '1.5rem' }}>&times;</Box>
@@ -358,11 +250,11 @@ export default function WebsiteDetails({
               }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              title={`${formData.platform} Integration Guide`}
+              title={t('store.guide.videoTitle', { platform: getPlatformDisplayName() })}
             />
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Follow this guide to find and set up the required credentials for your {formData.platform} store integration.
+            {t('store.guide.dialogDescription', { platform: getPlatformDisplayName() })}
           </Typography>
         </DialogContent>
       </Dialog>

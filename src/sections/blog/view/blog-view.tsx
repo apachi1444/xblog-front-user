@@ -4,10 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
+import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
@@ -18,7 +23,6 @@ import { Iconify } from 'src/components/iconify';
 import { LoadingSpinner } from 'src/components/loading';
 
 import { PostItem } from '../post-item';
-import { PostSort } from '../post-sort';
 
 // ----------------------------------------------------------------------
 
@@ -29,6 +33,7 @@ export function BlogView() {
   const [page, setPage] = useState(1);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentTab, setCurrentTab] = useState('all');
   
   const articles = useSelector(selectAllArticles);
   
@@ -43,18 +48,23 @@ export function BlogView() {
         })
         .catch((err) => {
           toast.error(err.error.data.message);
-          console.error(err);
         });
   }, [doGetArticles, dispatch]);
   
   useEffect(() => {
     let sorted = [...articles];
     
+    // Apply search filter
     if (searchQuery) {
       sorted = sorted.filter(post => 
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
+    }
+    
+    // Apply status filter
+    if (currentTab !== 'all') {
+      sorted = sorted.filter(post => post.status.toLowerCase() === currentTab.toLowerCase());
     }
     
     // Apply sorting
@@ -70,7 +80,7 @@ export function BlogView() {
     }
     
     setFilteredPosts(sorted);
-  }, [articles, sortBy, searchQuery]);
+  }, [articles, sortBy, searchQuery, currentTab]);
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort);
@@ -82,6 +92,14 @@ export function BlogView() {
   
   const handleNewArticle = () => {
     navigate('/generate');
+  };
+  
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+  
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
+    setCurrentTab(newValue);
   };
   
   // Pagination
@@ -111,16 +129,66 @@ export function BlogView() {
 
       {isLoading && <LoadingSpinner message="Loading your blogs..." fullHeight />}
 
-      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
-        <PostSort
-          sortBy={sortBy}
-          onSort={handleSort}
-          options={[
-            { value: 'latest', label: 'Latest' },
-            { value: 'popular', label: 'Popular' },
-            { value: 'oldest', label: 'Oldest' },
-          ]}
+      {/* Search and Filter Section */}
+      <Stack 
+        direction={{ xs: 'column', md: 'row' }} 
+        spacing={2} 
+        alignItems={{ xs: 'stretch', md: 'center' }}
+        sx={{ mb: 4 }}
+      >
+        <TextField
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search articles..."
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ maxWidth: { md: 280 } }}
         />
+      </Stack>
+      
+      {/* Status Tabs */}
+      <Box sx={{ mb: 4 }}>
+        <Tabs
+          value={currentTab}
+          onChange={handleTabChange}
+          sx={{
+            px: 2,
+            bgcolor: 'background.neutral',
+            borderRadius: 1,
+            '& .MuiTab-root': { minWidth: 100 },
+          }}
+        >
+          <Tab 
+            value="all" 
+            label="All" 
+            iconPosition="start"
+            icon={<Iconify icon="mdi:view-grid" width={20} height={20} />}
+          />
+          <Tab 
+            value="published" 
+            label="Published" 
+            iconPosition="start"
+            icon={<Iconify icon="mdi:check-circle" width={20} height={20} />}
+          />
+          <Tab 
+            value="draft" 
+            label="Draft" 
+            iconPosition="start"
+            icon={<Iconify icon="mdi:file-document-outline" width={20} height={20} />}
+          />
+          <Tab 
+            value="scheduled" 
+            label="Scheduled" 
+            iconPosition="start"
+            icon={<Iconify icon="mdi:clock-outline" width={20} height={20} />}
+          />
+        </Tabs>
       </Box>
 
       {!isLoading && filteredPosts.length === 0 ? (

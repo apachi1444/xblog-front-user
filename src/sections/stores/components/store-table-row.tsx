@@ -1,11 +1,10 @@
-import type { LabelColor } from 'src/components/label';
 
+// First, let's update the StoreTableRow component to include a toggle button
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Checkbox from '@mui/material/Checkbox';
@@ -13,13 +12,15 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
-
-import { fDate } from 'src/utils/format-time';
+import DialogContentText from '@mui/material/DialogContentText';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
-import { ConfirmDialog } from 'src/components/confirm-dialog';
+
 
 // ----------------------------------------------------------------------
 
@@ -34,58 +35,61 @@ export interface StoreProps {
   isConnected: boolean;
 }
 
+// ----------------------------------------------------------------------
+
 type Props = {
-  row: StoreProps;
+  row: any;
   selected: boolean;
   onSelectRow: VoidFunction;
   onDelete: (id: string) => void;
+  onDisconnect: (id: string) => void;
+  onReconnect: (id: string) => void;
   isDeleting: boolean;
+  isDisconnecting: boolean;
+  isReconnecting: boolean;
 };
 
-export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting }: Props) {
-  const navigate = useNavigate();
-  const [openConfirm, setOpenConfirm] = useState(false);
-  const [openStatusConfirm, setOpenStatusConfirm] = useState(false);
-
+export function StoreTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onDelete,
+  onDisconnect,
+  onReconnect,
+  isDeleting,
+  isDisconnecting,
+  isReconnecting,
+}: Props) {
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openConnectionDialog, setOpenConnectionDialog] = useState(false);
+  const [connectionAction, setConnectionAction] = useState<'connect' | 'disconnect'>('disconnect');
+  
   const { id, name, platform, business, creationDate, articlesCount, isConnected } = row;
 
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true);
+  const handleConnectionToggle = () => {
+    setConnectionAction(isConnected ? 'disconnect' : 'connect');
+    setOpenConnectionDialog(true);
   };
 
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-  };
-
-  const handleOpenStatusConfirm = () => {
-    setOpenStatusConfirm(true);
-  };
-
-  const handleCloseStatusConfirm = () => {
-    setOpenStatusConfirm(false);
-  };
-
-  const handleDelete = () => {
-    onDelete(id);
-    handleCloseConfirm();
-  };
-
-  const handleStatusClick = () => {
-    // Only show confirmation if the store is disconnected
-    if (!isConnected) {
-      handleOpenStatusConfirm();
+  const handleConfirmConnection = () => {
+    if (connectionAction === 'connect') {
+      onReconnect(id);
+    } else {
+      onDisconnect(id);
     }
+    setOpenConnectionDialog(false);
   };
 
-  const handleStatusConfirm = () => {
-    // Use the same delete function for status confirmation
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
     onDelete(id);
-    handleCloseStatusConfirm();
+    setOpenDeleteDialog(false);
   };
 
-  const handleViewDetails = () => {
-    navigate(`/stores/${id}`);
-  };
+  const isActionLoading = isDeleting || isDisconnecting || isReconnecting;
 
   return (
     <>
@@ -95,67 +99,49 @@ export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting
         </TableCell>
 
         <TableCell>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Box component="img" 
-              src={`/assets/icons/platforms/${platform?.toLowerCase()}.png`} 
-              alt={platform}
-              sx={{ width: 28, height: 28, borderRadius: '8px' }}
-            />
-            
-            <Box>
-              <Link 
-                color="inherit" 
-                variant="subtitle2" 
-                onClick={handleViewDetails}
-                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-              >
-                {name}
-              </Link>
-              
-              <Typography variant="body2" color="text.secondary">
-                {`${business} business`}
-              </Typography>
-            </Box>
-          </Stack>
+          <Typography variant="subtitle2" noWrap>
+            {name}
+          </Typography>
         </TableCell>
 
-        <TableCell>
-          <Label variant="soft" color="primary">
-            {platform}
-          </Label>
-        </TableCell>
+        <TableCell>{platform}</TableCell>
 
         <TableCell>{business}</TableCell>
 
-        <TableCell>{fDate(creationDate)}</TableCell>
+        <TableCell>{format(new Date(creationDate), 'dd MMM yyyy')}</TableCell>
 
         <TableCell align="center">{articlesCount}</TableCell>
 
-        <TableCell>
+        <TableCell align="center">
           <Label
             variant="soft"
-            color={(isConnected ? 'success' : 'error') as LabelColor}
-            sx={{ 
-              cursor: !isConnected ? 'pointer' : 'default',
-              '&:hover': !isConnected ? { opacity: 0.8 } : {}
-            }}
-            onClick={!isConnected ? handleStatusClick : undefined}
+            color={isConnected ? 'success' : 'error'}
+            sx={{ textTransform: 'capitalize' }}
           >
             {isConnected ? 'Connected' : 'Disconnected'}
           </Label>
         </TableCell>
 
-        <TableCell align="center">
+        <TableCell align="right" sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+          <Tooltip title={isConnected ? "Disconnect store" : "Connect store"}>
+            <Switch
+              checked={isConnected}
+              onChange={handleConnectionToggle}
+              color="success"
+              disabled={isActionLoading}
+            />
+          </Tooltip>
+
           <Tooltip title="Delete">
-            <IconButton 
-              color="error" 
-              onClick={handleOpenConfirm}
-              disabled={isDeleting}
+            <IconButton
+              color="error"
+              onClick={handleDeleteClick}
+              disabled={isActionLoading}
             >
               {isDeleting ? (
-                <CircularProgress size={20} color="error" />
+                <CircularProgress size={24} />
               ) : (
-                <Iconify icon="eva:trash-2-outline" />
+                <Iconify icon="solar:trash-bin-trash-bold" />
               )}
             </IconButton>
           </Tooltip>
@@ -163,42 +149,50 @@ export function StoreTableRow({ row, selected, onSelectRow, onDelete, isDeleting
       </TableRow>
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        open={openConfirm}
-        onClose={handleCloseConfirm}
-        title="Delete"
-        content="Are you sure you want to delete this website?"
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:trash-2-outline" />}
-          >
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this website? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
             Delete
           </Button>
-        }
-      />
+        </DialogActions>
+      </Dialog>
 
-      {/* Status Confirmation Dialog */}
-      <ConfirmDialog
-        open={openStatusConfirm}
-        onClose={handleCloseStatusConfirm}
-        title="Remove Disconnected Website"
-        content="This website is disconnected. Would you like to remove it from your list?"
-        action={
+      {/* Connection Toggle Confirmation Dialog */}
+      <Dialog
+        open={openConnectionDialog}
+        onClose={() => setOpenConnectionDialog(false)}
+      >
+        <DialogTitle>
+          {connectionAction === 'connect' ? 'Connect Website' : 'Disconnect Website'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {connectionAction === 'connect'
+              ? 'Are you sure you want to reconnect this website? This will restore the connection to your store.'
+              : 'Are you sure you want to disconnect this website? This will temporarily disable the connection to your store.'}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConnectionDialog(false)}>Cancel</Button>
           <Button 
-            onClick={handleStatusConfirm} 
-            color="error"
+            onClick={handleConfirmConnection} 
+            color={connectionAction === 'connect' ? 'success' : 'warning'} 
             variant="contained"
-            disabled={isDeleting}
-            startIcon={isDeleting ? <CircularProgress size={20} color="inherit" /> : null}
           >
-            Remove
+            {connectionAction === 'connect' ? 'Connect' : 'Disconnect'}
           </Button>
-        }
-      />
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

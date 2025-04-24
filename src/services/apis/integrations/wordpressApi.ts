@@ -7,8 +7,6 @@ interface ConnectWordPressRequest {
   store_url: string;
   store_username: string;
   store_password: string;
-  name: string;
-  domain: string;
 }
 
 // Interface for WordPress store connection response
