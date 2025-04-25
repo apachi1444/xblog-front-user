@@ -15,6 +15,7 @@ import { FormStepper } from 'src/components/stepper/FormStepper';
 
 import SelectPlatform from './SelectPlatform';
 import WebsiteDetails from './WebsiteDetails';
+import { SuccessAnimation } from './SuccessAnimation';
 
 // Test mode for bypassing API errors
 const TEST_MODE = true;
@@ -71,6 +72,7 @@ export default function AddStoreFlow() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
+  const [integrationSuccess, setIntegrationSuccess] = useState(false);
   
   // API mutation hooks
   const [connectWordPress , {isLoading : isWordPressLoading}] = useConnectWordPressMutation();
@@ -116,7 +118,6 @@ export default function AddStoreFlow() {
 
   // Centralized submit handler for all platforms
   const handleSubmit = async (data: StoreFormData) => {
-    
     try {
       // Handle different platforms
       switch (data.platform) {
@@ -133,15 +134,20 @@ export default function AddStoreFlow() {
           throw new Error('Unsupported platform');
       }
       
+      // Show success animation
+      setIntegrationSuccess(true);
+      
       // Redirect after a delay
       setTimeout(() => {
         navigate('/stores');
-      }, 2000);
+      }, 3000);
     } catch (errore) {
       if (TEST_MODE) {
+        // Even in test mode, show the success animation
+        setIntegrationSuccess(true);
         setTimeout(() => {
           navigate('/stores');
-        }, 2000);
+        }, 3000);
       } else {
         toast.error(t('store.error'));
       }
@@ -155,13 +161,14 @@ export default function AddStoreFlow() {
       store_username: data.store_username || '',
       store_password: data.store_password || '',
     }).unwrap()
-      .then(() => {})
+      .then(() => {
+        toast.success(t('store.success'));
+      })
       .catch(() => {
         if (TEST_MODE) {
           toast.success(t('store.success'));
         }
       })
-    
   };
 
   const handleShopifyConnection = async (data: StoreFormData) => {    
@@ -233,6 +240,8 @@ export default function AddStoreFlow() {
       <FormProvider {...methods}>
         {renderStepContent()}
       </FormProvider>
+      
+      <SuccessAnimation show={integrationSuccess} />
     </DashboardContent>
   );
 }

@@ -136,6 +136,89 @@
           "dialogTitle": "How to Connect Your {{platform}} Store"
         }
       },
+      "common": {
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "profile": {
+        "title": "Profile",
+        "subtitle": "Manage your account settings and subscription",
+        "editProfile": "Edit Profile",
+        "form": {
+          "firstName": "First Name",
+          "lastName": "Last Name"
+        },
+        "tabs": {
+          "account": "Account",
+          "subscription": "Subscription",
+          "security": "Security"
+        },
+        "subscription": {
+          "current": "Current Subscription",
+          "viewDetails": "View Details",
+          "hideDetails": "Hide Details",
+          "manage": "Manage Subscription",
+          "upgrade": "Upgrade Plan",
+          "plans": "Subscription Plans",
+          "choosePlan": "Choose the plan that works best for you",
+          "currentPlan": "Current Plan",
+          "perMonth": "per month",
+          "planNames": {
+            "free": "Free",
+            "basic": "Basic",
+            "professional": "Professional"
+          },
+          "features": {
+            "0": "Basic Article Generation",
+            "1": "Limited Analytics",
+            "2": "Standard Support",
+            "3": "5 Articles per month",
+            "4": "1GB Storage"
+          },
+          "planFeatures": {
+            "0": {
+              "0": "Basic Article Generation",
+              "1": "Limited Analytics",
+              "2": "Standard Support",
+              "3": "5 Articles per month",
+              "4": "1GB Storage"
+            },
+            "1": {
+              "0": "Advanced Article Generation",
+              "1": "Basic Analytics",
+              "2": "Standard Support",
+              "3": "20 Articles per month",
+              "4": "5GB Storage"
+            },
+            "2": {
+              "0": "All Basic Features",
+              "1": "Unlimited Article Generation",
+              "2": "Advanced Analytics",
+              "3": "Priority Support",
+              "4": "Custom Publishing Schedule"
+            }
+          }
+        },
+        "billing": {
+          "history": "Billing History",
+          "loading": "Loading invoices...",
+          "noHistory": "No billing history available",
+          "date": "Date",
+          "invoiceNumber": "Invoice Number",
+          "plan": "Plan",
+          "amount": "Amount",
+          "status": "Status",
+          "planMonthly": "{{plan}} Plan - Monthly",
+          "refreshSuccess": "Invoices refreshed successfully"
+        },
+        "errors": {
+          "refreshInvoices": "Failed to refresh invoices"
+        }
+      },
+      "common": {
+        "save": "Save",
+        "cancel": "Cancel"
+      },
       "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",

@@ -60,15 +60,12 @@ const TABLE_HEAD = [
     const [filterName, setFilterName] = useState('');
     const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
   
-    const [doGetStores] = useLazyGetStoresQuery();
+    const [doGetStores , {isLoading}] = useLazyGetStoresQuery();
     const [deleteStore, { isLoading: isDeleting }] = useDeleteStoreMutation();
     const [disconnectStore, { isLoading: isDisconnecting }] = useDisconnectStoreMutation();
     const [reconnectStore, { isLoading: isReconnecting }] = useReconnectStoreMutation();
-    const [isLoading, setIsLoading] = useState(false);
   
     useEffect(() => {
-      setIsLoading(true);
-  
       const timeoutId = setTimeout(() => {
         doGetStores()
           .unwrap()
@@ -81,12 +78,10 @@ const TABLE_HEAD = [
             } else {
               setStores(result.stores);
             }
-            setIsLoading(false);
           })
           .catch(() => {
             setStores(_stores);
             toast.error("Failed to load websites. Using cached data.");
-            setIsLoading(false);
           });
       }, 2000);
   

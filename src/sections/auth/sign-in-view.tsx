@@ -198,6 +198,8 @@ export function SignInView() {
     router.push('/forgot-password');
   }, [router]);
 
+  console.log(showPassword)
+
 
   return (
     <Box
@@ -285,18 +287,7 @@ export function SignInView() {
           label={t('auth.signin.password', 'Password')}
           fullWidth
           margin="normal"
-          autoComplete="current-password"
-          type={showPassword ? 'text' : 'password'}
           disabled={testMode}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" disabled={testMode}>
-                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
         />
 
         <Box

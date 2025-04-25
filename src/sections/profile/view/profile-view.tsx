@@ -1,4 +1,7 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Edit, Award, CreditCard, ChevronRight } from 'lucide-react';
 
 import { Download } from '@mui/icons-material';
@@ -9,17 +12,22 @@ import {
   Card,
   Chip,
   Grid,
-  Stack,
+  Table,
   Avatar,
   Button,
   Divider,
   useTheme,
+  TableRow,
   Container,
   TextField,
+  TableBody,
+  TableCell,
+  TableHead,
   Typography,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useGetUserInvoicesQuery, useLazyGetUserInvoicesQuery } from 'src/services/apis/subscriptionApi';
 
 import { ProfileForm } from 'src/components/profile/ProfileForm';
 import { SecurityForm } from 'src/components/profile/SecurityForm';
@@ -92,44 +100,74 @@ const SUBSCRIPTION_PLANS = [
   }
 ];
 
+
+const MOCK_INVOICES = {
+  invoices: [
+    {
+      id: '1',
+      invoiceNumber: 'INV-2023-001',
+      amount: 19.99,
+      currency: 'USD',
+      status: 'paid',
+      createdAt: '2023-01-15T00:00:00.000Z',
+      plan: 'Professional',
+      downloadUrl: '#'
+    },
+    {
+      id: '2',
+      invoiceNumber: 'INV-2023-002',
+      amount: 19.99,
+      currency: 'USD',
+      status: 'paid',
+      createdAt: '2023-02-15T00:00:00.000Z',
+      plan: 'Professional',
+      downloadUrl: '#'
+    }
+  ],
+  count: 2
+};
+
 export function ProfileView() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const [showSubscriptionDetails, setShowSubscriptionDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState('Jaydon');
   const [lastName, setLastName] = useState('Frankie');
   const subscriptionTabRef = React.useRef<HTMLDivElement>(null);
+  const [shouldRefreshInvoices, setShouldRefreshInvoices] = useState(false);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const navigate = useNavigate();
+  
+  // Add this to fetch invoices
+  const { data: invoicesData, isLoading: isLoadingInvoices } = useGetUserInvoicesQuery();
+  const [fetchInvoices] = useLazyGetUserInvoicesQuery();
+
+  // Add useEffect to handle page visibility changes
+  React.useEffect(() => {
+    fetchInvoices()
+      .unwrap()
+      .then(() => {
+        toast.success(t('profile.billing.refreshSuccess', 'Invoices refreshed successfully'));
+      })
+      .catch((error) => {
+        setInvoices(MOCK_INVOICES.invoices)
+        toast.error(t('profile.errors.refreshInvoices', 'Failed to refresh invoices'));
+      });
+        // Reset the flag
+  }, [shouldRefreshInvoices, fetchInvoices, t]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
-  // Calculate days remaining in subscription
-  const calculateDaysRemaining = () => {
-    if (USER.subscription.plan === 'Free') return 'Unlimited';
-    
-    const endDate = new Date(USER.subscription.endDate);
-    const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
-
-  // Calculate percentage of usage
-  const calculateUsagePercentage = (used: number, limit: number) => (used / limit) * 100;
-
-  const daysRemaining = calculateDaysRemaining();
-  const isSubscriptionEnding = typeof daysRemaining === 'number' && daysRemaining <= 30;
-
   const handleManageSubscription = () => {
-    setActiveTab(1);
-    // Use setTimeout to ensure the tab change has happened before scrolling
-    setTimeout(() => {
-      if (subscriptionTabRef.current) {
-        subscriptionTabRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+    // Set flag to refresh invoices when user returns
+    setShouldRefreshInvoices(true);
+    
+    // Navigate using React Router (keeps it in the same tab)
+    navigate('/subscription/manage');
   };
 
   const handleSaveProfile = () => {
@@ -143,10 +181,10 @@ export function ProfileView() {
         {/* Profile Overview */}
         <Box mb={5}>
           <Typography variant="h4" gutterBottom>
-            My Profile
+            {t('profile.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Manage your account settings and subscription
+            {t('profile.subtitle')}
           </Typography>
         </Box>
 
@@ -171,7 +209,7 @@ export function ProfileView() {
                   <Box sx={{ width: '100%', mt: 2 }}>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
-                        <Typography variant="body2" gutterBottom>First Name</Typography>
+                        <Typography variant="body2" gutterBottom>{t('profile.form.firstName')}</Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -180,7 +218,7 @@ export function ProfileView() {
                         />
                       </Grid>
                       <Grid item xs={6}>
-                        <Typography variant="body2" gutterBottom>Last Name</Typography>
+                        <Typography variant="body2" gutterBottom>{t('profile.form.lastName')}</Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -195,14 +233,14 @@ export function ProfileView() {
                         size="small" 
                         onClick={handleSaveProfile}
                       >
-                        Save
+                        {t('common.save')}
                       </Button>
                       <Button 
                         variant="outlined" 
                         size="small" 
                         onClick={() => setIsEditing(false)}
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </Button>
                     </Box>
                   </Box>
@@ -221,7 +259,7 @@ export function ProfileView() {
                       sx={{ mt: 1 }}
                       onClick={() => setIsEditing(true)}
                     >
-                      Edit Profile
+                      {t('profile.editProfile')}
                     </Button>
                   </>
                 )}
@@ -232,7 +270,7 @@ export function ProfileView() {
               <Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h6">
-                    Current Subscription
+                    {t('profile.subscription.current')}
                   </Typography>
                   <Button 
                     variant="text" 
@@ -240,7 +278,7 @@ export function ProfileView() {
                     endIcon={<ChevronRight />}
                     onClick={() => setShowSubscriptionDetails(!showSubscriptionDetails)}
                   >
-                    {showSubscriptionDetails ? 'Hide Details' : 'View Details'}
+                    {showSubscriptionDetails ? t('profile.subscription.hideDetails') : t('profile.subscription.viewDetails')}
                   </Button>
                 </Box>
 
@@ -253,7 +291,7 @@ export function ProfileView() {
                     startIcon={<CreditCard />}
                     onClick={handleManageSubscription}
                   >
-                    Manage Subscription
+                    {t('profile.subscription.manage')}
                   </Button>
                   {USER.subscription.plan !== 'Professional' && (
                     <Button 
@@ -262,7 +300,7 @@ export function ProfileView() {
                       startIcon={<Award />}
                       onClick={handleManageSubscription}
                     >
-                      Upgrade Plan
+                      {t('profile.subscription.upgrade')}
                     </Button>
                   )}
                 </Box>
@@ -275,7 +313,7 @@ export function ProfileView() {
         {showSubscriptionDetails && (
           <Card sx={{ mb: 5, p: 3, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom>
-              {USER.subscription.plan} Plan Features
+              {t('profile.subscription.planFeatures', { plan: USER.subscription.plan })}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
@@ -292,7 +330,7 @@ export function ProfileView() {
                         mr: 1.5,
                       }}
                     />
-                    <Typography variant="body2">{feature}</Typography>
+                    <Typography variant="body2">{t(`profile.subscription.features.${index}`, { defaultValue: feature })}</Typography>
                   </Box>
                 </Grid>
               ))}
@@ -313,9 +351,9 @@ export function ProfileView() {
               borderColor: 'divider',
             }}
           >
-            <Tab label="Account Settings" />
-            <Tab label="Subscription" />
-            <Tab label="Security" />
+            <Tab label={t('profile.tabs.account')} />
+            <Tab label={t('profile.tabs.subscription')} />
+            <Tab label={t('profile.tabs.security')} />
           </Tabs>
         </Box>
 
@@ -326,14 +364,14 @@ export function ProfileView() {
           {activeTab === 1 && (
             <Box ref={subscriptionTabRef}>
               <Typography variant="h5" gutterBottom>
-                Subscription Plans
+                {t('profile.subscription.plans')}
               </Typography>
               <Typography variant="body2" color="text.secondary" paragraph>
-                Choose the plan that works best for your needs
+                {t('profile.subscription.choosePlan')}
               </Typography>
               
               <Grid container spacing={3} sx={{ mt: 2 }}>
-                {SUBSCRIPTION_PLANS.map((plan) => (
+                {SUBSCRIPTION_PLANS.map((plan, planIndex) => (
                   <Grid item xs={12} md={4} key={plan.name}>
                     <Card 
                       variant="outlined"
@@ -352,7 +390,7 @@ export function ProfileView() {
                     >
                       {plan.current && (
                         <Chip 
-                          label="Current Plan" 
+                          label={t('profile.subscription.currentPlan')} 
                           color="primary" 
                           size="small"
                           sx={{ 
@@ -364,7 +402,7 @@ export function ProfileView() {
                       )}
                       
                       <Typography variant="h6" gutterBottom>
-                        {plan.name}
+                        {t(`profile.subscription.planNames.${plan.name.toLowerCase()}`, { defaultValue: plan.name })}
                       </Typography>
                       
                       <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
@@ -372,7 +410,7 @@ export function ProfileView() {
                           ${plan.price}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                          /month
+                          {t('profile.subscription.perMonth')}
                         </Typography>
                       </Box>
                       
@@ -390,7 +428,9 @@ export function ProfileView() {
                                 mr: 1.5,
                               }}
                             />
-                            <Typography variant="body2">{feature}</Typography>
+                            <Typography variant="body2">
+                              {t(`profile.subscription.planFeatures.${planIndex}.${index}`, { defaultValue: feature })}
+                            </Typography>
                           </Box>
                         ))}
                       </Box>
@@ -402,7 +442,7 @@ export function ProfileView() {
                         sx={{ mt: 3 }}
                         disabled={plan.current}
                       >
-                        {plan.current ? 'Current Plan' : 'Upgrade'}
+                        {plan.current ? t('profile.subscription.currentPlan') : t('profile.subscription.upgrade')}
                       </Button>
                     </Card>
                   </Grid>
@@ -411,38 +451,65 @@ export function ProfileView() {
               
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h6" gutterBottom>
-                  Billing History
+                  {t('profile.billing.history')}
                 </Typography>
                 <Card variant="outlined">
-                  <Stack spacing={2} sx={{ p: 3 }}>
-                    {USER.subscription.plan !== 'Free' ? (
-                      <>
-                        <Box display="flex" justifyContent="space-between">
-                          <Box>
-                            <Typography variant="subtitle2">
-                              {USER.subscription.plan} Plan - Monthly
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(USER.subscription.startDate).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                          <Typography variant="subtitle1">
-                            ${SUBSCRIPTION_PLANS.find(p => p.name === USER.subscription.plan)?.price}
-                          </Typography>
-                        </Box>
-                        <Divider />
-                        <Box display="flex" justifyContent="flex-end">
-                          <Button variant="text" startIcon={<Download />}>
-                            Download Invoice
-                          </Button>
-                        </Box>
-                      </>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                        No billing history available for Free plan
+                  {isLoadingInvoices ? (
+                    <Box sx={{ py: 4, textAlign: 'center' }}>
+                      <Typography variant="body2">
+                        {t('profile.billing.loading', 'Loading invoices...')}
                       </Typography>
-                    )}
-                  </Stack>
+                    </Box>
+                  ) : invoices && invoices.length > 0 ? (
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>{t('profile.billing.date', 'Date')}</TableCell>
+                          <TableCell>{t('profile.billing.invoiceNumber', 'Invoice Number')}</TableCell>
+                          <TableCell>{t('profile.billing.plan', 'Plan')}</TableCell>
+                          <TableCell align="right">{t('profile.billing.amount', 'Amount')}</TableCell>
+                          <TableCell align="right">{t('profile.billing.status', 'Status')}</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {invoices.map((invoice) => (
+                          <TableRow key={invoice.id} hover>
+                            <TableCell>
+                              {new Date(invoice.createdAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>{invoice.invoiceNumber}</TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {invoice.plan}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography variant="subtitle2">
+                                ${invoice.amount}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Chip
+                                size="small"
+                                label={invoice.status}
+                                color={invoice.status === 'paid' ? 'success' : 'warning'}
+                                sx={{ 
+                                  textTransform: 'capitalize',
+                                  fontWeight: 'medium'
+                                }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <Box sx={{ py: 4, textAlign: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {t('profile.billing.noHistory')}
+                      </Typography>
+                    </Box>
+                  )}
                 </Card>
               </Box>
             </Box>
