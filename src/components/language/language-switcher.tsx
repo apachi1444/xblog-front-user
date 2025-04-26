@@ -12,7 +12,8 @@ import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
-import { setLanguage } from 'src/services/slices/userDashboardSlice';
+import { setLanguage } from 'src/services/slices/globalSlice';
+
 
 // Updated languages configuration with all requested languages
 const DEFAULT_LANGUAGES = [
@@ -63,7 +64,7 @@ export function LanguageSwitcher({ data = DEFAULT_LANGUAGES, sx, ...other }: Lan
   const { i18n } = useTranslation();
   
   // Get language from Redux store
-  const storedLanguage = useSelector((state: RootState) => state.userDashboard.preferences.language);
+  const storedLanguage = useSelector((state: RootState) => state.global.language);
   
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 

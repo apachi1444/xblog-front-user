@@ -1,58 +1,32 @@
 import type { AuthUser } from 'src/types/user';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { Plan } from 'src/services/apis/plansApi';
+import type { SubscriptionDetails } from 'src/services/apis/subscriptionApi';
 
 import { createSlice } from '@reduxjs/toolkit';
 
-// Define auth state interface
 export interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   onboardingCompleted: boolean;
-  currentStore?: {
-    id: string;
-    name: string;
-    storesRemaining: number;
-    storesTotal: number;
-    articlesRemaining: number;
-    articlesTotal: number;
-  };
+  availablePlans: Plan[];
+  subscriptionDetails: SubscriptionDetails | null;
 }
 
-// Initial state
 const initialState: AuthState = {
   user: null,
   accessToken: null,
-  refreshToken: null,
   isAuthenticated: false,
   onboardingCompleted: false,
-  currentStore: {
-    id: '0',
-    name: 'My Store',
-    storesRemaining: 0,
-    storesTotal: 0,
-    articlesRemaining: 0,
-    articlesTotal: 0
-  }
+  availablePlans: [],
+  subscriptionDetails: null,
 };
 
-const loadAuthState = () => {
-  try {
-    const serializedAuth = localStorage.getItem('auth');
-    if (serializedAuth === null) {
-      return initialState;
-    }
-    return JSON.parse(serializedAuth);
-  } catch (err) {
-    return initialState;
-  }
-};
-
-
+// Create the slice
 const authSlice = createSlice({
   name: 'auth',
-  initialState : loadAuthState(),
+  initialState,
   reducers: {
     setCredentials: (
       state, 
@@ -68,13 +42,26 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = !!action.payload.accessToken;
 
-      // Save to localStorage
-      localStorage.setItem('auth', JSON.stringify(state));
+      localStorage.setItem('auth', JSON.stringify({
+        user: state.user,
+        accessToken: state.accessToken,
+        isAuthenticated: state.isAuthenticated,
+        onboardingCompleted: state.onboardingCompleted
+      }));
+    },
+    
+    rehydrateAuth: (state) => {
+      const savedAuth = localStorage.getItem('auth');
+      if (savedAuth) {
+        const parsedAuth = JSON.parse(savedAuth);
+        state.user = parsedAuth.user;
+        state.accessToken = parsedAuth.accessToken;
+        state.isAuthenticated = parsedAuth.isAuthenticated;
+        state.onboardingCompleted = parsedAuth.onboardingCompleted;
+      }
     },
     clearCredentials: (state) => {
-       // Clear localStorage
-       localStorage.removeItem('auth');
-
+      localStorage.removeItem('auth');
       state.user = null;
       state.isAuthenticated = false;
       state.accessToken = null;
@@ -82,21 +69,41 @@ const authSlice = createSlice({
     
     setOnboardingCompleted: (state, action: PayloadAction<boolean>) => {
       state.onboardingCompleted = action.payload;
+      const savedAuth = localStorage.getItem('auth');
+      if (savedAuth) {
+        const parsedAuth = JSON.parse(savedAuth);
+        localStorage.setItem('auth', JSON.stringify({
+          ...parsedAuth,
+          onboardingCompleted: action.payload
+        }));
+      }
     },
     logout: (state) => {
+      localStorage.removeItem('auth');
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
     },
+    
+    // Add a new reducer to set available plans
+    setAvailablePlans: (state, action: PayloadAction<Plan[]>) => {
+      state.availablePlans = action.payload;
+    },
+    setSubscriptionDetails: (state, action: PayloadAction<SubscriptionDetails>) => {
+      state.subscriptionDetails = action.payload;
+    },
   },
 });
 
-// Export actions
-export const {
-  setCredentials,
-  setOnboardingCompleted,
+export const { 
+  setCredentials, 
+  logout, 
   clearCredentials,
-  logout,
+  setOnboardingCompleted, 
+  setAvailablePlans,
+  setSubscriptionDetails,
+  rehydrateAuth
 } = authSlice.actions;
 
+export const selectAvailablePlans = (state: { auth: AuthState }) => state.auth.availablePlans;
 export default authSlice.reducer;

@@ -30,6 +30,22 @@ export const articlesApi = api.injectEndpoints({
       }),
     }),
     
+    // Get draft article by ID
+    getDraftArticle: builder.query<Article, string>({
+      query: (articleId) => ({
+        url: `${ARTICLES_BASE_URL}/drafts/${articleId}`,
+        method: 'GET',
+      }),
+    }),
+
+    // Get published article by ID
+    getPublishedArticle: builder.query<Article, string>({
+      query: (articleId) => ({
+        url: `${ARTICLES_BASE_URL}/published/${articleId}`,
+        method: 'GET',
+      }),
+    }),
+    
     getArticleById: builder.query<Article, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
@@ -45,19 +61,13 @@ export const articlesApi = api.injectEndpoints({
       }),
     }),
     
-    updateArticle: builder.mutation<Article, Partial<Article> & { id: string }>({
-      query: ({ id, ...article }) => ({
-        url: `${ARTICLES_BASE_URL}/${id}`,
-        method: 'PUT',
-        body: article,
-      }),
-    }),
     
     deleteArticle: builder.mutation<void, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'DELETE',
       }),
+  
     }),
   }),
 });
@@ -65,8 +75,9 @@ export const articlesApi = api.injectEndpoints({
 export const {
   useGetArticlesQuery,
   useLazyGetArticlesQuery,
+  useGetDraftArticleQuery,
+  useGetPublishedArticleQuery,
   useGetArticleByIdQuery,
   useCreateArticleMutation,
-  useUpdateArticleMutation,
   useDeleteArticleMutation,
 } = articlesApi;

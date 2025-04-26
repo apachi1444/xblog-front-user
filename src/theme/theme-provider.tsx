@@ -25,7 +25,7 @@ export enum ThemeVariantsProps {
 
 export function CustomThemeProvider({ children }: Props) {  
   // Get dark mode preference from Redux store
-  const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
+  const isDarkMode = useSelector((state: RootState) => state.global.isDarkMode);
   
   // Set the mode based on isDarkMode value
   const mode = isDarkMode ? ThemeVariantsProps.dark : ThemeVariantsProps.light;

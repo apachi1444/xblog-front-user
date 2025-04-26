@@ -4,9 +4,9 @@ const SHOPIFY_BASE_URL = 'shopify';
 
 // Interface for Shopify store connection request
 interface ConnectShopifyRequest {
-  store_name: string;
   api_key: string;
-  api_secret: string;
+  api_password: string;
+  store_domain: string;
 }
 
 // Interface for Shopify store connection response
@@ -22,10 +22,10 @@ export const shopifyApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Connect Shopify store
     connectShopify: builder.mutation<ConnectShopifyResponse, ConnectShopifyRequest>({
-      query: (storeData) => ({
+      query: (data) => ({
         url: `/connect/${SHOPIFY_BASE_URL}`,
         method: 'POST',
-        body: storeData,
+        body: data,
       }),
     }),
     

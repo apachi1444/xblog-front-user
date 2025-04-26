@@ -14,6 +14,7 @@ import { CustomThemeProvider } from 'src/theme/theme-provider';
 
 import i18n from './locales/i18n';
 import { ToastProvider } from './contexts/ToastContext';
+import { AuthPersistence } from './components/auth/auth-persistence';
 
 // Get Google OAuth client ID from environment variables
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -27,6 +28,7 @@ export default function App() {
       <I18nextProvider i18n={i18n}>  
         <CustomThemeProvider>
           <ToasterWithTheme />
+          <AuthPersistence />
           <ToastProvider>
               <Router />
           </ToastProvider>

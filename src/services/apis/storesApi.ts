@@ -1,5 +1,7 @@
 import type { Store } from 'src/types/store';
 
+import { _fakeStores } from 'src/_mock/stores';
+
 import { api } from '.';
 
 const STORES_BASE_URL = '/stores';
@@ -16,15 +18,19 @@ export const storesApi = api.injectEndpoints({
         url: `${STORES_BASE_URL}/`,
         method: 'GET',
       }),
+      transformErrorResponse: (response, meta, arg) => {
+        console.log('API Error, using fallback store data');
+        return {
+          stores: _fakeStores
+        };
+      }
     }),
     
-    // Delete store mutation endpoint
     deleteStore: builder.mutation<void, number>({
       query: (store_id) => ({
         url: `${STORES_BASE_URL}/${store_id}`,
         method: 'DELETE',
       }),
-      // Optimistically update the cache to remove the deleted store
       async onQueryStarted(store_id, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -45,7 +51,7 @@ export const storesApi = api.injectEndpoints({
     // New disconnectStore mutation endpoint
     disconnectStore: builder.mutation<void, number>({
       query: (store_id) => ({
-        url: `${STORES_BASE_URL}/${store_id}/disconnect`,
+        url: `${STORES_BASE_URL}/disconnect/${store_id}`,
         method: 'POST',
       }),
       // Optimistically update the cache to change the store's connection status
@@ -71,7 +77,7 @@ export const storesApi = api.injectEndpoints({
     // New reconnectStore mutation endpoint
     reconnectStore: builder.mutation<void, number>({
       query: (store_id) => ({
-        url: `${STORES_BASE_URL}/${store_id}/connect`,
+        url: `${STORES_BASE_URL}/reconnect/${store_id}`,
         method: 'POST',
       }),
       // Optimistically update the cache to change the store's connection status

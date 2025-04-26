@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, alpha, Typography, LinearProgress } from '@mui/material';
 
-import { selectAllArticles } from 'src/services/slices/articles/selectors';
-
 interface ResourceUsageProps {
   compact?: boolean;
 }
@@ -14,23 +12,20 @@ interface ResourceUsageProps {
 export function ResourceUsage({ compact = false }: ResourceUsageProps) {
   const { t } = useTranslation();
   
-  // Get store data from Auth Redux store
-  const user = useSelector((state: RootState) => state.auth.user);
-  const articles = useSelector(selectAllArticles);
-
-  const stores = useSelector((state: RootState) => state.stores.stores);
+  // Get subscription details from Redux store
+  const subscriptionDetails = useSelector((state: RootState) => state.auth.subscriptionDetails);
   
-  // Articles usage data
-  const articlesUsed = articles.length || 90;
-  const articlesTotal = user?.articles?.total || 100;
+  // Articles usage data from subscription details
+  const articlesUsed = subscriptionDetails?.articles_created || 0;
+  const articlesTotal = subscriptionDetails?.articles_limit || 100;
   const articlesPercentage = Math.min((articlesUsed / articlesTotal) * 100, 100);
   const articlesRemaining = articlesTotal - articlesUsed;
   
-  // Stores usage data - now using the actual stores count from the API
-  const storesUsed = stores?.length || 3;
-  const storesTotal = user?.stores?.total || 5;
-  const storesPercentage = Math.min((storesUsed / storesTotal) * 100, 100);
-  const storesRemaining = storesTotal - storesUsed;
+  // Websites usage data from subscription details
+  const websitesUsed = subscriptionDetails?.connected_websites || 0;
+  const websitesTotal = subscriptionDetails?.websites_limit || 5;
+  const websitesPercentage = Math.min((websitesUsed / websitesTotal) * 100, 100);
+  const websitesRemaining = websitesTotal - websitesUsed;
   
   // Dynamic color calculation function based on percentage
   const getProgressColor = (theme: any, percentage: number) => {
@@ -42,7 +37,6 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
       return theme.palette.warning.main; // Orange/Yellow for high usage
     } 
       return theme.palette.primary.main; // Red for critical usage
-    
   };
   
   return (
@@ -54,11 +48,11 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
         bgcolor: 'var(--layout-nav-bg)',
         border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.9)}`,
         color: (theme) => theme.palette.text.primary,
-        mb : compact? 1.5 : 2.5,
+        mb: compact ? 1.5 : 2.5,
       }}
     >
       
-      {/* Stores Usage */}
+      {/* Websites Usage */}
       <Box mb={compact ? 1.5 : 2.5}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.75}>
           <Typography 
@@ -73,16 +67,16 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
           <Typography 
             variant={compact ? "caption" : "body2"} 
             sx={{ 
-              color: (theme) => getProgressColor(theme, storesPercentage),
+              color: (theme) => getProgressColor(theme, websitesPercentage),
               fontWeight: 600,
             }}
           >
-            {storesUsed}/{storesTotal}
+            {websitesUsed}/{websitesTotal}
           </Typography>
         </Box>
         <LinearProgress 
           variant="determinate" 
-          value={storesPercentage} 
+          value={websitesPercentage} 
           sx={{ 
             height: compact ? 5 : 7, 
             borderRadius: 10,
@@ -100,16 +94,16 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
             display: 'block', 
             mt: 0.75,
             color: (theme) => 
-              storesPercentage > 90 
+              websitesPercentage > 90 
                 ? theme.palette.error.main 
-                : storesPercentage > 70
+                : websitesPercentage > 70
                   ? theme.palette.warning.main
                   : theme.palette.text.secondary,
             fontWeight: 500,
             fontSize: compact ? '0.7rem' : '0.75rem'
           }}
         >
-          {t('resources.websitesRemaining', '{{count}} websites remaining', { count: storesRemaining })}
+          {t('resources.websitesRemaining', '{{count}} websites remaining', { count: websitesRemaining })}
         </Typography>
       </Box>
       

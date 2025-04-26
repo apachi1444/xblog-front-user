@@ -5,19 +5,17 @@ import type { SignInFormData} from 'src/validation/auth-schemas';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useCallback } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
 import { FormContainer, PasswordElement, TextFieldElement } from 'react-hook-form-mui';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import InputAdornment from '@mui/material/InputAdornment';
+  import LoadingButton from '@mui/lab/LoadingButton';
 import { Switch, Tooltip, CircularProgress, FormControlLabel } from "@mui/material";
 
 import { useRouter } from 'src/routes/hooks';
@@ -25,13 +23,14 @@ import { useRouter } from 'src/routes/hooks';
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
 import { signInSchema } from 'src/validation/auth-schemas';
+import { useLazyGetPlansQuery } from 'src/services/apis/plansApi';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
+import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
-import { setCredentials, setOnboardingCompleted } from "src/services/slices/auth/authSlice";
+import { setCredentials , setAvailablePlans, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 
 import { Logo } from 'src/components/logo/logo';
-import { Iconify } from 'src/components/iconify';
 // Import the centralized language switcher
 import { LanguageSwitcher } from 'src/components/language/language-switcher';
 
@@ -50,11 +49,8 @@ export function SignInView() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  
-  // Local state
-  const [showPassword, setShowPassword] = useState(false);
-  const [testMode, setTestMode] = useState(false);
-  
+
+  const testMode = useSelector(selectIsTestMode);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
   
@@ -103,13 +99,16 @@ export function SignInView() {
       user: MOCK_USER_DATA
     }));
     dispatch(setOnboardingCompleted(true));
-    toast.success('Test mode enabled! Redirecting to dashboard...');
+    toast.success(t('auth.testMode.redirecting'));
     router.replace('/');
-  }, [dispatch, router]);
+  }, [dispatch, router, t]);
   
-  // Centralized authentication success handler
+  
+  // Inside the SignInView component, add this hook
+  const [getPlans] = useLazyGetPlansQuery();
+  
+  // Update the handleAuthSuccess function to fetch plans
   const handleAuthSuccess = useCallback(async (accessToken: string) => {
-    // If in test mode, use mock data instead of API calls
     if (testMode) {
       handleTestModeLogin();
       return;
@@ -122,6 +121,39 @@ export function SignInView() {
       dispatch(setCredentials({accessToken, user: userData}));
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
       
+      // Fetch available plans
+      try {
+        const plansData = await getPlans().unwrap();
+        if (plansData && plansData.plans) {
+          dispatch(setAvailablePlans(plansData.plans));
+        }
+      } catch (error) {
+        toast.error('Failed to fetch plans. Using fallback plans.');
+        dispatch(setAvailablePlans([
+          {
+            id: "free-plan",
+            name: "Free (Monthly)",
+            price: 0,
+            url: "free",
+            features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
+          },
+          {
+            id: "starter-plan",
+            name: "Starter (Monthly)",
+            price: 29,
+            url: "starter",
+            features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
+          },
+          {
+            id: "professional-plan",
+            name: "Professional (Monthly)",
+            price: 49,
+            url: "professional",
+            features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
+          }
+        ]));
+      }
+      
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
     } catch (error) {
       if (testMode) {
@@ -131,11 +163,10 @@ export function SignInView() {
         console.error('Failed to fetch user data:', error);
       }
     }
-  }, [dispatch, getCurrentUser, router, testMode, handleTestModeLogin]);
+  }, [testMode, handleTestModeLogin, getCurrentUser, dispatch, router, getPlans]);
   
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {
-    // If test mode is enabled, bypass API calls entirely
     if (testMode) {
       handleTestModeLogin();
       return;
@@ -160,7 +191,6 @@ export function SignInView() {
   
   // Handle Google authentication
   const handleGoogleSuccess = useCallback(async (response: CredentialResponse) => {
-    // If test mode is enabled, bypass Google auth
     if (testMode) {
       handleTestModeLogin();
       return;
@@ -182,13 +212,13 @@ export function SignInView() {
   }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
   
   const handleToggleTestMode = useCallback(() => {
-    setTestMode(prevMode => !prevMode);
-    if (!testMode) {
-      toast.success('Test mode enabled. Authentication will be bypassed.');
-    } else {
-      toast.success('Test mode disabled. Real authentication will be used.');
-    }
-  }, [testMode]);
+    dispatch(setTestMode(!testMode));
+    toast.success(
+      !testMode 
+        ? t('auth.testMode.enabled') 
+        : t('auth.testMode.disabled')
+    );
+  }, [dispatch, t, testMode]);
   
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
@@ -197,8 +227,6 @@ export function SignInView() {
   const handleNavigateToForgotPassword = useCallback(() => {
     router.push('/forgot-password');
   }, [router]);
-
-  console.log(showPassword)
 
 
   return (

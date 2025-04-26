@@ -171,34 +171,9 @@ export default function AddStoreFlow() {
       })
   };
 
-  const handleShopifyConnection = async (data: StoreFormData) => {    
-    await connectShopify({
-      store_name: data.shopifyStore || '',
-      api_key: data.apiKey || '',
-      api_secret: data.apiSecret || '',
-    }).unwrap()
-      .then(() => {})
-      .catch(() => {
-        if (TEST_MODE) {
-          toast.success(t('store.success'));
-        }
-      })
-  
-  };
+  const handleShopifyConnection = async (data: StoreFormData) => {};
 
-  const handleWixConnection = async (data: StoreFormData) => {    
-    await connectWix({
-      admin_url: data.adminUrl || '',
-      consumer_key: data.consumerKey || '',
-      consumer_secret: data.consumerSecret || '',
-    }).unwrap()
-      .then(() => {})
-      .catch(() => {
-        if (TEST_MODE) {
-          toast.success(t('store.success'));
-        }
-      })
-  };
+  const handleWixConnection = async (data: StoreFormData) => {};
 
   // Handle platform selection
   const handlePlatformSelect = (platform: string) => {

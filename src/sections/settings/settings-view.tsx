@@ -20,11 +20,11 @@ import {
 } from "@mui/material";
 
 import { DashboardContent } from "src/layouts/dashboard";
-import { toggleDarkMode } from "src/services/slices/userDashboardSlice";
+import { setThemeMode } from "src/services/slices/globalSlice";
 
 export function SettingsView() {
   const dispatch = useDispatch();
-  const { darkMode } = useSelector((state: RootState) => state.userDashboard.preferences);
+  const { isDarkMode } = useSelector((state: RootState) => state.global);
   
   const [notifications, setNotifications] = useState({
     emailNotifications: true,
@@ -44,12 +44,10 @@ export function SettingsView() {
   };
   
   const handleThemeToggle = () => {
-    dispatch(toggleDarkMode());
+    dispatch(setThemeMode());
   };
   
   const handleSaveSettings = () => {
-    // Here you would save the settings to your backend
-    console.log('Saving settings:', { darkMode, notifications });
     setShowSaveSuccess(true);
   };
   
@@ -82,7 +80,7 @@ export function SettingsView() {
             <Card>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  {darkMode ? <Moon size={20} /> : <Sun size={20} />}
+                  {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
                   <Typography variant="h6" sx={{ ml: 1 }}>
                     Appearance
                   </Typography>
@@ -93,7 +91,7 @@ export function SettingsView() {
                 <FormControlLabel
                   control={
                     <Switch 
-                      checked={darkMode} 
+                      checked={isDarkMode} 
                       onChange={handleThemeToggle}
                       name="darkMode"
                     />
@@ -101,7 +99,7 @@ export function SettingsView() {
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Typography>Dark Mode</Typography>
-                      {darkMode ? 
+                      {isDarkMode ? 
                         <Moon size={16} style={{ marginLeft: 8 }} /> : 
                         <Sun size={16} style={{ marginLeft: 8 }} />
                       }

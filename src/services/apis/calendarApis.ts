@@ -28,6 +28,12 @@ interface ScheduleArticleResponse {
   message: string;
 }
 
+interface UpdateCalendarRequest {
+  scheduled_date?: string;
+  status?: string;
+  color?: string;
+}
+
 // Create the calendar API endpoints
 export const calendarApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -47,6 +53,23 @@ export const calendarApi = api.injectEndpoints({
         body: scheduleData,
       }),
     }),
+
+    // Update calendar entry
+    updateCalendar: builder.mutation<CalendarItem, { calendarId: number; data: UpdateCalendarRequest }>({
+      query: ({ calendarId, data }) => ({
+        url: `/calendars/${calendarId}`,
+        method: 'PUT',
+        body: data,
+      }),
+    }),
+
+    // Delete calendar entry
+    deleteCalendar: builder.mutation<void, number>({
+      query: (calendarId) => ({
+        url: `/calendars/${calendarId}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
@@ -55,4 +78,6 @@ export const {
   useGetScheduledArticlesQuery,
   useLazyGetScheduledArticlesQuery,
   useScheduleArticleMutation,
+  useUpdateCalendarMutation,
+  useDeleteCalendarMutation,
 } = calendarApi;

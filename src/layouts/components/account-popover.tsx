@@ -52,7 +52,22 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     }
   }, []); // Empty dependency array ensures it only runs once on mount
 
+  // Add cleanup effect
+  useEffect(() => 
+    // Cleanup function to ensure popover is closed when component unmounts
+     () => {
+      setOpenPopover(null);
+    }
+  , []);
+
+  // Add route change handler
+  useEffect(() => {
+    // Close popover when route changes
+    setOpenPopover(null);
+  }, [pathname]);
+
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Prevent any default behavior
     setOpenPopover(event.currentTarget);
   }, []);
 
@@ -60,27 +75,36 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     setOpenPopover(null);
   }, []);
 
+  // Updated click handler with better timing
   const handleClickItem = useCallback(
-    (path: string) => {      
-      handleClosePopover()
-      // Then navigate
-      setTimeout(() => {
+    (path: string) => {
+      // Immediately close the popover
+      setOpenPopover(null);
+      
+      // Small delay to ensure smooth transition
+      const timeoutId = setTimeout(() => {
         router.push(path);
-      }, 10);
+      }, 100);
+
+      // Cleanup timeout if component unmounts
+      return () => clearTimeout(timeoutId);
     },
-    [handleClosePopover, router]
+    [router]
   );
 
-
+  // Add proper cleanup for logout
   const handleLogOut = useCallback(() => {
-    // Close the popover first
-    handleClosePopover();
-    dispatch(clearCredentials());
-    router.push('/sign-in');
-    localStorage.removeItem('auth');
-    sessionStorage.removeItem('access_token');
+    setOpenPopover(null);
     
-  }, [dispatch, router, handleClosePopover]);
+    const timeoutId = setTimeout(() => {
+      dispatch(clearCredentials());
+      router.push('/sign-in');
+      localStorage.removeItem('auth');
+      sessionStorage.removeItem('access_token');
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, router]);
 
   console.log(openPopover);
   return (
@@ -132,6 +156,9 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               border: (theme) => `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
             },
           },
+        }}
+        TransitionProps={{
+          onExited: () => setOpenPopover(null),
         }}
       >
         <Box 

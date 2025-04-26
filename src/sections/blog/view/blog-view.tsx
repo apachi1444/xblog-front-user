@@ -17,6 +17,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { setArticles } from 'src/services/slices/articles/articleSlice';
+import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { selectAllArticles } from 'src/services/slices/articles/selectors';
 
 import { Iconify } from 'src/components/iconify';
@@ -36,11 +37,13 @@ export function BlogView() {
   const [currentTab, setCurrentTab] = useState('all');
   
   const articles = useSelector(selectAllArticles);
+  const currentStore = useSelector(selectCurrentStore);
   
-  const [doGetArticles , {isLoading}] = useLazyGetArticlesQuery();
+  const [doGetArticles, { isLoading }] = useLazyGetArticlesQuery();
   
   useEffect(() => {
-    doGetArticles()
+    if (currentStore?.id) {
+      doGetArticles({ store_id: currentStore.id })
         .unwrap()
         .then((result) => {
           const articlesFromApi = result.drafts_articles.concat(result.published_articles);
@@ -49,7 +52,8 @@ export function BlogView() {
         .catch((err) => {
           toast.error(err.error.data.message);
         });
-  }, [doGetArticles, dispatch]);
+    }
+  }, [currentStore?.id, doGetArticles, dispatch]);
   
   useEffect(() => {
     let sorted = [...articles];

@@ -5,38 +5,40 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
 
 interface GlobalSliceState {
-  themeMode: 'light' | 'dark';
-  language: 'en' | 'pt';
+  isDarkMode: boolean;
+  language: string;
+  isTestMode: boolean;
 }
 
-// Define the initial state
 export const initialState: GlobalSliceState = {
-  themeMode: 'light', // Default theme
-  language: 'en', // Default language
+  isDarkMode: false,
+  language: 'en',
+  isTestMode: localStorage.getItem('isTestMode') === 'true' || false,
 };
 
-/* eslint-disable no-param-reassign */
 const globalSlice = createSlice({
   name: 'global',
   initialState,
   reducers: {
-    
-    setThemeMode: (state, action: PayloadAction<'light' | 'dark'>) => {
-      state.themeMode = action.payload;
+    setThemeMode: (state) => {
+      state.isDarkMode = !state.isDarkMode;
     },
-
-    setLanguage: (state, action: PayloadAction<'en' | 'pt'>) => {
+    setLanguage: (state, action: PayloadAction<string>) => {
       state.language = action.payload;
+    },
+    setTestMode: (state, action: PayloadAction<boolean>) => {
+      state.isTestMode = action.payload;
+      localStorage.setItem('isTestMode', action.payload.toString());
     },
   },
 });
 
-// Export actions
-export const { setThemeMode, setLanguage } = globalSlice.actions;
+export const { setThemeMode, setLanguage, setTestMode } = globalSlice.actions;
 
 // Selectors
 export const selectGlobalDomain = (state: RootState) => state.global;
-export const selectThemeMode = (state: RootState) => state.global.themeMode;
+export const selectThemeMode = (state: RootState) => state.global.isDarkMode;
 export const selectLanguage = (state: RootState) => state.global.language;
+export const selectIsTestMode = (state: RootState) => state.global.isTestMode;
 
 export default globalSlice.reducer;

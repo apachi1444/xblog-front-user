@@ -38,6 +38,32 @@ interface GoogleAuthResponse {
   token_type: string;
 }
 
+// New interfaces for password operations
+interface RequestPasswordResetRequest {
+  email: string;
+}
+
+interface RequestPasswordResetResponse {
+  message: string;
+}
+
+interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+}
+
+interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+interface ChangePasswordResponse {
+  message: string;
+}
 // RTK Query endpoints
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -67,11 +93,30 @@ export const authApi = api.injectEndpoints({
       }),
     }),
 
-    // Logout endpoint
-    logout: builder.mutation<void, void>({
-      query: () => ({
-        url: `${AUTH_BASE_URL}/auth/logout`,
+    // Request password reset (sends email with reset link)
+    requestPasswordReset: builder.mutation<RequestPasswordResetResponse, RequestPasswordResetRequest>({
+      query: (data) => ({
+        url: `${AUTH_BASE_URL}/request-password-reset`,
         method: 'POST',
+        body: data,
+      }),
+    }),
+
+    // Reset password (with token from email)
+    resetPassword: builder.mutation<ResetPasswordResponse, ResetPasswordRequest>({
+      query: (data) => ({
+        url: `${AUTH_BASE_URL}/reset-password`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    // Change password (when user is logged in)
+    changePassword: builder.mutation<ChangePasswordResponse, ChangePasswordRequest>({
+      query: (data) => ({
+        url: `${AUTH_BASE_URL}/change-password`,
+        method: 'POST',
+        body: data,
       }),
     }),
   }),
@@ -82,5 +127,7 @@ export const {
   useGoogleAuthMutation,
   useLoginMutation,
   useSignUpMutation,
-  useLogoutMutation,
+  useRequestPasswordResetMutation,
+  useResetPasswordMutation,
+  useChangePasswordMutation,
 } = authApi;

@@ -1,6 +1,8 @@
+import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
 import { useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
@@ -9,7 +11,9 @@ import { useTheme } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
-import { Label } from 'src/components/label';
+import { selectStores } from 'src/services/slices/stores/selectors';
+import { setCurrentStore } from 'src/services/slices/stores/storeSlice';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -24,7 +28,9 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
 };
 
 export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
-  const [workspace, setWorkspace] = useState(data[0]);
+  const dispatch = useDispatch();
+  const stores = useSelector(selectStores);
+  const [workspace, setWorkspace] = useState(stores[0]);
   const theme = useTheme()
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -38,11 +44,12 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   }, []);
 
   const handleChangeWorkspace = useCallback(
-    (newValue: (typeof data)[number]) => {
-      setWorkspace(newValue);
+    (newStore: Store) => {
+      setWorkspace(newStore);
+      dispatch(setCurrentStore(newStore));
       handleClosePopover();
     },
-    [handleClosePopover]
+    [dispatch, handleClosePopover]
   );
 
   const renderAvatar = (alt: string, src: string) => (
@@ -110,24 +117,15 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
             },
           }}
         >
-          {data.map((option) => (
+          {stores.map((store) => (
             <MenuItem
-              key={option.id}
-              selected={option.id === workspace?.id}
-              onClick={() => handleChangeWorkspace(option)}
+              key={store.id}
+              selected={store.id === workspace?.id}
+              onClick={() => handleChangeWorkspace(store)}
             >
-              {renderAvatar(option.name, option.logo)}
-
-              <Box 
-                component="span" 
-                sx={{ 
-                  flexGrow: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {option.name}
+              {renderAvatar(store.name, store.logo)}
+              <Box component="span" sx={{ flexGrow: 1 }}>
+                {store.name}
               </Box>
             </MenuItem>
           ))}

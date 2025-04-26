@@ -1,7 +1,6 @@
 import type { RootState } from 'src/services/store';
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -13,13 +12,14 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 
+import { useStoreDependentData } from 'src/hooks/useStoreDependentData';
+
 import { _langs, _notifications } from 'src/_mock';
 import { setThemeMode } from 'src/services/slices/globalSlice';
 import { getStores } from 'src/services/slices/stores/storeSlice';
 import { useLazyGetStoresQuery } from 'src/services/apis/storesApi';
-import { toggleDarkMode } from 'src/services/slices/userDashboardSlice';
-import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
-import { setArticles } from 'src/services/slices/articles/articleSlice';
+import { setSubscriptionDetails } from 'src/services/slices/auth/authSlice';
+import { useLazyGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -45,45 +45,47 @@ export type DashboardLayoutProps = {
 };
 
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
+  useStoreDependentData();
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
   
-  const isDarkMode = useSelector((state: RootState) => state.userDashboard.preferences.darkMode);
+  const isDarkMode = useSelector((state: RootState) => state.global);
   
   const [doGetStores] = useLazyGetStoresQuery();
   
   const storesData = useSelector((state: RootState) => state.stores);  
+  
+  const [doGetSubscriptionDetails] = useLazyGetSubscriptionDetailsQuery();
 
-  const [doGetArticles] = useLazyGetArticlesQuery();
-  
-  useEffect(() => {
-    doGetArticles()
-        .unwrap()
-        .then((result) => {
-          const articlesFromApi = result.drafts_articles.concat(result.published_articles);
-          dispatch(setArticles(articlesFromApi));
-        })
-        .catch((err) => {
-          toast.error(err.error.data.message);
-          console.error(err);
-        });
-  }, [doGetArticles, dispatch]);
-  
   // Fetch stores data when component mounts
   useEffect(() => {
     const fetchStoresData = async () => {
       try {
         const result = await doGetStores().unwrap();
-          dispatch(getStores(result.stores));
-        } catch (error) {
-          console.error('Failed to fetch stores data:', error);
-        }
+        dispatch(getStores(result.stores));
+      } catch (error) {
+        dispatch(getStores(error.stores));
+      }
     };
     
     fetchStoresData();
   }, [doGetStores, dispatch]);
+
+  useEffect(() => {
+    const fetchUserSubscriptionDetails = async () => {
+      try {
+        const result = await doGetSubscriptionDetails().unwrap();
+        dispatch(setSubscriptionDetails(result));
+      } catch (error) {
+        console.log(error);
+        dispatch(setSubscriptionDetails(error));
+      }
+    };
+    
+    fetchUserSubscriptionDetails();
+  }, [doGetSubscriptionDetails, dispatch]);
   
   const [navOpen, setNavOpen] = useState(false);
 
@@ -91,14 +93,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   
   // Handle theme mode toggle
   const handleToggleTheme = () => {
-    dispatch(toggleDarkMode());
-    dispatch(setThemeMode(isDarkMode ? 'light' : 'dark'));
+    dispatch(setThemeMode());
   };
-  
-  // Sync theme mode with system on initial load
-  useEffect(() => {
-    dispatch(setThemeMode(isDarkMode ? 'dark' : 'light'));
-  }, [dispatch, isDarkMode]);
 
   // Handle navigation to add new website
   const handleAddNewWebsite = () => {
@@ -163,7 +159,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
               </>
             ),
             rightArea: (
-              <Box gap={1} display="flex" alignItems="center">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <IconButton 
                   onClick={handleToggleTheme}
                   sx={{

@@ -4,9 +4,7 @@ const WIX_BASE_URL = 'wix';
 
 // Interface for Wix store connection request
 interface ConnectWixRequest {
-  admin_url: string;
-  consumer_key: string;
-  consumer_secret: string;
+  api_token: string;
 }
 
 // Interface for Wix store connection response
@@ -22,10 +20,10 @@ export const wixApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Connect Wix store
     connectWix: builder.mutation<ConnectWixResponse, ConnectWixRequest>({
-      query: (storeData) => ({
+      query: (data) => ({
         url: `/connect/${WIX_BASE_URL}`,
         method: 'POST',
-        body: storeData,
+        body: data,
       }),
     }),
     
