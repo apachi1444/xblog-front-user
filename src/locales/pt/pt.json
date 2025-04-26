@@ -152,6 +152,71 @@
     },
     "websites": {
       "addNew": "Adicionar novo site"
+    },
+    "store": {
+      "title": "Conectar Sua Loja",
+      "subtitle": "Escolha sua plataforma e conecte sua loja",
+      "selectPlatform": "Selecionar Plataforma",
+      "selectPlatformSubtitle": "Escolha a plataforma em que seu site foi construído para otimizar a integração",
+      "selectPlatformRequired": "Por favor selecione uma plataforma para continuar",
+      "selectPlatformFirst": "Por favor selecione uma plataforma primeiro",
+      "next": "Próximo",
+      "back": "Voltar",
+      "backToStores": "Voltar para Lojas",
+      "connect": "Conectar Loja",
+      "connecting": "Conectando...",
+      "success": "Loja conectada com sucesso!",
+      "error": "Falha ao conectar loja. Por favor tente novamente.",
+      "formErrors": "Por favor corrija os erros do formulário antes de enviar",
+      "integrationTitle": "Integração {{platform}}",
+      "integrationSubtitle": "Por favor forneça os detalhes do seu site {{platform}}.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
+      },
+      "wordpress": {
+        "url": "URL do WordPress",
+        "urlPlaceholder": "https://seu-site-wordpress.com",
+        "username": "Usuário do WordPress",
+        "usernamePlaceholder": "admin",
+        "password": "Senha do WordPress",
+        "passwordPlaceholder": "••••••••",
+        "description": "Conecte seu site WordPress"
+      },
+      "shopify": {
+        "storeName": "Nome da Loja Shopify",
+        "storeNamePlaceholder": "sua-loja",
+        "apiKey": "Chave API",
+        "apiKeyPlaceholder": "Digite sua chave API",
+        "apiSecret": "Segredo API",
+        "apiSecretPlaceholder": "Digite seu segredo API",
+        "description": "Conecte sua loja Shopify"
+      }
+    },
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Gerencie suas configurações de conta e assinatura",
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nome",
+        "lastName": "Sobrenome"
+      },
+      "tabs": {
+        "account": "Conta",
+        "subscription": "Assinatura",
+        "security": "Segurança"
+      },
+      "subscription": {
+        "current": "Assinatura Atual",
+        "viewDetails": "Ver Detalhes",
+        "hideDetails": "Ocultar Detalhes",
+        "manage": "Gerenciar Assinatura",
+        "upgrade": "Atualizar Plano",
+        "plans": "Planos de Assinatura",
+        "choosePlan": "Escolha o plano que melhor funciona para você",
+        "currentPlan": "Plano Atual"
+      }
     }
   }
 }

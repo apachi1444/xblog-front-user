@@ -151,6 +151,80 @@
     },
     "websites": {
       "addNew": "Ajouter un nouveau site web"
+    },
+    "store": {
+      "title": "Connecter Votre Boutique",
+      "subtitle": "Choisissez votre plateforme et connectez votre boutique",
+      "selectPlatform": "Sélectionner la Plateforme",
+      "selectPlatformSubtitle": "Choisissez la plateforme sur laquelle votre site web est construit pour optimiser l'intégration",
+      "selectPlatformRequired": "Veuillez sélectionner une plateforme pour continuer",
+      "selectPlatformFirst": "Veuillez d'abord sélectionner une plateforme",
+      "next": "Suivant",
+      "back": "Retour",
+      "backToStores": "Retour aux Boutiques",
+      "connect": "Connecter la Boutique",
+      "connecting": "Connexion en cours...",
+      "success": "Boutique connectée avec succès !",
+      "error": "Échec de la connexion de la boutique. Veuillez réessayer.",
+      "formErrors": "Veuillez corriger les erreurs du formulaire avant de soumettre",
+      "integrationTitle": "Intégration {{platform}}",
+      "integrationSubtitle": "Veuillez fournir les détails de votre site web {{platform}}.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
+      },
+      "wordpress": {
+        "url": "URL WordPress",
+        "urlPlaceholder": "https://votre-site-wordpress.com",
+        "username": "Nom d'utilisateur WordPress",
+        "usernamePlaceholder": "admin",
+        "password": "Mot de passe WordPress",
+        "passwordPlaceholder": "••••••••",
+        "description": "Connectez votre site WordPress"
+      },
+      "shopify": {
+        "storeName": "Nom de la boutique Shopify",
+        "storeNamePlaceholder": "votre-boutique",
+        "apiKey": "Clé API",
+        "apiKeyPlaceholder": "Entrez votre clé API",
+        "apiSecret": "Secret API",
+        "apiSecretPlaceholder": "Entrez votre secret API",
+        "description": "Connectez votre boutique Shopify"
+      },
+      "wix": {
+        "adminUrl": "URL Admin Wix",
+        "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+        "consumerKey": "Clé Consommateur",
+        "consumerKeyPlaceholder": "Entrez votre clé consommateur",
+        "consumerSecret": "Secret Consommateur",
+        "consumerSecretPlaceholder": "Entrez votre secret consommateur",
+        "description": "Connectez votre boutique Wix"
+      }
+    },
+    "profile": {
+      "title": "Profil",
+      "subtitle": "Gérez vos paramètres de compte et votre abonnement",
+      "editProfile": "Modifier le Profil",
+      "form": {
+        "firstName": "Prénom",
+        "lastName": "Nom"
+      },
+      "tabs": {
+        "account": "Compte",
+        "subscription": "Abonnement",
+        "security": "Sécurité"
+      },
+      "subscription": {
+        "current": "Abonnement Actuel",
+        "viewDetails": "Voir les Détails",
+        "hideDetails": "Masquer les Détails",
+        "manage": "Gérer l'Abonnement",
+        "upgrade": "Mettre à Niveau",
+        "plans": "Plans d'Abonnement",
+        "choosePlan": "Choisissez le plan qui vous convient le mieux",
+        "currentPlan": "Plan Actuel"
+      }
     }
   }
 }

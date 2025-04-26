@@ -1,5 +1,11 @@
 {
   "translation": {
+    "resources": {
+      "websites": "المواقع",
+      "articles": "المقالات",
+      "websitesRemaining": "{{count}} مواقع متبقية",
+      "articlesRemaining": "{{count}} مقالات متبقية"
+    },
     "navigation": {
       "dashboard": "لوحة التحكم",
       "generate": "إنشاء",
@@ -51,7 +57,7 @@
       }
     },
     "store": {
-      "title": "ربط متجرك",
+      "title": "ربط المتجر",
       "subtitle": "اختر منصتك وقم بربط متجرك",
       "selectPlatform": "اختر المنصة",
       "selectPlatformSubtitle": "اختر المنصة التي تم بناء موقعك عليها لتحسين التكامل",
@@ -63,10 +69,10 @@
       "connect": "ربط المتجر",
       "connecting": "جاري الربط...",
       "success": "تم ربط المتجر بنجاح!",
-      "error": "فشل ربط المتجر. يرجى المحاولة مرة أخرى.",
-      "formErrors": "يرجى إصلاح أخطاء النموذج قبل الإرسال",
+      "error": "فشل في ربط المتجر. الرجاء المحاولة مرة أخرى.",
+      "formErrors": "الرجاء تصحيح أخطاء النموذج قبل الإرسال",
       "integrationTitle": "تكامل {{platform}}",
-      "integrationSubtitle": "يرجى تقديم تفاصيل موقع {{platform}} الخاص بك.",
+      "integrationSubtitle": "الرجاء تقديم تفاصيل موقع {{platform}} الخاص بك.",
       "platforms": {
         "wordpress": "ووردبريس",
         "shopify": "شوبيفاي",
@@ -79,16 +85,16 @@
         "usernamePlaceholder": "admin",
         "password": "كلمة مرور ووردبريس",
         "passwordPlaceholder": "••••••••",
-        "description": "ربط موقع ووردبريس الخاص بك"
+        "description": "قم بربط موقع ووردبريس الخاص بك"
       },
       "shopify": {
         "storeName": "اسم متجر شوبيفاي",
-        "storeNamePlaceholder": "your-store",
+        "storeNamePlaceholder": "متجرك",
         "apiKey": "مفتاح API",
         "apiKeyPlaceholder": "أدخل مفتاح API الخاص بك",
         "apiSecret": "سر API",
         "apiSecretPlaceholder": "أدخل سر API الخاص بك",
-        "description": "ربط متجر شوبيفاي الخاص بك"
+        "description": "قم بربط متجر شوبيفاي الخاص بك"
       },
       "wix": {
         "adminUrl": "رابط إدارة ويكس",
@@ -110,6 +116,30 @@
         "watchTooltip": "مشاهدة دليل التكامل",
         "videoTitle": "دليل تكامل {{platform}}",
         "dialogTitle": "كيفية ربط متجر {{platform}} الخاص بك"
+      }
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "subtitle": "إدارة إعدادات حسابك واشتراكك",
+      "editProfile": "تعديل الملف الشخصي",
+      "form": {
+        "firstName": "الاسم الأول",
+        "lastName": "اسم العائلة"
+      },
+      "tabs": {
+        "account": "الحساب",
+        "subscription": "الاشتراك",
+        "security": "الأمان"
+      },
+      "subscription": {
+        "current": "الاشتراك الحالي",
+        "viewDetails": "عرض التفاصيل",
+        "hideDetails": "إخفاء التفاصيل",
+        "manage": "إدارة الاشتراك",
+        "upgrade": "ترقية الخطة",
+        "plans": "خطط الاشتراك",
+        "choosePlan": "اختر الخطة التي تناسبك",
+        "currentPlan": "الخطة الحالية"
       }
     }
   }

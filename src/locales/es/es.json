@@ -145,13 +145,75 @@
       "upgradeToPro": "Actualizar a Pro 🚀"
     },
     "resources": {
-      "websites": "Sitios web",
+      "websites": "Sitios Web",
       "articles": "Artículos",
       "websitesRemaining": "{{count}} sitios web restantes",
       "articlesRemaining": "{{count}} artículos restantes"
     },
-    "websites": {
-      "addNew": "Añadir nuevo sitio web"
+    "store": {
+      "title": "Conectar Tu Tienda",
+      "subtitle": "Elige tu plataforma y conecta tu tienda",
+      "selectPlatform": "Seleccionar Plataforma",
+      "selectPlatformSubtitle": "Elige la plataforma en la que está construido tu sitio web para optimizar la integración",
+      "selectPlatformRequired": "Por favor selecciona una plataforma para continuar",
+      "selectPlatformFirst": "Por favor selecciona primero una plataforma",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "backToStores": "Volver a Tiendas",
+      "connect": "Conectar Tienda",
+      "connecting": "Conectando...",
+      "success": "¡Tienda conectada exitosamente!",
+      "error": "Error al conectar la tienda. Por favor intenta de nuevo.",
+      "formErrors": "Por favor corrige los errores del formulario antes de enviar",
+      "integrationTitle": "Integración de {{platform}}",
+      "integrationSubtitle": "Por favor proporciona los detalles de tu sitio web {{platform}}.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
+      },
+      "wordpress": {
+        "url": "URL de WordPress",
+        "urlPlaceholder": "https://tu-sitio-wordpress.com",
+        "username": "Usuario de WordPress",
+        "usernamePlaceholder": "admin",
+        "password": "Contraseña de WordPress",
+        "passwordPlaceholder": "••••••••",
+        "description": "Conecta tu sitio WordPress"
+      },
+      "shopify": {
+        "storeName": "Nombre de la Tienda Shopify",
+        "storeNamePlaceholder": "tu-tienda",
+        "apiKey": "Clave API",
+        "apiKeyPlaceholder": "Ingresa tu clave API",
+        "apiSecret": "Secreto API",
+        "apiSecretPlaceholder": "Ingresa tu secreto API",
+        "description": "Conecta tu tienda Shopify"
+      }
+    },
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Administra la configuración de tu cuenta y suscripción",
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nombre",
+        "lastName": "Apellido"
+      },
+      "tabs": {
+        "account": "Cuenta",
+        "subscription": "Suscripción",
+        "security": "Seguridad"
+      },
+      "subscription": {
+        "current": "Suscripción Actual",
+        "viewDetails": "Ver Detalles",
+        "hideDetails": "Ocultar Detalles",
+        "manage": "Administrar Suscripción",
+        "upgrade": "Mejorar Plan",
+        "plans": "Planes de Suscripción",
+        "choosePlan": "Elige el plan que mejor funcione para ti",
+        "currentPlan": "Plan Actual"
+      }
     }
   }
 }
