@@ -10,6 +10,8 @@ interface PreviewSEOTabProps {
   metaDescription?: string;
   urlSlug?: string;
   onGenerateMeta?: () => void;
+  isGeneratingMeta? : boolean;
+  isGenerateDisabled? : boolean;
 }
 
 export function PreviewSEOTab({
@@ -17,7 +19,9 @@ export function PreviewSEOTab({
   metaTitle,
   metaDescription,
   urlSlug,
-  onGenerateMeta
+  onGenerateMeta,
+  isGeneratingMeta,
+  isGenerateDisabled
 }: PreviewSEOTabProps) {
   return (
     <CardContent sx={{ p: 2 }}>
@@ -76,6 +80,7 @@ export function PreviewSEOTab({
               borderRadius: 28,
               px: 3
             }}
+            disabled={isGenerateDisabled}
             onClick={onGenerateMeta}
           >
             Generate now !

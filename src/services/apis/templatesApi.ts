@@ -1,5 +1,6 @@
-import { api } from '.';
 import type { ArticleTemplate } from 'src/sections/templates/template-types';
+
+import { api } from '.';
 
 const TEMPLATES_BASE_URL = '/templates';
 

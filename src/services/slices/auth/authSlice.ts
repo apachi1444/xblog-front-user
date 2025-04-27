@@ -1,17 +1,14 @@
 import type { AuthUser } from 'src/types/user';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Plan } from 'src/services/apis/plansApi';
-import type { SubscriptionDetails } from 'src/services/apis/subscriptionApi';
 
 import { createSlice } from '@reduxjs/toolkit';
+
 
 export interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   onboardingCompleted: boolean;
-  availablePlans: Plan[];
-  subscriptionDetails: SubscriptionDetails | null;
 }
 
 const initialState: AuthState = {
@@ -19,23 +16,19 @@ const initialState: AuthState = {
   accessToken: null,
   isAuthenticated: false,
   onboardingCompleted: false,
-  availablePlans: [],
-  subscriptionDetails: null,
 };
 
-// Create the slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     setCredentials: (
-      state, 
-      action: { 
-        payload: { 
-          user?: AuthUser | null; 
-          accessToken: string; 
-          refreshToken?: string | null;
-        } 
+      state,
+      action: {
+        payload: {
+          user?: AuthUser | null;
+          accessToken: string;
+        }
       }
     ) => {
       state.user = action.payload.user || null;
@@ -60,13 +53,7 @@ const authSlice = createSlice({
         state.onboardingCompleted = parsedAuth.onboardingCompleted;
       }
     },
-    clearCredentials: (state) => {
-      localStorage.removeItem('auth');
-      state.user = null;
-      state.isAuthenticated = false;
-      state.accessToken = null;
-    },
-    
+
     setOnboardingCompleted: (state, action: PayloadAction<boolean>) => {
       state.onboardingCompleted = action.payload;
       const savedAuth = localStorage.getItem('auth');
@@ -78,32 +65,21 @@ const authSlice = createSlice({
         }));
       }
     },
+
     logout: (state) => {
       localStorage.removeItem('auth');
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
     },
-    
-    // Add a new reducer to set available plans
-    setAvailablePlans: (state, action: PayloadAction<Plan[]>) => {
-      state.availablePlans = action.payload;
-    },
-    setSubscriptionDetails: (state, action: PayloadAction<SubscriptionDetails>) => {
-      state.subscriptionDetails = action.payload;
-    },
   },
 });
 
-export const { 
-  setCredentials, 
-  logout, 
-  clearCredentials,
-  setOnboardingCompleted, 
-  setAvailablePlans,
-  setSubscriptionDetails,
+export const {
+  setCredentials,
+  logout,
+  setOnboardingCompleted,
   rehydrateAuth
 } = authSlice.actions;
 
-export const selectAvailablePlans = (state: { auth: AuthState }) => state.auth.availablePlans;
 export default authSlice.reducer;

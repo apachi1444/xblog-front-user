@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { GeneratingView } from 'src/components/form/GeneratingView';
+import { GeneratingView } from 'src/sections/generate/GeneratingView';
 
 
 // ----------------------------------------------------------------------

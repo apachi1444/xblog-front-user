@@ -20,6 +20,16 @@
         "articlesRemaining": "{{count}} articles remaining"
       },
       "auth": {
+        "resetPassword": {
+          "title": "Reset Password",
+          "subtitle": "Enter your new password below",
+          "newPassword": "New Password",
+          "confirmPassword": "Confirm New Password",
+          "submit": "Reset Password",
+          "rememberPassword": "Remember your password?",
+          "success": "Password reset successfully! Please sign in with your new password.",
+          "error": "Failed to reset password. Please try again."
+        },
         "signup": {
           "title": "Join Our Creative Community",
           "subtitle": "Start your creative journey with exclusive features",
@@ -59,15 +69,6 @@
           "checkEmail": "Check Your Email",
           "emailSent": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions."
         },
-        "resetPassword": {
-          "title": "Reset Password",
-          "subtitle": "Please set your new password",
-          "newPassword": "New Password",
-          "confirmPassword": "Confirm Password",
-          "submit": "Submit",
-          "success": "Password reset successful!",
-          "backToSignIn": "Back to Sign In"
-        },
         "common": {
           "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
           "emailInvalid": "Please enter a valid email address"
@@ -90,7 +91,6 @@
         "formErrors": "Please fix the form errors before submitting",
         "integrationTitle": "{{platform}} Integration",
         "integrationSubtitle": "Please provide the details for your {{platform}} website.",
-        
         "platforms": {
           "wordpress": "WordPress",
           "shopify": "Shopify",
@@ -138,7 +138,9 @@
       },
       "common": {
         "save": "Save",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "select": "Select",
+        "selected": "Selected"
       },
       "profile": {
         "title": "Profile",
@@ -271,6 +273,82 @@
         "benefit1": "Get personalized guidance from our expert team",
         "benefit2": "See real-time examples of how our platform can solve your specific challenges",
         "benefit3": "Receive a custom implementation plan tailored to your business needs"
+      },
+      "onboarding": {
+        "welcome": "Welcome to XBlog!",
+        "choosePlan": "Choose Your Plan",
+        "welcomeSubtitle": "Let's get to know you better so we can personalize your experience.",
+        "planSubtitle": "Select a plan that works best for your content creation needs.",
+        "steps": {
+          "preferences": "Your Preferences",
+          "subscription": "Subscription Plan"
+        },
+        "interests": {
+          "title": "What are you interested in?",
+          "subtitle": "Select all that apply. This helps us personalize your dashboard.",
+          "options": {
+            "blogging": "Blogging",
+            "marketing": "Content Marketing",
+            "seo": "SEO Optimization",
+            "social": "Social Media",
+            "analytics": "Analytics",
+            "ecommerce": "E-commerce"
+          }
+        },
+        "referral": {
+          "title": "How did you hear about us?",
+          "options": {
+            "search": "Search Engine",
+            "social": "Social Media",
+            "friend": "Friend/Colleague",
+            "ad": "Advertisement",
+            "blog": "Blog/Article",
+            "other": "Other"
+          }
+        },
+        "plans": {
+          "free": {
+            "name": "Free",
+            "price": "0",
+            "billing": "forever",
+            "features": [
+              "Basic article generation",
+              "Limited to 5 articles/month",
+              "Standard support",
+              "Basic analytics"
+            ]
+          },
+          "pro": {
+            "name": "Pro",
+            "price": "19",
+            "billing": "monthly",
+            "features": [
+              "Unlimited article generation",
+              "Advanced SEO tools",
+              "Priority support",
+              "Comprehensive analytics",
+              "Custom publishing schedule"
+            ]
+          },
+          "business": {
+            "name": "Business",
+            "price": "49",
+            "billing": "monthly",
+            "features": [
+              "Everything in Pro",
+              "Team collaboration",
+              "API access",
+              "White-label options",
+              "Dedicated account manager"
+            ]
+          },
+          "popular": "Popular"
+        },
+        "loading": "Preparing your experience...",
+        "buttons": {
+          "next": "Next",
+          "complete": "Complete Setup"
+        }
       }
     }
     }

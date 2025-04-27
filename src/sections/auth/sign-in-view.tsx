@@ -28,7 +28,8 @@ import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
 import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
-import { setCredentials , setAvailablePlans, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
+import { setAvailablePlans } from 'src/services/slices/subscription/subscriptionSlice';
+import { setCredentials, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 
 import { Logo } from 'src/components/logo/logo';
 // Import the centralized language switcher
@@ -40,7 +41,6 @@ const MOCK_USER_DATA = {
   email: 'test@example.com',
   name: 'Test User',
   is_completed_onboarding: true,
-  // Add any other user properties your app needs
 };
 
 const MOCK_ACCESS_TOKEN = 'test-mode-access-token';
@@ -98,10 +98,9 @@ export function SignInView() {
       accessToken: MOCK_ACCESS_TOKEN,
       user: MOCK_USER_DATA
     }));
-    dispatch(setOnboardingCompleted(true));
+    dispatch(setOnboardingCompleted(false));
     toast.success(t('auth.testMode.redirecting'));
-    router.replace('/');
-  }, [dispatch, router, t]);
+  }, [dispatch, t]);
   
   
   // Inside the SignInView component, add this hook
@@ -111,6 +110,30 @@ export function SignInView() {
   const handleAuthSuccess = useCallback(async (accessToken: string) => {
     if (testMode) {
       handleTestModeLogin();
+      dispatch(setAvailablePlans([
+        {
+          id: "free-plan",
+          name: "Free (Monthly)",
+          price: 0,
+          url: "free",
+          features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
+        },
+        {
+          id: "starter-plan",
+          name: "Starter (Monthly)",
+          price: 29,
+          url: "starter",
+          features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
+        },
+        {
+          id: "professional-plan",
+          name: "Professional (Monthly)",
+          price: 49,
+          url: "professional",
+          features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
+        }
+      ]));
+      router.replace('/onboarding'); // Move navigation here
       return;
     }
     
@@ -121,7 +144,6 @@ export function SignInView() {
       dispatch(setCredentials({accessToken, user: userData}));
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
       
-      // Fetch available plans
       try {
         const plansData = await getPlans().unwrap();
         if (plansData && plansData.plans) {
@@ -129,29 +151,6 @@ export function SignInView() {
         }
       } catch (error) {
         toast.error('Failed to fetch plans. Using fallback plans.');
-        dispatch(setAvailablePlans([
-          {
-            id: "free-plan",
-            name: "Free (Monthly)",
-            price: 0,
-            url: "free",
-            features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
-          },
-          {
-            id: "starter-plan",
-            name: "Starter (Monthly)",
-            price: 29,
-            url: "starter",
-            features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
-          },
-          {
-            id: "professional-plan",
-            name: "Professional (Monthly)",
-            price: 49,
-            url: "professional",
-            features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
-          }
-        ]));
       }
       
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');

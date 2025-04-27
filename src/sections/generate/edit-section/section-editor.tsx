@@ -1,5 +1,6 @@
 import type { EditorOptions } from "@tiptap/core";
 
+import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useRef , useState, useCallback } from "react";
 import {
@@ -8,26 +9,25 @@ import {
   RichTextEditor,
 
   MenuButtonBold,
-  MenuButtonItalic,
-  MenuSelectHeading,
-  MenuButtonSubscript,
-  MenuControlsContainer,
-  type RichTextEditorRef,
-  RichTextEditorProvider,
-  MenuButtonEditLink,
-  MenuButtonBulletedList,
-  MenuButtonOrderedList,
-  MenuButtonHorizontalRule,
   MenuButtonRedo,
   MenuButtonUndo,
-  MenuButtonImageUpload} from "mui-tiptap";
+  MenuButtonItalic,
+  MenuSelectHeading,
+  MenuButtonEditLink,
+  MenuButtonSubscript,
+  MenuControlsContainer,
+  MenuButtonOrderedList,
+  MenuButtonImageUpload,
+  type RichTextEditorRef,
+  RichTextEditorProvider,
+  MenuButtonBulletedList,
+  MenuButtonHorizontalRule} from "mui-tiptap";
 
 import { Box , Button, Typography } from "@mui/material";
-import { useEditor } from "@tiptap/react";
+
 import useExtensions from "./useExtensions";
 
 
-const exampleContent ='<h2 style="text-align: center">Hey there 👋</h2>'
 function fileListToImageFiles(fileList: FileList): File[] {
   // You may want to use a package like attr-accept
   // (https://www.npmjs.com/package/attr-accept) to restrict to certain file
@@ -124,7 +124,7 @@ export default function Editor() {
       [handleNewImageFiles],
     );
 
-  const [submittedContent, setSubmittedContent] = useState("");
+  const [submittedContent] = useState("");
 
   const editor = useEditor({
     extensions: [StarterKit],

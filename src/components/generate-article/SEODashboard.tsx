@@ -1,41 +1,30 @@
+import type { Step1State } from "src/sections/generate/generate-steps/steps/Step1ContentSetup";
+
 import React, { useState, useCallback } from "react";
 
 // Icons
-import Add from "@mui/icons-material/Add";
-import Menu from "@mui/icons-material/Menu";
 import { useTheme } from "@mui/material/styles";
-import Remove from "@mui/icons-material/Remove";
-import CheckCircle from "@mui/icons-material/CheckCircle";
-import ErrorOutline from "@mui/icons-material/ErrorOutline";
 // MUI Components
 import {
   Box,
   Tab,
   Card,
   Tabs,
-  Stack,
-  Button,
-  Divider,
   IconButton,
   Typography,
-  CardContent,
-  LinearProgress,
 } from "@mui/material";
 
+import { canGenerateContent } from "src/utils/formValidation";
+
 import { Iconify } from "src/components/iconify";
+
 import { PreviewSEOTab } from "./PreviewSEOTab";
 import { RealTimeScoringTab } from "./RealTimeScoringTab";
 
+
 // Types
 interface SEODashboardProps {
-  title?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  urlSlug?: string;
-  currentStep?: number;
-  isVisible?: boolean;
-  onCollapseChange?: (collapsed: boolean) => void;
-  onGenerateMeta?: () => void; // Add this prop for generating meta
+  state: Step1State;
 }
 
 // Constants
@@ -53,16 +42,20 @@ const COLORS = {
 
 
 
-export function SEODashboard({
-  title,
-  metaTitle,
-  metaDescription,
-  urlSlug,
-  currentStep = 0,
-  isVisible = true,
-  onCollapseChange,
-  onGenerateMeta
-}: SEODashboardProps) {
+export function SEODashboard({ state }: SEODashboardProps) {
+  const {
+    form,
+    generation: {
+      meta: { isGenerating: isGeneratingMeta, onGenerate: onGenerateMeta },
+    },
+  } = state;
+
+  const { watch } = form;
+  
+  const title = watch('title');
+  const metaTitle = watch('metaTitle');
+  const metaDescription = watch('metaDescription');
+  const urlSlug = watch('urlSlug');
   const theme = useTheme();
   
   // State management
@@ -87,14 +80,12 @@ export function SEODashboard({
     }));
   }, []);
 
+  const isVisible = true
+
   const handleToggleContent = useCallback(() => {
     const newState = !showContent;
     setShowContent(newState);
-    // Notify parent component about collapse state change
-    if (onCollapseChange) {
-      onCollapseChange(newState);
-    }
-  }, [onCollapseChange, showContent]);
+  }, [showContent]);
 
   // If not visible, return null
   if (!isVisible) {
@@ -293,6 +284,7 @@ export function SEODashboard({
     },
   ];
 
+  const isGenerateDisabled = !canGenerateContent(form.getValues());
 
   // Function to render SEO content based on tab value
   const renderTabContent = () => {
@@ -305,6 +297,8 @@ export function SEODashboard({
               metaDescription={metaDescription}
               urlSlug={urlSlug}
               onGenerateMeta={onGenerateMeta}
+              isGeneratingMeta={isGeneratingMeta}
+              isGenerateDisabled={isGenerateDisabled}
             />
         );
       

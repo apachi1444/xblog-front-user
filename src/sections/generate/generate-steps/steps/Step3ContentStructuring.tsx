@@ -1,6 +1,5 @@
-import type { SectionItem } from 'src/components/form/DraggableSectionList';
+import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
-import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
 import { 
@@ -8,21 +7,14 @@ import {
   Grid, 
   Fade, 
   Paper, 
-  Button, 
-  Dialog, 
-  MenuItem,
-  useTheme,
-  TextField,
-  Typography,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  Button,
+  Typography
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
-import { DraggableSectionList } from 'src/components/form/DraggableSectionList';
+import { DraggableSectionList } from 'src/components/generate-article/DraggableSectionList';
 
-import { FormContainer } from '../FormContainer';
+import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
 interface Step3Props {
   generatedSections?: SectionItem[];

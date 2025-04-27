@@ -21,6 +21,7 @@ export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const SignUpPage = lazy(() => import('src/pages/sign-up'));
 export const ForgotPasswordPage = lazy(() => import('src/pages/forgot-password'));
+export const ResetPasswordPage = lazy(() => import('src/pages/reset-password'));
 export const SettingsPage = lazy(() => import('src/pages/settings'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const ProfilePage = lazy(() => import('src/pages/profile'));
@@ -115,6 +116,14 @@ export function Router() {
       element: (
         <AuthLayout>
           <ForgotPasswordPage />
+        </AuthLayout>
+      ),
+    },
+    {
+      path: 'reset-password',
+      element: (
+        <AuthLayout>
+          <ResetPasswordPage />
         </AuthLayout>
       ),
     },

@@ -1,10 +1,10 @@
 import type { RootState } from 'src/services/store';
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -15,11 +15,18 @@ import IconButton from '@mui/material/IconButton';
 import { useStoreDependentData } from 'src/hooks/useStoreDependentData';
 
 import { _langs, _notifications } from 'src/_mock';
+import { FALLBACK_PLANS } from 'src/services/apis/plansApi';
 import { setThemeMode } from 'src/services/slices/globalSlice';
 import { getStores } from 'src/services/slices/stores/storeSlice';
 import { useLazyGetStoresQuery } from 'src/services/apis/storesApi';
-import { setSubscriptionDetails } from 'src/services/slices/auth/authSlice';
-import { useLazyGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { 
+  useLazyGetSubscriptionDetailsQuery 
+} from 'src/services/apis/subscriptionApi';
+import { 
+  setCurrentPlan,
+  selectAvailablePlans,
+  setSubscriptionDetails 
+} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -49,15 +56,82 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   
   const isDarkMode = useSelector((state: RootState) => state.global);
+  const availablePlans = useSelector(selectAvailablePlans);
   
   const [doGetStores] = useLazyGetStoresQuery();
-  
-  const storesData = useSelector((state: RootState) => state.stores);  
-  
   const [doGetSubscriptionDetails] = useLazyGetSubscriptionDetailsQuery();
+  
+  const storesData = useSelector((state: RootState) => state.stores);
+
+  // Subscription sync logic
+  const syncSubscriptionData = useCallback(async () => {
+    try {
+      // Get subscription details
+      const subDetails = await doGetSubscriptionDetails().unwrap();
+      dispatch(setSubscriptionDetails(subDetails));
+
+      if (!subDetails?.subscription_url) {
+        console.warn('No subscription URL found in subscription details');
+        return;
+      }
+
+
+      const currentPlan = availablePlans.find(plan => 
+        subDetails.subscription_url.includes(plan.url)
+      );
+
+      if (currentPlan) {
+        // Set current plan
+        dispatch(setCurrentPlan({
+          ...currentPlan,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to sync subscription data:', error);
+      const currentPlan = FALLBACK_PLANS.find(plan => 
+        error?.subscription_url?.includes(plan.url)
+      ) || FALLBACK_PLANS.find(plan => plan.id === 'free-plan');
+
+
+      dispatch(setCurrentPlan(
+        currentPlan 
+          ? {
+              ...currentPlan,
+            }
+          : {
+              id: 'free-plan',
+              name: 'sfdq',
+              price: 0,
+              url: 'free-plan',
+              features: ['5 Articles/month', 'Basic Analytics', 'Standard Support']
+            }
+      ));
+    }
+  }, [doGetSubscriptionDetails, dispatch, availablePlans]);
+
+  // Effect for initial load and route changes
+  useEffect(() => {
+    syncSubscriptionData();
+  }, [location.pathname, syncSubscriptionData]);
+
+  // Effect for visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncSubscriptionData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [syncSubscriptionData]);
 
   // Fetch stores data when component mounts
   useEffect(() => {
@@ -73,22 +147,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     fetchStoresData();
   }, [doGetStores, dispatch]);
 
-  useEffect(() => {
-    const fetchUserSubscriptionDetails = async () => {
-      try {
-        const result = await doGetSubscriptionDetails().unwrap();
-        dispatch(setSubscriptionDetails(result));
-      } catch (error) {
-        console.log(error);
-        dispatch(setSubscriptionDetails(error));
-      }
-    };
-    
-    fetchUserSubscriptionDetails();
-  }, [doGetSubscriptionDetails, dispatch]);
-  
   const [navOpen, setNavOpen] = useState(false);
-
   const layoutQuery: Breakpoint = 'lg';
   
   // Handle theme mode toggle

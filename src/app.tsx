@@ -48,8 +48,8 @@ function ToasterWithTheme() {
       reverseOrder={false}
       gutter={12}
       toastOptions={{
-        duration: 2000,
-        removeDelay: 1000,
+        duration: 500,
+        removeDelay: 500,
         style: {
           background: theme.palette.mode === 'dark' 
             ? theme.palette.background.paper 
@@ -64,7 +64,7 @@ function ToasterWithTheme() {
 
         // Default options for specific types
         success: {
-          duration: 3000,
+          duration: 500,
           style: {
             background: theme.palette.mode === 'dark'
               ? theme.palette.success.dark
@@ -81,7 +81,7 @@ function ToasterWithTheme() {
           },
         },
         error: {
-          duration: 4000,
+          duration: 1500,
           style: {
             background: theme.palette.mode === 'dark'
               ? theme.palette.error.dark

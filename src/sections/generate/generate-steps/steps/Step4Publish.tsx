@@ -24,7 +24,7 @@ import {
 
 import { Iconify } from 'src/components/iconify';
 
-import { FormContainer } from '../FormContainer';
+import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
 interface CopyModalProps {
   open: boolean;

@@ -13,7 +13,7 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
   const { t } = useTranslation();
   
   // Get subscription details from Redux store
-  const subscriptionDetails = useSelector((state: RootState) => state.auth.subscriptionDetails);
+  const subscriptionDetails = useSelector((state: RootState) => state.subscription.subscriptionDetails);
   
   // Articles usage data from subscription details
   const articlesUsed = subscriptionDetails?.articles_created || 0;

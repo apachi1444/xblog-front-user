@@ -1,3 +1,4 @@
+import type { Plan } from "src/services/apis/plansApi";
 
 export interface AuthUser {
     email?: string;
@@ -10,12 +11,7 @@ export interface AuthUser {
     is_completed_onboarding?: boolean;
     interests?: string[] | null;
     heard_about_us?: string | null;
-    subscription?: {
-      plan: string;
-      startDate?: string;
-      endDate?: string;
-      status?: string;
-    };
+    subscription?: Plan;
     credits?: {
       used: number;
       total: number;

@@ -15,7 +15,7 @@ interface UpdateUserRequest {
   telephone?: string;
   role?: string;
   is_completed_onboarding?: boolean;
-  interests?: string[] | null;
+  interests?: string | null;
   heard_about_us?: string | null;
 }
 

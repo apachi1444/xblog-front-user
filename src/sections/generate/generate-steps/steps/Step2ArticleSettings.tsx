@@ -4,8 +4,8 @@ import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, Circu
 
 import { Iconify } from 'src/components/iconify';
 
-import { FormDropdown } from '../FormDropdown';
-import { FormContainer } from '../FormContainer';
+import { FormDropdown } from '../../../../components/generate-article/FormDropdown';
+import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
 // Add a new prop to receive the function that will set the table of contents
 // Update the interface to include the onGenerateTableOfContents prop

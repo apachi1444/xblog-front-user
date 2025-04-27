@@ -3,7 +3,6 @@ import type { RootState } from 'src/services/store';
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
@@ -20,8 +19,9 @@ import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
+import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
+import { selectAvailablePlans } from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -94,10 +94,40 @@ export function OnBoardingView() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+
+  // Get plans from auth slice
+  const plans = useSelector(selectAvailablePlans);
+  
+  // Fallback plans in case the selector returns empty
+  const availablePlans = plans?.length > 0 ? plans : [
+    {
+      id: "free-plan",
+      name: "Free (Monthly)",
+      price: 0,
+      url: "free",
+      features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
+    },
+    {
+      id: "starter-plan",
+      name: "Starter (Monthly)",
+      price: 29,
+      url: "starter",
+      features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
+    },
+    {
+      id: "professional-plan",
+      name: "Professional (Monthly)",
+      price: 49,
+      url: "professional",
+      features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
+    }
+  ];
+
+  console.log('Plans from Redux:', plans);
+  console.log('Available Plans:', availablePlans);
   
   // Initialize the updateUser mutation
-  const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
   
   // Check if onboarding is already completed
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
@@ -167,7 +197,7 @@ export function OnBoardingView() {
     try {
       // Send the user preferences to the API
       await updateUser({
-        interests: selectedInterests,
+        interests: selectedInterests.join(","),
         heard_about_us: referralSource,
         is_completed_onboarding: true,
       }).unwrap();

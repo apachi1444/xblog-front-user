@@ -37,7 +37,7 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { FormDropdown } from 'src/components/form/FormDropdown';
+import { FormDropdown } from 'src/components/generate-article/FormDropdown';
 
 // Demo video URL
 const DEMO_VIDEO = 'https://www.youtube.com/embed/example-demo-video';

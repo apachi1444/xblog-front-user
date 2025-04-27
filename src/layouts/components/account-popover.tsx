@@ -17,8 +17,9 @@ import IconButton from '@mui/material/IconButton';
 import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
+import { logout } from 'src/services/slices/auth/authSlice';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
-import { clearCredentials } from 'src/services/slices/auth/authSlice';
+import { selectCurrentPlan } from 'src/services/slices/subscription/subscriptionSlice';
 
 // ----------------------------------------------------------------------
 
@@ -38,8 +39,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   
 
   const user = useSelector(selectAuthUser);
-  const userPlan = user?.subscription?.plan || 'Free';
+  const currentPlan = useSelector(selectCurrentPlan);
+
+  console.log(currentPlan , "current plan");
   
+    
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const isInitialMount = useRef(true);
 
@@ -97,7 +101,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     setOpenPopover(null);
     
     const timeoutId = setTimeout(() => {
-      dispatch(clearCredentials());
+      dispatch(logout());
       router.push('/sign-in');
       localStorage.removeItem('auth');
       sessionStorage.removeItem('access_token');
@@ -214,17 +218,17 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 1,
-                bgcolor: (theme) => userPlan === 'Free' 
+                bgcolor: (theme) => currentPlan?.name === 'Free' 
                   ? alpha(theme.palette.grey[500], 0.16)
                   : alpha(theme.palette.primary.main, 0.16),
-                color: (theme) => userPlan === 'Free' 
+                color: (theme) => currentPlan?.name === 'Free' 
                   ? theme.palette.text.primary 
                   : theme.palette.primary.main,
                 fontWeight: 'medium',
                 fontSize: '0.75rem',
               }}
             >
-              {userPlan} Plan
+              {currentPlan?.name} Plan
             </Box>
           </Box>
         </Box>
