@@ -1,10 +1,11 @@
 import type { RootState } from 'src/services/store';
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
+import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -12,21 +13,12 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 
-import { useStoreDependentData } from 'src/hooks/useStoreDependentData';
-
 import { _langs, _notifications } from 'src/_mock';
-import { FALLBACK_PLANS } from 'src/services/apis/plansApi';
 import { setThemeMode } from 'src/services/slices/globalSlice';
-import { getStores } from 'src/services/slices/stores/storeSlice';
-import { useLazyGetStoresQuery } from 'src/services/apis/storesApi';
-import { 
-  useLazyGetSubscriptionDetailsQuery 
-} from 'src/services/apis/subscriptionApi';
-import { 
-  setCurrentPlan,
-  selectAvailablePlans,
-  setSubscriptionDetails 
-} from 'src/services/slices/subscription/subscriptionSlice';
+import { useGetStoresQuery } from 'src/services/apis/storesApi';
+import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlice';
+import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -52,100 +44,53 @@ export type DashboardLayoutProps = {
 };
 
 export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) {
-  useStoreDependentData();
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
   
   const isDarkMode = useSelector((state: RootState) => state.global);
-  const availablePlans = useSelector(selectAvailablePlans);
-  
-  const [doGetStores] = useLazyGetStoresQuery();
-  const [doGetSubscriptionDetails] = useLazyGetSubscriptionDetailsQuery();
-  
-  const storesData = useSelector((state: RootState) => state.stores);
 
-  // Subscription sync logic
-  const syncSubscriptionData = useCallback(async () => {
-    try {
-      // Get subscription details
-      const subDetails = await doGetSubscriptionDetails().unwrap();
-      dispatch(setSubscriptionDetails(subDetails));
+  const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery(undefined, {
+    pollingInterval: 300000, // Poll every 5 minutes
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true
+  });
 
-      if (!subDetails?.subscription_url) {
-        console.warn('No subscription URL found in subscription details');
-        return;
-      }
+  const { data: storesData, error: storesError } = useGetStoresQuery(undefined, {
+    pollingInterval: 300000, // Poll every 5 minutes
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true
+  });
 
+  const storesCount = storesData?.count ?? 0
 
-      const currentPlan = availablePlans.find(plan => 
-        subDetails.subscription_url.includes(plan.url)
-      );
-
-      if (currentPlan) {
-        // Set current plan
-        dispatch(setCurrentPlan({
-          ...currentPlan,
-        }));
-      }
-    } catch (error) {
-      console.error('Failed to sync subscription data:', error);
-      const currentPlan = FALLBACK_PLANS.find(plan => 
-        error?.subscription_url?.includes(plan.url)
-      ) || FALLBACK_PLANS.find(plan => plan.id === 'free-plan');
-
-
-      dispatch(setCurrentPlan(
-        currentPlan 
-          ? {
-              ...currentPlan,
-            }
-          : {
-              id: 'free-plan',
-              name: 'sfdq',
-              price: 0,
-              url: 'free-plan',
-              features: ['5 Articles/month', 'Basic Analytics', 'Standard Support']
-            }
-      ));
+  // Effect to update Redux store when subscription data changes
+  useEffect(() => {
+    if (subscriptionData) {
+      dispatch(setSubscriptionDetails(subscriptionData));
     }
-  }, [doGetSubscriptionDetails, dispatch, availablePlans]);
+    if (subscriptionError) {
+      toast.error(t('errors.subscription.fetch', 'Failed to fetch subscription details'));
+    }
+  }, [subscriptionData, subscriptionError, dispatch, t]);
 
-  // Effect for initial load and route changes
+  // Effect to update Redux store when stores data changes
   useEffect(() => {
-    syncSubscriptionData();
-  }, [location.pathname, syncSubscriptionData]);
-
-  // Effect for visibility changes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        syncSubscriptionData();
+    if (storesData?.stores) {
+      // Update stores list in Redux
+      dispatch(getStores(storesData.stores));
+      
+      // Set first store as current if we have stores and no current store is selected
+      if (storesData.stores.length > 0) {
+        dispatch(setCurrentStore(storesData.stores[0]));
       }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
     
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [syncSubscriptionData]);
-
-  // Fetch stores data when component mounts
-  useEffect(() => {
-    const fetchStoresData = async () => {
-      try {
-        const result = await doGetStores().unwrap();
-        dispatch(getStores(result.stores));
-      } catch (error) {
-        dispatch(getStores(error.stores));
-      }
-    };
-    
-    fetchStoresData();
-  }, [doGetStores, dispatch]);
+    if (storesError) {
+      toast.error(t('errors.stores.fetch', 'Failed to fetch stores data'));
+    }
+  }, [storesData, storesError, dispatch, t]);
 
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
@@ -161,8 +106,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   };
 
   // Create custom workspaces based on stores data
-  const customWorkspaces = storesData.count > 0 
-    ? storesData.stores.map(store => ({
+  const customWorkspaces = storesCount > 0 
+    ? storesData?.stores.map(store => ({
         id: store.id,
         name: store.name,
         logo: store.logo || `/assets/icons/workspaces/logo-1.webp`,
@@ -213,7 +158,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   data={navData}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
-                  workspaces={storesData.count > 0 ? customWorkspaces : []}
+                  workspaces={storesCount > 0 ? customWorkspaces : []}
                 />
               </>
             ),
@@ -279,10 +224,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         <NavDesktop 
           data={navData} 
           layoutQuery={layoutQuery} 
-          workspaces={storesData.count > 0 ? customWorkspaces : []} 
+          workspaces={storesCount > 0 ? customWorkspaces : []} 
           bottomNavData={bottomNavData}
           emptyStoresAction={
-            storesData.count === 0 ? (
+            storesCount === 0 ? (
               <Box>
                 <Button
                   fullWidth

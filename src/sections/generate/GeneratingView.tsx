@@ -14,6 +14,7 @@ import {
   useGenerateMetaMutation, 
   useGenerateTitleMutation,
   useGenerateKeywordsMutation,
+  useGenerateSectionsMutation,
 } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -24,7 +25,6 @@ import SectionEditor from './edit-section/section-editor';
 import { step1Schema, generateArticleSchema } from './schemas';
 import { Step4Publish } from './generate-steps/steps/Step4Publish';
 import { Step1ContentSetup } from './generate-steps/steps/Step1ContentSetup';
-import { useGenerateArticleMutation } from '../../hooks/useGenerateArticleApi';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 import { Step2ArticleSettings } from './generate-steps/steps/Step2ArticleSettings';
 import { Step3ContentStructuring } from './generate-steps/steps/Step3ContentStructuring';
@@ -38,10 +38,10 @@ export function GeneratingView() {
   const theme = useTheme();
   
   // API mutations
-  const [generateArticle] = useGenerateArticleMutation();
   const [generateTitle] = useGenerateTitleMutation();
   const [generateMeta] = useGenerateMetaMutation();
   const [generateKeywords] = useGenerateKeywordsMutation();
+  const [generateSections] = useGenerateSectionsMutation();
 
   // Form setup
   const methods = useForm<GenerateArticleFormData>({
@@ -76,6 +76,7 @@ export function GeneratingView() {
   const [isTitleGenerated, setIsTitleGenerated] = useState(false);
   const [isMetaGenerated, setIsMetaGenerated] = useState(false);
   const [isGeneratingSecondaryKeywords, setIsGeneratingSecondaryKeywords] = useState(false);
+  const [isGeneratingSections, setIsGeneratingSections] = useState(false);
 
   // Additional states needed
   const [isPublishing, setIsPublishing] = useState(false);
@@ -93,17 +94,12 @@ export function GeneratingView() {
         language,
         targetCountry,
       });
-      
-      // Fallback data if API fails
+      console.log(data , "title");
       const title = data?.title || `Best ${primaryKeyword} Guide for ${targetCountry}`;
       setValue('title', title);
       setIsTitleGenerated(true);
     } catch (error) {
-      // Use fallback data on error
-      const fallbackTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
-      setValue('title', fallbackTitle);
-      setIsTitleGenerated(true);
-      toast.success('Generated title with fallback data');
+      toast.error('Generated title with fallback data');
     } finally {
       setIsGeneratingTitle(false);
     }
@@ -186,6 +182,38 @@ export function GeneratingView() {
     }
   };
 
+  const handleGenerateTableOfContents = async () => {
+    try {
+      setIsGeneratingSections(true);      
+      const title = step1Form.watch("title") ?? "";
+      const response = await generateSections({
+        title,
+        keyword: primaryKeyword
+      }).unwrap();
+
+      if (response.sections) {
+        // Convert the sections to match SectionItem interface
+        const formattedSections = response.sections.map(section => ({
+          id: section.id,
+          title: section.title,
+          content: section.content || '',
+          status: 'Not Started' as const,
+          description: section.content || ''
+        }));
+
+        setGeneratedSections(formattedSections);
+        toast.success('Table of contents generated successfully');
+        handleNext(); // Move to next step
+      }
+    } catch (error) {
+      toast.error('Failed to generate table of contents');
+      console.error('Section generation error:', error);
+    } finally {
+      setIsGeneratingSections(false);
+    }
+  };
+
+
   const steps = [
     { id: 1, label: "Content Setup" },
     { id: 2, label: "Article Settings" },
@@ -234,6 +262,8 @@ export function GeneratingView() {
       if (activeStep === steps.length - 1) {
         try {
           setIsPublishing(true);
+          // Add timeout to simulate processing
+          await new Promise(resolve => setTimeout(resolve, 3000));
           navigate('/blog');
         } catch (error) {
           toast.error('Failed to generate article');
@@ -344,16 +374,6 @@ export function GeneratingView() {
   const handleReturnFromEditing = () => {
     setIsEditingSection(false);
     setCurrentEditSection(null);
-  };
-
-  const handleGenerateTableOfContents = async () => {
-    // Implementation for generating table of contents
-    try {
-      // Add your implementation here
-      console.log('Generating table of contents...');
-    } catch (error) {
-      toast.error('Failed to generate table of contents');
-    }
   };
 
   async function submitSteppedForm(data: GenerateArticleFormData) {

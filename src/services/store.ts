@@ -3,14 +3,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { api } from './apis';
 import globalReducer from './slices/globalSlice';
 import authReducer from './slices/auth/authSlice';
-import articleReducer from './slices/articleSlice';
 import storesReducer from './slices/stores/storeSlice';
 import articlesReducer from './slices/articles/articleSlice';
 import subscriptionReducer from './slices/subscription/subscriptionSlice';
 
 export const store = configureStore({
   reducer: {
-    article: articleReducer,
     global: globalReducer,
     stores: storesReducer,
     articles: articlesReducer,

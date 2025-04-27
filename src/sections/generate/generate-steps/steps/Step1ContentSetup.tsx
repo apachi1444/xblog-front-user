@@ -1,8 +1,6 @@
 import type React from "react"
 import type { UseFormReturn } from "react-hook-form"
 
-import { useEffect } from "react"
-
 import { useTheme } from "@mui/material/styles"
 import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
 
@@ -70,11 +68,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   const targetCountry = watch("targetCountry")
   const primaryKeyword = watch("primaryKeyword")
   const secondaryKeywords = watch("secondaryKeywords") || []
-
-  // Debug the primary keyword value to ensure it's being captured correctly
-  useEffect(() => {
-    console.log("Step1ContentSetup - primaryKeyword:", primaryKeyword)
-  }, [primaryKeyword])
+  
+  const title = watch("title")
+  const metaTitle = watch("metaTitle")
+  const metaDescription = watch("metaDescription")
+  const urlSlug = watch("urlSlug")
 
   // Compute disabled states
   const isPrimaryKeywordDisabled = !language || !targetCountry
@@ -388,6 +386,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
                   {...register("title")}
+                  value={title}
                   tooltipText="Article Title"
                   label="Article Title"
                   fullWidth
@@ -457,6 +456,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               {/* Meta Title */}
               <FormInput
                 {...register("metaTitle")}
+                value={metaTitle}
                 tooltipText="Meta title"
                 label="Meta Title"
                 fullWidth
@@ -467,6 +467,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               <FormInput
                 {...register("metaDescription")}
                 tooltipText="Meta Description"
+                value={metaDescription}
                 label="Meta Description"
                 fullWidth
                 multiline
@@ -478,6 +479,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               <FormInput
                 {...register("urlSlug")}
                 tooltipText="URL Slug"
+                value={urlSlug}
                 label="URL Slug"
                 fullWidth
                 helperText={errors.urlSlug?.message}

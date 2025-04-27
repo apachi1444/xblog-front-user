@@ -61,6 +61,11 @@ interface GeneratedSection {
   subsections?: GeneratedSection[];
 }
 
+interface GenerateSectionsResponse {
+  sections: GeneratedSection[];
+  score?: number;
+}
+
 interface GeneratedImage {
   url: string;
   alt: string;
@@ -99,11 +104,11 @@ export const generateContentApi = api.injectEndpoints({
     }),
 
     // Generate sections endpoint
-    generateSections: builder.mutation<GeneratedSection[], GenerateSectionsRequest>({
-      query: (data) => ({
+    generateSections: builder.mutation<GenerateSectionsResponse, GenerateSectionsRequest>({
+      query: (body) => ({
         url: `${GENERATE_BASE_URL}/sections`,
         method: 'POST',
-        body: data,
+        body,
       }),
     }),
 

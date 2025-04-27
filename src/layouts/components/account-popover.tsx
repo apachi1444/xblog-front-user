@@ -19,7 +19,7 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
-import { selectCurrentPlan } from 'src/services/slices/subscription/subscriptionSlice';
+import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 
 // ----------------------------------------------------------------------
 
@@ -39,9 +39,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   
 
   const user = useSelector(selectAuthUser);
-  const currentPlan = useSelector(selectCurrentPlan);
-
-  console.log(currentPlan , "current plan");
+  const subscriptionDetails = useSelector(selectSubscriptionDetails);
   
     
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -218,17 +216,17 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 1,
-                bgcolor: (theme) => currentPlan?.name === 'Free' 
+                bgcolor: (theme) => subscriptionDetails?.subscription_name === 'Free' 
                   ? alpha(theme.palette.grey[500], 0.16)
                   : alpha(theme.palette.primary.main, 0.16),
-                color: (theme) => currentPlan?.name === 'Free' 
+                color: (theme) => subscriptionDetails?.subscription_name === 'Free' 
                   ? theme.palette.text.primary 
                   : theme.palette.primary.main,
                 fontWeight: 'medium',
                 fontSize: '0.75rem',
               }}
             >
-              {currentPlan?.name} Plan
+              {subscriptionDetails?.subscription_name} Plan
             </Box>
           </Box>
         </Box>

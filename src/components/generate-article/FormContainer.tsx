@@ -25,7 +25,9 @@ export function FormContainer({
   const theme = useTheme();
   
   const toggleExpand = () => {
-    setExpanded(!expanded);
+    if(isCollapsible){
+      setExpanded(!expanded);
+    }
   };
 
   return (

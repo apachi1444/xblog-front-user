@@ -64,7 +64,7 @@ function ToasterWithTheme() {
 
         // Default options for specific types
         success: {
-          duration: 500,
+          duration: 1500,
           style: {
             background: theme.palette.mode === 'dark'
               ? theme.palette.success.dark

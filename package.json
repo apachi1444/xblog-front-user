@@ -79,6 +79,7 @@
     "@types/react-beautiful-dnd": "^13.1.8",
     "apexcharts": "^3.52.0",
     "axios": "^1.7.9",
+    "axios-mock-adapter": "^2.1.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.7.2",

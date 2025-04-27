@@ -1,6 +1,4 @@
-import type { RootState } from 'src/services/store';
 
-import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -9,11 +7,9 @@ import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMon
 import { 
   Box, 
   Grid, 
-  Fade, 
   List, 
   Paper, 
   Modal, 
-  Alert, 
   Button, 
   Divider, 
   Checkbox, 
@@ -54,7 +50,6 @@ export default function CalendarPage() {
     data: articlesData, 
     isLoading: isLoadingArticles,
     error: articlesError,
-    isError,
     isSuccess
   } = useGetArticlesQuery({ store_id: storeId.toString() });
 

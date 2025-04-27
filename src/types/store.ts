@@ -1,3 +1,5 @@
+import type { Article } from "./article"
+
 export interface Store {
   id: string
   name: string
@@ -11,34 +13,10 @@ export interface Store {
     sales: number
     revenue: number
   }
-  articles_list: {
-    id: string
-    title: string
-    description: string
-    publishedDate: string
-    readTime: string
-    views: number
-  }[],
+  articles_list: Article[],
   platform?: string
   business?: string
   creationDate?: string
-}
-
-  export interface Article {
-    id: string
-    title: string
-    excerpt: string
-    content: string
-    publishDate: string
-    readTime: number
-    views: number
-    author: string
-    category: string
-    tags: string[]
-    imageUrl: string
-    seoScore: number
-    keywordDensity: number
-    backlinks: number
 }
   
   

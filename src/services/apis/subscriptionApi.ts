@@ -21,19 +21,6 @@ interface InvoicesResponse {
   count: number;
 }
 
-// Fallback/mock subscription data
-const FALLBACK_SUBSCRIPTION_DETAILS: SubscriptionDetails = {
-  start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
-  end_date: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toISOString(), // 335 days from now
-  connected_websites: 3,
-  websites_limit: 5,
-  articles_created: 45,
-  articles_limit: 100,
-  regeneration_number: 15,
-  regeneration_limit: 50,
-  subscription_url: 'https://example.com/manage-subscription',
-};
-
 // Interface for subscription details
 export interface SubscriptionDetails {
   start_date: string;
@@ -45,6 +32,7 @@ export interface SubscriptionDetails {
   regeneration_number: number;
   regeneration_limit: number;
   subscription_url: string;
+  subscription_name: string;
 }
 
 // RTK Query endpoints for subscription operations
@@ -64,10 +52,6 @@ export const subscriptionApi = api.injectEndpoints({
         url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'GET',
       }),
-      transformErrorResponse: () => {
-        console.log('Subscription API error, using fallback data');
-        return FALLBACK_SUBSCRIPTION_DETAILS;
-      },
     }),
 
     createSubscription: builder.mutation<void, { planId: string }>({

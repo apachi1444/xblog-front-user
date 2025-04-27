@@ -1,12 +1,11 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
+import toast from 'react-hot-toast';
 import React, { useState, useEffect } from 'react';
 
 import { 
   Box, 
   Grid, 
-  Fade, 
-  Paper, 
   Button,
   Typography
 } from '@mui/material';
@@ -30,8 +29,6 @@ export function Step3ContentStructuring({
   const [editTitle, setEditTitle] = useState('');
   const [editStatus, setEditStatus] = useState<"Not Started" | "In Progress" | "Completed">("Not Started");
   const [editDescription, setEditDescription] = useState('');
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Update sections when generatedSections prop changes
   useEffect(() => {
@@ -80,10 +77,8 @@ export function Step3ContentStructuring({
   };
 
   const handleDeleteSection = (sectionId: string) => {
-    setSections(sections.filter(section => section.id !== sectionId));
-    setSuccessMessage('Section deleted successfully!');
-    setShowSuccessMessage(true);
-    setTimeout(() => setShowSuccessMessage(false), 3000);
+    setSections(sections.filter(section => section.id !== sectionId))
+    toast.success("Section deleted successfully !")
   };
 
   const handleSaveEdit = () => {
@@ -96,36 +91,12 @@ export function Step3ContentStructuring({
     );
     
     setSections(updatedSections);
-    
-    // Show success message
-    setSuccessMessage('Section updated successfully!');
-    setShowSuccessMessage(true);
-    setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <FormContainer title="Content Outline">
-          {showSuccessMessage && (
-            <Fade in={showSuccessMessage}>
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  mb: 3, 
-                  bgcolor: 'success.lighter', 
-                  color: 'success.darker',
-                  borderRadius: 1
-                }}
-              >
-                <Typography variant="body2">
-                  {successMessage}
-                </Typography>
-              </Paper>
-            </Fade>
-          )}
-          
           {sections.length > 0 ? (
             <Box sx={{ width: '100%' }}>
               <Box sx={{ mb: 3 }}>

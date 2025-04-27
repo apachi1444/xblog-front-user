@@ -1,35 +1,28 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useLazyGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
-// Import other necessary APIs
+import { useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
 export const useStoreDependentData = () => {
   const currentStore = useSelector(selectCurrentStore);
   
-  const [fetchArticles] = useLazyGetArticlesQuery();
-  const [fetchScheduledArticles] = useLazyGetScheduledArticlesQuery();
-  // Add other fetch functions as needed
+  const { 
+    data: articles,
+    isLoading: isLoadingArticles 
+  } = useGetArticlesQuery({ store_id: currentStore?.id });
+  
+  const { 
+    data: scheduledArticles,
+    isLoading: isLoadingScheduled 
+  } = useGetScheduledArticlesQuery();
 
-  useEffect(() => {
-    if (currentStore?.id) {
-      // Refetch all store-dependent data
-      const fetchData = async () => {
-        try {
-          await Promise.all([
-            fetchArticles().unwrap(),
-            fetchScheduledArticles().unwrap(),
-          ]);
-        } catch (error) {
-          console.error('Failed to fetch store-dependent data:', error);
-        }
-      };
+  const totalArticles = articles?.drafts_articles.concat(articles.published_articles) ?? []
 
-      fetchData();
-    }
-  }, [currentStore?.id, fetchArticles, fetchScheduledArticles]);
-
-  return { isStoreSelected: !!currentStore?.id };
+  return { 
+    isStoreSelected: !!currentStore?.id,
+    isLoading: isLoadingArticles || isLoadingScheduled,
+    totalArticles,
+    scheduledArticles
+  };
 };

@@ -1,10 +1,10 @@
 
 import type { Store } from 'src/types/store';
+import type { Article } from 'src/types/article';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
 
-import { _fakeStores } from 'src/_mock/stores';
 
 interface StoreState {
   stores: Store[];
@@ -37,8 +37,15 @@ const storeSlice = createSlice({
     setCurrentStore: (state, action: PayloadAction<Store>) => {
       state.currentStore = action.payload;
     },
+    setArticlesForCurrentStore: (state, action: PayloadAction<Article[]>) => {
+      if (state.currentStore) {
+        state.currentStore.articles_list = action.payload.map(article => ({
+          ...article,
+        }));
+      }
+    },
   },
 });
 
-export const { getStores, addStore, deleteStore , setCurrentStore } = storeSlice.actions;
+export const { getStores, addStore, deleteStore , setCurrentStore, setArticlesForCurrentStore } = storeSlice.actions;
 export default storeSlice.reducer;
