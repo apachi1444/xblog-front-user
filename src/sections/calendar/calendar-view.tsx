@@ -45,7 +45,7 @@ export default function CalendarPage() {
     isLoading: isLoadingArticles,
   } = useGetArticlesQuery({ store_id: storeId });
 
-  const articles = articlesData?.all_articles || [];
+  const articles = articlesData?.articles || [];
 
   // console log articles that are filtered by the status scheduled !
   console.log(articles.filter(article => article.status === 'scheduled', "test"));

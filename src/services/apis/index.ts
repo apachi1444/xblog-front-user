@@ -1,13 +1,14 @@
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
-import type { AxiosError, AxiosRequestConfig } from 'axios';
 
 import MockAdapter from 'axios-mock-adapter';
 import { createApi } from '@reduxjs/toolkit/query/react';
+import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { _posts } from 'src/_mock/_data';
 import { _fakeStores } from 'src/_mock/stores';
 
 import customRequest from './axios';
+import { setupGenerateContentMocks } from './mockGenerateContent';
 
 // Initialize mock adapter
 const mock = new MockAdapter(customRequest, { onNoMatch: 'passthrough' });
@@ -47,54 +48,10 @@ const shouldUseMocks = () => true
 // Setup mock endpoints
 const setupMocks = () => {
   if (shouldUseMocks()) {
-    // Generate title mock with delay
-    mock.onPost('/generate/title').reply(async (config) => {
-      // Random delay between 1-3 seconds
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      const { primaryKeyword, targetCountry } = JSON.parse(config.data);
-      return [200, {
-        title: `Ultimate Guide to ${primaryKeyword} in ${targetCountry} ${new Date().getFullYear()}`,
-        score: 85
-      }];
-    });
-
-    // Generate meta mock with delay
-    mock.onPost('/generate/meta').reply(async (config) => {
-      // Random delay between 1-3 seconds
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      const { title, primaryKeyword } = JSON.parse(config.data);
-      return [200, {
-        metaTitle: `${title} | Complete ${primaryKeyword} Guide ${new Date().getFullYear()}`,
-        metaDescription: `Learn everything about ${primaryKeyword}. Our comprehensive guide covers all aspects with expert tips, examples, and best practices.`,
-        urlSlug: `${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${new Date().getFullYear()}`
-      }];
-    });
-
-    // Generate keywords mock with delay
-    mock.onPost('/generate/keywords').reply(async (config) => {
-      // Random delay between 1-3 seconds
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-      
-      const { primaryKeyword } = JSON.parse(config.data);
-      return [200, {
-        keywords: [
-          `${primaryKeyword} guide`,
-          `best ${primaryKeyword}`,
-          `${primaryKeyword} tips`,
-          `${primaryKeyword} tutorial`,
-          `${primaryKeyword} examples`,
-          `${primaryKeyword} for beginners`,
-          `professional ${primaryKeyword}`,
-          `${primaryKeyword} ${new Date().getFullYear()}`
-        ],
-        score: 90
-      }];
-    });
+    // setupGenerateContentMocks(mock);
 
     mock.onGet('/stores/').reply(() => [
-        200, 
+        200,
         {
           stores: _fakeStores,
           count: _fakeStores.length
@@ -102,19 +59,13 @@ const setupMocks = () => {
       ]);
 
     // Setup mock for articles endpoint
-    mock.onGet(new RegExp(`/all${ARTICLES_BASE_URL}/.*`)).reply(() => {
-      // Add console.log to verify the mock is being hit
-      console.log('Mock articles endpoint hit');
-      
-      return [
-        200, 
+    mock.onGet(new RegExp(`/all${ARTICLES_BASE_URL}/.*`)).reply(() => [
+        200,
         {
           count: _posts.length,
-          drafts_articles: _posts.filter(post => post.status === 'draft'),
-          published_articles: _posts.filter(post => post.status === 'published')
+          articles: _posts
         }
-      ];
-    });
+      ]);
 
     // Subscription endpoints
     mock.onGet('/subscriptions').reply(200, mockSubscriptionDetails);
@@ -152,8 +103,8 @@ const setupMocks = () => {
     // Store operations mocks
     mock.onDelete(/\/stores\/.*/).reply((config) => {
       const storeId = config.url?.split('/').pop();
-      
-      return [200, { 
+
+      return [200, {
         success: true,
         message: `Store ${storeId} deleted successfully`
       }];
@@ -162,12 +113,12 @@ const setupMocks = () => {
     // Disconnect store mock
     mock.onPost(/\/stores\/disconnect\/.*/).reply((config) => {
       const storeId = config.url?.match(/\/disconnect\/(\d+)$/)?.[1];
-      
+
       return [200, {
         success: true,
         message: `Store ${storeId} disconnected successfully`,
         store: {
-          ..._fakeStores.find(store => store.id === storeId),
+          ..._fakeStores.find(store => store.id === Number(storeId)),
           isConnected: false
         }
       }];
@@ -176,72 +127,14 @@ const setupMocks = () => {
     // Reconnect store mock
     mock.onPost(/\/stores\/reconnect\/.*/).reply((config) => {
       const storeId = config.url?.match(/\/reconnect\/(\d+)$/)?.[1];
-      
+
       return [200, {
         success: true,
         message: `Store ${storeId} reconnected successfully`,
         store: {
-          ..._fakeStores.find(store => store.id === storeId),
+          ..._fakeStores.find(store => store.id === Number(storeId)),
           isConnected: true
         }
-      }];
-    });
-
-    // Generate sections mock with delay
-    mock.onPost('/generate/sections').reply(async (config) => {
-      // Random delay between 2-4 seconds
-      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
-      
-      const { keyword } = JSON.parse(config.data);
-      
-      return [200, {
-        sections: [
-          {
-            id: '1',
-            title: `Introduction to ${keyword}`,
-            content: 'Brief overview and importance of the topic.',
-            status: 'Not Started'
-          },
-          {
-            id: '2',
-            title: 'Understanding the Basics',
-            content: 'Fundamental concepts and key principles.',
-            status: 'Not Started',
-            subsections: [
-              {
-                id: '2.1',
-                title: 'Key Concepts',
-                content: 'Essential terminology and basic principles.',
-                status: 'Not Started'
-              },
-              {
-                id: '2.2',
-                title: 'Common Applications',
-                content: 'Real-world use cases and applications.',
-                status: 'Not Started'
-              }
-            ]
-          },
-          {
-            id: '3',
-            title: 'Best Practices and Tips',
-            content: 'Expert recommendations and proven strategies.',
-            status: 'Not Started'
-          },
-          {
-            id: '4',
-            title: 'Advanced Techniques',
-            content: 'In-depth exploration of advanced concepts.',
-            status: 'Not Started'
-          },
-          {
-            id: '5',
-            title: 'Conclusion and Next Steps',
-            content: 'Summary and recommendations for further learning.',
-            status: 'Not Started'
-          }
-        ],
-        score: 88
       }];
     });
 
@@ -251,7 +144,7 @@ const setupMocks = () => {
       return [404, { message: 'Endpoint not mocked' }];
     });
 
-    console.log('🔧 Mock API enabled');
+    console.log('🔧 Mock API enabled with AI-powered content generation');
   } else {
     mock.reset();
   }

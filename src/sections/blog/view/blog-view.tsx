@@ -47,8 +47,7 @@ export function BlogView() {
         .unwrap()
         .then((result) => {   
           toast.success("Successfully get blogs")
-          const articlesFromApi = result.drafts_articles.concat(result.published_articles);
-          setArticles(articlesFromApi)
+          setArticles(result.articles)
         })
         .catch((err) => {
           toast.error(err.error.data.message);
