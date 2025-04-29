@@ -1,7 +1,7 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { 
   Box, 

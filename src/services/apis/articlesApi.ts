@@ -6,7 +6,7 @@ const ARTICLES_BASE_URL = '/articles';
 
 // Interface for article query parameters
 interface ArticleQueryParams {
-  store_id?: string;
+  store_id?: number;
   page?: number;
   limit?: number;
   sort?: string;
@@ -17,6 +17,7 @@ interface ArticlesResponse {
   count: number;
   drafts_articles: Article[];
   published_articles: Article[];
+  all_articles: Article[];
 }
 
 export const articlesApi = api.injectEndpoints({
@@ -28,6 +29,11 @@ export const articlesApi = api.injectEndpoints({
         method: 'GET',
         params: params || {},
       }),
+      providesTags : ['Articles'],
+      transformResponse: (response: ArticlesResponse) => ({
+          ...response,
+          all_articles: response.drafts_articles.concat(response.published_articles)
+        }),
     }),
     
     // Get draft article by ID

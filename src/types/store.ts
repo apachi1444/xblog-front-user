@@ -1,7 +1,7 @@
 import type { Article } from "./article"
 
 export interface Store {
-  id: string
+  id: number
   name: string
   url: string
   logo: string

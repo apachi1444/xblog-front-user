@@ -1,8 +1,10 @@
 import type React from "react"
 import type { UseFormReturn } from "react-hook-form"
 
+import { useTranslation } from "react-i18next";
+
 import { useTheme } from "@mui/material/styles"
-import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
+import { Box, Grid, Stack, alpha, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
 
 import { canGenerateContent } from 'src/utils/formValidation';
 
@@ -40,6 +42,8 @@ interface Step1ContentSetupProps {
 }
 
 export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
+  const { t } = useTranslation(); // Initialize the translation hook
+
   const {
     form,
     generation: {
@@ -111,11 +115,33 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   const formValues = form.getValues();
   const isGenerateDisabled = !canGenerateContent(formValues);
 
+  // Define a style for important containers - Enhanced for more attraction
+  const importantContainerSx = {
+    // Subtle gradient background
+    background: `linear-gradient(145deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.primary.main, 0.02)})`,
+    // Slightly more defined border
+    border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+    borderRadius: theme.shape.borderRadius * 1.5, // Slightly more rounded corners
+    p: 2.5, // Increase padding slightly
+    mb: 2.5, // Increase margin bottom slightly
+    boxShadow: `0 2px 12px ${alpha(theme.palette.primary.main, 0.05)}`, // Add a subtle shadow
+    transition: 'all 0.3s ease-in-out',
+    '&:hover': {
+      boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.08)}`, // Enhance shadow on hover
+      borderColor: alpha(theme.palette.primary.main, 0.25),
+    },
+    // Style the title within the container if possible (assuming FormContainer applies sx to its root)
+    '& .FormContainer-title': { // Hypothetical class name for the title, adjust if needed
+        color: theme.palette.primary.dark,
+        fontWeight: 600,
+    }
+  };
+
   return (
     <Grid container spacing={1}>
-      {/* Language & Region section */}
+      {/* Language & Region section - Enhanced */}
       <Grid item xs={12}>
-        <FormContainer title="Language & Region">
+        <FormContainer title={t('generate.step1.titles.languageRegion')}>
           <FormDropdown
             {...register("language")}
             label="Language"
@@ -134,9 +160,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
         </FormContainer>
       </Grid>
 
-      {/* Keywords section */}
+      {/* Keywords section - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title="Keywords" layout="column">
+        <FormContainer title={t('generate.step1.titles.keywords')} layout="column" sx={importantContainerSx}>
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("primaryKeyword")}
@@ -307,9 +333,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
         </FormContainer>
       </Grid>
 
-      {/* Content Description */}
+      {/* Content Description - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title="Content Description">
+        <FormContainer title={t('generate.step1.titles.contentDescription')} sx={importantContainerSx}>
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("contentDescription", {
@@ -382,7 +408,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
           </Box>
         ) : (
           <Box sx={{ width: "100%", mb: 1 }}>
-            <FormContainer title="Generated Title">
+            <FormContainer title={t('generate.step1.titles.generatedTitle')}>
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
                   {...register("title")}

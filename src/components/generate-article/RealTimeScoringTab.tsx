@@ -1,3 +1,6 @@
+import type { ChecklistItem, ProgressSection } from "src/utils/seoScoring";
+
+import toast from "react-hot-toast";
 import { useState, useCallback } from "react";
 
 import Add from "@mui/icons-material/Add";
@@ -11,54 +14,82 @@ import {
   Typography,
   CardContent,
   LinearProgress,
+  CircularProgress,
 } from "@mui/material";
 
 import { ItemSection } from "./ItemSection";
-
-// Types
-interface ProgressSection {
-  id: number;
-  title: string;
-  progress: number;
-  type: "error" | "warning" | "success" | "inactive";
-  items: ChecklistItem[];
-}
-
-export interface ChecklistItem {
-  id: number;
-  text: string;
-  status: "error" | "warning" | "success" | "inactive";
-  action?: string | null;
-}
+import { EditItemModal } from "./EditItemModal";
 
 interface RealTimeScoringTabProps {
   progressSections: ProgressSection[];
-  score?: number;
+  score: number;
 }
 
 // Constants
+// Update the COLORS constant to include a new color for pending items
 const COLORS = {
   error: "#d81d1d",
   warning: "#ffb20d",
   success: "#2dc191",
   inactive: "#f7f7fa",
+  pending: "#e0e0e0", // Light gray for pending items
   primary: "#5969cf",
   border: "#acb9f9",
   background: "#dbdbfa",
 };
 
-export function RealTimeScoringTab({ progressSections, score = 35 }: RealTimeScoringTabProps) {
+
+// Field mapping type
+interface FieldConfig {
+  field: string;
+  type: 'text' | 'textarea'; // Keep type info if needed elsewhere, though EditItemModal infers it
+}
+
+// Map checklist item IDs to form fields
+const FIELD_MAPPING: Record<number, FieldConfig> = {
+  // Primary SEO Checklist
+  101: { field: 'metaDescription', type: 'textarea' },
+  102: { field: 'urlSlug', type: 'text' },
+  103: { field: 'content', type: 'textarea' }, // Note: EditItemModal might not be ideal for large 'content' edits
+  104: { field: 'content', type: 'textarea' },
+  105: { field: 'content', type: 'textarea' },
+  106: { field: 'tableOfContents', type: 'text' }, // Assuming 'tableOfContents' is a form field
+  107: { field: 'metaDescription', type: 'textarea' },
+  108: { field: 'content', type: 'textarea' },
+
+  // Title Optimization
+  201: { field: 'title', type: 'text' },
+  202: { field: 'title', type: 'text' },
+  203: { field: 'title', type: 'text' },
+  204: { field: 'metaTitle', type: 'text' },
+  205: { field: 'title', type: 'text' },
+
+  // Content Presentation Quality
+  301: { field: 'content', type: 'textarea' },
+  302: { field: 'content', type: 'textarea' },
+  303: { field: 'content', type: 'textarea' },
+  304: { field: 'content', type: 'textarea' },
+
+  // Additional SEO Factors
+  401: { field: 'content', type: 'textarea' },
+  402: { field: 'content', type: 'textarea' },
+  403: { field: 'urlSlug', type: 'text' },
+  404: { field: 'content', type: 'textarea' },
+  405: { field: 'content', type: 'textarea' },
+  406: { field: 'content', type: 'textarea' },
+};
+
+// Suggestions are not directly used by EditItemModal in this setup
+// const FIELD_SUGGESTIONS: Record<string, string[]> = { ... };
+
+export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringTabProps) {
   const theme = useTheme();
-  
   // State management
-  const [expanded, setExpanded] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
 
   // Event handlers
-  const handleToggleBasicSEO = useCallback(() => {
-    setExpanded(prev => !prev);
-  }, []);
-
   const handleToggleSection = useCallback((sectionId: number) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -66,8 +97,12 @@ export function RealTimeScoringTab({ progressSections, score = 35 }: RealTimeSco
     }));
   }, []);
 
-  // Calculate gauge rotation based on score
-  const gaugeRotation = -45 + (score * 1.8); // 0 = -45deg, 100 = 135deg
+  // Helper function to determine color based on score
+  const getScoreColor = () => {
+    if (score < 33) return COLORS.error;
+    if (score < 66) return COLORS.warning;
+    return COLORS.success;
+  };
 
   // Helper function to convert ChecklistItem to NotificationItem
   const convertToNotificationItem = (item: ChecklistItem): ChecklistItem => ({
@@ -75,7 +110,37 @@ export function RealTimeScoringTab({ progressSections, score = 35 }: RealTimeSco
     status: item.status === "inactive" ? "warning" : item.status, // Map inactive to warning for UI purposes
     text: item.text,
     action: item.action || null,
+    score: item.score,
+    maxScore: item.maxScore
   });
+
+  // Handle action click (Fix or Optimize) - Opens the modal
+  const handleActionClick = (item: ChecklistItem) => {
+    // Ensure there's a mapping before trying to open the modal
+    if (FIELD_MAPPING[item.id]) {
+        setSelectedItem(item);
+        setModalOpen(true);
+    } else {
+        toast.error(`Optimization not available for this item yet.`);
+    }
+  };
+
+  // --- Define the Optimization Handler ---
+  const handleOptimizeField = useCallback(async (fieldType: string, currentValue: string): Promise<string> => {
+    console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
+    // Replace with your actual API endpoint and request structure
+    const apiUrl = '/api/optimize-content'; // Placeholder API endpoint
+
+    try {
+      return "test !"
+
+    } catch (error: any) {
+  
+      throw new Error(error.message || 'An unexpected error occurred during optimization.');
+    }
+  }, [/* Add dependencies like 'watch' if context is needed */]);
+
+
 
   return (
     <CardContent
@@ -87,277 +152,127 @@ export function RealTimeScoringTab({ progressSections, score = 35 }: RealTimeSco
         bgcolor: "white",
       }}
     >
-      {/* Gauge section - unchanged */}
+      {/* SEO Score */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
-          mb: 4,
+          justifyContent: "space-between",
+          mb: 2,
         }}
       >
-        <Box
-          sx={{
-            position: "relative",
-            width: 164,
-            height: 164,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {/* Gauge background circles */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              borderRadius: "50%",
-              border: "1px solid #f0f0f0",
-            }}
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          SEO Score
+        </Typography>
+        <Box sx={{ position: "relative", display: "inline-flex" }}>
+          <CircularProgress
+            variant="determinate"
+            value={score}
+            size={60}
+            thickness={5}
+            sx={{ color: getScoreColor() }}
           />
-
-          {/* Red gauge arc (35% filled) */}
           <Box
             sx={{
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
               position: "absolute",
-              width: "100%",
-              height: "100%",
-              borderRadius: "50%",
-              clipPath: "polygon(50% 50%, 0 0, 0 50%, 0 100%, 50% 100%)",
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                border: `10px solid ${COLORS.error}`,
-              }}
-            />
-          </Box>
-
-          {/* Inner white circle */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "70%",
-              height: "70%",
-              borderRadius: "50%",
-              bgcolor: "white",
               display: "flex",
+              alignItems: "center",
               justifyContent: "center",
-              alignItems: "center",
             }}
           >
-            {/* Gauge needle */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "40%",
-                height: "2px",
-                bgcolor: "#333",
-                transform: `rotate(${gaugeRotation}deg)`,
-                transformOrigin: "left center",
-                left: "50%",
-              }}
-            />
-
-            {/* Center dot */}
-            <Box
-              sx={{
-                width: "4px",
-                height: "4px",
-                borderRadius: "50%",
-                bgcolor: "#333",
-              }}
-            />
-          </Box>
-
-          {/* Min value */}
-          <Typography
-            variant="caption"
-            sx={{
-              position: "absolute",
-              bottom: "15%",
-              left: "30%",
-              fontSize: "8px",
-              color: theme.palette.text.secondary,
-            }}
-          >
-            00
-          </Typography>
-
-          {/* Max value */}
-          <Typography
-            variant="caption"
-            sx={{
-              position: "absolute",
-              bottom: "15%",
-              right: "30%",
-              fontSize: "8px",
-              color: theme.palette.text.secondary,
-            }}
-          >
-            100
-          </Typography>
-
-          {/* Percentage */}
-          <Typography
-            sx={{
-              position: "absolute",
-              top: "10%",
-              fontWeight: "bold",
-              fontSize: "16px",
-              color: COLORS.error,
-            }}
-          >
-            {score}%
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Basic SEO Section */}
-      <Box sx={{ mb: 3 }}>
-        <Box
-          sx={{ display: "flex", alignItems: "center", mb: 1 }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
-            onClick={handleToggleBasicSEO}
-          >
-            <IconButton size="small" sx={{ p: 0, mr: 1 }}>
-              {expanded ? (
-                <Remove fontSize="small" />
-              ) : (
-                <Add fontSize="small" />
-              )}
-            </IconButton>
             <Typography
               variant="body2"
-              sx={{
-                fontSize: "12px",
-                fontWeight: 500,
-                color: theme.palette.text.secondary,
-              }}
+              component="div"
+              sx={{ fontWeight: 600, fontSize: "1rem" }}
             >
-              {progressSections[0]?.title || "Primary SEO Checklist"}
+              {score}
             </Typography>
           </Box>
-          <Box sx={{ flexGrow: 1 }} />
-          <Typography
-            variant="body2"
-            sx={{
-              fontSize: "12px",
-              fontWeight: 500,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            Progress: {progressSections[0]?.progress || 100}%
-          </Typography>
         </Box>
-        <LinearProgress
-          variant="determinate"
-          value={progressSections[0]?.progress || 100}
-          sx={{
-            height: 6,
-            borderRadius: 2,
-            bgcolor: COLORS.inactive,
-            "& .MuiLinearProgress-bar": {
-              bgcolor: COLORS[progressSections[0]?.type || "success"],
-              borderRadius: 2,
-            },
-          }}
-        />
       </Box>
 
-      {expanded && progressSections[0] && (
-        <Stack spacing={2} sx={{ mb: 3 }}>
-          {/* Content Optimization Section - Now using ItemSection */}
-          <Box sx={{ pl: 2 }}>
-            <Stack spacing={1}>
-              {progressSections[0].items.map((item) => (
-                <ItemSection key={item.id} {...convertToNotificationItem(item)} />
-              ))}
-            </Stack>
-          </Box>
-        </Stack>
-      )}
+      <Divider sx={{ my: 2 }} />
 
       {/* Progress Sections */}
-      <Stack divider={<Divider />} spacing={2}>
-        {progressSections.slice(1).map((section) => (
+      <Stack spacing={2}>
+        {progressSections.map((section) => (
           <Box key={section.id}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Box 
-                sx={{ 
-                  display: "flex", 
-                  alignItems: "center",
-                  cursor: "pointer" 
-                }}
-                onClick={() => handleToggleSection(section.id)}
-              >
-                <IconButton size="small" sx={{ p: 0, mr: 1 }}>
-                  {expandedSections[section.id] ? (
-                    <Remove fontSize="small" />
-                  ) : (
-                    <Add fontSize="small" />
-                  )}
-                </IconButton>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    color: theme.palette.text.secondary,
-                  }}
-                >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   {section.title}
                 </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ ml: 1, color: theme.palette.text.secondary }}
+                >
+                  ({section.progress}%)
+                </Typography>
               </Box>
-              <Box sx={{ flexGrow: 1 }} />
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  color: theme.palette.text.secondary,
-                }}
+              <IconButton
+                size="small"
+                onClick={() => handleToggleSection(section.id)}
               >
-                Progress: {section.progress}%
-              </Typography>
+                {expandedSections[section.id] ? <Remove /> : <Add />}
+              </IconButton>
             </Box>
+
             <LinearProgress
               variant="determinate"
               value={section.progress}
               sx={{
-                height: 6,
-                borderRadius: 2,
+                height: 8,
+                borderRadius: 1,
+                mb: 1,
                 bgcolor: COLORS.inactive,
                 "& .MuiLinearProgress-bar": {
                   bgcolor: COLORS[section.type],
-                  borderRadius: 2,
                 },
               }}
             />
-            
-            {/* Expanded section with items - Now using ItemSection */}
+
             {expandedSections[section.id] && (
-              <Box sx={{ pl: 2, pt: 2 }}>
-                <Stack spacing={1}>
-                  {section.items.map((item) => (
-                    <ItemSection key={item.id} {...convertToNotificationItem(item)} />
-                  ))}
-                </Stack>
-              </Box>
+              <Stack spacing={1} sx={{ mt: 2 }}>                
+                {section.items.map((item) => (
+                  <ItemSection
+                    key={item.id}
+                    id={item.id}
+                    status={item.status}
+                    text={item.text}
+                    action={item.action || null}
+                    score={item.score}
+                    maxScore={item.maxScore}
+                    onActionClick={() => handleActionClick(convertToNotificationItem(item))}
+                  />
+                ))}
+              </Stack>
             )}
           </Box>
         ))}
       </Stack>
+
+      {/* Replace SEOOptimizationModal with EditItemModal */}
+      {selectedItem && FIELD_MAPPING[selectedItem.id] && (
+        <EditItemModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onOptimize={handleOptimizeField}
+          fieldType={FIELD_MAPPING[selectedItem.id].field}
+          score={60}
+          onUpdateScore={(newScore: number) => console.log(`New score: ${newScore}`)}
+        />
+      )}
     </CardContent>
   );
 }

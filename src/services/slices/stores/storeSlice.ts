@@ -30,7 +30,7 @@ const storeSlice = createSlice({
       state.stores.push(action.payload);
       state.count += 1;
     },
-    deleteStore: (state, action: PayloadAction<string>) => {
+    deleteStore: (state, action: PayloadAction<number>) => {
       state.stores = state.stores.filter(store => store.id !== action.payload) || [];
       state.count = state.stores.length;
     },

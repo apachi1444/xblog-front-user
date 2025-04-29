@@ -14,13 +14,14 @@ import {
   Typography,
 } from "@mui/material";
 
+import { useSEOScoring } from "src/hooks/useSEOScoring";
+
 import { canGenerateContent } from "src/utils/formValidation";
 
 import { Iconify } from "src/components/iconify";
 
 import { PreviewSEOTab } from "./PreviewSEOTab";
 import { RealTimeScoringTab } from "./RealTimeScoringTab";
-
 
 // Types
 interface SEODashboardProps {
@@ -38,10 +39,6 @@ const COLORS = {
   background: "#dbdbfa",
 };
 
-// Types for notification and progress sections
-
-
-
 export function SEODashboard({ state }: SEODashboardProps) {
   const {
     form,
@@ -57,6 +54,9 @@ export function SEODashboard({ state }: SEODashboardProps) {
   const metaDescription = watch('metaDescription');
   const urlSlug = watch('urlSlug');
   const theme = useTheme();
+  
+  // Get real-time SEO scoring
+  const { progressSections, overallScore } = useSEOScoring();
   
   // State management
   const [tabValue, setTabValue] = useState(0);
@@ -80,7 +80,7 @@ export function SEODashboard({ state }: SEODashboardProps) {
     }));
   }, []);
 
-  const isVisible = true
+  const isVisible = true;
 
   const handleToggleContent = useCallback(() => {
     const newState = !showContent;
@@ -92,198 +92,6 @@ export function SEODashboard({ state }: SEODashboardProps) {
     return null;
   }
 
-  interface ChecklistItem {
-    id: number;
-    text: string;
-    status: "error" | "warning" | "success" | "inactive";
-    action?: string | null;
-  }
-
-  interface ProgressSection {
-    id: number;
-    title: string;
-    progress: number;
-    type: "error" | "warning" | "success" | "inactive";
-    items: ChecklistItem[];
-  }
-
-  if (!isVisible) {
-    return null;
-  }
-
-  const progressSections: ProgressSection[] = [
-    {
-      id: 1,
-      title: "Primary SEO Checklist",
-      progress: 100,
-      type: "success",
-      items: [
-        {
-          id: 101,
-          text: "Focus keyword added to meta description",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 102,
-          text: "Focus keyword present in the URL",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 103,
-          text: "Focus keyword appears within the first 10% of content",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 104,
-          text: "Focus keyword used throughout the content",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 105,
-          text: "Content length: 970 words – Good job!",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 106,
-          text: "You seem not to be using a table of contents",
-          status: "error",
-          action: "Fix",
-        },
-        {
-          id: 107,
-          text: "Meta description is well optimized",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 108,
-          text: "You seem not to be using header tags properly",
-          status: "warning",
-          action: "Optimize",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Title Optimization",
-      progress: 20,
-      type: "error",
-      items: [
-        {
-          id: 201,
-          text: "Primary keyword appears at the start of the title",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 202,
-          text: "Title evokes emotional sentiment (positive or negative)",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 203,
-          text: "Includes at least 2 power words to drive engagement",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 204,
-          text: "Focus keyword included in SEO title",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 205,
-          text: "Title is too short (only 24 characters)",
-          status: "error",
-          action: "Fix",
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Content Presentation Quality",
-      progress: 50,
-      type: "warning",
-      items: [
-        {
-          id: 301,
-          text: "Content uses short, easy-to-read paragraphs",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 302,
-          text: "Content includes media (images and/or videos)",
-          status: "success",
-          action: null,
-        },
-        {
-          id: 303,
-          text: "Proper use of headings and subheadings",
-          status: "warning",
-          action: "Optimize",
-        },
-        {
-          id: 304,
-          text: "Content includes bullet points or numbered lists",
-          status: "warning",
-          action: "Add",
-        },
-      ],
-    },
-    {
-      id: 4,
-      title: "Additional SEO Factors",
-      progress: 0,
-      type: "inactive",
-      items: [
-        {
-          id: 401,
-          text: "Focus keyword found in subheadings (H2, H3, etc.)",
-          status: "inactive",
-          action: null,
-        },
-        {
-          id: 402,
-          text: "Keyword density is balanced (e.g. 2.47%) with 24 mentions",
-          status: "inactive",
-          action: null,
-        },
-        {
-          id: 403,
-          text: "URL length is optimal (e.g. 47 characters)",
-          status: "inactive",
-          action: null,
-        },
-        {
-          id: 404,
-          text: "You're linking to high-quality external resources",
-          status: "inactive",
-          action: null,
-        },
-        {
-          id: 405,
-          text: "Includes at least one external DoFollow link",
-          status: "inactive",
-          action: null,
-        },
-        {
-          id: 406,
-          text: "Internal links to related content on your website",
-          status: "inactive",
-          action: null,
-        },
-      ],
-    },
-  ];
-
   const isGenerateDisabled = !canGenerateContent(form.getValues());
 
   // Function to render SEO content based on tab value
@@ -291,28 +99,29 @@ export function SEODashboard({ state }: SEODashboardProps) {
     switch (tabValue) {
       case 0:
         return (
-            <PreviewSEOTab
-              title={title}
-              metaTitle={metaTitle}
-              metaDescription={metaDescription}
-              urlSlug={urlSlug}
-              onGenerateMeta={onGenerateMeta}
-              isGeneratingMeta={isGeneratingMeta}
-              isGenerateDisabled={isGenerateDisabled}
-            />
+          <PreviewSEOTab
+            title={title}
+            metaTitle={metaTitle}
+            metaDescription={metaDescription}
+            urlSlug={urlSlug}
+            onGenerateMeta={onGenerateMeta}
+            isGeneratingMeta={isGeneratingMeta}
+            isGenerateDisabled={isGenerateDisabled}
+          />
         );
       
       case 1:
         return (
           <RealTimeScoringTab 
             progressSections={progressSections}
-            score={35} // You can make this dynamic based on actual calculations
+            score={overallScore}
           />
         );
       
       default:
         return null;
-  }}
+    }
+  };
 
   return (
     <Box sx={{ 
@@ -383,7 +192,7 @@ export function SEODashboard({ state }: SEODashboardProps) {
               }}
             >
               <Tab label="Preview SEO" />
-              <Tab label="Real-time Scoring" />
+              <Tab label={`Real-time Scoring (${overallScore})`} />
             </Tabs>
           )}
         </Box>
@@ -434,4 +243,4 @@ export function SEODashboard({ state }: SEODashboardProps) {
       </Card>
     </Box>
   );
-};
+}

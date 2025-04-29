@@ -1,22 +1,23 @@
+import type { ContainerProps } from '@mui/material';
+
 import React, { useState } from 'react';
 
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Box, Card, Chip, Collapse, useTheme, IconButton, Typography, CardContent } from '@mui/material';
 
-interface FormContainerProps {
+type FormContainerProps = ContainerProps &  {
   title: string;
   children: React.ReactNode;
-  maxWidth?: string | number;
   layout?: 'row' | 'column';
   isCollapsible?: boolean;
   collapsedMessage?: string; // Custom message when collapsed
 }
 
 export function FormContainer({
+  sx,
   title,
   children,
-  maxWidth = '100%',
   layout = 'column',
   isCollapsible = false,
   collapsedMessage = 'Click to expand and view form fields' // Default message
@@ -31,14 +32,14 @@ export function FormContainer({
   };
 
   return (
-    <Card sx={{ width: '100%', maxWidth, border: 0, boxShadow: 'none', mb: 3 }}>
+    <Card sx={{ ...sx, width: '100%', border: 0, boxShadow: 'none', mb: 3 }}>
       <CardContent sx={{ p: 0 }}>
         <Box
           sx={{
             position: 'relative',
-            bgcolor: theme.palette.background.neutral || '#F1F2F7',
+            bgcolor: theme.palette.secondary.light ,
             borderRadius: '8px',
-            borderColor: theme.palette.primary.lighter || '#A0AFF8',
+            borderColor: theme.palette.primary.lighter,
             pt: 4,
             pb: 2,
             px: 2,
@@ -58,8 +59,8 @@ export function FormContainer({
                 height: '39px',
                 px: 2,
                 py: 1.5,
-                bgcolor: theme.palette.secondary.lighter || '#cfcff9',
-                color: theme.palette.primary.main || '#5969cf',
+                bgcolor: theme.palette.secondary.lighter,
+                color: theme.palette.primary.main,
                 borderRadius: '20px',
                 border: `0.3px solid ${theme.palette.primary.lighter}`,
                 fontWeight: 'bold',
@@ -80,9 +81,9 @@ export function FormContainer({
                 position: 'absolute',
                 top: -20, 
                 right: 18,
-                bgcolor: theme.palette.primary.lighter || '#cfcff9',
-                color: theme.palette.primary.dark || '#5969cf',
-                border: `1px solid ${theme.palette.primary.light || '#abb8f8'}`,
+                bgcolor: theme.palette.primary.lighter,
+                color: theme.palette.primary.dark,
+                border: `1px solid ${theme.palette.primary.light}`,
                 width: '39px',
                 height: '39px',
                 zIndex: 1, // Ensure button stays above the clickable area
@@ -104,7 +105,7 @@ export function FormContainer({
               <Typography 
                 variant="body2"
                 sx={{ 
-                  color: theme.palette.primary.dark || '#5969cf',
+                  color: theme.palette.primary.dark,
                   fontFamily: theme.typography.fontFamily,
                   fontStyle: 'italic',
                   cursor: 'pointer'
@@ -124,7 +125,7 @@ export function FormContainer({
                 gap: 2,
                 width: '100%',
               }}
-              onClick={(e) => e.stopPropagation()} // Prevent form field clicks from toggling
+              onClick={(e) => e.stopPropagation()}
             >
               {children}
             </Box>

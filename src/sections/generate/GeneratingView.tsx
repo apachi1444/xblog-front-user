@@ -332,7 +332,7 @@ export function GeneratingView() {
           />
         );
       case 2:
-        if (isEditingSection && currentEditSection) {
+        if (isEditingSection) {
           return (
             <Box>
               <Button
@@ -497,9 +497,7 @@ export function GeneratingView() {
                   }),
                 }}
               >
-                <SEODashboard 
-                  state={step1State}
-                />
+                <SEODashboard state={step1State} />
               </Box>
             )}
           </Box>

@@ -1,6 +1,5 @@
-import React from 'react';
-
-import { Box, Stack, Button, Typography, CardContent } from '@mui/material';
+import { alpha , useTheme } from '@mui/material/styles';
+import { Box , Stack, Button, Typography, CardContent, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -23,6 +22,8 @@ export function PreviewSEOTab({
   isGeneratingMeta,
   isGenerateDisabled
 }: PreviewSEOTabProps) {
+  const theme = useTheme();
+
   return (
     <CardContent sx={{ p: 2 }}>
       {/* If meta information is not generated yet, show empty state */}
@@ -59,18 +60,63 @@ export function PreviewSEOTab({
           </Box>
           
           <Typography variant="h6" sx={{ mb: 1 }}>
-            You have to generate the SEO Meta information
+            You have to generate the SEO Meta information to see the full preview!
           </Typography>
-          
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: 'text.secondary',
-              mb: 3
-            }}
-          >
-            to see the full preview!
-          </Typography>
+
+          {isGenerateDisabled && (
+            <Box
+              sx={{
+                mb: 2,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: () => alpha(theme.palette.warning.main, 0.08),
+                border: '1px solid',
+                borderColor: () => alpha(theme.palette.warning.main, 0.24),
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'warning.dark',
+                  gap: 1,
+                }}
+              >
+                <Iconify icon="eva:info-fill" width={16} height={16} />
+                Please fill in the required fields:
+              </Typography>
+              <Box
+                component="ul"
+                sx={{
+                  mt: 1,
+                  mb: 0,
+                  pl: 2,
+                  listStyle: 'none',
+                }}
+              >
+                {['Target Country', 'Language', 'Primary Keyword', 'Secondary Keywords'].map((field) => (
+                  <Box
+                    component="li"
+                    key={field}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      color: 'warning.dark',
+                      fontSize: '0.75rem',
+                      '&:before': {
+                        content: '"•"',
+                        color: 'warning.dark',
+                      },
+                    }}
+                  >
+                    {field}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
           
           <Button
             variant="contained"
@@ -82,8 +128,15 @@ export function PreviewSEOTab({
             }}
             disabled={isGenerateDisabled}
             onClick={onGenerateMeta}
+            startIcon={
+              isGeneratingMeta ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="eva:flash-fill" width={16} />
+              )
+            }
           >
-            Generate now !
+            {isGeneratingMeta ? 'Generating...' : 'Generate now!'}
           </Button>
         </Box>
       ) : (

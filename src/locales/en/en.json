@@ -1,5 +1,16 @@
 {
     "translation": {
+      "generate": {
+        "step1": {
+          "titles": {
+            "languageRegion": "Language & Region",
+            "keywords": "Keywords",
+            "contentDescription": "Content Description",
+            "generatedTitle": "Generated Title",
+            "seoMeta": "SEO Meta Information"
+          }
+        }
+      },
       "navigation": {
         "dashboard": "Dashboard",
         "generate": "Generate",

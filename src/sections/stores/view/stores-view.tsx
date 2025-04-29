@@ -72,7 +72,7 @@ export function StoresView() {
   const [filterName, setFilterName] = useState('');
   const [isAddStoreModalOpen, setIsAddStoreModalOpen] = useState(false);
   const [showStoreSelection, setShowStoreSelection] = useState(false);
-  const [storeToDelete, setStoreToDelete] = useState<string | null>(null);
+  const [storeToDelete, setStoreToDelete] = useState<number | null>(null);
 
   // Use the mutations
   const [deleteStore, { isLoading: isDeleting }] = useDeleteStoreMutation();
@@ -96,22 +96,18 @@ export function StoresView() {
     table.onResetPage();
   }, [table]);
 
-  const performDelete = useCallback(async (id: string) => {
+  const performDelete = useCallback(async (id: number) => {
     try {
-      await deleteStore(Number(id)).unwrap();
+      await deleteStore(id).unwrap();
       toast.success(t('store.deleteSuccess'));
-      
-      if (table?.selected?.includes(id)) {
-        table.onSelectRow?.(id);
-      }
     } catch (error) {
       toast.error(t('store.deleteError'));
     }
     
-  }, [deleteStore, t, table]);
+  }, [deleteStore, t]);
 
   const handleDelete = useCallback(
-    async (id: string) => {
+    async (id: number) => {
       // If deleting current store and there are other stores available
       if (id === currentStore?.id && stores.length > 1) {
         setStoreToDelete(id);
@@ -234,8 +230,8 @@ export function StoresView() {
                     <StoreTableRow
                       key={row.id}
                       row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
+                      selected={table.selected.includes(row.id.toString())}
+                      onSelectRow={() => table.onSelectRow(row.id.toString())}
                       onDelete={handleDelete}
                       onDisconnect={handleDisconnect}
                       onReconnect={handleReconnect}

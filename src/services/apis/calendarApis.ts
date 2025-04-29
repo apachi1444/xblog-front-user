@@ -52,6 +52,7 @@ export const calendarApi = api.injectEndpoints({
         method: 'POST',
         body: scheduleData,
       }),
+      invalidatesTags: ['Articles'],
     }),
 
     // Update calendar entry
@@ -75,8 +76,6 @@ export const calendarApi = api.injectEndpoints({
 
 // Export the hooks for use in components
 export const {
-  useGetScheduledArticlesQuery,
-  useLazyGetScheduledArticlesQuery,
   useScheduleArticleMutation,
   useUpdateCalendarMutation,
   useDeleteCalendarMutation,

@@ -26,7 +26,7 @@ import { Iconify } from 'src/components/iconify';
 
 // Define and export the StoreProps interface
 export interface StoreProps {
-  id: string;
+  id: number;
   name: string;
   platform: string;
   business: string;
@@ -41,7 +41,7 @@ type Props = {
   row: any;
   selected: boolean;
   onSelectRow: VoidFunction;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
   onDisconnect: (id: string) => void;
   onReconnect: (id: string) => void;
   isDeleting: boolean;

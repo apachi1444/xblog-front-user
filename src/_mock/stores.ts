@@ -3,7 +3,7 @@ import type { Store } from 'src/types/store';
 import { _id, _times, _company, _boolean, _fullName, _postTitles, _description } from './_mock';
 
 export const _fakeStores: Store[] = [...Array(5)].map((_, index) => ({
-  id: _id(index),
+  id: index,
   name: _company(index),
   url: `https://${_company(index).toLowerCase().replace(/\s+/g, '-')}.com`,
   logo: `/assets/icons/platforms/store-${(index % 3) + 1}.svg`,

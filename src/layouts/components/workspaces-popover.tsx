@@ -22,7 +22,7 @@ import { Iconify } from 'src/components/iconify';
 
 export type WorkspacesPopoverProps = ButtonBaseProps & {
   data?: {
-    id: string;
+    id: number;
     name: string;
     logo: string;
     plan: string;
@@ -79,109 +79,82 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         disableRipple
         onClick={handleOpenPopover}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           width: 1,
-          py: 1.5,
-          px: 2,
+          p: 2,
           borderRadius: 2,
-          transition: "all 0.2s ease-in-out",
+          transition: 'all 0.2s ease-in-out',
           background: currentStore.isConnected
             ? alpha(theme.palette.success.main, 0.08)
             : alpha(theme.palette.error.main, 0.08),
-          border: "1px solid",
+          border: '1px solid',
           borderColor: currentStore.isConnected
             ? alpha(theme.palette.success.main, 0.2)
             : alpha(theme.palette.error.main, 0.2),
-          "&:hover": {
-            background: currentStore.isConnected
-              ? alpha(theme.palette.success.main, 0.12)
-              : alpha(theme.palette.error.main, 0.12),
-          },
+          textAlign: 'left',
+          minHeight: 64,
           ...sx,
         }}
         {...other}
       >
-        {/* Left section with status indicator and store info */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box
+        {/* Left: Store name + Platform + Status */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, overflow: 'hidden' }}>
+          {/* Store Name */}
+          <Typography
+            variant="subtitle2"
+            noWrap
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              fontWeight: 600,
+              color: theme.palette.text.primary,
             }}
           >
-            <Iconify
-              icon={currentStore.isConnected ? "eva:checkmark-circle-2-fill" : "eva:alert-circle-fill"}
-              width={20}
-              sx={{
-                color: currentStore.isConnected 
-                  ? theme.palette.success.main 
-                  : theme.palette.error.main,
-                animation: currentStore.isConnected ? 'pulse 2s infinite' : 'none',
-              }}
-            />
-          </Box>
+            {currentStore.name}
+          </Typography>
 
-          <Box sx={{ textAlign: "left" }}>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-              }}
-            >
-              {currentStore.name}
-              {currentStore.platform && (
-                <Typography
-                  component="span"
-                  variant="caption"
-                  sx={{ 
-                    color: 'text.secondary',
-                    bgcolor: 'action.selected',
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: 1,
-                    ml: 1,
-                  }}
-                >
-                  {getPlatformDisplayName(currentStore.platform)}
-                </Typography>
-              )}
-            </Typography>
-            
+          {/* Second row with Platform Badge and Connection Status */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Platform Badge */}
+            {currentStore.platform && (
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  backgroundColor: 'action.selected',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {getPlatformDisplayName(currentStore.platform)}
+              </Typography>
+            )}
+
+            {/* Connection Status */}
             <Typography
               variant="caption"
+              noWrap
               sx={{
-                color: currentStore.isConnected 
-                  ? theme.palette.success.main 
+                color: currentStore.isConnected
+                  ? theme.palette.success.main
                   : theme.palette.error.main,
-                fontWeight: 500,
+                fontWeight: 600,
               }}
             >
-              {currentStore.isConnected ? "Connected" : "Disconnected"}
+              {currentStore.isConnected ? 'Connected' : 'Disconnected'}
             </Typography>
           </Box>
         </Box>
 
-        {/* Right section with dropdown indicator */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            transition: "transform 0.2s ease",
-          }}
-        >
-          <Iconify 
-            icon="eva:chevron-down-fill" 
-            width={18} 
-            sx={{ color: 'text.secondary' }}
-          />
-        </Box>
+        {/* Right Chevron */}
+        <Iconify 
+          icon="eva:chevron-down-fill" 
+          width={18} 
+          sx={{ color: 'text.secondary' }}
+        />
       </ButtonBase>
 
       <Popover 
