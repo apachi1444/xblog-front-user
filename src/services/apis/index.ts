@@ -65,29 +65,6 @@ const setupMocks = () => {
         }
       ]);
 
-    // Mock get draft article by ID
-    mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/drafts/.*`)).reply((config) => {
-      const articleId = config.url?.split('/').pop();
-      const article = _posts.find(post => post.id === articleId && post.status === 'draft');
-
-      if (article) {
-        return [200, article];
-      }
-      return [404, { message: 'Draft article not found' }];
-    });
-
-    // Mock get published article by ID
-    mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/published/.*`)).reply((config) => {
-      const articleId = config.url?.split('/').pop();
-      const article = _posts.find(post => post.id === articleId && post.status === 'published');
-
-      if (article) {
-        return [200, article];
-      }
-      return [404, { message: 'Published article not found' }];
-    });
-
-    // Mock get article by ID (any status)
     mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/\\d+$`)).reply((config) => {
       const articleId = config.url?.split('/').pop();
       const article = _posts.find(post => post.id === articleId);
@@ -224,11 +201,62 @@ const setupMocks = () => {
 
     mock.onPost('/schedule-article').reply((config) => {
       const scheduleData = JSON.parse(config.data);
+      const { article_id, scheduled_date } = scheduleData;
+
+      // Find the article in the mock data
+      const articleIndex = _posts.findIndex(post => post.id === article_id);
+
+      if (articleIndex !== -1) {
+        // Update the article status and scheduledAt date
+        _posts[articleIndex] = {
+          ..._posts[articleIndex],
+          status: 'scheduled',
+          scheduledAt: scheduled_date,
+          updatedAt: new Date().toISOString()
+        };
+
+        console.log(`Article ${article_id} scheduled for ${scheduled_date}`);
+      } else {
+        console.warn(`Article ${article_id} not found for scheduling`);
+      }
+
       return [201, {
         id: `schedule-${Date.now()}`,
         ...scheduleData,
         status: 'scheduled',
+        message: 'Article scheduled successfully'
       }];
+    });
+
+    // Mock unschedule article endpoint
+    mock.onPost('/articles/unschedule').reply((config) => {
+      const unscheduleData = JSON.parse(config.data);
+      const { article_id } = unscheduleData;
+
+      // Find the article in the mock data
+      const articleIndex = _posts.findIndex(post => post.id === article_id);
+
+      if (articleIndex !== -1) {
+        // Update the article status and remove scheduledAt date
+        _posts[articleIndex] = {
+          ..._posts[articleIndex],
+          status: 'draft', // Change status back to draft
+          scheduledAt: undefined, // Remove scheduled date
+          updatedAt: new Date().toISOString()
+        };
+
+        console.log(`Article ${article_id} unscheduled successfully`);
+
+        // Return the updated article
+        return [200, {
+          ..._posts[articleIndex],
+          message: 'Article unscheduled successfully'
+        }];
+      }
+
+      // If article not found
+      console.warn(`Article ${article_id} not found for removing schedule`);
+      return [404, { message: 'Article not found' }];
     });
 
     mock.onPut(/\/calendars\/.*/).reply((config) => {

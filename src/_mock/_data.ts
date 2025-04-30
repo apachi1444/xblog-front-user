@@ -57,6 +57,7 @@ export const _posts: Article[] = [...Array(23)].map((_, index) => ({
   createdAt: _times(index),
   updatedAt: _times(index),
   publishedAt: _times(index),
+  scheduledAt: _times(index),
   author: {
     id: _id(index),
     name: _fullName(index),

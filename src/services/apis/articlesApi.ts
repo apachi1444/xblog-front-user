@@ -29,30 +29,14 @@ export const articlesApi = api.injectEndpoints({
       }),
       providesTags : ['Articles'],
     }),
-    
-    // Get draft article by ID
-    getDraftArticle: builder.query<Article, string>({
-      query: (articleId) => ({
-        url: `${ARTICLES_BASE_URL}/drafts/${articleId}`,
-        method: 'GET',
-      }),
-    }),
 
-    // Get published article by ID
-    getPublishedArticle: builder.query<Article, string>({
-      query: (articleId) => ({
-        url: `${ARTICLES_BASE_URL}/published/${articleId}`,
-        method: 'GET',
-      }),
-    }),
-    
     getArticleById: builder.query<Article, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'GET',
       }),
     }),
-    
+
     createArticle: builder.mutation<Article, Partial<Article>>({
       query: (article) => ({
         url: ARTICLES_BASE_URL,
@@ -60,14 +44,22 @@ export const articlesApi = api.injectEndpoints({
         body: article,
       }),
     }),
-    
-    
+
+
     deleteArticle: builder.mutation<void, string>({
       query: (id) => ({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'DELETE',
       }),
-  
+    }),
+
+    unscheduleArticle: builder.mutation<Article, { article_id: string; store_id: number }>({
+      query: (params) => ({
+        url: `${ARTICLES_BASE_URL}/unschedule`,
+        method: 'POST',
+        body: params,
+      }),
+      invalidatesTags: ['Articles'],
     }),
   }),
 });
@@ -75,9 +67,8 @@ export const articlesApi = api.injectEndpoints({
 export const {
   useGetArticlesQuery,
   useLazyGetArticlesQuery,
-  useGetDraftArticleQuery,
-  useGetPublishedArticleQuery,
   useGetArticleByIdQuery,
   useCreateArticleMutation,
   useDeleteArticleMutation,
+  useUnscheduleArticleMutation,
 } = articlesApi;

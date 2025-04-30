@@ -1,14 +1,15 @@
 
-import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState, useCallback } from 'react';
+import { X, Plus, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 
 import {
   Box,
   Grid,
   List,
+  Chip,
   Paper,
   Modal,
   Button,
@@ -22,7 +23,7 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 
@@ -35,27 +36,57 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
 
+  const [selectedArticleDetails, setSelectedArticleDetails] = useState<any>(null);
+  const [isArticleDetailsModalOpen, setIsArticleDetailsModalOpen] = useState(false);
+
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
 
   const [scheduleArticle] = useScheduleArticleMutation();
+  const [unscheduleArticle, { isLoading: isUnscheduling }] = useUnscheduleArticleMutation();
 
   const {
     data: articlesData,
     isLoading: isLoadingArticles,
+    refetch: refetchArticles
   } = useGetArticlesQuery({ store_id: storeId });
 
-  // Log articles data only when it changes
-  useEffect(() => {
-    if (articlesData) {
-      console.log("articlesData", articlesData);
+  // Memoize articles to prevent unnecessary re-renders
+  const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
+  // Handle showing article details
+  const handleArticleClick = useCallback((article: any) => {
+    setSelectedArticleDetails(article);
+    setIsArticleDetailsModalOpen(true);
+  }, []);
+
+  // Close article details modal
+  const handleCloseArticleDetails = useCallback(() => {
+    setIsArticleDetailsModalOpen(false);
+    setSelectedArticleDetails(null);
+  }, []);
+
+  // Handle unscheduling an article
+  const handleUnscheduleArticle = useCallback(async () => {
+    if (!selectedArticleDetails) return;
+
+    try {
+      await unscheduleArticle({
+        article_id: selectedArticleDetails.id,
+        store_id: storeId
+      }).unwrap();
+
+      toast.success('Article unscheduled successfully');
+      setIsArticleDetailsModalOpen(false);
+      setSelectedArticleDetails(null);
+
+      // Refresh articles data after unscheduling
+      refetchArticles();
+    } catch (error) {
+      console.error('Error unscheduling article:', error);
+      toast.error('Failed to unschedule article. Please try again.');
     }
-  }, [articlesData]);
+  }, [selectedArticleDetails, storeId, unscheduleArticle, refetchArticles]);
 
-  const articles = articlesData?.articles || [];
-
-
-  // Get days for the current month view
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -93,34 +124,47 @@ export default function CalendarPage() {
     if (!selectedDay || selectedArticles.length === 0) return;
 
     try {
+      const scheduledDate = format(selectedDay, 'yyyy-MM-dd');
+
+      // Log the scheduling attempt
+      console.log(`Scheduling articles for ${scheduledDate}:`, selectedArticles);
+
       await Promise.all(selectedArticles.map(articleId =>
         scheduleArticle({
           store_id: storeId,
           article_id: articleId,
-          scheduled_date: format(selectedDay, 'yyyy-MM-dd')
+          scheduled_date: scheduledDate
         })
       ));
 
       toast.success('Articles scheduled successfully!');
       setIsModalOpen(false);
       setSelectedArticles([]);
+
+      // Refresh articles data after scheduling
+      refetchArticles();
+
     } catch (error) {
       toast.error('Failed to schedule articles. Please try again.');
     }
   };
 
-  // Get scheduled articles for a specific day
-  const getScheduledArticlesForDay = (day: Date) => {
+  // Memoize the scheduled articles for each day to avoid recalculating on every render
+  const getScheduledArticlesForDay = useCallback((day: Date) => {
     const formattedDay = format(day, 'yyyy-MM-dd');
     return articles.filter(article => {
       if (article.status !== 'scheduled') return false;
-      const articleDate = article.publishedAt ? format(new Date(article.publishedAt), 'yyyy-MM-dd') : null;
+
+      const scheduledDate = article.scheduledAt || article.publishedAt;
+      if (!scheduledDate) return false;
+
+      const articleDate = format(new Date(scheduledDate), 'yyyy-MM-dd');
       return articleDate === formattedDay;
     });
-  };
+  }, [articles]);
 
-  // Get status for a day (for styling)
-  const getDayStatus = (day: Date) => {
+  // Get status for a day (for styling) - memoized to prevent recalculation
+  const getDayStatus = useCallback((day: Date) => {
     const scheduledArticles = getScheduledArticlesForDay(day);
 
     if (isBefore(day, new Date()) && !isToday(day)) {
@@ -132,13 +176,15 @@ export default function CalendarPage() {
     if (scheduledArticles.length === 0) return 'empty';
     if (scheduledArticles.some(article => article.status === 'draft')) return 'upcoming';
     return 'published';
-  };
+  }, [getScheduledArticlesForDay]);
 
   // Determine if a day is interactive
   const isDayInteractive = (day: Date) => !isBefore(day, new Date()) || isToday(day);
 
-  // Get available articles (not yet scheduled)
-  const getAvailableArticles = () => articles.filter(article => article.status !== 'scheduled');
+  // Get available articles (not yet scheduled) - memoized to prevent recalculation
+  const getAvailableArticles = useCallback(() =>
+    articles.filter(article => article.status !== 'scheduled'),
+  [articles]);
 
   if (isLoadingArticles) {
     return (
@@ -199,72 +245,93 @@ export default function CalendarPage() {
                 sx={{
                   border: '1px solid #ddd',
                   height: 'auto',
-                  minHeight: 80,
+                  minHeight: 100, // Increased minimum height
                   position: 'relative',
                   bgcolor: bgColor,
                   opacity: isInteractive ? 1 : 0.7,
-                  '&:hover': {
-                    bgcolor: isInteractive ? 'rgba(0, 0, 0, 0.04)' : bgColor,
-                    cursor: isInteractive ? 'pointer' : 'default'
-                  }
+                  padding: 1, // Add some padding
+                  // Remove hover effect from the entire grid cell
                 }}
-                onClick={() => isInteractive && handleDayClick(day)}
               >
-                <Typography
-                  variant="body2"
+                {/* Day number and add button in the same row */}
+                <Box
                   sx={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 8,
-                    fontWeight: isToday(day) ? 'bold' : 'normal'
+                    position: 'relative',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1.5 // Add margin bottom to separate from articles
                   }}
                 >
-                  {format(day, 'd')}
-                </Typography>
-
-                {isInteractive && (
-                  <IconButton
-                    size="small"
+                  <Typography
+                    variant="body2"
                     sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: 32,
-                      height: 32,
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      }
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDayClick(day);
+                      fontWeight: isToday(day) ? 'bold' : 'normal'
                     }}
                   >
-                    <Plus size={20} />
-                  </IconButton>
-                )}
+                    {format(day, 'd')}
+                  </Typography>
 
-                {scheduledArticles.map((article, idx) => (
-                  <Box key={idx} sx={{
-                    position: 'absolute',
-                    top: 24 + idx * 20,
-                    left: 8,
-                    right: 8,
-                    bgcolor: article.status === 'published' ? theme.palette.success.main : theme.palette.warning.main,
-                    color: '#fff',
-                    p: 0.5,
-                    borderRadius: 1,
-                    textAlign: 'center',
-                    fontSize: '0.75rem',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>
-                    {article.title || `Article #${article.id}`}
-                  </Box>
-                ))}
+                  {isInteractive && (
+                    <IconButton
+                      size="small"
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          cursor: 'pointer',
+                          transform: 'scale(1.1)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                        },
+                        transition: 'all 0.2s ease-in-out'
+                      }}
+                      onClick={() => handleDayClick(day)}
+                    >
+                      <Plus size={16} />
+                    </IconButton>
+                  )}
+                </Box>
+
+                {/* Container for scheduled articles with proper spacing */}
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2, // Add space between articles
+                    mt: 1 // Add margin top
+                  }}
+                >
+                  {scheduledArticles.map((article, idx) => (
+                    <Box
+                      key={idx}
+                      onClick={() => handleArticleClick(article)}
+                      sx={{
+                        bgcolor: article.status === 'published' ? theme.palette.success.main : theme.palette.warning.main,
+                        color: '#fff',
+                        p: 0.75, // Slightly more padding
+                        borderRadius: 1,
+                        textAlign: 'center',
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        '&:hover': {
+                          filter: 'brightness(1.1)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                          transform: 'translateY(-1px)'
+                        },
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {article.title || `Article #${article.id}`}
+                    </Box>
+                  ))}
+                </Box>
               </Grid>
             );
           })}
@@ -359,6 +426,106 @@ export default function CalendarPage() {
               Schedule
             </Button>
           </Box>
+        </Box>
+      </Modal>
+
+      {/* Article Details Modal */}
+      <Modal
+        open={isArticleDetailsModalOpen}
+        onClose={handleCloseArticleDetails}
+        aria-labelledby="article-details-modal-title"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 500,
+          maxWidth: '90vw',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography id="article-details-modal-title" variant="h6" component="h2">
+              Article Details
+            </Typography>
+            <IconButton size="small" onClick={handleCloseArticleDetails}>
+              <X size={18} />
+            </IconButton>
+          </Box>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {selectedArticleDetails && (
+            <>
+              <Typography variant="h5" gutterBottom>
+                {selectedArticleDetails.title || `Article #${selectedArticleDetails.id}`}
+              </Typography>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', mr: 2 }}>
+                    <Info size={16} style={{ marginRight: 4 }} />
+                    Status: <Chip
+                      size="small"
+                      label={selectedArticleDetails.status}
+                      color={selectedArticleDetails.status === 'published' ? 'success' : 'warning'}
+                      sx={{ ml: 1 }}
+                    />
+                  </Box>
+                </Typography>
+              </Box>
+
+              {selectedArticleDetails.description && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>Description:</Typography>
+                  <Typography variant="body2">{selectedArticleDetails.description}</Typography>
+                </Box>
+              )}
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" gutterBottom>Schedule Information:</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="body2">
+                    <strong>Scheduled Date:</strong> {selectedArticleDetails.scheduledAt ?
+                      format(new Date(selectedArticleDetails.scheduledAt), 'MMMM d, yyyy') :
+                      'Not scheduled'}
+                  </Typography>
+                  {selectedArticleDetails.publishedAt && (
+                    <Typography variant="body2">
+                      <strong>Published Date:</strong> {format(new Date(selectedArticleDetails.publishedAt), 'MMMM d, yyyy')}
+                    </Typography>
+                  )}
+                  <Typography variant="body2">
+                    <strong>Created:</strong> {format(new Date(selectedArticleDetails.createdAt), 'MMMM d, yyyy')}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box display="flex" justifyContent="flex-end" gap={1} mt={3}>
+                {/* Only show Unschedule button for scheduled articles */}
+                {selectedArticleDetails.status === 'scheduled' && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleUnscheduleArticle}
+                    disabled={isUnscheduling}
+                    startIcon={isUnscheduling ? <LoadingSpinner size={16} /> : null}
+                  >
+                    {isUnscheduling ? 'Unscheduling...' : 'Unschedule'}
+                  </Button>
+                )}
+                <Button
+                  variant="outlined"
+                  onClick={handleCloseArticleDetails}
+                >
+                  Close
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
       </Modal>
     </DashboardContent>

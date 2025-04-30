@@ -41,6 +41,7 @@ export interface KeywordData {
     createdAt: string;
     updatedAt: string;
     publishedAt?: string;
+    scheduledAt?: string;
     keywords?: KeywordData;
     meta?: MetaData;
     content?: ArticleContent;
