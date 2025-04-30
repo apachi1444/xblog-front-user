@@ -32,7 +32,6 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
 export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
   const dispatch = useDispatch();
   const { data: stores, isLoading } = useGetStoresQuery();
-  console.log("getting stores again in the workspaces !");
   
   const currentStore = useSelector(selectCurrentStore);
   const theme = useTheme();

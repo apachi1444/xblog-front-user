@@ -48,24 +48,16 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
+
   const isDarkMode = useSelector((state: RootState) => state.global);
+  const currentStore = useSelector((state: RootState) => state.stores.currentStore);
 
-  const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery(undefined, {
-    pollingInterval: 300000, // Poll every 5 minutes
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true
-  });
+  const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery();
 
-  const { data: storesData, error: storesError } = useGetStoresQuery(undefined, {
-    pollingInterval: 300000, // Poll every 5 minutes
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true
-  });
+  const { data: storesData, error: storesError } = useGetStoresQuery();
 
   const storesCount = storesData?.count ?? 0
 
-  // Effect to update Redux store when subscription data changes
   useEffect(() => {
     if (subscriptionData) {
       dispatch(setSubscriptionDetails(subscriptionData));
@@ -75,26 +67,26 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     }
   }, [subscriptionData, subscriptionError, dispatch, t]);
 
-  // Effect to update Redux store when stores data changes
   useEffect(() => {
     if (storesData?.stores) {
-      // Update stores list in Redux
       dispatch(getStores(storesData.stores));
-      
-      // Set first store as current if we have stores and no current store is selected
-      if (storesData.stores.length > 0) {
-        dispatch(setCurrentStore(storesData.stores[0]));
+
+      if (storesData.stores.length > 0 &&
+          (!currentStore || currentStore.id !== storesData.stores[0].id)) {
+        setTimeout(() => {
+          dispatch(setCurrentStore(storesData.stores[0]));
+        }, 0);
       }
     }
-    
+
     if (storesError) {
       toast.error(t('errors.stores.fetch', 'Failed to fetch stores data'));
     }
-  }, [storesData, storesError, dispatch, t]);
+  }, [storesData, storesError, dispatch, t, currentStore]);
 
   const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
-  
+
   // Handle theme mode toggle
   const handleToggleTheme = () => {
     dispatch(setThemeMode());
@@ -106,7 +98,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   };
 
   // Create custom workspaces based on stores data
-  const customWorkspaces = storesCount > 0 
+  const customWorkspaces = storesCount > 0
     ? storesData?.stores.map(store => ({
         id: store.id,
         name: store.name,
@@ -126,13 +118,13 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           slotProps={{
             container: {
               maxWidth: false,
-              sx: { 
-                px: { [layoutQuery]: 5 }, 
-                backgroundColor: `${theme.palette.secondary.lighter}`, 
-                borderRadius: 40, 
+              sx: {
+                px: { [layoutQuery]: 5 },
+                backgroundColor: `${theme.palette.secondary.lighter}`,
+                borderRadius: 40,
                 marginTop: 3,
-                marginX: 10, 
-                paddingY: 2 
+                marginX: 10,
+                paddingY: 2
               },
             },
           }}
@@ -164,20 +156,20 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             ),
             rightArea: (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <IconButton 
+                <IconButton
                   onClick={handleToggleTheme}
                   sx={{
                     width: 40,
                     height: 40,
                     transition: 'all 0.2s ease-in-out',
-                    '&:hover': { 
+                    '&:hover': {
                       bgcolor: (themee) => themee.palette.action.hover,
                     },
                   }}
                 >
-                  <Iconify 
-                    icon={isDarkMode ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'} 
-                    width={24} 
+                  <Iconify
+                    icon={isDarkMode ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'}
+                    width={24}
                     height={24}
                     sx={{
                       color: isDarkMode ? 'warning.main' : 'text.primary',
@@ -185,7 +177,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                     }}
                   />
                 </IconButton>
-             
+
                 <LanguagePopover data={_langs} />
                 <NotificationsPopover data={_notifications} />
                 <AccountPopover
@@ -221,10 +213,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop 
-          data={navData} 
-          layoutQuery={layoutQuery} 
-          workspaces={storesCount > 0 ? customWorkspaces : []} 
+        <NavDesktop
+          data={navData}
+          layoutQuery={layoutQuery}
+          workspaces={storesCount > 0 ? customWorkspaces : []}
           bottomNavData={bottomNavData}
           emptyStoresAction={
             storesCount === 0 ? (

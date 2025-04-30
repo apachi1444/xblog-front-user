@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -18,8 +18,8 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { DashboardContent } from "src/layouts/dashboard";
 import { setCurrentStore } from "src/services/slices/stores/storeSlice";
-import { 
-  useGetStoresQuery, 
+import {
+  useGetStoresQuery,
   useDeleteStoreMutation,
   useReconnectStoreMutation,
   useDisconnectStoreMutation
@@ -57,14 +57,13 @@ export function StoresView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  
+
   // Use direct query hook instead of lazy loading
-  const { 
-    data, 
-    isLoading, 
-    isFetching 
+  const {
+    data,
+    isLoading,
+    isFetching
   } = useGetStoresQuery(undefined, {
-    // Add error handling at the query level
     refetchOnMountOrArgChange: true
   });
 
@@ -82,7 +81,17 @@ export function StoresView() {
   // Get stores directly from the query result
   const stores = useMemo(() => data?.stores || [], [data]);
 
-  const dataFiltered = useMemo(() => 
+  // This component no longer needs to set the current store
+  // as it's now handled in the dashboard layout
+  // We'll keep this as a fallback just in case
+  useEffect(() => {
+    if (stores.length > 0 && !currentStore) {
+      console.log('Setting current store in StoresView (fallback):', stores[0]);
+      dispatch(setCurrentStore(stores[0]));
+    }
+  }, [stores, currentStore, dispatch]);
+
+  const dataFiltered = useMemo(() =>
     applyFilter({
       inputData: stores as StoreProps[],
       comparator: getComparator(table.order, table.orderBy),
@@ -103,7 +112,7 @@ export function StoresView() {
     } catch (error) {
       toast.error(t('store.deleteError'));
     }
-    
+
   }, [deleteStore, t]);
 
   const handleDelete = useCallback(
@@ -165,7 +174,7 @@ export function StoresView() {
   const isDataEmpty = stores.length === 0;
 
   // Paginated data for the current page
-  const paginatedData = useMemo(() => 
+  const paginatedData = useMemo(() =>
     dataFiltered.slice(
       table.page * table.rowsPerPage,
       table.page * table.rowsPerPage + table.rowsPerPage
@@ -193,9 +202,9 @@ export function StoresView() {
       </Box>
 
       {isLoading ? (
-        <LoadingSpinner 
-          message="Loading your websites..." 
-          fullHeight 
+        <LoadingSpinner
+          message="Loading your websites..."
+          fullHeight
         />
       ) : (
         <Card>
@@ -207,7 +216,7 @@ export function StoresView() {
 
           <Scrollbar>
             <TableContainer sx={{ overflow: 'unset' }}>
-              <Table sx={{ 
+              <Table sx={{
                 minWidth: { xs: 650, sm: 800 },
                 tableLayout: 'fixed'
               }}>
@@ -265,7 +274,7 @@ export function StoresView() {
           />
         </Card>
       )}
-      
+
       <AddStoreModal
         open={isAddStoreModalOpen}
         onClose={() => setIsAddStoreModalOpen(false)}

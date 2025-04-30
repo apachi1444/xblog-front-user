@@ -35,42 +35,59 @@ export function BlogView() {
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTab, setCurrentTab] = useState('all');
-  
   const [articles, setArticles] = useState<Article[]>([]);
   const currentStore = useSelector(selectCurrentStore);
-  
   const [doGetArticles, { isLoading , isFetching }] = useLazyGetArticlesQuery();
+
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
     if (currentStore?.id) {
+      setHasFetched(true);
       doGetArticles({ store_id: currentStore.id })
         .unwrap()
-        .then((result) => {   
-          toast.success("Successfully get blogs")
-          setArticles(result.articles)
+        .then((result) => {
+          console.log("Articles fetched successfully:", result.articles.length);
+          toast.success("Successfully get blogs");
+          setArticles(result.articles);
         })
         .catch((err) => {
-          toast.error(err.error.data.message);
+          console.error("Error fetching articles:", err);
+          toast.error(err.error?.data?.message || "Failed to fetch articles");
+        });
+    } else if (!hasFetched) {
+
+      setHasFetched(true);
+      doGetArticles({ store_id: 1 })
+        .unwrap()
+        .then((result) => {
+          console.log("Articles fetched with default store ID:", result.articles.length);
+          toast.success("Successfully get blogs");
+          setArticles(result.articles);
+        })
+        .catch((err) => {
+          console.error("Error fetching articles with default store:", err);
+          // Don't show error toast here as this is a fallback attempt
         });
     }
-  }, [currentStore?.id, doGetArticles, dispatch, currentStore]);
-  
+  }, [currentStore?.id, doGetArticles, dispatch, currentStore, hasFetched]);
+
   useEffect(() => {
     let sorted = [...articles];
-    
+
     // Apply search filter
     if (searchQuery) {
-      sorted = sorted.filter(post => 
+      sorted = sorted.filter(post =>
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     // Apply status filter
     if (currentTab !== 'all') {
       sorted = sorted.filter(post => post.status.toLowerCase() === currentTab.toLowerCase());
     }
-    
+
     // Apply sorting
     switch (sortBy) {
       case 'latest':
@@ -82,33 +99,33 @@ export function BlogView() {
       default:
         break;
     }
-    
+
     setFilteredPosts(sorted);
   }, [articles, sortBy, searchQuery, currentTab]);
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort);
   }, []);
-  
+
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
-  
+
   const handleNewArticle = () => {
     navigate('/generate');
   };
-  
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
-  
+
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
   };
 
   const notFound = !filteredPosts.length;
   const isDataEmpty = articles.length === 0;
-  
+
   // Pagination
   const postsPerPage = 8;
   const paginatedPosts = filteredPosts.slice((page - 1) * postsPerPage, page * postsPerPage);
@@ -135,16 +152,16 @@ export function BlogView() {
       </Box>
 
       {isLoading ? (
-        <LoadingSpinner 
-          message="Loading your blogs..." 
-          fullHeight 
+        <LoadingSpinner
+          message="Loading your blogs..."
+          fullHeight
         />
       ) : (
         <>
           {/* Search and Filter Section */}
-          <Stack 
-            direction={{ xs: 'column', md: 'row' }} 
-            spacing={2} 
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
             alignItems={{ xs: 'stretch', md: 'center' }}
             sx={{ mb: 4 }}
           >
@@ -163,7 +180,7 @@ export function BlogView() {
               sx={{ maxWidth: { md: 280 } }}
             />
           </Stack>
-          
+
           {/* Status Tabs */}
           <Box sx={{ mb: 4 }}>
             <Tabs
@@ -176,27 +193,27 @@ export function BlogView() {
                 '& .MuiTab-root': { minWidth: 100 },
               }}
             >
-              <Tab 
-                value="all" 
-                label="All" 
+              <Tab
+                value="all"
+                label="All"
                 iconPosition="start"
                 icon={<Iconify icon="mdi:view-grid" width={20} height={20} />}
               />
-              <Tab 
-                value="published" 
-                label="Published" 
+              <Tab
+                value="published"
+                label="Published"
                 iconPosition="start"
                 icon={<Iconify icon="mdi:check-circle" width={20} height={20} />}
               />
-              <Tab 
-                value="draft" 
-                label="Draft" 
+              <Tab
+                value="draft"
+                label="Draft"
                 iconPosition="start"
                 icon={<Iconify icon="mdi:file-document-outline" width={20} height={20} />}
               />
-              <Tab 
-                value="scheduled" 
-                label="Scheduled" 
+              <Tab
+                value="scheduled"
+                label="Scheduled"
                 iconPosition="start"
                 icon={<Iconify icon="mdi:clock-outline" width={20} height={20} />}
               />
@@ -226,12 +243,12 @@ export function BlogView() {
           </Grid>
 
           {pageCount > 1 && (
-            <Pagination 
-              count={pageCount} 
+            <Pagination
+              count={pageCount}
               page={page}
               onChange={handlePageChange}
-              color="primary" 
-              sx={{ mt: 8, mx: 'auto', display: 'flex', justifyContent: 'center' }} 
+              color="primary"
+              sx={{ mt: 8, mx: 'auto', display: 'flex', justifyContent: 'center' }}
             />
           )}
         </>
