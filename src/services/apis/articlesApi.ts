@@ -15,9 +15,7 @@ interface ArticleQueryParams {
 // Updated response interface to match the API
 interface ArticlesResponse {
   count: number;
-  drafts_articles: Article[];
-  published_articles: Article[];
-  all_articles: Article[];
+  articles: Article[];
 }
 
 export const articlesApi = api.injectEndpoints({
@@ -30,10 +28,6 @@ export const articlesApi = api.injectEndpoints({
         params: params || {},
       }),
       providesTags : ['Articles'],
-      transformResponse: (response: ArticlesResponse) => ({
-          ...response,
-          all_articles: response.drafts_articles.concat(response.published_articles)
-        }),
     }),
     
     // Get draft article by ID

@@ -24,7 +24,7 @@ export interface KeywordData {
     sections: SectionContent[];
   }
   
-  // New Article interface for overview information
+  // New  interface for overview information
   export interface Article {
     id: string;
     title: string;
@@ -43,11 +43,9 @@ export interface KeywordData {
     publishedAt?: string;
     keywords?: KeywordData;
     meta?: MetaData;
-    // Full content is optional
     content?: ArticleContent;
   }
   
-  // Renamed from ArticleData to ArticleContent to better represent its purpose
   export interface ArticleContent {
     contextDescription: string;
     tableOfContents: TableOfContentsItem[];
@@ -56,7 +54,6 @@ export interface KeywordData {
     generatingSection: string | null;
   }
   
-  // Original ArticleData interface maintained for backward compatibility
   export interface ArticleData {
     title: string;
     contextDescription: string;

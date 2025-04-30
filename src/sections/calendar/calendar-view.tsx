@@ -1,22 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 
-import { 
-  Box, 
-  Grid, 
-  List, 
-  Paper, 
-  Modal, 
-  Button, 
-  Divider, 
-  Checkbox, 
-  ListItem, 
-  useTheme, 
-  Typography, 
+import {
+  Box,
+  Grid,
+  List,
+  Paper,
+  Modal,
+  Button,
+  Divider,
+  Checkbox,
+  ListItem,
+  useTheme,
+  Typography,
   IconButton,
   ListItemText
 } from '@mui/material';
@@ -37,28 +37,33 @@ export default function CalendarPage() {
 
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
-  
+
   const [scheduleArticle] = useScheduleArticleMutation();
-  
-  const { 
-    data: articlesData, 
+
+  const {
+    data: articlesData,
     isLoading: isLoadingArticles,
   } = useGetArticlesQuery({ store_id: storeId });
 
+  // Log articles data only when it changes
+  useEffect(() => {
+    if (articlesData) {
+      console.log("articlesData", articlesData);
+    }
+  }, [articlesData]);
+
   const articles = articlesData?.articles || [];
 
-  // console log articles that are filtered by the status scheduled !
-  console.log(articles.filter(article => article.status === 'scheduled', "test"));
 
   // Get days for the current month view
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  
+
   // Navigation functions
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-  
+
   // Handle day click to open scheduling modal
   const handleDayClick = (day: Date) => {
     if (!isBefore(day, new Date()) || isToday(day)) {
@@ -67,35 +72,35 @@ export default function CalendarPage() {
       setIsModalOpen(true);
     }
   };
-  
+
   // Close modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedArticles([]);
   };
-  
+
   // Toggle article selection
   const handleArticleToggle = (articleId: string) => {
-    setSelectedArticles(prev => 
+    setSelectedArticles(prev =>
       prev.includes(articleId)
         ? prev.filter(id => id !== articleId)
         : [...prev, articleId]
     );
   };
-  
+
   // Submit scheduled articles
   const handleScheduleSubmit = async () => {
     if (!selectedDay || selectedArticles.length === 0) return;
-    
+
     try {
-      await Promise.all(selectedArticles.map(articleId => 
+      await Promise.all(selectedArticles.map(articleId =>
         scheduleArticle({
           store_id: storeId,
           article_id: articleId,
           scheduled_date: format(selectedDay, 'yyyy-MM-dd')
         })
       ));
-      
+
       toast.success('Articles scheduled successfully!');
       setIsModalOpen(false);
       setSelectedArticles([]);
@@ -103,7 +108,7 @@ export default function CalendarPage() {
       toast.error('Failed to schedule articles. Please try again.');
     }
   };
-  
+
   // Get scheduled articles for a specific day
   const getScheduledArticlesForDay = (day: Date) => {
     const formattedDay = format(day, 'yyyy-MM-dd');
@@ -113,17 +118,17 @@ export default function CalendarPage() {
       return articleDate === formattedDay;
     });
   };
-  
+
   // Get status for a day (for styling)
   const getDayStatus = (day: Date) => {
     const scheduledArticles = getScheduledArticlesForDay(day);
-    
+
     if (isBefore(day, new Date()) && !isToday(day)) {
       if (scheduledArticles.length === 0) return 'past-empty';
       if (scheduledArticles.some(article => article.status === 'published')) return 'published';
       return 'past-missed';
     }
-    
+
     if (scheduledArticles.length === 0) return 'empty';
     if (scheduledArticles.some(article => article.status === 'draft')) return 'upcoming';
     return 'published';
@@ -152,8 +157,8 @@ export default function CalendarPage() {
       </Box>
 
       {/* Calendar Grid */}
-      <Paper sx={{ 
-        overflow: 'hidden', 
+      <Paper sx={{
+        overflow: 'hidden',
         borderRadius: 2,
         height: 'calc(100vh - 200px)',
         display: 'flex',
@@ -172,7 +177,7 @@ export default function CalendarPage() {
             const dayStatus = getDayStatus(day);
             const isInteractive = isDayInteractive(day);
             const scheduledArticles = getScheduledArticlesForDay(day);
-            
+
             let bgColor = 'transparent';
             if (isToday(day)) {
               bgColor = 'rgba(25, 118, 210, 0.08)';
@@ -185,15 +190,15 @@ export default function CalendarPage() {
             } else if (dayStatus === 'past-empty') {
               bgColor = 'rgba(158, 158, 158, 0.15)';
             }
-            
+
             return (
-              <Grid 
-                item 
-                xs={12 / 7} 
-                key={index} 
-                sx={{ 
-                  border: '1px solid #ddd', 
-                  height: 'auto', 
+              <Grid
+                item
+                xs={12 / 7}
+                key={index}
+                sx={{
+                  border: '1px solid #ddd',
+                  height: 'auto',
                   minHeight: 80,
                   position: 'relative',
                   bgcolor: bgColor,
@@ -205,22 +210,22 @@ export default function CalendarPage() {
                 }}
                 onClick={() => isInteractive && handleDayClick(day)}
               >
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
+                <Typography
+                  variant="body2"
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
                     left: 8,
                     fontWeight: isToday(day) ? 'bold' : 'normal'
                   }}
                 >
                   {format(day, 'd')}
                 </Typography>
-                
+
                 {isInteractive && (
-                  <IconButton 
-                    size="small" 
-                    sx={{ 
+                  <IconButton
+                    size="small"
+                    sx={{
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
@@ -240,7 +245,7 @@ export default function CalendarPage() {
                     <Plus size={20} />
                   </IconButton>
                 )}
-                
+
                 {scheduledArticles.map((article, idx) => (
                   <Box key={idx} sx={{
                     position: 'absolute',
@@ -265,7 +270,7 @@ export default function CalendarPage() {
           })}
         </Grid>
       </Paper>
-      
+
       {/* Scheduling Modal */}
       <Modal
         open={isModalOpen}
@@ -292,17 +297,17 @@ export default function CalendarPage() {
               <X size={18} />
             </IconButton>
           </Box>
-          
+
           <Divider sx={{ mb: 2 }} />
-          
+
           <Typography variant="subtitle2" gutterBottom>
             Select articles to schedule:
           </Typography>
-          
-          <Paper 
-            variant="outlined" 
-            sx={{ 
-              maxHeight: 300, 
+
+          <Paper
+            variant="outlined"
+            sx={{
+              maxHeight: 300,
               overflow: 'auto',
               mt: 1,
               mb: 2
@@ -310,8 +315,8 @@ export default function CalendarPage() {
           >
             <List disablePadding>
               {getAvailableArticles().map((article) => (
-                <ListItem 
-                  key={article.id} 
+                <ListItem
+                  key={article.id}
                   disablePadding
                   divider
                   secondaryAction={
@@ -330,7 +335,7 @@ export default function CalendarPage() {
                     }),
                   }}
                 >
-                  <ListItemText 
+                  <ListItemText
                     primary={article.title || `Article #${article.id}`}
                     secondary={article.status}
                   />
@@ -338,15 +343,15 @@ export default function CalendarPage() {
               ))}
             </List>
           </Paper>
-          
+
           <Box display="flex" justifyContent="flex-end" gap={1}>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={handleCloseModal}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               variant="contained"
               disabled={selectedArticles.length === 0}
               onClick={handleScheduleSubmit}
