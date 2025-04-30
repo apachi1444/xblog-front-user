@@ -47,7 +47,6 @@ const shouldUseMocks = () => true
 // Setup mock endpoints
 const setupMocks = () => {
   if (shouldUseMocks()) {
-    // setupGenerateContentMocks(mock);
 
     mock.onGet('/stores/').reply(() => [
         200,
@@ -57,7 +56,7 @@ const setupMocks = () => {
         }
       ]);
 
-    // Setup mock for articles endpoint
+    // Setup mock for articles endpoint - get all articles
     mock.onGet(new RegExp(`/all${ARTICLES_BASE_URL}/.*`)).reply(() => [
         200,
         {
@@ -66,9 +65,152 @@ const setupMocks = () => {
         }
       ]);
 
+    // Mock get draft article by ID
+    mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/drafts/.*`)).reply((config) => {
+      const articleId = config.url?.split('/').pop();
+      const article = _posts.find(post => post.id === articleId && post.status === 'draft');
+
+      if (article) {
+        return [200, article];
+      }
+      return [404, { message: 'Draft article not found' }];
+    });
+
+    // Mock get published article by ID
+    mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/published/.*`)).reply((config) => {
+      const articleId = config.url?.split('/').pop();
+      const article = _posts.find(post => post.id === articleId && post.status === 'published');
+
+      if (article) {
+        return [200, article];
+      }
+      return [404, { message: 'Published article not found' }];
+    });
+
+    // Mock get article by ID (any status)
+    mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/\\d+$`)).reply((config) => {
+      const articleId = config.url?.split('/').pop();
+      const article = _posts.find(post => post.id === articleId);
+
+      if (article) {
+        return [200, article];
+      }
+      return [404, { message: 'Article not found' }];
+    });
+
+    // Mock create article
+    mock.onPost(ARTICLES_BASE_URL).reply((config) => {
+      const newArticle = JSON.parse(config.data);
+      const articleWithId = {
+        ...newArticle,
+        id: `article-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      return [201, articleWithId];
+    });
+
+    // Mock delete article
+    mock.onDelete(new RegExp(`${ARTICLES_BASE_URL}/.*`)).reply((config) => {
+      const articleId = config.url?.split('/').pop();
+      const articleExists = _posts.some(post => post.id === articleId);
+
+      if (articleExists) {
+        return [200, { message: `Article ${articleId} deleted successfully` }];
+      }
+      return [404, { message: 'Article not found' }];
+    });
+
     // Subscription endpoints
     mock.onGet('/subscriptions').reply(200, mockSubscriptionDetails);
 
+    // Mock subscription plans endpoint
+    mock.onGet('/subscriptions/plans').reply(200, {
+      plans: [
+        {
+          id: '1',
+          name: 'Free',
+          price: '0',
+          features: [
+            'Basic Article Generation',
+            'Limited Analytics',
+            'Standard Support',
+            '5 Articles per month',
+            '1GB Storage'
+          ],
+          current: false
+        },
+        {
+          id: '2',
+          name: 'Basic',
+          price: '9.99',
+          features: [
+            'Advanced Article Generation',
+            'Basic Analytics',
+            'Standard Support',
+            '20 Articles per month',
+            '5GB Storage'
+          ],
+          current: false
+        },
+        {
+          id: '3',
+          name: 'Professional',
+          price: '29.99',
+          features: [
+            'All Basic Features',
+            'Unlimited Article Generation',
+            'Advanced Analytics',
+            'Priority Support',
+            'Custom Publishing Schedule'
+          ],
+          current: true,
+          highlight: true
+        }
+      ]
+    });
+
+    // Mock invoices endpoint
+    mock.onGet('/subscriptions/invoices').reply(200, {
+      invoices: [
+        {
+          id: '1',
+          invoiceNumber: 'INV-001',
+          amount: 29.99,
+          currency: 'USD',
+          status: 'paid',
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          plan: 'Pro',
+          downloadUrl: 'https://example.com/invoices/INV-001.pdf'
+        },
+        {
+          id: '2',
+          invoiceNumber: 'INV-002',
+          amount: 29.99,
+          currency: 'USD',
+          status: 'paid',
+          createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+          plan: 'Pro',
+          downloadUrl: 'https://example.com/invoices/INV-002.pdf'
+        }
+      ],
+      count: 2
+    });
+
+    // Mock create subscription endpoint
+    mock.onPost('/subscriptions/create').reply(200, {
+      success: true,
+      message: 'Subscription created successfully',
+    });
+
+    // Mock upgrade subscription endpoint
+    mock.onPatch('/subscriptions/upgrade').reply(200, {
+      success: true,
+      message: 'Subscription upgraded successfully',
+    });
+
+    // Legacy endpoint (can be removed if not needed)
     mock.onPost('/subscription/upgrade').reply(200, {
       success: true,
       message: 'Subscription upgraded successfully',
@@ -96,6 +238,15 @@ const setupMocks = () => {
         id: calendarId,
         ...updateData,
         updatedAt: new Date().toISOString(),
+      }];
+    });
+
+    // Mock delete calendar entry
+    mock.onDelete(/\/calendars\/.*/).reply((config) => {
+      const calendarId = config.url?.split('/').pop();
+      return [200, {
+        success: true,
+        message: `Calendar entry ${calendarId} deleted successfully`
       }];
     });
 

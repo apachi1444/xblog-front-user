@@ -35,6 +35,21 @@ export interface SubscriptionDetails {
   subscription_name: string;
 }
 
+// Interface for subscription plan
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: string;
+  features: string[];
+  current: boolean;
+  highlight?: boolean;
+}
+
+// Interface for subscription plans response
+export interface SubscriptionPlansResponse {
+  plans: SubscriptionPlan[];
+}
+
 // RTK Query endpoints for subscription operations
 export const subscriptionApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -45,11 +60,19 @@ export const subscriptionApi = api.injectEndpoints({
         method: 'GET',
       }),
     }),
-    
+
     // Get subscription details
     getSubscriptionDetails: builder.query<SubscriptionDetails, void>({
       query: () => ({
         url: `${SUBSCRIPTION_BASE_URL}`,
+        method: 'GET',
+      }),
+    }),
+
+    // Get subscription plans
+    getSubscriptionPlans: builder.query<SubscriptionPlansResponse, void>({
+      query: () => ({
+        url: `${SUBSCRIPTION_BASE_URL}/plans`,
         method: 'GET',
       }),
     }),
@@ -61,7 +84,7 @@ export const subscriptionApi = api.injectEndpoints({
         body: data,
       }),
     }),
-    
+
     // Upgrade subscription
     upgradeSubscription: builder.mutation<void, { planId: string }>({
       query: (data) => ({
@@ -79,6 +102,8 @@ export const {
   useLazyGetUserInvoicesQuery,
   useGetSubscriptionDetailsQuery,
   useLazyGetSubscriptionDetailsQuery,
+  useGetSubscriptionPlansQuery,
+  useLazyGetSubscriptionPlansQuery,
   useUpgradeSubscriptionMutation,
   useCreateSubscriptionMutation
 } = subscriptionApi;

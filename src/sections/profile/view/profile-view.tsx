@@ -1,10 +1,11 @@
-import toast from 'react-hot-toast';
+import type { RootState } from 'src/services/store';
+
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Award, CreditCard, ChevronRight } from 'lucide-react';
 
-import { Download } from '@mui/icons-material';
 import {
   Box,
   Tab,
@@ -27,152 +28,57 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetUserInvoicesQuery, useLazyGetUserInvoicesQuery } from 'src/services/apis/subscriptionApi';
+import {
+  useGetUserInvoicesQuery,
+  useGetSubscriptionPlansQuery
+} from 'src/services/apis/subscriptionApi';
 
 import { ProfileForm } from 'src/components/profile/ProfileForm';
 import { SecurityForm } from 'src/components/profile/SecurityForm';
 
-// Mock user data - in a real app, this would come from your API
-const USER = {
-  id: '1',
-  name: 'Jaydon Frankie',
-  email: 'demo@minimals.cc',
-  photoURL: '/assets/images/avatar/avatar-25.webp',
-  subscription: {
-    plan: 'Professional',
-    status: 'active',
-    startDate: '2023-01-15',
-    endDate: '2024-01-15',
-    features: [
-      'All Basic Features',
-      'Unlimited Article Generation',
-      'Advanced Analytics',
-      'Priority Support',
-      'Custom Publishing Schedule'
-    ],
-    usageStats: {
-      articlesGenerated: 45,
-      articlesLimit: 100,
-      storageUsed: 2.5,
-      storageLimit: 10
-    }
-  }
-};
-
-// For demo purposes - different subscription plans
-const SUBSCRIPTION_PLANS = [
-  {
-    name: 'Free',
-    price: '0',
-    features: [
-      'Basic Article Generation',
-      'Limited Analytics',
-      'Standard Support',
-      '5 Articles per month',
-      '1GB Storage'
-    ],
-    current: USER.subscription.plan === 'Free'
-  },
-  {
-    name: 'Basic',
-    price: '9.99',
-    features: [
-      'Advanced Article Generation',
-      'Basic Analytics',
-      'Standard Support',
-      '20 Articles per month',
-      '5GB Storage'
-    ],
-    current: USER.subscription.plan === 'Basic'
-  },
-  {
-    name: 'Professional',
-    price: '19.99',
-    features: [
-      'All Basic Features',
-      'Unlimited Article Generation',
-      'Advanced Analytics',
-      'Priority Support',
-      'Custom Publishing Schedule'
-    ],
-    current: USER.subscription.plan === 'Professional',
-    highlight: true
-  }
-];
-
-
-const MOCK_INVOICES = {
-  invoices: [
-    {
-      id: '1',
-      invoiceNumber: 'INV-2023-001',
-      amount: 19.99,
-      currency: 'USD',
-      status: 'paid',
-      createdAt: '2023-01-15T00:00:00.000Z',
-      plan: 'Professional',
-      downloadUrl: '#'
-    },
-    {
-      id: '2',
-      invoiceNumber: 'INV-2023-002',
-      amount: 19.99,
-      currency: 'USD',
-      status: 'paid',
-      createdAt: '2023-02-15T00:00:00.000Z',
-      plan: 'Professional',
-      downloadUrl: '#'
-    }
-  ],
-  count: 2
-};
-
 export function ProfileView() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Get the authenticated user from Redux
+  const authUser = useSelector((state: RootState) => state.auth.user);
+
+  // Parse the user's name into first and last name
+  const getUserNames = () => {
+    if (!authUser?.name) return { firstName: 'User', lastName: 'Name' };
+
+    const nameParts = authUser.name.split(' ');
+    return {
+      firstName: nameParts[0] || 'User',
+      lastName: nameParts.slice(1).join(' ') || 'Name'
+    };
+  };
+
   const [activeTab, setActiveTab] = useState(0);
   const [showSubscriptionDetails, setShowSubscriptionDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [firstName, setFirstName] = useState('Jaydon');
-  const [lastName, setLastName] = useState('Frankie');
+  const [firstName, setFirstName] = useState(getUserNames().firstName);
+  const [lastName, setLastName] = useState(getUserNames().lastName);
   const subscriptionTabRef = React.useRef<HTMLDivElement>(null);
-  const [shouldRefreshInvoices, setShouldRefreshInvoices] = useState(false);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const navigate = useNavigate();
-  
-  // Add this to fetch invoices
-  const { data: invoicesData, isLoading: isLoadingInvoices } = useGetUserInvoicesQuery();
-  const [fetchInvoices] = useLazyGetUserInvoicesQuery();
 
-  // Add useEffect to handle page visibility changes
-  React.useEffect(() => {
-    fetchInvoices()
-      .unwrap()
-      .then(() => {
-        toast.success(t('profile.billing.refreshSuccess', 'Invoices refreshed successfully'));
-      })
-      .catch((error) => {
-        setInvoices(MOCK_INVOICES.invoices)
-        toast.error(t('profile.errors.refreshInvoices', 'Failed to refresh invoices'));
-      });
-        // Reset the flag
-  }, [shouldRefreshInvoices, fetchInvoices, t]);
+  const { data: invoicesData, isLoading: isLoadingInvoices } = useGetUserInvoicesQuery();
+
+  // Fetch subscription plans
+  const { data: plansData, isLoading: isLoadingPlans } = useGetSubscriptionPlansQuery();
+
+
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
   const handleManageSubscription = () => {
-    // Set flag to refresh invoices when user returns
-    setShouldRefreshInvoices(true);
-    
-    // Navigate using React Router (keeps it in the same tab)
     navigate('/subscription/manage');
   };
 
   const handleSaveProfile = () => {
     setIsEditing(false);
-    // Here you would typically save the updated profile to your backend
   };
 
   return (
@@ -194,17 +100,17 @@ export function ProfileView() {
             <Grid item xs={12} md={4}>
               <Box display="flex" flexDirection="column" alignItems="center">
                 <Avatar
-                  src={USER.photoURL}
-                  alt={USER.name}
-                  sx={{ 
-                    width: 120, 
-                    height: 120, 
+                  src={authUser?.avatar || '/assets/images/avatar/avatar-default.jpg'}
+                  alt={authUser?.name || 'User'}
+                  sx={{
+                    width: 120,
+                    height: 120,
                     mb: 2,
                     border: `4px solid ${theme.palette.background.paper}`,
                     boxShadow: theme.customShadows.z8
                   }}
                 />
-                
+
                 {isEditing ? (
                   <Box sx={{ width: '100%', mt: 2 }}>
                     <Grid container spacing={2}>
@@ -228,16 +134,16 @@ export function ProfileView() {
                       </Grid>
                     </Grid>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 1 }}>
-                      <Button 
-                        variant="contained" 
-                        size="small" 
+                      <Button
+                        variant="contained"
+                        size="small"
                         onClick={handleSaveProfile}
                       >
                         {t('common.save')}
                       </Button>
-                      <Button 
-                        variant="outlined" 
-                        size="small" 
+                      <Button
+                        variant="outlined"
+                        size="small"
                         onClick={() => setIsEditing(false)}
                       >
                         {t('common.cancel')}
@@ -247,14 +153,14 @@ export function ProfileView() {
                 ) : (
                   <>
                     <Typography variant="h6" gutterBottom>
-                      {USER.name}
+                      {authUser?.name || `${firstName} ${lastName}`}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {USER.email}
+                      {authUser?.email || 'user@example.com'}
                     </Typography>
-                    <Button 
-                      variant="outlined" 
-                      size="small" 
+                    <Button
+                      variant="outlined"
+                      size="small"
                       startIcon={<Edit />}
                       sx={{ mt: 1 }}
                       onClick={() => setIsEditing(true)}
@@ -272,8 +178,8 @@ export function ProfileView() {
                   <Typography variant="h6">
                     {t('profile.subscription.current')}
                   </Typography>
-                  <Button 
-                    variant="text" 
+                  <Button
+                    variant="text"
                     color="primary"
                     endIcon={<ChevronRight />}
                     onClick={() => setShowSubscriptionDetails(!showSubscriptionDetails)}
@@ -282,27 +188,23 @@ export function ProfileView() {
                   </Button>
                 </Box>
 
-                {/* Rest of subscription info */}
-                
                 <Box mt={3} display="flex" gap={2}>
-                  <Button 
-                    variant="contained" 
+                  <Button
+                    variant="contained"
                     color="primary"
                     startIcon={<CreditCard />}
                     onClick={handleManageSubscription}
                   >
                     {t('profile.subscription.manage')}
                   </Button>
-                  {USER.subscription.plan !== 'Professional' && (
-                    <Button 
-                      variant="outlined" 
-                      color="primary"
-                      startIcon={<Award />}
-                      onClick={handleManageSubscription}
-                    >
-                      {t('profile.subscription.upgrade')}
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<Award />}
+                    onClick={handleManageSubscription}
+                  >
+                    {t('profile.subscription.upgrade', 'Upgrade Plan')}
+                  </Button>
                 </Box>
               </Box>
             </Grid>
@@ -310,15 +212,15 @@ export function ProfileView() {
         </Card>
 
         {/* Subscription Details (Expandable) */}
-        {showSubscriptionDetails && (
+        {showSubscriptionDetails && plansData?.plans && (
           <Card sx={{ mb: 5, p: 3, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom>
-              {t('profile.subscription.planFeatures', { plan: USER.subscription.plan })}
+              {t('profile.subscription.planFeatures', { plan: 'Professional' })}
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            
+
             <Grid container spacing={2}>
-              {USER.subscription.features.map((feature, index) => (
+              {plansData.plans.find(plan => plan.name === 'Professional')?.features.map((feature, index) => (
                 <Grid item xs={12} sm={6} key={index}>
                   <Box display="flex" alignItems="center">
                     <Box
@@ -330,7 +232,7 @@ export function ProfileView() {
                         mr: 1.5,
                       }}
                     />
-                    <Typography variant="body2">{t(`profile.subscription.features.${index}`, { defaultValue: feature })}</Typography>
+                    <Typography variant="body2">{feature}</Typography>
                   </Box>
                 </Grid>
               ))}
@@ -340,8 +242,8 @@ export function ProfileView() {
 
         {/* Tabs for different sections */}
         <Box sx={{ width: '100%', mb: 3 }}>
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onChange={handleTabChange}
             sx={{
               '& .MuiTabs-indicator': {
@@ -360,7 +262,7 @@ export function ProfileView() {
         {/* Tab Content */}
         <Box sx={{ mt: 3 }}>
           {activeTab === 0 && <ProfileForm />}
-          
+
           {activeTab === 1 && (
             <Box ref={subscriptionTabRef}>
               <Typography variant="h5" gutterBottom>
@@ -369,11 +271,11 @@ export function ProfileView() {
               <Typography variant="body2" color="text.secondary" paragraph>
                 {t('profile.subscription.choosePlan')}
               </Typography>
-              
+
               <Grid container spacing={3} sx={{ mt: 2 }}>
-                {SUBSCRIPTION_PLANS.map((plan, planIndex) => (
+                {plansData?.plans.map((plan, planIndex) => (
                   <Grid item xs={12} md={4} key={plan.name}>
-                    <Card 
+                    <Card
                       variant="outlined"
                       sx={{
                         p: 3,
@@ -389,22 +291,22 @@ export function ProfileView() {
                       }}
                     >
                       {plan.current && (
-                        <Chip 
-                          label={t('profile.subscription.currentPlan')} 
-                          color="primary" 
+                        <Chip
+                          label={t('profile.subscription.currentPlan')}
+                          color="primary"
                           size="small"
-                          sx={{ 
+                          sx={{
                             position: 'absolute',
                             top: 12,
                             right: 12,
                           }}
                         />
                       )}
-                      
+
                       <Typography variant="h6" gutterBottom>
                         {t(`profile.subscription.planNames.${plan.name.toLowerCase()}`, { defaultValue: plan.name })}
                       </Typography>
-                      
+
                       <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
                         <Typography variant="h4" component="span">
                           ${plan.price}
@@ -413,9 +315,9 @@ export function ProfileView() {
                           {t('profile.subscription.perMonth')}
                         </Typography>
                       </Box>
-                      
+
                       <Divider sx={{ my: 2 }} />
-                      
+
                       <Box sx={{ flexGrow: 1 }}>
                         {plan.features.map((feature, index) => (
                           <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -434,8 +336,8 @@ export function ProfileView() {
                           </Box>
                         ))}
                       </Box>
-                      
-                      <Button 
+
+                      <Button
                         variant={plan.current ? "outlined" : "contained"}
                         color="primary"
                         fullWidth
@@ -448,7 +350,7 @@ export function ProfileView() {
                   </Grid>
                 ))}
               </Grid>
-              
+
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h6" gutterBottom>
                   {t('profile.billing.history')}
@@ -460,7 +362,7 @@ export function ProfileView() {
                         {t('profile.billing.loading', 'Loading invoices...')}
                       </Typography>
                     </Box>
-                  ) : invoices && invoices.length > 0 ? (
+                  ) : invoicesData?.invoices && invoicesData.invoices.length > 0 ? (
                     <Table>
                       <TableHead>
                         <TableRow>
@@ -472,7 +374,7 @@ export function ProfileView() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {invoices.map((invoice) => (
+                        {invoicesData.invoices.map((invoice) => (
                           <TableRow key={invoice.id} hover>
                             <TableCell>
                               {new Date(invoice.createdAt).toLocaleDateString()}
@@ -493,7 +395,7 @@ export function ProfileView() {
                                 size="small"
                                 label={invoice.status}
                                 color={invoice.status === 'paid' ? 'success' : 'warning'}
-                                sx={{ 
+                                sx={{
                                   textTransform: 'capitalize',
                                   fontWeight: 'medium'
                                 }}
@@ -514,7 +416,7 @@ export function ProfileView() {
               </Box>
             </Box>
           )}
-          
+
           {activeTab === 2 && <SecurityForm />}
         </Box>
       </Container>

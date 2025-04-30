@@ -23,7 +23,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
 import { signInSchema } from 'src/validation/auth-schemas';
-import { useLazyGetPlansQuery } from 'src/services/apis/plansApi';
+import { useGetPlansQuery } from 'src/services/apis/plansApi';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
 import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
@@ -65,7 +65,6 @@ export function SignInView() {
     mode: 'onBlur',
   });
   
-  // Add this line to use the error handler
   useFormErrorHandler(formMethods.formState.errors);
   
   // Update form values when test mode changes
@@ -104,35 +103,12 @@ export function SignInView() {
   
   
   // Inside the SignInView component, add this hook
-  const [getPlans] = useLazyGetPlansQuery();
+  const  { data : plansData } = useGetPlansQuery();
   
   // Update the handleAuthSuccess function to fetch plans
   const handleAuthSuccess = useCallback(async (accessToken: string) => {
     if (testMode) {
       handleTestModeLogin();
-      dispatch(setAvailablePlans([
-        {
-          id: "free-plan",
-          name: "Free (Monthly)",
-          price: 0,
-          url: "free",
-          features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
-        },
-        {
-          id: "starter-plan",
-          name: "Starter (Monthly)",
-          price: 29,
-          url: "starter",
-          features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
-        },
-        {
-          id: "professional-plan",
-          name: "Professional (Monthly)",
-          price: 49,
-          url: "professional",
-          features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
-        }
-      ]));
       router.replace('/onboarding'); // Move navigation here
       return;
     }
@@ -145,7 +121,6 @@ export function SignInView() {
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
       
       try {
-        const plansData = await getPlans().unwrap();
         if (plansData && plansData.plans) {
           dispatch(setAvailablePlans(plansData.plans));
         }
@@ -162,7 +137,7 @@ export function SignInView() {
         console.error('Failed to fetch user data:', error);
       }
     }
-  }, [testMode, handleTestModeLogin, getCurrentUser, dispatch, router, getPlans]);
+  }, [testMode, handleTestModeLogin, router, getCurrentUser, dispatch, plansData]);
   
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {
