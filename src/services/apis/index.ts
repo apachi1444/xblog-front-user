@@ -8,7 +8,7 @@ import { _posts } from 'src/_mock/_data';
 import { _fakeStores } from 'src/_mock/stores';
 
 import customRequest from './axios';
-import { setupGenerateContentMocks } from './mockGenerateContent';
+//import { setupGenerateContentMocks } from './mockGenerateContent';
 
 // Initialize mock adapter
 const mock = new MockAdapter(customRequest, { onNoMatch: 'passthrough' });
