@@ -234,8 +234,55 @@
         "upgrade": "Mettre à Niveau",
         "plans": "Plans d'Abonnement",
         "choosePlan": "Choisissez le plan qui vous convient le mieux",
-        "currentPlan": "Plan Actuel"
+        "currentPlan": "Plan Actuel",
+        "perMonth": "par mois",
+        "planNames": {
+          "free": "Gratuit",
+          "basic": "Basique",
+          "professional": "Professionnel"
+        },
+        "planFeatures": {
+          "0": "Génération d'Articles Basique",
+          "1": "Analyses Limitées",
+          "2": "Support Standard",
+          "3": "5 Articles par mois",
+          "4": "1Go de Stockage"
+        }
+      },
+      "billing": {
+        "history": "Historique de Facturation",
+        "loading": "Chargement des factures...",
+        "noHistory": "Aucun historique de facturation disponible",
+        "date": "Date",
+        "invoiceNumber": "Numéro de Facture",
+        "plan": "Plan",
+        "amount": "Montant",
+        "status": "Statut",
+        "planMonthly": "Plan {{plan}} - Mensuel",
+        "refreshSuccess": "Factures mises à jour avec succès"
+      },
+      "errors": {
+        "refreshInvoices": "Échec de la mise à jour des factures"
       }
+    },
+    "common": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "select": "Sélectionner",
+      "selected": "Sélectionné"
+    },
+    "calendar": {
+      "schedule": "Planifier",
+      "unschedule": "Déplanifier",
+      "unscheduling": "Déplanification...",
+      "articleDetails": "Détails de l'Article",
+      "scheduleArticles": "Planifier des Articles pour le {{date}}",
+      "selectArticles": "Sélectionnez les articles à planifier :",
+      "noArticles": "Aucun article disponible pour la planification",
+      "scheduledSuccessfully": "Articles planifiés avec succès",
+      "unscheduledSuccessfully": "Article déplanifié avec succès",
+      "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",
+      "unschedulingFailed": "Échec de la déplanification de l'article. Veuillez réessayer."
     }
   }
 }
