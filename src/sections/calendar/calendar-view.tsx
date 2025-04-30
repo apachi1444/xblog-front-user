@@ -23,9 +23,9 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
+import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/apis/articlesApi';
 
 import { LoadingSpinner } from 'src/components/loading';
 

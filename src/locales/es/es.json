@@ -200,6 +200,27 @@
         "apiSecret": "Secreto API",
         "apiSecretPlaceholder": "Ingresa tu secreto API",
         "description": "Conecta tu tienda Shopify"
+      },
+      "wix": {
+        "adminUrl": "URL de Administración de Wix",
+        "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+        "consumerKey": "Clave de Consumidor",
+        "consumerKeyPlaceholder": "Ingresa tu clave de consumidor",
+        "consumerSecret": "Secreto de Consumidor",
+        "consumerSecretPlaceholder": "Ingresa tu secreto de consumidor",
+        "description": "Conecta tu tienda Wix"
+      },
+      "terms": {
+        "accept": "Acepto los términos y condiciones y autorizo a XBlog a acceder a mi tienda"
+      },
+      "guide": {
+        "title": "Guía de Integración",
+        "description": "Este video muestra cómo encontrar y configurar las credenciales requeridas para la integración de tu tienda {{platform}}.",
+        "dialogDescription": "Sigue esta guía para encontrar y configurar las credenciales requeridas para la integración de tu tienda {{platform}}.",
+        "watchButton": "Ver Guía de Integración",
+        "watchTooltip": "Ver guía de integración",
+        "videoTitle": "Guía de Integración de {{platform}}",
+        "dialogTitle": "Cómo Conectar Tu Tienda {{platform}}"
       }
     },
     "profile": {
@@ -223,8 +244,55 @@
         "upgrade": "Mejorar Plan",
         "plans": "Planes de Suscripción",
         "choosePlan": "Elige el plan que mejor funcione para ti",
-        "currentPlan": "Plan Actual"
+        "currentPlan": "Plan Actual",
+        "perMonth": "por mes",
+        "planNames": {
+          "free": "Gratis",
+          "basic": "Básico",
+          "professional": "Profesional"
+        },
+        "planFeatures": {
+          "0": "Generación Básica de Artículos",
+          "1": "Análisis Limitado",
+          "2": "Soporte Estándar",
+          "3": "5 Artículos por mes",
+          "4": "1GB de Almacenamiento"
+        }
+      },
+      "billing": {
+        "history": "Historial de Facturación",
+        "loading": "Cargando facturas...",
+        "noHistory": "No hay historial de facturación disponible",
+        "date": "Fecha",
+        "invoiceNumber": "Número de Factura",
+        "plan": "Plan",
+        "amount": "Monto",
+        "status": "Estado",
+        "planMonthly": "Plan {{plan}} - Mensual",
+        "refreshSuccess": "Facturas actualizadas con éxito"
+      },
+      "errors": {
+        "refreshInvoices": "Error al actualizar las facturas"
       }
+    },
+    "common": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "select": "Seleccionar",
+      "selected": "Seleccionado"
+    },
+    "calendar": {
+      "schedule": "Programar",
+      "unschedule": "Desprogramar",
+      "unscheduling": "Desprogramando...",
+      "articleDetails": "Detalles del Artículo",
+      "scheduleArticles": "Programar Artículos para {{date}}",
+      "selectArticles": "Seleccionar artículos para programar:",
+      "noArticles": "No hay artículos disponibles para programar",
+      "scheduledSuccessfully": "Artículos programados con éxito",
+      "unscheduledSuccessfully": "Artículo desprogramado con éxito",
+      "schedulingFailed": "Error al programar artículos. Por favor intenta de nuevo.",
+      "unschedulingFailed": "Error al desprogramar artículo. Por favor intenta de nuevo."
     }
   }
 }
