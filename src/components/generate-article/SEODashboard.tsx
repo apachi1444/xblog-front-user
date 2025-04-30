@@ -1,6 +1,6 @@
 import type { Step1State } from "src/sections/generate/generate-steps/steps/Step1ContentSetup";
 
-import React, { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 // Icons
 import { useTheme } from "@mui/material/styles";
@@ -15,8 +15,6 @@ import {
 } from "@mui/material";
 
 import { useSEOScoring } from "src/hooks/useSEOScoring";
-
-import { canGenerateContent } from "src/utils/formValidation";
 
 import { Iconify } from "src/components/iconify";
 
@@ -48,54 +46,33 @@ export function SEODashboard({ state }: SEODashboardProps) {
   } = state;
 
   const { watch } = form;
-  
+
   const title = watch('title');
   const metaTitle = watch('metaTitle');
   const metaDescription = watch('metaDescription');
   const urlSlug = watch('urlSlug');
   const theme = useTheme();
-  
-  // Get real-time SEO scoring
+
+  // Get real-time SEO scoring - only recalculate when form values change
   const { progressSections, overallScore } = useSEOScoring();
-  
+
   // State management
   const [tabValue, setTabValue] = useState(0);
-  const [expanded, setExpanded] = useState(false);
   const [showContent, setShowContent] = useState(true);
-  const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
 
   // Event handlers
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   }, []);
 
-  const handleToggleBasicSEO = useCallback(() => {
-    setExpanded(prev => !prev);
-  }, []);
-
-  const handleToggleSection = useCallback((sectionId: number) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  }, []);
-
-  const isVisible = true;
-
   const handleToggleContent = useCallback(() => {
-    const newState = !showContent;
-    setShowContent(newState);
-  }, [showContent]);
+    setShowContent(prevState => !prevState);
+  }, []);
 
-  // If not visible, return null
-  if (!isVisible) {
-    return null;
-  }
+  const isGenerateDisabled = false;
 
-  const isGenerateDisabled = !canGenerateContent(form.getValues());
-
-  // Function to render SEO content based on tab value
-  const renderTabContent = () => {
+  // Memoize tab content to prevent unnecessary re-renders
+  const tabContent = useMemo(() => {
     switch (tabValue) {
       case 0:
         return (
@@ -109,24 +86,35 @@ export function SEODashboard({ state }: SEODashboardProps) {
             isGenerateDisabled={isGenerateDisabled}
           />
         );
-      
+
       case 1:
         return (
-          <RealTimeScoringTab 
+          <RealTimeScoringTab
             progressSections={progressSections}
             score={overallScore}
           />
         );
-      
+
       default:
         return null;
     }
-  };
+  }, [
+    tabValue,
+    title,
+    metaTitle,
+    metaDescription,
+    urlSlug,
+    onGenerateMeta,
+    isGeneratingMeta,
+    isGenerateDisabled,
+    progressSections,
+    overallScore
+  ]);
 
   return (
-    <Box sx={{ 
-      width: showContent ? "100%" : "40px", 
-      height: showContent ? null : "100%", 
+    <Box sx={{
+      width: showContent ? "100%" : "40px",
+      height: showContent ? null : "100%",
       transition: theme.transitions.create(['width'], {
         duration: theme.transitions.duration.standard,
       }),
@@ -152,8 +140,8 @@ export function SEODashboard({ state }: SEODashboardProps) {
             justifyContent: showContent ? "flex-start" : "center",
           }}
         >
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             sx={{ ml: showContent ? 0.5 : 0 }}
             onClick={handleToggleContent}
           >
@@ -163,7 +151,7 @@ export function SEODashboard({ state }: SEODashboardProps) {
               <Iconify icon="material-symbols:zoom-out-map-rounded" fontSize="medium" />
             )}
           </IconButton>
-          
+
           {showContent && (
             <Tabs
               value={tabValue}
@@ -198,8 +186,8 @@ export function SEODashboard({ state }: SEODashboardProps) {
         </Box>
 
         {showContent && (
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               height: "calc(100% - 46px)",
               bgcolor: "white",
               borderRadius: "0 0 10px 10px",
@@ -209,13 +197,13 @@ export function SEODashboard({ state }: SEODashboardProps) {
               borderBottom: `0.5px solid ${COLORS.border}`
             }}
           >
-            {renderTabContent()}
+            {tabContent}
           </Box>
         )}
-        
+
         {!showContent && (
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               height: "calc(100% - 46px)",
               bgcolor: "white",
               borderRadius: "0 0 10px 10px",
@@ -227,9 +215,9 @@ export function SEODashboard({ state }: SEODashboardProps) {
               borderBottom: `0.5px solid ${COLORS.border}`
             }}
           >
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 color: theme.palette.text.secondary,
                 transform: "rotate(-90deg)",
                 letterSpacing: 1,

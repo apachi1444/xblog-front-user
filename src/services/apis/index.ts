@@ -316,7 +316,67 @@ const setupMocks = () => {
       }];
     });
 
-    // Add error handling mock to log what's happening
+    // Mock title generation endpoint
+    mock.onPost('/ai/generate/title').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { topic, keywords = [], targetAudience = 'general readers' } = requestData;
+
+        if (!topic) {
+          return [400, { error: 'Topic is required for title generation' }];
+        }
+
+        // Generate a mock title based on the topic and keywords
+        let title = '';
+
+        // Simple algorithm to generate a title
+        if (keywords && keywords.length > 0) {
+          // Use one of the keywords in the title
+          const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+
+          const titleTemplates = [
+            `${randomKeyword.charAt(0).toUpperCase() + randomKeyword.slice(1)}: The Ultimate Guide to ${topic}`,
+            `How to Master ${topic} with ${randomKeyword} Techniques`,
+            `10 ${randomKeyword} Strategies for Improving Your ${topic}`,
+            `The Complete ${randomKeyword} Guide to ${topic}`,
+            `Why ${topic} Matters: ${randomKeyword} Insights for ${targetAudience}`
+          ];
+
+          title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
+        } else {
+          // No keywords provided
+          const titleTemplates = [
+            `The Ultimate Guide to ${topic}`,
+            `How to Master ${topic} in 5 Simple Steps`,
+            `10 Proven Strategies for ${topic}`,
+            `Everything You Need to Know About ${topic}`,
+            `${topic}: A Comprehensive Guide for ${targetAudience}`
+          ];
+
+          title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
+        }
+
+        // Add a simulated delay to make it feel more realistic
+        return [
+          200,
+          {
+            title,
+            metadata: {
+              topic,
+              keywords,
+              targetAudience,
+              generationTime: Math.random() * 2 + 0.5, // Random time between 0.5 and 2.5 seconds
+              model: 'gemini-pro-mock'
+            }
+          }
+        ];
+      } catch (error) {
+        console.error('Error in title generation mock:', error);
+        return [500, { error: 'Internal server error in title generation' }];
+      }
+    });
+
+    // Catch-all for unhandled requests
     mock.onAny().reply((config) => {
       console.log('Unhandled request:', config.url);
       return [404, { message: 'Endpoint not mocked' }];

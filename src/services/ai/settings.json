@@ -1,0 +1,113 @@
+{
+  "seo": {
+    "title": {
+      "maxLength": 60,
+      "minLength": 30,
+      "bestPractices": [
+        "Include primary keyword near the beginning",
+        "Use numbers when applicable (e.g., '10 Ways to...')",
+        "Include the current year when relevant",
+        "Use power words (e.g., 'ultimate', 'essential', 'complete')",
+        "Create curiosity or promise value"
+      ],
+      "templates": [
+        "Ultimate Guide to {keyword}: {benefit} in {year}",
+        "{number} Best {keyword} Tips for {audience} in {year}",
+        "How to {action} with {keyword}: {benefit}",
+        "The Complete {keyword} Guide: {subTopic} Explained",
+        "{keyword}: {number} Strategies That Actually Work"
+      ]
+    },
+    "meta": {
+      "title": {
+        "maxLength": 60,
+        "minLength": 30,
+        "bestPractices": [
+          "Include primary keyword",
+          "Differentiate from the main title",
+          "Include brand name at the end if possible",
+          "Be specific and descriptive"
+        ]
+      },
+      "description": {
+        "maxLength": 160,
+        "minLength": 70,
+        "bestPractices": [
+          "Include primary keyword naturally",
+          "Summarize the content's value proposition",
+          "Include a call to action",
+          "Be specific and avoid vague descriptions",
+          "Match search intent"
+        ]
+      },
+      "urlSlug": {
+        "maxLength": 60,
+        "bestPractices": [
+          "Include primary keyword",
+          "Use hyphens to separate words",
+          "Keep it short and descriptive",
+          "Avoid stop words (a, the, and, or, but, etc.)",
+          "Use lowercase letters only"
+        ]
+      }
+    },
+    "keywords": {
+      "primaryKeyword": {
+        "bestPractices": [
+          "Focus on one main keyword with high search volume",
+          "Ensure it matches user search intent",
+          "Choose keywords with moderate competition"
+        ]
+      },
+      "secondaryKeywords": {
+        "count": {
+          "min": 5,
+          "max": 15,
+          "optimal": 8
+        },
+        "bestPractices": [
+          "Include long-tail variations of the primary keyword",
+          "Add related terms that support the main topic",
+          "Include synonyms and semantic variations",
+          "Consider question-based keywords"
+        ]
+      }
+    },
+    "sections": {
+      "bestPractices": [
+        "Use H2 headings for main sections",
+        "Use H3 headings for subsections",
+        "Include keywords in headings naturally",
+        "Keep headings descriptive and concise",
+        "Ensure logical flow between sections",
+        "Cover all aspects of the topic comprehensively"
+      ],
+      "structure": {
+        "introduction": {
+          "purpose": "Hook the reader and introduce the topic",
+          "elements": ["Problem statement", "Why it matters", "What will be covered"]
+        },
+        "mainContent": {
+          "purpose": "Deliver valuable information on the topic",
+          "elements": ["Key points", "Examples", "Evidence", "Step-by-step instructions"]
+        },
+        "conclusion": {
+          "purpose": "Summarize and provide next steps",
+          "elements": ["Summary of key points", "Call to action", "Final thoughts"]
+        }
+      }
+    },
+    "content": {
+      "bestPractices": [
+        "Aim for comprehensive coverage (1500+ words for competitive topics)",
+        "Use short paragraphs (3-4 sentences max)",
+        "Include bulleted or numbered lists",
+        "Add relevant images with alt text",
+        "Link to authoritative external sources",
+        "Include internal links to related content",
+        "Use data and statistics when available",
+        "Answer common questions related to the topic"
+      ]
+    }
+  }
+}

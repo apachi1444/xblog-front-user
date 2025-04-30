@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles"
 import { Box, Grid, Stack, alpha, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
 
-import { canGenerateContent } from 'src/utils/formValidation';
-
 import { Iconify } from "src/components/iconify"
 import { FormInput } from "src/components/generate-article/FormInput"
 import { FormDropdown } from "src/components/generate-article/FormDropdown"
@@ -113,7 +111,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   }
 
   const formValues = form.getValues();
-  const isGenerateDisabled = !canGenerateContent(formValues);
+  const isGenerateDisabled = false;
 
   // Define a style for important containers - Enhanced for more attraction
   const importantContainerSx = {

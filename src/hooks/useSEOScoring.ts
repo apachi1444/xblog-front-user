@@ -1,5 +1,5 @@
 import { useFormContext } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import {
   containsKeyword,
@@ -17,42 +17,40 @@ export const useSEOScoring = () => {
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
   const [overallScore, setOverallScore] = useState<number>(0);
 
-  // Watch all relevant form fields
-  const formValues = watch();
-  const {
-    title,
-    metaTitle,
-    metaDescription,
-    urlSlug,
-    content,
-    primaryKeyword,
-    tableOfContents
-  } = formValues;
+  // We'll watch individual fields directly
+  // Get individual values directly from watch to avoid unnecessary re-renders
+  const title = watch('title');
+  const metaTitle = watch('metaTitle');
+  const metaDescription = watch('metaDescription');
+  const urlSlug = watch('urlSlug');
+  const content = watch('content');
+  const primaryKeyword = watch('primaryKeyword');
+  const tableOfContents = watch('tableOfContents');
 
   // Helper function to check if a field is valid and has a value
   const isFieldValid = useCallback((fieldName: string): boolean => {
     const fieldState = getFieldState(fieldName, formState);
-    const value = formValues[fieldName];
-    
+    const value = watch(fieldName);
+
     // Check if the field has a value and is valid according to form validation
     const hasValue = value !== undefined && value !== null && value !== '';
     const isValid = !fieldState.invalid;
-    
+
     return hasValue && isValid;
-  }, [getFieldState, formState, formValues]);
+  }, [getFieldState, formState, watch]);
 
   // Helper function to determine status based on field validity
   const getStatusBasedOnFields = useCallback((
-    requiredFields: string[], 
+    requiredFields: string[],
     successCondition: boolean
   ): 'pending' | 'success' | 'error' | 'warning' => {
     // Check if any required field is missing
     const missingField = requiredFields.some(field => !isFieldValid(field));
-    
+
     if (missingField) {
       return 'pending';
     }
-    
+
     return successCondition ? 'success' : 'error';
   }, [isFieldValid]);
 
@@ -65,21 +63,21 @@ export const useSEOScoring = () => {
   ): string | null => {
     // Check if any required field is missing
     const missingField = fieldNames.some(field => !isFieldValid(field));
-    
+
     if (missingField) {
       return "Fill Required Fields";
     }
-    
+
     // If score is at or above max threshold, no action needed
     if (currentScore >= maxThreshold) {
       return null;
     }
-    
+
     // If score is below min threshold, it needs fixing
     if (currentScore < minThreshold) {
       return "Fix";
     }
-    
+
     // If score is between min and max, it needs optimization
     return "Optimize";
   }, [isFieldValid]);
@@ -88,7 +86,7 @@ export const useSEOScoring = () => {
   const calculateKeywordScore = useCallback((
     text: string,
     keyword: string,
-    options: { 
+    options: {
       startsWith?: boolean,
       contains?: boolean,
       density?: number,
@@ -96,20 +94,20 @@ export const useSEOScoring = () => {
     } = {}
   ): number => {
     if (!text || !keyword) return 0;
-    
+
     let score = 0;
     const maxScore = 10;
-    
+
     // Check if text starts with keyword (worth 40% of max score)
     if (options.startsWith && text.toLowerCase().startsWith(keyword.toLowerCase())) {
       score += maxScore * 0.4;
     }
-    
+
     // Check if text contains keyword (worth 30% of max score)
     if (options.contains && containsKeyword(text, keyword)) {
       score += maxScore * 0.3;
     }
-    
+
     // Check keyword density (worth 20% of max score)
     if (options.density) {
       const density = calculateKeywordDensity(text, keyword);
@@ -119,12 +117,12 @@ export const useSEOScoring = () => {
         score += maxScore * 0.1;
       }
     }
-    
+
     // Check if keyword appears in first percentage of content (worth 10% of max score)
     if (options.firstPercentage && isKeywordInFirstPercentage(text, keyword, options.firstPercentage)) {
       score += maxScore * 0.1;
     }
-    
+
     return score;
   }, []);
 
@@ -147,7 +145,7 @@ export const useSEOScoring = () => {
           8  // Max threshold (80% of max score)
         )
       },
-      
+
       // Update other items similarly...
       {
         id: 102,
@@ -165,7 +163,7 @@ export const useSEOScoring = () => {
           8
         )
       },
-      
+
       {
         id: 103,
         text: "Focus keyword appears within the first 10% of content",
@@ -182,7 +180,7 @@ export const useSEOScoring = () => {
           8
         )
       },
-      
+
       // Continue updating other items...
     ];
 
@@ -190,11 +188,11 @@ export const useSEOScoring = () => {
       {
         id: 201,
         text: "Primary keyword appears at the start of the title",
-        status: !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 
-                'pending' : 
+        status: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
+                'pending' :
                 title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 'success' : 'warning',
-        action: !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 
-                "Fill Required Fields" : 
+        action: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
+                "Fill Required Fields" :
                 title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? null : "Optimize"
       },
       {
@@ -212,22 +210,22 @@ export const useSEOScoring = () => {
       {
         id: 204,
         text: "Focus keyword included in SEO title",
-        status: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ? 
-                'pending' : 
+        status: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
+                'pending' :
                 containsKeyword(metaTitle, primaryKeyword) ? 'success' : 'error',
-        action: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ? 
-                "Fill Required Fields" : 
+        action: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
+                "Fill Required Fields" :
                 containsKeyword(metaTitle, primaryKeyword) ? null : "Fix"
       },
       {
         id: 205,
         text: `Title length: ${isFieldValid('title') ? title.length : 0} characters`,
-        status: !isFieldValid('title') ? 
-                'pending' : 
-                title.length >= 40 && title.length <= 60 ? 'success' : 
+        status: !isFieldValid('title') ?
+                'pending' :
+                title.length >= 40 && title.length <= 60 ? 'success' :
                 title.length < 40 ? 'error' : 'warning',
-        action: !isFieldValid('title') ? 
-                "Fill Required Fields" : 
+        action: !isFieldValid('title') ?
+                "Fill Required Fields" :
                 (title.length >= 40 && title.length <= 60) ? null : "Fix"
       },
     ];
@@ -349,24 +347,26 @@ export const useSEOScoring = () => {
     setProgressSections(sections);
     setOverallScore(score);
   }, [
-    title, 
-    metaTitle, 
-    metaDescription, 
-    urlSlug, 
-    content, 
-    primaryKeyword, 
-    tableOfContents, 
-    formState, 
-    getFieldState, 
-    formValues, 
-    getStatusBasedOnFields, 
+    title,
+    metaTitle,
+    metaDescription,
+    urlSlug,
+    content,
+    primaryKeyword,
+    tableOfContents,
+    formState,
+    getFieldState,
+    getStatusBasedOnFields,
     isFieldValid,
     getActionText,
     calculateKeywordScore
   ]);
 
-  return {
+  // Memoize the return values to prevent unnecessary re-renders
+  const returnValue = useMemo(() => ({
     progressSections,
-    overallScore
-  };
+    overallScore: Math.round(overallScore)
+  }), [progressSections, overallScore]);
+
+  return returnValue;
 };
