@@ -24,6 +24,7 @@ import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import { selectAvailablePlans } from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
+import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 // Define interest options
 const INTERESTS = [
@@ -45,86 +46,17 @@ const REFERRAL_SOURCES = [
   { id: 'other', label: 'Other', icon: 'mdi:dots-horizontal' },
 ];
 
-// Define subscription plans
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: '0',
-    billing: 'forever',
-    features: [
-      'Basic article generation',
-      'Limited to 5 articles/month',
-      'Standard support',
-      'Basic analytics',
-    ],
-    popular: false,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '19',
-    billing: 'monthly',
-    features: [
-      'Unlimited article generation',
-      'Advanced SEO tools',
-      'Priority support',
-      'Comprehensive analytics',
-      'Custom publishing schedule',
-    ],
-    popular: true,
-  },
-  {
-    id: 'business',
-    name: 'Business',
-    price: '49',
-    billing: 'monthly',
-    features: [
-      'Everything in Pro',
-      'Team collaboration',
-      'API access',
-      'White-label options',
-      'Dedicated account manager',
-    ],
-    popular: false,
-  },
-];
-
 export function OnBoardingView() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get plans from auth slice
-  const plans = useSelector(selectAvailablePlans);
-  
-  // Fallback plans in case the selector returns empty
-  const availablePlans = plans?.length > 0 ? plans : [
-    {
-      id: "free-plan",
-      name: "Free (Monthly)",
-      price: 0,
-      url: "free",
-      features: ["5 Articles per month", "Basic Analytics", "Standard Support"]
-    },
-    {
-      id: "starter-plan",
-      name: "Starter (Monthly)",
-      price: 29,
-      url: "starter",
-      features: ["20 Articles per month", "Advanced Analytics", "Priority Support"]
-    },
-    {
-      id: "professional-plan",
-      name: "Professional (Monthly)",
-      price: 49,
-      url: "professional",
-      features: ["Unlimited Articles", "Premium Analytics", "24/7 Support", "Custom Publishing"]
-    }
-  ];
+    // Fetch subscription plans
+    const {
+      data: plansData,
+    } = useGetSubscriptionPlansQuery();
 
-  console.log('Plans from Redux:', plans);
-  console.log('Available Plans:', availablePlans);
+  const plans = plansData?.plans || [];
   
   // Initialize the updateUser mutation
   const [updateUser] = useUpdateUserMutation();
@@ -425,19 +357,15 @@ export function OnBoardingView() {
           </Stack>
         )}
         
-        {/* Step 2: Subscription Plans */}
         {step === 2 && (
           <Stack spacing={5}>
             <Grid container spacing={3}>
-              {PLANS.map((plan) => (
+              {plans.map((plan) => (
                 <Grid xs={12} md={4} key={plan.id}>
                   <Card 
                     sx={{ 
                       height: '100%',
                       position: 'relative',
-                      borderColor: selectedPlan === plan.id 
-                        ? 'primary.main' 
-                        : plan.popular ? 'primary.light' : 'divider',
                       borderWidth: 2,
                       borderStyle: 'solid',
                       boxShadow: selectedPlan === plan.id 
@@ -446,19 +374,6 @@ export function OnBoardingView() {
                       transition: 'all 0.2s ease-in-out',
                     }}
                   >
-                    {plan.popular && (
-                      <Chip 
-                        label="Popular" 
-                        color="primary"
-                        size="small"
-                        sx={{ 
-                          position: 'absolute', 
-                          top: 12, 
-                          right: 12,
-                          fontWeight: 'bold',
-                        }} 
-                      />
-                    )}
                     <CardActionArea 
                       onClick={() => handlePlanSelect(plan.id)}
                       sx={{ height: '100%' }}
@@ -473,7 +388,7 @@ export function OnBoardingView() {
                             ${plan.price}
                           </Typography>
                           <Typography variant="subtitle1" component="span" color="text.secondary" sx={{ ml: 1 }}>
-                            /{plan.billing}
+                            /{plan.price}
                           </Typography>
                         </Box>
                         

@@ -2,12 +2,11 @@ import type { EditorOptions } from "@tiptap/core";
 
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useRef , useState, useCallback } from "react";
+import { useRef, useState, forwardRef, useCallback, useEffect } from "react";
 import {
   MenuDivider,
   insertImages,
   RichTextEditor,
-
   MenuButtonBold,
   MenuButtonRedo,
   MenuButtonUndo,
@@ -21,26 +20,43 @@ import {
   type RichTextEditorRef,
   RichTextEditorProvider,
   MenuButtonBulletedList,
-  MenuButtonHorizontalRule} from "mui-tiptap";
+  MenuButtonHorizontalRule
+} from "mui-tiptap";
 
-import { Box , Button, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 
 import useExtensions from "./useExtensions";
 
-
 function fileListToImageFiles(fileList: FileList): File[] {
-  // You may want to use a package like attr-accept
-  // (https://www.npmjs.com/package/attr-accept) to restrict to certain file
-  // types.
   return Array.from(fileList).filter((file) => {
     const mimeType = (file.type || "").toLowerCase();
     return mimeType.startsWith("image/");
   });
 }
 
-export default function Editor() {
+interface EditorProps {
+  initialContent?: string;
+  onChange?: (content: string) => void;
+}
+
+export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
+  initialContent = "<p>Start writing here...</p>",
+  onChange
+}, ref) => {
   const rteRef = useRef<RichTextEditorRef>(null);
-  const [showMenuBar, setShowMenuBar] = useState(true);
+  const [showMenuBar] = useState(true);
+  const [content, setContent] = useState(initialContent);
+
+  // Update content when initialContent changes
+  useEffect(() => {
+    if (initialContent && initialContent !== content) {
+      console.log('Updating editor content from initialContent:', initialContent);
+      setContent(initialContent);
+      if (rteRef.current?.editor) {
+        rteRef.current.editor.commands.setContent(initialContent);
+      }
+    }
+  }, [initialContent, content]);
 
   const handleNewImageFiles = useCallback(
     (files: File[], insertPosition?: number): void => {
@@ -48,14 +64,6 @@ export default function Editor() {
         return;
       }
 
-      // For the sake of a demo, we don't have a server to upload the files to,
-      // so we'll instead convert each one to a local "temporary" object URL.
-      // This will not persist properly in a production setting. You should
-      // instead upload the image files to your server, or perhaps convert the
-      // images to bas64 if you would like to encode the image data directly
-      // into the editor content, though that can make the editor content very
-      // large. You will probably want to use the same upload function here as
-      // for the MenuButtonImageUpload `onUploadFiles` prop.
       const attributesForImageFiles = files.map((file) => ({
         src: URL.createObjectURL(file),
         alt: file.name,
@@ -66,7 +74,7 @@ export default function Editor() {
         editor: rteRef.current.editor,
       });
     },
-    [],
+    []
   );
 
   // Allow for dropping images into the editor
@@ -85,16 +93,13 @@ export default function Editor() {
           })?.pos;
 
           handleNewImageFiles(imageFiles, insertPosition);
-
-          // Return true to treat the event as handled. We call preventDefault
-          // ourselves for good measure.
           event.preventDefault();
           return true;
         }
 
         return false;
       },
-      [handleNewImageFiles],
+      [handleNewImageFiles]
     );
 
   // Allow for pasting images
@@ -106,120 +111,114 @@ export default function Editor() {
         }
 
         const pastedImageFiles = fileListToImageFiles(
-          event.clipboardData.files,
+          event.clipboardData.files
         );
         if (pastedImageFiles.length > 0) {
           handleNewImageFiles(pastedImageFiles);
-          // Return true to mark the paste event as handled. This can for
-          // instance prevent redundant copies of the same image showing up,
-          // like if you right-click and copy an image from within the editor
-          // (in which case it will be added to the clipboard both as a file and
-          // as HTML, which Tiptap would otherwise separately parse.)
           return true;
         }
 
-        // We return false here to allow the standard paste-handler to run.
         return false;
       },
-      [handleNewImageFiles],
+      [handleNewImageFiles]
     );
 
-  const [submittedContent] = useState("");
-
+  // Set up editor with content change handler
   const editor = useEditor({
     extensions: [StarterKit],
-    content: "<p>Hello <b>world</b>!</p>",
+    content: initialContent || "<p>Start writing your section content here...</p>",
+    onUpdate: ({ editor: editore }) => {
+      if (onChange) {
+        const newContent = editore.getHTML();
+        console.log('Editor content updated in section-editor.tsx:', newContent);
+        onChange(newContent);
+      }
+    },
+    editorProps: {
+      handleDrop,
+      handlePaste,
+    }
   });
 
+  // Add a direct input handler to ensure we catch all content changes
+  useEffect(() => {
+    if (!editor || !onChange) return;
+
+    const handleInput = () => {
+      const newContent = editor.getHTML();
+      console.log('Direct input handler triggered, content:', newContent);
+      onChange(newContent);
+    };
+
+    // Add event listener to the editor DOM element
+    const editorElement = document.querySelector('.ProseMirror');
+    if (editorElement) {
+      editorElement.addEventListener('input', handleInput);
+      // eslint-disable-next-line consistent-return
+      return () => {
+        editorElement.removeEventListener('input', handleInput);
+      };
+    }
+  }, [editor, onChange]);
+
   const extensions = useExtensions({
-    placeholder: "Add your own content here...",
+    placeholder: "Start writing your content here...",
   });
 
   return (
-    <>
-      <Box
-        sx={{
-          // An example of how editor styles can be overridden. In this case,
-          // setting where the scroll anchors to when jumping to headings. The
-          // scroll margin isn't built in since it will likely vary depending on
-          // where the editor itself is rendered (e.g. if there's a sticky nav
-          // bar on your site).
-          "& .ProseMirror": {
-            "& h1, & h2, & h3, & h4, & h5, & h6": {
-              scrollMarginTop: showMenuBar ? 50 : 0,
-            },
+    <Box
+      sx={{
+        height: '100%',
+        "& .ProseMirror": {
+          "& h1, & h2, & h3, & h4, & h5, & h6": {
+            scrollMarginTop: showMenuBar ? 50 : 0,
           },
-        }}
-      >
-        <RichTextEditorProvider editor={editor} >
-          <RichTextEditor
-            ref={rteRef}
-            extensions={extensions}
-            content="<p>Hello world</p>"
-            renderControls={() => (
-              <MenuControlsContainer>
-                <MenuSelectHeading />
-                <MenuDivider />
-                <MenuButtonBold />
-                <MenuButtonItalic />
-                <MenuButtonSubscript/>
-                <MenuButtonEditLink />
-                <MenuDivider />
-                <MenuButtonOrderedList />
-                <MenuButtonBulletedList />
-                <MenuDivider />
-                <MenuButtonImageUpload
-                    onUploadFiles={(files) =>
-                      // For the sake of a demo, we don't have a server to upload the files
-                      // to, so we'll instead convert each one to a local "temporary" object
-                      // URL. This will not persist properly in a production setting. You
-                      // should instead upload the image files to your server, or perhaps
-                      // convert the images to bas64 if you would like to encode the image
-                      // data directly into the editor content, though that can make the
-                      // editor content very large.
-                      files.map((file) => ({
-                        src: URL.createObjectURL(file),
-                        alt: file.name,
-                      }))
-                    }
-                  />
-                <MenuDivider />
-                <MenuButtonHorizontalRule />
-                <MenuButtonUndo />
-                <MenuButtonRedo />
-              </MenuControlsContainer>
-            )}
-          />
-        </RichTextEditorProvider>
-      <Button onClick={() => console.log(rteRef.current?.editor?.getHTML())}>
-        Log HTML
-      </Button>
-      </Box>
+        },
+      }}
+    >
+      <RichTextEditorProvider editor={editor}>
+        <RichTextEditor
+          ref={rteRef}
+          extensions={extensions}
+          content={initialContent || "<p>Start writing your section content here...</p>"}
+          onBlur={() => {
+            if (editor && onChange) {
+              const newContent = editor.getHTML();
+              console.log('Editor blurred, content:', newContent);
+              onChange(newContent);
+            }
+          }}
+          renderControls={() => (
+            <MenuControlsContainer>
+              <MenuSelectHeading />
+              <MenuDivider />
+              <MenuButtonBold />
+              <MenuButtonItalic />
+              <MenuButtonSubscript />
+              <MenuButtonEditLink />
+              <MenuDivider />
+              <MenuButtonOrderedList />
+              <MenuButtonBulletedList />
+              <MenuDivider />
+              <MenuButtonImageUpload
+                onUploadFiles={(files) =>
+                  files.map((file) => ({
+                    src: URL.createObjectURL(file),
+                    alt: file.name,
+                  }))
+                }
+              />
+              <MenuDivider />
+              <MenuButtonHorizontalRule />
+              <MenuButtonUndo />
+              <MenuButtonRedo />
+            </MenuControlsContainer>
+          )}
+        />
+      </RichTextEditorProvider>
 
-      <Typography variant="h5" sx={{ mt: 5 }}>
-        Saved result:
-      </Typography>
-
-      {submittedContent ? (
-        <>
-          <pre style={{ marginTop: 10, overflow: "auto", maxWidth: "100%" }}>
-            <code>{submittedContent}</code>
-          </pre>
-
-          <Box mt={3}>
-            <Typography variant="overline" sx={{ mb: 2 }}>
-              Read-only saved snapshot:
-            </Typography>
-
-          </Box>
-        </>
-      ) : (
-        <>
-          Press “Save” above to show the HTML markup for the editor content.
-          Typically you’d use a similar <code>editor.getHTML()</code> approach
-          to save your data in a form.
-        </>
-      )}
-    </>
+    </Box>
   );
-}
+});
+
+Editor.displayName = 'Editor';

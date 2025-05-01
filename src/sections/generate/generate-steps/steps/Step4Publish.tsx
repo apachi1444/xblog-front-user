@@ -10,7 +10,6 @@ import {
   Paper, 
   Button, 
   Select, 
-  Switch, 
   Divider, 
   MenuItem, 
   useTheme, 
@@ -18,8 +17,7 @@ import {
   Typography,
   InputLabel,
   IconButton,
-  FormControl,
-  FormControlLabel
+  FormControl
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -592,20 +590,6 @@ export function Step4Publish() {
                     <MenuItem value="content-strategy">Content Strategy</MenuItem>
                   </Select>
                 </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={<Switch defaultChecked />}
-                  label="Allow Comments"
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={<Switch defaultChecked />}
-                  label="Share on Social Media"
-                />
               </Grid>
               
               <Grid item xs={12}>

@@ -1,4 +1,5 @@
 import { api } from '.';
+import { GeminiTitleRequest, GeminiTitleResponse } from './aiGenerateApi';
 
 const GENERATE_BASE_URL = '/generate';
 
@@ -77,12 +78,55 @@ interface GeneratedImage {
 export const generateContentApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Generate title endpoint
-    generateTitle: builder.mutation<GeneratedTitle, GenerateTitleRequest>({
-      query: (data) => ({
-        url: `${GENERATE_BASE_URL}/title`,
-        method: 'POST',
-        body: data,
-      }),
+    generateTitle: builder.mutation<GeminiTitleResponse, GeminiTitleRequest>({
+      query: (data) => {
+        const apiKey = 'AIzaSyBgXmwBn-QvGmCMIU4OkkG-UPB7SKG6K-Y';
+
+        // Construct an SEO-optimized prompt for title generation
+        const prompt = `
+Generate a compelling, SEO-friendly article title about "${data.topic}".
+
+The title should:
+- Be attention-grabbing and engaging
+- Include at least one of these keywords if possible: ${data.keywords?.join(', ') || 'N/A'}
+- Be appropriate for ${data.targetAudience || 'general readers'}
+- Be between 5-12 words long
+- Include power words to drive engagement
+- Be optimized for search engines
+- Not use clickbait tactics
+- Not include quotes unless absolutely necessary
+
+Only return the title itself, nothing else.
+`;
+        console.log(prompt , "title");
+        
+
+        return {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          method: 'POST',
+          body: {
+            contents: [{
+              parts: [{ text: prompt }]
+            }],
+          },
+          transformResponse: (response: any) => {
+            console.log(response);
+            
+            const title = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Failed to generate title';
+
+            return {
+              title,
+              metadata: {
+                topic: data.topic,
+                keywords: data.keywords || [],
+                targetAudience: data.targetAudience || 'general readers',
+                generationTime: 1.2, // Mock value since Gemini doesn't return this
+                model: 'gemini-2.0-flash'
+              }
+            };
+          },
+        };
+      },
     }),
 
     // Generate meta information endpoint

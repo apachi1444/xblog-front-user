@@ -28,10 +28,10 @@ export function PreviewSEOTab({
     <CardContent sx={{ p: 2 }}>
       {/* If meta information is not generated yet, show empty state */}
       {!metaTitle && !metaDescription && !urlSlug ? (
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             py: 4,
@@ -39,10 +39,10 @@ export function PreviewSEOTab({
           }}
         >
           {/* Empty state content */}
-          <Box 
-            sx={{ 
-              width: 120, 
-              height: 120, 
+          <Box
+            sx={{
+              width: 120,
+              height: 120,
               borderRadius: '50%',
               bgcolor: 'primary.lighter',
               display: 'flex',
@@ -51,14 +51,14 @@ export function PreviewSEOTab({
               mb: 2
             }}
           >
-            <Iconify 
-              icon="eva:alert-triangle-outline" 
-              width={48} 
-              height={48} 
-              sx={{ color: 'primary.main' }} 
+            <Iconify
+              icon="eva:alert-triangle-outline"
+              width={48}
+              height={48}
+              sx={{ color: 'primary.main' }}
             />
           </Box>
-          
+
           <Typography variant="h6" sx={{ mb: 1 }}>
             You have to generate the SEO Meta information to see the full preview!
           </Typography>
@@ -117,12 +117,12 @@ export function PreviewSEOTab({
               </Box>
             </Box>
           )}
-          
+
           <Button
             variant="contained"
             color="primary"
             size="small"
-            sx={{ 
+            sx={{
               borderRadius: 28,
               px: 3
             }}
@@ -147,20 +147,20 @@ export function PreviewSEOTab({
             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
               Google Search Result Preview
             </Typography>
-            
-            <Box 
-              sx={{ 
-                p: 2, 
-                border: '1px solid', 
+
+            <Box
+              sx={{
+                p: 2,
+                border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 1,
                 bgcolor: 'background.paper'
               }}
             >
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  color: '#1a0dab', 
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: '#1a0dab',
                   fontSize: '18px',
                   mb: 0.5,
                   overflow: 'hidden',
@@ -170,23 +170,23 @@ export function PreviewSEOTab({
                   WebkitBoxOrient: 'vertical',
                 }}
               >
-                {metaTitle || title || 'Title not available'}
+                {(metaTitle || title || 'Title not available').trim()}
               </Typography>
-              
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#006621', 
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#006621',
                   fontSize: '14px',
-                  mb: 0.5 
+                  mb: 0.5
                 }}
               >
-                yourdomain.com/{urlSlug || 'url-slug'}
+                yourdomain.com/{(urlSlug || 'url-slug').trim()}
               </Typography>
-              
-              <Typography 
-                variant="body2" 
-                sx={{ 
+
+              <Typography
+                variant="body2"
+                sx={{
                   color: 'text.secondary',
                   fontSize: '14px',
                   overflow: 'hidden',
@@ -196,25 +196,25 @@ export function PreviewSEOTab({
                   WebkitBoxOrient: 'vertical',
                 }}
               >
-                {metaDescription || 'Meta description not available. Add a meta description to improve your SEO.'}
+                {(metaDescription || 'Meta description not available. Add a meta description to improve your SEO.').trim()}
               </Typography>
             </Box>
           </Box>
-          
+
           {/* SEO Metadata Summary */}
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
               SEO Metadata
             </Typography>
-            
+
             <Stack spacing={2}>
               <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
                   Title
                 </Typography>
-                <Box 
-                  sx={{ 
-                    p: 1.5, 
+                <Box
+                  sx={{
+                    p: 1.5,
                     bgcolor: 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
@@ -222,18 +222,18 @@ export function PreviewSEOTab({
                   }}
                 >
                   <Typography variant="body2">
-                    {title || 'Not set'}
+                    {(title || 'Not set').trim()}
                   </Typography>
                 </Box>
               </Box>
-              
+
               <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
                   Meta Title
                 </Typography>
-                <Box 
-                  sx={{ 
-                    p: 1.5, 
+                <Box
+                  sx={{
+                    p: 1.5,
                     bgcolor: 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
@@ -241,18 +241,18 @@ export function PreviewSEOTab({
                   }}
                 >
                   <Typography variant="body2">
-                    {metaTitle || 'Not set'}
+                    {(metaTitle || 'Not set').trim()}
                   </Typography>
                 </Box>
               </Box>
-              
+
               <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
                   Meta Description
                 </Typography>
-                <Box 
-                  sx={{ 
-                    p: 1.5, 
+                <Box
+                  sx={{
+                    p: 1.5,
                     bgcolor: 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
@@ -260,18 +260,18 @@ export function PreviewSEOTab({
                   }}
                 >
                   <Typography variant="body2">
-                    {metaDescription || 'Not set'}
+                    {(metaDescription || 'Not set').trim()}
                   </Typography>
                 </Box>
               </Box>
-              
+
               <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
                   URL Slug
                 </Typography>
-                <Box 
-                  sx={{ 
-                    p: 1.5, 
+                <Box
+                  sx={{
+                    p: 1.5,
                     bgcolor: 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
@@ -279,7 +279,7 @@ export function PreviewSEOTab({
                   }}
                 >
                   <Typography variant="body2">
-                    /{urlSlug || 'Not set'}
+                    /{(urlSlug || 'Not set').trim()}
                   </Typography>
                 </Box>
               </Box>

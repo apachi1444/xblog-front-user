@@ -1,6 +1,6 @@
 import type { Step1State } from "src/sections/generate/generate-steps/steps/Step1ContentSetup";
 
-import { useState, useCallback, useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 // Icons
 import { useTheme } from "@mui/material/styles";
@@ -24,6 +24,7 @@ import { RealTimeScoringTab } from "./RealTimeScoringTab";
 // Types
 interface SEODashboardProps {
   state: Step1State;
+  defaultTab?: number; // 0 for Preview SEO, 1 for Real-time Scoring
 }
 
 // Constants
@@ -37,7 +38,7 @@ const COLORS = {
   background: "#dbdbfa",
 };
 
-export function SEODashboard({ state }: SEODashboardProps) {
+export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
   const {
     form,
     generation: {
@@ -47,20 +48,24 @@ export function SEODashboard({ state }: SEODashboardProps) {
 
   const { watch } = form;
 
-  const title = watch('title');
-  const metaTitle = watch('metaTitle');
-  const metaDescription = watch('metaDescription');
-  const urlSlug = watch('urlSlug');
+  // Watch the values properly
+  const primaryKeyword = watch('primaryKeyword');
+  const secondaryKeywords = watch('secondaryKeywords');
+  const contentDescription = watch('contentDescription')
+  const language = watch('language')
+  const targetCountry = watch('targetCountry')
+
+  const title = watch('title') || '';
+  const metaTitle = watch('metaTitle') || '';
+  const metaDescription = watch('metaDescription') || '';
+  const urlSlug = watch('urlSlug') || '';
   const theme = useTheme();
 
-  // Get real-time SEO scoring - only recalculate when form values change
   const { progressSections, overallScore } = useSEOScoring();
 
-  // State management
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(defaultTab);
   const [showContent, setShowContent] = useState(true);
 
-  // Event handlers
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   }, []);
@@ -69,7 +74,7 @@ export function SEODashboard({ state }: SEODashboardProps) {
     setShowContent(prevState => !prevState);
   }, []);
 
-  const isGenerateDisabled = false;
+  const isGenerateDisabled = !primaryKeyword || !secondaryKeywords || !contentDescription || !language || !targetCountry;
 
   // Memoize tab content to prevent unnecessary re-renders
   const tabContent = useMemo(() => {

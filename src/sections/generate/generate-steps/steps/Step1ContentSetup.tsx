@@ -1,10 +1,11 @@
 import type React from "react"
 import type { UseFormReturn } from "react-hook-form"
 
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@mui/material/styles"
-import { Box, Grid, Stack, alpha, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
+import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
 
 import { Iconify } from "src/components/iconify"
 import { FormInput } from "src/components/generate-article/FormInput"
@@ -69,12 +70,27 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   const language = watch("language")
   const targetCountry = watch("targetCountry")
   const primaryKeyword = watch("primaryKeyword")
-  const secondaryKeywords = watch("secondaryKeywords") || []
-  
+  const secondaryKeywords = watch("secondaryKeywords")
+  const contentDescription = watch("contentDescription")
+
   const title = watch("title")
   const metaTitle = watch("metaTitle")
   const metaDescription = watch("metaDescription")
   const urlSlug = watch("urlSlug")
+
+  // Log form values for debugging
+  useEffect(() => {
+    console.log('Form values in Step1ContentSetup:', {
+      language,
+      targetCountry,
+      primaryKeyword,
+      secondaryKeywords,
+      title,
+      metaTitle,
+      metaDescription,
+      urlSlug
+    });
+  }, [language, targetCountry, primaryKeyword, secondaryKeywords, title, metaTitle, metaDescription, urlSlug]);
 
   // Compute disabled states
   const isPrimaryKeywordDisabled = !language || !targetCountry
@@ -110,30 +126,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
     setValue("primaryKeyword", value, { shouldValidate: true })
   }
 
-  const formValues = form.getValues();
   const isGenerateDisabled = false;
-
-  // Define a style for important containers - Enhanced for more attraction
-  const importantContainerSx = {
-    // Subtle gradient background
-    background: `linear-gradient(145deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.primary.main, 0.02)})`,
-    // Slightly more defined border
-    border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
-    borderRadius: theme.shape.borderRadius * 1.5, // Slightly more rounded corners
-    p: 2.5, // Increase padding slightly
-    mb: 2.5, // Increase margin bottom slightly
-    boxShadow: `0 2px 12px ${alpha(theme.palette.primary.main, 0.05)}`, // Add a subtle shadow
-    transition: 'all 0.3s ease-in-out',
-    '&:hover': {
-      boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.08)}`, // Enhance shadow on hover
-      borderColor: alpha(theme.palette.primary.main, 0.25),
-    },
-    // Style the title within the container if possible (assuming FormContainer applies sx to its root)
-    '& .FormContainer-title': { // Hypothetical class name for the title, adjust if needed
-        color: theme.palette.primary.dark,
-        fontWeight: 600,
-    }
-  };
 
   return (
     <Grid container spacing={1}>
@@ -141,37 +134,52 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
       <Grid item xs={12}>
         <FormContainer title={t('generate.step1.titles.languageRegion')}>
           <FormDropdown
-            {...register("language")}
+            {...register("language", {
+              onChange: (e) => {
+                setValue("language", e.target.value, { shouldValidate: true });
+              }
+            })}
             label="Language"
             options={languages}
             error={!!errors.language}
             helperText={errors.language?.message}
+            value={language}
           />
 
           <FormDropdown
-            {...register("targetCountry")}
+            {...register("targetCountry", {
+              onChange: (e) => {
+                setValue("targetCountry", e.target.value, { shouldValidate: true });
+              }
+            })}
             label="Target Country"
             options={countries}
             error={!!errors.targetCountry}
             helperText={errors.targetCountry?.message}
+            value={targetCountry} // Explicitly set the value
           />
         </FormContainer>
       </Grid>
 
       {/* Keywords section - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title={t('generate.step1.titles.keywords')} layout="column" sx={importantContainerSx}>
+        <FormContainer title={t('generate.step1.titles.keywords')} layout="column">
           <Box sx={{ width: "100%" }}>
             <FormInput
-              {...register("primaryKeyword")}
+              {...register("primaryKeyword", {
+                onChange: (e) => {
+                  setValue("primaryKeyword", e.target.value, { shouldValidate: true });
+                }
+              })}
               label="Primary Keyword"
               disabled={isPrimaryKeywordDisabled}
               tooltipText="Enter the main keyword for your content"
               placeholder="Enter primary keyword"
               fullWidth
               error={!!errors.primaryKeyword}
-              onChange={handlePrimaryKeywordChange} // Add explicit onChange handler
+              onChange={handlePrimaryKeywordChange}
               helperText={errors.primaryKeyword ? "Primary keyword is required" : ""}
+              value={primaryKeyword} // Explicitly set the value
             />
           </Box>
 
@@ -333,14 +341,14 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
       {/* Content Description - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title={t('generate.step1.titles.contentDescription')} sx={importantContainerSx}>
+        <FormContainer title={t('generate.step1.titles.contentDescription')}>
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("contentDescription", {
                 required: true,
                 onChange: (e) => {
-                  setValue("contentDescription", e.target.value, { 
-                    shouldValidate: true 
+                  setValue("contentDescription", e.target.value, {
+                    shouldValidate: true
                   });
                 }
               })}
@@ -349,6 +357,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               placeholder="Enter a detailed description of your content"
               multiline
               rows={4}
+              value={contentDescription}
               fullWidth
               error={!!errors.contentDescription}
               helperText={errors.contentDescription ? "Content description is required" : ""}

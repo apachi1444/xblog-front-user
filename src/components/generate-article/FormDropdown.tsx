@@ -3,13 +3,13 @@ import type { SelectProps } from '@mui/material';
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 
-import { 
-  Box, 
-  Select, 
-  Tooltip, 
-  MenuItem, 
-  useTheme, 
-  Typography, 
+import {
+  Box,
+  Select,
+  Tooltip,
+  MenuItem,
+  useTheme,
+  Typography,
   FormControl,
   FormHelperText
 } from '@mui/material';
@@ -30,24 +30,24 @@ interface FormDropdownProps extends Omit<SelectProps, 'renderValue'> {
   helperText?: React.ReactNode;
 }
 
-export function FormDropdown({ 
-  label, 
-  options, 
-  tooltipText, 
+export function FormDropdown({
+  label,
+  options,
+  tooltipText,
   icon,
   placeholder,
   error,
   helperText,
-  ...selectProps 
+  ...selectProps
 }: FormDropdownProps) {
   const theme = useTheme();
-  
+
   return (
     <FormControl fullWidth size="small" error={error}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-        <Typography 
+        <Typography
           variant="caption"
-          sx={{ 
+          sx={{
             fontWeight: 500,
             color: error ? theme.palette.error.main : theme.palette.text.primary,
             letterSpacing: '0.5px',
@@ -81,20 +81,40 @@ export function FormDropdown({
             py: 0.5
           }
         }}
+        onChange={(e) => {
+          // Log the value for debugging
+          console.log(`Dropdown ${label} changed to:`, e.target.value);
+
+          // Call the original onChange handler from selectProps
+          if (selectProps.onChange) {
+            // @ts-ignore - The onChange handler might have different parameter requirements
+            selectProps.onChange(e);
+          }
+
+          // Add a small delay to allow the form to update before validation
+          setTimeout(() => {
+            // Trigger validation immediately after selection
+            if (selectProps.name && selectProps.onChange) {
+              // This will trigger validation for this field
+              const event = new Event('change', { bubbles: true });
+              document.getElementsByName(selectProps.name)[0]?.dispatchEvent(event);
+            }
+          }, 0);
+        }}
         renderValue={(selected) => {
           if (!selected) {
             return (
-              <Typography 
-                sx={{ 
-                  opacity: 0.3, 
-                  fontSize: theme.typography.caption.fontSize 
+              <Typography
+                sx={{
+                  opacity: 0.3,
+                  fontSize: theme.typography.caption.fontSize
                 }}
               >
                 {placeholder || 'Select an option'}
               </Typography>
             );
           }
-          
+
           const option = options.find(opt => opt.value === selected);
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

@@ -114,9 +114,7 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
     maxScore: item.maxScore
   });
 
-  // Handle action click (Fix or Optimize) - Opens the modal
   const handleActionClick = (item: ChecklistItem) => {
-    // Ensure there's a mapping before trying to open the modal
     if (FIELD_MAPPING[item.id]) {
         setSelectedItem(item);
         setModalOpen(true);
@@ -128,14 +126,12 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
   // --- Define the Optimization Handler ---
   const handleOptimizeField = useCallback(async (fieldType: string, currentValue: string): Promise<string> => {
     console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
-    // Replace with your actual API endpoint and request structure
-    const apiUrl = '/api/optimize-content'; // Placeholder API endpoint
 
     try {
       return "test !"
 
     } catch (error: any) {
-  
+
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
   }, [/* Add dependencies like 'watch' if context is needed */]);
@@ -152,46 +148,128 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
         bgcolor: "white",
       }}
     >
-      {/* SEO Score */}
+      {/* SEO Score - Enhanced Version */}
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "space-between",
-          mb: 2,
+          justifyContent: "center",
+          mb: 3,
+          p: 2,
+          borderRadius: 2,
+          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+          boxShadow: `0 4px 20px 0 rgba(0,0,0,0.05)`,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: `linear-gradient(90deg, ${COLORS.error} 0%, ${COLORS.warning} 50%, ${COLORS.success} 100%)`,
+          }
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          SEO Score
+        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+          SEO Performance Score
         </Typography>
-        <Box sx={{ position: "relative", display: "inline-flex" }}>
-          <CircularProgress
-            variant="determinate"
-            value={score}
-            size={60}
-            thickness={5}
-            sx={{ color: getScoreColor() }}
-          />
+
+        <Box sx={{
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          my: 1
+        }}>
+          {/* Background circle */}
+          <Box sx={{
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              ${getScoreColor()} ${score}%,
+              ${theme.palette.grey[200]} ${score}% 100%
+            )`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 0 15px 0 ${getScoreColor()}40`,
+            transition: 'all 0.5s ease-in-out',
+          }}>
+            {/* Inner white circle */}
+            <Box sx={{
+              width: 100,
+              height: 100,
+              borderRadius: '50%',
+              bgcolor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              boxShadow: '0 0 10px 0 rgba(0,0,0,0.1) inset',
+            }}>
+              <Typography
+                variant="h4"
+                component="div"
+                sx={{
+                  fontWeight: 700,
+                  color: getScoreColor(),
+                  lineHeight: 1,
+                  mb: 0.5
+                }}
+              >
+                {score}
+              </Typography>
+              <Typography
+                variant="caption"
+                component="div"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.secondary,
+                  lineHeight: 1,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                points
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Score rating text */}
+        <Box sx={{
+          mt: 1,
+          py: 0.5,
+          px: 2,
+          borderRadius: 10,
+          bgcolor: `${getScoreColor()}20`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
           <Box
+            component="span"
             sx={{
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-              position: "absolute",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: getScoreColor(),
+              display: 'inline-block'
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              color: getScoreColor()
             }}
           >
-            <Typography
-              variant="body2"
-              component="div"
-              sx={{ fontWeight: 600, fontSize: "1rem" }}
-            >
-              {score}
-            </Typography>
-          </Box>
+            {score < 33 ? 'Needs Improvement' : score < 66 ? 'Good' : 'Excellent'}
+          </Typography>
         </Box>
       </Box>
 
@@ -243,7 +321,7 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
             />
 
             {expandedSections[section.id] && (
-              <Stack spacing={1} sx={{ mt: 2 }}>                
+              <Stack spacing={1} sx={{ mt: 2 }}>
                 {section.items.map((item) => (
                   <ItemSection
                     key={item.id}

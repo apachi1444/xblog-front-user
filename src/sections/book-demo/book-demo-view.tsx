@@ -1,11 +1,12 @@
 import { z } from "zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { TextFieldElement } from "react-hook-form-mui"
 import { useForm, FormProvider } from "react-hook-form"
-import { Mail, Users, Calendar, Building, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Mail, Users, Calendar, Building, HelpCircle, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react"
+import { EmailSentAnimation } from "src/components/animations/EmailSentAnimation"
 
 import {
   Box,
@@ -52,6 +53,8 @@ export function BookDemoView() {
   const [activeStep, setActiveStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
+  const [showEmailAnimation, setShowEmailAnimation] = useState(false)
+  const [demoScheduled, setDemoScheduled] = useState(false)
 
   const methods = useForm<BookDemoFormData>({
     resolver: zodResolver(bookDemoSchema),
@@ -123,8 +126,19 @@ export function BookDemoView() {
     setIsSubmitting(true)
 
     try {
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Show email animation
+      setShowEmailAnimation(true)
+
+      // Wait for animation to complete before showing confirmation step
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      // Hide animation and show confirmation step
+      setShowEmailAnimation(false)
       setActiveStep(2)
+      setDemoScheduled(true)
     } catch (error) {
       console.error("Error submitting form:", error)
     } finally {
@@ -281,8 +295,8 @@ export function BookDemoView() {
                 },
               }}
             >
-              {steps.map((label) => (
-                <Step key={label}>
+              {steps.map((label, index) => (
+                <Step key={label} completed={index < activeStep || (index === 2 && demoScheduled)}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
@@ -480,6 +494,13 @@ export function BookDemoView() {
             </Paper>
           </Box>
         </motion.div>
+
+        {/* Email Sent Animation */}
+        <EmailSentAnimation
+          show={showEmailAnimation}
+          onComplete={() => setShowEmailAnimation(false)}
+          message={t('demo.emailSent.title', 'Demo Scheduled!')}
+        />
 
         {/* Video Dialog - For full-screen viewing */}
         <Dialog open={videoDialogOpen} onClose={() => setVideoDialogOpen(false)} maxWidth="md" fullWidth>

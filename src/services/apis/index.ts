@@ -317,16 +317,10 @@ const setupMocks = () => {
     });
 
     // Mock title generation endpoint
-    mock.onPost('/ai/generate/title').reply((config) => {
+    mock.onPost('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBgXmwBn-QvGmCMIU4OkkG-UPB7SKG6K-Y').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
         const { topic, keywords = [], targetAudience = 'general readers' } = requestData;
-
-        if (!topic) {
-          return [400, { error: 'Topic is required for title generation' }];
-        }
-
-        // Generate a mock title based on the topic and keywords
         let title = '';
 
         // Simple algorithm to generate a title
@@ -356,6 +350,9 @@ const setupMocks = () => {
           title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
         }
 
+        console.log("response of the title ", title);
+
+
         // Add a simulated delay to make it feel more realistic
         return [
           200,
@@ -373,6 +370,73 @@ const setupMocks = () => {
       } catch (error) {
         console.error('Error in title generation mock:', error);
         return [500, { error: 'Internal server error in title generation' }];
+      }
+    });
+
+    // Mock section generation endpoint
+    mock.onPost('/generate/sections').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { title, keyword } = requestData;
+
+        // Create mock sections based on the title and keyword
+        const mockSections = [
+          {
+            id: 'section-1',
+            title: `Introduction to ${keyword}`,
+            content: `This section provides an overview of ${keyword} and why it's important.`
+          },
+          {
+            id: 'section-2',
+            title: `Understanding ${keyword} Fundamentals`,
+            content: `Learn the core concepts and principles behind ${keyword}.`
+          },
+          {
+            id: 'section-3',
+            title: `Benefits of ${keyword}`,
+            content: `Discover the key advantages and benefits of implementing ${keyword} in your strategy.`
+          },
+          {
+            id: 'section-4',
+            title: `Best Practices for ${keyword}`,
+            content: `Follow these industry-proven best practices to maximize your success with ${keyword}.`
+          },
+          {
+            id: 'section-5',
+            title: `Common Challenges with ${keyword} and How to Overcome Them`,
+            content: `Address the typical obstacles you might face when working with ${keyword} and learn effective solutions.`
+          },
+          {
+            id: 'section-6',
+            title: `Case Studies: Successful ${keyword} Implementation`,
+            content: `Real-world examples of organizations that have successfully implemented ${keyword}.`
+          },
+          {
+            id: 'section-7',
+            title: `Tools and Resources for ${keyword}`,
+            content: `A curated list of the best tools, platforms, and resources to help you with ${keyword}.`
+          },
+          {
+            id: 'section-8',
+            title: `Future Trends in ${keyword}`,
+            content: `Explore upcoming developments and future directions in the field of ${keyword}.`
+          },
+          {
+            id: 'section-9',
+            title: `Conclusion: Taking Your ${keyword} Strategy to the Next Level`,
+            content: `Summarize key points and provide next steps for advancing your ${keyword} implementation.`
+          }
+        ];
+
+        return [
+          200,
+          {
+            sections: mockSections,
+            score: Math.floor(Math.random() * 30) + 70 // Random score between 70-100
+          }
+        ];
+      } catch (error) {
+        return [500, { error: 'Internal server error in section generation' }];
       }
     });
 

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { Box, Chip, Stack, Typography, Collapse, Divider, IconButton } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
@@ -26,6 +28,8 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
   onEditSection,
   onDeleteSection
 }) => {
+  const [expanded, setExpanded] = useState(false);
+
   const statusStyles: Record<Status, StatusStyle> = {
     "Not Started": {
       bgcolor: '#FFEBEE',
@@ -46,48 +50,59 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
 
   const currentStyle = statusStyles[section.status];
 
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpanded(!expanded);
+  };
+
   return (
     <Box sx={{ width: '100%', position: "relative" }}>
       <Box
         sx={{
           width: '100%',
           bgcolor: '#F1F2F7',
-          borderRadius: "5px",
+          borderRadius: expanded ? "5px 5px 0 0" : "5px",
           border: "0.5px solid #A0AFF8",
+          borderBottom: expanded ? 0 : "0.5px solid #A0AFF8",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           px: 2,
           py: 1,
+          cursor: 'pointer',
+          '&:hover': {
+            bgcolor: '#E8EAFB',
+          },
         }}
+        onClick={handleToggleExpand}
       >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <DragIndicatorIcon 
-            sx={{ 
-              width: "16px", 
-              height: "16px", 
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ flexGrow: 1 }}>
+          <DragIndicatorIcon
+            sx={{
+              width: "16px",
+              height: "16px",
               color: '#A0AFF8',
               cursor: 'grab',
-            }} 
+            }}
+            onMouseDown={(e) => e.stopPropagation()} // Prevent expand toggle when dragging
           />
           <Typography
             sx={{
               fontFamily: "'Poppins', Helvetica",
               fontSize: "12px",
-              fontWeight: 400,
+              fontWeight: 500,
               letterSpacing: "0.5px",
               lineHeight: "1.2",
               color: 'text.primary',
               flexGrow: 1,
               mr: 2,
             }}
-            noWrap
           >
             {section.title}
           </Typography>
         </Stack>
 
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
           <Chip
             label={section.status}
             sx={{
@@ -101,33 +116,151 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
               fontSize: "8px",
               letterSpacing: "0.5px",
             }}
+            onClick={(e) => e.stopPropagation()} // Prevent expand toggle when clicking on chip
           />
+
+          <IconButton
+            size="small"
+            onClick={handleToggleExpand}
+            sx={{ p: 0.5 }}
+          >
+            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+          </IconButton>
+
           <Stack direction="row" spacing={1}>
             {onEditSection && (
-              <EditIcon 
-                onClick={() => onEditSection(section)}
-                sx={{ 
-                  width: "18px", 
-                  height: "18px", 
+              <EditIcon
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent expand toggle
+                  onEditSection(section);
+                }}
+                sx={{
+                  width: "18px",
+                  height: "18px",
                   color: '#5969cf',
                   cursor: 'pointer',
-                }} 
+                }}
               />
             )}
             {onDeleteSection && (
-              <DeleteOutlineIcon 
-                onClick={() => onDeleteSection(section.id)}
-                sx={{ 
-                  width: "20px", 
-                  height: "20px", 
+              <DeleteOutlineIcon
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent expand toggle
+                  onDeleteSection(section.id);
+                }}
+                sx={{
+                  width: "20px",
+                  height: "20px",
                   color: '#D32F2F',
                   cursor: 'pointer',
-                }} 
+                }}
               />
             )}
           </Stack>
         </Stack>
       </Box>
+
+      {/* Collapsible content preview */}
+      <Collapse in={expanded}>
+        <Box
+          sx={{
+            width: '100%',
+            bgcolor: '#FFFFFF',
+            borderRadius: "0 0 5px 5px",
+            border: "0.5px solid #A0AFF8",
+            borderTop: 0,
+            p: 2,
+          }}
+        >
+          {section.description && (
+            <>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: 'text.secondary',
+                  mb: 0.5,
+                }}
+              >
+                Description:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "12px",
+                  color: 'text.secondary',
+                  mb: 1.5,
+                }}
+              >
+                {section.description}
+              </Typography>
+              <Divider sx={{ my: 1.5 }} />
+            </>
+          )}
+
+          {section.content ? (
+            <>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: 'text.secondary',
+                  mb: 0.5,
+                }}
+              >
+                Content Preview:
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "12px",
+                  color: 'text.primary',
+                  mb: 1,
+                  fontStyle: 'italic',
+                  maxHeight: '100px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: 'vertical',
+                }}
+              >
+                {section.content}
+              </Typography>
+
+              <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'primary.main',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onEditSection) onEditSection(section);
+                  }}
+                >
+                  Edit full content
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "12px",
+                color: 'text.secondary',
+                fontStyle: 'italic',
+              }}
+            >
+              No content has been added to this section yet. Click the edit button to add content.
+            </Typography>
+          )}
+        </Box>
+      </Collapse>
     </Box>
   );
 };

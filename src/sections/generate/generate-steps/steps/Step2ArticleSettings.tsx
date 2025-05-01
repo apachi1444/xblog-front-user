@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, CircularProgress } from '@mui/material';
+import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -12,10 +13,11 @@ import { FormContainer } from '../../../../components/generate-article/FormConta
 interface Step2ArticleSettingsProps {
   onNextStep?: () => void;
   onGenerateTableOfContents?: (tableOfContents: any) => void;
+  isGeneratingSections?: boolean;
 }
 
 
-export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: Step2ArticleSettingsProps) {
+export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents, isGeneratingSections }: Step2ArticleSettingsProps) {
   // Options for dropdowns
   const articleTypeOptions = [
     { value: "how-to", label: "How-to guide" },
@@ -107,14 +109,14 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents }: 
   const [toneOfVoice, setToneOfVoice] = useState(toneOptions[0].value);
   const [pointOfView, setPointOfView] = useState(povOptions[0].value);
   const [aiContentCleaning, setAiContentCleaning] = useState(aiCleaningOptions[0].value);
-  
+
   const [imageQuality, setImageQuality] = useState(imageQualityOptions[0].value);
   const [imagePlacement, setImagePlacement] = useState(imagePlacementOptions[0].value);
   const [imageStyle, setImageStyle] = useState(imageStyleOptions[0].value);
   const [numberOfImages, setNumberOfImages] = useState(numberOptions[0].value);
   const [includeVideos, setIncludeVideos] = useState(false);
   const [numberOfVideos, setNumberOfVideos] = useState(videoNumberOptions[0].value);
-  
+
   const [internalLinking, setInternalLinking] = useState(linkingOptions[0].value);
   const [externalLinking, setExternalLinking] = useState(externalLinkingOptions[0].value);
 
@@ -219,9 +221,9 @@ const validateFields = () => {
     internalLinking: !internalLinking,
     externalLinking: !externalLinking,
   };
-  
+
   setErrors(newErrors);
-  
+
   // Return true if all fields are valid
   return !Object.values(newErrors).some(error => error);
 };
@@ -230,73 +232,22 @@ const validateFields = () => {
 const handleGenerateTableOfContentsWithValidation = async () => {
   if (validateFields()) {
     setIsGenerating(true);
-    
+
     try {
-      // Simulate API call with a timeout
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Generate fake table of contents data
-      const generatedTableOfContents = {
-        title: "How to Optimize Your Website for Better SEO Performance",
-        sections: [
-          {
-            id: 1,
-            title: "Introduction to SEO Optimization",
-            content: "Brief overview of SEO and why it matters for website performance."
-          },
-          {
-            id: 2,
-            title: "Understanding Search Engine Algorithms",
-            content: "Explanation of how search engines rank websites and what factors influence rankings."
-          },
-          {
-            id: 3,
-            title: "On-Page SEO Techniques",
-            subsections: [
-              { id: 3.1, title: "Keyword Research and Implementation", content: "How to find and use the right keywords." },
-              { id: 3.2, title: "Content Optimization", content: "Creating content that ranks well in search engines." },
-              { id: 3.3, title: "Meta Tags and Descriptions", content: "Optimizing HTML elements for better SEO." }
-            ]
-          },
-          {
-            id: 4,
-            title: "Off-Page SEO Strategies",
-            content: "Building backlinks and improving domain authority."
-          },
-          {
-            id: 5,
-            title: "Technical SEO Improvements",
-            subsections: [
-              { id: 5.1, title: "Site Speed Optimization", content: "Making your website load faster." },
-              { id: 5.2, title: "Mobile Responsiveness", content: "Ensuring your site works well on all devices." },
-              { id: 5.3, title: "URL Structure and Site Architecture", content: "Creating a logical site structure." }
-            ]
-          },
-          {
-            id: 6,
-            title: "Measuring SEO Success",
-            content: "Tools and metrics to track your SEO performance."
-          },
-          {
-            id: 7,
-            title: "Conclusion",
-            content: "Summary of key points and next steps for improving your website's SEO."
-          }
-        ]
-      };
-      
-      // Pass the generated data to the parent component
+      // Instead of simulating the API call here, we'll use the parent component's function
+      // which already has the animation and error handling
       if (onGenerateTableOfContents) {
-        onGenerateTableOfContents(generatedTableOfContents);
+        onGenerateTableOfContents({
+          title: "Generated Table of Contents",
+          sections: [] // The parent component will handle the actual section generation
+        });
       }
-      
+
       // Set generated to true
       setIsGenerated(true);
-      
-      // After successful API call, navigate to next step
-      if (onNextStep) {
-        onNextStep();
-      }
+
+      // Note: We don't need to call onNextStep() here as the parent component will handle it
+      // after the animation completes
     } catch (error) {
       console.error('Error generating table of contents:', error);
     } finally {
@@ -308,11 +259,11 @@ const handleGenerateTableOfContentsWithValidation = async () => {
   // Handle generate table of contents
   const handleGenerateTableOfContents = async () => {
     setIsGenerating(true);
-    
+
     try {
       // Simulate API call with a timeout
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // Generate fake table of contents data
       const generatedTableOfContents = {
         title: "How to Optimize Your Website for Better SEO Performance",
@@ -362,15 +313,15 @@ const handleGenerateTableOfContentsWithValidation = async () => {
           }
         ]
       };
-      
+
       // Pass the generated data to the parent component
       if (onGenerateTableOfContents) {
         onGenerateTableOfContents(generatedTableOfContents);
       }
-      
+
       // Set generated to true
       setIsGenerated(true);
-      
+
       // After successful API call, navigate to next step
       if (onNextStep) {
         onNextStep();
@@ -384,15 +335,21 @@ const handleGenerateTableOfContentsWithValidation = async () => {
 
   return (
     <Grid container spacing={3}>
+      {/* Section Generation Animation */}
+      <SectionGenerationAnimation
+        show={isGeneratingSections || false}
+        onComplete={() => {}} // We don't need to do anything on complete as the parent component handles it
+      />
+
       <Grid item xs={12}>
         <FormContainer title="Article Settings">
           {/* Main Settings Section - Grid of 4 */}
           <Box sx={{ width: '100%', mb: 4 }}>
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                mb: 2, 
-                fontWeight: 600, 
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
                 color: 'text.primary',
                 display: 'flex',
                 alignItems: 'center',
@@ -403,7 +360,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Iconify icon="mdi:cog-outline" width={20} height={20} />
               Main Settings
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
@@ -417,7 +374,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.articleType ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Article Size"
@@ -430,7 +387,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.articleSize ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Tone of Voice"
@@ -443,7 +400,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.toneOfVoice ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Point of View"
@@ -456,7 +413,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.pointOfView ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="AI Content Cleaning"
@@ -471,16 +428,16 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               </Grid>
             </Grid>
           </Box>
-          
+
           <Divider sx={{ my: 1, width: '100%' }} />
-          
+
           {/* Media Settings Section - Grid of 4 */}
           <Box sx={{ width: '100%', mb: 4 }}>
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                mb: 2, 
-                fontWeight: 600, 
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
                 color: 'text.primary',
                 display: 'flex',
                 alignItems: 'center',
@@ -491,7 +448,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Iconify icon="mdi:image-outline" width={20} height={20} />
               Media Settings
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
@@ -505,7 +462,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.imageQuality ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Image Placement"
@@ -518,7 +475,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.imagePlacement ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Image Style"
@@ -531,7 +488,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.imageStyle ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Number of Images"
@@ -544,7 +501,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.numberOfImages ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <FormControlLabel
@@ -559,7 +516,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   />
                 </Box>
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormDropdown
                   label="Number of Videos"
@@ -573,16 +530,16 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               </Grid>
             </Grid>
           </Box>
-          
+
           <Divider sx={{ my: 1, width: '100%' }} />
-          
+
           {/* Linking Settings Section - Grid of 2 */}
           <Box sx={{ width: '100%', mb: 4 }}>
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
-                mb: 2, 
-                fontWeight: 600, 
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
                 color: 'text.primary',
                 display: 'flex',
                 alignItems: 'center',
@@ -593,7 +550,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               <Iconify icon="mdi:link-variant" width={20} height={20} />
               Linking Settings
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <FormDropdown
@@ -607,7 +564,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
                   helperText={errors.internalLinking ? "Required field" : ""}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6}>
                 <FormDropdown
                   label="External Linking"
@@ -622,7 +579,7 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               </Grid>
             </Grid>
           </Box>
-          
+
           {/* Generate Button */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <Button
@@ -630,17 +587,17 @@ const handleGenerateTableOfContentsWithValidation = async () => {
               color="primary"
               size="large"
               onClick={handleGenerateTableOfContentsWithValidation}
-              disabled={isGenerating}
-              startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
-              sx={{ 
+              disabled={isGenerating || isGeneratingSections}
+              startIcon={isGenerating || isGeneratingSections ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
+              sx={{
                 borderRadius: '28px',
                 px: 4
               }}
             >
-              {isGenerating ? 'Generating...' : 'Generate Table of Contents'}
+              {isGenerating || isGeneratingSections ? 'Generating...' : 'Generate Table of Contents'}
             </Button>
           </Box>
-        
+
         </FormContainer>
       </Grid>
     </Grid>

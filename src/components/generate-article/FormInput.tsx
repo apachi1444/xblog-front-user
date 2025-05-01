@@ -3,14 +3,14 @@ import type { TextFieldProps } from '@mui/material';
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 
-import { 
-  Box, 
-  Tooltip, 
-  TextField, 
-  Typography, 
-  useTheme, 
-  FormControl, 
-  FormHelperText 
+import {
+  Box,
+  Tooltip,
+  TextField,
+  Typography,
+  useTheme,
+  FormControl,
+  FormHelperText
 } from '@mui/material';
 
 interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
@@ -23,25 +23,25 @@ interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
   helperText?: React.ReactNode;
 }
 
-export function FormInput({ 
-  label, 
-  tooltipText, 
+export function FormInput({
+  label,
+  tooltipText,
   tooltipPlacement = 'top',
   icon,
   endComponent,
   error,
   helperText,
-  ...textFieldProps 
+  ...textFieldProps
 }: FormInputProps) {
   const theme = useTheme();
-  
+
   return (
     <FormControl fullWidth error={error}>
       <Box sx={{ flex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-          <Typography 
+          <Typography
             variant="caption"
-            sx={{ 
+            sx={{
               fontWeight: 500,
               color: error ? theme.palette.error.main : theme.palette.text.primary,
               letterSpacing: '0.5px',
@@ -79,13 +79,20 @@ export function FormInput({
                 }
               }
             }}
+            // Log the value for debugging
+            onChange={(e) => {
+              console.log(`Input ${label} changed to:`, e.target.value);
+              if (textFieldProps.onChange) {
+                textFieldProps.onChange(e);
+              }
+            }}
             {...textFieldProps}
           />
-          
+
           {/* End component positioned outside the TextField */}
           {endComponent}
         </Box>
-        
+
         {helperText && (
           <FormHelperText>{helperText}</FormHelperText>
         )}

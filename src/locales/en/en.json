@@ -271,6 +271,10 @@
         "step3": "We'll send you a reminder 1 hour before the scheduled demo",
         "bookAnother": "Book Another Demo"
       },
+      "emailSent": {
+        "title": "Demo Scheduled!",
+        "message": "We've sent you a confirmation email with all the details."
+      },
       "video": {
         "title": "Why Book a Demo?",
         "description": "See how our team provides exceptional support and quick responses to help you maximize your results.",
