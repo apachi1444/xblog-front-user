@@ -1,7 +1,7 @@
 import type React from "react"
 import type { UseFormReturn } from "react-hook-form"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence } from "framer-motion";
 
@@ -12,6 +12,7 @@ import { Iconify } from "src/components/iconify"
 import { FormInput } from "src/components/generate-article/FormInput"
 import { FormDropdown } from "src/components/generate-article/FormDropdown"
 import { FormContainer } from "src/components/generate-article/FormContainer"
+import { KeywordInput } from "src/components/generate-article/KeywordInput"
 import { GenerationLoadingAnimation } from "src/components/generate-article/GenerationLoadingAnimation"
 
 import type { Step1FormData } from "../../schemas"
@@ -31,7 +32,7 @@ export interface Step1State {
     }
     secondaryKeywords: {
       isGenerating: boolean
-      handleAddKeyword: () => void
+      handleAddKeyword: (arg: string) => void
       handleDeleteKeyword: (arg: string) => void
       onGenerate: () => Promise<void>
     }
@@ -53,7 +54,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
       secondaryKeywords: {
         isGenerating: isGeneratingSecondaryKeywords,
         onGenerate: onGenerateSecondaryKeywords,
-        handleAddKeyword,
+        handleAddKeyword: originalHandleAddKeyword,
         handleDeleteKeyword,
       },
     },
@@ -128,6 +129,33 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
     setValue("primaryKeyword", value, { shouldValidate: true })
   }
 
+  const [secondaryKeywordValue, setSecondaryKeywordValue] = useState("")
+
+  // Handle adding a secondary keyword
+  const handleAddKeyword = (keyword: string) => {
+    if (!keyword.trim()) return;
+
+    // Ensure secondaryKeywords is always an array
+    const currentKeywords = Array.isArray(secondaryKeywords) ? secondaryKeywords : [];
+
+    // Check if keyword already exists
+    if (currentKeywords.includes(keyword.trim())) {
+      return;
+    }
+
+    // Add the new keyword to the array
+    const updatedKeywords = [...currentKeywords, keyword.trim()];
+    setValue("secondaryKeywords", updatedKeywords, { shouldValidate: true });
+
+    // Clear the input field
+    setSecondaryKeywordValue("");
+
+    // Call the original handler if needed
+    if (typeof originalHandleAddKeyword === 'function') {
+      originalHandleAddKeyword(keyword.trim());
+    }
+  }
+
   const isGenerateDisabled = false;
 
   return (
@@ -185,16 +213,16 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             />
           </Box>
 
-          {/* Secondary Keywords */}
           <Box sx={{ width: "100%" }}>
             <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
               <FormInput
-                {...register("secondaryKeywords")}
+                value={secondaryKeywordValue}
                 disabled={isSecondaryKeywordsDisabled}
                 label="Secondary Keywords"
                 placeholder="Add secondary keywords manually or generate with AI"
                 tooltipText="Add relevant secondary keywords to improve SEO ranking"
                 fullWidth
+                onChange={(e) => { setSecondaryKeywordValue(e.target.value)} }
                 error={errors.secondaryKeywords && secondaryKeywords.length === 0}
                 helperText={
                   errors.secondaryKeywords && secondaryKeywords.length === 0
@@ -205,7 +233,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 endComponent={
                   <Tooltip title="Add keyword manually">
                     <Box
-                      onClick={handleAddKeyword}
+                      onClick={() => {
+                        handleAddKeyword(secondaryKeywordValue);
+                      }}
                       sx={{
                         display: "flex",
                         alignItems: "center",
@@ -229,9 +259,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   </Tooltip>
                 }
               />
+
             </Box>
 
-            {/* AI Suggestion Button - Conditionally Rendered */}
             {primaryKeyword && (
               <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, minHeight: theme.spacing(4) }}>
                 <Button
@@ -290,14 +320,14 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 flexWrap: "wrap",
                 gap: 1,
                 mt: 1.5,
-                minHeight: secondaryKeywords.length > 0 ? "auto" : 0,
-                maxHeight: secondaryKeywords.length > 0 ? "200px" : 0,
-                opacity: secondaryKeywords.length > 0 ? 1 : 0,
+                minHeight: secondaryKeywords?.length > 0 ? "auto" : 0,
+                maxHeight: secondaryKeywords?.length > 0 ? "200px" : 0,
+                opacity: secondaryKeywords?.length > 0 ? 1 : 0,
                 overflow: "auto",
                 transition: "all 0.3s ease-in-out",
               }}
             >
-              {secondaryKeywords.map((keyword, index) => (
+              {secondaryKeywords?.map((keyword, index) => (
                 <Box
                   key={index}
                   sx={{

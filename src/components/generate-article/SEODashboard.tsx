@@ -1,4 +1,4 @@
-import type { Step1State } from "src/sections/generate/generate-steps/steps/Step1ContentSetup";
+import type { Step1State } from "src/sections/generate/generate-steps/steps/step-one-content-setup";
 
 import { useMemo, useState, useCallback } from "react";
 

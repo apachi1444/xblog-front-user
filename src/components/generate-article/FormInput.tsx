@@ -6,9 +6,9 @@ import { HelpCircle } from 'lucide-react';
 import {
   Box,
   Tooltip,
+  useTheme,
   TextField,
   Typography,
-  useTheme,
   FormControl,
   FormHelperText
 } from '@mui/material';
@@ -62,6 +62,7 @@ export function FormInput({
         {/* Input field with end component layout */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
           <TextField
+            value={textFieldProps.value}
             fullWidth
             size="small"
             variant="outlined"
@@ -81,7 +82,6 @@ export function FormInput({
             }}
             // Log the value for debugging
             onChange={(e) => {
-              console.log(`Input ${label} changed to:`, e.target.value);
               if (textFieldProps.onChange) {
                 textFieldProps.onChange(e);
               }

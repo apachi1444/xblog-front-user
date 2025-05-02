@@ -22,15 +22,15 @@ import { SEODashboard } from 'src/components/generate-article/SEODashboard';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 
 import { step1Schema, generateArticleSchema } from './schemas';
-import { Step4Publish } from './generate-steps/steps/Step4Publish';
+import { Step4Publish } from './generate-steps/steps/step-four-publish';
 import { SectionEditorScreen } from './edit-section/SectionEditorScreen';
-import { Step1ContentSetup } from './generate-steps/steps/Step1ContentSetup';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
-import { Step2ArticleSettings } from './generate-steps/steps/Step2ArticleSettings';
-import { Step3ContentStructuring } from './generate-steps/steps/Step3ContentStructuring';
+import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
+import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
+import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
 import type { Step1FormData, GenerateArticleFormData } from './schemas';
-import type { Step1State } from './generate-steps/steps/Step1ContentSetup';
+import type { Step1State } from './generate-steps/steps/step-one-content-setup';
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
@@ -317,14 +317,34 @@ export function GeneratingView() {
   };
 
   // Create a function to handle adding keywords
-  const handleAddKeyword = () => {
-    // Implementation for adding keywords
-    console.log('Add keyword');
+  const handleAddKeyword = (newValue : string) => {
+    if (!newValue.trim()) return;
+
+    // Ensure currentKeywords is always an array
+    const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
+
+    // Check if the keyword already exists to avoid duplicates
+    if (Array.isArray(currentKeywords) && currentKeywords.includes(newValue.trim())) {
+      return;
+    }
+
+    // Set the new keywords array
+    setValue('secondaryKeywords', Array.isArray(currentKeywords)
+      ? [...currentKeywords, newValue.trim()]
+      : [newValue.trim()]
+    );
   };
 
   // Create a function to handle deleting keywords
   const handleDeleteKeyword = (keyword: string) => {
-    const currentKeywords = step1Form.getValues('secondaryKeywords');
+    // Ensure currentKeywords is always an array
+    const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
+
+    if (!Array.isArray(currentKeywords)) {
+      setValue('secondaryKeywords', []);
+      return;
+    }
+
     const updatedKeywords = currentKeywords.filter(k => k !== keyword);
     setValue('secondaryKeywords', updatedKeywords);
   };
@@ -449,7 +469,7 @@ export function GeneratingView() {
   return (
     <DashboardContent>
       {/* IMPORTANT: Wrap everything with the step1Form FormProvider instead of methods */}
-      <FormProvider {...step1Form}>
+      <FormProvider {...methods}>
         {/* Publishing animation overlay */}
         {isPublishing && (
           <LoadingAnimation message="Publishing your content..." />
