@@ -20,7 +20,6 @@ import {
 import { Iconify } from 'src/components/iconify';
 import { SEODashboard } from 'src/components/generate-article/SEODashboard';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
-import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
 import { step1Schema, generateArticleSchema } from './schemas';
 import { Step4Publish } from './generate-steps/steps/Step4Publish';
@@ -100,6 +99,9 @@ export function GeneratingView() {
         return;
       }
 
+      // I wanna add a delay here to show the animation properly !
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
       // Generate title
       const generatedTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
 
@@ -107,8 +109,6 @@ export function GeneratingView() {
       setValue('title', generatedTitle);
       setIsTitleGenerated(true);
 
-      // Log success
-      console.log('Title generated successfully:', generatedTitle);
     } catch (error) {
       console.error('Error generating title:', error);
       toast.error('Failed to generate title');
@@ -127,15 +127,11 @@ export function GeneratingView() {
         return;
       }
 
-      // Call API to generate meta information
-      const { data } = await generateMeta({
-        title: step1Form.getValues('title') || "",
-        primaryKeyword,
-        language,
-      });
+      // I wanna add a delay here to show the animation properly !
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Fallback data if API fails
-      const metaData = data || {
+      const metaData = {
         metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
         metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
         urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
@@ -147,22 +143,7 @@ export function GeneratingView() {
       setValue('urlSlug', metaData.urlSlug);
       setIsMetaGenerated(true);
 
-      // Log success
-      console.log('Meta information generated successfully:', metaData);
     } catch (error) {
-      console.error('Error generating meta information:', error);
-
-      // Use fallback data on error
-      const fallbackMeta = {
-        metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
-        metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
-        urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
-      };
-
-      setValue('metaTitle', fallbackMeta.metaTitle);
-      setValue('metaDescription', fallbackMeta.metaDescription);
-      setValue('urlSlug', fallbackMeta.urlSlug);
-      setIsMetaGenerated(true);
       toast.success('Generated meta with fallback data');
     } finally {
       setIsGeneratingMeta(false);

@@ -3,6 +3,7 @@ import type { UseFormReturn } from "react-hook-form"
 
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { AnimatePresence } from "framer-motion";
 
 import { useTheme } from "@mui/material/styles"
 import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material"
@@ -11,6 +12,7 @@ import { Iconify } from "src/components/iconify"
 import { FormInput } from "src/components/generate-article/FormInput"
 import { FormDropdown } from "src/components/generate-article/FormDropdown"
 import { FormContainer } from "src/components/generate-article/FormContainer"
+import { GenerationLoadingAnimation } from "src/components/generate-article/GenerationLoadingAnimation"
 
 import type { Step1FormData } from "../../schemas"
 
@@ -132,7 +134,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
     <Grid container spacing={1}>
       {/* Language & Region section - Enhanced */}
       <Grid item xs={12}>
-        <FormContainer title={t('generate.step1.titles.languageRegion')}>
+        <FormContainer title={t('generate.step1.titles.languageRegion', 'Language & Region')}>
           <FormDropdown
             {...register("language", {
               onChange: (e) => {
@@ -163,7 +165,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
       {/* Keywords section - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title={t('generate.step1.titles.keywords')} layout="column">
+        <FormContainer title={t('generate.step1.titles.keywords', 'Keywords')} layout="column">
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("primaryKeyword", {
@@ -341,7 +343,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
       {/* Content Description - Enhanced */}
       <Grid item xs={12} sx={{ mt: -2 }}>
-        <FormContainer title={t('generate.step1.titles.contentDescription')}>
+        <FormContainer title={t('generate.step1.titles.contentDescription', 'Content Description')}>
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("contentDescription", {
@@ -412,10 +414,22 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             >
               {isGeneratingTitle ? "Generating..." : "Generate Title"}
             </Button>
+
+            <AnimatePresence>
+              {isGeneratingTitle && (
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', zIndex: 10 }}>
+                  <GenerationLoadingAnimation
+                    isLoading={isGeneratingTitle}
+                    message="Generating your title..."
+                    size="medium"
+                  />
+                </Box>
+              )}
+            </AnimatePresence>
           </Box>
         ) : (
           <Box sx={{ width: "100%", mb: 1 }}>
-            <FormContainer title={t('generate.step1.titles.generatedTitle')}>
+            <FormContainer title={t('generate.step1.titles.generatedTitle', 'Generated Title')}>
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
                   {...register("title")}
@@ -438,6 +452,19 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                     {isGeneratingTitle ? "Regenerating..." : "Regenerate Article Title"}
                   </Button>
                 </Box>
+
+                {/* Title Regeneration Loading Animation */}
+                <AnimatePresence>
+                  {isGeneratingTitle && (
+                    <Box sx={{ mt: 2, position: 'relative' }}>
+                      <GenerationLoadingAnimation
+                        isLoading={isGeneratingTitle}
+                        message="Regenerating your title..."
+                        size="medium"
+                      />
+                    </Box>
+                  )}
+                </AnimatePresence>
               </Box>
             </FormContainer>
           </Box>
@@ -482,9 +509,22 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             >
               {isGeneratingMeta ? "Generating..." : "Generate Meta Info"}
             </Button>
+
+            {/* Meta Generation Loading Animation */}
+            <AnimatePresence>
+              {isGeneratingMeta && (
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '90%', zIndex: 10 }}>
+                  <GenerationLoadingAnimation
+                    isLoading={isGeneratingMeta}
+                    message="Generating SEO meta information..."
+                    size="medium"
+                  />
+                </Box>
+              )}
+            </AnimatePresence>
           </Box>
         ) : (
-          <FormContainer title="SEO Meta Information">
+          <FormContainer title={t('generate.step1.titles.seoMetaInfo', 'SEO Meta Information')}>
             <Stack spacing={1} sx={{ width: "100%" }}>
               {/* Meta Title */}
               <FormInput
@@ -531,6 +571,19 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   {isGeneratingMeta ? "Regenerating..." : "Regenerate All"}
                 </Button>
               </Box>
+
+              {/* Meta Regeneration Loading Animation */}
+              <AnimatePresence>
+                {isGeneratingMeta && (
+                  <Box sx={{ mt: 2, position: 'relative' }}>
+                    <GenerationLoadingAnimation
+                      isLoading={isGeneratingMeta}
+                      message="Regenerating SEO meta information..."
+                      size="medium"
+                    />
+                  </Box>
+                )}
+              </AnimatePresence>
             </Stack>
           </FormContainer>
         )}
