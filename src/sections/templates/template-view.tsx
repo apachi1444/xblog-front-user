@@ -31,7 +31,7 @@ import { ARTICLE_TEMPLATES, TEMPLATE_CATEGORIES } from './template-data';
 // ----------------------------------------------------------------------
 
 // Feature flag to control whether the Templates feature is locked or available
-const IS_FEATURE_LOCKED = true;
+const IS_FEATURE_LOCKED = false;
 
 export function TemplateView() {
   const navigate = useNavigate();
