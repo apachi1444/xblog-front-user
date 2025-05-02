@@ -53,20 +53,20 @@ export function SignInView() {
   const testMode = useSelector(selectIsTestMode);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
-  
+
   const [googleAuth, { isLoading: isGoogleAuthLoading }] = useGoogleAuthMutation();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const [getCurrentUser] = useLazyGetCurrentUserQuery();
-  
+
   // Setup form with react-hook-form and zod validation
   const formMethods = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: '', password: '' },
     mode: 'onBlur',
   });
-  
+
   useFormErrorHandler(formMethods.formState.errors);
-  
+
   // Update form values when test mode changes
   useEffect(() => {
     if (testMode) {
@@ -77,20 +77,20 @@ export function SignInView() {
       formMethods.setValue('password', '');
     }
   }, [testMode, formMethods]);
-  
+
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTimeout = setTimeout(() => {
         router.replace(onboardingCompleted ? '/' : '/onboarding');
       }, 1000);
-      
+
       return () => clearTimeout(redirectTimeout);
     }
-    
+
     // Explicit return for when the condition isn't met
     return undefined;
   }, [isAuthenticated, onboardingCompleted, router]);
-  
+
   // Simulate login with mock data in test mode
   const handleTestModeLogin = useCallback(() => {
     dispatch(setCredentials({
@@ -100,11 +100,11 @@ export function SignInView() {
     dispatch(setOnboardingCompleted(false));
     toast.success(t('auth.testMode.redirecting'));
   }, [dispatch, t]);
-  
-  
+
+
   // Inside the SignInView component, add this hook
   const  { data : plansData } = useGetPlansQuery();
-  
+
   // Update the handleAuthSuccess function to fetch plans
   const handleAuthSuccess = useCallback(async (accessToken: string) => {
     if (testMode) {
@@ -112,14 +112,14 @@ export function SignInView() {
       router.replace('/onboarding'); // Move navigation here
       return;
     }
-    
+
     try {
       const userData = await getCurrentUser().unwrap();
       const isOnboardingCompleted = userData?.is_completed_onboarding ?? false;
-      
+
       dispatch(setCredentials({accessToken, user: userData}));
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
-      
+
       try {
         if (plansData && plansData.plans) {
           dispatch(setAvailablePlans(plansData.plans));
@@ -127,7 +127,7 @@ export function SignInView() {
       } catch (error) {
         toast.error('Failed to fetch plans. Using fallback plans.');
       }
-      
+
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
     } catch (error) {
       if (testMode) {
@@ -138,66 +138,66 @@ export function SignInView() {
       }
     }
   }, [testMode, handleTestModeLogin, router, getCurrentUser, dispatch, plansData]);
-  
+
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {
     if (testMode) {
       handleTestModeLogin();
       return;
     }
-    
+
     try {
-      const result = await login({ 
-        email: data.email.trim(), 
-        password: data.password.trim() 
+      const result = await login({
+        email: data.email.trim(),
+        password: data.password.trim()
       }).unwrap();
-      
+
       if (!result?.token_access) {
         throw new Error('Invalid login response');
       }
-      
+
       toast.success('Successfully signed in!');
       await handleAuthSuccess(result.token_access);
     } catch (error) {
       toast.error('Login failed. Please check your credentials and try again.');
     }
   }, [login, handleAuthSuccess, testMode, handleTestModeLogin]);
-  
+
   // Handle Google authentication
   const handleGoogleSuccess = useCallback(async (response: CredentialResponse) => {
     if (testMode) {
       handleTestModeLogin();
       return;
     }
-    
+
     try {
       const jwtToken = response.credential || "";
       const result = await googleAuth(jwtToken).unwrap();
-      
+
       if (!result?.token_access) {
         throw new Error('Invalid authentication response');
       }
-      
+
       toast.success('Successfully signed in with Google!');
       await handleAuthSuccess(result.token_access);
     } catch (error) {
       toast.error('Failed to authenticate with Google. Please try again.');
     }
   }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
-  
+
   const handleToggleTestMode = useCallback(() => {
     dispatch(setTestMode(!testMode));
     toast.success(
-      !testMode 
-        ? t('auth.testMode.enabled') 
+      !testMode
+        ? t('auth.testMode.enabled')
         : t('auth.testMode.disabled')
     );
   }, [dispatch, t, testMode]);
-  
+
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
   }, [router]);
-  
+
   const handleNavigateToForgotPassword = useCallback(() => {
     router.push('/forgot-password');
   }, [router]);
@@ -215,9 +215,9 @@ export function SignInView() {
       }}
     >
       {/* Top row with test mode toggle and language switcher */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
         position: 'absolute',
         top: 12,
@@ -243,7 +243,7 @@ export function SignInView() {
             }
           />
         </Tooltip>
-        
+
         <LanguageSwitcher sx={{ position: 'relative', top: 0, right: 0 }} />
       </Box>
 
@@ -257,11 +257,11 @@ export function SignInView() {
       </Typography>
 
       {testMode && (
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            mb: 2, 
-            textAlign: 'center', 
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 2,
+            textAlign: 'center',
             color: 'warning.main',
             bgcolor: 'warning.lighter',
             py: 1,
@@ -321,8 +321,8 @@ export function SignInView() {
           loading={isLoginLoading && !testMode}
           sx={{ mb: 2 }}
         >
-          {testMode 
-            ? t('auth.signin.enterTestMode', 'Enter Test Dashboard') 
+          {testMode
+            ? t('auth.signin.enterTestMode', 'Enter Test Dashboard')
             : t('auth.signin.signIn', 'Sign In')}
         </LoadingButton>
       </FormContainer>
@@ -336,24 +336,27 @@ export function SignInView() {
           </Divider>
 
           {isGoogleAuthLoading ? (
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               height: 48,
               width: '100%'
             }}>
               <CircularProgress size={24} color="primary" />
             </Box>
           ) : (
-            <GoogleLogin
+            <Box sx={{ width: '100%' }}>
+              <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 text="signin_with"
                 theme="filled_black"
                 onError={() => toast.error("Google Login Failed")}
                 useOneTap={false}
                 context="signin"
+                width="100%"
               />
+            </Box>
           )}
         </>
       )}
