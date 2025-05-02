@@ -346,7 +346,7 @@ export function SignInView() {
               <CircularProgress size={24} color="primary" />
             </Box>
           ) : (
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: '100%' }} id="google-login-container">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 text="signin_with"
@@ -355,6 +355,8 @@ export function SignInView() {
                 useOneTap={false}
                 context="signin"
                 width="100%"
+                auto_select={false}
+                prompt_parent_id="google-login-container"
               />
             </Box>
           )}
