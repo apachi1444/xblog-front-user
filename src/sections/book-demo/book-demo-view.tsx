@@ -1,12 +1,11 @@
 import { z } from "zod"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { TextFieldElement } from "react-hook-form-mui"
 import { useForm, FormProvider } from "react-hook-form"
-import { Mail, Users, Calendar, Building, HelpCircle, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react"
-import { EmailSentAnimation } from "src/components/animations/EmailSentAnimation"
+import { Mail, Users, Calendar, Building, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
 import {
   Box,
@@ -31,6 +30,7 @@ import {
 import { DashboardContent } from "src/layouts/dashboard"
 
 import { FormDropdown } from "src/components/generate-article/FormDropdown"
+import { EmailSentAnimation } from "src/components/animations/EmailSentAnimation"
 
 // Demo video URL
 const DEMO_VIDEO = "https://www.youtube.com/embed/example-demo-video"

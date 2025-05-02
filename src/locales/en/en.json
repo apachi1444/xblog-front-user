@@ -152,7 +152,28 @@
         "save": "Save",
         "cancel": "Cancel",
         "select": "Select",
-        "selected": "Selected"
+        "selected": "Selected",
+        "success": "Success!"
+      },
+      "templates": {
+        "title": "Article Templates",
+        "subtitle": "Choose from our SEO-optimized templates to create high-quality content",
+        "createFromScratch": "Create from Scratch",
+        "searchPlaceholder": "Search templates...",
+        "tabs": {
+          "all": "All",
+          "popular": "Popular",
+          "new": "New"
+        },
+        "premiumOnly": "Premium Only",
+        "preview": "Preview",
+        "benefits": "Benefits",
+        "viewPreview": "View Preview",
+        "continueToPurchase": "Continue to Purchase",
+        "coming_soon": "Coming Soon!",
+        "locked_message": "Templates feature is currently in development and will be available soon. Stay tuned for updates!",
+        "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
+        "notify_me": "Notify Me When Available"
       },
       "profile": {
         "title": "Profile",
@@ -238,7 +259,11 @@
         "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",
         "sample_response": "I'm currently in development. Soon I'll be able to help you with content creation, SEO optimization, and more!",
         "message_placeholder": "Type your message here...",
-        "typing": "AI is typing..."
+        "typing": "AI is typing...",
+        "coming_soon": "Coming Soon!",
+        "locked_message": "This feature is currently in development and will be available soon. Stay tuned for updates!",
+        "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
+        "notify_me": "Notify Me When Available"
       },
       "demo": {
       "title": "Book a Demo",
