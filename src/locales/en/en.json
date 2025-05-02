@@ -18,7 +18,8 @@
         "calendar": "Calendar",
         "templates": "Templates",
         "upgrade_license": "Upgrade license",
-        "book_demo": "Book Demo"
+        "book_demo": "Book Demo",
+        "ai_assistance_chat": "AI Assistance chat"
       },
       "upgrade": {
         "unlockFeatures": "Want to unlock more features?",
@@ -231,6 +232,13 @@
       "common": {
         "save": "Save",
         "cancel": "Cancel"
+      },
+      "ai_chat": {
+        "title": "AI Assistance Chat",
+        "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",
+        "sample_response": "I'm currently in development. Soon I'll be able to help you with content creation, SEO optimization, and more!",
+        "message_placeholder": "Type your message here...",
+        "typing": "AI is typing..."
       },
       "demo": {
       "title": "Book a Demo",

@@ -1,6 +1,6 @@
 import type { Step1State } from "src/sections/generate/generate-steps/steps/step-one-content-setup";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 
 // Icons
 import { useTheme } from "@mui/material/styles";
@@ -25,6 +25,8 @@ import { RealTimeScoringTab } from "./RealTimeScoringTab";
 interface SEODashboardProps {
   state: Step1State;
   defaultTab?: number; // 0 for Preview SEO, 1 for Real-time Scoring
+  onCollapseChange?: (collapsed: boolean) => void;
+  isCollapsed?: boolean;
 }
 
 // Constants
@@ -38,7 +40,12 @@ const COLORS = {
   background: "#dbdbfa",
 };
 
-export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
+export function SEODashboard({
+  state,
+  defaultTab = 0,
+  onCollapseChange,
+  isCollapsed
+}: SEODashboardProps) {
   const {
     form,
     generation: {
@@ -64,15 +71,29 @@ export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
   const { progressSections, overallScore } = useSEOScoring();
 
   const [tabValue, setTabValue] = useState(defaultTab);
-  const [showContent, setShowContent] = useState(true);
+  // Use the isCollapsed prop if provided, otherwise use internal state
+  const [showContent, setShowContent] = useState(isCollapsed !== undefined ? !isCollapsed : true);
+
+  // Update internal state when isCollapsed prop changes
+  useEffect(() => {
+    if (isCollapsed !== undefined) {
+      setShowContent(!isCollapsed);
+    }
+  }, [isCollapsed]);
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   }, []);
 
   const handleToggleContent = useCallback(() => {
-    setShowContent(prevState => !prevState);
-  }, []);
+    const newShowContent = !showContent;
+    setShowContent(newShowContent);
+
+    // Notify parent component of collapse state change
+    if (onCollapseChange) {
+      onCollapseChange(!newShowContent);
+    }
+  }, [showContent, onCollapseChange]);
 
   const isGenerateDisabled = !primaryKeyword || !secondaryKeywords || !contentDescription || !language || !targetCountry;
 
@@ -123,6 +144,8 @@ export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
       transition: theme.transitions.create(['width'], {
         duration: theme.transitions.duration.standard,
       }),
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       <Card
         sx={{
@@ -131,6 +154,9 @@ export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
           borderRadius: "10px",
           overflow: "visible",
           transition: theme.transitions.create(["height"]),
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
         }}
       >
         {/* Tabs Header - Always visible */}
@@ -217,7 +243,8 @@ export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
               alignItems: "center",
               borderLeft: `0.5px solid ${COLORS.border}`,
               borderRight: `0.5px solid ${COLORS.border}`,
-              borderBottom: `0.5px solid ${COLORS.border}`
+              borderBottom: `0.5px solid ${COLORS.border}`,
+              flexGrow: 1,
             }}
           >
             <Typography
@@ -226,10 +253,13 @@ export function SEODashboard({ state, defaultTab = 0 }: SEODashboardProps) {
                 color: theme.palette.text.secondary,
                 transform: "rotate(-90deg)",
                 letterSpacing: 1,
-                fontWeight: 500
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                position: 'absolute',
+                top: '50%',
               }}
             >
-              Expand
+              SEO Dashboard
             </Typography>
           </Box>
         )}

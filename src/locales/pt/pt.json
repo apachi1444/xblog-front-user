@@ -7,7 +7,8 @@
       "calendar": "Calendário",
       "templates": "Modelos",
       "upgrade_license": "Atualizar licença",
-      "book_demo": "Agendar demonstração"
+      "book_demo": "Agendar demonstração",
+      "ai_assistance_chat": "Chat de assistência IA"
     },
     "auth": {
       "signup": {

@@ -31,6 +31,7 @@ export const BookDemo = lazy(() => import('src/pages/book-demo'));
 export const CalendarPage = lazy(() => import('src/pages/calendar'));
 export const TemplatePage = lazy(() => import('src/pages/templates'));
 export const AddStorePage = lazy(() => import('src/pages/add-store'));
+export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
 
 // ----------------------------------------------------------------------
 
@@ -89,6 +90,7 @@ export function Router() {
             { path: 'stores/add', element: <AddStorePage /> },
             { path: 'calendar', element: <CalendarPage /> },
             { path: 'templates', element: <TemplatePage /> },
+            { path: 'ai-chat', element: <AIChatPage /> },
           ],
         },
       ],

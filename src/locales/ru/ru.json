@@ -7,7 +7,8 @@
       "calendar": "Календарь",
       "templates": "Шаблоны",
       "upgrade_license": "Обновить лицензию",
-      "book_demo": "Заказать демо"
+      "book_demo": "Заказать демо",
+      "ai_assistance_chat": "Чат с ИИ-ассистентом"
     },
     "auth": {
       "signup": {

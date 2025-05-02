@@ -18,7 +18,8 @@
       "calendar": "Calendrier",
       "templates": "Modèles",
       "upgrade_license": "Mettre à niveau la licence",
-      "book_demo": "Réserver une démo"
+      "book_demo": "Réserver une démo",
+      "ai_assistance_chat": "Chat d'assistance IA"
     },
     "auth": {
       "signup": {

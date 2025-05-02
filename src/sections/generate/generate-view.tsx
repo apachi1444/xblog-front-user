@@ -430,9 +430,10 @@ export function GeneratingView() {
 
   const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
 
-  // Additional handlers
+  // Handler for SEO dashboard collapse state change
   const handleSEODashboardCollapseChange = (collapsed: boolean) => {
     setIsSEODashboardCollapsed(collapsed);
+    console.log('SEO Dashboard collapsed:', collapsed);
   };
 
   const handleEditSection = (section: SectionItem) => {
@@ -549,7 +550,14 @@ export function GeneratingView() {
         </Box>
 
         <form onSubmit={methods.handleSubmit(submitSteppedForm)}>
-          <Box sx={{ display: 'flex', width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              width: '100%',
+              position: 'relative',
+              minHeight: 'calc(100vh - 200px)', // Adjust based on your layout
+            }}
+          >
             {/* Forms on the left - adjust width based on SEO dashboard visibility and collapse state */}
             <Box
               sx={{
@@ -560,7 +568,7 @@ export function GeneratingView() {
                 transition: () => theme.transitions.create(['width'], {
                   duration: theme.transitions.duration.standard,
                 }),
-                pr: isSEODashboardVisible ? 2 : 0
+                pr: isSEODashboardVisible && !isSEODashboardCollapsed ? 2 : 0
               }}
             >
               <Box sx={{ width: '100%' }}>
@@ -576,11 +584,17 @@ export function GeneratingView() {
                   transition: () => theme.transitions.create(['width'], {
                     duration: theme.transitions.duration.standard,
                   }),
+                  position: isSEODashboardCollapsed ? 'absolute' : 'relative',
+                  right: isSEODashboardCollapsed ? 0 : 'auto',
+                  top: isSEODashboardCollapsed ? 0 : 'auto',
+                  height: isSEODashboardCollapsed ? '100%' : 'auto',
                 }}
               >
                 <SEODashboard
                   state={step1State}
                   defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
+                  onCollapseChange={handleSEODashboardCollapseChange}
+                  isCollapsed={isSEODashboardCollapsed}
                 />
               </Box>
             )}

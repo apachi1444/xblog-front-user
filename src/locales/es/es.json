@@ -18,7 +18,8 @@
       "calendar": "Calendario",
       "templates": "Plantillas",
       "upgrade_license": "Actualizar licencia",
-      "book_demo": "Reservar demo"
+      "book_demo": "Reservar demo",
+      "ai_assistance_chat": "Chat de asistencia IA"
     },
     "auth": {
       "signup": {
@@ -293,6 +294,13 @@
       "unscheduledSuccessfully": "Artículo desprogramado con éxito",
       "schedulingFailed": "Error al programar artículos. Por favor intenta de nuevo.",
       "unschedulingFailed": "Error al desprogramar artículo. Por favor intenta de nuevo."
+    },
+    "ai_chat": {
+      "title": "Chat de Asistencia IA",
+      "welcome_message": "¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte hoy?",
+      "sample_response": "Actualmente estoy en desarrollo. ¡Pronto podré ayudarte con la creación de contenido, optimización SEO y más!",
+      "message_placeholder": "Escribe tu mensaje aquí...",
+      "typing": "IA está escribiendo..."
     }
   }
 }

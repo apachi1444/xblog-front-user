@@ -45,4 +45,9 @@ export const bottomNavData = [
     path: '/book-demo',
     icon: icon('mdi:book-open'),
   },
+  {
+    title: 'AI Assistance chat',
+    path: '/ai-chat',
+    icon: icon('mdi:robot-outline'),
+  },
 ];
