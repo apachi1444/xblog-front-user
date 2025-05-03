@@ -1,7 +1,9 @@
 import 'src/global.css';
 
+import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { I18nextProvider } from 'react-i18next';
+import { ErrorBoundary } from 'react-error-boundary';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import { useTheme } from '@mui/material/styles';
@@ -14,6 +16,7 @@ import { CustomThemeProvider } from 'src/theme/theme-provider';
 
 import i18n from './locales/i18n';
 import { ToastProvider } from './contexts/ToastContext';
+import { ErrorFallback } from './components/error-boundary';
 import { AuthPersistence } from './components/auth/auth-persistence';
 
 // Get Google OAuth client ID from environment variables
@@ -21,27 +24,45 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 console.log(GOOGLE_CLIENT_ID);
 
+// Function to log errors to a monitoring service
+const logError = (error: Error, info: React.ErrorInfo) => {
+  // In a production app, you would send this to your error tracking service
+  // Example: Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
+  console.error('Error caught by ErrorBoundary:', error);
+  console.error('Component stack:', info.componentStack);
+};
+
 export default function App() {
-  useAxiosAuth()
+  useAxiosAuth();
+
   return (
-    <GoogleOAuthProvider clientId="116914976486-bkkcrqu1202aau2g8s1pcfbdq59066uj.apps.googleusercontent.com">
-      <I18nextProvider i18n={i18n}>  
-        <CustomThemeProvider>
-          <ToasterWithTheme />
-          <AuthPersistence />
-          <ToastProvider>
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={logError}
+      onReset={() => {
+        // Optional: Reset app state here if needed
+        window.location.href = '/';
+      }}
+    >
+      <GoogleOAuthProvider clientId="116914976486-bkkcrqu1202aau2g8s1pcfbdq59066uj.apps.googleusercontent.com">
+        <I18nextProvider i18n={i18n}>
+          <CustomThemeProvider>
+            <ToasterWithTheme />
+            <AuthPersistence />
+            <ToastProvider>
               <Router />
-          </ToastProvider>
-        </CustomThemeProvider>
-      </I18nextProvider>
-    </GoogleOAuthProvider>
+            </ToastProvider>
+          </CustomThemeProvider>
+        </I18nextProvider>
+      </GoogleOAuthProvider>
+    </ErrorBoundary>
   );
 }
 
 // Separate component to access theme context
 function ToasterWithTheme() {
   const theme = useTheme();
-  
+
   return (
     <Toaster
       position="top-center"
@@ -51,8 +72,8 @@ function ToasterWithTheme() {
         duration: 500,
         removeDelay: 500,
         style: {
-          background: theme.palette.mode === 'dark' 
-            ? theme.palette.background.paper 
+          background: theme.palette.mode === 'dark'
+            ? theme.palette.background.paper
             : theme.palette.background.default,
           color: theme.palette.text.primary,
           border: `1px solid ${theme.palette.divider}`,

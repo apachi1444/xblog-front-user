@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import Box from '@mui/material/Box';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
@@ -8,6 +9,7 @@ import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { AuthGuard } from 'src/guards/AuthGuard';
 import { DashboardLayout } from 'src/layouts/dashboard';
+import { ErrorFallback } from 'src/components/error-boundary';
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +34,7 @@ export const CalendarPage = lazy(() => import('src/pages/calendar'));
 export const TemplatePage = lazy(() => import('src/pages/templates'));
 export const AddStorePage = lazy(() => import('src/pages/add-store'));
 export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
+export const ErrorTestPage = lazy(() => import('src/pages/error-test'));
 
 // ----------------------------------------------------------------------
 
@@ -55,7 +58,9 @@ export function Router() {
       element: (
         <AuthGuard>
           <Suspense fallback={renderFallback}>
-            <OnBoardingPage />
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <OnBoardingPage />
+            </ErrorBoundary>
           </Suspense>
         </AuthGuard>
       ),
@@ -64,7 +69,9 @@ export function Router() {
       element: (
         <AuthGuard>
           <Suspense fallback={renderFallback}>
-            <Outlet />
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <Outlet />
+            </ErrorBoundary>
           </Suspense>
         </AuthGuard>
       ),
@@ -72,25 +79,140 @@ export function Router() {
         {
           element: (
             <DashboardLayout>
-              <Outlet />
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <Outlet />
+              </ErrorBoundary>
             </DashboardLayout>
           ),
           children: [
-            { index: true, element: <HomePage /> },
-            { path: 'user', element: <UserPage /> },
-            { path: 'generate', element: <GenerateFlow /> },
-            { path: 'create', element: <CreatePage /> },
-            { path: 'products', element: <ProductsPage /> },
-            { path: 'blog', element: <BlogPage /> },
-            { path: 'profile', element: <ProfilePage /> },
-            { path: 'settings', element: <SettingsPage /> },
-            { path: 'upgrade-license', element: <UpgradeLicense /> },
-            { path: 'book-demo', element: <BookDemo /> },
-            { path: 'stores', element: <StoresPage /> },
-            { path: 'stores/add', element: <AddStorePage /> },
-            { path: 'calendar', element: <CalendarPage /> },
-            { path: 'templates', element: <TemplatePage /> },
-            { path: 'ai-chat', element: <AIChatPage /> },
+            {
+              index: true,
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <HomePage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'user',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <UserPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'generate',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <GenerateFlow />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'create',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <CreatePage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'products',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ProductsPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'blog',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <BlogPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'profile',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ProfilePage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'settings',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <SettingsPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'upgrade-license',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <UpgradeLicense />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'book-demo',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <BookDemo />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'stores',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <StoresPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'stores/add',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <AddStorePage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'calendar',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <CalendarPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'templates',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <TemplatePage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'ai-chat',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <AIChatPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'error-test',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ErrorTestPage />
+                </ErrorBoundary>
+              )
+            },
           ],
         },
       ],
@@ -100,38 +222,50 @@ export function Router() {
     {
       path: 'sign-in',
       element: (
-        <AuthLayout>
-          <SignInPage />
-        </AuthLayout>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <AuthLayout>
+            <SignInPage />
+          </AuthLayout>
+        </ErrorBoundary>
       ),
     },
     {
       path: 'sign-up',
       element: (
-        <AuthLayout>
-          <SignUpPage />
-        </AuthLayout>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <AuthLayout>
+            <SignUpPage />
+          </AuthLayout>
+        </ErrorBoundary>
       ),
     },
     {
       path: 'forgot-password',
       element: (
-        <AuthLayout>
-          <ForgotPasswordPage />
-        </AuthLayout>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <AuthLayout>
+            <ForgotPasswordPage />
+          </AuthLayout>
+        </ErrorBoundary>
       ),
     },
     {
       path: 'reset-password',
       element: (
-        <AuthLayout>
-          <ResetPasswordPage />
-        </AuthLayout>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <AuthLayout>
+            <ResetPasswordPage />
+          </AuthLayout>
+        </ErrorBoundary>
       ),
     },
     {
       path: '404',
-      element: <Page404 />,
+      element: (
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Page404 />
+        </ErrorBoundary>
+      ),
     },
     {
       path: '*',

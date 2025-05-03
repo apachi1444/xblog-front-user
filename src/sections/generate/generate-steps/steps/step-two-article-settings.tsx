@@ -1,5 +1,4 @@
-import toast from 'react-hot-toast';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -126,7 +125,7 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents, is
   ];
 
   // Initialize form with react-hook-form
-  const { control, handleSubmit, watch, formState: { errors } } = useForm<ArticleSettingsFormData>({
+  const { control, handleSubmit, watch } = useForm<ArticleSettingsFormData>({
     defaultValues: {
       articleType: articleTypeOptions[0].value,
       articleSize: articleSizeOptions[0].value,
@@ -153,26 +152,25 @@ export function Step2ArticleSettings({ onNextStep, onGenerateTableOfContents, is
     setIsGenerating(true);
 
     try {
+      // Call the parent component's function to generate table of contents
       if (onGenerateTableOfContents) {
-        // Pass the form data to the parent component
-        onGenerateTableOfContents({
-          title: "Generated Table of Contents",
-          sections: [],
-          settings: data // Include all form data
-        });
+        onGenerateTableOfContents(data);
       }
     } catch (error) {
-      toast.error(t('article.error.generateTableOfContents', 'Error generating table of contents'));
-    } finally {
-      setIsGenerating(false);
+      console.error('Error generating table of contents:', error);
     }
   };
 
   return (
     <Grid container spacing={3}>
       <SectionGenerationAnimation
-        show={isGeneratingSections || false}
-        onComplete={() => {}} // We don't need to do anything on complete as the parent component handles it
+        show={isGeneratingSections || isGenerating}
+        onComplete={() => {
+          setIsGenerating(false);
+          if(onNextStep){
+            onNextStep();
+          }
+        }}
       />
 
       <Grid item xs={12}>

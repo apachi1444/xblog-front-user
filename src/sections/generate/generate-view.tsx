@@ -205,25 +205,16 @@ export function GeneratingView() {
       await new Promise(resolve => setTimeout(resolve, 6000));
 
       try {
-        const response = await generateSections({
-          title,
-          keyword: primaryKeyword
-        }).unwrap();
-
-        if (response.sections) {
-          const formattedSections = response.sections.map(section => ({
-            id: section.id,
-            title: section.title,
-            content: section.content || '',
-            status: 'Not Started' as const,
-            description: section.content || ''
-          }));
-
-          setGeneratedSections(formattedSections);
-          toast.success('Table of contents generated successfully');
-
-          handleNext();
-        }
+        const keyword = title
+        const mockSections : SectionItem[] = [
+          {
+            id: 'section-1',
+            status : 'Completed',
+            title: `Introduction to ${keyword}`,
+            content: `This section provides an overview of ${keyword} and why it's important.`
+          },
+        ];
+        setGeneratedSections(mockSections)
       } catch (apiError) {
         toast.error('Failed to generate table of contents');
       }

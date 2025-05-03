@@ -133,7 +133,7 @@ export function ItemSection({ id, status, text, action, onActionClick }: ItemSec
               size="small"
               color={status === "error" ? "error" : status === "warning" ? "warning" : "primary"}
               onClick={handleActionClick}
-              disabled={isPending} // Disable button for pending items
+              disabled={isPending}
               sx={{
                 minWidth: "auto",
                 ml: 1,

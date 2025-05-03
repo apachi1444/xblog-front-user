@@ -155,6 +155,15 @@
         "selected": "Selected",
         "success": "Success!"
       },
+      "error": {
+        "title": "Something went wrong",
+        "message": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
+        "retry": "Try Again",
+        "showDetails": "Show Details",
+        "hideDetails": "Hide Details",
+        "reportIssue": "If this issue persists, please report it to our support team.",
+        "copyToClipboard": "Copy to clipboard"
+      },
       "templates": {
         "title": "Article Templates",
         "subtitle": "Choose from our SEO-optimized templates to create high-quality content",
