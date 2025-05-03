@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { Box, Chip, Stack, Typography, Collapse, Divider, IconButton } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { Box, Stack, Divider, Collapse, Typography, IconButton } from "@mui/material";
 
 import type { SectionItem } from "./DraggableSectionList";
 
@@ -48,7 +48,6 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
     },
   };
 
-  const currentStyle = statusStyles[section.status];
 
   const handleToggleExpand = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -103,21 +102,6 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
         </Stack>
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <Chip
-            label={section.status}
-            sx={{
-              bgcolor: currentStyle.bgcolor,
-              color: currentStyle.color,
-              height: "25px",
-              borderRadius: "20px",
-              border: `1px solid ${currentStyle.borderColor}`,
-              fontFamily: "'Poppins', Helvetica",
-              fontWeight: 700,
-              fontSize: "8px",
-              letterSpacing: "0.5px",
-            }}
-            onClick={(e) => e.stopPropagation()} // Prevent expand toggle when clicking on chip
-          />
 
           <IconButton
             size="small"

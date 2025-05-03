@@ -153,7 +153,9 @@
         "cancel": "Cancel",
         "select": "Select",
         "selected": "Selected",
-        "success": "Success!"
+        "success": "Success!",
+        "next": "Next",
+        "previous": "Previous"
       },
       "error": {
         "title": "Something went wrong",
@@ -258,10 +260,6 @@
         "errors": {
           "refreshInvoices": "Failed to refresh invoices"
         }
-      },
-      "common": {
-        "save": "Save",
-        "cancel": "Cancel"
       },
       "ai_chat": {
         "title": "AI Assistance Chat",

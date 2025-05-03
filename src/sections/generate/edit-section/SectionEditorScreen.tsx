@@ -1,13 +1,11 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
-import toast from 'react-hot-toast';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -19,7 +17,7 @@ import { Editor } from './section-editor';
 
 
 interface SectionEditorScreenProps {
-  section: SectionItem | null;
+  section: SectionItem | undefined;
   onSave: (updatedSection: SectionItem) => void;
   onCancel: () => void;
 }
@@ -53,7 +51,6 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
   // Initialize form values when section changes
   useEffect(() => {
     if (section) {
-      console.log('Section data loaded:', section);
       setTitle(section.title);
       setDescription(section.description || '');
       setContent(section.content || '');
@@ -85,9 +82,7 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
       content,
     };
 
-    console.log('Saving section with content:', content);
     onSave(updatedSection);
-    toast.success('Section updated successfully!');
   }, [section, title, description, content, onSave]);
 
   const handleCancel = useCallback(() => {
@@ -158,59 +153,6 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
         height: 'calc(100% - 60px)',
         flexGrow: 1
       }}>
-        {/* Section Details - Fixed width on desktop, full width on mobile */}
-        <Box sx={{
-          width: isSmallScreen ? '100%' : '350px',
-          flexShrink: 0
-        }}>
-          <FormContainer title="Section Details">
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
-              <TextField
-                label="Section Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                fullWidth
-                variant="outlined"
-                sx={{
-                  bgcolor: 'background.paper',
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: theme.palette.divider,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.light,
-                    },
-                  }
-                }}
-              />
-
-
-
-              <TextField
-                label="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                fullWidth
-                multiline
-                rows={4}
-                variant="outlined"
-                placeholder="Brief description of this section"
-                sx={{
-                  bgcolor: 'background.paper',
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: theme.palette.divider,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: theme.palette.primary.light,
-                    },
-                  }
-                }}
-              />
-            </Box>
-          </FormContainer>
-        </Box>
-
         {/* Section Content - Flexible width, takes remaining space */}
         <Box sx={{
           flexGrow: 1,
@@ -225,10 +167,8 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
               display: 'flex',
               flexDirection: 'column'
             }}>
-              {/* Rich Text Editor */}
               <Box sx={{
                 flexGrow: 1,
-                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: 1,
                 overflow: 'hidden',
                 minHeight: '400px',
@@ -238,7 +178,7 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
                   initialContent={content}
                   onChange={handleEditorChange}
                   ref={editorRef}
-                  key={`editor-${section.id}`} // Add a key to force re-render when section changes
+                  key={`editor-${section.id}`}
                 />
               </Box>
             </Box>

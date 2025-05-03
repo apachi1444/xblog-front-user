@@ -1,7 +1,7 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import {
   Box,
@@ -15,6 +15,7 @@ import { SectionEditDialog } from 'src/components/generate-article/SectionEditDi
 import { DraggableSectionList } from 'src/components/generate-article/DraggableSectionList';
 
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
+
 
 // Sample content for mock sections
 const SAMPLE_CONTENT = [
@@ -31,24 +32,28 @@ const SAMPLE_CONTENT = [
   "Here we'll look at future trends and developments in this field. This section discusses emerging technologies, evolving practices, and what readers might expect to see in the coming years."
 ];
 
-interface Step3Props {
-  generatedSections?: SectionItem[];
-  onSaveAllSections?: (sections: SectionItem[]) => void;
-  onEditSection?: (section: SectionItem) => void;
+export interface Step3State {
+  tableOfContents: {
+    generatedSections: SectionItem[];
+    onSaveSection?: (sections: SectionItem) => void;
+    onEditSection?: (section: SectionItem) => void;
+  }
 }
 
-export function Step3ContentStructuring({
-  generatedSections = [],
-  onSaveAllSections,
-  onEditSection: externalEditHandler,
-}: Step3Props) {
-  // Initialize with mock data if no sections are provided
+interface Step3Props {
+  state: Step3State
+}
+
+export function Step3ContentStructuring({state}: Step3Props) {
+
+  const {tableOfContents} = state
+  const { generatedSections , onSaveSection , onEditSection } = tableOfContents
+
   const initialSections = generatedSections.length > 0
     ? generatedSections
     : Array(4).fill(0).map((_, index) => ({
         id: (index + 1).toString(),
         title: `Section ${index + 1}: ${['Introduction', 'Main Concepts', 'Applications', 'Benefits'][index] || 'Additional Content'}`,
-        status: ['Not Started', 'In Progress', 'Completed'][Math.floor(Math.random() * 3)] as "Not Started" | "In Progress" | "Completed",
         description: `This section covers ${['the basics', 'key concepts', 'practical applications', 'main benefits'][index] || 'important aspects'} of the topic.`,
         content: SAMPLE_CONTENT[index] || SAMPLE_CONTENT[0]
       }));
@@ -57,20 +62,6 @@ export function Step3ContentStructuring({
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  // Update sections when generatedSections prop changes
-  useEffect(() => {
-    if (generatedSections.length > 0) {
-      setSections(generatedSections);
-    }
-  }, [generatedSections]);
-
-  // Save all sections when they change
-  useEffect(() => {
-    if (onSaveAllSections && sections.length > 0) {
-      console.log('Saving all sections to parent component:', sections);
-      onSaveAllSections(sections);
-    }
-  }, [sections, onSaveAllSections]);
 
   const handleSectionsChange = useCallback((newSections: SectionItem[]) => {
     setSections(newSections);
@@ -81,7 +72,6 @@ export function Step3ContentStructuring({
     const newSection: SectionItem = {
       id: newId,
       title: `Section ${newId}: New Section`,
-      status: 'Not Started',
       description: 'Add your section description here',
       content: ''
     };
@@ -92,17 +82,6 @@ export function Step3ContentStructuring({
     setCurrentSection(newSection);
     setEditDialogOpen(true);
   }, [sections]);
-
-  const handleEditSection = useCallback((section: SectionItem) => {
-    if (externalEditHandler) {
-      // Use the external edit handler if provided (for dedicated screen editing)
-      externalEditHandler(section);
-    } else {
-      // Otherwise use the dialog
-      setCurrentSection(section);
-      setEditDialogOpen(true);
-    }
-  }, [externalEditHandler]);
 
   const handleDeleteSection = useCallback((sectionId: string) => {
     setSections(sections.filter(section => section.id !== sectionId));
@@ -133,7 +112,7 @@ export function Step3ContentStructuring({
               <DraggableSectionList
                 sections={sections}
                 onSectionsChange={handleSectionsChange}
-                onEditSection={handleEditSection}
+                onEditSection={onEditSection}
                 onDeleteSection={handleDeleteSection}
               />
 

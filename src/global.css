@@ -19,12 +19,50 @@
 @import './components/chart/styles.css';
 
 /** **************************************
+* CSS Reset for Browser Consistency
+*************************************** */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/** **************************************
 * Baseline
 *************************************** */
+:root {
+  --edge-font-adjustment: 1; /* Will be set by browser-normalize.ts */
+}
+
 html {
   height: 100%;
   -webkit-overflow-scrolling: touch;
+  font-size: calc(14px * var(--edge-font-adjustment)); /* Adjusted base font size with browser-specific correction */
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
+  -ms-text-size-adjust: 100%; /* IE/Edge specific */
+  text-size-adjust: 100%;
 }
+
+/* Edge-specific adjustments */
+@supports (-ms-ime-align:auto) {
+  html {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+}
+body {
+  min-height: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Force browsers to use the same rendering mode */
+  -webkit-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  -ms-text-rendering: optimizeLegibility;
+  -o-text-rendering: optimizeLegibility;
+  /* Disable auto-enlargement of small text in Safari */
+  -webkit-text-size-adjust: 100%;
+}
+
 body,
 #root,
 #root__layout {

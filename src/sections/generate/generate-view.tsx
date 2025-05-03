@@ -1,230 +1,67 @@
-import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
+// Types
 
 import toast from 'react-hot-toast';
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, FormProvider } from 'react-hook-form';
+import { FormProvider } from 'react-hook-form';
+import { useState, useEffect, useCallback } from 'react';
 
-import { Box, Button, useTheme } from '@mui/material';
-
+// Layout components
 import { DashboardContent } from 'src/layouts/dashboard';
-// api
-import {
-  useGenerateMetaMutation,
-  useGenerateTitleMutation,
-  useGenerateKeywordsMutation,
-  useGenerateSectionsMutation,
-} from 'src/services/apis/generateContentApi';
 
-import { Iconify } from 'src/components/iconify';
-import { SEODashboard } from 'src/components/generate-article/SEODashboard';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 
-import { step1Schema, generateArticleSchema } from './schemas';
+// Custom components
+import { ContentLayout } from './components/ContentLayout';
+import { StepNavigation } from './components/StepNavigation';
+// Custom hooks
+import { useContentSetupForm } from './hooks/useContentSetupForm';
+import { useArticleSettingsForm } from './hooks/useArticleSettingsForm';
+import { useGenerateArticleForm } from './hooks/useGenerateArticleForm';
 import { Step4Publish } from './generate-steps/steps/step-four-publish';
 import { SectionEditorScreen } from './edit-section/SectionEditorScreen';
+import { useContentStructuringForm } from './hooks/useContentStructuringForm';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
+// Step components
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
-import type { Step1FormData, GenerateArticleFormData } from './schemas';
 import type { Step1State } from './generate-steps/steps/step-one-content-setup';
+import type { Step2State } from './generate-steps/steps/step-two-article-settings';
+import type { Step3State } from './generate-steps/steps/step-three-content-structuring';
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
-  const theme = useTheme();
 
-  // API mutations
-  const [generateTitle] = useGenerateTitleMutation();
-  const [generateMeta] = useGenerateMetaMutation();
-  const [generateKeywords] = useGenerateKeywordsMutation();
-  const [generateSections] = useGenerateSectionsMutation();
-
-  // Form setup
-  const methods = useForm<GenerateArticleFormData>({
-    resolver: zodResolver(generateArticleSchema),
-  });
-
-  const step1Form = useForm<Step1FormData>({
-    resolver: zodResolver(step1Schema),
-    defaultValues: {
-      contentDescription: '',
-      primaryKeyword: '',
-      secondaryKeywords: [],
-      language: '',
-      targetCountry: '',
-      title: '',
-      metaTitle: '',
-      metaDescription: '',
-      urlSlug: '',
-    },
-  });
-
-  const { setValue, watch, trigger } = step1Form;
-
-  // Watch the value properly
-  const primaryKeyword = watch('primaryKeyword') || "";
-  const language = watch('language');
-  const targetCountry = watch('targetCountry');
-  const contentDescription = watch('contentDescription');
-  const secondaryKeywords = watch('secondaryKeywords');
-
-  // Generation states
-  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
-  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
-  const [isTitleGenerated, setIsTitleGenerated] = useState(false);
-  const [isMetaGenerated, setIsMetaGenerated] = useState(false);
-  const [isGeneratingSecondaryKeywords, setIsGeneratingSecondaryKeywords] = useState(false);
-  const [isGeneratingSections, setIsGeneratingSections] = useState(false);
-
-  // Additional states needed
+  // Additional states
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
-  const [isEditingSection, setIsEditingSection] = useState(false);
-  const [currentEditSection, setCurrentEditSection] = useState<string | null>(null);
-  const [generatedSections, setGeneratedSections] = useState<SectionItem[]>([]);
-  const [sections, setSections] = useState<SectionItem[]>([]);
 
-  // Handlers for generation
-  const handleGenerateTitle = async () => {
-    setIsGeneratingTitle(true);
-    try {
-      if(!primaryKeyword || !language || !targetCountry || !contentDescription || !secondaryKeywords){
-        trigger(['primaryKeyword', 'language', 'targetCountry', 'contentDescription','secondaryKeywords']);
-        toast.error('Please fill in all required fields before generating a title');
-        setIsGeneratingTitle(false);
-        return;
-      }
+  // Initialize the main form
+  const { methods } = useGenerateArticleForm();
 
-      // I wanna add a delay here to show the animation properly !
-      await new Promise(resolve => setTimeout(resolve, 3000));
+  const {
+    step1Form,
+    generationState,
+    handleGenerateTitle,
+    handleGenerateMeta,
+    handleGenerateSecondaryKeywords,
+    handleAddKeyword,
+    handleDeleteKeyword,
+  } = useContentSetupForm();
 
-      // Generate title
-      const generatedTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
+  const { step2Form } = useArticleSettingsForm();
 
-      // Update form values
-      setValue('title', generatedTitle);
-      setIsTitleGenerated(true);
-
-    } catch (error) {
-      console.error('Error generating title:', error);
-      toast.error('Failed to generate title');
-    } finally {
-      setIsGeneratingTitle(false);
-    }
-  };
-
-  const handleGenerateMeta = async () => {
-    setIsGeneratingMeta(true);
-    try {
-      if(!primaryKeyword || !language || !targetCountry || !contentDescription || !secondaryKeywords){
-        trigger(['primaryKeyword', 'language', 'targetCountry', 'contentDescription','secondaryKeywords']);
-        toast.error('Please fill in all required fields before generating meta information');
-        setIsGeneratingMeta(false);
-        return;
-      }
-
-      // I wanna add a delay here to show the animation properly !
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Fallback data if API fails
-      const metaData = {
-        metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
-        metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
-        urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
-      };
-
-      // Update form values
-      setValue('metaTitle', metaData.metaTitle);
-      setValue('metaDescription', metaData.metaDescription);
-      setValue('urlSlug', metaData.urlSlug);
-      setIsMetaGenerated(true);
-
-    } catch (error) {
-      toast.success('Generated meta with fallback data');
-    } finally {
-      setIsGeneratingMeta(false);
-    }
-  };
-
-  const handleGenerateSecondaryKeywords = async () => {
-    setIsGeneratingSecondaryKeywords(true);
-    try {
-
-      if(!primaryKeyword || !language || !targetCountry){
-        trigger(['primaryKeyword', 'language', 'targetCountry', 'contentDescription','secondaryKeywords']);
-        return;
-      }
-
-      const { data } = await generateKeywords({
-        primaryKeyword,
-        language,
-        targetCountry,
-      });
-
-      const keywords = data?.keywords || [
-        `${primaryKeyword} guide`,
-        `best ${primaryKeyword}`,
-        `${primaryKeyword} tips`,
-        `${primaryKeyword} tutorial`,
-        `${primaryKeyword} examples`,
-        `${primaryKeyword} for beginners`,
-        `professional ${primaryKeyword}`,
-        `${primaryKeyword} ${new Date().getFullYear()}`
-      ];
-
-      setValue('secondaryKeywords', keywords);
-    } catch (error) {
-      // Fallback keywords
-      const fallbackKeywords = [
-        `${primaryKeyword} guide`,
-        `best ${primaryKeyword}`,
-        `${primaryKeyword} tips`,
-        `${primaryKeyword} tutorial`,
-        `${primaryKeyword} examples`,
-        `${primaryKeyword} for beginners`,
-        `professional ${primaryKeyword}`,
-        `${primaryKeyword} ${new Date().getFullYear()}`
-      ];
-      setValue('secondaryKeywords', fallbackKeywords);
-      toast.success('Generated keywords with fallback data');
-    } finally {
-      setIsGeneratingSecondaryKeywords(false);
-    }
-  };
-
-  const handleGenerateTableOfContents = async () => {
-    try {
-      setIsGeneratingSections(true);
-
-      const title = step1Form.watch("title") ?? "";
-
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
-      try {
-        const keyword = title
-        const mockSections : SectionItem[] = [
-          {
-            id: 'section-1',
-            status : 'Completed',
-            title: `Introduction to ${keyword}`,
-            content: `This section provides an overview of ${keyword} and why it's important.`
-          },
-        ];
-        setGeneratedSections(mockSections)
-      } catch (apiError) {
-        toast.error('Failed to generate table of contents');
-      }
-    } catch (error) {
-      toast.error('Failed to generate table of contents');
-    } finally {
-      setIsGeneratingSections(false);
-    }
-  };
-
+  const {
+    sections: generatedSections,
+    isGenerating: isGeneratingSections,
+    isGenerated,
+    editDialogOpen,
+    handleGenerateTableOfContents,
+    handleSaveSection,
+    handleEditSection,
+    handleCancelSectionChanges
+  } = useContentStructuringForm();
 
   const steps = [
     { id: 1, label: "Content Setup" },
@@ -233,16 +70,8 @@ export function GeneratingView() {
     { id: 4, label: "Publish" }
   ];
 
-  // Sync sections with generatedSections
-  useEffect(() => {
-    if (generatedSections.length > 0) {
-      console.log('Syncing sections with generatedSections:', generatedSections);
-      setSections(generatedSections);
-    }
-  }, [generatedSections]);
-
   // Navigation handlers
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     let isStepValid = false;
 
     switch (activeStep) {
@@ -256,12 +85,11 @@ export function GeneratingView() {
           'targetCountry'
         ]);
 
-        // Check if title and meta information have been generated
         if (isStepValid) {
-          if (!isTitleGenerated) {
+          if (!generationState.title.isGenerated) {
             toast.error('Please generate a title before proceeding');
             isStepValid = false;
-          } else if (!isMetaGenerated) {
+          } else if (!generationState.meta.isGenerated) {
             toast.error('Please generate meta information before proceeding');
             isStepValid = false;
           }
@@ -269,7 +97,13 @@ export function GeneratingView() {
         break;
 
       case 1:
-        isStepValid = true;
+        isStepValid = await step2Form.trigger();
+
+        // Check if table of contents has been generated
+        if (isStepValid && !isGenerated) {
+          toast.error('Please generate a table of contents before proceeding');
+          isStepValid = false;
+        }
         break;
 
       case 2:
@@ -298,63 +132,41 @@ export function GeneratingView() {
       } else {
         setActiveStep((prev) => prev + 1);
       }
-    } else if (!(activeStep === 0 && (!isTitleGenerated || !isMetaGenerated))) {
+    } else if (!(activeStep === 0 && (!generationState.title.isGenerated || !generationState.meta.isGenerated))) {
       toast.error('Please fill in all required fields for this step');
     }
-  };
+  }, [activeStep, generationState.meta.isGenerated, generationState.title.isGenerated, isGenerated, navigate, setActiveStep, setIsPublishing, step1Form, step2Form, steps.length]);
 
   const handleBack = () => {
     setActiveStep((prev) => prev - 1);
   };
 
-  // Create a function to handle adding keywords
-  const handleAddKeyword = (newValue : string) => {
-    if (!newValue.trim()) return;
+  useEffect(() => {
+    if (isGenerated && !isGeneratingSections && generatedSections.length > 0) {
+      if (activeStep === 1) {
+        setTimeout(() => {
+          handleNext();        
+        }, 4000);
 
-    // Ensure currentKeywords is always an array
-    const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
-
-    // Check if the keyword already exists to avoid duplicates
-    if (Array.isArray(currentKeywords) && currentKeywords.includes(newValue.trim())) {
-      return;
+      }
     }
-
-    // Set the new keywords array
-    setValue('secondaryKeywords', Array.isArray(currentKeywords)
-      ? [...currentKeywords, newValue.trim()]
-      : [newValue.trim()]
-    );
-  };
-
-  // Create a function to handle deleting keywords
-  const handleDeleteKeyword = (keyword: string) => {
-    // Ensure currentKeywords is always an array
-    const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
-
-    if (!Array.isArray(currentKeywords)) {
-      setValue('secondaryKeywords', []);
-      return;
-    }
-
-    const updatedKeywords = currentKeywords.filter(k => k !== keyword);
-    setValue('secondaryKeywords', updatedKeywords);
-  };
+  }, [isGenerated, isGeneratingSections, generatedSections, activeStep, handleNext]);
 
   const step1State: Step1State = {
     form: step1Form,
     generation: {
       title: {
-        isGenerating: isGeneratingTitle,
-        isGenerated: isTitleGenerated,
+        isGenerating: generationState.title.isGenerating,
+        isGenerated: generationState.title.isGenerated,
         onGenerate: handleGenerateTitle,
       },
       meta: {
-        isGenerating: isGeneratingMeta,
-        isGenerated: isMetaGenerated,
+        isGenerating: generationState.meta.isGenerating,
+        isGenerated: generationState.meta.isGenerated,
         onGenerate: handleGenerateMeta,
       },
       secondaryKeywords: {
-        isGenerating: isGeneratingSecondaryKeywords,
+        isGenerating: generationState.secondaryKeywords.isGenerating,
         onGenerate: handleGenerateSecondaryKeywords,
         handleAddKeyword,
         handleDeleteKeyword,
@@ -362,56 +174,51 @@ export function GeneratingView() {
     },
   };
 
+  const step2State: Step2State = {
+    form: step2Form,
+    generation: {
+      tableOfContents: {
+        isGenerating: isGeneratingSections,
+        isGenerated,
+        onGenerate: async () => {
+          await handleGenerateTableOfContents(step1Form.getValues().title || 'Topic');
+        },
+      }
+    },
+  };
+
+  const step3State: Step3State = {
+    tableOfContents: {
+      generatedSections,
+      onSaveSection: handleSaveSection,
+      onEditSection: handleEditSection,
+    }
+  };
+
+
   const renderStepContent = () => {
+    if (activeStep === 2 && editDialogOpen) {
+      return (
+        <SectionEditorScreen
+          section={generatedSections.at(0)}
+          onSave={(updatedSection) => {
+            handleSaveSection(updatedSection);
+          }}
+          onCancel={() => {
+            handleCancelSectionChanges();
+          }}
+        />
+      );
+    }
+
     // Regular steps
     switch (activeStep) {
       case 0:
-        return (
-          <Step1ContentSetup state={step1State} />
-        );
+        return <Step1ContentSetup state={step1State} />;
       case 1:
-        return (
-          <Step2ArticleSettings
-            onNextStep={handleNext}
-            onGenerateTableOfContents={handleGenerateTableOfContents}
-            isGeneratingSections={isGeneratingSections}
-          />
-        );
+        return <Step2ArticleSettings state={step2State} />;
       case 2:
-        if (isEditingSection) {
-          return (
-            <SectionEditorScreen
-              section={sections.find(s => s.id === currentEditSection) || null}
-              onSave={(updatedSection) => {
-                console.log('Saving updated section in GeneratingView:', updatedSection);
-
-                // Update both sections and generatedSections to ensure consistency
-                setSections(prevSections =>
-                  prevSections.map(section =>
-                    section.id === updatedSection.id ? updatedSection : section
-                  )
-                );
-
-                setGeneratedSections(prevSections =>
-                  prevSections.map(section =>
-                    section.id === updatedSection.id ? updatedSection : section
-                  )
-                );
-
-                setIsEditingSection(false);
-                setCurrentEditSection(null);
-              }}
-              onCancel={handleReturnFromEditing}
-            />
-          );
-        }
-        return (
-          <Step3ContentStructuring
-            generatedSections={generatedSections}
-            onSaveAllSections={setSections}
-            onEditSection={handleEditSection}
-          />
-        );
+        return <Step3ContentStructuring state={step3State} />;
       case 3:
         return <Step4Publish />;
       default:
@@ -419,48 +226,16 @@ export function GeneratingView() {
     }
   };
 
-  const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
-
-  // Handler for SEO dashboard collapse state change
-  const handleSEODashboardCollapseChange = (collapsed: boolean) => {
-    setIsSEODashboardCollapsed(collapsed);
-    console.log('SEO Dashboard collapsed:', collapsed);
-  };
-
-  const handleEditSection = (section: SectionItem) => {
-    console.log('Editing section:', section);
-
-    // Make sure the section exists in our sections array
-    const sectionExists = sections.some(s => s.id === section.id);
-
-    if (!sectionExists) {
-      // If the section doesn't exist in our sections array, add it
-      console.log('Section not found in sections array, adding it');
-      setSections(prevSections => [...prevSections, section]);
-    }
-
-    // Set the current edit section ID
-    setCurrentEditSection(section.id);
-    setIsEditingSection(true);
-  };
-
-  const handleReturnFromEditing = () => {
-    setIsEditingSection(false);
-    setCurrentEditSection(null);
-  };
-
-  async function submitSteppedForm(data: GenerateArticleFormData) {
+  const submitSteppedForm = async (data: any) => {
     try {
-      // Perform your form submission logic here
-      console.log('data', data);
+      console.log('Submitting form data:', data);
     } catch (error) {
       console.error('Form submission error:', error);
     }
-  }
+  };
 
   return (
     <DashboardContent>
-      {/* IMPORTANT: Wrap everything with the step1Form FormProvider instead of methods */}
       <FormProvider {...methods}>
         {/* Publishing animation overlay */}
         {isPublishing && (
@@ -470,126 +245,18 @@ export function GeneratingView() {
         {/* Stepper */}
         <StepperComponent steps={steps} activeStep={activeStep} />
 
-        {/* Fixed Next Button at the bottom */}
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            py: 2,
-            px: 3,
-            bgcolor: 'background.paper',
-            borderTop: `1px solid ${theme.palette.divider}`,
-            zIndex: 1000,
-            display: 'flex',
-            justifyContent: 'space-between',
-            width: 'calc(100% - 245px)',
-            ml: '245px',
-          }}
-        >
-          <Box>
-            {activeStep > 0 ? (
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="eva:arrow-back-fill" />}
-                sx={{
-                  borderRadius: '24px',
-                  minWidth: '120px', // Increased width
-                }}
-                onClick={handleBack}
-              >
-                Previous
-              </Button>
-            ) : (
-              null
-            )}
-          </Box>
-
-          <Box>
-            {activeStep === steps.length - 1 ? (
-              <Button
-                variant="contained"
-                endIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-                sx={{
-                  borderRadius: '24px',
-                  bgcolor: 'success.main',
-                  minWidth: '180px', // Increased width
-                  px: 3, // Add more horizontal padding
-                  '&:hover': {
-                    bgcolor: 'success.dark',
-                  }
-                }}
-                onClick={handleNext}
-              >
-                Finish & Publish
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-                sx={{
-                  borderRadius: '24px',
-                  minWidth: '120px', // Increased width
-                }}
-                onClick={handleNext}
-              >
-                Next
-              </Button>
-            )}
-          </Box>
-        </Box>
+        {/* Navigation buttons */}
+        <StepNavigation
+          activeStep={activeStep}
+          totalSteps={steps.length}
+          onNext={handleNext}
+          onBack={handleBack}
+        />
 
         <form onSubmit={methods.handleSubmit(submitSteppedForm)}>
-          <Box
-            sx={{
-              display: 'flex',
-              width: '100%',
-              position: 'relative',
-              minHeight: 'calc(100vh - 200px)', // Adjust based on your layout
-            }}
-          >
-            {/* Forms on the left - adjust width based on SEO dashboard visibility and collapse state */}
-            <Box
-              sx={{
-                flexGrow: 1,
-                width: isSEODashboardVisible ?
-                  (isSEODashboardCollapsed ? 'calc(100% - 40px)' : '70%') :
-                  '100%',
-                transition: () => theme.transitions.create(['width'], {
-                  duration: theme.transitions.duration.standard,
-                }),
-                pr: isSEODashboardVisible && !isSEODashboardCollapsed ? 2 : 0
-              }}
-            >
-              <Box sx={{ width: '100%' }}>
-                {renderStepContent()}
-              </Box>
-            </Box>
-
-            {/* SEO Dashboard on the right - only visible on certain steps */}
-            {isSEODashboardVisible && (
-              <Box
-                sx={{
-                  width: isSEODashboardCollapsed ? '40px' : '30%',
-                  transition: () => theme.transitions.create(['width'], {
-                    duration: theme.transitions.duration.standard,
-                  }),
-                  position: isSEODashboardCollapsed ? 'absolute' : 'relative',
-                  right: isSEODashboardCollapsed ? 0 : 'auto',
-                  top: isSEODashboardCollapsed ? 0 : 'auto',
-                  height: isSEODashboardCollapsed ? '100%' : 'auto',
-                }}
-              >
-                <SEODashboard
-                  state={step1State}
-                  defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
-                  onCollapseChange={handleSEODashboardCollapseChange}
-                  isCollapsed={isSEODashboardCollapsed}
-                />
-              </Box>
-            )}
-          </Box>
+          <ContentLayout activeStep={activeStep} state={step1State}>
+            {renderStepContent()}
+          </ContentLayout>
         </form>
       </FormProvider>
     </DashboardContent>

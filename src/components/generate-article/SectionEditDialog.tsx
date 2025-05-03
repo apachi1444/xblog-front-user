@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
+
+import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
   Dialog,
-  DialogActions,
-  DialogContent,
+  Select,
+  MenuItem,
+  TextField,
+  InputLabel,
+  Typography,
   DialogTitle,
   FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
+  DialogActions,
+  DialogContent,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { SectionItem } from './DraggableSectionList';
+
+import type { SectionItem } from './DraggableSectionList';
 
 interface SectionEditDialogProps {
   open: boolean;
@@ -38,7 +40,6 @@ export const SectionEditDialog: React.FC<SectionEditDialogProps> = ({
   useEffect(() => {
     if (section) {
       setTitle(section.title);
-      setStatus(section.status);
       setDescription(section.description || '');
       setContent(section.content || '');
     }
@@ -50,7 +51,6 @@ export const SectionEditDialog: React.FC<SectionEditDialogProps> = ({
     const updatedSection: SectionItem = {
       ...section,
       title,
-      status,
       description,
       content,
     };
@@ -89,30 +89,6 @@ export const SectionEditDialog: React.FC<SectionEditDialogProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             fullWidth
             variant="outlined"
-          />
-          
-          <FormControl fullWidth>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={status}
-              label="Status"
-              onChange={(e) => setStatus(e.target.value as "Not Started" | "In Progress" | "Completed")}
-            >
-              <MenuItem value="Not Started">Not Started</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-            </Select>
-          </FormControl>
-          
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            multiline
-            rows={2}
-            variant="outlined"
-            placeholder="Brief description of this section"
           />
           
           <Box>

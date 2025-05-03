@@ -22,16 +22,18 @@ export function setFont(fontName: string) {
 
 /**
  * Converts rem to px
+ * Using 14px as base size instead of the default 16px to match pxToRem
  */
 export function remToPx(value: string): number {
-  return Math.round(parseFloat(value) * 16);
+  return Math.round(parseFloat(value) * 14);
 }
 
 /**
  * Converts px to rem
+ * Using 14px as base size instead of the default 16px to make all fonts smaller
  */
 export function pxToRem(value: number): string {
-  return `${value / 16}rem`;
+  return `${value / 14}rem`;
 }
 
 /**

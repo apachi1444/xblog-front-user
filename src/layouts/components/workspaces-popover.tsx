@@ -1,7 +1,7 @@
 import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
@@ -32,11 +32,19 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
 export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
   const dispatch = useDispatch();
   const { data: stores, isLoading } = useGetStoresQuery();
-  
+
   const currentStore = useSelector(selectCurrentStore);
   const theme = useTheme();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(currentStore?.id || null);
+
+  // Update local state when currentStore changes
+  useEffect(() => {
+    if (currentStore?.id) {
+      setSelectedStoreId(currentStore.id);
+    }
+  }, [currentStore]);
 
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     setOpenPopover(event.currentTarget);
@@ -49,17 +57,18 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   const handleChangeWorkspace = useCallback(
     (newStore: Store) => {
       dispatch(setCurrentStore(newStore));
+      setSelectedStoreId(newStore.id);
       handleClosePopover();
     },
-    [dispatch, handleClosePopover]
+    [dispatch, handleClosePopover, setSelectedStoreId]
   );
 
   const renderAvatar = (alt: string, src: string) => (
-    <Box 
-      component="img" 
-      alt={alt} 
-      src={src} 
-      sx={{ width: 24, height: 24, borderRadius: '50%' }} 
+    <Box
+      component="img"
+      alt={alt}
+      src={src}
+      sx={{ width: 24, height: 24, borderRadius: '50%' }}
     />
   );
 
@@ -149,16 +158,16 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         </Box>
 
         {/* Right Chevron */}
-        <Iconify 
-          icon="eva:chevron-down-fill" 
-          width={18} 
+        <Iconify
+          icon="eva:chevron-down-fill"
+          width={18}
           sx={{ color: 'text.secondary' }}
         />
       </ButtonBase>
 
-      <Popover 
-        open={!!openPopover} 
-        anchorEl={openPopover} 
+      <Popover
+        open={!!openPopover}
+        anchorEl={openPopover}
         onClose={handleClosePopover}
       >
         <MenuList
@@ -183,7 +192,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           {stores?.stores.map((store) => (
             <MenuItem
               key={store.id}
-              selected={store.id === currentStore.id}
+              selected={store.id === selectedStoreId}
               onClick={() => handleChangeWorkspace(store)}
             >
               {renderAvatar(store.name, store.logo)}

@@ -20,16 +20,14 @@ export const step2Schema = z.object({
   toneOfVoice: z.string().min(1, 'Tone of voice is required'),
   pointOfView: z.string().min(1, 'Point of view is required'),
   aiContentCleaning: z.string().min(1, 'AI content cleaning is required'),
-  imageSettings: z.object({
-    quality: z.string().min(1, 'Image quality is required'),
-    placement: z.string().min(1, 'Image placement is required'),
-    style: z.string().min(1, 'Image style is required'),
-    count: z.number().min(1, 'Number of images is required'),
-  }),
-  linking: z.object({
-    internal: z.string().min(1, 'Internal linking is required'),
-    external: z.string().min(1, 'External linking is required'),
-  }),
+  imageSettingsQuality: z.string().min(1, 'Image quality is required'),
+  imageSettingsPlacement: z.string().min(1, 'Image placement is required'),
+  imageSettingsStyle: z.string().min(1, 'Image style is required'),
+  imageSettingsCount: z.number().min(1, 'Number of images is required'),
+  internalLinking: z.string().min(1, 'Internal linking is required'),
+    externalLinking: z.string().min(1, 'External linking is required'),
+  includeVideos: z.boolean().default(false),
+  numberOfVideos: z.number().default(1),
 });
 
 // Step 3: Content Structure Schema
@@ -48,24 +46,15 @@ export const step3Schema = z.object({
   })).min(1, 'At least one section is required'),
 });
 
-// Step 4: Publishing Schema
-export const step4Schema = z.object({
-  publishDate: z.date().optional(),
-  categories: z.array(z.string()).min(1, 'At least one category is required'),
-  tags: z.array(z.string()).optional(),
-  status: z.enum(['draft', 'published']),
-});
 
 // Combined schema for the entire form
 export const generateArticleSchema = z.object({
   step1: step1Schema,
   step2: step2Schema,
   step3: step3Schema,
-  step4: step4Schema,
 });
 
 export type Step1FormData = z.infer<typeof step1Schema>;
 export type Step2FormData = z.infer<typeof step2Schema>;
 export type Step3FormData = z.infer<typeof step3Schema>;
-export type Step4FormData = z.infer<typeof step4Schema>;
 export type GenerateArticleFormData = z.infer<typeof generateArticleSchema>;

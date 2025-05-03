@@ -210,25 +210,6 @@ export function PreviewSEOTab({
             <Stack spacing={2}>
               <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                  Title
-                </Typography>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    bgcolor: 'background.neutral',
-                    borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'divider'
-                  }}
-                >
-                  <Typography variant="body2">
-                    {(title || 'Not set').trim()}
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
                   Meta Title
                 </Typography>
                 <Box
