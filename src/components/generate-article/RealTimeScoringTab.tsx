@@ -14,7 +14,6 @@ import {
   Typography,
   CardContent,
   LinearProgress,
-  CircularProgress,
 } from "@mui/material";
 
 import { ItemSection } from "./ItemSection";
@@ -50,12 +49,10 @@ const FIELD_MAPPING: Record<number, FieldConfig> = {
   // Primary SEO Checklist
   101: { field: 'metaDescription', type: 'textarea' },
   102: { field: 'urlSlug', type: 'text' },
-  103: { field: 'content', type: 'textarea' }, // Note: EditItemModal might not be ideal for large 'content' edits
-  104: { field: 'content', type: 'textarea' },
-  105: { field: 'content', type: 'textarea' },
-  106: { field: 'tableOfContents', type: 'text' }, // Assuming 'tableOfContents' is a form field
-  107: { field: 'metaDescription', type: 'textarea' },
-  108: { field: 'content', type: 'textarea' },
+  103: { field: 'content', type: 'textarea' },
+  104: { field: 'contentDescription', type: 'textarea' },
+  105: { field: 'secondaryKeywords', type: 'text' },
+  106: { field: 'language', type: 'text' },
 
   // Title Optimization
   201: { field: 'title', type: 'text' },
@@ -63,20 +60,22 @@ const FIELD_MAPPING: Record<number, FieldConfig> = {
   203: { field: 'title', type: 'text' },
   204: { field: 'metaTitle', type: 'text' },
   205: { field: 'title', type: 'text' },
+  206: { field: 'metaTitle', type: 'text' },
+  207: { field: 'metaDescription', type: 'textarea' },
 
   // Content Presentation Quality
-  301: { field: 'content', type: 'textarea' },
-  302: { field: 'content', type: 'textarea' },
-  303: { field: 'content', type: 'textarea' },
-  304: { field: 'content', type: 'textarea' },
+  301: { field: 'contentDescription', type: 'textarea' },
+  302: { field: 'contentDescription', type: 'textarea' },
+  303: { field: 'contentDescription', type: 'textarea' },
+  304: { field: 'contentDescription', type: 'textarea' },
 
   // Additional SEO Factors
-  401: { field: 'content', type: 'textarea' },
-  402: { field: 'content', type: 'textarea' },
+  401: { field: 'urlSlug', type: 'text' },
+  402: { field: 'urlSlug', type: 'text' },
   403: { field: 'urlSlug', type: 'text' },
-  404: { field: 'content', type: 'textarea' },
-  405: { field: 'content', type: 'textarea' },
-  406: { field: 'content', type: 'textarea' },
+  404: { field: 'language', type: 'text' },
+  405: { field: 'primaryKeyword', type: 'text' },
+  406: { field: 'secondaryKeywords', type: 'text' },
 };
 
 // Suggestions are not directly used by EditItemModal in this setup
@@ -128,13 +127,58 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
     console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
 
     try {
-      return "test !"
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
+      // Generate optimized content based on field type
+      let optimizedValue = currentValue;
+
+      if (fieldType === 'title' || fieldType === 'metaTitle') {
+        // For titles, ensure they include keywords and are properly formatted
+        if (!optimizedValue.includes('SEO')) {
+          optimizedValue = `SEO-Optimized: ${optimizedValue}`;
+        }
+        // Capitalize first letter of each word
+        optimizedValue = optimizedValue
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+      else if (fieldType === 'metaDescription') {
+        // For meta descriptions, ensure they're the right length and include call-to-action
+        if (optimizedValue.length < 120) {
+          optimizedValue += ' Learn more about this topic and improve your SEO strategy today.';
+        } else if (optimizedValue.length > 160) {
+          optimizedValue = `${optimizedValue.substring(0, 157)  }...`;
+        }
+
+        if (!optimizedValue.includes('Learn more')) {
+          optimizedValue += ' Learn more now!';
+        }
+      }
+      else if (fieldType === 'urlSlug') {
+        // For URL slugs, ensure they're properly formatted
+        optimizedValue = optimizedValue
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+      }
+      else if (fieldType === 'primaryKeyword' || fieldType === 'secondaryKeywords') {
+        // For keywords, ensure they're properly formatted
+        optimizedValue = optimizedValue.toLowerCase().trim();
+      }
+      else if (fieldType === 'contentDescription') {
+        // For content descriptions, ensure they include keywords and are detailed
+        if (optimizedValue.length < 100) {
+          optimizedValue += ' This content will provide valuable insights and actionable tips for readers interested in this topic.';
+        }
+      }
+
+      return optimizedValue;
     } catch (error: any) {
-
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
-  }, [/* Add dependencies like 'watch' if context is needed */]);
+  }, []);
 
 
 
@@ -347,8 +391,12 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
           onClose={() => setModalOpen(false)}
           onOptimize={handleOptimizeField}
           fieldType={FIELD_MAPPING[selectedItem.id].field}
-          score={60}
-          onUpdateScore={(newScore: number) => console.log(`New score: ${newScore}`)}
+          score={selectedItem.score || 0}
+          onUpdateScore={(newScore: number) => {
+            // In a real implementation, this would update the score in the store/context
+            // For now, we'll just show a toast notification
+            toast.success(`Score updated to ${newScore}`);
+          }}
         />
       )}
     </CardContent>

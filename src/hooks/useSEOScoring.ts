@@ -1,5 +1,5 @@
-import { useFormContext } from 'react-hook-form';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import {
   containsKeyword,
@@ -12,8 +12,8 @@ import {
 
 import type { ChecklistItem, ProgressSection } from '../utils/seoScoring';
 
-export const useSEOScoring = () => {
-  const { watch, getFieldState, formState } = useFormContext();
+export const useSEOScoring = (form: UseFormReturn<any>) => {
+  const { watch, getFieldState, formState } = form;
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
   const [overallScore, setOverallScore] = useState<number>(0);
 
@@ -25,6 +25,10 @@ export const useSEOScoring = () => {
   const urlSlug = watch('urlSlug');
   const content = watch('content');
   const primaryKeyword = watch('primaryKeyword');
+  const secondaryKeywords = watch('secondaryKeywords');
+  const contentDescription = watch('contentDescription');
+  const language = watch('language');
+  const targetCountry = watch('targetCountry');
   const tableOfContents = watch('tableOfContents');
 
   // Helper function to check if a field is valid and has a value
@@ -146,7 +150,6 @@ export const useSEOScoring = () => {
         )
       },
 
-      // Update other items similarly...
       {
         id: 102,
         text: "Focus keyword present in the URL",
@@ -181,7 +184,56 @@ export const useSEOScoring = () => {
         )
       },
 
-      // Continue updating other items...
+      {
+        id: 104,
+        text: "Focus keyword included in content description",
+        status: getStatusBasedOnFields(
+          ['contentDescription', 'primaryKeyword'],
+          containsKeyword(contentDescription, primaryKeyword)
+        ),
+        score: calculateKeywordScore(contentDescription, primaryKeyword, { contains: true }),
+        maxScore: 10,
+        action: getActionText(
+          ['contentDescription', 'primaryKeyword'],
+          calculateKeywordScore(contentDescription, primaryKeyword, { contains: true }),
+          4,
+          8
+        )
+      },
+
+      {
+        id: 105,
+        text: "Secondary keywords are defined",
+        status: getStatusBasedOnFields(
+          ['secondaryKeywords'],
+          Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0
+        ),
+        score: Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0 ? 10 : 0,
+        maxScore: 10,
+        action: getActionText(
+          ['secondaryKeywords'],
+          Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0 ? 10 : 0,
+          4,
+          8
+        )
+      },
+
+      {
+        id: 106,
+        text: "Language and target country are specified",
+        status: getStatusBasedOnFields(
+          ['language', 'targetCountry'],
+          !!language && !!targetCountry
+        ),
+        score: !!language && !!targetCountry ? 10 : 0,
+        maxScore: 10,
+        action: getActionText(
+          ['language', 'targetCountry'],
+          !!language && !!targetCountry ? 10 : 0,
+          4,
+          8
+        )
+      },
     ];
 
     const titleOptimizationItems: ChecklistItem[] = [
@@ -191,6 +243,9 @@ export const useSEOScoring = () => {
         status: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
                 'pending' :
                 title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 'success' : 'warning',
+        score: !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 0 :
+               title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 10 : 5,
+        maxScore: 10,
         action: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
                 "Fill Required Fields" :
                 title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? null : "Optimize"
@@ -199,12 +254,16 @@ export const useSEOScoring = () => {
         id: 202,
         text: "Title evokes emotional sentiment",
         status: !isFieldValid('title') ? 'pending' : 'success', // Simplified for demo
+        score: !isFieldValid('title') ? 0 : 10, // Simplified for demo
+        maxScore: 10,
         action: !isFieldValid('title') ? "Fill Required Fields" : null
       },
       {
         id: 203,
         text: "Includes power words to drive engagement",
         status: !isFieldValid('title') ? 'pending' : 'success', // Simplified for demo
+        score: !isFieldValid('title') ? 0 : 10, // Simplified for demo
+        maxScore: 10,
         action: !isFieldValid('title') ? "Fill Required Fields" : null
       },
       {
@@ -213,6 +272,9 @@ export const useSEOScoring = () => {
         status: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
                 'pending' :
                 containsKeyword(metaTitle, primaryKeyword) ? 'success' : 'error',
+        score: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ? 0 :
+               containsKeyword(metaTitle, primaryKeyword) ? 10 : 0,
+        maxScore: 10,
         action: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
                 "Fill Required Fields" :
                 containsKeyword(metaTitle, primaryKeyword) ? null : "Fix"
@@ -224,78 +286,172 @@ export const useSEOScoring = () => {
                 'pending' :
                 title.length >= 40 && title.length <= 60 ? 'success' :
                 title.length < 40 ? 'error' : 'warning',
+        score: !isFieldValid('title') ? 0 :
+               title.length >= 40 && title.length <= 60 ? 10 :
+               title.length >= 30 && title.length < 40 ? 7 :
+               title.length > 60 && title.length <= 70 ? 7 :
+               title.length > 70 ? 3 : 5,
+        maxScore: 10,
         action: !isFieldValid('title') ?
                 "Fill Required Fields" :
                 (title.length >= 40 && title.length <= 60) ? null : "Fix"
+      },
+      {
+        id: 206,
+        text: "Meta title length is optimal",
+        status: !isFieldValid('metaTitle') ?
+                'pending' :
+                metaTitle.length >= 50 && metaTitle.length <= 60 ? 'success' :
+                metaTitle.length < 50 ? 'error' : 'warning',
+        score: !isFieldValid('metaTitle') ? 0 :
+               metaTitle.length >= 50 && metaTitle.length <= 60 ? 10 :
+               metaTitle.length >= 40 && metaTitle.length < 50 ? 7 :
+               metaTitle.length > 60 && metaTitle.length <= 70 ? 7 :
+               metaTitle.length > 70 ? 3 : 5,
+        maxScore: 10,
+        action: !isFieldValid('metaTitle') ?
+                "Fill Required Fields" :
+                (metaTitle.length >= 50 && metaTitle.length <= 60) ? null : "Fix"
+      },
+      {
+        id: 207,
+        text: "Meta description length is optimal",
+        status: !isFieldValid('metaDescription') ?
+                'pending' :
+                metaDescription.length >= 120 && metaDescription.length <= 160 ? 'success' :
+                metaDescription.length < 120 ? 'error' : 'warning',
+        score: !isFieldValid('metaDescription') ? 0 :
+               metaDescription.length >= 120 && metaDescription.length <= 160 ? 10 :
+               metaDescription.length >= 100 && metaDescription.length < 120 ? 7 :
+               metaDescription.length > 160 && metaDescription.length <= 180 ? 7 :
+               metaDescription.length > 180 ? 3 : 5,
+        maxScore: 10,
+        action: !isFieldValid('metaDescription') ?
+                "Fill Required Fields" :
+                (metaDescription.length >= 120 && metaDescription.length <= 160) ? null : "Fix"
       },
     ];
 
     // Create content presentation and additional SEO sections similarly
     const contentPresentationItems: ChecklistItem[] = [
-      // Simplified for demo
       {
         id: 301,
-        text: "Content uses short, easy-to-read paragraphs",
-        status: !isFieldValid('content') ? 'pending' : 'success',
-        action: !isFieldValid('content') ? "Fill Required Fields" : null
+        text: "Content description is detailed and comprehensive",
+        status: !isFieldValid('contentDescription') ? 'pending' :
+                contentDescription.length >= 100 ? 'success' : 'warning',
+        score: !isFieldValid('contentDescription') ? 0 :
+               contentDescription.length >= 100 ? 10 :
+               contentDescription.length >= 50 ? 5 : 2,
+        maxScore: 10,
+        action: !isFieldValid('contentDescription') ? "Fill Required Fields" :
+                contentDescription.length < 100 ? "Add more details" : null
       },
       {
         id: 302,
-        text: "Content includes media (images and/or videos)",
-        status: !isFieldValid('content') ? 'pending' : 'success',
-        action: !isFieldValid('content') ? "Fill Required Fields" : null
+        text: "Content description includes primary keyword",
+        status: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? 'pending' :
+                containsKeyword(contentDescription, primaryKeyword) ? 'success' : 'error',
+        score: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? 0 :
+               containsKeyword(contentDescription, primaryKeyword) ? 10 : 0,
+        maxScore: 10,
+        action: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? "Fill Required Fields" :
+                containsKeyword(contentDescription, primaryKeyword) ? null : "Add keyword to description"
       },
       {
         id: 303,
-        text: "Proper use of headings and subheadings",
-        status: !isFieldValid('content') ? 'pending' : 'warning',
-        action: !isFieldValid('content') ? "Fill Required Fields" : "Optimize"
+        text: "Content description includes secondary keywords",
+        status: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 'pending' :
+                secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? 'success' : 'warning',
+        score: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 0 :
+               secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? 10 : 0,
+        maxScore: 10,
+        action: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? "Fill Required Fields" :
+                secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? null : "Add secondary keywords to description"
       },
       {
         id: 304,
-        text: "Content includes bullet points or numbered lists",
-        status: !isFieldValid('content') ? 'pending' : 'warning',
-        action: !isFieldValid('content') ? "Fill Required Fields" : "Add"
+        text: "Content description is clear and focused",
+        status: !isFieldValid('contentDescription') ? 'pending' : 'success', // Simplified for demo
+        score: !isFieldValid('contentDescription') ? 0 : 10, // Simplified for demo
+        maxScore: 10,
+        action: !isFieldValid('contentDescription') ? "Fill Required Fields" : null
       },
     ];
 
     const additionalSEOItems: ChecklistItem[] = [
-      // Simplified for demo
       {
         id: 401,
-        text: "Focus keyword found in subheadings",
-        status: !isFieldValid('content') || !isFieldValid('primaryKeyword') ? 'pending' : 'inactive',
-        action: !isFieldValid('content') || !isFieldValid('primaryKeyword') ? "Fill Required Fields" : null
+        text: "URL slug is concise and descriptive",
+        status: !isFieldValid('urlSlug') ? 'pending' :
+                urlSlug.length > 0 && urlSlug.length <= 50 ? 'success' : 'warning',
+        score: !isFieldValid('urlSlug') ? 0 :
+               urlSlug.length > 0 && urlSlug.length <= 50 ? 10 :
+               urlSlug.length > 50 && urlSlug.length <= 70 ? 7 :
+               urlSlug.length > 70 ? 3 : 0,
+        maxScore: 10,
+        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
+                urlSlug.length === 0 ? "Add URL slug" :
+                urlSlug.length > 50 ? "Shorten URL slug" : null
       },
       {
         id: 402,
-        text: "Keyword density is balanced",
-        status: !isFieldValid('content') || !isFieldValid('primaryKeyword') ? 'pending' : 'inactive',
-        action: !isFieldValid('content') || !isFieldValid('primaryKeyword') ? "Fill Required Fields" : null
+        text: "URL slug uses hyphens to separate words",
+        status: !isFieldValid('urlSlug') ? 'pending' :
+                urlSlug.includes('-') ? 'success' : 'warning',
+        score: !isFieldValid('urlSlug') ? 0 :
+               urlSlug.includes('-') ? 10 : 0,
+        maxScore: 10,
+        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
+                !urlSlug.includes('-') ? "Use hyphens to separate words" : null
       },
       {
         id: 403,
-        text: "URL length is optimal",
-        status: !isFieldValid('urlSlug') ? 'pending' : 'inactive',
-        action: !isFieldValid('urlSlug') ? "Fill Required Fields" : null
+        text: "URL slug contains no special characters",
+        status: !isFieldValid('urlSlug') ? 'pending' :
+                /^[a-z0-9-]+$/.test(urlSlug) ? 'success' : 'error',
+        score: !isFieldValid('urlSlug') ? 0 :
+               /^[a-z0-9-]+$/.test(urlSlug) ? 10 : 0,
+        maxScore: 10,
+        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
+                !/^[a-z0-9-]+$/.test(urlSlug) ? "Remove special characters" : null
       },
       {
         id: 404,
-        text: "You're linking to high-quality external resources",
-        status: !isFieldValid('content') ? 'pending' : 'inactive',
-        action: !isFieldValid('content') ? "Fill Required Fields" : null
+        text: "Language and target country are compatible",
+        status: !isFieldValid('language') || !isFieldValid('targetCountry') ? 'pending' :
+                (language === 'en-us' && targetCountry === 'us') ||
+                (language === 'en-gb' && targetCountry === 'uk') ||
+                (language === 'fr-fr' && targetCountry === 'fr') ? 'success' : 'warning',
+        score: !isFieldValid('language') || !isFieldValid('targetCountry') ? 0 :
+               (language === 'en-us' && targetCountry === 'us') ||
+               (language === 'en-gb' && targetCountry === 'uk') ||
+               (language === 'fr-fr' && targetCountry === 'fr') ? 10 : 5,
+        maxScore: 10,
+        action: !isFieldValid('language') || !isFieldValid('targetCountry') ? "Fill Required Fields" :
+                !((language === 'en-us' && targetCountry === 'us') ||
+                  (language === 'en-gb' && targetCountry === 'uk') ||
+                  (language === 'fr-fr' && targetCountry === 'fr')) ? "Ensure language and country match" : null
       },
       {
         id: 405,
-        text: "Includes at least one external DoFollow link",
-        status: !isFieldValid('content') ? 'pending' : 'inactive',
-        action: !isFieldValid('content') ? "Fill Required Fields" : null
+        text: "Secondary keywords are relevant to primary keyword",
+        status: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 'pending' : 'success',
+        score: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 0 : 10,
+        maxScore: 10,
+        action: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? "Fill Required Fields" : null
       },
       {
         id: 406,
-        text: "Internal links to related content on your website",
-        status: !isFieldValid('content') ? 'pending' : 'inactive',
-        action: !isFieldValid('content') ? "Fill Required Fields" : null
+        text: "Has sufficient number of secondary keywords",
+        status: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? 'pending' :
+                secondaryKeywords.length >= 5 ? 'success' :
+                secondaryKeywords.length > 0 ? 'warning' : 'error',
+        score: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? 0 :
+               secondaryKeywords.length >= 5 ? 10 :
+               secondaryKeywords.length > 0 ? secondaryKeywords.length * 2 : 0,
+        maxScore: 10,
+        action: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? "Fill Required Fields" :
+                secondaryKeywords.length < 5 ? "Add more secondary keywords" : null
       },
     ];
 
@@ -309,11 +465,11 @@ export const useSEOScoring = () => {
     const sections: ProgressSection[] = [
       {
         id: 1,
-        title: `Primary SEO Checklist (${40}%)`,
+        title: `Primary SEO Checklist (${35}%)`,
         progress: primarySEOProgress,
         type: determineSectionType(primarySEOProgress),
         items: primarySEOItems,
-        weight: 40
+        weight: 35
       },
       {
         id: 2,
@@ -333,16 +489,27 @@ export const useSEOScoring = () => {
       },
       {
         id: 4,
-        title: `Additional SEO Factors (${10}%)`,
+        title: `Additional SEO Factors (${15}%)`,
         progress: additionalSEOProgress,
         type: determineSectionType(additionalSEOProgress),
         items: additionalSEOItems,
-        weight: 10
+        weight: 15
       }
     ];
 
     // Calculate overall score
     const score = calculateOverallScore(sections);
+
+    // Debug log to see when scoring is updated
+    console.log('SEO Scoring updated:', {
+      title,
+      metaTitle,
+      metaDescription,
+      urlSlug,
+      primaryKeyword,
+      secondaryKeywords,
+      score
+    });
 
     setProgressSections(sections);
     setOverallScore(score);
@@ -353,6 +520,10 @@ export const useSEOScoring = () => {
     urlSlug,
     content,
     primaryKeyword,
+    secondaryKeywords,
+    contentDescription,
+    language,
+    targetCountry,
     tableOfContents,
     formState,
     getFieldState,

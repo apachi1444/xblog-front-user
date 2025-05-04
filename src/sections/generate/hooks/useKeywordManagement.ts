@@ -11,9 +11,9 @@ export const useKeywordManagement = (
 ) => {
   const { setValue, watch } = form;
   const [keywordInput, setKeywordInput] = useState('');
-  
+
   const secondaryKeywords = watch('secondaryKeywords') || [];
-  
+
   const handleAddKeyword = (keyword: string) => {
     if (!keyword.trim()) return;
 
@@ -27,7 +27,11 @@ export const useKeywordManagement = (
 
     // Add the new keyword to the array
     const updatedKeywords = [...currentKeywords, keyword.trim()];
-    setValue('secondaryKeywords', updatedKeywords, { shouldValidate: true });
+    setValue('secondaryKeywords', updatedKeywords, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
 
     // Clear the input field
     setKeywordInput('');
@@ -44,7 +48,11 @@ export const useKeywordManagement = (
 
     // Remove the keyword from the array
     const updatedKeywords = currentKeywords.filter(k => k !== keyword);
-    setValue('secondaryKeywords', updatedKeywords, { shouldValidate: true });
+    setValue('secondaryKeywords', updatedKeywords, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
 
     // Call the external handler if provided
     if (externalHandleDeleteKeyword) {

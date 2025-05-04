@@ -143,7 +143,11 @@ export function EditItemModal({
     setSuccess(null);
 
     try {
-      setValue(fieldType, optimizedValue, { shouldValidate: true, shouldDirty: true });
+      setValue(fieldType, optimizedValue, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
       if (projectedScore !== null) {
         onUpdateScore(projectedScore);
       }
@@ -250,7 +254,7 @@ export function EditItemModal({
 
     // Determine which projected score to show based on the modal step
     const showProjectedScore = modalStep === 'optimized' ? projectedScore : editingProjectedScore;
-    
+
     const projectedScoreDisplay = showProjectedScore && (
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography variant="body2" sx={{ mr: 1, fontWeight: 'medium' }}>
@@ -270,11 +274,11 @@ export function EditItemModal({
     );
 
     return (
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 2, 
-          mb: 3, 
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 3,
           bgcolor: 'background.default',
           border: '1px solid',
           borderColor: 'divider',
@@ -286,8 +290,8 @@ export function EditItemModal({
             {fieldTypeName} Optimization
           </Typography>
 
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 2
@@ -304,7 +308,7 @@ export function EditItemModal({
             )}
           </Box>
         </Box>
-        
+
       </Paper>
     );
   };

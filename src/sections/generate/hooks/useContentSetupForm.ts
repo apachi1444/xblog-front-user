@@ -43,13 +43,13 @@ export const useContentSetupForm = () => {
   const validateRequiredFields = (fields: string[]) => {
     const values = step1Form.getValues();
     const missingFields = fields.filter(field => !values[field as keyof Step1FormData]);
-    
+
     if (missingFields.length > 0) {
       step1Form.trigger(missingFields as any);
       toast.error('Please fill in all required fields');
       return false;
     }
-    
+
     return true;
   };
 
@@ -62,7 +62,7 @@ export const useContentSetupForm = () => {
 
     try {
       const { primaryKeyword, language, targetCountry, contentDescription, secondaryKeywords } = step1Form.getValues();
-      
+
       if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription', 'secondaryKeywords'])) {
         return;
       }
@@ -74,7 +74,11 @@ export const useContentSetupForm = () => {
       const generatedTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
 
       // Update form values
-      step1Form.setValue('title', generatedTitle);
+      step1Form.setValue('title', generatedTitle, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
       setGenerationState(prev => ({
         ...prev,
         title: { isGenerating: false, isGenerated: true }
@@ -100,7 +104,7 @@ export const useContentSetupForm = () => {
 
     try {
       const { primaryKeyword, language, targetCountry, contentDescription, secondaryKeywords } = step1Form.getValues();
-      
+
       if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription', 'secondaryKeywords'])) {
         return;
       }
@@ -116,10 +120,22 @@ export const useContentSetupForm = () => {
       };
 
       // Update form values
-      step1Form.setValue('metaTitle', metaData.metaTitle);
-      step1Form.setValue('metaDescription', metaData.metaDescription);
-      step1Form.setValue('urlSlug', metaData.urlSlug);
-      
+      step1Form.setValue('metaTitle', metaData.metaTitle, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      step1Form.setValue('metaDescription', metaData.metaDescription, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      step1Form.setValue('urlSlug', metaData.urlSlug, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
       setGenerationState(prev => ({
         ...prev,
         meta: { isGenerating: false, isGenerated: true }
@@ -144,7 +160,7 @@ export const useContentSetupForm = () => {
 
     try {
       const { primaryKeyword, language, targetCountry } = step1Form.getValues();
-      
+
       if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry'])) {
         return;
       }
@@ -163,8 +179,12 @@ export const useContentSetupForm = () => {
         `professional ${primaryKeyword}`,
         `${primaryKeyword} ${new Date().getFullYear()}`
       ];
-      
-      step1Form.setValue('secondaryKeywords', fallbackKeywords);
+
+      step1Form.setValue('secondaryKeywords', fallbackKeywords, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
       toast.success('Generated keywords successfully');
     } catch (error) {
       toast.error('Failed to generate keywords');
@@ -179,21 +199,30 @@ export const useContentSetupForm = () => {
   // Keyword management
   const handleAddKeyword = (keyword: string) => {
     if (!keyword.trim()) return;
-    
+
     const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
     if (currentKeywords.includes(keyword.trim())) {
       toast.error('This keyword already exists');
       return;
     }
-    
-    step1Form.setValue('secondaryKeywords', [...currentKeywords, keyword.trim()]);
+
+    step1Form.setValue('secondaryKeywords', [...currentKeywords, keyword.trim()], {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
   };
 
   const handleDeleteKeyword = (keyword: string) => {
     const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
     step1Form.setValue(
       'secondaryKeywords',
-      currentKeywords.filter(k => k !== keyword)
+      currentKeywords.filter(k => k !== keyword),
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      }
     );
   };
 

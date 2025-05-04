@@ -1,6 +1,6 @@
 import type { Step1State } from "src/sections/generate/generate-steps/steps/step-one-content-setup";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 
 // Icons
 import { useTheme } from "@mui/material/styles";
@@ -68,7 +68,7 @@ export function SEODashboard({
   const urlSlug = watch('urlSlug') || '';
   const theme = useTheme();
 
-  const { progressSections, overallScore } = useSEOScoring();
+  const { progressSections, overallScore } = useSEOScoring(form);
 
   const [tabValue, setTabValue] = useState(defaultTab);
   // Use the isCollapsed prop if provided, otherwise use internal state

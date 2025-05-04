@@ -117,7 +117,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   // Handle primary keyword change explicitly
   const handlePrimaryKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {value} = e.target
-    setValue("primaryKeyword", value, { shouldValidate: true })
+    setValue("primaryKeyword", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    })
   }
 
   // Use the keyword management hook
@@ -137,7 +141,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
           <FormDropdown
             {...register("language", {
               onChange: (e) => {
-                setValue("language", e.target.value, { shouldValidate: true });
+                setValue("language", e.target.value, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                  shouldTouch: true
+                });
               }
             })}
             label="Language"
@@ -150,7 +158,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
           <FormDropdown
             {...register("targetCountry", {
               onChange: (e) => {
-                setValue("targetCountry", e.target.value, { shouldValidate: true });
+                setValue("targetCountry", e.target.value, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                  shouldTouch: true
+                });
               }
             })}
             label="Target Country"
@@ -169,7 +181,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <FormInput
               {...register("primaryKeyword", {
                 onChange: (e) => {
-                  setValue("primaryKeyword", e.target.value, { shouldValidate: true });
+                  setValue("primaryKeyword", e.target.value, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true
+                  });
                 }
               })}
               label="Primary Keyword"
@@ -320,7 +336,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 required: true,
                 onChange: (e) => {
                   setValue("contentDescription", e.target.value, {
-                    shouldValidate: true
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true
                   });
                 }
               })}
@@ -402,7 +420,15 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <FormContainer title="Generated Title">
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
-                  {...register("title")}
+                  {...register("title", {
+                    onChange: (e) => {
+                      setValue("title", e.target.value, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                        shouldTouch: true
+                      });
+                    }
+                  })}
                   value={title}
                   tooltipText="Article Title"
                   label="Article Title"
@@ -448,7 +474,15 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <Stack spacing={1} sx={{ width: "100%" }}>
               {/* Meta Title */}
               <FormInput
-                {...register("metaTitle")}
+                {...register("metaTitle", {
+                  onChange: (e) => {
+                    setValue("metaTitle", e.target.value, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                      shouldTouch: true
+                    });
+                  }
+                })}
                 value={metaTitle}
                 tooltipText="Meta title"
                 label="Meta Title"
@@ -458,7 +492,15 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
               {/* Meta Description */}
               <FormInput
-                {...register("metaDescription")}
+                {...register("metaDescription", {
+                  onChange: (e) => {
+                    setValue("metaDescription", e.target.value, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                      shouldTouch: true
+                    });
+                  }
+                })}
                 tooltipText="Meta Description"
                 value={metaDescription}
                 label="Meta Description"
@@ -470,7 +512,15 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
               {/* URL Slug */}
               <FormInput
-                {...register("urlSlug")}
+                {...register("urlSlug", {
+                  onChange: (e) => {
+                    setValue("urlSlug", e.target.value, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                      shouldTouch: true
+                    });
+                  }
+                })}
                 tooltipText="URL Slug"
                 value={urlSlug}
                 label="URL Slug"

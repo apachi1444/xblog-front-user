@@ -1,6 +1,6 @@
 import type { ReactNode} from 'react';
 
-import { useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import { Box, useTheme } from '@mui/material';
 
@@ -17,7 +17,10 @@ interface ContentLayoutProps {
 export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProps) => {
   const theme = useTheme();
   const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
-  
+  const [isFixed, setIsFixed] = useState(false);
+  const dashboardRef = useRef<HTMLDivElement>(null);
+  const initialTopOffset = useRef<number>(0);
+
   // Determine if SEO Dashboard should be visible based on the active step
   const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
 
@@ -25,6 +28,38 @@ export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProp
   const handleSEODashboardCollapseChange = (collapsed: boolean) => {
     setIsSEODashboardCollapsed(collapsed);
   };
+
+  // Set up scroll event listener to fix the SEO dashboard when scrolling
+  useEffect(() => {
+    if (!isSEODashboardVisible) return;
+
+    const handleScroll = () => {
+      if (!dashboardRef.current) return;
+
+      // If we haven't stored the initial offset yet, do it now
+      if (initialTopOffset.current === 0) {
+        const rect = dashboardRef.current.getBoundingClientRect();
+        initialTopOffset.current = rect.top;
+      }
+
+      // Check if we've scrolled at all
+      const shouldBeFixed = window.scrollY > 0;
+
+      if (shouldBeFixed !== isFixed) {
+        setIsFixed(shouldBeFixed);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Initial check
+    handleScroll();
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isSEODashboardVisible, isFixed]);
 
   return (
     <Box
@@ -56,24 +91,31 @@ export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProp
       {/* SEO Dashboard on the right - only visible on certain steps */}
       {isSEODashboardVisible && (
         <Box
-          sx={{
-            width: isSEODashboardCollapsed ? '40px' : '30%',
-            transition: () => theme.transitions.create(['width'], {
-              duration: theme.transitions.duration.standard,
-            }),
-            position: isSEODashboardCollapsed ? 'absolute' : 'relative',
-            right: isSEODashboardCollapsed ? 0 : 'auto',
-            top: isSEODashboardCollapsed ? 0 : 'auto',
-            height: isSEODashboardCollapsed ? '100%' : 'auto',
-          }}
-        >
-          <SEODashboard
-            state={state}
-            defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
-            onCollapseChange={handleSEODashboardCollapseChange}
-            isCollapsed={isSEODashboardCollapsed}
-          />
-        </Box>
+            ref={dashboardRef}
+            sx={{
+              width: isSEODashboardCollapsed ? '40px' : '30%',
+              transition: () => theme.transitions.create(['width', 'position'], {
+                duration: theme.transitions.duration.standard,
+              }),
+              position: isFixed
+                ? 'sticky'
+                : (isSEODashboardCollapsed ? 'absolute' : 'relative'),
+              right: isSEODashboardCollapsed ? 0 : 'auto',
+              top: isFixed ? '64px' : (isSEODashboardCollapsed ? 0 : 'auto'),
+              height: isSEODashboardCollapsed ? '100%' : 'auto',
+              alignSelf: 'flex-start',
+              zIndex: isFixed ? 10 : 'auto',
+              maxHeight: isFixed ? 'calc(100vh - 64px)' : 'none', // Adjust for header height
+              overflow: 'auto',
+            }}
+          >
+            <SEODashboard
+              state={state}
+              defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
+              onCollapseChange={handleSEODashboardCollapseChange}
+              isCollapsed={isSEODashboardCollapsed}
+            />
+          </Box>
       )}
     </Box>
   );
