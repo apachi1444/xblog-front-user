@@ -1,7 +1,7 @@
 import type { ChecklistItem, ProgressSection } from "src/utils/seoScoring";
 
 import toast from "react-hot-toast";
-import { useState, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 import Add from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
@@ -22,6 +22,7 @@ import { EditItemModal } from "./EditItemModal";
 interface RealTimeScoringTabProps {
   progressSections: ProgressSection[];
   score: number;
+  changedCriteriaIds?: number[];
 }
 
 // Constants
@@ -81,12 +82,56 @@ const FIELD_MAPPING: Record<number, FieldConfig> = {
 // Suggestions are not directly used by EditItemModal in this setup
 // const FIELD_SUGGESTIONS: Record<string, string[]> = { ... };
 
-export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringTabProps) {
+export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds = [] }: RealTimeScoringTabProps) {
   const theme = useTheme();
   // State management
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
+  const [highlightedItems, setHighlightedItems] = useState<number[]>([]);
+
+  // Effect to handle highlighting changed criteria
+  // Track previous changed criteria IDs to avoid infinite loops
+  const prevChangedIdsRef = useRef<number[]>([]);
+
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    const hasNewChanges = changedCriteriaIds.length > 0 &&
+      (prevChangedIdsRef.current.length !== changedCriteriaIds.length ||
+       !prevChangedIdsRef.current.every(id => changedCriteriaIds.includes(id)));
+
+    if (hasNewChanges) {
+      // Update ref with current changed IDs
+      prevChangedIdsRef.current = [...changedCriteriaIds];
+
+      // Set the highlighted items
+      setHighlightedItems(changedCriteriaIds);
+
+      // Auto-expand sections that contain changed criteria
+      setExpandedSections(prev => {
+        const sectionsToExpand = {...prev};
+
+        progressSections.forEach(section => {
+          const hasChangedItem = section.items.some(item =>
+            changedCriteriaIds.includes(item.id)
+          );
+
+          if (hasChangedItem) {
+            sectionsToExpand[section.id] = true;
+          }
+        });
+
+        return sectionsToExpand;
+      });
+
+      // Clear highlights after 5 seconds
+      const timer = setTimeout(() => {
+        setHighlightedItems([]);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [changedCriteriaIds, progressSections]);
 
   // Event handlers
   const handleToggleSection = useCallback((sectionId: number) => {
@@ -110,7 +155,8 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
     text: item.text,
     action: item.action || null,
     score: item.score,
-    maxScore: item.maxScore
+    maxScore: item.maxScore,
+    tooltip: item.tooltip
   });
 
   const handleActionClick = (item: ChecklistItem) => {
@@ -375,7 +421,9 @@ export function RealTimeScoringTab({ progressSections, score }: RealTimeScoringT
                     action={item.action || null}
                     score={item.score}
                     maxScore={item.maxScore}
+                    tooltip={item.tooltip}
                     onActionClick={() => handleActionClick(convertToNotificationItem(item))}
+                    isHighlighted={highlightedItems.includes(item.id)}
                   />
                 ))}
               </Stack>

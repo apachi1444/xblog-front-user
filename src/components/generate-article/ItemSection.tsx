@@ -1,5 +1,6 @@
 import type { ChecklistItem } from "src/utils/seoScoring";
 
+import { useState, useEffect } from "react";
 import { Box, Button, Tooltip, useTheme, Typography } from "@mui/material";
 
 // Constants
@@ -60,26 +61,47 @@ function NotificationIcon({ status }: { status: string }) {
 
 interface ItemSectionProps extends ChecklistItem {
   onActionClick?: (item: ChecklistItem) => void;
+  isHighlighted?: boolean;
 }
 
-export function ItemSection({ id, status, text, action, onActionClick }: ItemSectionProps) {
+export function ItemSection({ id, status, text, action, tooltip, score, maxScore, onActionClick, isHighlighted = false }: ItemSectionProps) {
   const theme = useTheme();
   const color = COLORS[status];
   const icon = <NotificationIcon status={status} />;
-  
+
+  // Animation for highlighting
+  const [highlight, setHighlight] = useState(isHighlighted);
+
+  // Effect to handle highlighting animation
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (isHighlighted) {
+      setHighlight(true);
+      const timer = setTimeout(() => {
+        setHighlight(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isHighlighted]);
+
   const handleActionClick = () => {
     if (onActionClick) {
-      onActionClick({ id, status, text, action });
+      onActionClick({ id, status, text, action, tooltip, score, maxScore });
     }
   };
-  
+
   // Determine if this is a pending item (waiting for input)
   const isPending = status === "pending";
-  
+
   // Get appropriate text and tooltip based on status
   const displayText = isPending ? `${text} (waiting for input)` : text;
-  const tooltipText = isPending ? "This check is waiting for you to fill in required fields" : "";
-  
+
+  // Use custom tooltip if provided, otherwise use default based on status
+  const tooltipText = tooltip || (isPending ? "This check is waiting for you to fill in required fields" :
+                     status === "error" ? "This item needs attention to improve your SEO score" :
+                     status === "warning" ? "This item could be improved for better SEO" :
+                     status === "success" ? "This item is optimized for SEO" : "");
+
   return (
     <Box
       key={id}
@@ -88,6 +110,21 @@ export function ItemSection({ id, status, text, action, onActionClick }: ItemSec
         alignItems: "center",
         opacity: isPending ? 0.7 : 1, // Reduce opacity for pending items
         mb: 1, // Add margin bottom for spacing between items
+        position: 'relative',
+        animation: highlight ? 'pulse 2s infinite' : 'none',
+        '@keyframes pulse': {
+          '0%': {
+            boxShadow: '0 0 0 0 rgba(89, 105, 207, 0.7)'
+          },
+          '70%': {
+            boxShadow: '0 0 0 10px rgba(89, 105, 207, 0)'
+          },
+          '100%': {
+            boxShadow: '0 0 0 0 rgba(89, 105, 207, 0)'
+          }
+        },
+        transition: 'all 0.3s ease',
+        transform: highlight ? 'scale(1.02)' : 'scale(1)',
       }}
     >
       <Box
@@ -103,7 +140,38 @@ export function ItemSection({ id, status, text, action, onActionClick }: ItemSec
       >
         {icon}
       </Box>
-      <Tooltip title={tooltipText} placement="top" arrow disableHoverListener={!isPending}>
+      <Tooltip
+        title={
+          <Box sx={{ p: 0.5, maxWidth: 300 }}>
+            <Typography variant="body2" sx={{ fontWeight: tooltipText.startsWith("Great") || tooltipText.startsWith("Perfect") ? 'bold' : 'normal' }}>
+              {tooltipText}
+            </Typography>
+          </Box>
+        }
+        placement="top"
+        arrow
+        disableHoverListener={tooltipText === ""}
+        componentsProps={{
+          tooltip: {
+            sx: {
+              bgcolor: status === 'success' ? 'success.lighter' :
+                      status === 'error' ? 'error.lighter' :
+                      status === 'warning' ? 'warning.lighter' : 'grey.100',
+              color: status === 'success' ? 'success.darker' :
+                     status === 'error' ? 'error.darker' :
+                     status === 'warning' ? 'warning.darker' : 'text.primary',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+              borderRadius: 1,
+              p: 1,
+              '& .MuiTooltip-arrow': {
+                color: status === 'success' ? 'success.lighter' :
+                       status === 'error' ? 'error.lighter' :
+                       status === 'warning' ? 'warning.lighter' : 'grey.100',
+              }
+            }
+          }
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -115,18 +183,48 @@ export function ItemSection({ id, status, text, action, onActionClick }: ItemSec
             borderRadius: "0 4px 4px 0",
             border: `1px solid ${isPending ? "#e0e0e0" : "#f0f0f0"}`,
             borderStyle: isPending ? "dashed" : "solid", // Dashed border for pending items
+            cursor: tooltipText ? 'help' : 'default', // Show help cursor when tooltip is available
           }}
         >
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
-              fontStyle: isPending ? "italic" : "normal", // Italic text for pending items
-            }}
-          >
-            {displayText}
-          </Typography>
-          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
+                fontStyle: isPending ? "italic" : "normal", // Italic text for pending items
+              }}
+            >
+              {displayText}
+            </Typography>
+            {tooltipText && tooltipText !== "This check is waiting for you to fill in required fields" && (
+              <Box
+                component="span"
+                sx={{
+                  display: 'inline-flex',
+                  ml: 0.5,
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  bgcolor: status === 'success' ? 'success.lighter' :
+                           status === 'error' ? 'error.lighter' :
+                           status === 'warning' ? 'warning.lighter' : 'grey.200',
+                  border: `1px solid ${status === 'success' ? theme.palette.success.main :
+                                       status === 'error' ? theme.palette.error.main :
+                                       status === 'warning' ? theme.palette.warning.main : theme.palette.grey[400]}`,
+                  fontSize: '9px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  fontWeight: 'bold',
+                  color: status === 'success' ? theme.palette.success.dark :
+                         status === 'error' ? theme.palette.error.dark :
+                         status === 'warning' ? theme.palette.warning.dark : theme.palette.grey[600],
+                }}
+              >
+                ?
+              </Box>
+            )}
+          </Box>
+
           {action && (
             <Button
               variant={isPending ? "text" : "outlined"}

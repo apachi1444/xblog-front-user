@@ -68,9 +68,16 @@ export function SEODashboard({
   const urlSlug = watch('urlSlug') || '';
   const theme = useTheme();
 
-  const { progressSections, overallScore } = useSEOScoring(form);
-
+  const { progressSections, overallScore, changedCriteriaIds } = useSEOScoring(form);
   const [tabValue, setTabValue] = useState(defaultTab);
+
+  // Auto-switch to real-time scoring tab when criteria change
+  useEffect(() => {
+    if (changedCriteriaIds.length > 0) {
+      setTabValue(1); // Switch to real-time scoring tab
+    }
+  }, [changedCriteriaIds]);
+
   // Use the isCollapsed prop if provided, otherwise use internal state
   const [showContent, setShowContent] = useState(isCollapsed !== undefined ? !isCollapsed : true);
 
@@ -118,6 +125,7 @@ export function SEODashboard({
           <RealTimeScoringTab
             progressSections={progressSections}
             score={overallScore}
+            changedCriteriaIds={changedCriteriaIds}
           />
         );
 
@@ -134,7 +142,8 @@ export function SEODashboard({
     isGeneratingMeta,
     isGenerateDisabled,
     progressSections,
-    overallScore
+    overallScore,
+    changedCriteriaIds
   ]);
 
   return (

@@ -21,6 +21,7 @@ export interface ChecklistItem {
   action?: string | null;
   score?: number;
   maxScore?: number;
+  tooltip?: string; // Tooltip text explaining the issue and how to fix it
 }
 
 export interface ProgressSection {
@@ -41,8 +42,8 @@ export const isFieldFilled = (value: any): boolean => {
 
 // Add a helper function to determine item status
 export const determineItemStatus = (
-  isActive: boolean, 
-  dependsOnField: boolean, 
+  isActive: boolean,
+  dependsOnField: boolean,
   fieldFilled: boolean,
   condition: boolean
 ): CriterionStatus => {
@@ -70,7 +71,7 @@ export const calculateKeywordDensity = (text: string, keyword: string): number =
   if (!text || !keyword) return 0;
   const wordCount = text.split(/\s+/).length;
   if (wordCount === 0) return 0;
-  
+
   const occurrences = countKeywordOccurrences(text, keyword);
   return (occurrences / wordCount) * 100;
 };
@@ -78,7 +79,7 @@ export const calculateKeywordDensity = (text: string, keyword: string): number =
 // Check if keyword is in first N% of content
 export const isKeywordInFirstPercentage = (text: string, keyword: string, percentage: number): boolean => {
   if (!text || !keyword) return false;
-  
+
   const firstNPercent = text.substring(0, Math.floor(text.length * (percentage / 100)));
   return containsKeyword(firstNPercent, keyword);
 };
@@ -86,11 +87,11 @@ export const isKeywordInFirstPercentage = (text: string, keyword: string, percen
 // Count headings in content
 export const countHeadings = (content: string): { total: number, withKeyword: number } => {
   if (!content) return { total: 0, withKeyword: 0 };
-  
+
   // Simple regex to match h1-h6 tags - in a real app, you'd use a proper HTML parser
   const headingRegex = /<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi;
   const headings = content.match(headingRegex) || [];
-  
+
   return {
     total: headings.length,
     withKeyword: 0 // This would need actual implementation with keyword checking
@@ -101,19 +102,19 @@ export const countHeadings = (content: string): { total: number, withKeyword: nu
 // Update the calculateSectionProgress function to exclude pending items
 export const calculateSectionProgress = (items: ChecklistItem[]): number => {
   if (items.length === 0) return 0;
-  
+
   // Only consider active items (not inactive or pending)
   const activeItems = items.filter(item => item.status !== 'inactive' && item.status !== 'pending');
   if (activeItems.length === 0) return 0;
-  
+
   // If items have score and maxScore properties, use those for more accurate calculation
   if (activeItems.every(item => item.score !== undefined && item.maxScore !== undefined)) {
     const totalScore = activeItems.reduce((sum, item) => sum + (item.score || 0), 0);
     const totalMaxScore = activeItems.reduce((sum, item) => sum + (item.maxScore || 0), 0);
-    
+
     return Math.round((totalScore / totalMaxScore) * 100);
   }
-  
+
   // Fall back to simple success/total calculation
   const successItems = activeItems.filter(item => item.status === 'success');
   return Math.round((successItems.length / activeItems.length) * 100);
@@ -130,14 +131,14 @@ export const determineSectionType = (progress: number): CriterionStatus => {
 // Calculate overall SEO score
 export const calculateOverallScore = (sections: ProgressSection[]): number => {
   if (sections.length === 0) return 0;
-  
+
   let totalWeightedScore = 0;
   let totalWeight = 0;
-  
+
   sections.forEach(section => {
     totalWeightedScore += section.progress * section.weight;
     totalWeight += section.weight;
   });
-  
+
   return Math.round(totalWeightedScore / totalWeight);
 };
