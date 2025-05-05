@@ -5,12 +5,11 @@ import {
   Box,
   Tooltip,
   useTheme,
+  TextField,
   Typography,
   FormControl,
-  FormHelperText,
   Autocomplete,
-  TextField,
-  Chip
+  FormHelperText
 } from '@mui/material';
 
 interface DropdownOption {
@@ -123,8 +122,8 @@ export function FormAutocompleteDropdown({
             }}
           />
         )}
-        renderOption={(props, option) => (
-          <Box component="li" {...props}>
+        renderOption={(newProps, option) => (
+          <Box component="li" {...newProps}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {option.icon && (
                 <Box component="span" sx={{ fontSize: '1.2em' }}>
