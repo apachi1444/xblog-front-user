@@ -21,7 +21,6 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
     : Array(4).fill(0).map((_, index) => ({
         id: (index + 1).toString(),
         title: `Section ${index + 1}: ${['Introduction', 'Main Concepts', 'Applications', 'Benefits'][index] || 'Additional Content'}`,
-        status: ['Not Started', 'In Progress', 'Completed'][Math.floor(Math.random() * 3)] as "Not Started" | "In Progress" | "Completed",
         content: SAMPLE_CONTENT[index] || SAMPLE_CONTENT[0]
       }));
 
@@ -57,10 +56,14 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
   }, [sections]);
 
   const handleEditSection = useCallback((section: SectionItem, externalEditHandler?: (section: SectionItem) => void) => {
+    // Set the current section first
+    setCurrentSection(section);
+
     if (externalEditHandler) {
+      // If an external handler is provided, call it with the section
       externalEditHandler(section);
     } else {
-      setCurrentSection(section);
+      // Otherwise, open the edit dialog
       setEditDialogOpen(true);
     }
   }, []);
@@ -71,12 +74,22 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
   }, [sections]);
 
   const handleSaveSection = useCallback((updatedSection: SectionItem) => {
-    setSections(prevSections =>
-      prevSections.map(section =>
+    console.log('Saving section in useContentStructuringForm:', updatedSection);
+
+    // Update the sections state with the updated section
+    setSections(prevSections => {
+      const newSections = prevSections.map(section =>
         section.id === updatedSection.id ? updatedSection : section
-      )
-    );
-    toast.success("Section updated successfully!");
+      );
+      console.log('Updated sections:', newSections);
+      return newSections;
+    });
+
+    // Close the edit dialog
+    setEditDialogOpen(false);
+
+    // Reset the current section
+    setCurrentSection(null);
   }, []);
 
   // Generate table of contents based on title

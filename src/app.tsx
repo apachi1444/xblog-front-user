@@ -24,23 +24,13 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 console.log(GOOGLE_CLIENT_ID);
 
-// Function to log errors to a monitoring service
-const logError = (error: Error, info: React.ErrorInfo) => {
-  // In a production app, you would send this to your error tracking service
-  // Example: Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
-  console.error('Error caught by ErrorBoundary:', error);
-  console.error('Component stack:', info.componentStack);
-};
-
 export default function App() {
   useAxiosAuth();
 
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
-      onError={logError}
       onReset={() => {
-        // Optional: Reset app state here if needed
         window.location.href = '/';
       }}
     >

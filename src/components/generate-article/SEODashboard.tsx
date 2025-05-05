@@ -14,9 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useSEOScoring } from "src/hooks/useSEOScoring";
-
 import { Iconify } from "src/components/iconify";
+
+import { useSEOScoring } from "src/sections/generate/hooks/useSEOScoring";
 
 import { PreviewSEOTab } from "./PreviewSEOTab";
 import { RealTimeScoringTab } from "./RealTimeScoringTab";
@@ -79,28 +79,24 @@ export function SEODashboard({
   }, [changedCriteriaIds]);
 
   // Use the isCollapsed prop if provided, otherwise use internal state
-  const [showContent, setShowContent] = useState(isCollapsed !== undefined ? !isCollapsed : true);
+  const [internalShowContent, setInternalShowContent] = useState(true);
 
-  // Update internal state when isCollapsed prop changes
-  useEffect(() => {
-    if (isCollapsed !== undefined) {
-      setShowContent(!isCollapsed);
-    }
-  }, [isCollapsed]);
+  // Compute showContent based on props or internal state
+  const showContent = isCollapsed !== undefined ? !isCollapsed : internalShowContent;
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   }, []);
 
   const handleToggleContent = useCallback(() => {
-    const newShowContent = !showContent;
-    setShowContent(newShowContent);
-
-    // Notify parent component of collapse state change
-    if (onCollapseChange) {
-      onCollapseChange(!newShowContent);
+    if (isCollapsed !== undefined && onCollapseChange) {
+      // If isCollapsed is controlled by parent, notify parent to change it
+      onCollapseChange(!isCollapsed);
+    } else {
+      // Otherwise, toggle internal state
+      setInternalShowContent(!internalShowContent);
     }
-  }, [showContent, onCollapseChange]);
+  }, [isCollapsed, internalShowContent, onCollapseChange]);
 
   const isGenerateDisabled = !primaryKeyword || !secondaryKeywords || !contentDescription || !language || !targetCountry;
 

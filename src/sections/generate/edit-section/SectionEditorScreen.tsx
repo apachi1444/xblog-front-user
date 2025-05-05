@@ -1,5 +1,6 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
+import toast from 'react-hot-toast';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { useTheme } from '@mui/material/styles';
@@ -42,19 +43,20 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
 
     console.log('Is edited state set to:', true);
     console.log('Content state updated to:', newContent);
-
-    setTimeout(() => {
-      setIsEdited(true);
-    }, 0);
   }, [content]);
 
   // Initialize form values when section changes
   useEffect(() => {
     if (section) {
+      console.log('Loading section data in SectionEditorScreen:', section);
+      console.log('Section content to load:', section.content);
+
       setTitle(section.title);
       setDescription(section.description || '');
       setContent(section.content || '');
       setIsEdited(false);
+
+      console.log('Content state after loading:', section.content);
     } else {
       console.log('No section data available');
     }
@@ -75,6 +77,8 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
   const handleSave = useCallback(() => {
     if (!section) return;
 
+    console.log('Saving section with content:', content);
+
     const updatedSection: SectionItem = {
       ...section,
       title,
@@ -83,6 +87,9 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
     };
 
     onSave(updatedSection);
+
+    // Show success message
+    toast.success("Section saved successfully!");
   }, [section, title, description, content, onSave]);
 
   const handleCancel = useCallback(() => {
@@ -172,13 +179,16 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
                 borderRadius: 1,
                 overflow: 'hidden',
                 minHeight: '400px',
-                bgcolor: 'background.paper'
+                width: '100%',
+                height: '100%',
+                bgcolor: 'background.paper',
+                border: '1px solid #e0e0e0'
               }}>
                 <Editor
-                  initialContent={content}
+                  initialContent={content || section.content || '<p>Start writing here...</p>'}
                   onChange={handleEditorChange}
                   ref={editorRef}
-                  key={`editor-${section.id}`}
+                  key={`editor-${section.id}-${Date.now()}`}
                 />
               </Box>
             </Box>

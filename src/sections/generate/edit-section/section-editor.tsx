@@ -49,14 +49,20 @@ export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
 
   // Update content when initialContent changes
   useEffect(() => {
-    if (initialContent && initialContent !== content) {
+    console.log('initialContent changed in Editor component:', initialContent);
+    if (initialContent) {
       console.log('Updating editor content from initialContent:', initialContent);
       setContent(initialContent);
       if (rteRef.current?.editor) {
+        console.log('Setting editor content via commands.setContent');
         rteRef.current.editor.commands.setContent(initialContent);
+      } else {
+        console.log('Editor reference not available yet');
       }
+    } else {
+      console.log('initialContent is empty or undefined');
     }
-  }, [initialContent, content]);
+  }, [initialContent]);
 
   const handleNewImageFiles = useCallback(
     (files: File[], insertPosition?: number): void => {
@@ -138,7 +144,15 @@ export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
       handleDrop,
       handlePaste,
     }
-  });
+  }, [initialContent]);
+
+  // Log when editor is created or updated
+  useEffect(() => {
+    if (editor) {
+      console.log('Editor instance created/updated');
+      console.log('Current editor content:', editor.getHTML());
+    }
+  }, [editor]);
 
   // Add a direct input handler to ensure we catch all content changes
   useEffect(() => {
@@ -169,7 +183,13 @@ export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
     <Box
       sx={{
         height: '100%',
+        width: '100%',
+        border: '1px solid #e0e0e0',
+        borderRadius: 1,
+        overflow: 'hidden',
         "& .ProseMirror": {
+          minHeight: '300px',
+          padding: 2,
           "& h1, & h2, & h3, & h4, & h5, & h6": {
             scrollMarginTop: showMenuBar ? 50 : 0,
           },
@@ -180,7 +200,7 @@ export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
         <RichTextEditor
           ref={rteRef}
           extensions={extensions}
-          content={initialContent || "<p>Start writing your section content here...</p>"}
+          // Don't set content here, it's already set in the useEditor hook
           onBlur={() => {
             if (editor && onChange) {
               const newContent = editor.getHTML();

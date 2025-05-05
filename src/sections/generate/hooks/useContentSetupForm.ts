@@ -1,13 +1,16 @@
-import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, useFormContext } from 'react-hook-form';
 
 import { step1Schema } from '../schemas';
 
 import type { Step1FormData } from '../schemas';
 
 export const useContentSetupForm = () => {
+  // Try to access the main form context if available
+  const mainFormContext = useFormContext();
+
   // Generation states
   const [generationState, setGenerationState] = useState({
     title: {
@@ -39,6 +42,36 @@ export const useContentSetupForm = () => {
     },
   });
 
+  // Synchronize with main form if available
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (mainFormContext) {
+      // Listen for changes in the main form's step1 fields
+      const subscription = mainFormContext.watch((value, { name, type }) => {
+        if (!name || type !== 'change' || !name.startsWith('step1.')) return;
+
+        // Extract the field name from step1.fieldName
+        const fieldName = name.replace('step1.', '');
+
+        // Get the value from the main form
+        const fieldValue = mainFormContext.getValues(name);
+
+        // Only update if the value is different to avoid infinite loops
+        const currentValue = step1Form.getValues(fieldName as any);
+        if (JSON.stringify(currentValue) !== JSON.stringify(fieldValue)) {
+          console.log(`Syncing ${name} from main form to step1Form`, fieldValue);
+          step1Form.setValue(fieldName as any, fieldValue, {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true
+          });
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [mainFormContext, step1Form]);
+
   // Helper function to validate required fields
   const validateRequiredFields = (fields: string[]) => {
     const values = step1Form.getValues();
@@ -68,7 +101,7 @@ export const useContentSetupForm = () => {
       }
 
       // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
 
       // Generate title (replace with actual API call when ready)
       const generatedTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
@@ -85,7 +118,6 @@ export const useContentSetupForm = () => {
       }));
 
     } catch (error) {
-      console.error('Error generating title:', error);
       toast.error('Failed to generate title');
     } finally {
       setGenerationState(prev => ({

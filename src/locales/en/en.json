@@ -31,6 +31,9 @@
         "websitesRemaining": "{{count}} websites remaining",
         "articlesRemaining": "{{count}} articles remaining"
       },
+      "websites": {
+        "addNew": "Add New Website"
+      },
       "auth": {
         "resetPassword": {
           "title": "Reset Password",
@@ -157,6 +160,101 @@
         "next": "Next",
         "previous": "Previous"
       },
+      "regenerate": {
+        "label": "Regenerations",
+        "remaining": "{{count}} regenerations remaining",
+        "info": "Regenerations allow you to recreate content. Each regeneration decreases your available count.",
+        "notEnough": "No regenerations available. Please upgrade your plan for more.",
+        "upgradeMessage": "Upgrade your plan to get more regenerations.",
+        "error": "Failed to use regeneration. Please try again.",
+        "loading": "Regenerating {{type}}...",
+        "success": "{{type}} regenerated successfully!",
+        "available": "Regenerate ({{count}} remaining)",
+        "button": "Regenerate",
+        "example": {
+          "title": "Regeneration System Example",
+          "description": "This is an example of how to use the regeneration system. You have {{count}} regenerations available.",
+          "content": "Example Content",
+          "contentDescription": "This is some example content that can be regenerated."
+        }
+      },
+      "points": {
+        "label": "Points",
+        "remaining": "{{count}} points remaining",
+        "info": "Points are used when generating content with AI. Each generation costs points based on the type of content.",
+        "notEnough": "Not enough points for this operation",
+        "notEnoughTitle": "Not Enough Points",
+        "insufficientPoints": "Insufficient Points for This Operation",
+        "generationRequires": "Generating {{type}} requires {{points}} points. You have {{remaining}} points remaining.",
+        "youHave": "You have",
+        "required": "Required",
+        "needed": "Needed",
+        "upgradeMessage": "Upgrade your plan to get more points or wait for your points to refresh.",
+        "upgradePlan": "Upgrade Plan",
+        "deducted": "{{cost}} points used. {{remaining}} remaining",
+        "generationTypes": {
+          "title": "title",
+          "metaTitle": "meta title",
+          "metaDescription": "meta description",
+          "keywords": "keywords",
+          "sections": "sections",
+          "sectionContent": "section content",
+          "fullArticle": "full article"
+        },
+        "reasons": {
+          "title": "Generate title",
+          "metaTitle": "Generate meta title",
+          "metaDescription": "Generate meta description",
+          "keywords": "Generate keywords",
+          "sections": "Generate sections",
+          "sectionContent": "Generate section content",
+          "fullArticle": "Generate full article"
+        }
+      },
+      "article": {
+        "placeholders": {
+          "select": "Select an option",
+          "selectOrType": "Select or type an option"
+        },
+        "settings": {
+          "title": "Article Settings",
+          "mainSettings": "Main Settings",
+          "articleType": "Article Type",
+          "articleSize": "Article Size",
+          "toneOfVoice": "Tone of Voice",
+          "pointOfView": "Point of View",
+          "aiContentCleaning": "AI Content Cleaning",
+          "mediaSettings": "Media Settings",
+          "imageQuality": "Image Quality",
+          "imagePlacement": "Image Placement",
+          "imageStyle": "Image Style",
+          "numberOfImages": "Number of Images",
+          "includeVideos": "Include Videos",
+          "numberOfVideos": "Number of Videos",
+          "linkingSettings": "Linking Settings",
+          "internalLinking": "Internal Linking",
+          "externalLinking": "External Linking"
+        },
+        "tooltips": {
+          "articleType": "Choose the type of article that best fits your content goals",
+          "articleSize": "Determines the length and depth of your article",
+          "toneOfVoice": "Sets the overall tone and style of writing for your article",
+          "pointOfView": "Determines the perspective from which your article is written",
+          "aiContentCleaning": "Controls how AI-generated text is processed to sound more natural",
+          "imageQuality": "Sets the resolution and quality of generated images",
+          "imagePlacement": "Determines where images will be placed within your article",
+          "imageStyle": "Sets the visual style for generated images",
+          "numberOfImages": "Total number of images to include in your article",
+          "numberOfVideos": "Specify how many videos should be embedded in your article",
+          "internalLinking": "Select which of your websites to link to within the article",
+          "externalLinking": "Choose which external sources to reference in your article or type your own"
+        },
+        "buttons": {
+          "generating": "Generating...",
+          "generateTableOfContents": "Generate Table of Contents",
+          "tableOfContentsGenerated": "Table of Contents Generated"
+        }
+      },
       "error": {
         "title": "Something went wrong",
         "message": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
@@ -165,6 +263,14 @@
         "hideDetails": "Hide Details",
         "reportIssue": "If this issue persists, please report it to our support team.",
         "copyToClipboard": "Copy to clipboard"
+      },
+      "errors": {
+        "subscription": {
+          "fetch": "Failed to fetch subscription details"
+        },
+        "stores": {
+          "fetch": "Failed to fetch stores data"
+        }
       },
       "templates": {
         "title": "Article Templates",

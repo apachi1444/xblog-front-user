@@ -1,7 +1,7 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -62,6 +62,14 @@ export function Step3ContentStructuring({state}: Step3Props) {
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
+  // Update sections when generatedSections changes
+  useEffect(() => {
+    if (generatedSections.length > 0) {
+      console.log('Updating sections from generatedSections:', generatedSections);
+      setSections(generatedSections);
+    }
+  }, [generatedSections]);
+
 
   const handleSectionsChange = useCallback((newSections: SectionItem[]) => {
     setSections(newSections);
@@ -94,8 +102,14 @@ export function Step3ContentStructuring({state}: Step3Props) {
         section.id === updatedSection.id ? updatedSection : section
       )
     );
+
+    // Also update the parent component's state if onSaveSection is provided
+    if (onSaveSection) {
+      onSaveSection(updatedSection);
+    }
+
     toast.success("Section updated successfully!");
-  }, []);
+  }, [onSaveSection]);
 
   return (
     <Grid container spacing={3}>

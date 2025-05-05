@@ -99,17 +99,23 @@ export const countHeadings = (content: string): { total: number, withKeyword: nu
 };
 
 // Calculate overall section progress
-// Update the calculateSectionProgress function to exclude pending items
+// Include pending items in the calculation but count them as 0 score
 export const calculateSectionProgress = (items: ChecklistItem[]): number => {
   if (items.length === 0) return 0;
 
-  // Only consider active items (not inactive or pending)
-  const activeItems = items.filter(item => item.status !== 'inactive' && item.status !== 'pending');
+  // Only exclude inactive items, but include pending items with 0 score
+  const activeItems = items.filter(item => item.status !== 'inactive');
   if (activeItems.length === 0) return 0;
 
   // If items have score and maxScore properties, use those for more accurate calculation
   if (activeItems.every(item => item.score !== undefined && item.maxScore !== undefined)) {
-    const totalScore = activeItems.reduce((sum, item) => sum + (item.score || 0), 0);
+    // For pending items, ensure score is 0
+    const totalScore = activeItems.reduce((sum, item) => {
+      // If item is pending, count it as 0 regardless of its score value
+      const effectiveScore = item.status === 'pending' ? 0 : (item.score || 0);
+      return sum + effectiveScore;
+    }, 0);
+
     const totalMaxScore = activeItems.reduce((sum, item) => sum + (item.maxScore || 0), 0);
 
     return Math.round((totalScore / totalMaxScore) * 100);
@@ -117,6 +123,7 @@ export const calculateSectionProgress = (items: ChecklistItem[]): number => {
 
   // Fall back to simple success/total calculation
   const successItems = activeItems.filter(item => item.status === 'success');
+  // Include all items in the denominator, including pending ones
   return Math.round((successItems.length / activeItems.length) * 100);
 };
 

@@ -50,8 +50,6 @@ interface Step1ContentSetupProps {
 }
 
 export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
-  // const { t } = useTranslation(); // Initialize the translation hook if needed
-
   const {
     form,
     generation: {
@@ -363,7 +361,6 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
       </Grid>
 
       <Grid item xs={12} sx={{ mt: -2 }}>
-        {/* Title generation section */}
         {!isTitleGenerated ? (
           <Box
             sx={{

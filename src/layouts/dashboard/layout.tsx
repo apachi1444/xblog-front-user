@@ -21,6 +21,7 @@ import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlic
 import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
+import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 
 import { Main } from './main';
 import { layoutClasses } from '../classes';
@@ -178,6 +179,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   />
                 </IconButton>
 
+                <RegenerateCountDisplay />
                 <LanguagePopover data={_langs} />
                 <NotificationsPopover data={_notifications} />
                 <AccountPopover

@@ -117,6 +117,11 @@ export const useArticleSettingsForm = () => {
 
   // Handle generate table of contents
   const handleGenerateTableOfContents = async (onGenerate?: () => Promise<void>) => {
+    // Skip generation if onGenerate is empty (which happens when coming back from step 3)
+    if (!onGenerate) {
+      return;
+    }
+
     setIsGenerating(true);
 
     try {

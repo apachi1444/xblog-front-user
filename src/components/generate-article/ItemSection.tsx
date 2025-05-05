@@ -1,6 +1,8 @@
 import type { ChecklistItem } from "src/utils/seoScoring";
 
 import { useState, useEffect } from "react";
+
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { Box, Button, Tooltip, useTheme, Typography } from "@mui/material";
 
 // Constants
@@ -111,7 +113,7 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
         opacity: isPending ? 0.7 : 1, // Reduce opacity for pending items
         mb: 1, // Add margin bottom for spacing between items
         position: 'relative',
-        animation: highlight ? 'pulse 2s infinite' : 'none',
+        animation: highlight ? 'pulse 2s' : 'none',
         '@keyframes pulse': {
           '0%': {
             boxShadow: '0 0 0 0 rgba(89, 105, 207, 0.7)'
@@ -225,9 +227,9 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
             )}
           </Box>
 
-          {action && (
+          {action && status !== 'success' && (
             <Button
-              variant={isPending ? "text" : "outlined"}
+              variant={isPending ? "text" : status === "error" ? "contained" : "outlined"}
               size="small"
               color={status === "error" ? "error" : status === "warning" ? "warning" : "primary"}
               onClick={handleActionClick}
@@ -239,7 +241,14 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
                 textTransform: "none",
                 px: 1.5,
                 py: 0.25,
+                fontWeight: status === "error" ? 'bold' : 'normal',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: status === "error" ? '0 4px 8px rgba(211, 47, 47, 0.2)' : 'none',
+                  transition: 'all 0.2s ease-in-out'
+                }
               }}
+              startIcon={status === "error" ? <AutoFixHighIcon fontSize="small" /> : undefined}
             >
               {isPending ? "Waiting" : action}
             </Button>

@@ -21,7 +21,7 @@ const mockSubscriptionDetails = {
   articles_created: 45,
   articles_limit: 100,
   regeneration_number: 15,
-  regeneration_limit: 50,
+  regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
   subscription_name: 'FREEEE'
 };
@@ -148,6 +148,28 @@ const setupMocks = () => {
       ]
     });
 
+    // Mock user endpoint
+    mock.onGet('/users/me').reply(200, {
+      id: '1',
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      avatar: '/assets/images/avatar/avatar-1.webp',
+      role: 'user',
+      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      is_completed_onboarding: true,
+      subscription: {
+        name: 'Professional',
+        price: 29.99,
+        billing_cycle: 'monthly',
+        status: 'active'
+      },
+      regenerations: {
+        available: 15,
+        total: 50
+      }
+    });
+
     // Mock invoices endpoint
     mock.onGet('/subscriptions/invoices').reply(200, {
       invoices: [
@@ -258,6 +280,20 @@ const setupMocks = () => {
       console.warn(`Article ${article_id} not found for removing schedule`);
       return [404, { message: 'Article not found' }];
     });
+
+    mock.onGet('/regenerations/status').reply(200, {
+      success: true,
+      regenerationsAvailable: 15,
+      regenerationsTotal: 50
+    });
+
+    mock.onPost('/regenerations/use').reply((config) => 
+       [200, {
+        success: true,
+        regenerationsAvailable: 14, // Decreased by 1
+        regenerationsTotal: 50
+      }]
+    );
 
     mock.onPut(/\/calendars\/.*/).reply((config) => {
       const calendarId = config.url?.split('/').pop();
@@ -512,7 +548,7 @@ const axiosBaseQuery =
 
 export const api = createApi({
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Articles', 'Stores'],
+  tagTypes: ['Articles', 'Stores','User'],
   endpoints: () => ({}),
 });
 

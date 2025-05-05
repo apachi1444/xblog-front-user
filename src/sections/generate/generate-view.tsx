@@ -1,9 +1,10 @@
 // Types
+import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { FormProvider } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 // Layout components
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -15,6 +16,8 @@ import { ContentLayout } from './components/ContentLayout';
 import { StepNavigation } from './components/StepNavigation';
 // Custom hooks
 import { useContentSetupForm } from './hooks/useContentSetupForm';
+// Custom hook for form synchronization
+import { useFormSynchronization } from './hooks/useFormSynchronization';
 import { useArticleSettingsForm } from './hooks/useArticleSettingsForm';
 import { useGenerateArticleForm } from './hooks/useGenerateArticleForm';
 import { Step4Publish } from './generate-steps/steps/step-four-publish';
@@ -52,13 +55,34 @@ export function GeneratingView() {
 
   const { step2Form } = useArticleSettingsForm();
 
+  // Define field mappings for synchronization
+  const fieldMappings = useMemo(() => ({
+    'step1.contentDescription': ['contentDescription'],
+    'step1.primaryKeyword': ['primaryKeyword'],
+    'step1.secondaryKeywords': ['secondaryKeywords'],
+    'step1.language': ['language'],
+    'step1.targetCountry': ['targetCountry'],
+    'step1.title': ['title'],
+    'step1.metaTitle': ['metaTitle'],
+    'step1.metaDescription': ['metaDescription'],
+    'step1.urlSlug': ['urlSlug'],
+  }), []);
+
+  // Set up form synchronization
+  const { updateFieldInAllForms } = useFormSynchronization(
+    methods,
+    [step1Form],
+    fieldMappings
+  );
+
   const {
     sections: generatedSections,
+    setSections: setGeneratedSections,
     isGenerating: isGeneratingSections,
     isGenerated,
     editDialogOpen,
     handleGenerateTableOfContents,
-    handleSaveSection,
+    handleSaveSection: contentStructuringHandleSaveSection,
     handleEditSection,
     handleCancelSectionChanges
   } = useContentStructuringForm();
@@ -145,7 +169,7 @@ export function GeneratingView() {
     if (isGenerated && !isGeneratingSections && generatedSections.length > 0) {
       if (activeStep === 1) {
         setTimeout(() => {
-          handleNext();        
+          handleNext();
         }, 4000);
 
       }
@@ -187,25 +211,69 @@ export function GeneratingView() {
     },
   };
 
+  // Custom function to handle saving sections
+  const handleSaveSection = useCallback((updatedSection: SectionItem) => {
+    console.log('Custom handleSaveSection in generate-view:', updatedSection);
+
+    // Update the sections in the content structuring form
+    contentStructuringHandleSaveSection(updatedSection);
+
+    // Also update the generatedSections directly to ensure changes are persisted
+    setGeneratedSections(prevSections =>
+      prevSections.map(section =>
+        section.id === updatedSection.id ? updatedSection : section
+      )
+    );
+  }, [contentStructuringHandleSaveSection, setGeneratedSections]);
+
   const step3State: Step3State = {
     tableOfContents: {
       generatedSections,
       onSaveSection: handleSaveSection,
-      onEditSection: handleEditSection,
+      onEditSection: (section) => {
+        // Store the section being edited
+        setCurrentEditingSection(section);
+        // Call the edit handler
+        handleEditSection(section);
+      }
     }
   };
 
+
+  // State to track the section being edited
+  const [currentEditingSection, setCurrentEditingSection] = useState<any>(null);
+
+  // Update the current editing section when handleEditSection is called
+  useEffect(() => {
+    if (editDialogOpen && generatedSections.length > 0) {
+      // Find the section that's being edited
+      const sectionToEdit = currentEditingSection || generatedSections[0];
+      console.log('Setting current editing section:', sectionToEdit);
+      setCurrentEditingSection(sectionToEdit);
+    } else if (!editDialogOpen) {
+      // Only clear the current editing section when the dialog is closed
+      console.log('Clearing current editing section');
+      setCurrentEditingSection(null);
+    }
+  }, [editDialogOpen, generatedSections, currentEditingSection]);
 
   const renderStepContent = () => {
     if (activeStep === 2 && editDialogOpen) {
       return (
         <SectionEditorScreen
-          section={generatedSections.at(0)}
+          section={currentEditingSection}
           onSave={(updatedSection) => {
+            console.log('Saving section from SectionEditorScreen:', updatedSection);
+
+            // Call the handleSaveSection function to update the state
             handleSaveSection(updatedSection);
+
+            // Clear the current editing section
+            setCurrentEditingSection(null);
           }}
           onCancel={() => {
             handleCancelSectionChanges();
+            setCurrentEditingSection(null);
           }}
         />
       );
@@ -234,9 +302,15 @@ export function GeneratingView() {
     }
   };
 
+  // Create a context value to pass the updateFieldInAllForms function to child components
+  const formSyncContextValue = useMemo(() => ({
+    updateFieldInAllForms
+  }), [updateFieldInAllForms]);
+
   return (
     <DashboardContent>
-      <FormProvider {...methods}>
+      {/* Pass the methods and our custom form sync context to FormProvider */}
+      <FormProvider {...methods} {...formSyncContextValue}>
         {/* Publishing animation overlay */}
         {isPublishing && (
           <LoadingAnimation message="Publishing your content..." />

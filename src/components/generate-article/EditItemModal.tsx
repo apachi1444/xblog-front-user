@@ -24,9 +24,12 @@ import {
 interface EditItemModalProps {
   isOpen: boolean;
   score: number;
+  maxScore: number;
+  weight: number;
   onUpdateScore: (newScore: number) => void;
   onClose: () => void;
   fieldType: string;
+  tooltip?: string;
   onOptimize: (fieldType: string, currentValue: string) => Promise<string>;
 }
 
@@ -61,9 +64,17 @@ export function EditItemModal({
   fieldType,
   onOptimize,
   onUpdateScore,
-  score
+  score,
+  maxScore,
+  weight,
+  tooltip
 }: EditItemModalProps) {
-  const { getValues, setValue } = useFormContext(); // Access form methods
+  const formContext = useFormContext(); // Access form methods
+  const { getValues, setValue } = formContext;
+
+  // Access the updateFieldInAllForms function if available
+  // Use type assertion to access the custom property
+  const updateFieldInAllForms = (formContext as any).updateFieldInAllForms;
 
   const [modalStep, setModalStep] = useState<ModalStep>('initial');
   const [fieldValue, setFieldValue] = useState<string>(''); // Value being edited initially
@@ -84,32 +95,90 @@ export function EditItemModal({
   // Effect to reset state when the modal opens or fieldType changes
   useEffect(() => {
     if (isOpen) {
-      const initialValue = getValues(fieldType) || "";
-      setFieldValue(initialValue);
-      setOriginalValue(''); // Reset original value
+      // Try to get the current value from the form, checking both direct field and step1 field
+      let currentFormValue = "";
+
+      // First try to get the value from step1.fieldType
+      const step1Value = getValues(`step1.${fieldType}`);
+
+      // Then try to get the direct value
+      const directValue = getValues(fieldType);
+
+      // Use the step1 value if it exists, otherwise use the direct value
+      if (step1Value !== undefined && step1Value !== "") {
+        currentFormValue = step1Value;
+        console.log(`Using step1.${fieldType} value:`, currentFormValue);
+      } else if (directValue !== undefined && directValue !== "") {
+        currentFormValue = directValue;
+        console.log(`Using direct ${fieldType} value:`, currentFormValue);
+      } else {
+        console.log(`No existing value found for ${fieldType}, using empty string`);
+      }
+
+      console.log(`Final form value for ${fieldType}:`, currentFormValue);
+
+      // Set the field value to the current form value
+      setFieldValue(currentFormValue);
+
+      // Reset other state
+      setOriginalValue('');
       setOptimizedValue(null);
       setModalStep('initial');
       setError(null);
       setSuccess(null);
       setIsLoading(false);
       setProjectedScore(null);
-      setEditingProjectedScore(null); // Reset editing projected score
+      setEditingProjectedScore(null);
     }
   }, [isOpen, fieldType, getValues]);
 
-  // Add a handler for text field changes that updates the projected score
+  // Handler for text field changes that updates the projected score based on actual weight and maxScore
   const handleFieldValueChange = useCallback((value : string) => {
     const newValue = value;
     setFieldValue(newValue);
 
     if (newValue.length > 0) {
-      const lengthImpact = Math.min(10, Math.floor(newValue.length / 20));
-      const newProjectedScore = Math.min(100, score + lengthImpact);
+      // Calculate improvement based on content length and quality indicators
+      let qualityScore = 0;
+
+      // Basic quality checks
+      if (fieldType === 'title' || fieldType === 'metaTitle') {
+        // For titles, check optimal length (50-60 chars)
+        const titleLength = newValue.length;
+        if (titleLength >= 40 && titleLength <= 60) {
+          qualityScore += 3;
+        } else if (titleLength >= 30 && titleLength <= 70) {
+          qualityScore += 2;
+        } else {
+          qualityScore += 1;
+        }
+      } else if (fieldType === 'metaDescription') {
+        // For meta descriptions, check optimal length (150-160 chars)
+        const descLength = newValue.length;
+        if (descLength >= 140 && descLength <= 160) {
+          qualityScore += 3;
+        } else if (descLength >= 120 && descLength <= 180) {
+          qualityScore += 2;
+        } else {
+          qualityScore += 1;
+        }
+      } else {
+        // For other fields, base on content length
+        const contentLength = newValue.length;
+        qualityScore = Math.min(3, Math.floor(contentLength / 50));
+      }
+
+      // Calculate improvement as a percentage of the remaining potential
+      const remainingPotential = maxScore - score;
+      const improvement = Math.round(remainingPotential * (qualityScore / 5)); // 5 is max quality score
+
+      // Ensure we don't exceed maxScore
+      const newProjectedScore = Math.min(maxScore, score + improvement);
       setEditingProjectedScore(newProjectedScore);
     } else {
       setEditingProjectedScore(null);
     }
-  }, [score]);
+  }, [score, maxScore, fieldType]);
 
   const handleOptimize = useCallback(async () => {
     setIsLoading(true);
@@ -122,8 +191,38 @@ export function EditItemModal({
       const result = await onOptimize(fieldType, fieldValue);
       setOptimizedValue(result);
       setModalStep('optimized');
-      const newProjectedScore = Math.min(100, score + Math.floor(Math.random() * 15) + 5);
+
+      // Calculate the projected score based on the actual weight and maxScore
+      // If the current score is less than maxScore, we can improve it
+      let scoreImprovement = 0;
+
+      if (score < maxScore) {
+        // Calculate how much this item can improve based on its weight
+        // The improvement is proportional to how much of the maxScore is still available
+        const percentImprovement = 0.8; // Assume we can improve by 80% of the remaining potential
+        const remainingPotential = maxScore - score;
+        scoreImprovement = Math.round(remainingPotential * percentImprovement);
+      }
+
+      const newProjectedScore = Math.min(maxScore, score + scoreImprovement);
       setProjectedScore(newProjectedScore);
+
+      // Automatically update the form value with the optimized value
+      // This ensures the value is updated everywhere in the form
+      if (updateFieldInAllForms) {
+        // If we have the synchronization function, use it to update all forms
+        console.log(`Using updateFieldInAllForms to update ${fieldType} in all forms`);
+        updateFieldInAllForms(`step1.${fieldType}`, result);
+      } else {
+        // Fallback to regular setValue if synchronization function is not available
+        console.log(`Using regular setValue to update ${fieldType}`);
+        setValue(fieldType, result, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+      }
+
       setSuccess(`${fieldTypeName} optimized successfully. Review and apply.`);
     } catch (err: any) {
       setError(err.message || `Failed to optimize ${fieldTypeName}. Please try again.`);
@@ -132,7 +231,7 @@ export function EditItemModal({
     } finally {
       setIsLoading(false);
     }
-  }, [fieldType, fieldValue, onOptimize, fieldTypeName, score]);
+  }, [fieldType, fieldValue, onOptimize, fieldTypeName, score, maxScore, setValue, updateFieldInAllForms]);
 
   const handleApplyOptimization = useCallback(async () => {
     if (optimizedValue === null) return;
@@ -143,15 +242,33 @@ export function EditItemModal({
     setSuccess(null);
 
     try {
-      setValue(fieldType, optimizedValue, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      // Update the form value with the optimized value
+      if (updateFieldInAllForms) {
+        // If we have the synchronization function, use it to update all forms
+        console.log(`Using updateFieldInAllForms to apply ${fieldType} in all forms`);
+        updateFieldInAllForms(`step1.${fieldType}`, optimizedValue);
+      } else {
+        // Fallback to regular setValue if synchronization function is not available
+        console.log(`Using regular setValue to apply ${fieldType}`);
+        setValue(fieldType, optimizedValue, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+      }
+
+      // Log the updated form value
+      console.log(`Updated form value for ${fieldType}:`, getValues(fieldType));
+
+      // Update the score if available
       if (projectedScore !== null) {
         onUpdateScore(projectedScore);
       }
+
+      // Show success message
       setSuccess(`${fieldTypeName} updated successfully!`);
+
+      // Close the modal after a short delay
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -161,7 +278,7 @@ export function EditItemModal({
       setModalStep('optimized');
       setIsLoading(false);
     }
-  }, [fieldType, optimizedValue, setValue, onClose, fieldTypeName, projectedScore, onUpdateScore]);
+  }, [fieldType, optimizedValue, setValue, getValues, onClose, fieldTypeName, projectedScore, onUpdateScore, updateFieldInAllForms]);
 
 
   const handleClose = () => {
@@ -241,7 +358,7 @@ export function EditItemModal({
         </Typography>
         <Chip
           icon={<SignalCellularAltIcon />}
-          label={`${score}/100`}
+          label={`${score}/${maxScore}`}
           size="small"
           sx={{
             bgcolor: `${scoreColor}15`, // Light background of score color
@@ -262,7 +379,7 @@ export function EditItemModal({
         </Typography>
         <Chip
           icon={<SignalCellularAltIcon />}
-          label={`${showProjectedScore}/100`}
+          label={`${showProjectedScore}/${maxScore}`}
           size="small"
           sx={{
             bgcolor: `${getScoreColor(showProjectedScore)}15`,
@@ -272,6 +389,68 @@ export function EditItemModal({
         />
       </Box>
     );
+
+    // Get optimization tips based on field type
+    const getOptimizationTips = () => {
+      const commonTips = {
+        title: [
+          "Include your primary keyword near the beginning",
+          "Keep it between 50-60 characters",
+          "Make it compelling and descriptive",
+          "Avoid using all caps or excessive punctuation"
+        ],
+        metaTitle: [
+          "Include your primary keyword",
+          "Keep it under 60 characters to avoid truncation in search results",
+          "Make it unique from your page title",
+          "Include your brand name at the end if possible"
+        ],
+        metaDescription: [
+          "Include your primary keyword naturally",
+          "Keep it between 150-160 characters",
+          "Include a call-to-action",
+          "Make it compelling to increase click-through rates"
+        ],
+        urlSlug: [
+          "Include your primary keyword",
+          "Use hyphens to separate words",
+          "Keep it short and descriptive",
+          "Avoid numbers and special characters"
+        ],
+        primaryKeyword: [
+          "Choose a keyword with good search volume",
+          "Ensure it's relevant to your content",
+          "Consider long-tail keywords for less competition",
+          "Avoid keyword stuffing in your content"
+        ],
+        secondaryKeywords: [
+          "Choose keywords related to your primary keyword",
+          "Include semantic variations",
+          "Use keywords that support your main topic",
+          "Distribute them naturally throughout your content"
+        ],
+        contentDescription: [
+          "Include your primary keyword naturally",
+          "Make it comprehensive and informative",
+          "Structure with proper headings (H2, H3)",
+          "Include relevant examples and data points"
+        ],
+        content: [
+          "Include your primary keyword in the first paragraph",
+          "Use secondary keywords throughout",
+          "Structure with proper headings and subheadings",
+          "Include internal and external links where relevant"
+        ]
+      };
+
+      // Return tips for the current field type or general tips if not found
+      return commonTips[fieldType as keyof typeof commonTips] || [
+        "Make your content comprehensive and valuable",
+        "Include relevant keywords naturally",
+        "Structure your content logically",
+        "Ensure proper formatting and readability"
+      ];
+    };
 
     return (
       <Paper
@@ -285,30 +464,65 @@ export function EditItemModal({
           borderRadius: 1,
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            {fieldTypeName} Optimization
-          </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              {fieldTypeName} Optimization
+            </Typography>
 
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 2
-          }}>
-            {currentScoreDisplay}
-            {showProjectedScore && projectedScoreDisplay}
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
+            }}>
+              {currentScoreDisplay}
+              {showProjectedScore && projectedScoreDisplay}
 
-            {showProjectedScore && (
-              <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'success.main' }}>
-                  +{showProjectedScore - score} points
+              {showProjectedScore && (
+                <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                  <Typography variant="body2" sx={{ fontWeight: 'medium', color: 'success.main' }}>
+                    +{showProjectedScore - score} points
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Box>
+
+          {/* Optimization Tips Section */}
+          <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed', borderColor: 'divider' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center' }}>
+              <AutoFixHighIcon sx={{ fontSize: 18, mr: 0.5, color: 'primary.main' }} />
+              Optimization Tips
+            </Typography>
+
+            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+              {getOptimizationTips().map((tip, index) => (
+                <Typography
+                  key={index}
+                  component="li"
+                  variant="body2"
+                  sx={{
+                    mb: 0.5,
+                    color: 'text.secondary',
+                    '&::marker': {
+                      color: 'primary.main'
+                    }
+                  }}
+                >
+                  {tip}
                 </Typography>
-              </Box>
+              ))}
+            </Box>
+
+            {/* Custom tooltip if provided */}
+            {tooltip && (
+              <Alert severity="info" sx={{ mt: 2, fontSize: '0.875rem' }}>
+                {tooltip}
+              </Alert>
             )}
           </Box>
         </Box>
-
       </Paper>
     );
   };

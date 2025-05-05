@@ -9,9 +9,9 @@ import {
   calculateKeywordDensity,
   calculateSectionProgress,
   isKeywordInFirstPercentage
-} from '../utils/seoScoring';
+} from '../../../utils/seoScoring';
 
-import type { ChecklistItem, ProgressSection } from '../utils/seoScoring';
+import type { ChecklistItem, ProgressSection } from '../../../utils/seoScoring';
 
 export const useSEOScoring = (form: UseFormReturn<any>) => {
   const { watch, getFieldState, formState } = form;
@@ -37,14 +37,15 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
   // Helper function to check if a field is valid and has a value
   const isFieldValid = useCallback((fieldName: string): boolean => {
     const fieldState = getFieldState(fieldName, formState);
-    const value = watch(fieldName);
+    // Use direct access to avoid triggering watch unnecessarily
+    const value = form.getValues(fieldName);
 
     // Check if the field has a value and is valid according to form validation
     const hasValue = value !== undefined && value !== null && value !== '';
     const isValid = !fieldState.invalid;
 
     return hasValue && isValid;
-  }, [getFieldState, formState, watch]);
+  }, [getFieldState, formState, form]);
 
   // Helper function to determine status based on field validity
   const getStatusBasedOnFields = useCallback((
@@ -61,18 +62,24 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     return successCondition ? 'success' : 'error';
   }, [isFieldValid]);
 
-  // Helper function to determine the appropriate action text based on score
+  // Helper function to determine the appropriate action text based on score and status
   const getActionText = useCallback((
     fieldNames: string[],
     currentScore: number,
     minThreshold: number,
-    maxThreshold: number
+    maxThreshold: number,
+    status: 'pending' | 'success' | 'error' | 'warning' = 'pending'
   ): string | null => {
     // Check if any required field is missing
     const missingField = fieldNames.some(field => !isFieldValid(field));
 
     if (missingField) {
       return "Fill Required Fields";
+    }
+
+    // If status is success, no action needed regardless of score
+    if (status === 'success') {
+      return null;
     }
 
     // If score is at or above max threshold, no action needed
@@ -133,29 +140,51 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     return score;
   }, []);
 
+  // Memoize expensive calculations for the first checklist item
+  const metaDescriptionStatus = useMemo(() =>
+    getStatusBasedOnFields(
+      ['metaDescription', 'primaryKeyword'],
+      containsKeyword(metaDescription, primaryKeyword)
+    ),
+    [getStatusBasedOnFields, metaDescription, primaryKeyword]
+  );
+
+  const metaDescriptionScore = useMemo(() =>
+    calculateKeywordScore(metaDescription, primaryKeyword, { contains: true }),
+    [calculateKeywordScore, metaDescription, primaryKeyword]
+  );
+
+  const metaDescriptionAction = useMemo(() =>
+    getActionText(
+      ['metaDescription', 'primaryKeyword'],
+      metaDescriptionScore,
+      4, // Min threshold (40% of max score)
+      8, // Max threshold (80% of max score)
+      metaDescriptionStatus
+    ),
+    [getActionText, metaDescriptionScore, metaDescriptionStatus]
+  );
+
+  const metaDescriptionTooltip = useMemo(() =>
+    !isFieldValid('metaDescription') || !isFieldValid('primaryKeyword')
+      ? "Fill in both meta description and primary keyword fields"
+      : !containsKeyword(metaDescription, primaryKeyword)
+        ? `Your meta description doesn't include your primary keyword "${primaryKeyword}". Add the keyword to improve SEO.`
+        : "Great! Your meta description includes your primary keyword.",
+    [isFieldValid, metaDescription, primaryKeyword]
+  );
+
   useEffect(() => {
     // Generate checklist items based on current form values
     const primarySEOItems: ChecklistItem[] = [
       {
         id: 101,
         text: "Focus keyword added to meta description",
-        status: getStatusBasedOnFields(
-          ['metaDescription', 'primaryKeyword'],
-          containsKeyword(metaDescription, primaryKeyword)
-        ),
-        score: calculateKeywordScore(metaDescription, primaryKeyword, { contains: true }),
+        status: metaDescriptionStatus,
+        score: metaDescriptionScore,
         maxScore: 10,
-        action: getActionText(
-          ['metaDescription', 'primaryKeyword'],
-          calculateKeywordScore(metaDescription, primaryKeyword, { contains: true }),
-          4, // Min threshold (40% of max score)
-          8  // Max threshold (80% of max score)
-        ),
-        tooltip: !isFieldValid('metaDescription') || !isFieldValid('primaryKeyword')
-          ? "Fill in both meta description and primary keyword fields"
-          : !containsKeyword(metaDescription, primaryKeyword)
-            ? `Your meta description doesn't include your primary keyword "${primaryKeyword}". Add the keyword to improve SEO.`
-            : "Great! Your meta description includes your primary keyword."
+        action: metaDescriptionAction,
+        tooltip: metaDescriptionTooltip
       },
 
       {
@@ -267,9 +296,16 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
         score: !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 0 :
                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 10 : 5,
         maxScore: 10,
-        action: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
-                "Fill Required Fields" :
-                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? null : "Optimize",
+        action: getActionText(
+                ['title', 'primaryKeyword'],
+                !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 0 :
+                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 10 : 5,
+                4,
+                8,
+                !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
+                'pending' :
+                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 'success' : 'warning'
+              ),
         tooltip: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
                 "Fill in both title and primary keyword fields" :
                 title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ?
@@ -545,17 +581,6 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     // Calculate overall score
     const score = calculateOverallScore(sections);
 
-    // Debug log to see when scoring is updated
-    console.log('SEO Scoring updated:', {
-      title,
-      metaTitle,
-      metaDescription,
-      urlSlug,
-      primaryKeyword,
-      secondaryKeywords,
-      score
-    });
-
     // Track changes in criteria
     const allItems = sections.flatMap(section => section.items);
     const newChangedIds: number[] = [];
@@ -580,7 +605,14 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     setOverallScore(score);
     setChangedCriteriaIds(newChangedIds);
     setPreviousItems(currentItems);
-  }, [title, metaTitle, metaDescription, urlSlug, content, primaryKeyword, secondaryKeywords, contentDescription, language, targetCountry, tableOfContents, formState, getFieldState, getStatusBasedOnFields, isFieldValid, getActionText, calculateKeywordScore, previousItems]);
+  }, [
+    title, metaTitle, metaDescription, urlSlug, content, primaryKeyword,
+    secondaryKeywords, contentDescription, language, targetCountry, tableOfContents,
+    formState, getFieldState, getStatusBasedOnFields, isFieldValid, getActionText,
+    calculateKeywordScore, previousItems,
+    // Add the memoized values to the dependency array
+    metaDescriptionAction, metaDescriptionScore, metaDescriptionStatus, metaDescriptionTooltip
+  ]);
 
   // Memoize the return values to prevent unnecessary re-renders
   const returnValue = useMemo(() => ({

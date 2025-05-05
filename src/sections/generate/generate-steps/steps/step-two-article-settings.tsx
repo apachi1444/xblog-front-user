@@ -11,6 +11,7 @@ import { SectionGenerationAnimation } from 'src/components/generate-article/Sect
 import { useArticleSettingsForm } from '../../hooks/useArticleSettingsForm';
 import { FormDropdown } from '../../../../components/generate-article/FormDropdown';
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
+import { FormAutocompleteDropdown } from '../../../../components/generate-article/FormAutocompleteDropdown';
 
 import type { Step2FormData } from '../../schemas';
 
@@ -357,19 +358,18 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <FormDropdown
+                <FormAutocompleteDropdown
                   label={t('article.settings.externalLinking', "External Linking")}
-                  tooltipText={t('article.tooltips.externalLinking', "Choose which external sources to reference in your article")}
+                  tooltipText={t('article.tooltips.externalLinking', "Choose which external sources to reference in your article or type your own")}
                   options={externalLinkingOptions}
-                  {...register("externalLinking", {
-                    onChange: (e) => {
-                      setValue("externalLinking", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select external linking")}
+                  placeholder={t('article.placeholders.selectOrType', "Select or type external linking")}
                   error={!!errors.externalLinking}
                   helperText={errors.externalLinking?.message}
                   value={watch("externalLinking")}
+                  onChange={(newValue) => {
+                    setValue("externalLinking", newValue, { shouldValidate: true });
+                  }}
+                  freeSolo
                 />
               </Grid>
             </Grid>

@@ -1,7 +1,8 @@
 import type { ChecklistItem, ProgressSection } from "src/utils/seoScoring";
 
 import toast from "react-hot-toast";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useFormContext } from "react-hook-form";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 
 import Add from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
@@ -94,12 +95,13 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
   // Track previous changed criteria IDs to avoid infinite loops
   const prevChangedIdsRef = useRef<number[]>([]);
 
+  // Memoize the check for new changes to avoid unnecessary calculations
+  const hasNewChanges = useMemo(() => changedCriteriaIds.length > 0 &&
+      (prevChangedIdsRef.current.length !== changedCriteriaIds.length ||
+       !prevChangedIdsRef.current.every(id => changedCriteriaIds.includes(id))), [changedCriteriaIds]);
+
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    const hasNewChanges = changedCriteriaIds.length > 0 &&
-      (prevChangedIdsRef.current.length !== changedCriteriaIds.length ||
-       !prevChangedIdsRef.current.every(id => changedCriteriaIds.includes(id)));
-
     if (hasNewChanges) {
       // Update ref with current changed IDs
       prevChangedIdsRef.current = [...changedCriteriaIds];
@@ -131,7 +133,7 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
 
       return () => clearTimeout(timer);
     }
-  }, [changedCriteriaIds, progressSections]);
+  }, [hasNewChanges, changedCriteriaIds, progressSections]);
 
   // Event handlers
   const handleToggleSection = useCallback((sectionId: number) => {
@@ -159,8 +161,88 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
     tooltip: item.tooltip
   });
 
+  // Add a useFormContext hook to access form values
+  const formContext = useFormContext();
+
+  // Check if the updateFieldInAllForms function is available
+  // We'll use this directly in the syncFormField function
+
+  // Debug: Log form values when component renders
+  useEffect(() => {
+    if (formContext) {
+      // Log the main form values
+      const mainFormValues = formContext.getValues();
+      console.log('Main form values in RealTimeScoringTab:', mainFormValues);
+
+      // Log specific fields that might be edited
+      console.log('contentDescription:', formContext.getValues('step1.contentDescription'));
+      console.log('title:', formContext.getValues('step1.title'));
+      console.log('metaDescription:', formContext.getValues('step1.metaDescription'));
+    }
+  }, [formContext]);
+
+  // Utility function to update a field in all forms
+  const syncFormField = useCallback((fieldType: string, value: any) => {
+    console.log(`Syncing field ${fieldType} with value:`, value);
+
+    // If we have the custom synchronization function, use it
+    if ((formContext as any)?.updateFieldInAllForms) {
+      console.log(`Using custom updateFieldInAllForms for ${fieldType}`);
+      (formContext as any).updateFieldInAllForms(`step1.${fieldType}`, value);
+    } else {
+      // Otherwise, update both the direct field and the step1 field
+      console.log(`Manually updating ${fieldType} in all forms`);
+
+      // Update in the main form under step1
+      formContext?.setValue(`step1.${fieldType}`, value, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
+      // Also update the direct field for backward compatibility
+      formContext?.setValue(fieldType, value, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+    }
+  }, [formContext]);
+
   const handleActionClick = (item: ChecklistItem) => {
+    // Only allow optimization for items that aren't already at 100% (success status)
+    if (item.status === 'success') {
+      toast.success(`This item is already optimized!`);
+      return;
+    }
+
     if (FIELD_MAPPING[item.id]) {
+        // Get the field type from the mapping
+        const fieldType = FIELD_MAPPING[item.id].field;
+
+        // Get the current form values for debugging
+        const mainFormValue = formContext?.getValues(`step1.${fieldType}`);
+        const directFormValue = formContext?.getValues(fieldType);
+
+        // Log the current form values
+        console.log(`Current form values for ${fieldType}:`, {
+          mainForm: mainFormValue,
+          directForm: directFormValue
+        });
+
+        // Pre-fill the form field with the current value
+        // This ensures the user doesn't have to start from scratch
+        if (mainFormValue || directFormValue) {
+          // Use the main form value if it exists, otherwise use the direct value
+          const currentValue = mainFormValue || directFormValue || '';
+
+          // Update both form fields to ensure consistency
+          syncFormField(fieldType, currentValue);
+
+          console.log(`Pre-filled ${fieldType} with value:`, currentValue);
+        }
+
+        // Set the selected item and open the modal
         setSelectedItem(item);
         setModalOpen(true);
     } else {
@@ -173,6 +255,9 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
     console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
 
     try {
+      // Show loading toast
+      toast.loading(`Optimizing ${fieldType}...`, { id: 'optimize-toast' });
+
       // Simulate API call with a delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -220,11 +305,19 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
         }
       }
 
+      // Immediately update the field in all forms to ensure synchronization
+      syncFormField(fieldType, optimizedValue);
+
+      // Dismiss loading toast and show success
+      toast.success(`${fieldType} optimized successfully!`, { id: 'optimize-toast' });
+
       return optimizedValue;
     } catch (error: any) {
+      // Dismiss loading toast and show error
+      toast.error(`Failed to optimize ${fieldType}. Please try again.`, { id: 'optimize-toast' });
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
-  }, []);
+  }, [syncFormField]);
 
 
 
@@ -432,7 +525,7 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
         ))}
       </Stack>
 
-      {/* Replace SEOOptimizationModal with EditItemModal */}
+      {/* EditItemModal with enhanced props */}
       {selectedItem && FIELD_MAPPING[selectedItem.id] && (
         <EditItemModal
           isOpen={modalOpen}
@@ -440,6 +533,14 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
           onOptimize={handleOptimizeField}
           fieldType={FIELD_MAPPING[selectedItem.id].field}
           score={selectedItem.score || 0}
+          maxScore={selectedItem.maxScore || 10} // Default to 10 if not provided
+          weight={
+            // Find the section that contains this item to get its weight
+            progressSections.find(section =>
+              section.items.some(item => item.id === selectedItem.id)
+            )?.weight || 1 // Default to 1 if not found
+          }
+          tooltip={selectedItem.tooltip}
           onUpdateScore={(newScore: number) => {
             // In a real implementation, this would update the score in the store/context
             // For now, we'll just show a toast notification
