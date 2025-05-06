@@ -3,16 +3,13 @@ import { useTranslation } from 'react-i18next';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
-import { _tasks, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { AnalyticsTasks } from '../analytics-tasks';
+import { Iconify } from 'src/components/iconify';
+
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
 import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
-import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
-import { AnalyticsTrafficBySite } from '../analytics-traffic-by-site';
-import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
 // ----------------------------------------------------------------------
 
@@ -29,170 +26,146 @@ export function OverviewAnalyticsView() {
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title={t('analytics.articlesGenerated', 'Articles Generated')}
-            percent={2.6}
-            total={20}
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
+            percent={8.5}
+            total={42}
+            icon={<Iconify icon="mdi:file-document-edit-outline" width={48} height={48} />}
             chart={{
               categories: [
-                t('months.jan', 'Jan'), 
-                t('months.feb', 'Feb'), 
-                t('months.mar', 'Mar'), 
-                t('months.apr', 'Apr'), 
-                t('months.may', 'May'), 
-                t('months.jun', 'Jun'), 
-                t('months.jul', 'Jul'), 
+                t('months.jan', 'Jan'),
+                t('months.feb', 'Feb'),
+                t('months.mar', 'Mar'),
+                t('months.apr', 'Apr'),
+                t('months.may', 'May'),
+                t('months.jun', 'Jun'),
+                t('months.jul', 'Jul'),
                 t('months.aug', 'Aug')
               ],
-              series: [22, 8, 35, 50, 82, 84, 77, 12],
+              series: [5, 8, 12, 15, 20, 25, 32, 42],
             }}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title={t('analytics.totalWebsites', 'Total Websites')}
-            percent={-0.1}
-            total={10}
+            title={t('analytics.totalWebsites', 'Connected Websites')}
+            percent={12.5}
+            total={8}
             color="secondary"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
+            icon={<Iconify icon="mdi:web" width={48} height={48} />}
             chart={{
               categories: [
-                t('months.jan', 'Jan'), 
-                t('months.feb', 'Feb'), 
-                t('months.mar', 'Mar'), 
-                t('months.apr', 'Apr'), 
-                t('months.may', 'May'), 
-                t('months.jun', 'Jun'), 
-                t('months.jul', 'Jul'), 
+                t('months.jan', 'Jan'),
+                t('months.feb', 'Feb'),
+                t('months.mar', 'Mar'),
+                t('months.apr', 'Apr'),
+                t('months.may', 'May'),
+                t('months.jun', 'Jun'),
+                t('months.jul', 'Jul'),
                 t('months.aug', 'Aug')
               ],
-              series: [56, 47, 40, 62, 73, 30, 23, 54],
+              series: [2, 3, 3, 4, 5, 6, 7, 8],
             }}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title={t('analytics.purchaseOrders', 'Purchase orders')}
-            percent={2.8}
-            total={1723315}
+            title={t('analytics.regenerationsAvailable', 'Regenerations Available')}
+            percent={-5.2}
+            total={24}
+            color="info"
+            icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
+            chart={{
+              categories: [
+                t('months.jan', 'Jan'),
+                t('months.feb', 'Feb'),
+                t('months.mar', 'Mar'),
+                t('months.apr', 'Apr'),
+                t('months.may', 'May'),
+                t('months.jun', 'Jun'),
+                t('months.jul', 'Jul'),
+                t('months.aug', 'Aug')
+              ],
+              series: [50, 45, 38, 35, 32, 30, 28, 24],
+            }}
+          />
+        </Grid>
+
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title={t('analytics.scheduledArticles', 'Scheduled Articles')}
+            percent={16.7}
+            total={14}
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
+            icon={<Iconify icon="mdi:calendar-clock" width={48} height={48} />}
             chart={{
               categories: [
-                t('months.jan', 'Jan'), 
-                t('months.feb', 'Feb'), 
-                t('months.mar', 'Mar'), 
-                t('months.apr', 'Apr'), 
-                t('months.may', 'May'), 
-                t('months.jun', 'Jun'), 
-                t('months.jul', 'Jul'), 
+                t('months.jan', 'Jan'),
+                t('months.feb', 'Feb'),
+                t('months.mar', 'Mar'),
+                t('months.apr', 'Apr'),
+                t('months.may', 'May'),
+                t('months.jun', 'Jun'),
+                t('months.jul', 'Jul'),
                 t('months.aug', 'Aug')
               ],
-              series: [40, 70, 50, 28, 70, 75, 7, 64],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title={t('analytics.messages', 'Messages')}
-            percent={3.6}
-            total={234}
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
-            chart={{
-              categories: [
-                t('months.jan', 'Jan'), 
-                t('months.feb', 'Feb'), 
-                t('months.mar', 'Mar'), 
-                t('months.apr', 'Apr'), 
-                t('months.may', 'May'), 
-                t('months.jun', 'Jun'), 
-                t('months.jul', 'Jul'), 
-                t('months.aug', 'Aug')
-              ],
-              series: [56, 30, 23, 54, 47, 40, 62, 73],
+              series: [4, 5, 7, 8, 9, 10, 12, 14],
             }}
           />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
-            title={t('analytics.currentVisits', 'Current visits')}
+            title={t('analytics.websiteIntegrations', 'Website Integrations')}
+            subheader={t('analytics.websiteIntegrationsSubheader', 'Distribution by platform')}
             chart={{
+              colors: [
+                '#0073aa', // WordPress blue
+                '#96bf48', // Shopify green
+                '#faad4d', // Wix orange
+                '#7d7d7d', // Other platforms gray
+              ],
               series: [
-                { label: t('regions.america', 'America'), value: 3500 },
-                { label: t('regions.asia', 'Asia'), value: 2500 },
-                { label: t('regions.europe', 'Europe'), value: 1500 },
-                { label: t('regions.africa', 'Africa'), value: 500 },
+                { label: t('platforms.wordpress', 'WordPress'), value: 65 },
+                { label: t('platforms.shopify', 'Shopify'), value: 20 },
+                { label: t('platforms.wix', 'Wix'), value: 12 },
+                { label: t('platforms.other', 'Other'), value: 3 },
               ],
             }}
           />
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsWebsiteVisits
-            title={t('analytics.websiteVisits', 'Website visits')}
-            subheader={t('analytics.websiteVisitsSubheader', '(+43%) than last year')}
-            chart={{
-              categories: [
-                t('months.jan', 'Jan'), 
-                t('months.feb', 'Feb'), 
-                t('months.mar', 'Mar'), 
-                t('months.apr', 'Apr'), 
-                t('months.may', 'May'), 
-                t('months.jun', 'Jun'), 
-                t('months.jul', 'Jul'), 
-                t('months.aug', 'Aug'), 
-                t('months.sep', 'Sep')
-              ],
-              series: [
-                { name: t('analytics.teamA', 'Team A'), data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: t('analytics.teamB', 'Team B'), data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title={t('analytics.conversionRates', 'Conversion rates')}
-            subheader={t('analytics.conversionRatesSubheader', '(+43%) than last year')}
-            chart={{
-              categories: [
-                t('countries.italy', 'Italy'), 
-                t('countries.japan', 'Japan'), 
-                t('countries.china', 'China'), 
-                t('countries.canada', 'Canada'), 
-                t('countries.france', 'France')
-              ],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title={t('analytics.orderTimeline', 'Order timeline')} list={_timeline} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite
-            title={t('analytics.trafficBySite', 'Traffic by site')}
+          <AnalyticsOrderTimeline
+            title={t('analytics.purchaseHistory', 'Purchase History')}
+            subheader={t('analytics.purchaseHistorySubheader', 'Recent subscription activity')}
             list={[
-              { value: 'facebook', label: 'Facebook', total: 323234 },
-              { value: 'google', label: 'Google', total: 341212 },
-              { value: 'linkedin', label: 'Linkedin', total: 411213 },
-              { value: 'twitter', label: 'Twitter', total: 443232 },
+              {
+                id: '1',
+                title: t('analytics.purchases.premium', 'Premium Plan Subscription'),
+                type: 'order1',
+                time: new Date().getTime() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
+              },
+              {
+                id: '2',
+                title: t('analytics.purchases.regenerationCredits', 'Purchased 50 Regeneration Credits'),
+                type: 'order2',
+                time: new Date().getTime() - 14 * 24 * 60 * 60 * 1000, // 14 days ago
+              },
+              {
+                id: '3',
+                title: t('analytics.purchases.starter', 'Starter Plan Subscription'),
+                type: 'order3',
+                time: new Date().getTime() - 45 * 24 * 60 * 60 * 1000, // 45 days ago
+              },
+              {
+                id: '4',
+                title: t('analytics.purchases.trial', 'Free Trial Started'),
+                type: 'order4',
+                time: new Date().getTime() - 60 * 24 * 60 * 60 * 1000, // 60 days ago
+              },
             ]}
           />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title={t('analytics.tasks', 'Tasks')} list={_tasks} />
         </Grid>
       </Grid>
     </DashboardContent>

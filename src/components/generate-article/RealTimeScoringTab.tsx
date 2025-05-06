@@ -230,17 +230,9 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
           directForm: directFormValue
         });
 
-        // Pre-fill the form field with the current value
-        // This ensures the user doesn't have to start from scratch
-        if (mainFormValue || directFormValue) {
-          // Use the main form value if it exists, otherwise use the direct value
-          const currentValue = mainFormValue || directFormValue || '';
-
-          // Update both form fields to ensure consistency
-          syncFormField(fieldType, currentValue);
-
-          console.log(`Pre-filled ${fieldType} with value:`, currentValue);
-        }
+        // No need to pre-fill or sync the form field here
+        // The EditItemModal will get the current value directly from the form
+        // This avoids any potential issues with synchronization
 
         // Set the selected item and open the modal
         setSelectedItem(item);

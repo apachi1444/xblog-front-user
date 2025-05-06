@@ -117,11 +117,11 @@ export function EditItemModal({
 
       console.log(`Final form value for ${fieldType}:`, currentFormValue);
 
-      // Set the field value to the current form value
+      // Set both the field value and original value to the current form value
       setFieldValue(currentFormValue);
+      setOriginalValue(currentFormValue); // Store the original value properly
 
       // Reset other state
-      setOriginalValue('');
       setOptimizedValue(null);
       setModalStep('initial');
       setError(null);
@@ -185,7 +185,9 @@ export function EditItemModal({
     setModalStep('optimizing');
     setError(null);
     setSuccess(null);
-    setOriginalValue(fieldValue);
+
+    // We already set originalValue in the useEffect, so we don't need to set it again here
+    // This ensures we keep the original value from the form
 
     try {
       const result = await onOptimize(fieldType, fieldValue);
@@ -207,31 +209,19 @@ export function EditItemModal({
       const newProjectedScore = Math.min(maxScore, score + scoreImprovement);
       setProjectedScore(newProjectedScore);
 
-      // Automatically update the form value with the optimized value
-      // This ensures the value is updated everywhere in the form
-      if (updateFieldInAllForms) {
-        // If we have the synchronization function, use it to update all forms
-        console.log(`Using updateFieldInAllForms to update ${fieldType} in all forms`);
-        updateFieldInAllForms(`step1.${fieldType}`, result);
-      } else {
-        // Fallback to regular setValue if synchronization function is not available
-        console.log(`Using regular setValue to update ${fieldType}`);
-        setValue(fieldType, result, {
-          shouldValidate: true,
-          shouldDirty: true,
-          shouldTouch: true
-        });
-      }
+      // We don't automatically update the form value here anymore
+      // Instead, we wait for the user to click "Apply Optimization"
+      // This gives them a chance to review the changes before applying
 
       setSuccess(`${fieldTypeName} optimized successfully. Review and apply.`);
     } catch (err: any) {
       setError(err.message || `Failed to optimize ${fieldTypeName}. Please try again.`);
       setModalStep('initial');
-      setOriginalValue('');
+      // Don't reset the original value on error
     } finally {
       setIsLoading(false);
     }
-  }, [fieldType, fieldValue, onOptimize, fieldTypeName, score, maxScore, setValue, updateFieldInAllForms]);
+  }, [fieldType, fieldValue, onOptimize, fieldTypeName, score, maxScore]);
 
   const handleApplyOptimization = useCallback(async () => {
     if (optimizedValue === null) return;
