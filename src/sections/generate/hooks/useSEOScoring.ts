@@ -25,10 +25,6 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
   const [changedCriteriaIds, setChangedCriteriaIds] = useState<number[]>([]);
   const [previousItems, setPreviousItems] = useState<Record<number, ChecklistItem>>({});
 
-  // We'll watch individual fields from all possible locations
-  // Get individual values directly from watch to avoid unnecessary re-renders
-  // Try to get values from both direct fields and nested fields (step1, step2, step3)
-
   // Title field
   const directTitle = watch('title');
   const step1Title = watch('step1.title');
@@ -785,20 +781,29 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       }
     });
 
-    // Update state
-    setProgressSections(sections);
-    setOverallScore(scoreResult.score);
-    setTotalMaxScore(scoreResult.maxScore);
-    setChangedCriteriaIds(newChangedIds);
+    // Use a ref to compare previous values before updating state
+    const newScore = scoreResult.score;
+    const newMaxScore = scoreResult.maxScore;
+
+    // Only update state if values have actually changed
+    if (JSON.stringify(sections) !== JSON.stringify(progressSections)) {
+      setProgressSections(sections);
+    }
+
+    if (Math.round(newScore) !== Math.round(overallScore)) {
+      setOverallScore(newScore);
+    }
+
+    if (newMaxScore !== totalMaxScore) {
+      setTotalMaxScore(newMaxScore);
+    }
+
+    if (newChangedIds.length > 0) {
+      setChangedCriteriaIds(newChangedIds);
+    }
+
     setPreviousItems(currentItems);
-  }, [
-    title, metaTitle, metaDescription, urlSlug, content, primaryKeyword,
-    secondaryKeywords, contentDescription, language, targetCountry, tableOfContents,
-    formState, getFieldState, getStatusBasedOnFields, isFieldValid, getActionText,
-    calculateKeywordScore, previousItems,
-    // Add the memoized values to the dependency array
-    metaDescriptionAction, metaDescriptionScore, metaDescriptionStatus, metaDescriptionTooltip
-  ]);
+  }, [title, metaTitle, metaDescription, urlSlug, content, primaryKeyword, secondaryKeywords, contentDescription, language, targetCountry, tableOfContents, formState, getFieldState, getStatusBasedOnFields, isFieldValid, getActionText, calculateKeywordScore, previousItems, metaDescriptionAction, metaDescriptionScore, metaDescriptionStatus, metaDescriptionTooltip, progressSections, overallScore, totalMaxScore]);
 
   // Memoize the return values to prevent unnecessary re-renders
   const returnValue = useMemo(() => ({

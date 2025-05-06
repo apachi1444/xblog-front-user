@@ -1,6 +1,6 @@
 import type { SelectProps } from '@mui/material';
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { HelpCircle } from 'lucide-react';
 
 import {
@@ -30,7 +30,7 @@ interface FormDropdownProps extends Omit<SelectProps, 'renderValue'> {
   helperText?: React.ReactNode;
 }
 
-export function FormDropdown({
+export const FormDropdown = forwardRef<HTMLInputElement, FormDropdownProps>(({
   label,
   options,
   tooltipText,
@@ -39,7 +39,7 @@ export function FormDropdown({
   error,
   helperText,
   ...selectProps
-}: FormDropdownProps) {
+}, ref) => {
   const theme = useTheme();
 
   return (
@@ -68,6 +68,7 @@ export function FormDropdown({
       <Select
         displayEmpty
         error={error}
+        inputRef={ref}
         sx={{
           height: theme.spacing(6.25),
           bgcolor: theme.palette.background.paper,
@@ -154,4 +155,4 @@ export function FormDropdown({
       )}
     </FormControl>
   );
-}
+});

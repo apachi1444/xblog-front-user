@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { HelpCircle } from 'lucide-react';
 
 import {
@@ -32,7 +32,7 @@ interface FormAutocompleteDropdownProps {
   multiple?: boolean;
 }
 
-export function FormAutocompleteDropdown({
+export const FormAutocompleteDropdown = forwardRef<HTMLInputElement, FormAutocompleteDropdownProps>(({
   label,
   options,
   tooltipText,
@@ -45,13 +45,13 @@ export function FormAutocompleteDropdown({
   freeSolo = true,
   multiple = false,
   ...props
-}: FormAutocompleteDropdownProps) {
+}, ref) => {
   const theme = useTheme();
   const [inputValue, setInputValue] = useState('');
 
   // Find the selected option based on value
   const selectedOption = options.find(opt => opt.value === value);
-  
+
   // For display in the Autocomplete
   const autocompleteValue = selectedOption || (value && freeSolo ? { value, label: value } : null);
 
@@ -106,11 +106,12 @@ export function FormAutocompleteDropdown({
           setInputValue(newInputValue);
         }}
         renderInput={(params) => (
-          <TextField 
-            {...params} 
+          <TextField
+            {...params}
             placeholder={placeholder || 'Select or type...'}
             error={error}
             size="small"
+            inputRef={ref}
             sx={{
               '& .MuiOutlinedInput-root': {
                 height: theme.spacing(6.25),
@@ -136,10 +137,10 @@ export function FormAutocompleteDropdown({
         )}
         {...props}
       />
-      
+
       {helperText && (
         <FormHelperText>{helperText}</FormHelperText>
       )}
     </FormControl>
   );
-}
+});

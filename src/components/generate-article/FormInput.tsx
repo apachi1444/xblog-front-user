@@ -1,6 +1,6 @@
 import type { TextFieldProps } from '@mui/material';
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { HelpCircle } from 'lucide-react';
 
 import {
@@ -23,7 +23,7 @@ interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
   helperText?: React.ReactNode;
 }
 
-export function FormInput({
+export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   label,
   tooltipText,
   tooltipPlacement = 'top',
@@ -32,7 +32,7 @@ export function FormInput({
   error,
   helperText,
   ...textFieldProps
-}: FormInputProps) {
+}, ref) => {
   const theme = useTheme();
 
   return (
@@ -67,6 +67,7 @@ export function FormInput({
             size="small"
             variant="outlined"
             error={error}
+            inputRef={ref}
             InputProps={{
               startAdornment: icon,
               sx: {
@@ -99,4 +100,4 @@ export function FormInput({
       </Box>
     </FormControl>
   );
-}
+});

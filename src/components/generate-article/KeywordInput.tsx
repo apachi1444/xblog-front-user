@@ -1,15 +1,16 @@
 import type { TextFieldProps } from '@mui/material';
-import React, { useState, useRef, useEffect } from 'react';
+
 import { HelpCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import React, { useRef, useState, useEffect, forwardRef } from 'react';
 
 import {
   Box,
   Chip,
   Tooltip,
+  useTheme,
   TextField,
   Typography,
-  useTheme,
   FormControl,
   FormHelperText,
   InputAdornment,
@@ -30,7 +31,7 @@ interface KeywordInputProps extends Omit<TextFieldProps, 'variant'> {
   onDeleteKeyword: (keyword: string) => void;
 }
 
-export function KeywordInput({
+export const KeywordInput = forwardRef<HTMLInputElement, KeywordInputProps>(({
   label,
   tooltipText,
   tooltipPlacement = 'top',
@@ -42,7 +43,7 @@ export function KeywordInput({
   onAddKeyword,
   onDeleteKeyword,
   ...textFieldProps
-}: KeywordInputProps) {
+}, ref) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
@@ -107,7 +108,13 @@ export function KeywordInput({
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            inputRef={inputRef}
+            inputRef={(input) => {
+              if (typeof ref === 'function') {
+                ref(input);
+              } else if (ref) {
+                ref.current = input;
+              }
+            }}
             InputProps={{
               startAdornment: icon,
               endAdornment: (
@@ -200,4 +207,5 @@ export function KeywordInput({
       </Box>
     </FormControl>
   );
-}
+});
+
