@@ -1,6 +1,6 @@
 import type { UseFormReturn } from 'react-hook-form';
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
 import {
   formatPoints,
@@ -19,111 +19,111 @@ import type { ChecklistItem, ProgressSection } from '../../../utils/seoScoring';
 
 export const useSEOScoring = (form: UseFormReturn<any>) => {
   const { watch, getFieldState, formState } = form;
+
+  // State for SEO scoring
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
   const [overallScore, setOverallScore] = useState<number>(0);
-  const [totalMaxScore, setTotalMaxScore] = useState<number>(100); // Maximum possible score
+  const [totalMaxScore, setTotalMaxScore] = useState<number>(100);
   const [changedCriteriaIds, setChangedCriteriaIds] = useState<number[]>([]);
   const [previousItems, setPreviousItems] = useState<Record<number, ChecklistItem>>({});
 
-  // Title field
-  const directTitle = watch('title');
-  const step1Title = watch('step1.title');
-  const title = useMemo(() =>
-    step1Title || directTitle || '',
-    [step1Title, directTitle]
-  );
+  // Use refs to prevent unnecessary re-renders
+  const prevValuesRef = useRef<{
+    sectionsHash: string;
+    score: number;
+    maxScore: number;
+  }>({
+    sectionsHash: '',
+    score: 0,
+    maxScore: 100
+  });
 
-  // Meta title field
-  const directMetaTitle = watch('metaTitle');
-  const step1MetaTitle = watch('step1.metaTitle');
-  const metaTitle = useMemo(() =>
-    step1MetaTitle || directMetaTitle || '',
-    [step1MetaTitle, directMetaTitle]
-  );
+  // Watch all form fields that affect SEO scoring
+  // This ensures the hook re-renders when any of these fields change
+  const watchedFields = watch([
+    'title', 'step1.title',
+    'metaTitle', 'step1.metaTitle',
+    'metaDescription', 'step1.metaDescription',
+    'urlSlug', 'step1.urlSlug',
+    'content', 'step1.content', 'step3.content',
+    'primaryKeyword', 'step1.primaryKeyword',
+    'secondaryKeywords', 'step1.secondaryKeywords',
+    'contentDescription', 'step1.contentDescription',
+    'language', 'step1.language',
+    'targetCountry', 'step1.targetCountry'
+  ]);
 
-  // Meta description field
-  const directMetaDescription = watch('metaDescription');
-  const step1MetaDescription = watch('step1.metaDescription');
-  const metaDescription = useMemo(() =>
-    step1MetaDescription || directMetaDescription || '',
-    [step1MetaDescription, directMetaDescription]
-  );
+  // Memoize field values to prevent unnecessary re-renders
+  const title = useMemo(() => {
+    const directTitle = form.getValues('title');
+    const step1Title = form.getValues('step1.title');
+    return step1Title || directTitle || '';
+  }, [form]);
 
-  // URL slug field
-  const directUrlSlug = watch('urlSlug');
-  const step1UrlSlug = watch('step1.urlSlug');
-  const urlSlug = useMemo(() =>
-    step1UrlSlug || directUrlSlug || '',
-    [step1UrlSlug, directUrlSlug]
-  );
+  const metaTitle = useMemo(() => {
+    const directMetaTitle = form.getValues('metaTitle');
+    const step1MetaTitle = form.getValues('step1.metaTitle');
+    return step1MetaTitle || directMetaTitle || '';
+  }, [form,]);
 
-  // Content field
-  const directContent = watch('content');
-  const step1Content = watch('step1.content');
-  const step3Content = watch('step3.content');
-  const content = useMemo(() =>
-    step3Content || step1Content || directContent || '',
-    [step3Content, step1Content, directContent]
-  );
+  const metaDescription = useMemo(() => {
+    const directMetaDescription = form.getValues('metaDescription');
+    const step1MetaDescription = form.getValues('step1.metaDescription');
+    return step1MetaDescription || directMetaDescription || '';
+  }, [form]);
 
-  // Primary keyword field
-  const directPrimaryKeyword = watch('primaryKeyword');
-  const step1PrimaryKeyword = watch('step1.primaryKeyword');
-  const primaryKeyword = useMemo(() =>
-    step1PrimaryKeyword || directPrimaryKeyword || '',
-    [step1PrimaryKeyword, directPrimaryKeyword]
-  );
+  const urlSlug = useMemo(() => {
+    const directUrlSlug = form.getValues('urlSlug');
+    const step1UrlSlug = form.getValues('step1.urlSlug');
+    return step1UrlSlug || directUrlSlug || '';
+  }, [form]);
 
-  // Secondary keywords field
-  const directSecondaryKeywords = watch('secondaryKeywords');
-  const step1SecondaryKeywords = watch('step1.secondaryKeywords');
+  const content = useMemo(() => {
+    const directContent = form.getValues('content');
+    const step1Content = form.getValues('step1.content');
+    const step3Content = form.getValues('step3.content');
+    return step3Content || step1Content || directContent || '';
+  }, [form]);
 
-  // Use useMemo to prevent dependencies from changing on every render
-  const secondaryKeywords = useMemo(() =>
-    step1SecondaryKeywords || directSecondaryKeywords || [],
-    [step1SecondaryKeywords, directSecondaryKeywords]
-  );
+  const primaryKeyword = useMemo(() => {
+    const directPrimaryKeyword = form.getValues('primaryKeyword');
+    const step1PrimaryKeyword = form.getValues('step1.primaryKeyword');
+    return step1PrimaryKeyword || directPrimaryKeyword || '';
+  }, [form]);
 
-  // Content description field
-  const directContentDescription = watch('contentDescription');
-  const step1ContentDescription = watch('step1.contentDescription');
-  const contentDescription = useMemo(() =>
-    step1ContentDescription || directContentDescription || '',
-    [step1ContentDescription, directContentDescription]
-  );
+  const secondaryKeywords = useMemo(() => {
+    const directSecondaryKeywords = form.getValues('secondaryKeywords');
+    const step1SecondaryKeywords = form.getValues('step1.secondaryKeywords');
+    return step1SecondaryKeywords || directSecondaryKeywords || [];
+  }, [form]);
 
-  // Language field
-  const directLanguage = watch('language');
-  const step1Language = watch('step1.language');
-  const language = useMemo(() =>
-    step1Language || directLanguage || '',
-    [step1Language, directLanguage]
-  );
+  const contentDescription = useMemo(() => {
+    const directContentDescription = form.getValues('contentDescription');
+    const step1ContentDescription = form.getValues('step1.contentDescription');
+    return step1ContentDescription || directContentDescription || '';
+  }, [form]);
 
-  // Target country field
-  const directTargetCountry = watch('targetCountry');
-  const step1TargetCountry = watch('step1.targetCountry');
-  const targetCountry = useMemo(() =>
-    step1TargetCountry || directTargetCountry || '',
-    [step1TargetCountry, directTargetCountry]
-  );
+  const language = useMemo(() => {
+    const directLanguage = form.getValues('language');
+    const step1Language = form.getValues('step1.language');
+    return step1Language || directLanguage || '';
+  }, [form]);
 
-  // Table of contents field
-  const directTableOfContents = watch('tableOfContents');
-  const step1TableOfContents = watch('step1.tableOfContents');
-  const tableOfContents = useMemo(() =>
-    step1TableOfContents || directTableOfContents || '',
-    [step1TableOfContents, directTableOfContents]
-  );
+  const targetCountry = useMemo(() => {
+    const directTargetCountry = form.getValues('targetCountry');
+    const step1TargetCountry = form.getValues('step1.targetCountry');
+    return step1TargetCountry || directTargetCountry || '';
+  }, [form]);
 
   // Helper function to check if a field is valid and has a value
   const isFieldValid = useCallback((fieldName: string): boolean => {
     const fieldState = getFieldState(fieldName, formState);
-    // Use direct access to avoid triggering watch unnecessarily
     const value = form.getValues(fieldName);
+    const step1Value = form.getValues(`step1.${fieldName}`);
 
-    // Check if the field has a value and is valid according to form validation
-    const hasValue = value !== undefined && value !== null && value !== '';
+    // Check if the field has a value in any location and is valid
+    const hasValue = (value !== undefined && value !== null && value !== '') ||
+                    (step1Value !== undefined && step1Value !== null && step1Value !== '');
     const isValid = !fieldState.invalid;
 
     return hasValue && isValid;
@@ -144,7 +144,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     return successCondition ? 'success' : 'error';
   }, [isFieldValid]);
 
-  // Helper function to determine the appropriate action text based on score and status
+  // Helper function for action text
   const getActionText = useCallback((
     fieldNames: string[],
     currentScore: number,
@@ -152,33 +152,18 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     maxThreshold: number,
     status: 'pending' | 'success' | 'error' | 'warning' = 'pending'
   ): string | null => {
-    // Check if any required field is missing
-    const missingField = fieldNames.some(field => !isFieldValid(field));
-
-    if (missingField) {
+    if (fieldNames.some(field => !isFieldValid(field))) {
       return "Fill Required Fields";
     }
 
-    // If status is success, no action needed regardless of score
-    if (status === 'success') {
+    if (status === 'success' || currentScore >= maxThreshold) {
       return null;
     }
 
-    // If score is at or above max threshold, no action needed
-    if (currentScore >= maxThreshold) {
-      return null;
-    }
-
-    // If score is below min threshold, it needs fixing
-    if (currentScore < minThreshold) {
-      return "Fix";
-    }
-
-    // If score is between min and max, it needs optimization
-    return "Optimize";
+    return currentScore < minThreshold ? "Fix" : "Optimize";
   }, [isFieldValid]);
 
-  // Helper function to calculate score for keyword presence
+  // Helper function to calculate keyword score
   const calculateKeywordScore = useCallback((
     text: string,
     keyword: string,
@@ -194,17 +179,14 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     let score = 0;
     const maxScore = 10;
 
-    // Check if text starts with keyword (worth 40% of max score)
     if (options.startsWith && text.toLowerCase().startsWith(keyword.toLowerCase())) {
       score += maxScore * 0.4;
     }
 
-    // Check if text contains keyword (worth 30% of max score)
     if (options.contains && containsKeyword(text, keyword)) {
       score += maxScore * 0.3;
     }
 
-    // Check keyword density (worth 20% of max score)
     if (options.density) {
       const density = calculateKeywordDensity(text, keyword);
       if (density >= options.density) {
@@ -214,7 +196,6 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       }
     }
 
-    // Check if keyword appears in first percentage of content (worth 10% of max score)
     if (options.firstPercentage && isKeywordInFirstPercentage(text, keyword, options.firstPercentage)) {
       score += maxScore * 0.1;
     }
@@ -222,7 +203,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     return score;
   }, []);
 
-  // Memoize expensive calculations for the first checklist item
+  // Memoize expensive calculations for meta description
   const metaDescriptionStatus = useMemo(() =>
     getStatusBasedOnFields(
       ['metaDescription', 'primaryKeyword'],
@@ -256,8 +237,9 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     [isFieldValid, metaDescription, primaryKeyword]
   );
 
-  useEffect(() => {
-    // Generate checklist items based on current form values
+  // Generate checklist items for each section
+  const generateChecklistItems = useCallback(() => {
+    // Primary SEO items
     const primarySEOItems: ChecklistItem[] = [
       {
         id: 101,
@@ -759,8 +741,16 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       }
     ];
 
-    // Calculate overall score
-    const scoreResult = calculateOverallScore(sections);
+    return {
+      sections,
+      scoreResult: calculateOverallScore(sections)
+    };
+  }, [title, metaTitle, metaDescription, urlSlug, content, primaryKeyword, secondaryKeywords, contentDescription, language, targetCountry, isFieldValid, getStatusBasedOnFields, getActionText, calculateKeywordScore, metaDescriptionStatus, metaDescriptionScore, metaDescriptionAction, metaDescriptionTooltip]);
+
+  // Use a single useEffect with optimized dependency array
+  useEffect(() => {
+    // Generate checklist items and calculate scores
+    const { sections, scoreResult } = generateChecklistItems();
 
     // Track changes in criteria
     const allItems = sections.flatMap(section => section.items);
@@ -775,44 +765,62 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       const prevItem = previousItems[item.id];
       if (prevItem) {
         // Check if status or score has changed
-        if (prevItem.status !== item.status || prevItem.points !== item.points) {
+        if (prevItem.status !== item.status || prevItem.score !== item.score) {
           newChangedIds.push(item.id);
         }
       }
     });
 
-    // Use a ref to compare previous values before updating state
+    // Get new values
     const newScore = scoreResult.score;
     const newMaxScore = scoreResult.maxScore;
 
+    // Get current values from refs to avoid unnecessary re-renders
+    const currentSectionsHash = prevValuesRef.current.sectionsHash;
+    const currentScore = prevValuesRef.current.score;
+    const currentMaxScore = prevValuesRef.current.maxScore;
+
+    // Create a hash of the sections to compare
+    const sectionsHash = JSON.stringify(sections);
+
     // Only update state if values have actually changed
-    if (JSON.stringify(sections) !== JSON.stringify(progressSections)) {
+    let stateChanged = false;
+
+    if (sectionsHash !== currentSectionsHash) {
       setProgressSections(sections);
+      prevValuesRef.current.sectionsHash = sectionsHash;
+      stateChanged = true;
     }
 
-    if (Math.round(newScore) !== Math.round(overallScore)) {
+    if (Math.round(newScore) !== Math.round(currentScore)) {
       setOverallScore(newScore);
+      prevValuesRef.current.score = newScore;
+      stateChanged = true;
     }
 
-    if (newMaxScore !== totalMaxScore) {
+    if (newMaxScore !== currentMaxScore) {
       setTotalMaxScore(newMaxScore);
+      prevValuesRef.current.maxScore = newMaxScore;
+      stateChanged = true;
     }
 
     if (newChangedIds.length > 0) {
       setChangedCriteriaIds(newChangedIds);
+      stateChanged = true;
     }
 
-    setPreviousItems(currentItems);
-  }, [title, metaTitle, metaDescription, urlSlug, content, primaryKeyword, secondaryKeywords, contentDescription, language, targetCountry, tableOfContents, formState, getFieldState, getStatusBasedOnFields, isFieldValid, getActionText, calculateKeywordScore, previousItems, metaDescriptionAction, metaDescriptionScore, metaDescriptionStatus, metaDescriptionTooltip, progressSections, overallScore, totalMaxScore]);
+    // Only update previous items if something changed
+    if (stateChanged) {
+      setPreviousItems(currentItems);
+    }
+  }, [generateChecklistItems, previousItems, watchedFields]);
 
   // Memoize the return values to prevent unnecessary re-renders
-  const returnValue = useMemo(() => ({
+  return useMemo(() => ({
     progressSections,
     overallScore: Math.round(overallScore),
     totalMaxScore,
     changedCriteriaIds,
     formattedScore: formatPoints(overallScore)
   }), [progressSections, overallScore, totalMaxScore, changedCriteriaIds]);
-
-  return returnValue;
 };

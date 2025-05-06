@@ -11,14 +11,15 @@ import {
   Box,
   Stack,
   Divider,
+  Tooltip,
   IconButton,
   Typography,
   CardContent,
   LinearProgress,
-  Tooltip,
 } from "@mui/material";
 
 import { formatPoints } from "src/utils/seoScoringPoints";
+
 import { ItemSection } from "./ItemSection";
 import { EditItemModal } from "./EditItemModal";
 
@@ -353,8 +354,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           .replace(/[^a-z0-9-]/g, '');
       }
       else if (fieldType === 'primaryKeyword' || fieldType === 'secondaryKeywords') {
-        // For keywords, ensure they're properly formatted
-        optimizedValue = optimizedValue.toLowerCase().trim();
+        // For keywords, ensure they're properly formatted and relevant
       }
       else if (fieldType === 'contentDescription') {
         // For content descriptions, ensure they include keywords and are detailed
@@ -363,15 +363,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
         }
       }
 
-      // Immediately update the field in all forms to ensure synchronization
       syncFormField(fieldType, optimizedValue);
 
-      // Dismiss loading toast and show success
       toast.success(`${fieldType} optimized successfully!`, { id: 'optimize-toast' });
 
       return optimizedValue;
     } catch (error: any) {
-      // Dismiss loading toast and show error
       toast.error(`Failed to optimize ${fieldType}. Please try again.`, { id: 'optimize-toast' });
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
