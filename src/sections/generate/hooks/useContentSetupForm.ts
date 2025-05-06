@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFormContext } from 'react-hook-form';
 
 import { step1Schema } from '../schemas';
+import { generateTitle, generateMeta, generateSecondaryKeywords } from '../../../utils/aiGeneration';
 
 import type { Step1FormData } from '../schemas';
 
@@ -94,17 +95,18 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry, contentDescription, secondaryKeywords } = step1Form.getValues();
+      const { primaryKeyword, language, targetCountry } = step1Form.getValues();
 
-      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription', 'secondaryKeywords'])) {
+      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry'])) {
         return;
       }
 
-      // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
-      // Generate title (replace with actual API call when ready)
-      const generatedTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
+      // Call the Gemini API to generate a title
+      const generatedTitle = await generateTitle(
+        primaryKeyword,
+        targetCountry,
+        language
+      );
 
       // Update form values
       step1Form.setValue('title', generatedTitle, {
@@ -112,13 +114,27 @@ export const useContentSetupForm = () => {
         shouldDirty: true,
         shouldTouch: true
       });
+
       setGenerationState(prev => ({
         ...prev,
         title: { isGenerating: false, isGenerated: true }
       }));
 
+      toast.success('Title generated successfully');
+
     } catch (error) {
       toast.error('Failed to generate title');
+
+      // Fallback title in case of API failure
+      const { primaryKeyword, targetCountry } = step1Form.getValues();
+      const fallbackTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
+
+      step1Form.setValue('title', fallbackTitle, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
     } finally {
       setGenerationState(prev => ({
         ...prev,
@@ -135,21 +151,19 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry, contentDescription, secondaryKeywords } = step1Form.getValues();
+      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
 
-      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription', 'secondaryKeywords'])) {
+      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription'])) {
         return;
       }
 
-      // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Fallback data if API fails
-      const metaData = {
-        metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
-        metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
-        urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
-      };
+      // Call the Gemini API to generate meta information
+      const metaData = await generateMeta(
+        primaryKeyword,
+        targetCountry,
+        language,
+        contentDescription
+      );
 
       // Update form values
       step1Form.setValue('metaTitle', metaData.metaTitle, {
@@ -173,7 +187,37 @@ export const useContentSetupForm = () => {
         meta: { isGenerating: false, isGenerated: true }
       }));
 
+      toast.success('Meta information generated successfully');
+
     } catch (error) {
+      console.error('Meta generation error:', error);
+      toast.error('Failed to generate meta information');
+
+      // Fallback data if API fails
+      const { primaryKeyword, targetCountry } = step1Form.getValues();
+      const fallbackMetaData = {
+        metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
+        metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
+        urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
+      };
+
+      // Update form values with fallback data
+      step1Form.setValue('metaTitle', fallbackMetaData.metaTitle, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      step1Form.setValue('metaDescription', fallbackMetaData.metaDescription, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      step1Form.setValue('urlSlug', fallbackMetaData.urlSlug, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
       toast.success('Generated meta with fallback data');
     } finally {
       setGenerationState(prev => ({
@@ -197,10 +241,26 @@ export const useContentSetupForm = () => {
         return;
       }
 
-      // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Call the Gemini API to generate secondary keywords
+      const keywords = await generateSecondaryKeywords(
+        primaryKeyword,
+        targetCountry,
+        language
+      );
 
-      // Fallback keywords
+      step1Form.setValue('secondaryKeywords', keywords, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
+      toast.success('Generated keywords successfully');
+    } catch (error) {
+      console.error('Secondary keywords generation error:', error);
+      toast.error('Failed to generate keywords');
+
+      // Fallback keywords in case of API failure
+      const { primaryKeyword } = step1Form.getValues();
       const fallbackKeywords = [
         `${primaryKeyword} guide`,
         `best ${primaryKeyword}`,
@@ -217,9 +277,8 @@ export const useContentSetupForm = () => {
         shouldDirty: true,
         shouldTouch: true
       });
-      toast.success('Generated keywords successfully');
-    } catch (error) {
-      toast.error('Failed to generate keywords');
+
+      toast.success('Generated keywords with fallback data');
     } finally {
       setGenerationState(prev => ({
         ...prev,
