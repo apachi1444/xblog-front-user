@@ -69,7 +69,7 @@ export function SEODashboard({
   } = form.getValues();
   const theme = useTheme();
 
-  const { progressSections, overallScore, changedCriteriaIds } = useSEOScoring(form);
+  const { progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds } = useSEOScoring(form);
   const [tabValue, setTabValue] = useState(defaultTab);
 
   // Auto-switch to real-time scoring tab when criteria change
@@ -123,6 +123,8 @@ export function SEODashboard({
             <RealTimeScoringTab
               progressSections={progressSections}
               score={overallScore}
+              totalMaxScore={totalMaxScore}
+              formattedScore={formattedScore}
               changedCriteriaIds={changedCriteriaIds}
             />
           </FormProvider>
@@ -131,7 +133,7 @@ export function SEODashboard({
       default:
         return null;
     }
-  }, [tabValue, title, metaTitle, metaDescription, urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, changedCriteriaIds]);
+  }, [tabValue, title, metaTitle, metaDescription, urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds]);
 
   return (
     <Box sx={{
@@ -207,7 +209,7 @@ export function SEODashboard({
               }}
             >
               <Tab label="Preview SEO" />
-              <Tab label={`Real-time Scoring (${overallScore})`} />
+              <Tab label={`Real-time Scoring (${formattedScore || overallScore}/${totalMaxScore} pts)`} />
             </Tabs>
           )}
         </Box>

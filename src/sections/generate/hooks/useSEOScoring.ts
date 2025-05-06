@@ -3,6 +3,10 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import {
+  formatPoints,
+  getPointsForItem
+} from '../../../utils/seoScoringPoints';
+import {
   containsKeyword,
   determineSectionType,
   calculateOverallScore,
@@ -17,6 +21,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
   const { watch, getFieldState, formState } = form;
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
   const [overallScore, setOverallScore] = useState<number>(0);
+  const [totalMaxScore, setTotalMaxScore] = useState<number>(100); // Maximum possible score
   const [changedCriteriaIds, setChangedCriteriaIds] = useState<number[]>([]);
   const [previousItems, setPreviousItems] = useState<Record<number, ChecklistItem>>({});
 
@@ -693,49 +698,73 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     ];
 
     // Calculate progress for each section
-    const primarySEOProgress = calculateSectionProgress(primarySEOItems);
-    const titleOptimizationProgress = calculateSectionProgress(titleOptimizationItems);
-    const contentPresentationProgress = calculateSectionProgress(contentPresentationItems);
-    const additionalSEOProgress = calculateSectionProgress(additionalSEOItems);
+    const primarySEOResult = calculateSectionProgress(primarySEOItems);
+    const titleOptimizationResult = calculateSectionProgress(titleOptimizationItems);
+    const contentPresentationResult = calculateSectionProgress(contentPresentationItems);
+    const additionalSEOResult = calculateSectionProgress(additionalSEOItems);
 
     // Create sections with progress and type
     const sections: ProgressSection[] = [
       {
         id: 1,
         title: `Primary SEO Checklist (${35}%)`,
-        progress: primarySEOProgress,
-        type: determineSectionType(primarySEOProgress),
-        items: primarySEOItems,
+        progress: primarySEOResult.progress,
+        points: primarySEOResult.points,
+        maxPoints: primarySEOResult.maxPoints,
+        type: determineSectionType(primarySEOResult.progress),
+        items: primarySEOItems.map(item => ({
+          ...item,
+          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
+          maxPoints: getPointsForItem(item.id)
+        })),
         weight: 35
       },
       {
         id: 2,
-        title: `Title Optimization (${30}%)`,
-        progress: titleOptimizationProgress,
-        type: determineSectionType(titleOptimizationProgress),
-        items: titleOptimizationItems,
-        weight: 30
+        title: `Title Optimization (${25}%)`,
+        progress: titleOptimizationResult.progress,
+        points: titleOptimizationResult.points,
+        maxPoints: titleOptimizationResult.maxPoints,
+        type: determineSectionType(titleOptimizationResult.progress),
+        items: titleOptimizationItems.map(item => ({
+          ...item,
+          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
+          maxPoints: getPointsForItem(item.id)
+        })),
+        weight: 25
       },
       {
         id: 3,
-        title: `Content Presentation Quality (${20}%)`,
-        progress: contentPresentationProgress,
-        type: determineSectionType(contentPresentationProgress),
-        items: contentPresentationItems,
+        title: `Content Presentation (${20}%)`,
+        progress: contentPresentationResult.progress,
+        points: contentPresentationResult.points,
+        maxPoints: contentPresentationResult.maxPoints,
+        type: determineSectionType(contentPresentationResult.progress),
+        items: contentPresentationItems.map(item => ({
+          ...item,
+          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
+          maxPoints: getPointsForItem(item.id)
+        })),
         weight: 20
       },
       {
         id: 4,
-        title: `Additional SEO Factors (${15}%)`,
-        progress: additionalSEOProgress,
-        type: determineSectionType(additionalSEOProgress),
-        items: additionalSEOItems,
-        weight: 15
+        title: `Additional SEO Factors (${10}%)`,
+        progress: additionalSEOResult.progress,
+        points: additionalSEOResult.points,
+        maxPoints: additionalSEOResult.maxPoints,
+        type: determineSectionType(additionalSEOResult.progress),
+        items: additionalSEOItems.map(item => ({
+          ...item,
+          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
+          maxPoints: getPointsForItem(item.id)
+        })),
+        weight: 10
       }
     ];
 
     // Calculate overall score
-    const score = calculateOverallScore(sections);
+    const scoreResult = calculateOverallScore(sections);
 
     // Track changes in criteria
     const allItems = sections.flatMap(section => section.items);
@@ -750,7 +779,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       const prevItem = previousItems[item.id];
       if (prevItem) {
         // Check if status or score has changed
-        if (prevItem.status !== item.status || prevItem.score !== item.score) {
+        if (prevItem.status !== item.status || prevItem.points !== item.points) {
           newChangedIds.push(item.id);
         }
       }
@@ -758,7 +787,8 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
 
     // Update state
     setProgressSections(sections);
-    setOverallScore(score);
+    setOverallScore(scoreResult.score);
+    setTotalMaxScore(scoreResult.maxScore);
     setChangedCriteriaIds(newChangedIds);
     setPreviousItems(currentItems);
   }, [
@@ -774,8 +804,10 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
   const returnValue = useMemo(() => ({
     progressSections,
     overallScore: Math.round(overallScore),
-    changedCriteriaIds
-  }), [progressSections, overallScore, changedCriteriaIds]);
+    totalMaxScore,
+    changedCriteriaIds,
+    formattedScore: formatPoints(overallScore)
+  }), [progressSections, overallScore, totalMaxScore, changedCriteriaIds]);
 
   return returnValue;
 };

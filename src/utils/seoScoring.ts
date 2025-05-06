@@ -1,5 +1,6 @@
-export type CriterionStatus = "error" | "warning" | "success" | "inactive" | "pending";
+import { getPointsForItem, TOTAL_POSSIBLE_POINTS, formatPoints } from './seoScoringPoints';
 
+export type CriterionStatus = "error" | "warning" | "success" | "inactive" | "pending";
 
 export interface ScoringCriterion {
   id: number;
@@ -21,13 +22,17 @@ export interface ChecklistItem {
   action?: string | null;
   score?: number;
   maxScore?: number;
+  points?: number; // Actual points earned
+  maxPoints?: number; // Maximum possible points
   tooltip: string; // Tooltip text explaining the issue and how to fix it
 }
 
 export interface ProgressSection {
   id: number;
   title: string;
-  progress: number;
+  progress: number; // Progress as percentage
+  points: number; // Total points earned in this section
+  maxPoints: number; // Maximum possible points in this section
   type: CriterionStatus;
   items: ChecklistItem[];
   weight: number; // Section weight for overall scoring
@@ -98,33 +103,52 @@ export const countHeadings = (content: string): { total: number, withKeyword: nu
   };
 };
 
-// Calculate overall section progress
-// Include pending items in the calculation but count them as 0 score
-export const calculateSectionProgress = (items: ChecklistItem[]): number => {
-  if (items.length === 0) return 0;
+// Calculate overall section progress and points
+// Include pending items in the calculation but count them as 0 score/points
+export const calculateSectionProgress = (items: ChecklistItem[]): { progress: number; points: number; maxPoints: number } => {
+  if (items.length === 0) return { progress: 0, points: 0, maxPoints: 0 };
 
   // Only exclude inactive items, but include pending items with 0 score
   const activeItems = items.filter(item => item.status !== 'inactive');
-  if (activeItems.length === 0) return 0;
+  if (activeItems.length === 0) return { progress: 0, points: 0, maxPoints: 0 };
 
-  // If items have score and maxScore properties, use those for more accurate calculation
-  if (activeItems.every(item => item.score !== undefined && item.maxScore !== undefined)) {
-    // For pending items, ensure score is 0
-    const totalScore = activeItems.reduce((sum, item) => {
-      // If item is pending, count it as 0 regardless of its score value
-      const effectiveScore = item.status === 'pending' ? 0 : (item.score || 0);
-      return sum + effectiveScore;
-    }, 0);
+  // Calculate points based on item status and point values
+  let totalPoints = 0;
+  let totalMaxPoints = 0;
 
-    const totalMaxScore = activeItems.reduce((sum, item) => sum + (item.maxScore || 0), 0);
+  activeItems.forEach(item => {
+    // Get the maximum possible points for this item
+    const maxItemPoints = item.maxPoints || getPointsForItem(item.id);
+    totalMaxPoints += maxItemPoints;
 
-    return Math.round((totalScore / totalMaxScore) * 100);
-  }
+    // Calculate earned points based on status
+    let earnedPoints = 0;
+    if (item.status === 'success') {
+      earnedPoints = maxItemPoints;
+    } else if (item.status === 'warning') {
+      earnedPoints = maxItemPoints * 0.5; // 50% for warning status
+    } else if (item.status === 'error') {
+      earnedPoints = 0; // 0% for error status
+    } else if (item.status === 'pending') {
+      earnedPoints = 0; // 0% for pending status
+    }
 
-  // Fall back to simple success/total calculation
-  const successItems = activeItems.filter(item => item.status === 'success');
-  // Include all items in the denominator, including pending ones
-  return Math.round((successItems.length / activeItems.length) * 100);
+    // If points are explicitly provided, use those instead
+    if (item.points !== undefined) {
+      earnedPoints = item.points;
+    }
+
+    totalPoints += earnedPoints;
+  });
+
+  // Calculate progress percentage
+  const progress = totalMaxPoints > 0 ? Math.round((totalPoints / totalMaxPoints) * 100) : 0;
+
+  return {
+    progress,
+    points: totalPoints,
+    maxPoints: totalMaxPoints
+  };
 };
 
 // Determine section type based on progress
@@ -135,17 +159,20 @@ export const determineSectionType = (progress: number): CriterionStatus => {
   return 'success';
 };
 
-// Calculate overall SEO score
-export const calculateOverallScore = (sections: ProgressSection[]): number => {
-  if (sections.length === 0) return 0;
+// Calculate overall SEO score (in points)
+export const calculateOverallScore = (sections: ProgressSection[]): { score: number; maxScore: number } => {
+  if (sections.length === 0) return { score: 0, maxScore: 0 };
 
-  let totalWeightedScore = 0;
-  let totalWeight = 0;
+  let totalPoints = 0;
+  let totalMaxPoints = 0;
 
   sections.forEach(section => {
-    totalWeightedScore += section.progress * section.weight;
-    totalWeight += section.weight;
+    totalPoints += section.points;
+    totalMaxPoints += section.maxPoints;
   });
 
-  return Math.round(totalWeightedScore / totalWeight);
+  return {
+    score: Math.round(totalPoints),
+    maxScore: Math.round(totalMaxPoints)
+  };
 };

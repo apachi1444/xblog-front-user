@@ -3,7 +3,8 @@ import type { ChecklistItem } from "src/utils/seoScoring";
 import { useState, useEffect } from "react";
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import { Box, Button, Tooltip, useTheme, Typography } from "@mui/material";
+import { Box, Button, Tooltip, useTheme, Typography, Chip } from "@mui/material";
+import { formatPoints } from "src/utils/seoScoringPoints";
 
 // Constants
 const COLORS = {
@@ -66,7 +67,7 @@ interface ItemSectionProps extends ChecklistItem {
   isHighlighted?: boolean;
 }
 
-export function ItemSection({ id, status, text, action, tooltip, score, maxScore, onActionClick, isHighlighted = false }: ItemSectionProps) {
+export function ItemSection({ id, status, text, action, tooltip, score, maxScore, points, maxPoints, onActionClick, isHighlighted = false }: ItemSectionProps) {
   const theme = useTheme();
   const color = COLORS[status];
   const icon = <NotificationIcon status={status} />;
@@ -88,7 +89,7 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
 
   const handleActionClick = () => {
     if (onActionClick) {
-      onActionClick({ id, status, text, action, tooltip, score, maxScore });
+      onActionClick({ id, status, text, action, tooltip, score, maxScore, points, maxPoints });
     }
   };
 
@@ -188,42 +189,63 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
             cursor: tooltipText ? 'help' : 'default', // Show help cursor when tooltip is available
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
-                fontStyle: isPending ? "italic" : "normal", // Italic text for pending items
-              }}
-            >
-              {displayText}
-            </Typography>
-            {tooltipText && tooltipText !== "This check is waiting for you to fill in required fields" && (
-              <Box
-                component="span"
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography
+                variant="body2"
                 sx={{
-                  display: 'inline-flex',
-                  ml: 0.5,
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  bgcolor: status === 'success' ? 'success.lighter' :
-                           status === 'error' ? 'error.lighter' :
-                           status === 'warning' ? 'warning.lighter' : 'grey.200',
-                  border: `1px solid ${status === 'success' ? theme.palette.success.main :
-                                       status === 'error' ? theme.palette.error.main :
-                                       status === 'warning' ? theme.palette.warning.main : theme.palette.grey[400]}`,
-                  fontSize: '9px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  fontWeight: 'bold',
-                  color: status === 'success' ? theme.palette.success.dark :
-                         status === 'error' ? theme.palette.error.dark :
-                         status === 'warning' ? theme.palette.warning.dark : theme.palette.grey[600],
+                  color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
+                  fontStyle: isPending ? "italic" : "normal", // Italic text for pending items
                 }}
               >
-                ?
-              </Box>
+                {displayText}
+              </Typography>
+              {tooltipText && tooltipText !== "This check is waiting for you to fill in required fields" && (
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-flex',
+                    ml: 0.5,
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: status === 'success' ? 'success.lighter' :
+                             status === 'error' ? 'error.lighter' :
+                             status === 'warning' ? 'warning.lighter' : 'grey.200',
+                    border: `1px solid ${status === 'success' ? theme.palette.success.main :
+                                         status === 'error' ? theme.palette.error.main :
+                                         status === 'warning' ? theme.palette.warning.main : theme.palette.grey[400]}`,
+                    fontSize: '9px',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontWeight: 'bold',
+                    color: status === 'success' ? theme.palette.success.dark :
+                           status === 'error' ? theme.palette.error.dark :
+                           status === 'warning' ? theme.palette.warning.dark : theme.palette.grey[600],
+                  }}
+                >
+                  ?
+                </Box>
+              )}
+            </Box>
+
+            {/* Points display */}
+            {maxPoints !== undefined && (
+              <Chip
+                label={`${formatPoints(points || 0)}/${formatPoints(maxPoints)} pts`}
+                size="small"
+                color={status === 'success' ? 'success' : status === 'warning' ? 'warning' : status === 'error' ? 'error' : 'default'}
+                variant="outlined"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  mr: 1,
+                  opacity: isPending ? 0.5 : 1,
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
+                }}
+              />
             )}
           </Box>
 

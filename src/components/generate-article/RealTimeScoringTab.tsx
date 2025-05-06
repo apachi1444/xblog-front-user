@@ -15,14 +15,18 @@ import {
   Typography,
   CardContent,
   LinearProgress,
+  Tooltip,
 } from "@mui/material";
 
+import { formatPoints } from "src/utils/seoScoringPoints";
 import { ItemSection } from "./ItemSection";
 import { EditItemModal } from "./EditItemModal";
 
 interface RealTimeScoringTabProps {
   progressSections: ProgressSection[];
   score: number;
+  totalMaxScore?: number;
+  formattedScore?: string;
   changedCriteriaIds?: number[];
 }
 
@@ -83,7 +87,7 @@ const FIELD_MAPPING: Record<number, FieldConfig> = {
 // Suggestions are not directly used by EditItemModal in this setup
 // const FIELD_SUGGESTIONS: Record<string, string[]> = { ... };
 
-export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds = [] }: RealTimeScoringTabProps) {
+export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 100, formattedScore, changedCriteriaIds = [] }: RealTimeScoringTabProps) {
   const theme = useTheme();
   // State management
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
@@ -423,12 +427,12 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
         }}>
           {/* Background circle */}
           <Box sx={{
-            width: 120,
-            height: 120,
+            width: 140,
+            height: 140,
             borderRadius: '50%',
             background: `conic-gradient(
-              ${getScoreColor()} ${score}%,
-              ${theme.palette.grey[200]} ${score}% 100%
+              ${getScoreColor()} ${(score / totalMaxScore) * 100}%,
+              ${theme.palette.grey[200]} ${(score / totalMaxScore) * 100}% 100%
             )`,
             display: 'flex',
             alignItems: 'center',
@@ -438,8 +442,8 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
           }}>
             {/* Inner white circle */}
             <Box sx={{
-              width: 100,
-              height: 100,
+              width: 120,
+              height: 120,
               borderRadius: '50%',
               bgcolor: 'white',
               display: 'flex',
@@ -447,6 +451,7 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
               justifyContent: 'center',
               flexDirection: 'column',
               boxShadow: '0 0 10px 0 rgba(0,0,0,0.1) inset',
+              position: 'relative',
             }}>
               <Typography
                 variant="h4"
@@ -458,7 +463,7 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
                   mb: 0.5
                 }}
               >
-                {score}
+                {formattedScore || score}
               </Typography>
               <Typography
                 variant="caption"
@@ -473,6 +478,22 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
               >
                 points
               </Typography>
+
+              <Tooltip title={`${score} out of ${totalMaxScore} possible points`}>
+                <Typography
+                  variant="caption"
+                  component="div"
+                  sx={{
+                    position: 'absolute',
+                    bottom: 10,
+                    fontWeight: 400,
+                    color: theme.palette.text.secondary,
+                    fontSize: '0.7rem'
+                  }}
+                >
+                  {`${Math.round((score / totalMaxScore) * 100)}%`}
+                </Typography>
+              </Tooltip>
             </Box>
           </Box>
         </Box>
@@ -528,12 +549,14 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   {section.title}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ ml: 1, color: theme.palette.text.secondary }}
-                >
-                  ({section.progress}%)
-                </Typography>
+                <Tooltip title={`${Math.round(section.progress)}% complete`}>
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 1, color: theme.palette.text.secondary }}
+                  >
+                    ({formatPoints(section.points)} / {formatPoints(section.maxPoints)} pts)
+                  </Typography>
+                </Tooltip>
               </Box>
               <IconButton
                 size="small"
