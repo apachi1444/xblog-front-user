@@ -21,7 +21,7 @@ export interface ChecklistItem {
   action?: string | null;
   score?: number;
   maxScore?: number;
-  tooltip?: string; // Tooltip text explaining the issue and how to fix it
+  tooltip: string; // Tooltip text explaining the issue and how to fix it
 }
 
 export interface ProgressSection {

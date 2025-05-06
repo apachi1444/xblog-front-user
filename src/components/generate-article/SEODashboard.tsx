@@ -1,5 +1,6 @@
 import type { Step1State } from "src/sections/generate/generate-steps/steps/step-one-content-setup";
 
+import { FormProvider } from "react-hook-form";
 import { useMemo, useState, useEffect, useCallback } from "react";
 
 // Icons
@@ -53,19 +54,19 @@ export function SEODashboard({
     },
   } = state;
 
-  const { watch } = form;
-
-  // Watch the values properly
-  const primaryKeyword = watch('primaryKeyword');
-  const secondaryKeywords = watch('secondaryKeywords');
-  const contentDescription = watch('contentDescription')
-  const language = watch('language')
-  const targetCountry = watch('targetCountry')
-
-  const title = watch('title') || '';
-  const metaTitle = watch('metaTitle') || '';
-  const metaDescription = watch('metaDescription') || '';
-  const urlSlug = watch('urlSlug') || '';
+  // Use the form values directly from the state object
+  // This ensures we're using the correct form context
+  const {
+    primaryKeyword = '',
+    secondaryKeywords = [],
+    contentDescription = '',
+    language = '',
+    targetCountry = '',
+    title = '',
+    metaTitle = '',
+    metaDescription = '',
+    urlSlug = ''
+  } = form.getValues();
   const theme = useTheme();
 
   const { progressSections, overallScore, changedCriteriaIds } = useSEOScoring(form);
@@ -118,29 +119,19 @@ export function SEODashboard({
 
       case 1:
         return (
-          <RealTimeScoringTab
-            progressSections={progressSections}
-            score={overallScore}
-            changedCriteriaIds={changedCriteriaIds}
-          />
+          <FormProvider {...form}>
+            <RealTimeScoringTab
+              progressSections={progressSections}
+              score={overallScore}
+              changedCriteriaIds={changedCriteriaIds}
+            />
+          </FormProvider>
         );
 
       default:
         return null;
     }
-  }, [
-    tabValue,
-    title,
-    metaTitle,
-    metaDescription,
-    urlSlug,
-    onGenerateMeta,
-    isGeneratingMeta,
-    isGenerateDisabled,
-    progressSections,
-    overallScore,
-    changedCriteriaIds
-  ]);
+  }, [tabValue, title, metaTitle, metaDescription, urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, changedCriteriaIds]);
 
   return (
     <Box sx={{

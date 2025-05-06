@@ -43,7 +43,7 @@ const COLORS = {
 // Field mapping type
 interface FieldConfig {
   field: string;
-  type: 'text' | 'textarea'; // Keep type info if needed elsewhere, though EditItemModal infers it
+  type: 'text' | 'textarea';
 }
 
 // Map checklist item IDs to form fields
@@ -91,11 +91,34 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
   const [highlightedItems, setHighlightedItems] = useState<number[]>([]);
 
-  // Effect to handle highlighting changed criteria
-  // Track previous changed criteria IDs to avoid infinite loops
+  console.log(selectedItem , "selected item");
   const prevChangedIdsRef = useRef<number[]>([]);
 
-  // Memoize the check for new changes to avoid unnecessary calculations
+  const form = useFormContext();
+
+  const { getValues } = form;
+
+  // Log all form values to debug
+  useEffect(() => {
+    // Get all form values
+    const allValues = getValues();
+    console.log("All form values:", allValues);
+
+    // Try to access contentDescription from different locations
+    const formValues = {
+      direct: allValues.contentDescription,
+      step1: allValues.step1?.contentDescription,
+      step2: allValues.step2?.contentDescription,
+      step3: allValues.step3?.contentDescription
+    };
+
+    console.log("Content description values:", formValues);
+
+    // Log all available keys in the form
+    console.log("Available form keys:", Object.keys(allValues));
+  }, [getValues]);
+
+
   const hasNewChanges = useMemo(() => changedCriteriaIds.length > 0 &&
       (prevChangedIdsRef.current.length !== changedCriteriaIds.length ||
        !prevChangedIdsRef.current.every(id => changedCriteriaIds.includes(id))), [changedCriteriaIds]);
@@ -188,24 +211,49 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
     // If we have the custom synchronization function, use it
     if ((formContext as any)?.updateFieldInAllForms) {
       console.log(`Using custom updateFieldInAllForms for ${fieldType}`);
-      (formContext as any).updateFieldInAllForms(`step1.${fieldType}`, value);
+      (formContext as any).updateFieldInAllForms(fieldType, value);
     } else {
-      // Otherwise, update both the direct field and the step1 field
+      // Otherwise, update in all possible locations
       console.log(`Manually updating ${fieldType} in all forms`);
 
-      // Update in the main form under step1
-      formContext?.setValue(`step1.${fieldType}`, value, {
+      const updateOptions = {
         shouldValidate: true,
         shouldDirty: true,
         shouldTouch: true
-      });
+      };
 
-      // Also update the direct field for backward compatibility
-      formContext?.setValue(fieldType, value, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      // Try to update in all possible locations to ensure the value is updated
+      try {
+        // Update direct field
+        formContext?.setValue(fieldType, value, updateOptions);
+        console.log(`Updated direct field: ${fieldType}`);
+      } catch (err) {
+        console.warn(`Failed to update direct field: ${fieldType}`, err);
+      }
+
+      try {
+        // Update in step1
+        formContext?.setValue(`step1.${fieldType}`, value, updateOptions);
+        console.log(`Updated step1.${fieldType}`);
+      } catch (err) {
+        console.warn(`Failed to update step1.${fieldType}`, err);
+      }
+
+      try {
+        // Update in step2
+        formContext?.setValue(`step2.${fieldType}`, value, updateOptions);
+        console.log(`Updated step2.${fieldType}`);
+      } catch (err) {
+        console.warn(`Failed to update step2.${fieldType}`, err);
+      }
+
+      try {
+        // Update in step3
+        formContext?.setValue(`step3.${fieldType}`, value, updateOptions);
+        console.log(`Updated step3.${fieldType}`);
+      } catch (err) {
+        console.warn(`Failed to update step3.${fieldType}`, err);
+      }
     }
   }, [formContext]);
 
@@ -220,22 +268,36 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
         // Get the field type from the mapping
         const fieldType = FIELD_MAPPING[item.id].field;
 
-        // Get the current form values for debugging
-        const mainFormValue = formContext?.getValues(`step1.${fieldType}`);
-        const directFormValue = formContext?.getValues(fieldType);
+        // Try to get the field value from all possible locations
+        let fieldValue = '';
+        try {
+          // Try different paths to find the field value
+          const directValue = formContext?.getValues(fieldType);
+          const step1Value = formContext?.getValues(`step1.${fieldType}`);
+          const step2Value = formContext?.getValues(`step2.${fieldType}`);
+          const step3Value = formContext?.getValues(`step3.${fieldType}`);
 
-        // Log the current form values
-        console.log(`Current form values for ${fieldType}:`, {
-          mainForm: mainFormValue,
-          directForm: directFormValue
-        });
+          // Use the first non-empty value found
+          fieldValue = directValue || step1Value || step2Value || step3Value || '';
 
-        // No need to pre-fill or sync the form field here
-        // The EditItemModal will get the current value directly from the form
-        // This avoids any potential issues with synchronization
+          // Log the current form values
+          console.log(`Current form values for ${fieldType}:`, {
+            directValue,
+            step1Value,
+            step2Value,
+            step3Value,
+            fieldValue
+          });
+        } catch (error) {
+          console.error(`Error getting form value for ${fieldType}:`, error);
+        }
 
         // Set the selected item and open the modal
-        setSelectedItem(item);
+        setSelectedItem({
+          ...item,
+          // Update the text to include the actual field value for better context
+          text: fieldValue || item.text
+        });
         setModalOpen(true);
     } else {
         toast.error(`Optimization not available for this item yet.`);
@@ -520,6 +582,7 @@ export function RealTimeScoringTab({ progressSections, score, changedCriteriaIds
       {/* EditItemModal with enhanced props */}
       {selectedItem && FIELD_MAPPING[selectedItem.id] && (
         <EditItemModal
+          initialValue={selectedItem.text}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           onOptimize={handleOptimizeField}

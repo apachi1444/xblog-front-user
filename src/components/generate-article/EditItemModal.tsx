@@ -1,7 +1,10 @@
+/* eslint-disable no-plusplus */
 import { useFormContext } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
@@ -31,6 +34,7 @@ interface EditItemModalProps {
   fieldType: string;
   tooltip?: string;
   onOptimize: (fieldType: string, currentValue: string) => Promise<string>;
+  initialValue: string;
 }
 
 // Helper function to get a user-friendly name for the field
@@ -42,14 +46,12 @@ const getFieldTypeName = (type: string): string => {
     metaDescription: "Meta Description",
     contentDescription: "Content Description",
     urlSlug: "URL Slug",
-    // Add other field mappings from your Step1FormData schema as needed
   };
-  // Capitalize first letter if not found in map
   return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
 // Define the steps for the modal flow
-type ModalStep = 'initial' | 'optimizing' | 'optimized' | 'applying';
+type ModalStep = 'initial' | 'optimizing' | 'optimized' | 'applying' | 'comparing';
 
 // Function to determine score color
 const getScoreColor = (score: number): string => {
@@ -58,15 +60,138 @@ const getScoreColor = (score: number): string => {
   return '#f44336'; // Red for low scores
 };
 
+// Function to find and highlight differences between two strings
+const highlightDifferences = (original: string, optimized: string): {
+  originalHighlighted: React.ReactNode,
+  optimizedHighlighted: React.ReactNode
+} => {
+  // If either string is empty, return them as is
+  if (!original || !optimized) {
+    return {
+      originalHighlighted: original,
+      optimizedHighlighted: optimized
+    };
+  }
+
+  // Split the strings into words
+  const originalWords = original.split(/(\s+)/);
+  const optimizedWords = optimized.split(/(\s+)/);
+
+  // Create arrays to hold the highlighted words
+  const originalHighlighted: React.ReactNode[] = [];
+  const optimizedHighlighted: React.ReactNode[] = [];
+
+  // Find the longest common subsequence
+  const lcs = longestCommonSubsequence(originalWords, optimizedWords);
+
+  // Highlight the differences
+  let originalIndex = 0;
+  let optimizedIndex = 0;
+  let lcsIndex = 0;
+
+  while (originalIndex < originalWords.length || optimizedIndex < optimizedWords.length) {
+    // If we've reached the end of the LCS, highlight the remaining words
+    if (lcsIndex >= lcs.length) {
+      while (originalIndex < originalWords.length) {
+        originalHighlighted.push(
+          <span key={`orig-${originalIndex}`} style={{ backgroundColor: 'rgba(244, 67, 54, 0.1)', textDecoration: 'line-through' }}>
+            {originalWords[originalIndex]}
+          </span>
+        );
+        originalIndex++;
+      }
+      while (optimizedIndex < optimizedWords.length) {
+        optimizedHighlighted.push(
+          <span key={`opt-${optimizedIndex}`} style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
+            {optimizedWords[optimizedIndex]}
+          </span>
+        );
+        optimizedIndex++;
+      }
+      break;
+    }
+
+    // If the current words match the LCS, add them without highlighting
+    if (originalIndex < originalWords.length && originalWords[originalIndex] === lcs[lcsIndex]) {
+      originalHighlighted.push(originalWords[originalIndex]);
+      originalIndex++;
+      lcsIndex++;
+    } else {
+      // Highlight the removed word
+      originalHighlighted.push(
+        <span key={`orig-${originalIndex}`} style={{ backgroundColor: 'rgba(244, 67, 54, 0.1)', textDecoration: 'line-through' }}>
+          {originalWords[originalIndex]}
+        </span>
+      );
+      originalIndex++;
+    }
+
+    // If the current words match the LCS, add them without highlighting
+    if (optimizedIndex < optimizedWords.length && optimizedWords[optimizedIndex] === lcs[lcsIndex - 1]) {
+      optimizedHighlighted.push(optimizedWords[optimizedIndex]);
+      optimizedIndex++;
+    } else {
+      // Highlight the added word
+      optimizedHighlighted.push(
+        <span key={`opt-${optimizedIndex}`} style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
+          {optimizedWords[optimizedIndex]}
+        </span>
+      );
+      optimizedIndex++;
+    }
+  }
+
+  return {
+    originalHighlighted: <>{originalHighlighted}</>,
+    optimizedHighlighted: <>{optimizedHighlighted}</>
+  };
+};
+
+// Function to find the longest common subsequence of two arrays
+const longestCommonSubsequence = <T,>(a: T[], b: T[]): T[] => {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));
+
+  // Fill the dp table
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // Reconstruct the LCS
+  const lcs: T[] = [];
+  let i = m; let j = n;
+  while (i > 0 && j > 0) {
+    if (a[i - 1] === b[j - 1]) {
+      lcs.unshift(a[i - 1]);
+      i--;
+      j--;
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  return lcs;
+};
+
 export function EditItemModal({
   isOpen,
   onClose,
   fieldType,
+  initialValue,
   onOptimize,
   onUpdateScore,
   score,
   maxScore,
-  weight,
+  weight: _weight, // Prefix with underscore to indicate it's not used
   tooltip
 }: EditItemModalProps) {
   const formContext = useFormContext(); // Access form methods
@@ -74,7 +199,7 @@ export function EditItemModal({
 
   // Access the updateFieldInAllForms function if available
   // Use type assertion to access the custom property
-  const updateFieldInAllForms = (formContext as any).updateFieldInAllForms;
+  const {updateFieldInAllForms} = (formContext as any);
 
   const [modalStep, setModalStep] = useState<ModalStep>('initial');
   const [fieldValue, setFieldValue] = useState<string>(''); // Value being edited initially
@@ -84,6 +209,8 @@ export function EditItemModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [projectedScore, setProjectedScore] = useState<number | null>(null);
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [showDiff, setShowDiff] = useState(false);
 
   const fieldTypeName = getFieldTypeName(fieldType);
   const isMultiline = fieldType === "contentDescription" || fieldType === "metaDescription";
@@ -92,34 +219,37 @@ export function EditItemModal({
   // Add a new state for tracking real-time projected score during editing
   const [editingProjectedScore, setEditingProjectedScore] = useState<number | null>(null);
 
+  // Memoize the highlighted differences to avoid recalculating on every render
+  const highlightedDifferences = useMemo(() => {
+    if (showDiff && originalValue && optimizedValue) {
+      return highlightDifferences(originalValue, optimizedValue as string);
+    }
+    return null;
+  }, [showDiff, originalValue, optimizedValue]);
+
   // Effect to reset state when the modal opens or fieldType changes
   useEffect(() => {
     if (isOpen) {
-      // Try to get the current value from the form, checking both direct field and step1 field
-      let currentFormValue = "";
+      // Try to get the value from the form context first
+      let valueFromForm = '';
 
-      // First try to get the value from step1.fieldType
-      const step1Value = getValues(`step1.${fieldType}`);
+      try {
+        // Try different paths to find the field value
+        const directValue = getValues(fieldType);
+        const step1Value = getValues(`step1.${fieldType}`);
+        const step2Value = getValues(`step2.${fieldType}`);
+        const step3Value = getValues(`step3.${fieldType}`);
 
-      // Then try to get the direct value
-      const directValue = getValues(fieldType);
+        // Use the first non-empty value found
+        valueFromForm = directValue || step1Value || step2Value || step3Value || '';
+      } catch (_) { /* empty */ }
 
-      // Use the step1 value if it exists, otherwise use the direct value
-      if (step1Value !== undefined && step1Value !== "") {
-        currentFormValue = step1Value;
-        console.log(`Using step1.${fieldType} value:`, currentFormValue);
-      } else if (directValue !== undefined && directValue !== "") {
-        currentFormValue = directValue;
-        console.log(`Using direct ${fieldType} value:`, currentFormValue);
-      } else {
-        console.log(`No existing value found for ${fieldType}, using empty string`);
-      }
+      // Use the form value if available, otherwise fall back to initialValue
+      const valueToUse = valueFromForm || initialValue || '';
 
-      console.log(`Final form value for ${fieldType}:`, currentFormValue);
-
-      // Set both the field value and original value to the current form value
-      setFieldValue(currentFormValue);
-      setOriginalValue(currentFormValue); // Store the original value properly
+      // Set both the field value and original value
+      setFieldValue(valueToUse);
+      setOriginalValue(valueToUse); // Store the original value properly
 
       // Reset other state
       setOptimizedValue(null);
@@ -129,22 +259,27 @@ export function EditItemModal({
       setIsLoading(false);
       setProjectedScore(null);
       setEditingProjectedScore(null);
+
+      // Force a re-render after a short delay to ensure the value is displayed
+      setTimeout(() => {
+        setFieldValue(prev => prev || valueToUse); // Ensure we still have the value
+      }, 100);
     }
-  }, [isOpen, fieldType, getValues]);
+  }, [isOpen, fieldType, initialValue, getValues]);
 
   // Handler for text field changes that updates the projected score based on actual weight and maxScore
   const handleFieldValueChange = useCallback((value : string) => {
-    const newValue = value;
-    setFieldValue(newValue);
+    // Use functional update to avoid closure issues
+    setFieldValue(value);
 
-    if (newValue.length > 0) {
+    if (value.length > 0) {
       // Calculate improvement based on content length and quality indicators
       let qualityScore = 0;
 
       // Basic quality checks
       if (fieldType === 'title' || fieldType === 'metaTitle') {
         // For titles, check optimal length (50-60 chars)
-        const titleLength = newValue.length;
+        const titleLength = value.length;
         if (titleLength >= 40 && titleLength <= 60) {
           qualityScore += 3;
         } else if (titleLength >= 30 && titleLength <= 70) {
@@ -154,7 +289,7 @@ export function EditItemModal({
         }
       } else if (fieldType === 'metaDescription') {
         // For meta descriptions, check optimal length (150-160 chars)
-        const descLength = newValue.length;
+        const descLength = value.length;
         if (descLength >= 140 && descLength <= 160) {
           qualityScore += 3;
         } else if (descLength >= 120 && descLength <= 180) {
@@ -164,7 +299,7 @@ export function EditItemModal({
         }
       } else {
         // For other fields, base on content length
-        const contentLength = newValue.length;
+        const contentLength = value.length;
         qualityScore = Math.min(3, Math.floor(contentLength / 50));
       }
 
@@ -174,6 +309,8 @@ export function EditItemModal({
 
       // Ensure we don't exceed maxScore
       const newProjectedScore = Math.min(maxScore, score + improvement);
+
+      // Use functional update to avoid closure issues
       setEditingProjectedScore(newProjectedScore);
     } else {
       setEditingProjectedScore(null);
@@ -233,22 +370,58 @@ export function EditItemModal({
 
     try {
       // Update the form value with the optimized value
-      if (updateFieldInAllForms) {
-        // If we have the synchronization function, use it to update all forms
-        console.log(`Using updateFieldInAllForms to apply ${fieldType} in all forms`);
-        updateFieldInAllForms(`step1.${fieldType}`, optimizedValue);
-      } else {
-        // Fallback to regular setValue if synchronization function is not available
-        console.log(`Using regular setValue to apply ${fieldType}`);
-        setValue(fieldType, optimizedValue, {
+      try {
+        console.log(`Applying optimized value for ${fieldType}:`, optimizedValue);
+
+        // Method 1: Use updateFieldInAllForms if available
+        if (updateFieldInAllForms) {
+          console.log(`Using updateFieldInAllForms for ${fieldType}`);
+          // Update in all forms (this will handle the correct step)
+          updateFieldInAllForms(fieldType, optimizedValue);
+        }
+
+        // Try to update in all possible locations to ensure the value is updated
+        const updateOptions = {
           shouldValidate: true,
           shouldDirty: true,
           shouldTouch: true
-        });
-      }
+        };
 
-      // Log the updated form value
-      console.log(`Updated form value for ${fieldType}:`, getValues(fieldType));
+        // Method 2: Update using direct field name
+        try {
+          setValue(fieldType, optimizedValue, updateOptions);
+          console.log(`Updated direct field: ${fieldType}`);
+        } catch (err) {
+          console.warn(`Failed to update direct field: ${fieldType}`, err);
+        }
+
+        // Method 3: Try to update in step1
+        try {
+          setValue(`step1.${fieldType}`, optimizedValue, updateOptions);
+          console.log(`Updated step1.${fieldType}`);
+        } catch (err) {
+          console.warn(`Failed to update step1.${fieldType}`, err);
+        }
+
+        // Method 4: Try to update in step2
+        try {
+          setValue(`step2.${fieldType}`, optimizedValue, updateOptions);
+          console.log(`Updated step2.${fieldType}`);
+        } catch (err) {
+          console.warn(`Failed to update step2.${fieldType}`, err);
+        }
+
+        // Method 5: Try to update in step3
+        try {
+          setValue(`step3.${fieldType}`, optimizedValue, updateOptions);
+          console.log(`Updated step3.${fieldType}`);
+        } catch (err) {
+          console.warn(`Failed to update step3.${fieldType}`, err);
+        }
+      } catch (err) {
+        console.error(`Error updating form values:`, err);
+        // Continue execution even if some methods fail
+      }
 
       // Update the score if available
       if (projectedScore !== null) {
@@ -268,8 +441,26 @@ export function EditItemModal({
       setModalStep('optimized');
       setIsLoading(false);
     }
-  }, [fieldType, optimizedValue, setValue, getValues, onClose, fieldTypeName, projectedScore, onUpdateScore, updateFieldInAllForms]);
+  }, [fieldType, optimizedValue, setValue, onClose, fieldTypeName, projectedScore, onUpdateScore, updateFieldInAllForms]);
 
+  // Handler for copying the optimized value to clipboard
+  const handleCopy = useCallback(() => {
+    if (optimizedValue) {
+      navigator.clipboard.writeText(optimizedValue)
+        .then(() => {
+          setCopySuccess('Copied to clipboard!');
+          setTimeout(() => setCopySuccess(null), 2000);
+        })
+        .catch(() => {
+          setError('Failed to copy to clipboard.');
+        });
+    }
+  }, [optimizedValue]);
+
+  // Handler for toggling the diff view
+  const handleToggleDiff = useCallback(() => {
+    setShowDiff(prev => !prev);
+  }, []);
 
   const handleClose = () => {
     if (!isLoading) {
@@ -290,6 +481,7 @@ export function EditItemModal({
               disabled={isLoading || !fieldValue} // Disable if no content or loading
               variant="contained"
               startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <AutoFixHighIcon />}
+              sx={{ ml: 1 }}
             >
               {isLoading ? 'Optimizing...' : 'Optimize'}
             </Button>
@@ -313,11 +505,32 @@ export function EditItemModal({
               Cancel
             </Button>
             <Button
+              onClick={handleCopy}
+              disabled={isLoading || !optimizedValue}
+              variant="outlined"
+              color="info"
+              startIcon={<ContentCopyIcon />}
+              sx={{ ml: 1 }}
+            >
+              Copy
+            </Button>
+            <Button
+              onClick={handleToggleDiff}
+              disabled={isLoading || !optimizedValue}
+              variant="outlined"
+              color="secondary"
+              startIcon={<CompareArrowsIcon />}
+              sx={{ ml: 1 }}
+            >
+              {showDiff ? 'Hide Diff' : 'Show Diff'}
+            </Button>
+            <Button
               onClick={handleApplyOptimization}
               disabled={isLoading}
               variant="contained"
               color="success" // Use success color for apply
               startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlineIcon />}
+              sx={{ ml: 1 }}
             >
               {isLoading ? 'Applying...' : 'Apply Optimization'}
             </Button>
@@ -552,14 +765,14 @@ export function EditItemModal({
             multiline={isMultiline}
             rows={isMultiline ? 4 : 1}
             value={fieldValue}
-            onChange={(e) => {
-              handleFieldValueChange(e.target.value)
-            }}
+            onChange={(e) => handleFieldValueChange(e.target.value)}
             disabled={isLoading}
+            // Use a stable key that doesn't change when typing
+            key={`${fieldType}-field`}
           />
         )}
 
-        {modalStep === 'optimized' && (
+        {modalStep === 'optimized' && !showDiff && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {/* Original Value Display */}
             <TextField
@@ -592,7 +805,78 @@ export function EditItemModal({
           </Box>
         )}
 
-        {/* Keep a hidden or minimal text field during applying/optimizing if needed, or remove */}
+        {/* Diff View */}
+        {modalStep === 'optimized' && showDiff && highlightedDifferences && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: 'background.paper'
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Original {fieldTypeName} (with deletions highlighted)
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 1,
+                  bgcolor: 'background.default',
+                  minHeight: isMultiline ? '100px' : 'auto',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {highlightedDifferences.originalHighlighted}
+              </Box>
+            </Paper>
+
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: 'background.paper'
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Optimized {fieldTypeName} (with additions highlighted)
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 1,
+                  bgcolor: 'background.default',
+                  minHeight: isMultiline ? '100px' : 'auto',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {highlightedDifferences.optimizedHighlighted}
+              </Box>
+            </Paper>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
+                <Box sx={{ width: 12, height: 12, bgcolor: 'rgba(244, 67, 54, 0.1)', mr: 1, border: '1px solid rgba(244, 67, 54, 0.3)' }} />
+                <Typography variant="caption">Deleted text</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: 12, height: 12, bgcolor: 'rgba(76, 175, 80, 0.1)', mr: 1, border: '1px solid rgba(76, 175, 80, 0.3)' }} />
+                <Typography variant="caption">Added text</Typography>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
         {(modalStep === 'applying') && (
              <TextField
                 margin="dense"
@@ -606,6 +890,13 @@ export function EditItemModal({
                 InputProps={{ readOnly: true }}
                 disabled // Disable fully
              />
+        )}
+
+        {/* Copy success message */}
+        {copySuccess && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            {copySuccess}
+          </Alert>
         )}
         {/* --- End Text Field Rendering Logic --- */}
 
