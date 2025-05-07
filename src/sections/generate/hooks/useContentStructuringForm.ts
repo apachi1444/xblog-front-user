@@ -3,6 +3,8 @@ import type { SectionItem } from 'src/components/generate-article/DraggableSecti
 import toast from 'react-hot-toast';
 import { useState, useEffect, useCallback } from 'react';
 
+import { generateSections } from 'src/utils/aiGeneration';
+
 
 // Sample content for mock sections
 const SAMPLE_CONTENT = [
@@ -93,7 +95,7 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
   }, []);
 
   // Generate table of contents based on title
-  const handleGenerateTableOfContents = async (title: string, onGenerate?: () => void) => {
+  const handleGenerateTableOfContents = async (title: string, onGenerate?: () => void, primaryKeyword?: string, secondaryKeywords?: string[], language?: string) => {
     // Only start generating if we're not already in a generated state
     // This prevents the generating UI from appearing when navigating back
     if (!isGenerated) {
@@ -110,39 +112,34 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
         return;
       }
 
-      // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 6000));
-
       try {
-        const keyword = title || 'Topic';
-        const mockSections = [
-          {
-            id: 'section-1',
-            status: 'Completed',
-            title: `Introduction to ${keyword}`,
-            content: `This section provides an overview of ${keyword} and why it's important.`
-          },
-          {
-            id: 'section-2',
-            status: 'Completed',
-            title: `Benefits of ${keyword}`,
-            content: `This section explores the main benefits and advantages of ${keyword}.`
-          },
-          {
-            id: 'section-3',
-            status: 'Completed',
-            title: `How to Implement ${keyword}`,
-            content: `This section provides practical steps for implementing ${keyword} effectively.`
-          },
-          {
-            id: 'section-4',
-            status: 'Completed',
-            title: `${keyword} Best Practices`,
-            content: `This section covers the best practices and tips for optimizing ${keyword}.`
-          },
-        ] as any;
+        // Use the actual Gemini API to generate sections
+        console.log('Generating sections with:', {
+          title,
+          primaryKeyword: primaryKeyword || title,
+          secondaryKeywords: secondaryKeywords || [],
+          language: language || 'en'
+        });
 
-        setSections(mockSections);
+        const result = await generateSections(
+          title,
+          primaryKeyword || title,
+          secondaryKeywords || [],
+          language || 'en',
+          'blog'
+        );
+
+        console.log('Generated sections result:', result);
+
+        // Map the generated sections to the format expected by the app
+        const formattedSections = result.sections.map(section => ({
+          id: section.id,
+          status: 'Completed',
+          title: section.title,
+          content: section.content
+        })) as SectionItem[];
+
+        setSections(formattedSections);
         setIsGenerated(true);
 
         if (onGenerate) {
@@ -151,7 +148,32 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
 
         toast.success('Generated table of contents successfully');
       } catch (apiError) {
-        toast.error('Failed to generate table of contents');
+        const keyword = title || 'Topic';
+        const fallbackSections = [
+          {
+            id: 'section-1',
+            title: `Introduction to ${keyword}`,
+            content: `This section provides an overview of ${keyword} and why it's important.`
+          },
+          {
+            id: 'section-2',
+            title: `Benefits of ${keyword}`,
+            content: `This section explores the main benefits and advantages of ${keyword}.`
+          },
+          {
+            id: 'section-3',
+            title: `How to Implement ${keyword}`,
+            content: `This section provides practical steps for implementing ${keyword} effectively.`
+          },
+          {
+            id: 'section-4',
+            title: `${keyword} Best Practices`,
+            content: `This section covers the best practices and tips for optimizing ${keyword}.`
+          },
+        ] as SectionItem[];
+
+        setSections(fallbackSections);
+        setIsGenerated(true);
       }
     } catch (error) {
       toast.error('Failed to generate table of contents');

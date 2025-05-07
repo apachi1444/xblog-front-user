@@ -226,7 +226,28 @@ export function GeneratingView() {
         isGenerating: isGeneratingSections,
         isGenerated,
         onGenerate: async () => {
-          await handleGenerateTableOfContents(step1Form.getValues().title || 'Topic');
+          // Get all the necessary values from step1Form
+          const formValues = step1Form.getValues();
+          const title = formValues.title || 'Topic';
+          const primaryKeyword = formValues.primaryKeyword || title;
+          const secondaryKeywords = formValues.secondaryKeywords || [];
+          const language = formValues.language || 'en';
+
+          console.log('Generating table of contents with:', {
+            title,
+            primaryKeyword,
+            secondaryKeywords,
+            language
+          });
+
+          // Pass all the values to the handleGenerateTableOfContents function
+          await handleGenerateTableOfContents(
+            title,
+            undefined, // onGenerate callback
+            primaryKeyword,
+            secondaryKeywords,
+            language
+          );
         },
       }
     },
@@ -263,6 +284,34 @@ export function GeneratingView() {
 
   // State to track the section being edited
   const [currentEditingSection, setCurrentEditingSection] = useState<any>(null);
+
+  // Pass form values to step 4 for article preview
+  const step4State = useMemo(() => {
+    // Get values from all forms
+    const step1Values = step1Form.getValues();
+    const step2Values = step2Form.getValues();
+
+    return {
+      articleInfo: {
+        title: step1Values.title || '',
+        metaTitle: step1Values.metaTitle || '',
+        metaDescription: step1Values.metaDescription || '',
+        urlSlug: step1Values.urlSlug || '',
+        primaryKeyword: step1Values.primaryKeyword || '',
+        secondaryKeywords: step1Values.secondaryKeywords || [],
+        language: step1Values.language || 'en-us',
+        targetCountry: step1Values.targetCountry || 'us',
+        contentDescription: step1Values.contentDescription || '',
+        createdAt: new Date().toISOString(),
+      },
+      articleSettings: {
+        articleType: step2Values.articleType || 'how-to',
+        articleSize: step2Values.articleSize || 'medium',
+        toneOfVoice: step2Values.toneOfVoice || 'friendly',
+      },
+      sections: generatedSections,
+    };
+  }, [step1Form, step2Form, generatedSections]);
 
   // Update the current editing section when handleEditSection is called
   useEffect(() => {
