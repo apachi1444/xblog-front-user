@@ -257,16 +257,35 @@ export function GeneratingView() {
   const handleSaveSection = useCallback((updatedSection: SectionItem) => {
     console.log('Custom handleSaveSection in generate-view:', updatedSection);
 
+    // Make sure the section has all required properties
+    const completeSection = {
+      ...updatedSection,
+      id: updatedSection.id,
+      title: updatedSection.title || 'Untitled Section',
+      description: updatedSection.description || '',
+      content: updatedSection.content || ''
+    };
+
+    console.log('Saving complete section:', completeSection);
+
     // Update the sections in the content structuring form
-    contentStructuringHandleSaveSection(updatedSection);
+    contentStructuringHandleSaveSection(completeSection);
 
     // Also update the generatedSections directly to ensure changes are persisted
-    setGeneratedSections(prevSections =>
-      prevSections.map(section =>
-        section.id === updatedSection.id ? updatedSection : section
-      )
-    );
-  }, [contentStructuringHandleSaveSection, setGeneratedSections]);
+    setGeneratedSections(prevSections => {
+      const newSections = prevSections.map(section =>
+        section.id === completeSection.id ? completeSection : section
+      );
+      console.log('Updated sections list:', newSections);
+      return newSections;
+    });
+
+    // Close the edit dialog after saving
+    handleCancelSectionChanges();
+
+    // Show success message
+    toast.success('Section updated successfully!');
+  }, [contentStructuringHandleSaveSection, setGeneratedSections, handleCancelSectionChanges]);
 
   const step3State: Step3State = {
     tableOfContents: {
@@ -316,10 +335,21 @@ export function GeneratingView() {
   // Update the current editing section when handleEditSection is called
   useEffect(() => {
     if (editDialogOpen && generatedSections.length > 0) {
-      // Find the section that's being edited
-      const sectionToEdit = currentEditingSection || generatedSections[0];
-      console.log('Setting current editing section:', sectionToEdit);
-      setCurrentEditingSection(sectionToEdit);
+      if (currentEditingSection) {
+        // If we already have a section being edited, make sure it's the complete object
+        const fullSection = generatedSections.find(s => s.id === currentEditingSection.id);
+        if (fullSection) {
+          console.log('Setting current editing section with full data:', fullSection);
+          setCurrentEditingSection(fullSection);
+        } else {
+          console.log('Setting current editing section:', currentEditingSection);
+          setCurrentEditingSection(currentEditingSection);
+        }
+      } else {
+        // Default to the first section if none is selected
+        console.log('No section selected, defaulting to first section:', generatedSections[0]);
+        setCurrentEditingSection(generatedSections[0]);
+      }
     } else if (!editDialogOpen) {
       // Only clear the current editing section when the dialog is closed
       console.log('Clearing current editing section');
@@ -329,21 +359,24 @@ export function GeneratingView() {
 
   const renderStepContent = () => {
     if (activeStep === 2 && editDialogOpen) {
+      // Make sure we have the full section data
+      const fullSection = currentEditingSection ?
+        generatedSections.find(s => s.id === currentEditingSection.id) || currentEditingSection :
+        null;
+
+      console.log('Rendering editor with section:', fullSection);
+
       return (
         <SectionEditorScreen
-          section={currentEditingSection}
+          section={fullSection}
           onSave={(updatedSection) => {
             console.log('Saving section from SectionEditorScreen:', updatedSection);
 
             // Call the handleSaveSection function to update the state
             handleSaveSection(updatedSection);
-
-            // Clear the current editing section
-            setCurrentEditingSection(null);
           }}
           onCancel={() => {
             handleCancelSectionChanges();
-            setCurrentEditingSection(null);
           }}
         />
       );
@@ -358,7 +391,7 @@ export function GeneratingView() {
       case 2:
         return <Step3ContentStructuring state={step3State} />;
       case 3:
-        return <Step4Publish />;
+        return <Step4Publish state={step4State} />;
       default:
         return null;
     }

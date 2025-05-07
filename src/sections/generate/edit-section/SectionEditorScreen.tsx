@@ -7,14 +7,13 @@ import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
+  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 import { FormContainer } from 'src/components/generate-article/FormContainer';
-
-import { Editor } from './section-editor';
 
 
 interface SectionEditorScreenProps {
@@ -35,30 +34,37 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
 
 
   const handleEditorChange = useCallback((newContent: string) => {
-    console.log('Editor content changed in SectionEditorScreen:', newContent);
-    console.log('Current content state:', content);
-
     setContent(newContent);
     setIsEdited(true);
+  }, []);
 
-    console.log('Is edited state set to:', true);
-    console.log('Content state updated to:', newContent);
-  }, [content]);
+  // Initialize form values when section changes - using a ref to avoid infinite loops
+  const initializedRef = useRef(false);
 
-  // Initialize form values when section changes
   useEffect(() => {
     if (section) {
       console.log('Loading section data in SectionEditorScreen:', section);
       console.log('Section content to load:', section.content);
 
-      setTitle(section.title);
+      // Make sure we're getting the latest data
+      setTitle(section.title || '');
       setDescription(section.description || '');
-      setContent(section.content || '');
-      setIsEdited(false);
 
-      console.log('Content state after loading:', section.content);
+      // Ensure content is properly loaded - only if we haven't initialized yet or if the section ID changed
+      if (!initializedRef.current) {
+        if (section.content !== undefined) {
+          console.log('Setting content to:', section.content);
+          setContent(section.content);
+        } else {
+          console.log('No content available, setting empty string');
+          setContent('');
+        }
+      }
+
+      setIsEdited(false);
     } else {
       console.log('No section data available');
+      initializedRef.current = false;
     }
   }, [section]);
 
@@ -79,13 +85,18 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
 
     console.log('Saving section with content:', content);
 
+    // Create a complete updated section with all properties
     const updatedSection: SectionItem = {
       ...section,
-      title,
-      description,
-      content,
+      id: section.id,
+      title: title || section.title || 'Untitled Section',
+      description: description || section.description || '',
+      content: content || '',
     };
 
+    console.log('Sending updated section to parent:', updatedSection);
+
+    // Call the parent's onSave function with the updated section
     onSave(updatedSection);
 
     // Show success message
@@ -184,12 +195,37 @@ export function SectionEditorScreen({ section, onSave, onCancel }: SectionEditor
                 bgcolor: 'background.paper',
                 border: '1px solid #e0e0e0'
               }}>
-                <Editor
-                  initialContent={content || section.content || '<p>Start writing here...</p>'}
-                  onChange={handleEditorChange}
-                  ref={editorRef}
-                  key={`editor-${section.id}-${Date.now()}`}
-                />
+                <Box sx={{ p: 2, width: '100%', height: '100%' }}>
+                  <Typography variant="h6" gutterBottom>
+                    {title}
+                  </Typography>
+
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={15}
+                    maxRows={30}
+                    value={content}
+                    onChange={(e) => {
+                      setContent(e.target.value);
+                      setIsEdited(true);
+                    }}
+                    placeholder="Start writing your section content here..."
+                    sx={{
+                      mb: 2,
+                      '& .MuiOutlinedInput-root': {
+                        fontFamily: 'inherit',
+                      }
+                    }}
+                    InputProps={{
+                      sx: {
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: 1.6,
+                        fontSize: '14px',
+                      }
+                    }}
+                  />
+                </Box>
               </Box>
             </Box>
           </FormContainer>

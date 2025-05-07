@@ -6,7 +6,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import hostname from "../config";
 
 interface User {
-  
+
     id: string;
     name: string;
     email: string;
@@ -29,7 +29,7 @@ export const loginUser = createAsyncThunk<User, UserCredentials>(
     async (userCredentials: UserCredentials) => {
         const request = await axios.post(`${hostname}/auth/login`, userCredentials);
         const response = await request.data.token_access;
-        localStorage.setItem('access_token', response);
+        localStorage.setItem('xblog_access_token_v2', response);
         console.log(response);
         return response;
     }

@@ -183,6 +183,169 @@ const CopyModal = ({ open, onClose }: CopyModalProps) => {
   );
 };
 
+// Full Article Modal Component
+interface FullArticleModalProps {
+  open: boolean;
+  onClose: () => void;
+  articleInfo: {
+    title: string;
+    metaTitle: string;
+    metaDescription: string;
+    primaryKeyword: string;
+    secondaryKeywords: string[];
+    language: string;
+    targetCountry: string;
+    createdAt: string;
+  };
+  sections: any[];
+}
+
+const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleModalProps) => (
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="full-article-modal-title"
+    >
+      <Box sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: { xs: '95%', sm: '90%', md: '80%' },
+        maxWidth: '1200px',
+        maxHeight: '90vh',
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        boxShadow: 24,
+        p: { xs: 2, sm: 3, md: 4 },
+        overflow: 'auto',
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, position: 'sticky', top: 0, bgcolor: 'background.paper', zIndex: 10, py: 1 }}>
+          <Typography id="full-article-modal-title" variant="h6" component="h2">
+            Full Article Preview
+          </Typography>
+          <IconButton onClick={onClose} size="small">
+            <Iconify icon="eva:close-fill" />
+          </IconButton>
+        </Box>
+
+        <Divider sx={{ mb: 3 }} />
+
+        {/* Article Content */}
+        <Box sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
+          {/* Article Title */}
+          <Typography variant="h4" gutterBottom sx={{
+            fontWeight: 700,
+            color: 'text.primary',
+            fontSize: { xs: '1.5rem', md: '2rem' }
+          }}>
+            {articleInfo.title || 'Your Article Title'}
+          </Typography>
+
+          {/* Article Meta */}
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            mb: 3,
+            color: 'text.secondary'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
+              <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
+              <Typography variant="body2">
+                {new Date(articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
+              <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
+              <Typography variant="body2">
+                AI Generated
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
+              <Typography variant="body2">
+                {articleInfo.language.toUpperCase()} | {articleInfo.targetCountry.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Keywords */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Keywords:
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Chip
+                label={articleInfo.primaryKeyword}
+                sx={{
+                  bgcolor: 'success.lighter',
+                  color: 'success.dark',
+                  fontWeight: 'bold'
+                }}
+              />
+              {articleInfo.secondaryKeywords.map((keyword, index) => (
+                <Chip
+                  key={index}
+                  label={keyword}
+                  sx={{
+                    bgcolor: 'primary.lighter',
+                    color: 'primary.main'
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* All Sections */}
+          {sections && sections.length > 0 ? (
+            sections.map((section, index) => (
+              <Box key={index} sx={{ mb: 4 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                  {section.title || `Section ${index + 1}`}
+                </Typography>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                  {section.content || 'No content available for this section.'}
+                </Typography>
+              </Box>
+            ))
+          ) : (
+            <Box sx={{
+              textAlign: 'center',
+              color: 'text.secondary',
+              my: 3,
+              p: 2,
+              bgcolor: 'background.neutral',
+              borderRadius: 1
+            }}>
+              <Typography variant="body2">
+                No sections have been generated yet.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        {/* Bottom actions */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="mdi:content-copy" />}
+            onClick={() => {
+              // Copy article content to clipboard
+              const content = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content}\n\n`).join('')}`;
+              navigator.clipboard.writeText(content);
+              toast.success("Article content copied to clipboard");
+            }}
+          >
+            Copy Full Article
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+
 // Export Modal Component
 const ExportModal = ({ open, onClose }: ExportModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -400,7 +563,33 @@ const StoreSelectionModal = ({ open, onClose, onSelect, stores }: StoreSelection
   );
 };
 
-export function Step4Publish() {
+// Define the interface for the state prop
+interface Step4State {
+  articleInfo: {
+    title: string;
+    metaTitle: string;
+    metaDescription: string;
+    urlSlug: string;
+    primaryKeyword: string;
+    secondaryKeywords: string[];
+    language: string;
+    targetCountry: string;
+    contentDescription: string;
+    createdAt: string;
+  };
+  articleSettings: {
+    articleType: string;
+    articleSize: string;
+    toneOfVoice: string;
+  };
+  sections: any[];
+}
+
+interface Step4Props {
+  state: Step4State;
+}
+
+export function Step4Publish({ state }: Step4Props) {
   // API hooks
   const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
   const [publishWordPress] = usePublishWordPressMutation();
@@ -411,6 +600,7 @@ export function Step4Publish() {
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [storeSelectionOpen, setStoreSelectionOpen] = useState(false);
+  const [fullArticleModalOpen, setFullArticleModalOpen] = useState(false);
   const [publishingSchedule, setPublishingSchedule] = useState('now');
   const [selectedStore, setSelectedStore] = useState<number | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -432,6 +622,8 @@ export function Step4Publish() {
   const handleCloseExportModal = () => setExportModalOpen(false);
   const handleOpenStoreSelection = () => setStoreSelectionOpen(true);
   const handleCloseStoreSelection = () => setStoreSelectionOpen(false);
+  const handleOpenFullArticleModal = () => setFullArticleModalOpen(true);
+  const handleCloseFullArticleModal = () => setFullArticleModalOpen(false);
 
   // Handle store selection
   const handleStoreSelect = (storeId: number) => {
@@ -516,7 +708,7 @@ export function Step4Publish() {
                 color: 'text.primary',
                 fontSize: { xs: '1.5rem', md: '2rem' }
               }}>
-                How to Optimize Your Website for Better SEO Performance
+                {state.articleInfo.title || 'Your Article Title'}
               </Typography>
 
               {/* Article Meta */}
@@ -530,13 +722,19 @@ export function Step4Publish() {
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
                   <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(state.articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
                   <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
                   <Typography variant="body2">
                     AI Generated
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
+                  <Typography variant="body2">
+                    {state.articleInfo.language.toUpperCase()} | {state.articleInfo.targetCountry.toUpperCase()}
                   </Typography>
                 </Box>
               </Box>
@@ -561,32 +759,71 @@ export function Step4Publish() {
                 }}
               />
 
-              {/* Article Content - Simplified for better readability */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                  Introduction to SEO Optimization
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Search Engine Optimization (SEO) is crucial for any website looking to increase visibility and attract organic traffic. In today s digital landscape, having a well-optimized website can make the difference between success and failure online.
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Whether you re a small business owner, a content creator, or a marketing professional, understanding the fundamentals of SEO is essential for growing your online presence.
-                </Typography>
-              </Box>
+              {/* Article Content - Display generated sections */}
+              {state.sections && state.sections.length > 0 ? (
+                <>
+                  {/* Display first section as introduction */}
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                      {state.sections[0]?.title || 'Introduction'}
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      {state.sections[0]?.content || 'No content available for this section.'}
+                    </Typography>
+                  </Box>
 
-              {/* More sections would continue here... */}
-              <Box sx={{
-                textAlign: 'center',
-                color: 'text.secondary',
-                my: 3,
-                p: 2,
-                bgcolor: 'background.neutral',
-                borderRadius: 1
-              }}>
-                <Typography variant="body2">
-                  [Preview truncated for brevity]
-                </Typography>
-              </Box>
+                  {/* Display second section if available */}
+                  {state.sections.length > 1 && (
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                        {state.sections[1]?.title || 'Section 2'}
+                      </Typography>
+                      <Typography variant="body1" paragraph>
+                        {state.sections[1]?.content || 'No content available for this section.'}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Show a message for remaining sections */}
+                  {state.sections.length > 2 && (
+                    <Box sx={{
+                      textAlign: 'center',
+                      color: 'text.secondary',
+                      my: 3,
+                      p: 2,
+                      bgcolor: 'background.neutral',
+                      borderRadius: 1
+                    }}>
+                      <Typography variant="body2">
+                        +{state.sections.length - 2} more sections in the full article
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        {state.sections.slice(2).map((section, index) => (
+                          <Chip
+                            key={index}
+                            label={section.title}
+                            size="small"
+                            sx={{ m: 0.5, bgcolor: 'background.paper' }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                </>
+              ) : (
+                <Box sx={{
+                  textAlign: 'center',
+                  color: 'text.secondary',
+                  my: 3,
+                  p: 2,
+                  bgcolor: 'background.neutral',
+                  borderRadius: 1
+                }}>
+                  <Typography variant="body2">
+                    No sections have been generated yet. Please go back to step 3 and generate content.
+                  </Typography>
+                </Box>
+              )}
             </Box>
 
             {/* Action Buttons */}
@@ -624,6 +861,19 @@ export function Step4Publish() {
               </Button>
 
               <Button
+                variant="outlined"
+                startIcon={<Iconify icon="mdi:file-document-outline" />}
+                onClick={handleOpenFullArticleModal}
+                sx={{
+                  borderRadius: '24px',
+                  px: 3,
+                  mb: { xs: 1, sm: 0 }
+                }}
+              >
+                View Full Article
+              </Button>
+
+              <Button
                 variant="contained"
                 color="primary"
                 startIcon={<Iconify icon="mdi:publish" />}
@@ -653,14 +903,14 @@ export function Step4Publish() {
                   label="Article Title"
                   disabled
                   fullWidth
-                  value="How to Optimize Your Website for Better SEO Performance"
+                  value={state.articleInfo.title || 'No title available'}
                 />
               </Grid>
 
               <Grid item xs={12}>
                 <FormInput
                     label="Meta Title"
-                    value="SEO Optimization Guide: Boost Your Website Performance"
+                    value={state.articleInfo.metaTitle || 'No meta title available'}
                     disabled
                     fullWidth
                 />
@@ -669,7 +919,7 @@ export function Step4Publish() {
               <Grid item xs={12}>
                 <FormInput
                   label="Meta Description"
-                  value="Learn proven strategies to optimize your website for search engines and improve your rankings with our comprehensive SEO guide."
+                  value={state.articleInfo.metaDescription || 'No meta description available'}
                   disabled
                   fullWidth
                 />
@@ -678,7 +928,7 @@ export function Step4Publish() {
               <Grid item xs={12}>
                 <FormInput
                   label="URL Slug"
-                  value="SEO meta optimization"
+                  value={state.articleInfo.urlSlug || 'No URL slug available'}
                   disabled
                   fullWidth
                 />
@@ -686,22 +936,53 @@ export function Step4Publish() {
 
               <Grid item xs={12}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Keywords
+                  Primary Keyword
+                </Typography>
+                <Chip
+                  label={state.articleInfo.primaryKeyword || 'No primary keyword'}
+                  sx={{
+                    bgcolor: 'success.lighter',
+                    color: 'success.dark',
+                    borderRadius: '16px',
+                    mb: 1,
+                    fontWeight: 'bold'
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Secondary Keywords
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {['SEO', 'Website Optimization', 'Search Engine', 'Digital Marketing'].map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      sx={{
-                        bgcolor: 'primary.lighter',
-                        color: 'primary.main',
-                        borderRadius: '16px',
-                        mb: 0.5
-                      }}
-                    />
-                  ))}
+                  {state.articleInfo.secondaryKeywords && state.articleInfo.secondaryKeywords.length > 0 ? (
+                    state.articleInfo.secondaryKeywords.map((keyword, index) => (
+                      <Chip
+                        key={index}
+                        label={keyword}
+                        sx={{
+                          bgcolor: 'primary.lighter',
+                          color: 'primary.main',
+                          borderRadius: '16px',
+                          mb: 0.5
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No secondary keywords available
+                    </Typography>
+                  )}
                 </Box>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Content Description
+                </Typography>
+                <Typography variant="body2" sx={{ p: 1, bgcolor: 'background.neutral', borderRadius: 1 }}>
+                  {state.articleInfo.contentDescription || 'No content description available'}
+                </Typography>
               </Grid>
             </Grid>
           </FormContainer>
@@ -788,6 +1069,12 @@ export function Step4Publish() {
         onClose={handleCloseStoreSelection}
         onSelect={handleStoreSelect}
         stores={stores}
+      />
+      <FullArticleModal
+        open={fullArticleModalOpen}
+        onClose={handleCloseFullArticleModal}
+        articleInfo={state.articleInfo}
+        sections={state.sections}
       />
     </Box>
   );

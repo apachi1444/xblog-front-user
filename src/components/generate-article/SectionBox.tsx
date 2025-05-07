@@ -196,23 +196,28 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
               >
                 Content Preview:
               </Typography>
-              <Typography
-                variant="body2"
+              <Box
                 sx={{
-                  fontSize: "12px",
-                  color: 'text.primary',
                   mb: 1,
-                  fontStyle: 'italic',
-                  maxHeight: '100px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 4,
-                  WebkitBoxOrient: 'vertical',
+                  p: 1.5,
+                  borderRadius: 1,
+                  bgcolor: 'background.neutral',
+                  maxHeight: '300px',
+                  overflow: 'auto'
                 }}
               >
-                {section.content}
-              </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "13px",
+                    color: 'text.primary',
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {section.content || 'No content available for this section.'}
+                </Typography>
+              </Box>
 
               <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
                 <Typography
