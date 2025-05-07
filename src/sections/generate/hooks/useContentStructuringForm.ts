@@ -94,9 +94,22 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
 
   // Generate table of contents based on title
   const handleGenerateTableOfContents = async (title: string, onGenerate?: () => void) => {
-    setIsGenerating(true);
+    // Only start generating if we're not already in a generated state
+    // This prevents the generating UI from appearing when navigating back
+    if (!isGenerated) {
+      setIsGenerating(true);
+    }
 
     try {
+      // If already generated, don't wait for the API call
+      if (isGenerated) {
+        // Just return immediately since we already have sections
+        if (onGenerate) {
+          onGenerate();
+        }
+        return;
+      }
+
       // Simulate API call with delay
       await new Promise(resolve => setTimeout(resolve, 6000));
 

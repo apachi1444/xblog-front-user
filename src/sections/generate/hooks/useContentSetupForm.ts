@@ -3,14 +3,24 @@ import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFormContext } from 'react-hook-form';
 
+import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
+
 import { step1Schema } from '../schemas';
-import { generateTitle, generateMeta, generateSecondaryKeywords } from '../../../utils/aiGeneration';
+import { generateMeta, generateTitle, generateSecondaryKeywords } from '../../../utils/aiGeneration';
 
 import type { Step1FormData } from '../schemas';
 
 export const useContentSetupForm = () => {
   // Try to access the main form context if available
   const mainFormContext = useFormContext();
+
+  // Use the regeneration check hook
+  const {
+    checkRegenerationCredits,
+    showRegenerationDialog,
+    setShowRegenerationDialog,
+    regenerationsAvailable
+  } = useRegenerationCheck();
 
   // Generation states
   const [generationState, setGenerationState] = useState({
@@ -34,8 +44,8 @@ export const useContentSetupForm = () => {
       contentDescription: '',
       primaryKeyword: '',
       secondaryKeywords: [],
-      language: '',
-      targetCountry: '',
+      language: 'en-us', // Default to English (US)
+      targetCountry: 'us', // Default to United States
       title: '',
       metaTitle: '',
       metaDescription: '',
@@ -89,6 +99,11 @@ export const useContentSetupForm = () => {
 
   // Title generation handler
   const handleGenerateTitle = async () => {
+    // Check if user has regeneration credits
+    if (!checkRegenerationCredits()) {
+      return; // Exit if no credits available
+    }
+
     setGenerationState(prev => ({
       ...prev,
       title: { ...prev.title, isGenerating: true }
@@ -145,6 +160,11 @@ export const useContentSetupForm = () => {
 
   // Meta generation handler
   const handleGenerateMeta = async () => {
+    // Check if user has regeneration credits
+    if (!checkRegenerationCredits()) {
+      return; // Exit if no credits available
+    }
+
     setGenerationState(prev => ({
       ...prev,
       meta: { ...prev.meta, isGenerating: true }
@@ -229,6 +249,11 @@ export const useContentSetupForm = () => {
 
   // Secondary keywords generation handler
   const handleGenerateSecondaryKeywords = async () => {
+    // Check if user has regeneration credits
+    if (!checkRegenerationCredits()) {
+      return; // Exit if no credits available
+    }
+
     setGenerationState(prev => ({
       ...prev,
       secondaryKeywords: { isGenerating: true }
@@ -287,14 +312,13 @@ export const useContentSetupForm = () => {
     }
   };
 
-  // Keyword management
   const handleAddKeyword = (keyword: string) => {
     if (!keyword.trim()) return;
 
     const currentKeywords = step1Form.getValues('secondaryKeywords') || [];
+    // Check if keyword already exists, but don't show an error toast
     if (currentKeywords.includes(keyword.trim())) {
-      toast.error('This keyword already exists');
-      return;
+      return; // Silently return without adding the duplicate keyword
     }
 
     step1Form.setValue('secondaryKeywords', [...currentKeywords, keyword.trim()], {
@@ -302,6 +326,9 @@ export const useContentSetupForm = () => {
       shouldDirty: true,
       shouldTouch: true
     });
+
+    // Note: We don't show a success toast here because it's already shown in useKeywordManagement
+    // This prevents duplicate toasts when adding keywords
   };
 
   const handleDeleteKeyword = (keyword: string) => {
@@ -315,6 +342,9 @@ export const useContentSetupForm = () => {
         shouldTouch: true
       }
     );
+
+    // Note: We don't show an error toast here because it's already shown in useKeywordManagement
+    // This prevents duplicate toasts when removing keywords
   };
 
   return {
@@ -327,5 +357,9 @@ export const useContentSetupForm = () => {
     handleAddKeyword,
     handleDeleteKeyword,
     validateRequiredFields,
+    // Regeneration dialog state
+    showRegenerationDialog,
+    setShowRegenerationDialog,
+    regenerationsAvailable,
   };
 };

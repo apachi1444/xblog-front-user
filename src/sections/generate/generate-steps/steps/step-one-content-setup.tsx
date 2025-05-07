@@ -9,8 +9,8 @@ import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from 
 // Components
 import { Iconify } from "src/components/iconify";
 import { FormInput } from "src/components/generate-article/FormInput";
-import { FormDropdown } from "src/components/generate-article/FormDropdown";
 import { FormContainer } from "src/components/generate-article/FormContainer";
+import { TargetLanguageSelector } from "src/components/generate-article/TargetLanguageSelector";
 import { GenerationLoadingAnimation } from "src/components/generate-article/GenerationLoadingAnimation";
 
 import { KeywordChip } from "../../components/KeywordChip";
@@ -74,8 +74,6 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   const theme = useTheme()
 
   // Watch form fields for conditional rendering
-  const language = watch("language")
-  const targetCountry = watch("targetCountry")
   const primaryKeyword = watch("primaryKeyword")
   const secondaryKeywords = watch("secondaryKeywords")
   const contentDescription = watch("contentDescription")
@@ -85,7 +83,8 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
   const metaDescription = watch("metaDescription")
   const urlSlug = watch("urlSlug")
 
-  const isPrimaryKeywordDisabled = !language || !targetCountry
+  // Primary keyword should always be enabled since we have default values for language and targetCountry
+  const isPrimaryKeywordDisabled = false
   const isSecondaryKeywordsDisabled = !primaryKeyword
 
   // Handler for generating secondary keywords with validation
@@ -96,19 +95,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
     }
   }
 
-  // Data for country options
-  const countries = [
-    { value: "us", label: "English (US)" },
-    { value: "uk", label: "English (UK)" },
-    { value: "fr", label: "French" },
-  ]
 
-  // Data for language options
-  const languages = [
-    { value: "en-us", label: "English (US)" },
-    { value: "en-gb", label: "English (UK)" },
-    { value: "fr-fr", label: "French" },
-  ]
 
   const isLoadingSecondaryKeywords = isGeneratingSecondaryKeywords
 
@@ -127,48 +114,17 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
     keywordInput,
     setKeywordInput,
     handleAddKeyword,
+    handleDeleteKeyword: handleDeleteKeywordWithToast, // Rename to avoid conflict
   } = useKeywordManagement(form, originalHandleAddKeyword, handleDeleteKeyword);
 
   const isGenerateDisabled = false;
 
   return (
     <Grid container spacing={1}>
-      {/* Language & Region section - Enhanced */}
+      {/* Language & Region section - Enhanced with World Flags */}
       <Grid item xs={12}>
         <FormContainer title="Language & Region">
-          <FormDropdown
-            {...register("language", {
-              onChange: (e) => {
-                setValue("language", e.target.value, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                  shouldTouch: true
-                });
-              }
-            })}
-            label="Language"
-            options={languages}
-            error={!!errors.language}
-            helperText={errors.language?.message}
-            value={language}
-          />
-
-          <FormDropdown
-            {...register("targetCountry", {
-              onChange: (e) => {
-                setValue("targetCountry", e.target.value, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                  shouldTouch: true
-                });
-              }
-            })}
-            label="Target Country"
-            options={countries}
-            error={!!errors.targetCountry}
-            helperText={errors.targetCountry?.message}
-            value={targetCountry} // Explicitly set the value
-          />
+          <TargetLanguageSelector />
         </FormContainer>
       </Grid>
 
@@ -317,7 +273,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   key={index}
                   keyword={keyword}
                   index={index}
-                  onDelete={handleDeleteKeyword}
+                  onDelete={handleDeleteKeywordWithToast}
                 />
               ))}
             </Box>

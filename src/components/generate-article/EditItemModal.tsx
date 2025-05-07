@@ -1,4 +1,6 @@
 /* eslint-disable no-plusplus */
+import type { AffectedCriterion } from 'src/sections/generate/hooks/seoScoring/types';
+
 import { useFormContext } from 'react-hook-form';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
@@ -24,6 +26,8 @@ import {
   DialogContentText,
 } from '@mui/material';
 
+import { AffectedCriteriaList } from './AffectedCriteriaList';
+
 interface EditItemModalProps {
   isOpen: boolean;
   score: number;
@@ -35,6 +39,7 @@ interface EditItemModalProps {
   tooltip?: string;
   onOptimize: (fieldType: string, currentValue: string) => Promise<string>;
   initialValue: string;
+  simulateFieldChange?: (fieldName: string, newValue: any) => AffectedCriterion[];
 }
 
 // Helper function to get a user-friendly name for the field
@@ -192,7 +197,8 @@ export function EditItemModal({
   score,
   maxScore,
   weight: _weight, // Prefix with underscore to indicate it's not used
-  tooltip
+  tooltip,
+  simulateFieldChange
 }: EditItemModalProps) {
   const formContext = useFormContext(); // Access form methods
   const { getValues, setValue } = formContext;
@@ -211,6 +217,7 @@ export function EditItemModal({
   const [projectedScore, setProjectedScore] = useState<number | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [affectedCriteria, setAffectedCriteria] = useState<AffectedCriterion[]>([]);
 
   const fieldTypeName = getFieldTypeName(fieldType);
   const isMultiline = fieldType === "contentDescription" || fieldType === "metaDescription";
@@ -312,10 +319,17 @@ export function EditItemModal({
 
       // Use functional update to avoid closure issues
       setEditingProjectedScore(newProjectedScore);
+
+      // Simulate how this change would affect other criteria
+      if (simulateFieldChange) {
+        const affected = simulateFieldChange(fieldType, value);
+        setAffectedCriteria(affected);
+      }
     } else {
       setEditingProjectedScore(null);
+      setAffectedCriteria([]);
     }
-  }, [score, maxScore, fieldType]);
+  }, [score, maxScore, fieldType, simulateFieldChange]);
 
   const handleOptimize = useCallback(async () => {
     setIsLoading(true);
@@ -755,21 +769,32 @@ export function EditItemModal({
 
         {/* --- Text Field Rendering Logic --- */}
         {modalStep === 'initial' && (
-          <TextField
-            autoFocus
-            margin="dense"
-            label={fieldTypeName} // Simple label in initial step
-            type="text"
-            fullWidth
-            variant="outlined"
-            multiline={isMultiline}
-            rows={isMultiline ? 4 : 1}
-            value={fieldValue}
-            onChange={(e) => handleFieldValueChange(e.target.value)}
-            disabled={isLoading}
-            // Use a stable key that doesn't change when typing
-            key={`${fieldType}-field`}
-          />
+          <>
+            <TextField
+              autoFocus
+              margin="dense"
+              label={fieldTypeName} // Simple label in initial step
+              type="text"
+              fullWidth
+              variant="outlined"
+              multiline={isMultiline}
+              rows={isMultiline ? 4 : 1}
+              value={fieldValue}
+              onChange={(e) => handleFieldValueChange(e.target.value)}
+              disabled={isLoading}
+              // Use a stable key that doesn't change when typing
+              key={`${fieldType}-field`}
+            />
+
+            {/* Show affected criteria if any */}
+            {affectedCriteria.length > 0 && simulateFieldChange && (
+              <AffectedCriteriaList
+                criteria={affectedCriteria}
+                title="Other criteria affected by this change"
+                showImpactOnly={false}
+              />
+            )}
+          </>
         )}
 
         {modalStep === 'optimized' && !showDiff && (

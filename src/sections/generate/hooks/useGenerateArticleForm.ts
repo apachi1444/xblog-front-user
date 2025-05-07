@@ -15,8 +15,8 @@ export const useGenerateArticleForm = () => {
         contentDescription: '',
         primaryKeyword: '',
         secondaryKeywords: [],
-        language: '',
-        targetCountry: '',
+        language: 'en-us', // Default to English (US)
+        targetCountry: 'us', // Default to United States
         title: '',
         metaTitle: '',
         metaDescription: '',
@@ -50,8 +50,8 @@ export const useGenerateArticleForm = () => {
       contentDescription: '',
       primaryKeyword: '',
       secondaryKeywords: [],
-      language: '',
-      targetCountry: '',
+      language: 'en-us', // Default to English (US)
+      targetCountry: 'us', // Default to United States
       title: '',
       metaTitle: '',
       metaDescription: '',

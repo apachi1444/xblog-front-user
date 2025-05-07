@@ -68,45 +68,53 @@ export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProp
         width: '100%',
         position: 'relative',
         minHeight: 'calc(100vh - 200px)', // Adjust based on your layout
+        mb: 10, // Add bottom margin to prevent content from being hidden by the bottom navigation
+        mt: 2, // Add top margin for better spacing from the stepper
       }}
     >
-      {/* Content area - adjust width based on SEO dashboard visibility and collapse state */}
+      {/* Main content container - always takes full width */}
       <Box
         sx={{
-          flexGrow: 1,
-          width: isSEODashboardVisible ?
-            (isSEODashboardCollapsed ? 'calc(100% - 40px)' : '70%') :
-            '100%',
-          transition: () => theme.transitions.create(['width'], {
-            duration: theme.transitions.duration.standard,
-          }),
-          pr: isSEODashboardVisible && !isSEODashboardCollapsed ? 2 : 0
+          display: 'flex',
+          width: '100%',
+          position: 'relative',
         }}
       >
-        <Box sx={{ width: '100%' }}>
-          {children}
-        </Box>
-      </Box>
-
-      {/* SEO Dashboard on the right - only visible on certain steps */}
-      {isSEODashboardVisible && (
+        {/* Content area - adjust width based on SEO dashboard visibility and collapse state */}
         <Box
+          sx={{
+            flexGrow: 1,
+            width: isSEODashboardVisible ?
+              (isSEODashboardCollapsed ? 'calc(100% - 40px)' : '70%') :
+              '100%',
+            transition: () => theme.transitions.create(['width'], {
+              duration: theme.transitions.duration.standard,
+            }),
+            pr: isSEODashboardVisible && !isSEODashboardCollapsed ? 2 : 0
+          }}
+        >
+          <Box sx={{ width: '100%' }}>
+            {children}
+          </Box>
+        </Box>
+
+        {/* SEO Dashboard on the right - only visible on certain steps */}
+        {isSEODashboardVisible && (
+          <Box
             ref={dashboardRef}
             sx={{
               width: isSEODashboardCollapsed ? '40px' : '30%',
-              transition: () => theme.transitions.create(['width', 'position'], {
+              transition: () => theme.transitions.create(['width'], {
                 duration: theme.transitions.duration.standard,
               }),
-              position: isFixed
-                ? 'sticky'
-                : (isSEODashboardCollapsed ? 'absolute' : 'relative'),
-              right: isSEODashboardCollapsed ? 0 : 'auto',
-              top: isFixed ? '64px' : (isSEODashboardCollapsed ? 0 : 'auto'),
-              height: isSEODashboardCollapsed ? '100%' : 'auto',
+              position: isFixed ? 'sticky' : 'relative',
+              top: isFixed ? '80px' : 'auto',
+              marginTop: isFixed ? 2 : 0,
+              height: 'calc(100vh - 120px)', // Always use fixed height for consistency
               alignSelf: 'flex-start',
               zIndex: isFixed ? 10 : 'auto',
-              maxHeight: isFixed ? 'calc(100vh - 64px)' : 'none', // Adjust for header height
-              overflow: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <SEODashboard
@@ -116,7 +124,8 @@ export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProp
               isCollapsed={isSEODashboardCollapsed}
             />
           </Box>
-      )}
+        )}
+      </Box>
     </Box>
   );
 };

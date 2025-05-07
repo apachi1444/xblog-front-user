@@ -1,4 +1,5 @@
 import { Box, useTheme } from '@mui/material';
+import toast from 'react-hot-toast';
 
 interface KeywordChipProps {
   keyword: string;
@@ -18,9 +19,9 @@ export function KeywordChip({ keyword, index, onDelete }: KeywordChipProps) {
         bgcolor: theme.palette.primary.lighter,
         color: theme.palette.primary.dark,
         borderRadius: theme.shape.borderRadius * 2,
-        py: 0.5,
-        px: 1.5,
-        fontSize: theme.typography.pxToRem(12),
+        py: 0.75,
+        px: 2,
+        fontSize: theme.typography.pxToRem(14),
         animation: `fadeIn 0.3s ease-in-out ${index * 0.05}s both`,
         '@keyframes fadeIn': {
           '0%': { opacity: 0, transform: 'translateY(5px)' },
@@ -31,14 +32,20 @@ export function KeywordChip({ keyword, index, onDelete }: KeywordChipProps) {
       {keyword}
       <Box
         component="span"
-        onClick={() => onDelete(keyword)}
+        onClick={() => {
+          // Show error toast when keyword is removed
+          toast.error(`Keyword "${keyword}" removed`);
+          // Call the onDelete function
+          onDelete(keyword);
+        }}
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          ml: 0.5,
+          ml: 1,
           cursor: 'pointer',
-          fontSize: theme.typography.pxToRem(14),
+          fontSize: theme.typography.pxToRem(16),
+          fontWeight: 'bold',
           lineHeight: 1,
           transition: 'opacity 0.2s ease',
           '&:hover': { opacity: 0.7 },

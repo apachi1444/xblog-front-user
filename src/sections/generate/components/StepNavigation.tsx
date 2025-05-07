@@ -20,10 +20,11 @@ export const StepNavigation = ({ activeStep, totalSteps, onNext, onBack }: StepN
         bottom: 0,
         left: 0,
         right: 0,
-        py: 2,
-        px: 3,
+        py: 3, // Increased vertical padding
+        px: 4, // Increased horizontal padding
         bgcolor: 'background.paper',
         borderTop: `1px solid ${theme.palette.divider}`,
+        boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)', // Add subtle shadow for better separation
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'space-between',
@@ -42,7 +43,7 @@ export const StepNavigation = ({ activeStep, totalSteps, onNext, onBack }: StepN
             }}
             onClick={onBack}
           >
-            {t('common.previous')}
+            Previous
           </Button>
         ) : null}
       </Box>
@@ -63,7 +64,7 @@ export const StepNavigation = ({ activeStep, totalSteps, onNext, onBack }: StepN
             }}
             onClick={onNext}
           >
-            {t('generate.finishAndPublish')}
+            Finish & Publish
           </Button>
         ) : (
           <Button
@@ -75,7 +76,7 @@ export const StepNavigation = ({ activeStep, totalSteps, onNext, onBack }: StepN
             }}
             onClick={onNext}
           >
-            {t('common.next')}
+            Next
           </Button>
         )}
       </Box>

@@ -11,35 +11,40 @@ export interface ScoringItem {
 // Define the scoring items with their point values
 export const SEO_SCORING_ITEMS: ScoringItem[] = [
   // Primary SEO Checklist (35%)
-  { id: 101, description: 'Focus keyword in meta description', points: 15, category: 'primary' },
-  { id: 102, description: 'Focus keyword in URL', points: 15, category: 'primary' },
-  { id: 103, description: 'Keyword in first 10% of content', points: 15, category: 'primary' },
-  
+  { id: 101, description: 'Focus keyword in meta description', points: 10, category: 'primary' },
+  { id: 102, description: 'Focus keyword in URL', points: 10, category: 'primary' },
+  { id: 103, description: 'Keyword in first 10% of content', points: 10, category: 'primary' },
+  { id: 104, description: 'Focus keyword included in content description', points: 10, category: 'primary' },
+  { id: 105, description: 'Secondary keywords are defined', points: 10, category: 'primary' },
+  { id: 106, description: 'Language and target country are specified', points: 10, category: 'primary' },
+
   // Title Optimization (25%)
-  { id: 201, description: 'Keyword at the start of the title', points: 5, category: 'title' },
-  { id: 202, description: 'Emotional sentiment in title', points: 5, category: 'title' },
-  { id: 203, description: 'Power words used', points: 5, category: 'title' },
-  { id: 204, description: 'Keyword in SEO title', points: 5, category: 'title' },
-  { id: 205, description: 'Title length is optimal', points: 5, category: 'title' },
-  
+  { id: 201, description: 'Keyword at the start of the title', points: 3.5, category: 'title' },
+  { id: 202, description: 'Emotional sentiment in title', points: 3.5, category: 'title' },
+  { id: 203, description: 'Power words used', points: 3.5, category: 'title' },
+  { id: 204, description: 'Keyword in SEO title', points: 3.5, category: 'title' },
+  { id: 205, description: 'Title length is optimal', points: 3.5, category: 'title' },
+  { id: 206, description: 'Meta title length is optimal', points: 3.5, category: 'title' },
+  { id: 207, description: 'Meta description length is optimal', points: 3.5, category: 'title' },
+
   // Content Presentation (20%)
-  { id: 301, description: 'Easy-to-read paragraphs', points: 5, category: 'content' },
-  { id: 302, description: 'Includes media', points: 5, category: 'content' },
-  { id: 303, description: 'Proper use of headings', points: 5, category: 'content' },
-  { id: 304, description: 'Bullet points / numbered lists', points: 5, category: 'content' },
-  
+  { id: 301, description: 'Content description is detailed and comprehensive', points: 5, category: 'content' },
+  { id: 302, description: 'Content description includes primary keyword', points: 5, category: 'content' },
+  { id: 303, description: 'Content description includes secondary keywords', points: 5, category: 'content' },
+  { id: 304, description: 'Content description is clear and focused', points: 5, category: 'content' },
+
   // Additional SEO Factors (10%)
-  { id: 401, description: 'Keyword in subheadings', points: 1.6667, category: 'additional' },
-  { id: 402, description: 'Balanced keyword density', points: 1.6667, category: 'additional' },
-  { id: 403, description: 'Optimal URL length', points: 1.6667, category: 'additional' },
-  { id: 404, description: 'External links to quality resources', points: 1.6667, category: 'additional' },
-  { id: 405, description: 'External DoFollow link', points: 1.6667, category: 'additional' },
-  { id: 406, description: 'Internal linking', points: 1.6667, category: 'additional' },
+  { id: 401, description: 'URL slug is concise and descriptive', points: 1.6667, category: 'additional' },
+  { id: 402, description: 'URL slug uses hyphens to separate words', points: 1.6667, category: 'additional' },
+  { id: 403, description: 'URL slug contains no special characters', points: 1.6667, category: 'additional' },
+  { id: 404, description: 'Language and target country are compatible', points: 1.6667, category: 'additional' },
+  { id: 405, description: 'Secondary keywords are relevant to primary keyword', points: 1.6667, category: 'additional' },
+  { id: 406, description: 'Has sufficient number of secondary keywords', points: 1.6667, category: 'additional' },
 ];
 
 // Get the total possible points
 export const TOTAL_POSSIBLE_POINTS = SEO_SCORING_ITEMS.reduce(
-  (total, item) => total + item.points, 
+  (total, item) => total + item.points,
   0
 );
 
@@ -66,19 +71,13 @@ export const getCategoryWeight = (category: string): number => {
 };
 
 // Get items by category
-export const getItemsByCategory = (category: string): ScoringItem[] => {
-  return SEO_SCORING_ITEMS.filter(item => item.category === category);
-};
+export const getItemsByCategory = (category: string): ScoringItem[] => SEO_SCORING_ITEMS.filter(item => item.category === category);
 
 // Calculate total possible points for a category
-export const getTotalPointsForCategory = (category: string): number => {
-  return getItemsByCategory(category).reduce(
+export const getTotalPointsForCategory = (category: string): number => getItemsByCategory(category).reduce(
     (total, item) => total + item.points,
     0
   );
-};
 
 // Format points display
-export const formatPoints = (points: number): string => {
-  return points % 1 === 0 ? points.toString() : points.toFixed(1);
-};
+export const formatPoints = (points: number): string => points % 1 === 0 ? points.toString() : points.toFixed(1);

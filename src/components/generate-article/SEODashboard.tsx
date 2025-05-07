@@ -138,23 +138,25 @@ export function SEODashboard({
   return (
     <Box sx={{
       width: showContent ? "100%" : "40px",
-      height: showContent ? null : "100%",
+      height: "100%", // Always take full height
+      minHeight: "600px", // Ensure minimum height even before scrolling
       transition: theme.transitions.create(['width'], {
         duration: theme.transitions.duration.standard,
       }),
       display: 'flex',
       flexDirection: 'column',
+      flexGrow: 1, // Take available space
     }}>
       <Card
         sx={{
           width: "100%",
-          height: "100%",
+          height: "100%", // Take full height of parent
+          minHeight: "600px", // Ensure minimum height even before scrolling
           borderRadius: "10px",
           overflow: "visible",
-          transition: theme.transitions.create(["height"]),
           display: 'flex',
           flexDirection: 'column',
-          flexGrow: 1,
+          flexGrow: 1, // Take available space
         }}
       >
         {/* Tabs Header - Always visible */}
@@ -217,13 +219,15 @@ export function SEODashboard({
         {showContent && (
           <Box
             sx={{
-              height: "calc(100% - 46px)",
+              flexGrow: 1, // Take all available space
               bgcolor: "white",
               borderRadius: "0 0 10px 10px",
               overflow: "auto",
               borderLeft: `0.5px solid ${COLORS.border}`,
               borderRight: `0.5px solid ${COLORS.border}`,
-              borderBottom: `0.5px solid ${COLORS.border}`
+              borderBottom: `0.5px solid ${COLORS.border}`,
+              display: 'flex',
+              flexDirection: 'column'
             }}
           >
             {tabContent}
@@ -233,7 +237,7 @@ export function SEODashboard({
         {!showContent && (
           <Box
             sx={{
-              height: "calc(100% - 46px)",
+              flexGrow: 1, // Take all available space
               bgcolor: "white",
               borderRadius: "0 0 10px 10px",
               display: "flex",
@@ -242,7 +246,7 @@ export function SEODashboard({
               borderLeft: `0.5px solid ${COLORS.border}`,
               borderRight: `0.5px solid ${COLORS.border}`,
               borderBottom: `0.5px solid ${COLORS.border}`,
-              flexGrow: 1,
+              position: 'relative', // For positioning the text
             }}
           >
             <Typography

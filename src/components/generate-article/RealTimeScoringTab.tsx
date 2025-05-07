@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 
 import { formatPoints } from "src/utils/seoScoringPoints";
+import { useSEOScoring } from "src/sections/generate/hooks/useSEOScoring";
 
 import { ItemSection } from "./ItemSection";
 import { EditItemModal } from "./EditItemModal";
@@ -96,10 +97,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
   const [highlightedItems, setHighlightedItems] = useState<number[]>([]);
 
-  console.log(selectedItem , "selected item");
   const prevChangedIdsRef = useRef<number[]>([]);
 
   const form = useFormContext();
+
+  // Get the simulateFieldChange function from the useSEOScoring hook
+  const { simulateFieldChange } = useSEOScoring(form);
 
   const { getValues } = form;
 
@@ -616,6 +619,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
             )?.weight || 1 // Default to 1 if not found
           }
           tooltip={selectedItem.tooltip}
+          simulateFieldChange={simulateFieldChange}
           onUpdateScore={(newScore: number) => {
             // In a real implementation, this would update the score in the store/context
             // For now, we'll just show a toast notification

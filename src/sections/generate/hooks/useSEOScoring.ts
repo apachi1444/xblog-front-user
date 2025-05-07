@@ -7,18 +7,29 @@ import {
   getPointsForItem
 } from '../../../utils/seoScoringPoints';
 import {
-  containsKeyword,
   determineSectionType,
   calculateOverallScore,
-  calculateKeywordDensity,
-  calculateSectionProgress,
-  isKeywordInFirstPercentage
+  calculateSectionProgress
 } from '../../../utils/seoScoring';
+import {
+  usePrimarySEOItems,
+  useAdditionalSEOItems,
+  useTitleOptimizationItems,
+  useContentPresentationItems
+} from './seoScoring';
 
-import type { ChecklistItem, ProgressSection } from '../../../utils/seoScoring';
+import type {
+  ChecklistItem,
+  ProgressSection,
+  AffectedCriterion,
+  SEOScoringHookResult
+} from './seoScoring/types';
 
-export const useSEOScoring = (form: UseFormReturn<any>) => {
-  const { watch, getFieldState, formState } = form;
+/**
+ * Main SEO scoring hook that combines all section modules
+ */
+export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult => {
+  const { watch } = form;
 
   // State for SEO scoring
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
@@ -32,6 +43,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     sectionsHash: string;
     score: number;
     maxScore: number;
+    lastUpdate?: number; // Add lastUpdate field for forcing re-renders
   }>({
     sectionsHash: '',
     score: 0,
@@ -40,640 +52,114 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
 
   // Watch all form fields that affect SEO scoring
   // This ensures the hook re-renders when any of these fields change
-  const watchedFields = watch([
-    'title', 'step1.title',
-    'metaTitle', 'step1.metaTitle',
-    'metaDescription', 'step1.metaDescription',
-    'urlSlug', 'step1.urlSlug',
-    'content', 'step1.content', 'step3.content',
-    'primaryKeyword', 'step1.primaryKeyword',
-    'secondaryKeywords', 'step1.secondaryKeywords',
-    'contentDescription', 'step1.contentDescription',
-    'language', 'step1.language',
-    'targetCountry', 'step1.targetCountry'
+  // Use individual watch calls for each field to ensure more reliable updates
+  const watchTitle = watch('title');
+  const watchStep1Title = watch('step1.title');
+  const watchMetaTitle = watch('metaTitle');
+  const watchStep1MetaTitle = watch('step1.metaTitle');
+  const watchMetaDescription = watch('metaDescription');
+  const watchStep1MetaDescription = watch('step1.metaDescription');
+  const watchUrlSlug = watch('urlSlug');
+  const watchStep1UrlSlug = watch('step1.urlSlug');
+  const watchContent = watch('content');
+  const watchStep1Content = watch('step1.content');
+  const watchStep3Content = watch('step3.content');
+  const watchPrimaryKeyword = watch('primaryKeyword');
+  const watchStep1PrimaryKeyword = watch('step1.primaryKeyword');
+  const watchSecondaryKeywords = watch('secondaryKeywords');
+  const watchStep1SecondaryKeywords = watch('step1.secondaryKeywords');
+  const watchContentDescription = watch('contentDescription');
+  const watchStep1ContentDescription = watch('step1.contentDescription');
+  const watchLanguage = watch('language');
+  const watchStep1Language = watch('step1.language');
+  const watchTargetCountry = watch('targetCountry');
+  const watchStep1TargetCountry = watch('step1.targetCountry');
+
+  // Combine all watched fields into a single array for dependency tracking
+  // Use useMemo to prevent the array from changing on every render
+  const watchedFields = useMemo(() => [
+    watchTitle, watchStep1Title,
+    watchMetaTitle, watchStep1MetaTitle,
+    watchMetaDescription, watchStep1MetaDescription,
+    watchUrlSlug, watchStep1UrlSlug,
+    watchContent, watchStep1Content, watchStep3Content,
+    watchPrimaryKeyword, watchStep1PrimaryKeyword,
+    watchSecondaryKeywords, watchStep1SecondaryKeywords,
+    watchContentDescription, watchStep1ContentDescription,
+    watchLanguage, watchStep1Language,
+    watchTargetCountry, watchStep1TargetCountry
+  ], [
+    watchTitle, watchStep1Title,
+    watchMetaTitle, watchStep1MetaTitle,
+    watchMetaDescription, watchStep1MetaDescription,
+    watchUrlSlug, watchStep1UrlSlug,
+    watchContent, watchStep1Content, watchStep3Content,
+    watchPrimaryKeyword, watchStep1PrimaryKeyword,
+    watchSecondaryKeywords, watchStep1SecondaryKeywords,
+    watchContentDescription, watchStep1ContentDescription,
+    watchLanguage, watchStep1Language,
+    watchTargetCountry, watchStep1TargetCountry
   ]);
 
-  // Memoize field values to prevent unnecessary re-renders
-  const title = useMemo(() => {
-    const directTitle = form.getValues('title');
-    const step1Title = form.getValues('step1.title');
-    return step1Title || directTitle || '';
-  }, [form]);
+  // Debug the form values
+  useEffect(() => {
+    // Get raw values for debugging
+    const rawContentDescription = form.getValues('contentDescription') || form.getValues('step1.contentDescription') || '';
+    const rawPrimaryKeyword = form.getValues('primaryKeyword') || form.getValues('step1.primaryKeyword') || '';
+    const rawSecondaryKeywords = form.getValues('secondaryKeywords') || form.getValues('step1.secondaryKeywords') || [];
+    const rawMetaDescription = form.getValues('metaDescription') || form.getValues('step1.metaDescription') || '';
+    const rawUrlSlug = form.getValues('urlSlug') || form.getValues('step1.urlSlug') || '';
 
-  const metaTitle = useMemo(() => {
-    const directMetaTitle = form.getValues('metaTitle');
-    const step1MetaTitle = form.getValues('step1.metaTitle');
-    return step1MetaTitle || directMetaTitle || '';
-  }, [form,]);
-
-  const metaDescription = useMemo(() => {
-    const directMetaDescription = form.getValues('metaDescription');
-    const step1MetaDescription = form.getValues('step1.metaDescription');
-    return step1MetaDescription || directMetaDescription || '';
-  }, [form]);
-
-  const urlSlug = useMemo(() => {
-    const directUrlSlug = form.getValues('urlSlug');
-    const step1UrlSlug = form.getValues('step1.urlSlug');
-    return step1UrlSlug || directUrlSlug || '';
-  }, [form]);
-
-  const content = useMemo(() => {
-    const directContent = form.getValues('content');
-    const step1Content = form.getValues('step1.content');
-    const step3Content = form.getValues('step3.content');
-    return step3Content || step1Content || directContent || '';
-  }, [form]);
-
-  const primaryKeyword = useMemo(() => {
-    const directPrimaryKeyword = form.getValues('primaryKeyword');
-    const step1PrimaryKeyword = form.getValues('step1.primaryKeyword');
-    return step1PrimaryKeyword || directPrimaryKeyword || '';
-  }, [form]);
-
-  const secondaryKeywords = useMemo(() => {
-    const directSecondaryKeywords = form.getValues('secondaryKeywords');
-    const step1SecondaryKeywords = form.getValues('step1.secondaryKeywords');
-    return step1SecondaryKeywords || directSecondaryKeywords || [];
-  }, [form]);
-
-  const contentDescription = useMemo(() => {
-    const directContentDescription = form.getValues('contentDescription');
-    const step1ContentDescription = form.getValues('step1.contentDescription');
-    return step1ContentDescription || directContentDescription || '';
-  }, [form]);
-
-  const language = useMemo(() => {
-    const directLanguage = form.getValues('language');
-    const step1Language = form.getValues('step1.language');
-    return step1Language || directLanguage || '';
-  }, [form]);
-
-  const targetCountry = useMemo(() => {
-    const directTargetCountry = form.getValues('targetCountry');
-    const step1TargetCountry = form.getValues('step1.targetCountry');
-    return step1TargetCountry || directTargetCountry || '';
-  }, [form]);
-
-  // Helper function to check if a field is valid and has a value
-  const isFieldValid = useCallback((fieldName: string): boolean => {
-    const fieldState = getFieldState(fieldName, formState);
-    const value = form.getValues(fieldName);
-    const step1Value = form.getValues(`step1.${fieldName}`);
-
-    // Check if the field has a value in any location and is valid
-    const hasValue = (value !== undefined && value !== null && value !== '') ||
-                    (step1Value !== undefined && step1Value !== null && step1Value !== '');
-    const isValid = !fieldState.invalid;
-
-    return hasValue && isValid;
-  }, [getFieldState, formState, form]);
-
-  // Helper function to determine status based on field validity
-  const getStatusBasedOnFields = useCallback((
-    requiredFields: string[],
-    successCondition: boolean
-  ): 'pending' | 'success' | 'error' | 'warning' => {
-    // Check if any required field is missing
-    const missingField = requiredFields.some(field => !isFieldValid(field));
-
-    if (missingField) {
-      return 'pending';
-    }
-
-    return successCondition ? 'success' : 'error';
-  }, [isFieldValid]);
-
-  // Helper function for action text
-  const getActionText = useCallback((
-    fieldNames: string[],
-    currentScore: number,
-    minThreshold: number,
-    maxThreshold: number,
-    status: 'pending' | 'success' | 'error' | 'warning' = 'pending'
-  ): string | null => {
-    if (fieldNames.some(field => !isFieldValid(field))) {
-      return "Fill Required Fields";
-    }
-
-    if (status === 'success' || currentScore >= maxThreshold) {
-      return null;
-    }
-
-    return currentScore < minThreshold ? "Fix" : "Optimize";
-  }, [isFieldValid]);
-
-  // Helper function to calculate keyword score
-  const calculateKeywordScore = useCallback((
-    text: string,
-    keyword: string,
-    options: {
-      startsWith?: boolean,
-      contains?: boolean,
-      density?: number,
-      firstPercentage?: number
-    } = {}
-  ): number => {
-    if (!text || !keyword) return 0;
-
-    let score = 0;
-    const maxScore = 10;
-
-    if (options.startsWith && text.toLowerCase().startsWith(keyword.toLowerCase())) {
-      score += maxScore * 0.4;
-    }
-
-    if (options.contains && containsKeyword(text, keyword)) {
-      score += maxScore * 0.3;
-    }
-
-    if (options.density) {
-      const density = calculateKeywordDensity(text, keyword);
-      if (density >= options.density) {
-        score += maxScore * 0.2;
-      } else if (density >= options.density / 2) {
-        score += maxScore * 0.1;
+    console.log('[SEO DEBUG] Form Values Changed:', {
+      metaDescription: rawMetaDescription,
+      urlSlug: rawUrlSlug,
+      contentDescription: rawContentDescription,
+      primaryKeyword: rawPrimaryKeyword,
+      secondaryKeywords: rawSecondaryKeywords,
+      // Log which field triggered the update
+      triggeredBy: {
+        metaDescription: watchMetaDescription !== undefined || watchStep1MetaDescription !== undefined,
+        urlSlug: watchUrlSlug !== undefined || watchStep1UrlSlug !== undefined,
+        contentDescription: watchContentDescription !== undefined || watchStep1ContentDescription !== undefined,
+        primaryKeyword: watchPrimaryKeyword !== undefined || watchStep1PrimaryKeyword !== undefined,
+        secondaryKeywords: watchSecondaryKeywords !== undefined || watchStep1SecondaryKeywords !== undefined
       }
-    }
+    });
 
-    if (options.firstPercentage && isKeywordInFirstPercentage(text, keyword, options.firstPercentage)) {
-      score += maxScore * 0.1;
-    }
+    // Force a re-render of the component by updating a ref
+    // This is a hack to ensure the component re-renders when form values change
+    prevValuesRef.current = {
+      ...prevValuesRef.current,
+      lastUpdate: Date.now()
+    };
+  }, [
+    form,
+    watchedFields,
+    watchMetaDescription,
+    watchStep1MetaDescription,
+    watchUrlSlug,
+    watchStep1UrlSlug,
+    watchContentDescription,
+    watchStep1ContentDescription,
+    watchPrimaryKeyword,
+    watchStep1PrimaryKeyword,
+    watchSecondaryKeywords,
+    watchStep1SecondaryKeywords
+  ]);
 
-    return score;
-  }, []);
-
-  // Memoize expensive calculations for meta description
-  const metaDescriptionStatus = useMemo(() =>
-    getStatusBasedOnFields(
-      ['metaDescription', 'primaryKeyword'],
-      containsKeyword(metaDescription, primaryKeyword)
-    ),
-    [getStatusBasedOnFields, metaDescription, primaryKeyword]
-  );
-
-  const metaDescriptionScore = useMemo(() =>
-    calculateKeywordScore(metaDescription, primaryKeyword, { contains: true }),
-    [calculateKeywordScore, metaDescription, primaryKeyword]
-  );
-
-  const metaDescriptionAction = useMemo(() =>
-    getActionText(
-      ['metaDescription', 'primaryKeyword'],
-      metaDescriptionScore,
-      4, // Min threshold (40% of max score)
-      8, // Max threshold (80% of max score)
-      metaDescriptionStatus
-    ),
-    [getActionText, metaDescriptionScore, metaDescriptionStatus]
-  );
-
-  const metaDescriptionTooltip = useMemo(() =>
-    !isFieldValid('metaDescription') || !isFieldValid('primaryKeyword')
-      ? "Fill in both meta description and primary keyword fields"
-      : !containsKeyword(metaDescription, primaryKeyword)
-        ? `Your meta description doesn't include your primary keyword "${primaryKeyword}". Add the keyword to improve SEO.`
-        : "Great! Your meta description includes your primary keyword.",
-    [isFieldValid, metaDescription, primaryKeyword]
-  );
+  // Get section item generators
+  const { generatePrimarySEOItems } = usePrimarySEOItems(form);
+  const { generateTitleOptimizationItems } = useTitleOptimizationItems(form);
+  const { generateContentPresentationItems } = useContentPresentationItems(form);
+  const { generateAdditionalSEOItems } = useAdditionalSEOItems(form);
 
   // Generate checklist items for each section
   const generateChecklistItems = useCallback(() => {
-    // Primary SEO items
-    const primarySEOItems: ChecklistItem[] = [
-      {
-        id: 101,
-        text: "Focus keyword added to meta description",
-        status: metaDescriptionStatus,
-        score: metaDescriptionScore,
-        maxScore: 10,
-        action: metaDescriptionAction,
-        tooltip: metaDescriptionTooltip
-      },
-
-      {
-        id: 102,
-        text: "Focus keyword present in the URL",
-        status: getStatusBasedOnFields(
-          ['urlSlug', 'primaryKeyword'],
-          containsKeyword(urlSlug, primaryKeyword)
-        ),
-        score: calculateKeywordScore(urlSlug, primaryKeyword, { contains: true }),
-        maxScore: 10,
-        action: getActionText(
-          ['urlSlug', 'primaryKeyword'],
-          calculateKeywordScore(urlSlug, primaryKeyword, { contains: true }),
-          4,
-          8
-        ),
-        tooltip: !isFieldValid('urlSlug') || !isFieldValid('primaryKeyword')
-          ? "Fill in both URL slug and primary keyword fields"
-          : !containsKeyword(urlSlug, primaryKeyword)
-            ? `Your URL slug doesn't include your primary keyword "${primaryKeyword}". Including it can improve SEO ranking.`
-            : "Great! Your URL includes your primary keyword."
-      },
-
-      {
-        id: 103,
-        text: "Focus keyword appears within the first 10% of content",
-        status: getStatusBasedOnFields(
-          ['content', 'primaryKeyword'],
-          isKeywordInFirstPercentage(content, primaryKeyword, 10)
-        ),
-        score: calculateKeywordScore(content, primaryKeyword, { firstPercentage: 10 }),
-        maxScore: 10,
-        action: getActionText(
-          ['content', 'primaryKeyword'],
-          calculateKeywordScore(content, primaryKeyword, { firstPercentage: 10 }),
-          4,
-          8
-        ),
-        tooltip: !isFieldValid('content') || !isFieldValid('primaryKeyword')
-          ? "Fill in both content and primary keyword fields"
-          : !isKeywordInFirstPercentage(content, primaryKeyword, 10)
-            ? `Your primary keyword "${primaryKeyword}" should appear in the first 10% of your content. Search engines give more weight to keywords that appear early in the text.`
-            : "Great! Your primary keyword appears early in your content, which is good for SEO."
-      },
-
-      {
-        id: 104,
-        text: "Focus keyword included in content description",
-        status: getStatusBasedOnFields(
-          ['contentDescription', 'primaryKeyword'],
-          containsKeyword(contentDescription, primaryKeyword)
-        ),
-        score: calculateKeywordScore(contentDescription, primaryKeyword, { contains: true }),
-        maxScore: 10,
-        action: getActionText(
-          ['contentDescription', 'primaryKeyword'],
-          calculateKeywordScore(contentDescription, primaryKeyword, { contains: true }),
-          4,
-          8
-        ),
-        tooltip: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword')
-          ? "Fill in both content description and primary keyword fields"
-          : !containsKeyword(contentDescription, primaryKeyword)
-            ? `Your content description doesn't include your primary keyword "${primaryKeyword}". Including it helps search engines understand what your content is about.`
-            : "Great! Your content description includes your primary keyword."
-      },
-
-      {
-        id: 105,
-        text: "Secondary keywords are defined",
-        status: getStatusBasedOnFields(
-          ['secondaryKeywords'],
-          Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0
-        ),
-        score: Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0 ? 10 : 0,
-        maxScore: 10,
-        action: getActionText(
-          ['secondaryKeywords'],
-          Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0 ? 10 : 0,
-          4,
-          8
-        ),
-        tooltip: !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0
-          ? "You should add secondary keywords to improve your content's SEO. Secondary keywords help search engines understand the context of your content and can increase your visibility for related searches."
-          : `Great! You have ${secondaryKeywords.length} secondary keywords defined. This helps search engines understand your content better.`
-      },
-
-      {
-        id: 106,
-        text: "Language and target country are specified",
-        status: getStatusBasedOnFields(
-          ['language', 'targetCountry'],
-          !!language && !!targetCountry
-        ),
-        score: !!language && !!targetCountry ? 10 : 0,
-        maxScore: 10,
-        action: getActionText(
-          ['language', 'targetCountry'],
-          !!language && !!targetCountry ? 10 : 0,
-          4,
-          8
-        ),
-        tooltip: !isFieldValid('language') || !isFieldValid('targetCountry')
-          ? "Please specify both language and target country"
-          : !!language && !!targetCountry
-            ? "Great! You've specified both language and target country, which helps search engines understand your content's target audience."
-            : "Specifying both language and target country helps search engines understand your content's target audience."
-      },
-    ];
-
-    const titleOptimizationItems: ChecklistItem[] = [
-      {
-        id: 201,
-        text: "Primary keyword appears at the start of the title",
-        status: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
-                'pending' :
-                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 'success' : 'warning',
-        score: !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 0 :
-               title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 10 : 5,
-        maxScore: 10,
-        action: getActionText(
-                ['title', 'primaryKeyword'],
-                !isFieldValid('title') || !isFieldValid('primaryKeyword') ? 0 :
-                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 10 : 5,
-                4,
-                8,
-                !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
-                'pending' :
-                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ? 'success' : 'warning'
-              ),
-        tooltip: !isFieldValid('title') || !isFieldValid('primaryKeyword') ?
-                "Fill in both title and primary keyword fields" :
-                title.toLowerCase().startsWith(primaryKeyword.toLowerCase()) ?
-                "Great! Your title starts with your primary keyword, which is optimal for SEO." :
-                `For best SEO results, start your title with your primary keyword "${primaryKeyword}". Search engines give more weight to keywords at the beginning of titles.`
-      },
-      {
-        id: 202,
-        text: "Title evokes emotional sentiment",
-        status: !isFieldValid('title') ? 'pending' : 'success', // Simplified for demo
-        score: !isFieldValid('title') ? 0 : 10, // Simplified for demo
-        maxScore: 10,
-        action: !isFieldValid('title') ? "Fill Required Fields" : null,
-        tooltip: !isFieldValid('title')
-          ? "Please add a title to your content"
-          : "Titles that evoke emotions tend to get higher click-through rates. Your title appears to have emotional appeal, which is great for engagement."
-      },
-      {
-        id: 203,
-        text: "Includes power words to drive engagement",
-        status: !isFieldValid('title') ? 'pending' : 'success', // Simplified for demo
-        score: !isFieldValid('title') ? 0 : 10, // Simplified for demo
-        maxScore: 10,
-        action: !isFieldValid('title') ? "Fill Required Fields" : null,
-        tooltip: !isFieldValid('title')
-          ? "Please add a title to your content"
-          : "Power words like 'amazing', 'essential', 'proven', etc. can significantly increase engagement. Your title appears to include effective power words."
-      },
-      {
-        id: 204,
-        text: "Focus keyword included in SEO title",
-        status: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
-                'pending' :
-                containsKeyword(metaTitle, primaryKeyword) ? 'success' : 'error',
-        score: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ? 0 :
-               containsKeyword(metaTitle, primaryKeyword) ? 10 : 0,
-        maxScore: 10,
-        action: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword') ?
-                "Fill Required Fields" :
-                containsKeyword(metaTitle, primaryKeyword) ? null : "Fix",
-        tooltip: !isFieldValid('metaTitle') || !isFieldValid('primaryKeyword')
-                ? "Fill in both meta title and primary keyword fields"
-                : !containsKeyword(metaTitle, primaryKeyword)
-                  ? `Your SEO title doesn't include your primary keyword "${primaryKeyword}". Including it is essential for search engines to understand your content's focus.`
-                  : "Great! Your SEO title includes your primary keyword, which is essential for search engines."
-      },
-      {
-        id: 205,
-        text: `Title length: ${isFieldValid('title') ? title.length : 0} characters`,
-        status: !isFieldValid('title') ?
-                'pending' :
-                title.length >= 40 && title.length <= 60 ? 'success' :
-                title.length < 40 ? 'error' : 'warning',
-        score: !isFieldValid('title') ? 0 :
-               title.length >= 40 && title.length <= 60 ? 10 :
-               title.length >= 30 && title.length < 40 ? 7 :
-               title.length > 60 && title.length <= 70 ? 7 :
-               title.length > 70 ? 3 : 5,
-        maxScore: 10,
-        action: !isFieldValid('title') ?
-                "Fill Required Fields" :
-                (title.length >= 40 && title.length <= 60) ? null : "Fix",
-        tooltip: !isFieldValid('title')
-                ? "Please add a title to your content"
-                : title.length >= 40 && title.length <= 60
-                  ? "Perfect! Your title length is optimal (40-60 characters)."
-                  : title.length < 40
-                    ? `Your title is too short (${title.length} characters). Aim for 40-60 characters to provide enough information for search engines and users.`
-                    : `Your title is too long (${title.length} characters). Keep it under 60 characters to prevent truncation in search results.`
-      },
-      {
-        id: 206,
-        text: "Meta title length is optimal",
-        status: !isFieldValid('metaTitle') ?
-                'pending' :
-                metaTitle.length >= 50 && metaTitle.length <= 60 ? 'success' :
-                metaTitle.length < 50 ? 'error' : 'warning',
-        score: !isFieldValid('metaTitle') ? 0 :
-               metaTitle.length >= 50 && metaTitle.length <= 60 ? 10 :
-               metaTitle.length >= 40 && metaTitle.length < 50 ? 7 :
-               metaTitle.length > 60 && metaTitle.length <= 70 ? 7 :
-               metaTitle.length > 70 ? 3 : 5,
-        maxScore: 10,
-        action: !isFieldValid('metaTitle') ?
-                "Fill Required Fields" :
-                (metaTitle.length >= 50 && metaTitle.length <= 60) ? null : "Fix",
-        tooltip: !isFieldValid('metaTitle')
-                ? "Please add a meta title to your content"
-                : metaTitle.length >= 50 && metaTitle.length <= 60
-                  ? "Perfect! Your meta title length is optimal (50-60 characters)."
-                  : metaTitle.length < 50
-                    ? `Your meta title is too short (${metaTitle.length} characters). Aim for 50-60 characters to provide enough information for search engines and users.`
-                    : `Your meta title is too long (${metaTitle.length} characters). Keep it under 60 characters to prevent truncation in search results.`
-      },
-      {
-        id: 207,
-        text: "Meta description length is optimal",
-        status: !isFieldValid('metaDescription') ?
-                'pending' :
-                metaDescription.length >= 120 && metaDescription.length <= 160 ? 'success' :
-                metaDescription.length < 120 ? 'error' : 'warning',
-        score: !isFieldValid('metaDescription') ? 0 :
-               metaDescription.length >= 120 && metaDescription.length <= 160 ? 10 :
-               metaDescription.length >= 100 && metaDescription.length < 120 ? 7 :
-               metaDescription.length > 160 && metaDescription.length <= 180 ? 7 :
-               metaDescription.length > 180 ? 3 : 5,
-        maxScore: 10,
-        action: !isFieldValid('metaDescription') ?
-                "Fill Required Fields" :
-                (metaDescription.length >= 120 && metaDescription.length <= 160) ? null : "Fix",
-        tooltip: !isFieldValid('metaDescription') ?
-                "Please add a meta description" :
-                metaDescription.length >= 120 && metaDescription.length <= 160 ?
-                "Perfect! Your meta description length is optimal (120-160 characters)." :
-                metaDescription.length < 120 ?
-                `Your meta description is too short (${metaDescription.length} characters). Aim for 120-160 characters to provide enough information for search engines and users.` :
-                `Your meta description is too long (${metaDescription.length} characters). Keep it under 160 characters to prevent truncation in search results.`
-      },
-    ];
-
-    // Create content presentation and additional SEO sections similarly
-    const contentPresentationItems: ChecklistItem[] = [
-      {
-        id: 301,
-        text: "Content description is detailed and comprehensive",
-        status: !isFieldValid('contentDescription') ? 'pending' :
-                contentDescription.length >= 100 ? 'success' : 'warning',
-        score: !isFieldValid('contentDescription') ? 0 :
-               contentDescription.length >= 100 ? 10 :
-               contentDescription.length >= 50 ? 5 : 2,
-        maxScore: 10,
-        action: !isFieldValid('contentDescription') ? "Fill Required Fields" :
-                contentDescription.length < 100 ? "Add more details" : null,
-        tooltip: !isFieldValid('contentDescription') ?
-                "Please add a content description" :
-                contentDescription.length >= 100 ?
-                "Great! Your content description is detailed and comprehensive." :
-                `Your content description is too brief (${contentDescription.length} characters). Aim for at least 100 characters to provide a comprehensive description that helps search engines understand your content.`
-      },
-      {
-        id: 302,
-        text: "Content description includes primary keyword",
-        status: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? 'pending' :
-                containsKeyword(contentDescription, primaryKeyword) ? 'success' : 'error',
-        score: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? 0 :
-               containsKeyword(contentDescription, primaryKeyword) ? 10 : 0,
-        maxScore: 10,
-        action: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword') ? "Fill Required Fields" :
-                containsKeyword(contentDescription, primaryKeyword) ? null : "Add keyword to description",
-        tooltip: !isFieldValid('contentDescription') || !isFieldValid('primaryKeyword')
-                ? "Fill in both content description and primary keyword fields"
-                : !containsKeyword(contentDescription, primaryKeyword)
-                  ? `Your content description doesn't include your primary keyword "${primaryKeyword}". Including it helps search engines understand what your content is about.`
-                  : "Great! Your content description includes your primary keyword."
-      },
-      {
-        id: 303,
-        text: "Content description includes secondary keywords",
-        status: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 'pending' :
-                secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? 'success' : 'warning',
-        score: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 0 :
-               secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? 10 : 0,
-        maxScore: 10,
-        action: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? "Fill Required Fields" :
-                secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword)) ? null : "Add secondary keywords to description",
-        tooltip: !isFieldValid('contentDescription') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0
-                ? "Fill in content description and add secondary keywords"
-                : secondaryKeywords.some(keyword => containsKeyword(contentDescription, keyword))
-                  ? "Great! Your content description includes at least one of your secondary keywords."
-                  : "Your content description should include at least one of your secondary keywords to improve SEO and provide context."
-      },
-      {
-        id: 304,
-        text: "Content description is clear and focused",
-        status: !isFieldValid('contentDescription') ? 'pending' : 'success', // Simplified for demo
-        score: !isFieldValid('contentDescription') ? 0 : 10, // Simplified for demo
-        maxScore: 10,
-        action: !isFieldValid('contentDescription') ? "Fill Required Fields" : null,
-        tooltip: !isFieldValid('contentDescription')
-                ? "Please add a content description"
-                : "Your content description is clear and focused, which helps search engines understand your content."
-      },
-    ];
-
-    const additionalSEOItems: ChecklistItem[] = [
-      {
-        id: 401,
-        text: "URL slug is concise and descriptive",
-        status: !isFieldValid('urlSlug') ? 'pending' :
-                urlSlug.length > 0 && urlSlug.length <= 50 ? 'success' : 'warning',
-        score: !isFieldValid('urlSlug') ? 0 :
-               urlSlug.length > 0 && urlSlug.length <= 50 ? 10 :
-               urlSlug.length > 50 && urlSlug.length <= 70 ? 7 :
-               urlSlug.length > 70 ? 3 : 0,
-        maxScore: 10,
-        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
-                urlSlug.length === 0 ? "Add URL slug" :
-                urlSlug.length > 50 ? "Shorten URL slug" : null,
-        tooltip: !isFieldValid('urlSlug') ?
-                "Please add a URL slug" :
-                urlSlug.length === 0 ?
-                "Your URL slug is missing. Add a concise, descriptive slug that includes your primary keyword." :
-                urlSlug.length > 0 && urlSlug.length <= 50 ?
-                "Great! Your URL slug is concise and descriptive." :
-                `Your URL slug is too long (${urlSlug.length} characters). Keep it under 50 characters for better SEO and user experience.`
-      },
-      {
-        id: 402,
-        text: "URL slug uses hyphens to separate words",
-        status: !isFieldValid('urlSlug') ? 'pending' :
-                urlSlug.includes('-') ? 'success' : 'warning',
-        score: !isFieldValid('urlSlug') ? 0 :
-               urlSlug.includes('-') ? 10 : 0,
-        maxScore: 10,
-        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
-                !urlSlug.includes('-') ? "Use hyphens to separate words" : null,
-        tooltip: !isFieldValid('urlSlug')
-                ? "Please add a URL slug"
-                : urlSlug.includes('-')
-                  ? "Great! Your URL slug uses hyphens to separate words, which is optimal for SEO."
-                  : "Use hyphens to separate words in your URL slug (e.g., 'my-article-title'). Search engines recognize hyphens as word separators."
-      },
-      {
-        id: 403,
-        text: "URL slug contains no special characters",
-        status: !isFieldValid('urlSlug') ? 'pending' :
-                /^[a-z0-9-]+$/.test(urlSlug) ? 'success' : 'error',
-        score: !isFieldValid('urlSlug') ? 0 :
-               /^[a-z0-9-]+$/.test(urlSlug) ? 10 : 0,
-        maxScore: 10,
-        action: !isFieldValid('urlSlug') ? "Fill Required Fields" :
-                !/^[a-z0-9-]+$/.test(urlSlug) ? "Remove special characters" : null,
-        tooltip: !isFieldValid('urlSlug')
-                ? "Please add a URL slug"
-                : /^[a-z0-9-]+$/.test(urlSlug)
-                  ? "Great! Your URL slug contains only lowercase letters, numbers, and hyphens, which is optimal for SEO."
-                  : "Your URL slug should only contain lowercase letters, numbers, and hyphens. Special characters can cause issues with URLs and are not SEO-friendly."
-      },
-      {
-        id: 404,
-        text: "Language and target country are compatible",
-        status: !isFieldValid('language') || !isFieldValid('targetCountry') ? 'pending' :
-                (language === 'en-us' && targetCountry === 'us') ||
-                (language === 'en-gb' && targetCountry === 'uk') ||
-                (language === 'fr-fr' && targetCountry === 'fr') ? 'success' : 'warning',
-        score: !isFieldValid('language') || !isFieldValid('targetCountry') ? 0 :
-               (language === 'en-us' && targetCountry === 'us') ||
-               (language === 'en-gb' && targetCountry === 'uk') ||
-               (language === 'fr-fr' && targetCountry === 'fr') ? 10 : 5,
-        maxScore: 10,
-        action: !isFieldValid('language') || !isFieldValid('targetCountry') ? "Fill Required Fields" :
-                !((language === 'en-us' && targetCountry === 'us') ||
-                  (language === 'en-gb' && targetCountry === 'uk') ||
-                  (language === 'fr-fr' && targetCountry === 'fr')) ? "Ensure language and country match" : null,
-        tooltip: !isFieldValid('language') || !isFieldValid('targetCountry')
-                ? "Please specify both language and target country"
-                : (language === 'en-us' && targetCountry === 'us') ||
-                  (language === 'en-gb' && targetCountry === 'uk') ||
-                  (language === 'fr-fr' && targetCountry === 'fr')
-                  ? "Great! Your language and target country are compatible, which is optimal for SEO."
-                  : "Your language and target country should be compatible (e.g., en-us with US, en-gb with UK). This helps search engines understand your content's target audience."
-      },
-      {
-        id: 405,
-        text: "Secondary keywords are relevant to primary keyword",
-        status: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 'pending' : 'success',
-        score: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? 0 : 10,
-        maxScore: 10,
-        action: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0 ? "Fill Required Fields" : null,
-        tooltip: !isFieldValid('primaryKeyword') || !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) || secondaryKeywords.length === 0
-                ? "Please add both primary and secondary keywords"
-                : "Your secondary keywords appear to be relevant to your primary keyword, which is good for SEO. Related keywords help search engines understand your content's context."
-      },
-      {
-        id: 406,
-        text: "Has sufficient number of secondary keywords",
-        status: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? 'pending' :
-                secondaryKeywords.length >= 5 ? 'success' :
-                secondaryKeywords.length > 0 ? 'warning' : 'error',
-        score: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? 0 :
-               secondaryKeywords.length >= 5 ? 10 :
-               secondaryKeywords.length > 0 ? secondaryKeywords.length * 2 : 0,
-        maxScore: 10,
-        action: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords) ? "Fill Required Fields" :
-                secondaryKeywords.length < 5 ? "Add more secondary keywords" : null,
-        tooltip: !isFieldValid('secondaryKeywords') || !Array.isArray(secondaryKeywords)
-                ? "Please add secondary keywords"
-                : secondaryKeywords.length >= 5
-                  ? `Great! You have ${secondaryKeywords.length} secondary keywords, which is optimal for SEO.`
-                  : secondaryKeywords.length > 0
-                    ? `You have ${secondaryKeywords.length} secondary keywords. Adding more (aim for at least 5) will improve your SEO by providing more context for search engines.`
-                    : "You haven't added any secondary keywords. Adding at least 5 secondary keywords will significantly improve your SEO."
-      },
-    ];
+    // Get items from each section
+    const primarySEOItems = generatePrimarySEOItems();
+    const titleOptimizationItems = generateTitleOptimizationItems();
+    const contentPresentationItems = generateContentPresentationItems();
+    const additionalSEOItems = generateAdditionalSEOItems();
 
     // Calculate progress for each section
     const primarySEOResult = calculateSectionProgress(primarySEOItems);
@@ -745,10 +231,18 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
       sections,
       scoreResult: calculateOverallScore(sections)
     };
-  }, [title, metaTitle, metaDescription, urlSlug, content, primaryKeyword, secondaryKeywords, contentDescription, language, targetCountry, isFieldValid, getStatusBasedOnFields, getActionText, calculateKeywordScore, metaDescriptionStatus, metaDescriptionScore, metaDescriptionAction, metaDescriptionTooltip]);
+  }, [
+    generatePrimarySEOItems,
+    generateTitleOptimizationItems,
+    generateContentPresentationItems,
+    generateAdditionalSEOItems
+  ]);
 
   // Use a single useEffect with optimized dependency array
   useEffect(() => {
+    // Log that we're recalculating scores
+    console.log('[SEO DEBUG] Recalculating SEO scores...');
+
     // Generate checklist items and calculate scores
     const { sections, scoreResult } = generateChecklistItems();
 
@@ -767,6 +261,15 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
         // Check if status or score has changed
         if (prevItem.status !== item.status || prevItem.score !== item.score) {
           newChangedIds.push(item.id);
+
+          // Log the change for debugging
+          console.log(`[SEO DEBUG] Item ${item.id} changed:`, {
+            text: item.text,
+            oldStatus: prevItem.status,
+            newStatus: item.status,
+            oldScore: prevItem.score,
+            newScore: item.score
+          });
         }
       }
     });
@@ -779,6 +282,7 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     const currentSectionsHash = prevValuesRef.current.sectionsHash;
     const currentScore = prevValuesRef.current.score;
     const currentMaxScore = prevValuesRef.current.maxScore;
+    const lastUpdate = prevValuesRef.current.lastUpdate || 0;
 
     // Create a hash of the sections to compare
     const sectionsHash = JSON.stringify(sections);
@@ -786,34 +290,147 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     // Only update state if values have actually changed
     let stateChanged = false;
 
+    // Always update if the lastUpdate timestamp has changed (form values changed)
+    const now = Date.now();
+    if (now - lastUpdate < 1000) { // Only consider updates within the last second
+      console.log('[SEO DEBUG] Forcing update due to form value change');
+      stateChanged = true;
+    }
+
     if (sectionsHash !== currentSectionsHash) {
       setProgressSections(sections);
       prevValuesRef.current.sectionsHash = sectionsHash;
       stateChanged = true;
+      console.log('[SEO DEBUG] Sections changed');
     }
 
     if (Math.round(newScore) !== Math.round(currentScore)) {
       setOverallScore(newScore);
       prevValuesRef.current.score = newScore;
       stateChanged = true;
+      console.log('[SEO DEBUG] Overall score changed:', { old: currentScore, new: newScore });
     }
 
     if (newMaxScore !== currentMaxScore) {
       setTotalMaxScore(newMaxScore);
       prevValuesRef.current.maxScore = newMaxScore;
       stateChanged = true;
+      console.log('[SEO DEBUG] Max score changed:', { old: currentMaxScore, new: newMaxScore });
     }
 
     if (newChangedIds.length > 0) {
       setChangedCriteriaIds(newChangedIds);
       stateChanged = true;
+      console.log('[SEO DEBUG] Changed criteria IDs:', newChangedIds);
     }
 
     // Only update previous items if something changed
     if (stateChanged) {
       setPreviousItems(currentItems);
+      console.log('[SEO DEBUG] State updated');
+    } else {
+      console.log('[SEO DEBUG] No state changes detected');
     }
-  }, [generateChecklistItems, previousItems, watchedFields]);
+  }, [
+    generateChecklistItems,
+    previousItems,
+    watchedFields,
+    // Add individual watched fields to ensure the effect runs when any of them change
+    watchMetaDescription,
+    watchStep1MetaDescription,
+    watchUrlSlug,
+    watchStep1UrlSlug,
+    watchContentDescription,
+    watchStep1ContentDescription,
+    watchPrimaryKeyword,
+    watchStep1PrimaryKeyword,
+    watchSecondaryKeywords,
+    watchStep1SecondaryKeywords
+  ]);
+
+  // Function to identify criteria affected by a specific field
+  const getAffectedCriteriaByField = useCallback((fieldName: string): number[] => {
+    // Map of fields to criteria IDs they affect
+    const fieldToCriteriaMap: Record<string, number[]> = {
+      'title': [201, 202, 203, 205],
+      'metaTitle': [204, 206],
+      'metaDescription': [101, 207],
+      'urlSlug': [102, 401, 402, 403],
+      'content': [103],
+      'primaryKeyword': [101, 102, 103, 104, 201, 204, 302, 405],
+      'secondaryKeywords': [105, 303, 405, 406],
+      'contentDescription': [104, 301, 302, 303, 304],
+      'language': [106, 404],
+      'targetCountry': [106, 404]
+    };
+
+    // Handle both direct field names and step-prefixed field names
+    const baseFieldName = fieldName.includes('.') ? fieldName.split('.')[1] : fieldName;
+    return fieldToCriteriaMap[baseFieldName] || [];
+  }, []);
+
+  // Function to simulate how a field change would affect criteria
+  const simulateFieldChange = useCallback((
+    fieldName: string,
+    newValue: any
+  ): AffectedCriterion[] => {
+    // Get all criteria that would be affected by this field
+    const affectedCriteriaIds = getAffectedCriteriaByField(fieldName);
+    if (affectedCriteriaIds.length === 0) return [];
+
+    // Create a temporary form with the new value to simulate the change
+    const tempForm = { ...form };
+
+    // Modify the getValues function to return the new value for the specified field
+    tempForm.getValues = (path?: any) => {
+      if (path === fieldName) return newValue;
+      return form.getValues(path);
+    };
+
+    // Generate checklist items with the simulated change
+    const { sections } = generateChecklistItems();
+    const allCurrentItems = sections.flatMap(section => section.items);
+
+    // Find the current status of affected criteria
+    const currentItems = progressSections.flatMap(section => section.items);
+
+    // Compare current vs simulated status for affected criteria
+    return affectedCriteriaIds.map(id => {
+      const currentItem = currentItems.find(item => item.id === id);
+      const simulatedItem = allCurrentItems.find(item => item.id === id);
+
+      if (!currentItem || !simulatedItem) return null;
+
+      // Determine impact
+      let impact: 'positive' | 'negative' | 'neutral' = 'neutral';
+      let message = '';
+
+      if (currentItem.status === 'success' && simulatedItem.status !== 'success') {
+        impact = 'negative';
+        message = `This change would negatively affect "${simulatedItem.text}"`;
+      } else if (currentItem.status !== 'success' && simulatedItem.status === 'success') {
+        impact = 'positive';
+        message = `This change would satisfy "${simulatedItem.text}"`;
+      } else if (simulatedItem.score !== undefined && currentItem.score !== undefined) {
+        if (simulatedItem.score > currentItem.score) {
+          impact = 'positive';
+          message = `This change would improve "${simulatedItem.text}"`;
+        } else if (simulatedItem.score < currentItem.score) {
+          impact = 'negative';
+          message = `This change would reduce the score for "${simulatedItem.text}"`;
+        }
+      }
+
+      return {
+        id,
+        text: simulatedItem.text,
+        status: simulatedItem.status,
+        previousStatus: currentItem.status,
+        message,
+        impact
+      };
+    }).filter(Boolean) as AffectedCriterion[];
+  }, [form, generateChecklistItems, getAffectedCriteriaByField, progressSections]);
 
   // Memoize the return values to prevent unnecessary re-renders
   return useMemo(() => ({
@@ -821,6 +438,15 @@ export const useSEOScoring = (form: UseFormReturn<any>) => {
     overallScore: Math.round(overallScore),
     totalMaxScore,
     changedCriteriaIds,
-    formattedScore: formatPoints(overallScore)
-  }), [progressSections, overallScore, totalMaxScore, changedCriteriaIds]);
+    formattedScore: formatPoints(overallScore),
+    getAffectedCriteriaByField,
+    simulateFieldChange
+  }), [
+    progressSections,
+    overallScore,
+    totalMaxScore,
+    changedCriteriaIds,
+    getAffectedCriteriaByField,
+    simulateFieldChange
+  ]);
 };

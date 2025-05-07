@@ -161,20 +161,41 @@ export function GeneratingView() {
     }
   }, [activeStep, generationState.meta.isGenerated, generationState.title.isGenerated, isGenerated, navigate, setActiveStep, setIsPublishing, step1Form, step2Form, steps.length]);
 
-  const handleBack = () => {
+
+
+  // Track if we're navigating backwards
+  const [isNavigatingBack, setIsNavigatingBack] = useState(false);
+
+  // Update the handleBack function to set the navigating back flag
+  const handleBackWithFlag = useCallback(() => {
+    // Set the flag to indicate we're navigating backwards
+    setIsNavigatingBack(true);
+
+    // If we're going back from step 3 (Content Structuring) to step 2 (Article Settings)
+    if (activeStep === 2) {
+      // Make sure we're not showing the generating UI when going back
+      if (isGenerated) {
+        // If sections are already generated, we don't need to show the generating UI
+        setIsPublishing(false);
+      }
+    }
+
     setActiveStep((prev) => prev - 1);
-  };
+
+    setTimeout(() => {
+      setIsNavigatingBack(false);
+    }, 500);
+  }, [activeStep, isGenerated]);
 
   useEffect(() => {
     if (isGenerated && !isGeneratingSections && generatedSections.length > 0) {
-      if (activeStep === 1) {
+      if (activeStep === 1 && !isNavigatingBack) {
         setTimeout(() => {
           handleNext();
         }, 4000);
-
       }
     }
-  }, [isGenerated, isGeneratingSections, generatedSections, activeStep, handleNext]);
+  }, [isGenerated, isGeneratingSections, generatedSections, activeStep, handleNext, isNavigatingBack]);
 
   const step1State: Step1State = {
     form: step1Form,
@@ -324,7 +345,7 @@ export function GeneratingView() {
           activeStep={activeStep}
           totalSteps={steps.length}
           onNext={handleNext}
-          onBack={handleBack}
+          onBack={handleBackWithFlag}
         />
 
         <form onSubmit={methods.handleSubmit(submitSteppedForm)}>
