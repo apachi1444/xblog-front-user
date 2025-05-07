@@ -431,8 +431,8 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
             height: 140,
             borderRadius: '50%',
             background: `conic-gradient(
-              ${getScoreColor()} ${(score / totalMaxScore) * 100}%,
-              ${theme.palette.grey[200]} ${(score / totalMaxScore) * 100}% 100%
+              ${getScoreColor()} ${Math.min(100, (score / totalMaxScore) * 100)}%,
+              ${theme.palette.grey[200]} ${Math.min(100, (score / totalMaxScore) * 100)}% 100%
             )`,
             display: 'flex',
             alignItems: 'center',
@@ -491,7 +491,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
                     fontSize: '0.7rem'
                   }}
                 >
-                  {`${Math.round((score / totalMaxScore) * 100)}%`}
+                  {`${Math.min(100, Math.round((score / totalMaxScore) * 100))}%`}
                 </Typography>
               </Tooltip>
             </Box>
@@ -549,7 +549,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   {section.title}
                 </Typography>
-                <Tooltip title={`${Math.round(section.progress)}% complete`}>
+                <Tooltip title={`${Math.min(100, Math.round(section.progress))}% complete`}>
                   <Typography
                     variant="body2"
                     sx={{ ml: 1, color: theme.palette.text.secondary }}
@@ -568,7 +568,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
 
             <LinearProgress
               variant="determinate"
-              value={section.progress}
+              value={Math.min(100, section.progress)}
               sx={{
                 height: 8,
                 borderRadius: 1,

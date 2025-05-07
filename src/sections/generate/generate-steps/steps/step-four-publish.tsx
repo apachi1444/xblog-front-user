@@ -1,30 +1,46 @@
+// External imports
 // Types
 import type { Store } from 'src/types/store';
 
 import toast from 'react-hot-toast';
 import React, { useMemo, useState, useEffect } from 'react';
 
+// Material UI imports
 import {
   Box,
   Tab,
-  Grid,
-  Tabs,
   Chip,
+  Grid,
+  Link,
+  List,
+  Tabs,
   Modal,
   Paper,
   Radio,
+  Table,
   Button,
   Select,
   Divider,
+  ListItem,
   MenuItem,
+  TableRow,
+  Accordion,
+  TableBody,
+  TableCell,
+  TableHead,
   TextField,
-  Typography,
-  InputLabel,
   IconButton,
+  InputLabel,
   RadioGroup,
+  Typography,
   FormControl,
-  FormControlLabel,
-  CircularProgress
+  ListItemIcon,
+  ListItemText,
+  TableContainer,
+  AccordionDetails,
+  AccordionSummary,
+  CircularProgress,
+  FormControlLabel
 } from '@mui/material';
 
 // API hooks
@@ -35,20 +51,81 @@ import {
   usePublishWordPressMutation
 } from 'src/services/apis/integrations/publishApi';
 
+// Components
 import { Iconify } from 'src/components/iconify';
 import { FormInput } from 'src/components/generate-article/FormInput';
 import { FormDropdown } from 'src/components/generate-article/FormDropdown';
 
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
+// Section content types
+interface SectionLink {
+  text: string;
+  url: string;
+}
+
+interface SectionImage {
+  url: string;
+  alt: string;
+  caption?: string;
+}
+
+interface SectionFaqItem {
+  question: string;
+  answer: string;
+}
+
+interface SectionTableData {
+  headers: string[];
+  rows: string[][];
+}
+
+interface ArticleSection {
+  id: string;
+  title: string;
+  content?: string;
+  type?: 'introduction' | 'regular' | 'conclusion' | 'faq';
+  contentType?: 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery' | string;
+  bulletPoints?: string[];
+  internalLinks?: SectionLink[];
+  externalLinks?: SectionLink[];
+  tableData?: SectionTableData;
+  faqItems?: SectionFaqItem[];
+  images?: SectionImage[];
+}
+
+
+
 interface CopyModalProps {
   open: boolean;
   onClose: () => void;
+  articleInfo: {
+    title: string;
+    metaTitle: string;
+    metaDescription: string;
+    primaryKeyword: string;
+    secondaryKeywords: string[];
+    language: string;
+    targetCountry: string;
+    createdAt: string;
+  };
+  sections: ArticleSection[];
 }
 
 interface ExportModalProps {
   open: boolean;
   onClose: () => void;
+  articleInfo: {
+    title: string;
+    metaTitle: string;
+    metaDescription: string;
+    primaryKeyword: string;
+    secondaryKeywords: string[];
+    language: string;
+    targetCountry: string;
+    createdAt: string;
+  };
+  sections: ArticleSection[];
 }
 
 interface StoreSelectionModalProps {
@@ -59,11 +136,62 @@ interface StoreSelectionModalProps {
 }
 
 // Copy Modal Component
-const CopyModal = ({ open, onClose }: CopyModalProps) => {
+const CopyModal = ({ open, onClose, articleInfo, sections }: CopyModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [htmlContent, setHtmlContent] = useState('');
+  const [markdownContent, setMarkdownContent] = useState('');
+  const [plainTextContent, setPlainTextContent] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  // Load content when modal opens
+  useEffect(() => {
+    if (open && sections && sections.length > 0) {
+      setIsLoading(true);
+
+      // Import the markdown converter
+      import('src/utils/markdownConverter').then(({ articleToMarkdown, articleToHtml }) => {
+        // Create article info object
+        const articleInfoObj = {
+          title: articleInfo.title,
+          metaTitle: articleInfo.metaTitle,
+          metaDescription: articleInfo.metaDescription,
+          primaryKeyword: articleInfo.primaryKeyword,
+          secondaryKeywords: articleInfo.secondaryKeywords,
+          language: articleInfo.language,
+          targetCountry: articleInfo.targetCountry,
+          createdAt: articleInfo.createdAt
+        };
+
+        // Generate content in different formats
+        const markdown = articleToMarkdown(articleInfoObj, sections);
+        const html = articleToHtml(articleInfoObj, sections);
+        const plainText = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
+
+        setMarkdownContent(markdown);
+        setHtmlContent(html);
+        setPlainTextContent(plainText);
+        setIsLoading(false);
+      }).catch(error => {
+        console.error('Error generating content:', error);
+        // Fallback to simple text format
+        const plainText = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
+        setPlainTextContent(plainText);
+        setMarkdownContent(plainText);
+        setHtmlContent(`<h1>${articleInfo.title}</h1><p>${plainText.replace(/\n/g, '<br>')}</p>`);
+        setIsLoading(false);
+      });
+    }
+  }, [open, articleInfo, sections]);
+
+  // Copy content to clipboard
+  const handleCopy = (content: string, format: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success(`Copied as ${format} successfully!`);
+    onClose();
   };
 
   return (
@@ -101,82 +229,81 @@ const CopyModal = ({ open, onClose }: CopyModalProps) => {
           <Tab label="Plain Text" />
         </Tabs>
 
-        {activeTab === 0 && (
-          <Box>
-            <TextField
-              fullWidth
-              multiline
-              rows={8}
-              value={'<h1>How to Optimize Your Website for Better SEO Performance</h1>\n<p>Introduction to SEO Optimization...</p>'}
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ mb: 2 }}
-            />
-            <Button
-              variant="contained"
-              onClick={() => {
-                toast.success("Copied into HTML successfully !")
-                onClose()
-              }}
-              startIcon={<Iconify icon="mdi:content-copy" />}
-              sx={{ borderRadius: '24px' }}
-            >
-              Copy HTML
-            </Button>
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+            <CircularProgress />
           </Box>
-        )}
+        ) : (
+          <>
+            {activeTab === 0 && (
+              <Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={8}
+                  value={htmlContent}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={() => handleCopy(htmlContent, 'HTML')}
+                  startIcon={<Iconify icon="mdi:content-copy" />}
+                  sx={{ borderRadius: '24px' }}
+                >
+                  Copy HTML
+                </Button>
+              </Box>
+            )}
 
-        {activeTab === 1 && (
-          <Box>
-            <TextField
-              fullWidth
-              multiline
-              rows={8}
-              value={'# How to Optimize Your Website for Better SEO Performance\n\nIntroduction to SEO Optimization...'}
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ mb: 2 }}
-            />
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="mdi:content-copy" />}
-              onClick={() => {
-                toast.success("Copied into Markdown successfully !")
-                onClose()
-              }}
-              sx={{ borderRadius: '24px' }}
-            >
-              Copy Markdown
-            </Button>
-          </Box>
-        )}
+            {activeTab === 1 && (
+              <Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={8}
+                  value={markdownContent}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Iconify icon="mdi:content-copy" />}
+                  onClick={() => handleCopy(markdownContent, 'Markdown')}
+                  sx={{ borderRadius: '24px' }}
+                >
+                  Copy Markdown
+                </Button>
+              </Box>
+            )}
 
-        {activeTab === 2 && (
-          <Box>
-            <TextField
-              fullWidth
-              multiline
-              rows={8}
-              value={'How to Optimize Your Website for Better SEO Performance\n\nIntroduction to SEO Optimization...'}
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{ mb: 2 }}
-            />
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="mdi:content-copy" />}
-              sx={{ borderRadius: '24px' }}
-              onClick={() => {
-                toast.success("Copied into Plain text successfully !")
-                onClose()
-              }}
-            >
-              Copy Plain Text
-            </Button>
-          </Box>
+            {activeTab === 2 && (
+              <Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={8}
+                  value={plainTextContent}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ mb: 2 }}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Iconify icon="mdi:content-copy" />}
+                  sx={{ borderRadius: '24px' }}
+                  onClick={() => handleCopy(plainTextContent, 'Plain Text')}
+                >
+                  Copy Plain Text
+                </Button>
+              </Box>
+            )}
+          </>
         )}
       </Box>
     </Modal>
@@ -197,7 +324,7 @@ interface FullArticleModalProps {
     targetCountry: string;
     createdAt: string;
   };
-  sections: any[];
+  sections: ArticleSection[];
 }
 
 const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleModalProps) => (
@@ -302,13 +429,181 @@ const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleM
           {/* All Sections */}
           {sections && sections.length > 0 ? (
             sections.map((section, index) => (
-              <Box key={index} sx={{ mb: 4 }}>
+              <Box key={index} sx={{ mb: 6 }}>
+                {/* Section Title */}
                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
                   {section.title || `Section ${index + 1}`}
                 </Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                  {section.content || 'No content available for this section.'}
-                </Typography>
+
+                {/* Main Content - Display based on content type */}
+                {section.content && (
+                  <Box sx={{ mb: 2 }}>
+                    {/* Content Type Badge */}
+                    {(section.type === 'faq' || section.contentType) && (
+                      <Chip
+                        label={
+                          section.type === 'faq'
+                            ? 'FAQ Section'
+                            : section.contentType === 'bullet-list'
+                              ? 'List Section'
+                              : section.contentType === 'table'
+                                ? 'Table Section'
+                                : section.contentType === 'image-gallery'
+                                  ? 'Image Gallery'
+                                  : section.contentType || 'Paragraph'
+                        }
+                        size="small"
+                        sx={{
+                          mb: 1.5,
+                          bgcolor: 'background.neutral',
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          fontSize: '0.75rem'
+                        }}
+                      />
+                    )}
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                      {section.content}
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Bullet Points */}
+                {section.bulletPoints && section.bulletPoints.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <List disablePadding>
+                      {section.bulletPoints.map((point, i) => (
+                        <ListItem key={i} sx={{ py: 0.5 }}>
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Iconify icon="mdi:circle-small" />
+                          </ListItemIcon>
+                          <ListItemText primary={point} />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                )}
+
+                {/* Table Data */}
+                {section.tableData && section.tableData.headers && section.tableData.rows && (
+                  <TableContainer component={Paper} sx={{ mb: 2, overflow: 'auto' }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: 'background.neutral' }}>
+                          {section.tableData.headers.map((header, i) => (
+                            <TableCell key={i} sx={{ fontWeight: 'bold' }}>
+                              {header}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {section.tableData.rows.map((row: string[], rowIndex: number) => (
+                          <TableRow key={rowIndex}>
+                            {row.map((cell: string, cellIndex: number) => (
+                              <TableCell key={cellIndex}>{cell}</TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+
+                {/* FAQ Items */}
+                {section.faqItems && section.faqItems.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    {section.faqItems.map((faq, i) => (
+                      <Accordion key={i} sx={{ mb: 1 }}>
+                        <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
+                          <Typography variant="subtitle1">{faq.question}</Typography>
+                        </AccordionSummary>
+                        <Divider />
+                        <AccordionDetails>
+                          <Typography variant="body2">{faq.answer}</Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Images */}
+                {section.images && section.images.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    {section.images.map((image, i) => (
+                      <Box key={i} sx={{ mb: 2, textAlign: 'center' }}>
+                        <Box
+                          component="img"
+                          src={image.url}
+                          alt={image.alt}
+                          sx={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                            borderRadius: 1,
+                            mb: 1
+                          }}
+                        />
+                        {image.caption && (
+                          <Typography variant="caption" color="text.secondary">
+                            {image.caption}
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Internal Links */}
+                {section.internalLinks && section.internalLinks.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Related Content:
+                    </Typography>
+                    <List disablePadding>
+                      {section.internalLinks.map((link, i) => (
+                        <ListItem key={i} sx={{ py: 0.5 }}>
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Iconify icon="mdi:link-variant" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Link href={link.url} color="primary" underline="hover">
+                                {link.text}
+                              </Link>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                )}
+
+                {/* External Links */}
+                {section.externalLinks && section.externalLinks.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Sources:
+                    </Typography>
+                    <List disablePadding>
+                      {section.externalLinks.map((link, i) => (
+                        <ListItem key={i} sx={{ py: 0.5 }}>
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Iconify icon="mdi:open-in-new" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener">
+                                {link.text}
+                              </Link>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                )}
+
+                {index < sections.length - 1 && <Divider sx={{ my: 3 }} />}
               </Box>
             ))
           ) : (
@@ -333,10 +628,33 @@ const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleM
             variant="contained"
             startIcon={<Iconify icon="mdi:content-copy" />}
             onClick={() => {
-              // Copy article content to clipboard
-              const content = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content}\n\n`).join('')}`;
-              navigator.clipboard.writeText(content);
-              toast.success("Article content copied to clipboard");
+              // Import the markdown converter
+              import('src/utils/markdownConverter').then(({ articleToMarkdown }) => {
+                // Convert article to markdown
+                const markdownContent = articleToMarkdown(
+                  {
+                    title: articleInfo.title,
+                    metaTitle: articleInfo.metaTitle,
+                    metaDescription: articleInfo.metaDescription,
+                    primaryKeyword: articleInfo.primaryKeyword,
+                    secondaryKeywords: articleInfo.secondaryKeywords,
+                    language: articleInfo.language,
+                    targetCountry: articleInfo.targetCountry,
+                    createdAt: articleInfo.createdAt
+                  },
+                  sections
+                );
+
+                // Copy markdown content to clipboard
+                navigator.clipboard.writeText(markdownContent);
+                toast.success("Article content copied to clipboard in Markdown format");
+              }).catch(error => {
+                console.error("Error converting to markdown:", error);
+                // Fallback to simple text format if markdown conversion fails
+                const content = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content}\n\n`).join('')}`;
+                navigator.clipboard.writeText(content);
+                toast.success("Article content copied to clipboard");
+              });
             }}
           >
             Copy Full Article
@@ -347,11 +665,96 @@ const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleM
   );
 
 // Export Modal Component
-const ExportModal = ({ open, onClose }: ExportModalProps) => {
+const ExportModal = ({ open, onClose, articleInfo, sections }: ExportModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  // Function to download content as a file
+  const downloadFile = (content: string, fileName: string, contentType: string) => {
+    const blob = new Blob([content], { type: contentType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Handle export based on selected tab
+  const handleExport = async () => {
+    setIsExporting(true);
+
+    try {
+      // Import the markdown converter
+      const { articleToMarkdown, articleToHtml } = await import('src/utils/markdownConverter');
+
+      // Create article info object
+      const articleInfoObj = {
+        title: articleInfo.title,
+        metaTitle: articleInfo.metaTitle,
+        metaDescription: articleInfo.metaDescription,
+        primaryKeyword: articleInfo.primaryKeyword,
+        secondaryKeywords: articleInfo.secondaryKeywords,
+        language: articleInfo.language,
+        targetCountry: articleInfo.targetCountry,
+        createdAt: articleInfo.createdAt
+      };
+
+      // Generate file name base
+      const fileName = articleInfo.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      // Handle export based on tab
+      let content = '';
+      let fileExtension = '';
+      let contentType = '';
+      let successMessage = '';
+
+      if (activeTab === 0) { // PDF
+        // For PDF, we'll use HTML as an intermediate format
+        content = articleToHtml(articleInfoObj, sections);
+        fileExtension = 'html';
+        contentType = 'text/html';
+        successMessage = 'Content exported as HTML (PDF generation not implemented)';
+      } else if (activeTab === 1) { // Word
+        // For Word, we'll use Markdown as an intermediate format
+        content = articleToMarkdown(articleInfoObj, sections);
+        fileExtension = 'md';
+        contentType = 'text/markdown';
+        successMessage = 'Content exported as Markdown (Word generation not implemented)';
+      } else if (activeTab === 2) { // HTML
+        content = articleToHtml(articleInfoObj, sections);
+        fileExtension = 'html';
+        contentType = 'text/html';
+        successMessage = 'Content exported as HTML';
+      } else if (activeTab === 3) { // JSON
+        content = JSON.stringify({
+          articleInfo: articleInfoObj,
+          sections
+        }, null, 2);
+        fileExtension = 'json';
+        contentType = 'application/json';
+        successMessage = 'Content exported as JSON';
+      }
+
+      // Download the file
+      downloadFile(content, `${fileName}.${fileExtension}`, contentType);
+      toast.success(successMessage);
+    } catch (error) {
+      console.error('Error exporting content:', error);
+      toast.error('Failed to export content. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -422,8 +825,10 @@ const ExportModal = ({ open, onClose }: ExportModalProps) => {
               variant="contained"
               startIcon={<Iconify icon="mdi:file-pdf-box" />}
               sx={{ borderRadius: '24px' }}
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              Export as PDF
+              {isExporting ? 'Exporting...' : 'Export as PDF'}
             </Button>
           </Box>
         )}
@@ -437,8 +842,10 @@ const ExportModal = ({ open, onClose }: ExportModalProps) => {
               variant="contained"
               startIcon={<Iconify icon="mdi:microsoft-word" />}
               sx={{ borderRadius: '24px' }}
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              Export as Word
+              {isExporting ? 'Exporting...' : 'Export as Word'}
             </Button>
           </Box>
         )}
@@ -452,8 +859,10 @@ const ExportModal = ({ open, onClose }: ExportModalProps) => {
               variant="contained"
               startIcon={<Iconify icon="mdi:language-html5" />}
               sx={{ borderRadius: '24px' }}
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              Export as HTML
+              {isExporting ? 'Exporting...' : 'Export as HTML'}
             </Button>
           </Box>
         )}
@@ -467,8 +876,10 @@ const ExportModal = ({ open, onClose }: ExportModalProps) => {
               variant="contained"
               startIcon={<Iconify icon="mdi:code-json" />}
               sx={{ borderRadius: '24px' }}
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              Export as JSON
+              {isExporting ? 'Exporting...' : 'Export as JSON'}
             </Button>
           </Box>
         )}
@@ -563,30 +974,29 @@ const StoreSelectionModal = ({ open, onClose, onSelect, stores }: StoreSelection
   );
 };
 
-// Define the interface for the state prop
-interface Step4State {
-  articleInfo: {
-    title: string;
-    metaTitle: string;
-    metaDescription: string;
-    urlSlug: string;
-    primaryKeyword: string;
-    secondaryKeywords: string[];
-    language: string;
-    targetCountry: string;
-    contentDescription: string;
-    createdAt: string;
-  };
-  articleSettings: {
-    articleType: string;
-    articleSize: string;
-    toneOfVoice: string;
-  };
-  sections: any[];
-}
+
 
 interface Step4Props {
-  state: Step4State;
+  state: {
+    articleInfo: {
+      title: string;
+      metaTitle: string;
+      metaDescription: string;
+      urlSlug: string;
+      primaryKeyword: string;
+      secondaryKeywords: string[];
+      language: string;
+      targetCountry: string;
+      contentDescription: string;
+      createdAt: string;
+    };
+    articleSettings: {
+      articleType: string;
+      articleSize: string;
+      toneOfVoice: string;
+    };
+    sections: ArticleSection[];
+  };
 }
 
 export function Step4Publish({ state }: Step4Props) {
@@ -767,9 +1177,105 @@ export function Step4Publish({ state }: Step4Props) {
                     <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
                       {state.sections[0]?.title || 'Introduction'}
                     </Typography>
-                    <Typography variant="body1" paragraph>
-                      {state.sections[0]?.content || 'No content available for this section.'}
-                    </Typography>
+
+                    {/* Content Type Badge */}
+                    {(state.sections[0]?.type === 'faq' || state.sections[0]?.contentType) && (
+                      <Chip
+                        label={
+                          state.sections[0]?.type === 'faq'
+                            ? 'FAQ Section'
+                            : state.sections[0]?.contentType === 'bullet-list'
+                              ? 'List Section'
+                              : state.sections[0]?.contentType === 'table'
+                                ? 'Table Section'
+                                : state.sections[0]?.contentType === 'image-gallery'
+                                  ? 'Image Gallery'
+                                  : state.sections[0]?.contentType || 'Paragraph'
+                        }
+                        size="small"
+                        sx={{
+                          mb: 1.5,
+                          bgcolor: 'background.neutral',
+                          color: 'text.secondary',
+                          fontWeight: 500,
+                          fontSize: '0.75rem'
+                        }}
+                      />
+                    )}
+
+                    {/* Display content based on type */}
+                    {state.sections[0]?.type === 'faq' ? (
+                      <Box sx={{ mb: 2 }}>
+                        {state.sections[0]?.faqItems && state.sections[0]?.faqItems.length > 0 ? (
+                          <Accordion sx={{ mb: 1 }}>
+                            <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
+                              <Typography variant="subtitle2">{state.sections[0].faqItems[0].question}</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Typography variant="body2">{state.sections[0].faqItems[0].answer}</Typography>
+                            </AccordionDetails>
+                          </Accordion>
+                        ) : (
+                          <Typography variant="body1" paragraph>
+                            {state.sections[0]?.content || 'No content available for this section.'}
+                          </Typography>
+                        )}
+                      </Box>
+                    ) : state.sections[0]?.contentType === 'bullet-list' || (state.sections[0]?.bulletPoints && state.sections[0]?.bulletPoints.length > 0) ? (
+                      <Box sx={{ mb: 2 }}>
+                        <List disablePadding>
+                          {state.sections[0]?.bulletPoints && state.sections[0]?.bulletPoints.length > 0 ? (
+                            state.sections[0].bulletPoints.slice(0, 2).map((point, i) => (
+                              <ListItem key={i} sx={{ py: 0.5 }}>
+                                <ListItemIcon sx={{ minWidth: 36 }}>
+                                  <Iconify icon="mdi:circle-small" />
+                                </ListItemIcon>
+                                <ListItemText primary={point} />
+                              </ListItem>
+                            ))
+                          ) : (
+                            <Typography variant="body1" paragraph>
+                              {state.sections[0]?.content || 'No content available for this section.'}
+                            </Typography>
+                          )}
+                        </List>
+                      </Box>
+                    ) : state.sections[0]?.contentType === 'table' ? (
+                      <Box sx={{ mb: 2 }}>
+                        {state.sections[0]?.tableData ? (
+                          <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
+                            <Table size="small">
+                              <TableHead>
+                                <TableRow sx={{ bgcolor: 'background.neutral' }}>
+                                  {state.sections[0].tableData.headers.map((header, i) => (
+                                    <TableCell key={i} sx={{ fontWeight: 'bold' }}>
+                                      {header}
+                                    </TableCell>
+                                  ))}
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {state.sections[0].tableData.rows.slice(0, 2).map((row, rowIndex) => (
+                                  <TableRow key={rowIndex}>
+                                    {row.map((cell, cellIndex) => (
+                                      <TableCell key={cellIndex}>{cell}</TableCell>
+                                    ))}
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                        ) : (
+                          <Typography variant="body1" paragraph>
+                            {state.sections[0]?.content || 'No content available for this section.'}
+                          </Typography>
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography variant="body1" paragraph>
+                        {state.sections[0]?.content || 'No content available for this section.'}
+                      </Typography>
+                    )}
                   </Box>
 
                   {/* Display second section if available */}
@@ -778,9 +1284,105 @@ export function Step4Publish({ state }: Step4Props) {
                       <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
                         {state.sections[1]?.title || 'Section 2'}
                       </Typography>
-                      <Typography variant="body1" paragraph>
-                        {state.sections[1]?.content || 'No content available for this section.'}
-                      </Typography>
+
+                      {/* Content Type Badge */}
+                      {(state.sections[1]?.type === 'faq' || state.sections[1]?.contentType) && (
+                        <Chip
+                          label={
+                            state.sections[1]?.type === 'faq'
+                              ? 'FAQ Section'
+                              : state.sections[1]?.contentType === 'bullet-list'
+                                ? 'List Section'
+                                : state.sections[1]?.contentType === 'table'
+                                  ? 'Table Section'
+                                  : state.sections[1]?.contentType === 'image-gallery'
+                                    ? 'Image Gallery'
+                                    : state.sections[1]?.contentType || 'Paragraph'
+                          }
+                          size="small"
+                          sx={{
+                            mb: 1.5,
+                            bgcolor: 'background.neutral',
+                            color: 'text.secondary',
+                            fontWeight: 500,
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      )}
+
+                      {/* Display content based on type */}
+                      {state.sections[1]?.type === 'faq' ? (
+                        <Box sx={{ mb: 2 }}>
+                          {state.sections[1]?.faqItems && state.sections[1]?.faqItems.length > 0 ? (
+                            <Accordion sx={{ mb: 1 }}>
+                              <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
+                                <Typography variant="subtitle2">{state.sections[1].faqItems[0].question}</Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                <Typography variant="body2">{state.sections[1].faqItems[0].answer}</Typography>
+                              </AccordionDetails>
+                            </Accordion>
+                          ) : (
+                            <Typography variant="body1" paragraph>
+                              {state.sections[1]?.content || 'No content available for this section.'}
+                            </Typography>
+                          )}
+                        </Box>
+                      ) : state.sections[1]?.contentType === 'bullet-list' || (state.sections[1]?.bulletPoints && state.sections[1]?.bulletPoints.length > 0) ? (
+                        <Box sx={{ mb: 2 }}>
+                          <List disablePadding>
+                            {state.sections[1]?.bulletPoints && state.sections[1]?.bulletPoints.length > 0 ? (
+                              state.sections[1].bulletPoints.slice(0, 2).map((point, i) => (
+                                <ListItem key={i} sx={{ py: 0.5 }}>
+                                  <ListItemIcon sx={{ minWidth: 36 }}>
+                                    <Iconify icon="mdi:circle-small" />
+                                  </ListItemIcon>
+                                  <ListItemText primary={point} />
+                                </ListItem>
+                              ))
+                            ) : (
+                              <Typography variant="body1" paragraph>
+                                {state.sections[1]?.content || 'No content available for this section.'}
+                              </Typography>
+                            )}
+                          </List>
+                        </Box>
+                      ) : state.sections[1]?.contentType === 'table' ? (
+                        <Box sx={{ mb: 2 }}>
+                          {state.sections[1]?.tableData ? (
+                            <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow sx={{ bgcolor: 'background.neutral' }}>
+                                    {state.sections[1].tableData.headers.map((header, i) => (
+                                      <TableCell key={i} sx={{ fontWeight: 'bold' }}>
+                                        {header}
+                                      </TableCell>
+                                    ))}
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {state.sections[1].tableData.rows.slice(0, 2).map((row, rowIndex) => (
+                                    <TableRow key={rowIndex}>
+                                      {row.map((cell, cellIndex) => (
+                                        <TableCell key={cellIndex}>{cell}</TableCell>
+                                      ))}
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          ) : (
+                            <Typography variant="body1" paragraph>
+                              {state.sections[1]?.content || 'No content available for this section.'}
+                            </Typography>
+                          )}
+                        </Box>
+                      ) : (
+                        <Typography variant="body1" paragraph>
+                          {state.sections[1]?.content || 'No content available for this section.'}
+                        </Typography>
+                      )}
                     </Box>
                   )}
 
@@ -837,6 +1439,52 @@ export function Step4Publish({ state }: Step4Props) {
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="mdi:content-copy" />}
+                onClick={() => {
+                  // Check if we have sections to copy
+                  if (state.sections && state.sections.length > 0) {
+                    // Import the markdown converter
+                    import('src/utils/markdownConverter').then(({ articleToMarkdown }) => {
+                      // Convert article to markdown
+                      const markdownContent = articleToMarkdown(
+                        {
+                          title: state.articleInfo.title,
+                          metaTitle: state.articleInfo.metaTitle,
+                          metaDescription: state.articleInfo.metaDescription,
+                          primaryKeyword: state.articleInfo.primaryKeyword,
+                          secondaryKeywords: state.articleInfo.secondaryKeywords,
+                          language: state.articleInfo.language,
+                          targetCountry: state.articleInfo.targetCountry,
+                          createdAt: state.articleInfo.createdAt
+                        },
+                        state.sections
+                      );
+
+                      // Copy markdown content to clipboard
+                      navigator.clipboard.writeText(markdownContent);
+                      toast.success("Article content copied to clipboard in Markdown format");
+                    }).catch(error => {
+                      console.error("Error converting to markdown:", error);
+                      // Fallback to simple text format if markdown conversion fails
+                      const content = `${state.articleInfo.title}\n\n${state.sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
+                      navigator.clipboard.writeText(content);
+                      toast.success("Article content copied to clipboard");
+                    });
+                  } else {
+                    toast.error("No content available to copy");
+                  }
+                }}
+                sx={{
+                  borderRadius: '24px',
+                  px: 3,
+                  mb: { xs: 1, sm: 0 }
+                }}
+              >
+                Copy as Markdown
+              </Button>
+
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="mdi:format-list-bulleted" />}
                 onClick={handleOpenCopyModal}
                 sx={{
                   borderRadius: '24px',
@@ -844,7 +1492,7 @@ export function Step4Publish({ state }: Step4Props) {
                   mb: { xs: 1, sm: 0 }
                 }}
               >
-                Copy
+                Copy Options
               </Button>
 
               <Button
@@ -1062,8 +1710,18 @@ export function Step4Publish({ state }: Step4Props) {
       </Grid>
 
       {/* Modals */}
-      <CopyModal open={copyModalOpen} onClose={handleCloseCopyModal} />
-      <ExportModal open={exportModalOpen} onClose={handleCloseExportModal} />
+      <CopyModal
+        open={copyModalOpen}
+        onClose={handleCloseCopyModal}
+        articleInfo={state.articleInfo}
+        sections={state.sections}
+      />
+      <ExportModal
+        open={exportModalOpen}
+        onClose={handleCloseExportModal}
+        articleInfo={state.articleInfo}
+        sections={state.sections}
+      />
       <StoreSelectionModal
         open={storeSelectionOpen}
         onClose={handleCloseStoreSelection}

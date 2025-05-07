@@ -77,10 +77,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
   return (
     <Grid container spacing={3}>
       <SectionGenerationAnimation
-        show={isGeneratedTableOfContents}
+        show={isGeneratingTableOfContents || isGeneratedTableOfContents}
         onComplete={() => {
-          // Don't automatically navigate to next step
-          // Only show the animation
+          // Automatically navigate to next step when generation is complete
+          if (isGeneratedTableOfContents) {
+            // Use setTimeout to ensure the animation completes before navigating
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('generate-next-step'));
+            }, 500);
+          }
         }}
       />
 

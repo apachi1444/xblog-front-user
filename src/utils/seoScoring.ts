@@ -447,8 +447,8 @@ export const calculateSectionProgress = (items: ChecklistItem[]): { progress: nu
     totalPoints += earnedPoints;
   });
 
-  // Calculate progress percentage
-  const progress = totalMaxPoints > 0 ? Math.round((totalPoints / totalMaxPoints) * 100) : 0;
+  // Calculate progress percentage and ensure it never exceeds 100%
+  const progress = totalMaxPoints > 0 ? Math.min(100, Math.round((totalPoints / totalMaxPoints) * 100)) : 0;
 
   return {
     progress,
@@ -477,8 +477,11 @@ export const calculateOverallScore = (sections: ProgressSection[]): { score: num
     totalMaxPoints += section.maxPoints;
   });
 
+  // Ensure the score never exceeds 100 points
+  const cappedScore = Math.min(100, Math.round(totalPoints));
+
   return {
-    score: Math.round(totalPoints),
+    score: cappedScore,
     maxScore: Math.round(totalMaxPoints)
   };
 };

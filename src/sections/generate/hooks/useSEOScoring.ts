@@ -433,15 +433,20 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
   }, [form, generateChecklistItems, getAffectedCriteriaByField, progressSections]);
 
   // Memoize the return values to prevent unnecessary re-renders
-  return useMemo(() => ({
-    progressSections,
-    overallScore: Math.round(overallScore),
-    totalMaxScore,
-    changedCriteriaIds,
-    formattedScore: formatPoints(overallScore),
-    getAffectedCriteriaByField,
-    simulateFieldChange
-  }), [
+  return useMemo(() => {
+    // Ensure the score never exceeds 100 points
+    const cappedScore = Math.min(100, Math.round(overallScore));
+
+    return {
+      progressSections,
+      overallScore: cappedScore,
+      totalMaxScore,
+      changedCriteriaIds,
+      formattedScore: formatPoints(cappedScore),
+      getAffectedCriteriaByField,
+      simulateFieldChange
+    };
+  }, [
     progressSections,
     overallScore,
     totalMaxScore,

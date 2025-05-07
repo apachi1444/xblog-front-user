@@ -286,7 +286,15 @@ interface GeneratedSection {
   id: string;
   title: string;
   content?: string;
+  contentType?: string;
+  bulletPoints?: string[];
+  internalLinks?: { text: string; url: string }[];
+  externalLinks?: { text: string; url: string }[];
+  tableData?: { headers: string[]; rows: string[][] };
+  faqItems?: { question: string; answer: string }[];
+  images?: { url: string; alt: string; caption?: string }[];
   subsections?: GeneratedSection[];
+  type?: 'introduction' | 'regular' | 'conclusion' | 'faq';
 }
 
 /**
@@ -295,6 +303,8 @@ interface GeneratedSection {
 interface GenerateSectionsResponse {
   sections: GeneratedSection[];
   score?: number;
+  timestamp: string;
+  sectionTitles: string[];
 }
 
 /**
@@ -304,6 +314,9 @@ interface GenerateSectionsResponse {
  * @param secondaryKeywords - Optional array of secondary keywords
  * @param targetLanguage - The target language for the article
  * @param contentType - Optional content type (e.g., 'blog', 'guide', 'tutorial')
+ * @param articleSize - Optional article size (e.g., 'small', 'medium', 'large')
+ * @param toneOfVoice - Optional tone of voice (e.g., 'professional', 'casual', 'authoritative')
+ * @param targetCountry - Optional target country for localization
  * @returns Promise with generated sections
  */
 export const generateSections = async (
@@ -311,7 +324,10 @@ export const generateSections = async (
   primaryKeyword: string,
   secondaryKeywords: string[] = [],
   targetLanguage: string = 'en',
-  contentType: string = 'blog'
+  contentType: string = 'blog',
+  articleSize: string = 'medium',
+  toneOfVoice: string = 'professional',
+  targetCountry: string = 'United States'
 ): Promise<GenerateSectionsResponse> => {
   try {
     // Format secondary keywords for the prompt
@@ -324,20 +340,39 @@ export const generateSections = async (
 - Primary keyword: ${primaryKeyword}
 ${secondaryKeywordsText}
 - Target language: ${targetLanguage}
+- Target country: ${targetCountry}
 - Content type: ${contentType}
+- Article size: ${articleSize}
+- Tone of voice: ${toneOfVoice}
 
-Generate a comprehensive outline for a highly SEO-optimized article with 5-8 sections that follows all best practices for modern SEO content.
+Generate a Table of Contents (TOC) for a well-structured, SEO-optimized article.
 
-For each section:
-1. Create a compelling, SEO-friendly section title that includes relevant keywords
-2. Provide a brief description of what the section will cover (2-3 sentences)
+🔸 The TOC must be hierarchical, clear, and keyword-focused, with each section designed to support the article's semantic SEO structure.
 
-The outline MUST follow these SEO best practices:
+🔸 Each section in the TOC should be accompanied by a specified content type, selected from the following:
+- H2 + Paragraph
+- H2 + Bullet/Numbered List
+- H2 + Table
+- H2 + Internal Link(s)
+- H2 + External Link(s)
+- H2 + Image (via image URL)
+- H2 + FAQ Block
+- H2 + Backlink Context
+- H2 + Introduction/Conclusion
+
+🔹 Ensure:
+- Section order follows a logical, progressive flow
+- Each section builds on the previous one
+- TOC includes 6–10 well-distributed, valuable sections
+
+🔸 Mark content types explicitly in the JSON response for each section.
+
+The article MUST follow these SEO best practices:
 - Start with an engaging introduction that hooks the reader and includes the primary keyword in the first paragraph
 - Include a section addressing common questions or pain points related to the topic
 - Incorporate a section with practical tips, examples, or case studies
 - End with a strong conclusion that summarizes key points and includes a call to action
-- Follow a logical structure with proper hierarchy (H1 for title, H2 for main sections, H3 for subsections if needed)
+- Follow a logical structure with proper hierarchy (H1 for title, H2 for main sections)
 - Include the primary keyword in at least 2-3 section titles naturally
 - Distribute secondary keywords strategically across different sections
 - Ensure section titles are compelling and click-worthy while remaining informative
@@ -345,26 +380,85 @@ The outline MUST follow these SEO best practices:
 - Include at least one section that addresses current trends or future outlook
 - Ensure the content structure supports featured snippet optimization
 
-The outline should also:
+The article should also:
 - Follow a logical flow that guides the reader through the topic
 - Balance informational and actionable content
-- Be written in the target language with appropriate localization
-- Be appropriate for the specified content type
+- Be written in the target language with appropriate localization for the target country
+- Be appropriate for the specified content type and size
 - Support easy scanning with clear, descriptive section titles
+- Use the specified tone of voice consistently throughout
 
 Return the results in this JSON format:
 {
   "sections": [
     {
       "id": "section-1",
-      "title": "Section Title Here",
-      "content": "Brief description of what this section will cover."
+      "title": "Introduction to [Topic]",
+      "type": "introduction",
+      "contentType": "H2 + Introduction/Conclusion",
+      "content": "Detailed introduction content with primary keyword naturally included...",
+      "internalLinks": [
+        {"text": "anchor text", "url": "/internal-page-1"}
+      ],
+      "externalLinks": [
+        {"text": "source name", "url": "https://example.com/source"}
+      ],
+      "images": [
+        {"url": "https://example.com/sample-image.jpg", "alt": "Descriptive alt text", "caption": "Optional image caption"}
+      ]
     },
-    ...
-  ]
+    {
+      "id": "section-2",
+      "title": "Main Section Title",
+      "type": "regular",
+      "contentType": "H2 + Bullet/Numbered List",
+      "content": "Detailed section content...",
+      "bulletPoints": [
+        "First important point with keyword",
+        "Second important point with another keyword",
+        "Third important point with supporting information"
+      ]
+    },
+    {
+      "id": "section-3",
+      "title": "Comparison Section",
+      "type": "regular",
+      "contentType": "H2 + Table",
+      "content": "Introductory content for the comparison...",
+      "tableData": {
+        "headers": ["Feature", "Option A", "Option B", "Option C"],
+        "rows": [
+          ["Price", "$10", "$20", "$30"],
+          ["Quality", "Good", "Better", "Best"],
+          ["Support", "Limited", "Standard", "Premium"]
+        ]
+      }
+    },
+    {
+      "id": "section-4",
+      "title": "Frequently Asked Questions",
+      "type": "faq",
+      "contentType": "H2 + FAQ Block",
+      "content": "Introduction to the FAQ section...",
+      "faqItems": [
+        {"question": "What is [primary keyword]?", "answer": "Detailed answer to the question..."},
+        {"question": "How does [primary keyword] work?", "answer": "Explanation of how it works..."},
+        {"question": "Why is [primary keyword] important?", "answer": "Explanation of importance..."}
+      ]
+    },
+    {
+      "id": "section-5",
+      "title": "Conclusion",
+      "type": "conclusion",
+      "contentType": "H2 + Introduction/Conclusion",
+      "content": "Summary of key points and call to action..."
+    }
+  ],
+  "timestamp": "${new Date().toISOString()}",
+  "sectionTitles": ["Introduction to [Topic] (Type: H2 + Introduction/Conclusion)", "Main Section Title (Type: H2 + Bullet/Numbered List)", "Comparison Section (Type: H2 + Table)", "Frequently Asked Questions (Type: H2 + FAQ Block)", "Conclusion (Type: H2 + Introduction/Conclusion)"]
 }
 
-Ensure the JSON is valid and properly formatted.`;
+Ensure the JSON is valid and properly formatted. Include at least 5-7 sections for a comprehensive article.`;
 
     const requestData: GeminiRequest = {
       contents: [
@@ -417,17 +511,44 @@ Ensure the JSON is valid and properly formatted.`;
       content: section.content || `Content for section ${index + 1}`
     }));
 
-    // Calculate a mock score based on the number of sections and keywords included
+    // Calculate a more balanced score based on the number of sections and keywords included
+    // Base score calculation
+    const baseScore = 50; // Start with a lower base score
+
+    // Section count score (max 20 points)
+    const sectionCountScore = Math.min(20, validatedSections.length * 2);
+
+    // Primary keyword usage score (max 15 points)
+    const keywordCount = validatedSections.filter(
+      (s: GeneratedSection) => s.title.toLowerCase().includes(primaryKeyword.toLowerCase())
+    ).length;
+    const keywordScore = Math.min(15, keywordCount * 5);
+
+    // Content type diversity score (max 15 points)
+    const uniqueContentTypes = new Set(
+      validatedSections
+        .filter((s: GeneratedSection) => s.contentType)
+        .map((s: GeneratedSection) => s.contentType)
+    ).size;
+    const contentTypeDiversityScore = Math.min(15, uniqueContentTypes * 3);
+
+    // Calculate total score and ensure it never exceeds 100
     const score = Math.min(
       100,
-      70 + // Base score
-      (validatedSections.length * 3) + // Points for each section
-      (validatedSections.filter((s: GeneratedSection) => s.title.toLowerCase().includes(primaryKeyword.toLowerCase())).length * 5) // Points for primary keyword usage
+      baseScore + sectionCountScore + keywordScore + contentTypeDiversityScore
     );
+
+    // Extract section titles for easy reference
+    const sectionTitles = validatedSections.map((section: GeneratedSection) => section.title);
+
+    // Generate timestamp
+    const timestamp = new Date().toISOString();
 
     return {
       sections: validatedSections,
-      score
+      score,
+      timestamp,
+      sectionTitles
     };
   } catch (error) {
     console.error('Error generating sections:', error);
@@ -461,9 +582,34 @@ Ensure the JSON is valid and properly formatted.`;
       }
     ];
 
+    // Extract section titles for fallback
+    const fallbackSectionTitles = fallbackSections.map((section: any) => section.title);
+
+    // Generate timestamp
+    const timestamp = new Date().toISOString();
+
+    // Calculate a consistent fallback score using the same logic as the main score
+    const baseScore = 50;
+    const sectionCountScore = Math.min(20, fallbackSections.length * 2);
+    const keywordCount = fallbackSections.filter(
+      (s: any) => s.title.toLowerCase().includes(primaryKeyword.toLowerCase())
+    ).length;
+    const keywordScore = Math.min(15, keywordCount * 5);
+
+    // Assume some content type diversity in fallback
+    const contentTypeDiversityScore = 10;
+
+    // Calculate total fallback score and ensure it never exceeds 100
+    const fallbackScore = Math.min(
+      100,
+      baseScore + sectionCountScore + keywordScore + contentTypeDiversityScore
+    );
+
     return {
       sections: fallbackSections,
-      score: 75 // Default score for fallback content
+      score: fallbackScore,
+      timestamp,
+      sectionTitles: fallbackSectionTitles
     };
   }
 };

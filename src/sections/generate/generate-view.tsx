@@ -187,9 +187,26 @@ export function GeneratingView() {
     }, 500);
   }, [activeStep, isGenerated]);
 
+  // Add event listener for custom navigation event
+  useEffect(() => {
+    const handleGenerateNextStep = () => {
+      if (activeStep === 1) {
+        handleNext();
+      }
+    };
+
+    window.addEventListener('generate-next-step', handleGenerateNextStep);
+
+    return () => {
+      window.removeEventListener('generate-next-step', handleGenerateNextStep);
+    };
+  }, [activeStep, handleNext]);
+
+  // Automatic navigation after generation (as a fallback)
   useEffect(() => {
     if (isGenerated && !isGeneratingSections && generatedSections.length > 0) {
       if (activeStep === 1 && !isNavigatingBack) {
+        // This is a fallback in case the custom event doesn't work
         setTimeout(() => {
           handleNext();
         }, 4000);
@@ -226,18 +243,28 @@ export function GeneratingView() {
         isGenerating: isGeneratingSections,
         isGenerated,
         onGenerate: async () => {
-          // Get all the necessary values from step1Form
-          const formValues = step1Form.getValues();
-          const title = formValues.title || 'Topic';
-          const primaryKeyword = formValues.primaryKeyword || title;
-          const secondaryKeywords = formValues.secondaryKeywords || [];
-          const language = formValues.language || 'en';
+          // Get all the necessary values from step1Form and step2Form
+          const step1Values = step1Form.getValues();
+          const step2Values = step2Form.getValues();
+
+          const title = step1Values.title || 'Topic';
+          const primaryKeyword = step1Values.primaryKeyword || title;
+          const secondaryKeywords = step1Values.secondaryKeywords || [];
+          const language = step1Values.language || 'en';
+          const targetCountry = step1Values.targetCountry || 'United States';
+          const contentType = step2Values.articleType || 'blog';
+          const articleSize = step2Values.articleSize || 'medium';
+          const toneOfVoice = step2Values.toneOfVoice || 'professional';
 
           console.log('Generating table of contents with:', {
             title,
             primaryKeyword,
             secondaryKeywords,
-            language
+            language,
+            targetCountry,
+            contentType,
+            articleSize,
+            toneOfVoice
           });
 
           // Pass all the values to the handleGenerateTableOfContents function
@@ -246,7 +273,11 @@ export function GeneratingView() {
             undefined, // onGenerate callback
             primaryKeyword,
             secondaryKeywords,
-            language
+            language,
+            contentType,
+            articleSize,
+            toneOfVoice,
+            targetCountry
           );
         },
       }

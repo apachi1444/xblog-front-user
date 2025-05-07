@@ -94,8 +94,18 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
     setCurrentSection(null);
   }, []);
 
-  // Generate table of contents based on title
-  const handleGenerateTableOfContents = async (title: string, onGenerate?: () => void, primaryKeyword?: string, secondaryKeywords?: string[], language?: string) => {
+  // Generate table of contents based on title and other parameters
+  const handleGenerateTableOfContents = async (
+    title: string,
+    onGenerate?: () => void,
+    primaryKeyword?: string,
+    secondaryKeywords?: string[],
+    language?: string,
+    contentType?: string,
+    articleSize?: string,
+    toneOfVoice?: string,
+    targetCountry?: string
+  ) => {
     // Only start generating if we're not already in a generated state
     // This prevents the generating UI from appearing when navigating back
     if (!isGenerated) {
@@ -118,7 +128,11 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
           title,
           primaryKeyword: primaryKeyword || title,
           secondaryKeywords: secondaryKeywords || [],
-          language: language || 'en'
+          language: language || 'en',
+          contentType: contentType || 'blog',
+          articleSize: articleSize || 'medium',
+          toneOfVoice: toneOfVoice || 'professional',
+          targetCountry: targetCountry || 'United States'
         });
 
         const result = await generateSections(
@@ -126,7 +140,10 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
           primaryKeyword || title,
           secondaryKeywords || [],
           language || 'en',
-          'blog'
+          contentType || 'blog',
+          articleSize || 'medium',
+          toneOfVoice || 'professional',
+          targetCountry || 'United States'
         );
 
         console.log('Generated sections result:', result);
