@@ -42,6 +42,10 @@ export interface Step1State {
       handleDeleteKeyword: (arg: string) => void
       onGenerate: () => Promise<void>
     }
+    contentDescription?: {
+      isOptimizing: boolean
+      onOptimize: () => Promise<void>
+    }
   }
 }
 
@@ -312,6 +316,71 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 },
               }}
             />
+
+            {/* Optimize Content Description Button */}
+            {contentDescription && primaryKeyword && (
+              <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, minHeight: theme.spacing(4) }}>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={state.generation.contentDescription?.onOptimize}
+                  disabled={state.generation.contentDescription?.isOptimizing}
+                  startIcon={
+                    state.generation.contentDescription?.isOptimizing ? (
+                      <CircularProgress
+                        size={16}
+                        color="inherit"
+                        sx={{
+                          animation: "spin 1.2s linear infinite",
+                          "@keyframes spin": {
+                            "0%": { transform: "rotate(0deg)" },
+                            "100%": { transform: "rotate(360deg)" },
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Iconify icon="eva:sparkle-fill" width={16} />
+                    )
+                  }
+                  sx={{
+                    borderRadius: theme.spacing(3),
+                    borderColor: theme.palette.secondary.dark,
+                    textTransform: "none",
+                    fontSize: theme.typography.pxToRem(12),
+                    transition: "all 0.3s ease",
+                    opacity: state.generation.contentDescription?.isOptimizing ? 0.8 : 1,
+                    color: theme.palette.secondary.dark,
+                    "&:hover": {
+                      color: theme.palette.secondary.dark,
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "inherit",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {state.generation.contentDescription?.isOptimizing ? "Optimizing..." : "Optimize with AI"}
+                  </Typography>
+                </Button>
+              </Box>
+            )}
+
+            {/* Content Description Optimization Loading Animation */}
+            <AnimatePresence>
+              {state.generation.contentDescription?.isOptimizing && (
+                <Box sx={{ mt: 2, position: 'relative' }}>
+                  <GenerationLoadingAnimation
+                    isLoading={state.generation.contentDescription.isOptimizing}
+                    message="Optimizing your content description..."
+                    size="medium"
+                  />
+                </Box>
+              )}
+            </AnimatePresence>
           </Box>
         </FormContainer>
       </Grid>

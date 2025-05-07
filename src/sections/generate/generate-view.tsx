@@ -51,6 +51,7 @@ export function GeneratingView() {
     handleGenerateSecondaryKeywords,
     handleAddKeyword,
     handleDeleteKeyword,
+    handleOptimizeContentDescription,
   } = useContentSetupForm();
 
   const { step2Form } = useArticleSettingsForm();
@@ -232,6 +233,10 @@ export function GeneratingView() {
         onGenerate: handleGenerateSecondaryKeywords,
         handleAddKeyword,
         handleDeleteKeyword,
+      },
+      contentDescription: {
+        isOptimizing: generationState.contentDescription.isOptimizing,
+        onOptimize: handleOptimizeContentDescription,
       },
     },
   };

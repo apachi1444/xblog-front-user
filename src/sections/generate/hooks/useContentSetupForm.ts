@@ -6,7 +6,12 @@ import { useForm, useFormContext } from 'react-hook-form';
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
 import { step1Schema } from '../schemas';
-import { generateMeta, generateTitle, generateSecondaryKeywords } from '../../../utils/aiGeneration';
+import {
+  generateMeta,
+  generateTitle,
+  generateSecondaryKeywords,
+  optimizeContentDescription
+} from '../../../utils/aiGeneration';
 
 import type { Step1FormData } from '../schemas';
 
@@ -34,6 +39,9 @@ export const useContentSetupForm = () => {
     },
     secondaryKeywords: {
       isGenerating: false,
+    },
+    contentDescription: {
+      isOptimizing: false,
     },
   });
 
@@ -347,6 +355,52 @@ export const useContentSetupForm = () => {
     // This prevents duplicate toasts when removing keywords
   };
 
+  // Content description optimization handler
+  const handleOptimizeContentDescription = async () => {
+    // Check if user has regeneration credits
+    if (!checkRegenerationCredits()) {
+      return; // Exit if no credits available
+    }
+
+    setGenerationState(prev => ({
+      ...prev,
+      contentDescription: { isOptimizing: true }
+    }));
+
+    try {
+      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
+
+      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription'])) {
+        return;
+      }
+
+      // Call the Gemini API to optimize content description
+      const optimizedContent = await optimizeContentDescription(
+        contentDescription,
+        primaryKeyword,
+        targetCountry,
+        language
+      );
+
+      // Update form value
+      step1Form.setValue('contentDescription', optimizedContent, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+
+      toast.success('Content description optimized successfully');
+    } catch (error) {
+      console.error('Content description optimization error:', error);
+      toast.error('Failed to optimize content description');
+    } finally {
+      setGenerationState(prev => ({
+        ...prev,
+        contentDescription: { isOptimizing: false }
+      }));
+    }
+  };
+
   return {
     step1Form,
     generationState,
@@ -356,6 +410,7 @@ export const useContentSetupForm = () => {
     handleGenerateSecondaryKeywords,
     handleAddKeyword,
     handleDeleteKeyword,
+    handleOptimizeContentDescription,
     validateRequiredFields,
     // Regeneration dialog state
     showRegenerationDialog,

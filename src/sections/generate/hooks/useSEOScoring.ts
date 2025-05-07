@@ -34,7 +34,7 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
   // State for SEO scoring
   const [progressSections, setProgressSections] = useState<ProgressSection[]>([]);
   const [overallScore, setOverallScore] = useState<number>(0);
-  const [totalMaxScore, setTotalMaxScore] = useState<number>(100);
+  // We don't need to track totalMaxScore as state since we're capping it at 100
   const [changedCriteriaIds, setChangedCriteriaIds] = useState<number[]>([]);
   const [previousItems, setPreviousItems] = useState<Record<number, ChecklistItem>>({});
 
@@ -312,7 +312,7 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
     }
 
     if (newMaxScore !== currentMaxScore) {
-      setTotalMaxScore(newMaxScore);
+      // We don't need to update state for max score anymore
       prevValuesRef.current.maxScore = newMaxScore;
       stateChanged = true;
       console.log('[SEO DEBUG] Max score changed:', { old: currentMaxScore, new: newMaxScore });
@@ -436,11 +436,13 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
   return useMemo(() => {
     // Ensure the score never exceeds 100 points
     const cappedScore = Math.min(100, Math.round(overallScore));
+    // Also cap the max score at 100 for display purposes
+    const cappedMaxScore = 100;
 
     return {
       progressSections,
       overallScore: cappedScore,
-      totalMaxScore,
+      totalMaxScore: cappedMaxScore,
       changedCriteriaIds,
       formattedScore: formatPoints(cappedScore),
       getAffectedCriteriaByField,
@@ -449,7 +451,6 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
   }, [
     progressSections,
     overallScore,
-    totalMaxScore,
     changedCriteriaIds,
     getAffectedCriteriaByField,
     simulateFieldChange

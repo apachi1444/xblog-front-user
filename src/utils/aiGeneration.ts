@@ -613,3 +613,74 @@ Ensure the JSON is valid and properly formatted. Include at least 5-7 sections f
     };
   }
 };
+
+/**
+ * Optimize content description using Gemini API
+ * @param contentDescription - The original content description to optimize
+ * @param primaryKeyword - The primary keyword for the article
+ * @param targetCountry - The target country for the article
+ * @param targetLanguage - The target language for the article
+ * @returns The optimized content description
+ */
+export const optimizeContentDescription = async (
+  contentDescription: string,
+  primaryKeyword: string,
+  targetCountry: string,
+  targetLanguage: string
+): Promise<string> => {
+  try {
+    const prompt = `You are given:
+- Original content description: ${contentDescription}
+- Primary keyword: ${primaryKeyword}
+- Target country: ${targetCountry}
+- Target language: ${targetLanguage}
+
+Optimize the content description to make it more SEO-friendly and engaging.
+
+The optimized description must:
+- Include the primary keyword naturally (not forced)
+- Be well-structured and clear
+- Be 100-200 words in length
+- Use active voice and engaging language
+- Address the target audience in the specified country
+- Be written in the target language
+- Maintain the original intent and main points
+- Include relevant LSI (Latent Semantic Indexing) keywords
+- Be suitable for content planning and article generation
+
+Return only the optimized content description as plain text, without any additional text, formatting, or explanations.`;
+
+    const requestData: GeminiRequest = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt
+            }
+          ]
+        }
+      ]
+    };
+
+    const response = await axios.post<GeminiResponse>(
+      `${GEMINI_API_URL}?key=${API_KEY}`,
+      requestData
+    );
+
+    // Log the response for debugging (remove in production)
+    console.log('Gemini API response (optimize content):', JSON.stringify(response.data, null, 2));
+
+    // Extract the optimized content from the response
+    const optimizedContent = response.data.candidates[0]?.content.parts[0]?.text.trim();
+
+    if (!optimizedContent) {
+      throw new Error('No optimized content was generated');
+    }
+
+    // Return the optimized content
+    return optimizedContent;
+  } catch (error) {
+    console.error('Error optimizing content description:', error);
+    throw error;
+  }
+};
