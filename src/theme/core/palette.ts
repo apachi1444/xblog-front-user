@@ -111,9 +111,9 @@ export const background = {
     neutral: grey[200],
   }),
   dark: createPaletteChannel({
-    paper: '#18191A',  // Dark color for paper in dark mode
-    default: '#0A0A0A',
-    neutral: '#212223',
+    paper: '#1E1E2E',  // Modern dark purple-blue tint
+    default: '#141422',
+    neutral: '#2A2A3C',
   }),
 };
 
@@ -158,7 +158,7 @@ export const baseDarkPalette = {
   error: darkError,
   grey: darkGrey,
   common: darkCommon,
-  divider: varAlpha(darkGrey['500Channel'], 0.2), 
+  divider: varAlpha(darkGrey['500Channel'], 0.2),
 }
 
 export const lightPalette = {

@@ -54,19 +54,22 @@ export function SEODashboard({
     },
   } = state;
 
-  // Use the form values directly from the state object
-  // This ensures we're using the correct form context
-  const {
-    primaryKeyword = '',
-    secondaryKeywords = [],
-    contentDescription = '',
-    language = '',
-    targetCountry = '',
-    title = '',
-    metaTitle = '',
-    metaDescription = '',
-    urlSlug = ''
-  } = form.getValues();
+  // Use the form values directly from the state object but memoize them
+  // This ensures we're using the correct form context and prevents unnecessary re-renders
+  const formValues = useMemo(() => {
+    const values = form.getValues();
+    return {
+      primaryKeyword: values.primaryKeyword || '',
+      secondaryKeywords: values.secondaryKeywords || [],
+      contentDescription: values.contentDescription || '',
+      language: values.language || '',
+      targetCountry: values.targetCountry || '',
+      title: values.title || '',
+      metaTitle: values.metaTitle || '',
+      metaDescription: values.metaDescription || '',
+      urlSlug: values.urlSlug || ''
+    };
+  }, [form]);
   const theme = useTheme();
 
   const { progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds } = useSEOScoring(form);
@@ -99,7 +102,7 @@ export function SEODashboard({
     }
   }, [isCollapsed, internalShowContent, onCollapseChange]);
 
-  const isGenerateDisabled = !primaryKeyword || !secondaryKeywords || !contentDescription || !language || !targetCountry;
+  const isGenerateDisabled = !formValues.primaryKeyword || !formValues.secondaryKeywords.length || !formValues.contentDescription || !formValues.language || !formValues.targetCountry;
 
   // Memoize tab content to prevent unnecessary re-renders
   const tabContent = useMemo(() => {
@@ -107,10 +110,10 @@ export function SEODashboard({
       case 0:
         return (
           <PreviewSEOTab
-            title={title}
-            metaTitle={metaTitle}
-            metaDescription={metaDescription}
-            urlSlug={urlSlug}
+            title={formValues.title}
+            metaTitle={formValues.metaTitle}
+            metaDescription={formValues.metaDescription}
+            urlSlug={formValues.urlSlug}
             onGenerateMeta={onGenerateMeta}
             isGeneratingMeta={isGeneratingMeta}
             isGenerateDisabled={isGenerateDisabled}
@@ -133,7 +136,7 @@ export function SEODashboard({
       default:
         return null;
     }
-  }, [tabValue, title, metaTitle, metaDescription, urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds]);
+  }, [tabValue, formValues, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds]);
 
   return (
     <Box sx={{

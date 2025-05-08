@@ -2,6 +2,7 @@ import type { UseFormReturn } from 'react-hook-form';
 
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
+import { debounce } from '../../../utils/debounce';
 import {
   formatPoints,
   getPointsForItem
@@ -213,102 +214,117 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
     generateAdditionalSEOItems
   ]);
 
+  // Create a debounced version of the score calculation function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedCalculateScores = useCallback(
+    debounce(() => {
+      // Log that we're recalculating scores
+      console.log('[SEO DEBUG] Recalculating SEO scores...');
+
+      // Generate checklist items and calculate scores
+      const { sections, scoreResult } = generateChecklistItems();
+
+      // Track changes in criteria
+      const allItems = sections.flatMap(section => section.items);
+      const newChangedIds: number[] = [];
+
+      // Create a map of all current items
+      const currentItems: Record<number, ChecklistItem> = {};
+      allItems.forEach(item => {
+        currentItems[item.id] = item;
+
+        // Check if this item has changed from its previous state
+        const prevItem = previousItems[item.id];
+        if (prevItem) {
+          // Check if status or score has changed
+          if (prevItem.status !== item.status || prevItem.score !== item.score) {
+            newChangedIds.push(item.id);
+
+            // Log the change for debugging
+            console.log(`[SEO DEBUG] Item ${item.id} changed:`, {
+              text: item.text,
+              oldStatus: prevItem.status,
+              newStatus: item.status,
+              oldScore: prevItem.score,
+              newScore: item.score
+            });
+          }
+        }
+      });
+
+      // Get new values
+      const newScore = scoreResult.score;
+      const newMaxScore = scoreResult.maxScore;
+
+      // Get current values from refs to avoid unnecessary re-renders
+      const currentSectionsHash = prevValuesRef.current.sectionsHash;
+      const currentScore = prevValuesRef.current.score;
+      const currentMaxScore = prevValuesRef.current.maxScore;
+      const lastUpdate = prevValuesRef.current.lastUpdate || 0;
+
+      // Create a hash of the sections to compare
+      const sectionsHash = JSON.stringify(sections);
+
+      // Only update state if values have actually changed
+      let stateChanged = false;
+
+      // Always update if the lastUpdate timestamp has changed (form values changed)
+      const now = Date.now();
+      if (now - lastUpdate < 1000) { // Only consider updates within the last second
+        console.log('[SEO DEBUG] Forcing update due to form value change');
+        stateChanged = true;
+      }
+
+      if (sectionsHash !== currentSectionsHash) {
+        setProgressSections(sections);
+        prevValuesRef.current.sectionsHash = sectionsHash;
+        stateChanged = true;
+        console.log('[SEO DEBUG] Sections changed');
+      }
+
+      if (Math.round(newScore) !== Math.round(currentScore)) {
+        setOverallScore(newScore);
+        prevValuesRef.current.score = newScore;
+        stateChanged = true;
+        console.log('[SEO DEBUG] Overall score changed:', { old: currentScore, new: newScore });
+      }
+
+      if (newMaxScore !== currentMaxScore) {
+        // We don't need to update state for max score anymore
+        prevValuesRef.current.maxScore = newMaxScore;
+        stateChanged = true;
+        console.log('[SEO DEBUG] Max score changed:', { old: currentMaxScore, new: newMaxScore });
+      }
+
+      if (newChangedIds.length > 0) {
+        setChangedCriteriaIds(newChangedIds);
+        stateChanged = true;
+        console.log('[SEO DEBUG] Changed criteria IDs:', newChangedIds);
+      }
+
+      // Only update previous items if something changed
+      if (stateChanged) {
+        setPreviousItems(currentItems);
+        console.log('[SEO DEBUG] State updated');
+      } else {
+        console.log('[SEO DEBUG] No state changes detected');
+      }
+    }, 500), // 500ms debounce delay
+    [generateChecklistItems, previousItems]
+  );
+
   // Use a single useEffect with optimized dependency array
   useEffect(() => {
-    // Log that we're recalculating scores
-    console.log('[SEO DEBUG] Recalculating SEO scores...');
+    // Call the debounced function instead of doing the calculation directly
+    debouncedCalculateScores();
 
-    // Generate checklist items and calculate scores
-    const { sections, scoreResult } = generateChecklistItems();
-
-    // Track changes in criteria
-    const allItems = sections.flatMap(section => section.items);
-    const newChangedIds: number[] = [];
-
-    // Create a map of all current items
-    const currentItems: Record<number, ChecklistItem> = {};
-    allItems.forEach(item => {
-      currentItems[item.id] = item;
-
-      // Check if this item has changed from its previous state
-      const prevItem = previousItems[item.id];
-      if (prevItem) {
-        // Check if status or score has changed
-        if (prevItem.status !== item.status || prevItem.score !== item.score) {
-          newChangedIds.push(item.id);
-
-          // Log the change for debugging
-          console.log(`[SEO DEBUG] Item ${item.id} changed:`, {
-            text: item.text,
-            oldStatus: prevItem.status,
-            newStatus: item.status,
-            oldScore: prevItem.score,
-            newScore: item.score
-          });
-        }
-      }
-    });
-
-    // Get new values
-    const newScore = scoreResult.score;
-    const newMaxScore = scoreResult.maxScore;
-
-    // Get current values from refs to avoid unnecessary re-renders
-    const currentSectionsHash = prevValuesRef.current.sectionsHash;
-    const currentScore = prevValuesRef.current.score;
-    const currentMaxScore = prevValuesRef.current.maxScore;
-    const lastUpdate = prevValuesRef.current.lastUpdate || 0;
-
-    // Create a hash of the sections to compare
-    const sectionsHash = JSON.stringify(sections);
-
-    // Only update state if values have actually changed
-    let stateChanged = false;
-
-    // Always update if the lastUpdate timestamp has changed (form values changed)
-    const now = Date.now();
-    if (now - lastUpdate < 1000) { // Only consider updates within the last second
-      console.log('[SEO DEBUG] Forcing update due to form value change');
-      stateChanged = true;
-    }
-
-    if (sectionsHash !== currentSectionsHash) {
-      setProgressSections(sections);
-      prevValuesRef.current.sectionsHash = sectionsHash;
-      stateChanged = true;
-      console.log('[SEO DEBUG] Sections changed');
-    }
-
-    if (Math.round(newScore) !== Math.round(currentScore)) {
-      setOverallScore(newScore);
-      prevValuesRef.current.score = newScore;
-      stateChanged = true;
-      console.log('[SEO DEBUG] Overall score changed:', { old: currentScore, new: newScore });
-    }
-
-    if (newMaxScore !== currentMaxScore) {
-      // We don't need to update state for max score anymore
-      prevValuesRef.current.maxScore = newMaxScore;
-      stateChanged = true;
-      console.log('[SEO DEBUG] Max score changed:', { old: currentMaxScore, new: newMaxScore });
-    }
-
-    if (newChangedIds.length > 0) {
-      setChangedCriteriaIds(newChangedIds);
-      stateChanged = true;
-      console.log('[SEO DEBUG] Changed criteria IDs:', newChangedIds);
-    }
-
-    // Only update previous items if something changed
-    if (stateChanged) {
-      setPreviousItems(currentItems);
-      console.log('[SEO DEBUG] State updated');
-    } else {
-      console.log('[SEO DEBUG] No state changes detected');
-    }
+    // Return a cleanup function that cancels any pending debounced calls
+    return () => {
+      // The debounce implementation doesn't expose a cancel method,
+      // but the next call will clear any pending timeouts
+    };
   }, [
-    generateChecklistItems,
-    previousItems,
+    debouncedCalculateScores,
     watchedFields,
     // Add individual watched fields to ensure the effect runs when any of them change
     watchMetaDescription,

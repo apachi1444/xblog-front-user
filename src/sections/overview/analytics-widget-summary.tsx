@@ -1,17 +1,15 @@
 import type { CardProps } from '@mui/material/Card';
 import type { ColorType } from 'src/theme/core/palette';
-import type { ChartOptions } from 'src/components/chart';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
 
-import { fNumber, fShortenNumber } from 'src/utils/format-number';
+import { fShortenNumber } from 'src/utils/format-number';
 
 import { varAlpha, bgGradient } from 'src/theme/styles';
 
 import { SvgColor } from 'src/components/svg-color';
-import { Chart, useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
@@ -21,18 +19,12 @@ type Props = CardProps & {
   percent: number;
   color?: ColorType;
   icon: React.ReactNode;
-  chart: {
-    series: number[];
-    categories: string[];
-    options?: ChartOptions;
-  };
 };
 
 export function AnalyticsWidgetSummary({
   icon,
   title,
   total,
-  chart,
   percent,
   color = 'primary',
   sx,
@@ -40,63 +32,90 @@ export function AnalyticsWidgetSummary({
 }: Props) {
   const theme = useTheme();
 
-  const chartColors = [theme.palette[color].dark];
-
-  const chartOptions = useChart({
-    chart: { sparkline: { enabled: true } },
-    colors: chartColors,
-    xaxis: { categories: chart.categories },
-    grid: {
-      padding: {
-        top: 6,
-        left: 6,
-        right: 6,
-        bottom: 6,
-      },
-    },
-    tooltip: {
-      y: { formatter: (value: number) => fNumber(value), title: { formatter: () => '' } },
-    },
-    ...chart.options,
-  });
+  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <Card
       sx={{
         ...bgGradient({
-          color: `135deg, ${varAlpha(theme.palette[color].lighterChannel, 0.48)}, ${varAlpha(theme.palette[color].lightChannel, 0.48)}`,
+          color: isDarkMode
+            ? `135deg, ${varAlpha(theme.palette[color].darkerChannel, 0.8)}, ${varAlpha(theme.palette[color].darkChannel, 0.8)}`
+            : `135deg, ${varAlpha(theme.palette[color].lighterChannel, 0.48)}, ${varAlpha(theme.palette[color].lightChannel, 0.48)}`,
         }),
         p: 3,
-        boxShadow: 'none',
+        boxShadow: isDarkMode ? `0 8px 16px 0 ${varAlpha(theme.palette[color].darkChannel, 0.24)}` : 'none',
         position: 'relative',
-        color: `${color}.darker`,
-        backgroundColor: 'common.white',
+        color: isDarkMode ? `${color}.lighter` : `${color}.darker`,
+        backgroundColor: isDarkMode ? 'transparent' : 'common.white',
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: isDarkMode
+            ? `0 12px 20px 0 ${varAlpha(theme.palette[color].darkChannel, 0.3)}`
+            : theme.customShadows.z8,
+        },
         ...sx,
       }}
       {...other}
     >
-      <Box sx={{ width: 48, height: 48, mb: 3 }}>{icon}</Box>
+      <Box
+        sx={{
+          width: 48,
+          height: 48,
+          mb: 3,
+          color: isDarkMode ? `${color}.light` : `${color}.main`,
+          transition: 'transform 0.3s ease-in-out',
+          '& svg': {
+            filter: isDarkMode ? 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.2))' : 'none'
+          }
+        }}
+      >
+        {icon}
+      </Box>
 
       <Box
         sx={{
           display: 'flex',
           flexWrap: 'wrap',
-          alignItems: 'flex-end',
-          justifyContent: 'flex-end',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
         <Box sx={{ flexGrow: 1, minWidth: 112 }}>
-          <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
-          <Box sx={{ typography: 'h4' }}>{fShortenNumber(total)}</Box>
+          <Box sx={{
+            mb: 1,
+            typography: 'subtitle2',
+            color: isDarkMode ? 'grey.100' : 'inherit'
+          }}>
+            {title}
+          </Box>
+          <Box sx={{
+            typography: 'h4',
+            color: isDarkMode ? 'common.white' : 'inherit',
+            textShadow: isDarkMode ? '0 0 8px rgba(255, 255, 255, 0.15)' : 'none'
+          }}>
+            {fShortenNumber(total)}
+          </Box>
         </Box>
 
-        <Chart
-          type="line"
-          series={[{ data: chart.series }]}
-          options={chartOptions}
-          width={84}
-          height={56}
-        />
+        <Box
+          sx={{
+            typography: 'subtitle2',
+            color: percent >= 0
+              ? (isDarkMode ? 'success.light' : 'success.main')
+              : (isDarkMode ? 'error.light' : 'error.main'),
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4px 8px',
+            borderRadius: '12px',
+            backgroundColor: percent >= 0
+              ? (isDarkMode ? varAlpha(theme.palette.success.mainChannel, 0.16) : varAlpha(theme.palette.success.mainChannel, 0.08))
+              : (isDarkMode ? varAlpha(theme.palette.error.mainChannel, 0.16) : varAlpha(theme.palette.error.mainChannel, 0.08)),
+          }}
+        >
+          {percent > 0 && '+'}
+          {percent}%
+        </Box>
       </Box>
 
       <SvgColor
@@ -107,9 +126,10 @@ export function AnalyticsWidgetSummary({
           width: 240,
           zIndex: -1,
           height: 240,
-          opacity: 0.24,
+          opacity: isDarkMode ? 0.16 : 0.24,
           position: 'absolute',
           color: `${color}.main`,
+          filter: isDarkMode ? 'blur(2px)' : 'none',
         }}
       />
     </Card>
