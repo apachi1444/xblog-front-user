@@ -1,46 +1,59 @@
 // SEO Scoring Points System
-// This file defines the point values for each SEO criterion based on the provided table
+// This file defines the point values for each SEO criterion based on the detailed scoring rules
+
+import { SEO_SCORING_RULES } from './seoScoringRules';
+import { calculateSectionMaxScores } from './seoScoringCalculator';
 
 export interface ScoringItem {
   id: number;
   description: string;
   points: number;
   category: 'primary' | 'title' | 'content' | 'additional';
+  max_score?: number; // Maximum possible score for this item
 }
 
-// Define the scoring items with their point values
+// Calculate section weights based on max scores
+export const sectionScores = calculateSectionMaxScores();
+
+// Define the scoring items with their point values based on the detailed rules
 export const SEO_SCORING_ITEMS: ScoringItem[] = [
-  // Primary SEO Checklist (35%)
-  { id: 101, description: 'Focus keyword in meta description', points: 10, category: 'primary' },
-  { id: 102, description: 'Focus keyword in URL', points: 10, category: 'primary' },
-  { id: 103, description: 'Keyword in first 10% of content', points: 10, category: 'primary' },
-  { id: 104, description: 'Focus keyword included in content description', points: 10, category: 'primary' },
-  { id: 105, description: 'Secondary keywords are defined', points: 10, category: 'primary' },
-  { id: 106, description: 'Language and target country are specified', points: 10, category: 'primary' },
+  // Primary SEO Checklist (30%)
+  ...SEO_SCORING_RULES.primary_seo.map(item => ({
+    id: item.id,
+    description: item.description,
+    points: item.max_score,
+    category: 'primary' as const,
+    max_score: item.max_score
+  })),
 
-  // Title Optimization (25%)
-  { id: 201, description: 'Keyword at the start of the title', points: 3.5, category: 'title' },
-  { id: 202, description: 'Emotional sentiment in title', points: 3.5, category: 'title' },
-  { id: 203, description: 'Power words used', points: 3.5, category: 'title' },
-  { id: 204, description: 'Keyword in SEO title', points: 3.5, category: 'title' },
-  { id: 205, description: 'Title length is optimal', points: 3.5, category: 'title' },
-  { id: 206, description: 'Meta title length is optimal', points: 3.5, category: 'title' },
-  { id: 207, description: 'Meta description length is optimal', points: 3.5, category: 'title' },
+  // Title Optimization (28%)
+  ...SEO_SCORING_RULES.title_optimization.map(item => ({
+    id: item.id,
+    description: item.description,
+    points: item.max_score,
+    category: 'title' as const,
+    max_score: item.max_score
+  })),
 
-  // Content Presentation (20%)
-  { id: 301, description: 'Content description is detailed and comprehensive', points: 5, category: 'content' },
-  { id: 302, description: 'Content description includes primary keyword', points: 5, category: 'content' },
-  { id: 303, description: 'Content description includes secondary keywords', points: 5, category: 'content' },
-  { id: 304, description: 'Content description is clear and focused', points: 5, category: 'content' },
+  // Content Presentation (24%)
+  ...SEO_SCORING_RULES.content_presentation.map(item => ({
+    id: item.id,
+    description: item.description,
+    points: item.max_score,
+    category: 'content' as const,
+    max_score: item.max_score
+  })),
 
-  // Additional SEO Factors (10%)
-  { id: 401, description: 'URL slug is concise and descriptive', points: 1.6667, category: 'additional' },
-  { id: 402, description: 'URL slug uses hyphens to separate words', points: 1.6667, category: 'additional' },
-  { id: 403, description: 'URL slug contains no special characters', points: 1.6667, category: 'additional' },
-  { id: 404, description: 'Language and target country are compatible', points: 1.6667, category: 'additional' },
-  { id: 405, description: 'Secondary keywords are relevant to primary keyword', points: 1.6667, category: 'additional' },
-  { id: 406, description: 'Has sufficient number of secondary keywords', points: 1.6667, category: 'additional' },
+  // Additional SEO Factors (18%)
+  ...SEO_SCORING_RULES.additional_seo_factors.map(item => ({
+    id: item.id,
+    description: item.description,
+    points: item.max_score,
+    category: 'additional' as const,
+    max_score: item.max_score
+  })),
 ];
+
 
 // Get the total possible points
 export const TOTAL_POSSIBLE_POINTS = SEO_SCORING_ITEMS.reduce(
@@ -54,30 +67,27 @@ export const getPointsForItem = (itemId: number): number => {
   return item ? item.points : 0;
 };
 
-// Get category weight
+// Get max score for a specific item ID
+export const getMaxScoreForItem = (itemId: number): number => {
+  const item = SEO_SCORING_ITEMS.find(i => i.id === itemId);
+  return item?.max_score || 0;
+};
+
+// Get category weight based on calculated section scores
 export const getCategoryWeight = (category: string): number => {
   switch (category) {
     case 'primary':
-      return 35;
+      return sectionScores.weights.primarySeo;
     case 'title':
-      return 25;
+      return sectionScores.weights.titleOptimization;
     case 'content':
-      return 20;
+      return sectionScores.weights.contentPresentation;
     case 'additional':
-      return 10;
+      return sectionScores.weights.additionalSeoFactors;
     default:
       return 0;
   }
 };
-
-// Get items by category
-export const getItemsByCategory = (category: string): ScoringItem[] => SEO_SCORING_ITEMS.filter(item => item.category === category);
-
-// Calculate total possible points for a category
-export const getTotalPointsForCategory = (category: string): number => getItemsByCategory(category).reduce(
-    (total, item) => total + item.points,
-    0
-  );
 
 // Format points display
 export const formatPoints = (points: number): string => points % 1 === 0 ? points.toString() : points.toFixed(1);

@@ -3,8 +3,10 @@ import type { ChecklistItem } from "src/utils/seoScoring";
 import { useState, useEffect } from "react";
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import OptimizeIcon from '@mui/icons-material/Tune';
 import { Box, Button, Tooltip, useTheme, Typography, Chip } from "@mui/material";
 import { formatPoints } from "src/utils/seoScoringPoints";
+import { useTranslation } from 'react-i18next';
 
 // Constants
 const COLORS = {
@@ -64,11 +66,28 @@ function NotificationIcon({ status }: { status: string }) {
 
 interface ItemSectionProps extends ChecklistItem {
   onActionClick?: (item: ChecklistItem) => void;
+  onOptimizeClick?: (item: ChecklistItem) => void;
   isHighlighted?: boolean;
+  showOptimizeButton?: boolean;
 }
 
-export function ItemSection({ id, status, text, action, tooltip, score, maxScore, points, maxPoints, onActionClick, isHighlighted = false }: ItemSectionProps) {
+export function ItemSection({
+  id,
+  status,
+  text,
+  action,
+  tooltip,
+  score,
+  maxScore,
+  points,
+  maxPoints,
+  onActionClick,
+  onOptimizeClick,
+  isHighlighted = false,
+  showOptimizeButton = false
+}: ItemSectionProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const color = COLORS[status];
   const icon = <NotificationIcon status={status} />;
 
@@ -90,6 +109,12 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
   const handleActionClick = () => {
     if (onActionClick) {
       onActionClick({ id, status, text, action, tooltip, score, maxScore, points, maxPoints });
+    }
+  };
+
+  const handleOptimizeClick = () => {
+    if (onOptimizeClick) {
+      onOptimizeClick({ id, status, text, action, tooltip, score, maxScore, points, maxPoints });
     }
   };
 
@@ -249,32 +274,58 @@ export function ItemSection({ id, status, text, action, tooltip, score, maxScore
             )}
           </Box>
 
-          {action && status !== 'success' && (
-            <Button
-              variant={isPending ? "text" : status === "error" ? "contained" : "outlined"}
-              size="small"
-              color={status === "error" ? "error" : status === "warning" ? "warning" : "primary"}
-              onClick={handleActionClick}
-              disabled={isPending}
-              sx={{
-                minWidth: "auto",
-                ml: 1,
-                borderRadius: "4px",
-                textTransform: "none",
-                px: 1.5,
-                py: 0.25,
-                fontWeight: status === "error" ? 'bold' : 'normal',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: status === "error" ? '0 4px 8px rgba(211, 47, 47, 0.2)' : 'none',
-                  transition: 'all 0.2s ease-in-out'
-                }
-              }}
-              startIcon={status === "error" ? <AutoFixHighIcon fontSize="small" /> : undefined}
-            >
-              {isPending ? "Waiting" : action}
-            </Button>
-          )}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {/* Optimize button */}
+            {showOptimizeButton && !isPending && status !== 'success' && (
+              <Button
+                variant="outlined"
+                size="small"
+                color="info"
+                onClick={handleOptimizeClick}
+                sx={{
+                  minWidth: "auto",
+                  borderRadius: "4px",
+                  textTransform: "none",
+                  px: 1.5,
+                  py: 0.25,
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    transition: 'all 0.2s ease-in-out'
+                  }
+                }}
+                startIcon={<OptimizeIcon fontSize="small" />}
+              >
+                {t('common.Optimize')}
+              </Button>
+            )}
+
+            {/* Fix/Action button */}
+            {action && status !== 'success' && (
+              <Button
+                variant={isPending ? "text" : status === "error" ? "contained" : "outlined"}
+                size="small"
+                color={status === "error" ? "error" : status === "warning" ? "warning" : "primary"}
+                onClick={handleActionClick}
+                disabled={isPending}
+                sx={{
+                  minWidth: "auto",
+                  borderRadius: "4px",
+                  textTransform: "none",
+                  px: 1.5,
+                  py: 0.25,
+                  fontWeight: status === "error" ? 'bold' : 'normal',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: status === "error" ? '0 4px 8px rgba(211, 47, 47, 0.2)' : 'none',
+                    transition: 'all 0.2s ease-in-out'
+                  }
+                }}
+                startIcon={status === "error" ? <AutoFixHighIcon fontSize="small" /> : undefined}
+              >
+                {isPending ? t('common.Waiting') : action}
+              </Button>
+            )}
+          </Box>
         </Box>
       </Tooltip>
     </Box>

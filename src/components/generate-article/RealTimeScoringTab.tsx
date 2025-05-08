@@ -19,10 +19,14 @@ import {
 } from "@mui/material";
 
 import { formatPoints } from "src/utils/seoScoringPoints";
+import { optimizeInputForSEO } from "src/utils/aiGeneration";
+
 import { useSEOScoring } from "src/sections/generate/hooks/useSEOScoring";
 
 import { ItemSection } from "./ItemSection";
 import { EditItemModal } from "./EditItemModal";
+import { ScoringRulesButton } from "./ScoringRulesModal";
+import { OptimizeInputModal } from "./OptimizeInputModal";
 
 interface RealTimeScoringTabProps {
   progressSections: ProgressSection[];
@@ -52,39 +56,83 @@ interface FieldConfig {
   type: 'text' | 'textarea';
 }
 
-// Map checklist item IDs to form fields
-const FIELD_MAPPING: Record<number, FieldConfig> = {
-  // Primary SEO Checklist
-  101: { field: 'metaDescription', type: 'textarea' },
-  102: { field: 'urlSlug', type: 'text' },
-  103: { field: 'content', type: 'textarea' },
-  104: { field: 'contentDescription', type: 'textarea' },
-  105: { field: 'secondaryKeywords', type: 'text' },
-  106: { field: 'language', type: 'text' },
-
-  // Title Optimization
-  201: { field: 'title', type: 'text' },
-  202: { field: 'title', type: 'text' },
-  203: { field: 'title', type: 'text' },
-  204: { field: 'metaTitle', type: 'text' },
-  205: { field: 'title', type: 'text' },
-  206: { field: 'metaTitle', type: 'text' },
-  207: { field: 'metaDescription', type: 'textarea' },
-
-  // Content Presentation Quality
-  301: { field: 'contentDescription', type: 'textarea' },
-  302: { field: 'contentDescription', type: 'textarea' },
-  303: { field: 'contentDescription', type: 'textarea' },
-  304: { field: 'contentDescription', type: 'textarea' },
-
-  // Additional SEO Factors
-  401: { field: 'urlSlug', type: 'text' },
-  402: { field: 'urlSlug', type: 'text' },
-  403: { field: 'urlSlug', type: 'text' },
-  404: { field: 'language', type: 'text' },
-  405: { field: 'primaryKeyword', type: 'text' },
-  406: { field: 'secondaryKeywords', type: 'text' },
+// Define field types for each form field
+const FIELD_TYPES: Record<string, 'text' | 'textarea'> = {
+  'metaDescription': 'textarea',
+  'urlSlug': 'text',
+  'content': 'textarea',
+  'contentDescription': 'textarea',
+  'secondaryKeywords': 'text',
+  'title': 'text',
+  'metaTitle': 'text',
+  'primaryKeyword': 'text',
+  'language': 'text',
+  'targetCountry': 'text',
+  'internalLinks': 'text',
+  'externalLinks': 'text'
 };
+
+// Function to get the primary form field for a scoring item
+const getPrimaryFieldForScoringItem = (itemId: number): string => {
+  // Define primary fields for each scoring item
+  const SCORING_ITEM_TO_PRIMARY_FIELD: Record<number, string> = {
+    // Primary SEO Checklist
+    101: 'metaDescription', // Focus keyword in meta description
+    102: 'urlSlug',         // Focus keyword in URL
+    103: 'content',         // Keyword in first 10% of content
+    104: 'contentDescription', // Primary keyword used naturally
+    105: 'secondaryKeywords',  // Secondary keywords defined and relevant
+    106: 'language',           // Language and target country are defined
+
+    // Title Optimization
+    201: 'title',           // Keyword at start of title
+    202: 'title',           // Title includes emotional sentiment
+    203: 'title',           // Title uses power words
+    204: 'metaTitle',       // Focus keyword in SEO title
+    205: 'title',           // Title length optimal
+    206: 'metaTitle',       // Meta title length optimal
+    207: 'metaDescription', // Meta description length optimal
+
+    // Content Presentation
+    301: 'contentDescription', // Content detailed and comprehensive
+    302: 'contentDescription', // Content includes primary keyword
+    303: 'contentDescription', // Content includes secondary keywords
+    304: 'contentDescription', // Content clear and focused
+    305: 'internalLinks',      // Internal links to relevant pages
+    306: 'externalLinks',      // External links to high-authority sources
+
+    // Additional SEO Factors
+    401: 'urlSlug',            // URL slug concise and descriptive
+    402: 'urlSlug',            // URL slug uses hyphens
+    403: 'urlSlug',            // URL slug no special characters
+    404: 'language',           // Language and target country compatible
+    405: 'secondaryKeywords',  // Sufficient secondary keywords
+    406: 'secondaryKeywords',  // Secondary keywords support main topic
+  };
+
+  return SCORING_ITEM_TO_PRIMARY_FIELD[itemId] || 'contentDescription';
+};
+
+// Map checklist item IDs to form fields
+const FIELD_MAPPING: Record<number, FieldConfig> = {};
+
+// Generate the field mapping directly from the primary field mapping
+// eslint-disable-next-line no-plusplus
+for (let i = 101; i <= 406; i++) {
+  // Skip items that don't exist in our scoring system
+  if ((i > 106 && i < 201) || (i > 207 && i < 301) || (i > 306 && i < 401) || i > 406) {
+    // eslint-disable-next-line no-continue
+    continue;
+  }
+
+  const field = getPrimaryFieldForScoringItem(i);
+  if (field && FIELD_TYPES[field]) {
+    FIELD_MAPPING[i] = {
+      field,
+      type: FIELD_TYPES[field]
+    };
+  }
+}
 
 // Suggestions are not directly used by EditItemModal in this setup
 // const FIELD_SUGGESTIONS: Record<string, string[]> = { ... };
@@ -96,6 +144,13 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
   const [highlightedItems, setHighlightedItems] = useState<number[]>([]);
+
+  // State for the optimize input modal
+  const [optimizeModalOpen, setOptimizeModalOpen] = useState(false);
+  const [itemToOptimize, setItemToOptimize] = useState<ChecklistItem | null>(null);
+  const [inputTypeToOptimize, setInputTypeToOptimize] = useState<string>('');
+  const [inputLabelToOptimize, setInputLabelToOptimize] = useState<string>('');
+  const [currentInputValue, setCurrentInputValue] = useState<string>('');
 
   const prevChangedIdsRef = useRef<number[]>([]);
 
@@ -312,6 +367,79 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
     }
   };
 
+  // Handle optimize button click
+  const handleOptimizeClick = (item: ChecklistItem) => {
+    // Only allow optimization for items that aren't already at 100% (success status)
+    if (item.status === 'success') {
+      toast.success(`This item is already optimized!`);
+      return;
+    }
+
+    if (FIELD_MAPPING[item.id]) {
+      // Get the field type from the mapping
+      const fieldType = FIELD_MAPPING[item.id].field;
+
+      // Get a user-friendly label for the field
+      const fieldLabels: Record<string, string> = {
+        'metaDescription': 'Meta Description',
+        'urlSlug': 'URL Slug',
+        'content': 'Content',
+        'contentDescription': 'Content Description',
+        'secondaryKeywords': 'Secondary Keywords',
+        'title': 'Title',
+        'metaTitle': 'Meta Title',
+        'primaryKeyword': 'Primary Keyword',
+        'language': 'Language',
+        'targetCountry': 'Target Country',
+        'internalLinks': 'Internal Links',
+        'externalLinks': 'External Links'
+      };
+
+      const fieldLabel = fieldLabels[fieldType] || fieldType;
+
+      // Try to get the field value from all possible locations
+      let fieldValue = '';
+      try {
+        // Try different paths to find the field value
+        const directValue = formContext?.getValues(fieldType);
+        const step1Value = formContext?.getValues(`step1.${fieldType}`);
+        const step2Value = formContext?.getValues(`step2.${fieldType}`);
+        const step3Value = formContext?.getValues(`step3.${fieldType}`);
+
+        // Use the first non-empty value found
+        fieldValue = directValue || step1Value || step2Value || step3Value || '';
+      } catch (error) {
+        console.error(`Error getting form value for ${fieldType}:`, error);
+      }
+
+      // Set up the optimization modal
+      setItemToOptimize(item);
+      setInputTypeToOptimize(fieldType);
+      setInputLabelToOptimize(fieldLabel);
+      setCurrentInputValue(fieldValue);
+      setOptimizeModalOpen(true);
+    } else {
+      toast.error(`Optimization not available for this item yet.`);
+    }
+  };
+
+  // Handle saving the optimized input
+  const handleSaveOptimizedInput = useCallback((newValue: string) => {
+    if (!itemToOptimize || !inputTypeToOptimize) return;
+
+    // Update the form with the new value
+    syncFormField(inputTypeToOptimize, newValue);
+
+    // Simulate field change to update the SEO score
+    simulateFieldChange(inputTypeToOptimize, newValue);
+
+    // Show success toast
+    toast.success(`${inputLabelToOptimize} optimized successfully!`);
+
+    // Close the modal
+    setOptimizeModalOpen(false);
+  }, [itemToOptimize, inputTypeToOptimize, inputLabelToOptimize, syncFormField, simulateFieldChange]);
+
   // --- Define the Optimization Handler ---
   const handleOptimizeField = useCallback(async (fieldType: string, currentValue: string): Promise<string> => {
     console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
@@ -320,53 +448,24 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       // Show loading toast
       toast.loading(`Optimizing ${fieldType}...`, { id: 'optimize-toast' });
 
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Generate optimized content based on field type
-      let optimizedValue = currentValue;
-
-      if (fieldType === 'title' || fieldType === 'metaTitle') {
-        // For titles, ensure they include keywords and are properly formatted
-        if (!optimizedValue.includes('SEO')) {
-          optimizedValue = `SEO-Optimized: ${optimizedValue}`;
+      // Use the AI optimization function
+      const optimizedValue = await optimizeInputForSEO(
+        fieldType,
+        currentValue,
+        itemToOptimize?.id || 0,
+        {
+          primaryKeyword: formContext?.getValues('primaryKeyword') || formContext?.getValues('step1.primaryKeyword') || '',
+          secondaryKeywords: formContext?.getValues('secondaryKeywords') || formContext?.getValues('step1.secondaryKeywords') || [],
+          language: formContext?.getValues('language') || formContext?.getValues('step1.language') || 'en',
+          targetCountry: formContext?.getValues('targetCountry') || formContext?.getValues('step1.targetCountry') || 'United States',
+          title: formContext?.getValues('title') || formContext?.getValues('step1.title') || '',
+          metaTitle: formContext?.getValues('metaTitle') || formContext?.getValues('step1.metaTitle') || '',
+          metaDescription: formContext?.getValues('metaDescription') || formContext?.getValues('step1.metaDescription') || '',
+          urlSlug: formContext?.getValues('urlSlug') || formContext?.getValues('step1.urlSlug') || '',
+          content: formContext?.getValues('content') || formContext?.getValues('step3.content') || '',
+          contentDescription: formContext?.getValues('contentDescription') || formContext?.getValues('step1.contentDescription') || ''
         }
-        // Capitalize first letter of each word
-        optimizedValue = optimizedValue
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-      }
-      else if (fieldType === 'metaDescription') {
-        // For meta descriptions, ensure they're the right length and include call-to-action
-        if (optimizedValue.length < 120) {
-          optimizedValue += ' Learn more about this topic and improve your SEO strategy today.';
-        } else if (optimizedValue.length > 160) {
-          optimizedValue = `${optimizedValue.substring(0, 157)  }...`;
-        }
-
-        if (!optimizedValue.includes('Learn more')) {
-          optimizedValue += ' Learn more now!';
-        }
-      }
-      else if (fieldType === 'urlSlug') {
-        // For URL slugs, ensure they're properly formatted
-        optimizedValue = optimizedValue
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '');
-      }
-      else if (fieldType === 'primaryKeyword' || fieldType === 'secondaryKeywords') {
-        // For keywords, ensure they're properly formatted and relevant
-      }
-      else if (fieldType === 'contentDescription') {
-        // For content descriptions, ensure they include keywords and are detailed
-        if (optimizedValue.length < 100) {
-          optimizedValue += ' This content will provide valuable insights and actionable tips for readers interested in this topic.';
-        }
-      }
-
-      syncFormField(fieldType, optimizedValue);
+      );
 
       toast.success(`${fieldType} optimized successfully!`, { id: 'optimize-toast' });
 
@@ -375,7 +474,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       toast.error(`Failed to optimize ${fieldType}. Please try again.`, { id: 'optimize-toast' });
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
-  }, [syncFormField]);
+  }, [formContext, itemToOptimize?.id]);
 
 
 
@@ -414,9 +513,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           }
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-          SEO Performance Score
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            SEO Performance Score
+          </Typography>
+          <ScoringRulesButton />
+        </Box>
 
         <Box sx={{
           position: "relative",
@@ -593,7 +695,9 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
                     maxScore={item.maxScore}
                     tooltip={item.tooltip}
                     onActionClick={() => handleActionClick(convertToNotificationItem(item))}
+                    onOptimizeClick={() => handleOptimizeClick(convertToNotificationItem(item))}
                     isHighlighted={highlightedItems.includes(item.id)}
+                    showOptimizeButton={!!FIELD_MAPPING[item.id]} // Only show optimize button if there's a field mapping
                   />
                 ))}
               </Stack>
@@ -620,11 +724,37 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           }
           tooltip={selectedItem.tooltip}
           simulateFieldChange={simulateFieldChange}
+          selectedItem={selectedItem} // Pass the selected item to the modal
           onUpdateScore={(newScore: number) => {
             // In a real implementation, this would update the score in the store/context
             // For now, we'll just show a toast notification
             toast.success(`Score updated to ${newScore}`);
           }}
+        />
+      )}
+
+      {/* Optimize Input Modal */}
+      {itemToOptimize && (
+        <OptimizeInputModal
+          open={optimizeModalOpen}
+          onClose={() => setOptimizeModalOpen(false)}
+          inputType={inputTypeToOptimize}
+          inputLabel={inputLabelToOptimize}
+          currentValue={currentInputValue}
+          scoringItemId={itemToOptimize.id}
+          context={{
+            primaryKeyword: formContext?.getValues('primaryKeyword') || formContext?.getValues('step1.primaryKeyword') || '',
+            secondaryKeywords: formContext?.getValues('secondaryKeywords') || formContext?.getValues('step1.secondaryKeywords') || [],
+            language: formContext?.getValues('language') || formContext?.getValues('step1.language') || 'en',
+            targetCountry: formContext?.getValues('targetCountry') || formContext?.getValues('step1.targetCountry') || 'United States',
+            title: formContext?.getValues('title') || formContext?.getValues('step1.title') || '',
+            metaTitle: formContext?.getValues('metaTitle') || formContext?.getValues('step1.metaTitle') || '',
+            metaDescription: formContext?.getValues('metaDescription') || formContext?.getValues('step1.metaDescription') || '',
+            urlSlug: formContext?.getValues('urlSlug') || formContext?.getValues('step1.urlSlug') || '',
+            content: formContext?.getValues('content') || formContext?.getValues('step3.content') || '',
+            contentDescription: formContext?.getValues('contentDescription') || formContext?.getValues('step1.contentDescription') || ''
+          }}
+          onSave={handleSaveOptimizedInput}
         />
       )}
     </CardContent>

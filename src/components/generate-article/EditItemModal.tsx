@@ -3,6 +3,7 @@ import type { AffectedCriterion } from 'src/sections/generate/hooks/seoScoring/t
 
 import { useFormContext } from 'react-hook-form';
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { getFormFieldsForScoringItem } from 'src/utils/seoInputMapping';
 
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -40,6 +41,17 @@ interface EditItemModalProps {
   onOptimize: (fieldType: string, currentValue: string) => Promise<string>;
   initialValue: string;
   simulateFieldChange?: (fieldName: string, newValue: any) => AffectedCriterion[];
+  selectedItem?: {
+    id: number;
+    text: string;
+    status: string;
+    action?: string | null;
+    score?: number;
+    maxScore?: number;
+    points?: number;
+    maxPoints?: number;
+    tooltip?: string;
+  };
 }
 
 // Helper function to get a user-friendly name for the field
@@ -51,6 +63,11 @@ const getFieldTypeName = (type: string): string => {
     metaDescription: "Meta Description",
     contentDescription: "Content Description",
     urlSlug: "URL Slug",
+    internalLinks: "Internal Links",
+    externalLinks: "External Links",
+    secondaryKeywords: "Secondary Keywords",
+    language: "Language and Target Country",
+    content: "Article Content"
   };
   return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
@@ -198,7 +215,8 @@ export function EditItemModal({
   maxScore,
   weight: _weight, // Prefix with underscore to indicate it's not used
   tooltip,
-  simulateFieldChange
+  simulateFieldChange,
+  selectedItem
 }: EditItemModalProps) {
   const formContext = useFormContext(); // Access form methods
   const { getValues, setValue } = formContext;
@@ -222,6 +240,14 @@ export function EditItemModal({
   const fieldTypeName = getFieldTypeName(fieldType);
   const isMultiline = fieldType === "contentDescription" || fieldType === "metaDescription";
   const scoreColor = getScoreColor(score);
+
+  // Get related fields that might also affect this scoring item
+  const getRelatedFields = useCallback((itemId: number, primaryField: string): string[] => {
+    // Get all fields that affect this scoring item
+    const allFields = getFormFieldsForScoringItem(itemId);
+    // Filter out the primary field
+    return allFields.filter(field => field !== primaryField);
+  }, []);
 
   // Add a new state for tracking real-time projected score during editing
   const [editingProjectedScore, setEditingProjectedScore] = useState<number | null>(null);
@@ -613,8 +639,9 @@ export function EditItemModal({
         title: [
           "Include your primary keyword near the beginning",
           "Keep it between 50-60 characters",
-          "Make it compelling and descriptive",
-          "Avoid using all caps or excessive punctuation"
+          "Use emotional words to increase engagement",
+          "Include power words to make it compelling",
+          "Make it descriptive and relevant to the content"
         ],
         metaTitle: [
           "Include your primary keyword",
@@ -632,7 +659,7 @@ export function EditItemModal({
           "Include your primary keyword",
           "Use hyphens to separate words",
           "Keep it short and descriptive",
-          "Avoid numbers and special characters"
+          "Avoid special characters and numbers"
         ],
         primaryKeyword: [
           "Choose a keyword with good search volume",
@@ -644,19 +671,39 @@ export function EditItemModal({
           "Choose keywords related to your primary keyword",
           "Include semantic variations",
           "Use keywords that support your main topic",
-          "Distribute them naturally throughout your content"
+          "Include sufficient number of secondary keywords",
+          "Ensure they're relevant to the main topic"
         ],
         contentDescription: [
           "Include your primary keyword naturally",
           "Make it comprehensive and informative",
           "Structure with proper headings (H2, H3)",
-          "Include relevant examples and data points"
+          "Include relevant examples and data points",
+          "Make it clear, focused, and easy to understand"
         ],
         content: [
           "Include your primary keyword in the first paragraph",
           "Use secondary keywords throughout",
           "Structure with proper headings and subheadings",
           "Include internal and external links where relevant"
+        ],
+        internalLinks: [
+          "Link to relevant pages within your website",
+          "Use descriptive anchor text that includes keywords",
+          "Ensure links are contextually relevant",
+          "Don't overdo it - 2-3 internal links per 1000 words is ideal"
+        ],
+        externalLinks: [
+          "Link to high-authority sources in your industry",
+          "Choose reputable sites with good domain authority",
+          "Make sure external links open in a new tab",
+          "Use descriptive anchor text that explains the link destination"
+        ],
+        language: [
+          "Specify the primary language of your content",
+          "Ensure the target country is compatible with your language choice",
+          "Consider regional language variations if targeting specific markets",
+          "Use proper language tags in your HTML"
         ]
       };
 
@@ -731,6 +778,38 @@ export function EditItemModal({
                 </Typography>
               ))}
             </Box>
+
+            {/* Related Fields Section */}
+            {selectedItem && (
+              <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center' }}>
+                  <SignalCellularAltIcon sx={{ fontSize: 18, mr: 0.5, color: 'secondary.main' }} />
+                  Related Fields
+                </Typography>
+
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                  These fields also affect this scoring item:
+                </Typography>
+
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {getRelatedFields(selectedItem.id, fieldType).map((relatedField) => (
+                    <Chip
+                      key={relatedField}
+                      label={getFieldTypeName(relatedField)}
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                      sx={{ fontSize: '0.75rem' }}
+                    />
+                  ))}
+                  {getRelatedFields(selectedItem.id, fieldType).length === 0 && (
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                      No other fields directly affect this item.
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            )}
 
             {/* Custom tooltip if provided */}
             {tooltip && (

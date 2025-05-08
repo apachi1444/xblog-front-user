@@ -3,8 +3,11 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
 import { debounce } from '../../../utils/debounce';
+import { calculateItemScore } from '../../../utils/seoScoringCalculator';
+import { getScoringItemsForField } from '../../../utils/seoInputMapping';
 import {
   formatPoints,
+  sectionScores,
   getPointsForItem
 } from '../../../utils/seoScoringPoints';
 import {
@@ -143,63 +146,131 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
     const contentPresentationResult = calculateSectionProgress(contentPresentationItems);
     const additionalSEOResult = calculateSectionProgress(additionalSEOItems);
 
+    // Get the calculated weights from sectionScores
+    const primaryWeight = sectionScores.weights.primarySeo;
+    const titleWeight = sectionScores.weights.titleOptimization;
+    const contentWeight = sectionScores.weights.contentPresentation;
+    const additionalWeight = sectionScores.weights.additionalSeoFactors;
+
     // Create sections with progress and type
     const sections: ProgressSection[] = [
       {
         id: 1,
-        title: `Primary SEO Checklist (${35}%)`,
+        title: `Primary SEO Checklist (${primaryWeight}%)`,
         progress: primarySEOResult.progress,
         points: primarySEOResult.points,
         maxPoints: primarySEOResult.maxPoints,
         type: determineSectionType(primarySEOResult.progress),
-        items: primarySEOItems.map(item => ({
-          ...item,
-          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
-          maxPoints: getPointsForItem(item.id)
-        })),
-        weight: 35
+        items: primarySEOItems.map(item => {
+          // Calculate the actual score based on the detailed rules
+          const formValues = form.getValues();
+          const context = {
+            primaryKeyword: formValues.primaryKeyword || formValues.step1?.primaryKeyword || '',
+            secondaryKeywords: formValues.secondaryKeywords || formValues.step1?.secondaryKeywords || [],
+            language: formValues.language || formValues.step1?.language || '',
+            targetCountry: formValues.targetCountry || formValues.step1?.targetCountry || '',
+            contentDescription: formValues.contentDescription || formValues.step1?.contentDescription || ''
+          };
+
+          const itemScore = item.status === 'success'
+            ? calculateItemScore(item.id, item.text, context)
+            : 0;
+
+          return {
+            ...item,
+            points: itemScore,
+            maxPoints: getPointsForItem(item.id)
+          };
+        }),
+        weight: primaryWeight
       },
       {
         id: 2,
-        title: `Title Optimization (${25}%)`,
+        title: `Title Optimization (${titleWeight}%)`,
         progress: titleOptimizationResult.progress,
         points: titleOptimizationResult.points,
         maxPoints: titleOptimizationResult.maxPoints,
         type: determineSectionType(titleOptimizationResult.progress),
-        items: titleOptimizationItems.map(item => ({
-          ...item,
-          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
-          maxPoints: getPointsForItem(item.id)
-        })),
-        weight: 25
+        items: titleOptimizationItems.map(item => {
+          // Calculate the actual score based on the detailed rules
+          const formValues = form.getValues();
+          const context = {
+            primaryKeyword: formValues.primaryKeyword || formValues.step1?.primaryKeyword || '',
+            title: formValues.title || formValues.step1?.title || '',
+            metaTitle: formValues.metaTitle || formValues.step1?.metaTitle || '',
+            metaDescription: formValues.metaDescription || formValues.step1?.metaDescription || ''
+          };
+
+          const itemScore = item.status === 'success'
+            ? calculateItemScore(item.id, item.text, context)
+            : 0;
+
+          return {
+            ...item,
+            points: itemScore,
+            maxPoints: getPointsForItem(item.id)
+          };
+        }),
+        weight: titleWeight
       },
       {
         id: 3,
-        title: `Content Presentation (${20}%)`,
+        title: `Content Presentation (${contentWeight}%)`,
         progress: contentPresentationResult.progress,
         points: contentPresentationResult.points,
         maxPoints: contentPresentationResult.maxPoints,
         type: determineSectionType(contentPresentationResult.progress),
-        items: contentPresentationItems.map(item => ({
-          ...item,
-          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
-          maxPoints: getPointsForItem(item.id)
-        })),
-        weight: 20
+        items: contentPresentationItems.map(item => {
+          // Calculate the actual score based on the detailed rules
+          const formValues = form.getValues();
+          const context = {
+            primaryKeyword: formValues.primaryKeyword || formValues.step1?.primaryKeyword || '',
+            secondaryKeywords: formValues.secondaryKeywords || formValues.step1?.secondaryKeywords || [],
+            content: formValues.content || formValues.step1?.content || formValues.step3?.content || '',
+            contentDescription: formValues.contentDescription || formValues.step1?.contentDescription || ''
+          };
+
+          const itemScore = item.status === 'success'
+            ? calculateItemScore(item.id, item.text, context)
+            : 0;
+
+          return {
+            ...item,
+            points: itemScore,
+            maxPoints: getPointsForItem(item.id)
+          };
+        }),
+        weight: contentWeight
       },
       {
         id: 4,
-        title: `Additional SEO Factors (${10}%)`,
+        title: `Additional SEO Factors (${additionalWeight}%)`,
         progress: additionalSEOResult.progress,
         points: additionalSEOResult.points,
         maxPoints: additionalSEOResult.maxPoints,
         type: determineSectionType(additionalSEOResult.progress),
-        items: additionalSEOItems.map(item => ({
-          ...item,
-          points: item.status === 'success' ? getPointsForItem(item.id) : 0,
-          maxPoints: getPointsForItem(item.id)
-        })),
-        weight: 10
+        items: additionalSEOItems.map(item => {
+          // Calculate the actual score based on the detailed rules
+          const formValues = form.getValues();
+          const context = {
+            primaryKeyword: formValues.primaryKeyword || formValues.step1?.primaryKeyword || '',
+            secondaryKeywords: formValues.secondaryKeywords || formValues.step1?.secondaryKeywords || [],
+            language: formValues.language || formValues.step1?.language || '',
+            targetCountry: formValues.targetCountry || formValues.step1?.targetCountry || '',
+            urlSlug: formValues.urlSlug || formValues.step1?.urlSlug || ''
+          };
+
+          const itemScore = item.status === 'success'
+            ? calculateItemScore(item.id, item.text, context)
+            : 0;
+
+          return {
+            ...item,
+            points: itemScore,
+            maxPoints: getPointsForItem(item.id)
+          };
+        }),
+        weight: additionalWeight
       }
     ];
 
@@ -211,7 +282,8 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
     generatePrimarySEOItems,
     generateTitleOptimizationItems,
     generateContentPresentationItems,
-    generateAdditionalSEOItems
+    generateAdditionalSEOItems,
+    form
   ]);
 
   // Create a debounced version of the score calculation function
@@ -340,25 +412,10 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
   ]);
 
   // Function to identify criteria affected by a specific field
-  const getAffectedCriteriaByField = useCallback((fieldName: string): number[] => {
-    // Map of fields to criteria IDs they affect
-    const fieldToCriteriaMap: Record<string, number[]> = {
-      'title': [201, 202, 203, 205],
-      'metaTitle': [204, 206],
-      'metaDescription': [101, 207],
-      'urlSlug': [102, 401, 402, 403],
-      'content': [103],
-      'primaryKeyword': [101, 102, 103, 104, 201, 204, 302, 405],
-      'secondaryKeywords': [105, 303, 405, 406],
-      'contentDescription': [104, 301, 302, 303, 304],
-      'language': [106, 404],
-      'targetCountry': [106, 404]
-    };
-
-    // Handle both direct field names and step-prefixed field names
-    const baseFieldName = fieldName.includes('.') ? fieldName.split('.')[1] : fieldName;
-    return fieldToCriteriaMap[baseFieldName] || [];
-  }, []);
+  const getAffectedCriteriaByField = useCallback((fieldName: string): number[] => 
+    // Use the new mapping utility to get affected scoring items
+     getScoringItemsForField(fieldName)
+  , []);
 
   // Function to simulate how a field change would affect criteria
   const simulateFieldChange = useCallback((

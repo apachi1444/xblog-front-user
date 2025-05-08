@@ -158,7 +158,9 @@
         "selected": "Selected",
         "success": "Success!",
         "next": "Next",
-        "previous": "Previous"
+        "previous": "Previous",
+        "Optimize": "Optimize",
+        "Waiting": "Waiting"
       },
       "regenerate": {
         "label": "Regenerations",

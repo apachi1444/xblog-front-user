@@ -58,20 +58,28 @@ interface GeminiResponse {
  * @param primaryKeyword - The primary keyword for the article
  * @param targetCountry - The target country for the article
  * @param targetLanguage - The target language for the article
+ * @param contentDescription - Optional content description to provide context
  * @returns The generated title
  */
 export const generateTitle = async (
   primaryKeyword: string,
   targetCountry: string,
-  targetLanguage: string
+  targetLanguage: string,
+  contentDescription?: string
 ): Promise<string> => {
   try {
+    // Include content description in the prompt if available
+    const contentDescriptionText = contentDescription
+      ? `- A content description: ${contentDescription}`
+      : '';
+
     const prompt = `You are given:
 - A primary keyword: ${primaryKeyword}
 - A target country: ${targetCountry}
 - A target language: ${targetLanguage}
+${contentDescriptionText}
 
-Generate one compelling, SEO-optimized article title based on the primary keyword.
+Generate one compelling, SEO-optimized article title based on the primary keyword${contentDescription ? ' and content description' : ''}.
 
 The title must:
 - Include the primary keyword
@@ -80,6 +88,7 @@ The title must:
 - Avoid clickbait and quotation marks
 - Be written in the target language
 - Be relevant to readers in the specified country
+${contentDescription ? '- Reflect the main topic and angle from the content description' : ''}
 
 Return only one title as a plain string, without any additional text or formatting.`;
 
@@ -656,6 +665,7 @@ The optimized description must:
 
 Return only the optimized content description as plain text, without any additional text, formatting, or explanations.`;
 
+
     const requestData: GeminiRequest = {
       contents: [
         {
@@ -707,6 +717,232 @@ interface FeaturedImageResponse {
  * @param targetCountry - Optional target country for localization
  * @returns Promise with the generated image URL, alt text, and optional caption
  */
+/**
+ * Optimize a specific input field based on SEO scoring rules
+ * @param inputType - The type of input to optimize (e.g., 'metaInfo', 'seoTitle', 'contentDescription')
+ * @param currentValue - The current value of the input
+ * @param scoringItemId - The ID of the scoring item to optimize for
+ * @param context - Additional context (primaryKeyword, secondaryKeywords, etc.)
+ * @returns The optimized input value
+ */
+export const optimizeInputForSEO = async (
+  inputType: string,
+  currentValue: string,
+  scoringItemId: number,
+  context: Record<string, any>
+): Promise<string> => {
+  try {
+    // Get the primary keyword from context
+    const primaryKeyword = context.primaryKeyword || '';
+    const targetLanguage = context.language || 'en';
+    const targetCountry = context.targetCountry || 'United States';
+
+    // Create a prompt based on the input type and scoring item ID
+    let prompt = '';
+    let optimizationRules = '';
+
+    // Define optimization rules based on scoring item ID
+    switch (scoringItemId) {
+      // Primary SEO Checklist
+      case 101: // Focus keyword in meta description
+        optimizationRules = `
+- Include the exact primary keyword "${primaryKeyword}" in the meta description
+- Place the primary keyword near the beginning if possible
+- Keep the meta description between 140-160 characters
+- Make it compelling and click-worthy
+- Include a call to action if appropriate`;
+        break;
+
+      case 102: // Focus keyword in URL
+        optimizationRules = `
+- Include the exact primary keyword "${primaryKeyword}" in the URL slug
+- Use hyphens to separate words
+- Keep it concise (3-5 words)
+- Use only lowercase letters, numbers, and hyphens
+- Remove any special characters`;
+        break;
+
+      case 103: // Keyword in first 10% of content
+      case 104: // Focus keyword in content description
+        optimizationRules = `
+- Include the exact primary keyword "${primaryKeyword}" in the first paragraph
+- Make sure it appears within the first 100 words
+- Ensure it flows naturally in the text
+- Don't force the keyword if it doesn't fit contextually
+- Keep the overall content engaging and valuable`;
+        break;
+
+      case 105: // Secondary keywords are defined
+        optimizationRules = `
+- Generate at least 3 relevant secondary keywords related to "${primaryKeyword}"
+- Ensure they are semantically related to the primary keyword
+- Include a mix of short and long-tail keywords
+- Make them relevant to the target country and language
+- Ensure they would be commonly searched terms`;
+        break;
+
+      // Title Optimization
+      case 201: // Keyword at the start of title
+      case 204: // Keyword in SEO title
+        optimizationRules = `
+- Start the title with the primary keyword "${primaryKeyword}" if possible
+- If not at the start, include it within the first 4 words
+- Make the title compelling and click-worthy
+- Include power words or emotional terms
+- Keep the title between 50-60 characters`;
+        break;
+
+      case 202: // Emotional sentiment in title
+        optimizationRules = `
+- Include at least 2 emotional words in the title
+- Examples of emotional words: amazing, awesome, incredible, essential, surprising, shocking, etc.
+- Keep the title authentic and not clickbaity
+- Ensure the emotional words fit naturally with the topic
+- Keep the overall title length between 50-60 characters`;
+        break;
+
+      case 203: // Power words used in title
+        optimizationRules = `
+- Include at least 2 power words in the title
+- Examples of power words: instantly, proven, guaranteed, exclusive, ultimate, essential, revealed, etc.
+- Ensure the power words fit naturally with the topic
+- Keep the title authentic and not clickbaity
+- Keep the overall title length between 50-60 characters`;
+        break;
+
+      case 205: // Title length is optimal
+      case 206: // Meta title length is optimal
+        optimizationRules = `
+- Adjust the title length to be between 50-60 characters
+- Include the primary keyword "${primaryKeyword}"
+- Make it compelling and descriptive
+- Avoid truncation in search results
+- Ensure it accurately represents the content`;
+        break;
+
+      case 207: // Meta description length is optimal
+        optimizationRules = `
+- Adjust the meta description length to be between 140-160 characters
+- Include the primary keyword "${primaryKeyword}"
+- Make it compelling and encourage clicks
+- Provide a clear value proposition
+- Avoid truncation in search results`;
+        break;
+
+      // Content Presentation
+      case 301: // Content is detailed and comprehensive
+        optimizationRules = `
+- Ensure each section has at least 200 words
+- Include proper structure with headings and subheadings
+- Cover the topic comprehensively
+- Include examples, data, or case studies where appropriate
+- Make the content easy to scan with short paragraphs`;
+        break;
+
+      case 302: // Content includes primary keyword
+        optimizationRules = `
+- Include the primary keyword "${primaryKeyword}" in at least 80% of the sections
+- Use it naturally and contextually
+- Include variations of the keyword where appropriate
+- Don't overuse it (avoid keyword stuffing)
+- Ensure it reads naturally to human readers`;
+        break;
+
+      case 303: // Content includes secondary keywords
+        optimizationRules = `
+- Include at least 3 secondary keywords throughout the content
+- Distribute them across different sections
+- Use them naturally and contextually
+- Don't overuse them (avoid keyword stuffing)
+- Ensure they support the main topic`;
+        break;
+
+      case 304: // Content is clear and focused
+        optimizationRules = `
+- Ensure the content matches the description
+- Use clear headings and subheadings
+- Keep paragraphs short (3-5 lines)
+- Use bullet points or numbered lists where appropriate
+- Maintain a logical flow throughout the content`;
+        break;
+
+      // Additional SEO Factors
+      case 401: // URL slug is concise and descriptive
+        optimizationRules = `
+- Include 3-5 keywords in the URL slug
+- Separate words with hyphens
+- Keep it concise and descriptive
+- Include the primary keyword "${primaryKeyword}"
+- Use only lowercase letters, numbers, and hyphens`;
+        break;
+
+      case 402: // Table of contents present
+        optimizationRules = `
+- Add a table of contents at the beginning of the article
+- Include links to all major sections
+- Format it clearly with proper indentation
+- Use descriptive section titles
+- Make it easy to navigate`;
+        break;
+
+      default:
+        optimizationRules = `
+- Optimize for SEO best practices
+- Include the primary keyword "${primaryKeyword}" naturally
+- Make the content engaging and valuable
+- Follow proper formatting and structure
+- Ensure it's appropriate for the target audience`;
+    }
+
+    // Build the prompt based on the input type and optimization rules
+    prompt = `You are an SEO optimization expert. You need to optimize the following ${inputType} to improve its SEO score.
+
+Current ${inputType}: "${currentValue}"
+
+Primary keyword: "${primaryKeyword}"
+Target language: ${targetLanguage}
+Target country: ${targetCountry}
+
+Optimization rules:${optimizationRules}
+
+Please provide an optimized version that follows these rules. Return ONLY the optimized text without any explanations, formatting, or additional text.`;
+
+    const requestData: GeminiRequest = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt
+            }
+          ]
+        }
+      ]
+    };
+
+    const response = await axios.post<GeminiResponse>(
+      `${GEMINI_API_URL}?key=${API_KEY}`,
+      requestData
+    );
+
+    // Log the response for debugging (remove in production)
+    console.log(`Gemini API response (optimize ${inputType}):`, JSON.stringify(response.data, null, 2));
+
+    // Extract the optimized content from the response
+    const optimizedContent = response.data.candidates[0]?.content.parts[0]?.text.trim();
+
+    if (!optimizedContent) {
+      throw new Error(`No optimized ${inputType} was generated`);
+    }
+
+    // Return the optimized content
+    return optimizedContent;
+  } catch (error) {
+    console.error(`Error optimizing ${inputType}:`, error);
+    // Return the original value if optimization fails
+    return currentValue;
+  }
+};
+
 export const generateFeaturedImage = async (
   title: string,
   primaryKeyword: string,

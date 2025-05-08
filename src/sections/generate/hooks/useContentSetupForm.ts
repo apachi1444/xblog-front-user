@@ -118,17 +118,18 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry } = step1Form.getValues();
+      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
 
       if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry'])) {
         return;
       }
 
-      // Call the Gemini API to generate a title
+      // Call the Gemini API to generate a title, including content description if available
       const generatedTitle = await generateTitle(
         primaryKeyword,
         targetCountry,
-        language
+        language,
+        contentDescription // Pass content description to provide more context
       );
 
       // Update form values
