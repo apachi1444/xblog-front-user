@@ -1,7 +1,7 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRef, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
@@ -36,83 +36,46 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
-  
 
   const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
-  
-    
-  const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-  const isInitialMount = useRef(true);
 
-  // Close popover only on component mount
-  useEffect(() => {
-    if (isInitialMount.current) {
-      // Only run this on initial mount
-      setOpenPopover(null);
-      isInitialMount.current = false;
-    }
-  }, []); // Empty dependency array ensures it only runs once on mount
+  // Simple state for popover
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // Add cleanup effect
-  useEffect(() => 
-    // Cleanup function to ensure popover is closed when component unmounts
-     () => {
-      setOpenPopover(null);
-    }
-  , []);
+  // Simple open handler
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-  // Add route change handler
-  useEffect(() => {
-    // Close popover when route changes
-    setOpenPopover(null);
-  }, [pathname]);
+  // Simple close handler
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevent any default behavior
-    setOpenPopover(event.currentTarget);
-  }, []);
+  // Handle menu item click
+  const handleClickItem = (path: string) => {
+    handleClose();
+    setTimeout(() => {
+      router.push(path);
+    }, 100);
+  };
 
-  const handleClosePopover = useCallback(() => {
-    setOpenPopover(null);
-  }, []);
-
-  // Updated click handler with better timing
-  const handleClickItem = useCallback(
-    (path: string) => {
-      // Immediately close the popover
-      setOpenPopover(null);
-      
-      // Small delay to ensure smooth transition
-      const timeoutId = setTimeout(() => {
-        router.push(path);
-      }, 100);
-
-      // Cleanup timeout if component unmounts
-      return () => clearTimeout(timeoutId);
-    },
-    [router]
-  );
-
-  // Add proper cleanup for logout
-  const handleLogOut = useCallback(() => {
-    setOpenPopover(null);
-    
-    const timeoutId = setTimeout(() => {
+  // Handle logout
+  const handleLogOut = () => {
+    handleClose();
+    setTimeout(() => {
       dispatch(logout());
       router.push('/sign-in');
       localStorage.removeItem('auth');
       sessionStorage.removeItem('access_token');
     }, 100);
+  };
 
-    return () => clearTimeout(timeoutId);
-  }, [dispatch, router]);
-
-  console.log(openPopover);
   return (
     <>
       <IconButton
-        onClick={handleOpenPopover}
+        onClick={handleOpen}
         sx={{
           p: 0,
           width: 40,
@@ -129,11 +92,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         }}
         {...other}
       >
-        <Avatar 
-          src={user?.avatar || _myAccount.photoURL} 
-          alt={_myAccount.displayName} 
-          sx={{ 
-            width: 40, 
+        <Avatar
+          src={user?.avatar || _myAccount.photoURL}
+          alt={_myAccount.displayName}
+          sx={{
+            width: 40,
             height: 40,
             transition: 'all 0.2s ease-in-out',
           }}
@@ -143,28 +106,23 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       </IconButton>
 
       <Popover
-        open={!!openPopover}
-        anchorEl={openPopover}
-        onClose={handleClosePopover}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: {
-              width: 300,
-              mt: 1.5,
-              boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
-              borderRadius: 3,
-              border: (theme) => `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
-            },
+        PaperProps={{
+          sx: {
+            width: 300,
+            mt: 1.5,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
+            borderRadius: 3,
+            border: (theme) => `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
           },
         }}
-        TransitionProps={{
-          onExited: () => setOpenPopover(null),
-        }}
       >
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             position: 'relative',
             pt: 8,
             pb: 3,
@@ -183,11 +141,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             }
           }}
         >
-          <Avatar 
-            src={user?.avatar || _myAccount.photoURL} 
-            alt={_myAccount.displayName} 
-            sx={{ 
-              width: 80, 
+          <Avatar
+            src={user?.avatar || _myAccount.photoURL}
+            alt={_myAccount.displayName}
+            sx={{
+              width: 80,
               height: 80,
               mx: 'auto',
               position: 'relative',
@@ -197,8 +155,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             }}
           >
             {_myAccount.displayName.charAt(0).toUpperCase()}
-          </Avatar>          
-          
+          </Avatar>
+
           <Box sx={{ position: 'relative', zIndex: 1, mt: 2, px: 3 }}>
             <Typography variant="h6" fontWeight="bold">
               {user?.name || _myAccount?.displayName}
@@ -207,20 +165,20 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
               {user?.email || _myAccount?.email}
             </Typography>
-            
+
             {/* Plan Badge */}
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 display: 'inline-flex',
                 mt: 1,
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 1,
-                bgcolor: (theme) => subscriptionDetails?.subscription_name === 'Free' 
+                bgcolor: (theme) => subscriptionDetails?.subscription_name === 'Free'
                   ? alpha(theme.palette.grey[500], 0.16)
                   : alpha(theme.palette.primary.main, 0.16),
-                color: (theme) => subscriptionDetails?.subscription_name === 'Free' 
-                  ? theme.palette.text.primary 
+                color: (theme) => subscriptionDetails?.subscription_name === 'Free'
+                  ? theme.palette.text.primary
                   : theme.palette.primary.main,
                 fontWeight: 'medium',
                 fontSize: '0.75rem',
@@ -230,7 +188,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             </Box>
           </Box>
         </Box>
-        
+
         <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
 
         <Box sx={{ p: 2 }}>
@@ -257,7 +215,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   height: 80,
                   transition: 'all 0.2s ease',
                   color: 'text.secondary',
-                  '&:hover': { 
+                  '&:hover': {
                     bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                     color: 'primary.main',
                   },
@@ -271,7 +229,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                 }}
               >
                 {option.icon && (
-                  <Box sx={{ 
+                  <Box sx={{
                     mb: 1,
                     color: option.href === pathname ? 'primary.main' : 'text.secondary',
                     '& svg': { width: 24, height: 24 }
@@ -287,16 +245,16 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </MenuList>
         </Box>
 
-        <Box 
-          sx={{ 
-            p: 2, 
+        <Box
+          sx={{
+            p: 2,
             pt: 0,
             display: 'flex',
             justifyContent: 'center'
           }}
         >
-          <Button 
-            color="error" 
+          <Button
+            color="error"
             onClick={handleLogOut}
             startIcon={<Box component="span" sx={{ display: 'flex', '& svg': { width: 16, height: 16 } }}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
