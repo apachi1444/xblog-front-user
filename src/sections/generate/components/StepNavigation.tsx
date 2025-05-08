@@ -28,8 +28,8 @@ export const StepNavigation = ({ activeStep, totalSteps, onNext, onBack }: StepN
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'space-between',
-        width: 'calc(100% - 245px)',
-        ml: '245px',
+        width: 'calc(100% - 240px)',
+        ml: '240px',
       }}
     >
       <Box>

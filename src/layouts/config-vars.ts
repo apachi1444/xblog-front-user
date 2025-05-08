@@ -9,9 +9,9 @@ export const baseVars = (theme: Theme) => ({
   '--layout-nav-bg': theme.palette.common.white,
   '--layout-nav-border-color': varAlpha(theme.palette.grey['500Channel'], 0.08),
   '--layout-nav-zIndex': 1101,
-  '--layout-nav-mobile-width': '320px',
+  '--layout-nav-mobile-width': '240px',
   // nav item
-  '--layout-nav-item-height': '44px',
+  '--layout-nav-item-height': '40px',
   '--layout-nav-item-color': theme.palette.text.secondary,
   '--layout-nav-item-active-color': theme.palette.primary.main,
   '--layout-nav-item-active-bg': varAlpha(theme.palette.primary.mainChannel, 0.08),

@@ -43,6 +43,20 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Zoom level specific adjustments */
+html[data-browser-zoom="1.25"] {
+  font-size: calc(13px * var(--edge-font-adjustment));
+}
+
+html[data-browser-zoom="1.5"] {
+  font-size: calc(12px * var(--edge-font-adjustment));
+}
+
+html[data-browser-zoom="1.75"],
+html[data-browser-zoom="2"] {
+  font-size: calc(11px * var(--edge-font-adjustment));
+}
+
 /* Edge-specific adjustments */
 @supports (-ms-ime-align:auto) {
   html {

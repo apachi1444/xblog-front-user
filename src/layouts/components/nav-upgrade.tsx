@@ -25,18 +25,6 @@ export function NavUpgrade({ sx, ...other }: StackProps) {
         sx={{ mb: 4, textAlign: 'center', ...sx }}
         {...other}
       >
-        <Typography
-          variant="h6"
-          sx={(theme) => ({
-            fontWeight: 'bold',
-            fontSize: '1.2rem',
-            color: theme.palette.text.primary,
-            mb: 1,
-          })}
-        >
-          {t('upgrade.unlockFeatures', 'Want to unlock more features?')}
-        </Typography>
-
         <Button
           onClick={() => {
             navigate("/upgrade-license")

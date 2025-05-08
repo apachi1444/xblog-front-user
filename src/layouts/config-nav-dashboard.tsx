@@ -3,7 +3,7 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const icon = (name: string) => (
-  <Iconify icon={name} width={24} height={24} />
+  <Iconify icon={name} width={22} height={22} />
 );
 
 export const navData = [

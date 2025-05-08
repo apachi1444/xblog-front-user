@@ -251,7 +251,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Style
        *************************************** */
       cssVars={{
-        '--layout-nav-vertical-width': '245px',
+        '--layout-nav-vertical-width': '240px',
         '--layout-dashboard-content-pt': theme.spacing(5),
         '--layout-dashboard-content-pb': theme.spacing(8),
         '--layout-dashboard-content-px': theme.spacing(5),
