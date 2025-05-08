@@ -1,7 +1,7 @@
 import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import {
   Box,
@@ -16,26 +16,10 @@ import { DraggableSectionList } from 'src/components/generate-article/DraggableS
 
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
-
-// Sample content for mock sections
-const SAMPLE_CONTENT = [
-  "This section will cover the introduction to the topic, providing background information and context for the reader. It will establish the importance of the subject matter and outline the key points that will be discussed in the article.",
-
-  "Here we'll explore the main concepts and principles related to the topic. This section will dive deeper into the subject matter, explaining core ideas and their significance.",
-
-  "This section examines practical applications and real-world examples. It demonstrates how the concepts discussed can be applied in various contexts and situations.",
-
-  "In this section, we'll analyze the benefits and advantages of the approaches discussed earlier. We'll highlight positive outcomes and potential gains from implementing these ideas.",
-
-  "This section addresses common challenges and potential obstacles. It provides strategies for overcoming these difficulties and offers solutions to typical problems.",
-
-  "Here we'll look at future trends and developments in this field. This section discusses emerging technologies, evolving practices, and what readers might expect to see in the coming years."
-];
-
 export interface Step3State {
   tableOfContents: {
     generatedSections: SectionItem[];
-    onSaveSection?: (sections: SectionItem) => void;
+    onSaveSection?: (section: SectionItem) => void;
     onEditSection?: (section: SectionItem) => void;
   }
 }
@@ -47,33 +31,24 @@ interface Step3Props {
 export function Step3ContentStructuring({state}: Step3Props) {
 
   const {tableOfContents} = state
-  const { generatedSections , onSaveSection , onEditSection } = tableOfContents
+  const { generatedSections, onSaveSection, onEditSection } = tableOfContents
 
-  const initialSections = generatedSections.length > 0
-    ? generatedSections
-    : Array(4).fill(0).map((_, index) => ({
-        id: (index + 1).toString(),
-        title: `Section ${index + 1}: ${['Introduction', 'Main Concepts', 'Applications', 'Benefits'][index] || 'Additional Content'}`,
-        description: `This section covers ${['the basics', 'key concepts', 'practical applications', 'main benefits'][index] || 'important aspects'} of the topic.`,
-        content: SAMPLE_CONTENT[index] || SAMPLE_CONTENT[0]
-      }));
+  const sections = generatedSections;
 
-  const [sections, setSections] = useState<SectionItem[]>(initialSections);
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  // Update sections when generatedSections changes
-  useEffect(() => {
-    if (generatedSections.length > 0) {
-      console.log('Updating sections from generatedSections:', generatedSections);
-      setSections(generatedSections);
-    }
-  }, [generatedSections]);
-
 
   const handleSectionsChange = useCallback((newSections: SectionItem[]) => {
-    setSections(newSections);
-  }, []);
+    // Update the parent component's state directly
+    if (onSaveSection) {
+      // Since we can't update the entire array at once with the current API,
+      // we'll update each section individually
+      newSections.forEach(section => {
+        onSaveSection(section);
+      });
+    }
+  }, [onSaveSection]);
 
   const handleAddSection = useCallback(() => {
     const newId = (sections.length + 1).toString();
@@ -84,26 +59,35 @@ export function Step3ContentStructuring({state}: Step3Props) {
       content: ''
     };
 
-    setSections([...sections, newSection]);
+    // Update the parent component's state directly
+    if (onSaveSection) {
+      onSaveSection(newSection);
+    }
 
     // Open edit dialog for the new section
     setCurrentSection(newSection);
     setEditDialogOpen(true);
-  }, [sections]);
+  }, [sections, onSaveSection]);
 
   const handleDeleteSection = useCallback((sectionId: string) => {
-    setSections(sections.filter(section => section.id !== sectionId));
+    // We can't directly delete from the parent state, so we'll create a new array without the deleted section
+    // and update each section in the parent state
+    const updatedSections = sections.filter(section => section.id !== sectionId);
+
+    // Update the parent component's state directly
+    if (onSaveSection && updatedSections.length > 0) {
+      // Since we can't update the entire array at once with the current API,
+      // we'll update each section individually
+      updatedSections.forEach(section => {
+        onSaveSection(section);
+      });
+    }
+
     toast.success("Section deleted successfully!");
-  }, [sections]);
+  }, [sections, onSaveSection]);
 
   const handleSaveSection = useCallback((updatedSection: SectionItem) => {
-    setSections(prevSections =>
-      prevSections.map(section =>
-        section.id === updatedSection.id ? updatedSection : section
-      )
-    );
-
-    // Also update the parent component's state if onSaveSection is provided
+    // Update the parent component's state directly
     if (onSaveSection) {
       onSaveSection(updatedSection);
     }

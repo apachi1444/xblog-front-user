@@ -12,10 +12,12 @@ import customRequest from './axios';
 // Initialize mock adapter
 const mock = new MockAdapter(customRequest, { onNoMatch: 'passthrough' });
 
-// Mock data for subscription
+// Mock data for subscription with expiration date in 2 days to trigger the banner
 const mockSubscriptionDetails = {
   start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
   end_date: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toISOString(),
+  // Set expiration date to 2 days from now to trigger the banner
+  expiration_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
   connected_websites: 3,
   websites_limit: 5,
   articles_created: 45,
@@ -23,7 +25,7 @@ const mockSubscriptionDetails = {
   regeneration_number: 15,
   regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
-  subscription_name: 'FREEEE'
+  subscription_name: 'Professional'
 };
 
 // Mock data for calendar
@@ -287,7 +289,7 @@ const setupMocks = () => {
       regenerationsTotal: 50
     });
 
-    mock.onPost('/regenerations/use').reply((config) => 
+    mock.onPost('/regenerations/use').reply((config) =>
        [200, {
         success: true,
         regenerationsAvailable: 14, // Decreased by 1

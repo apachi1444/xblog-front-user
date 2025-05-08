@@ -106,21 +106,22 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
     toneOfVoice?: string,
     targetCountry?: string
   ) => {
-    // Only start generating if we're not already in a generated state
-    // This prevents the generating UI from appearing when navigating back
-    if (!isGenerated) {
-      setIsGenerating(true);
+    // Check if we already have sections (either from previous generation or from initialSections)
+    if (sections.length > 0) {
+      // If we already have sections, just set isGenerated to true and return
+      setIsGenerated(true);
+
+      // Call the onGenerate callback if provided
+      if (onGenerate) {
+        onGenerate();
+      }
+      return;
     }
 
+    // Otherwise, start generating
+    setIsGenerating(true);
+
     try {
-      // If already generated, don't wait for the API call
-      if (isGenerated) {
-        // Just return immediately since we already have sections
-        if (onGenerate) {
-          onGenerate();
-        }
-        return;
-      }
 
       try {
         // Use the actual Gemini API to generate sections

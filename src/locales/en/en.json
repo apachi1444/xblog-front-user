@@ -162,6 +162,15 @@
         "Optimize": "Optimize",
         "Waiting": "Waiting"
       },
+      "dashboard": {
+        "nextScheduledArticle": "Next Scheduled Article",
+        "articleScheduledFor": "\"{{title}}\" scheduled for {{date}}",
+        "timeRemaining": "Time remaining: {{days}}d {{hours}}h {{minutes}}m",
+        "noScheduledArticles": "No Scheduled Articles",
+        "scheduleArticlePrompt": "Schedule your next article to maintain consistent content publishing",
+        "viewCalendar": "View Calendar",
+        "createArticle": "Create Article"
+      },
       "regenerate": {
         "label": "Regenerations",
         "remaining": "{{count}} regenerations remaining",
@@ -317,6 +326,9 @@
           "choosePlan": "Choose the plan that works best for you",
           "currentPlan": "Current Plan",
           "perMonth": "per month",
+          "expirationWarning": "Your Subscription is Expiring Soon",
+          "daysRemaining": "Your subscription will expire in {{days}} days. Renew now to avoid service interruption.",
+          "renewNow": "Renew Now",
           "planNames": {
             "free": "Free",
             "basic": "Basic",

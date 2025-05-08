@@ -53,11 +53,15 @@ export const _posts: Article[] = [...Array(23)].map((_, index) => ({
   description: _description(index),
   slug: _postTitles(index).toLowerCase().replace(/\s+/g, '-'),
   coverImage: `/assets/images/cover/cover-${index + 1}.webp`,
-  status: ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
+  // Make the first article scheduled with a near future date to test the banner
+  status: index === 0 ? 'scheduled' : ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
   createdAt: _times(index),
   updatedAt: _times(index),
   publishedAt: _times(index),
-  scheduledAt: _times(index),
+  // Set the first article to be scheduled for tomorrow
+  scheduledAt: index === 0
+    ? new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+    : _times(index),
   author: {
     id: _id(index),
     name: _fullName(index),
@@ -67,10 +71,10 @@ export const _posts: Article[] = [...Array(23)].map((_, index) => ({
   keywords: {
     primary: ['WordPress', 'SEO', 'Marketing', 'Design', 'Development'][index % 5],
     secondary: [
-      'Plugin', 
-      'Theme', 
-      'Performance', 
-      'Security', 
+      'Plugin',
+      'Theme',
+      'Performance',
+      'Security',
       'Analytics'
     ].slice(0, (index % 5) + 1)
   },

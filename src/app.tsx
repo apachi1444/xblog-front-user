@@ -1,16 +1,18 @@
 import 'src/global.css';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { I18nextProvider } from 'react-i18next';
 import { ErrorBoundary } from 'react-error-boundary';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useDispatch } from 'react-redux';
 
 import { useTheme } from '@mui/material/styles';
 
 import { Router } from 'src/routes/sections';
 
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
+import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
 
 import { CustomThemeProvider } from 'src/theme/theme-provider';
 
@@ -26,6 +28,18 @@ console.log(GOOGLE_CLIENT_ID);
 
 export default function App() {
   useAxiosAuth();
+  const dispatch = useDispatch();
+
+  // Reset banner dismissals on app initialization (page reload)
+  // This ensures banners are shown when the page is reloaded
+  // but remain dismissed during navigation
+  useEffect(() => {
+    // This will only run once when the app is loaded/reloaded
+    dispatch(resetBannerDismissals());
+
+    // Log for debugging
+    console.log('App initialized - Banner dismissals reset');
+  }, [dispatch]);
 
   return (
     <ErrorBoundary

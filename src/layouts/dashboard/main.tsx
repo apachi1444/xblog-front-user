@@ -7,12 +7,13 @@ import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 
 import { layoutClasses } from 'src/layouts/classes';
+import DashboardBanners from 'src/components/banners/DashboardBanners';
 
 // ----------------------------------------------------------------------
 
 export function Main({ children, sx, ...other }: BoxProps) {
   const theme = useTheme();
-  
+
   return (
     <Box
       component="main"
@@ -49,34 +50,41 @@ export function DashboardContent({
   const layoutQuery: Breakpoint = 'lg';
 
   return (
-    <Container
-      className={layoutClasses.content}
-      maxWidth={maxWidth || false}
-      sx={{
-        display: 'flex',
-        flex: '1 1 auto',
-        flexDirection: 'column',
-        pt: 'var(--layout-dashboard-content-pt)',
-        pb: 'var(--layout-dashboard-content-pb)',
-        bgcolor: theme.palette.background.paper, // Use theme background for content area
-        borderRadius: 1,
-        [theme.breakpoints.up(layoutQuery)]: {
-          px: 'var(--layout-dashboard-content-px)',
-        },
-        ...(disablePadding && {
-          p: {
-            xs: 0,
-            sm: 0,
-            md: 0,
-            lg: 0,
-            xl: 0,
+    <>
+      {/* Banners above the content with margin-top for spacing from header */}
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, mb: 2, mt: 3, mx: { xs: 2, sm: 3, md: 5 } }}>
+        <DashboardBanners />
+      </Box>
+
+      <Container
+        className={layoutClasses.content}
+        maxWidth={maxWidth || false}
+        sx={{
+          display: 'flex',
+          flex: '1 1 auto',
+          flexDirection: 'column',
+          pt: 'var(--layout-dashboard-content-pt)',
+          pb: 'var(--layout-dashboard-content-pb)',
+          bgcolor: theme.palette.background.paper, // Use theme background for content area
+          borderRadius: 1,
+          [theme.breakpoints.up(layoutQuery)]: {
+            px: 'var(--layout-dashboard-content-px)',
           },
-        }),
-        ...sx,
-      }}
-      {...other}
-    >
-      {children}
-    </Container>
+          ...(disablePadding && {
+            p: {
+              xs: 0,
+              sm: 0,
+              md: 0,
+              lg: 0,
+              xl: 0,
+            },
+          }),
+          ...sx,
+        }}
+        {...other}
+      >
+        {children}
+      </Container>
+    </>
   );
 }

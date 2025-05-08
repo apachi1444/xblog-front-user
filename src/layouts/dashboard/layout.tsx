@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -131,11 +130,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
           }}
           sx={header?.sx}
           slots={{
-            topArea: (
-              <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
-                This is an info Alert.
-              </Alert>
-            ),
+            topArea: null,
             // Update the leftArea in the HeaderSection to use the Logo component
             leftArea: (
               <>
@@ -157,6 +152,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
             ),
             rightArea: (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <RegenerateCountDisplay />
+
                 <IconButton
                   onClick={handleToggleTheme}
                   sx={{
@@ -179,7 +176,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   />
                 </IconButton>
 
-                <RegenerateCountDisplay />
                 <LanguagePopover data={_langs} />
                 <NotificationsPopover data={_notifications} />
                 <AccountPopover

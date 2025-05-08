@@ -77,7 +77,7 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
   return (
     <Grid container spacing={3}>
       <SectionGenerationAnimation
-        show={isGeneratingTableOfContents || isGeneratedTableOfContents}
+        show={isGeneratingTableOfContents && !isGeneratedTableOfContents}
         onComplete={() => {
           // Automatically navigate to next step when generation is complete
           if (isGeneratedTableOfContents) {

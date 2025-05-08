@@ -25,6 +25,7 @@ interface InvoicesResponse {
 export interface SubscriptionDetails {
   start_date: string;
   end_date: string;
+  expiration_date: string; // Date when subscription expires
   connected_websites: number;
   websites_limit: number;
   articles_created: number;

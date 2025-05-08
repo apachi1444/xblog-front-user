@@ -6,6 +6,7 @@ import authReducer from './slices/auth/authSlice';
 import storesReducer from './slices/stores/storeSlice';
 import articlesReducer from './slices/articles/articleSlice';
 import subscriptionReducer from './slices/subscription/subscriptionSlice';
+import bannersReducer from './slices/banners/bannerSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     articles: articlesReducer,
     auth: authReducer,
     subscription: subscriptionReducer,
+    banners: bannersReducer,
     [api.reducerPath]: api.reducer,
   },
   // Add the api middleware to enable caching, invalidation, polling, etc.

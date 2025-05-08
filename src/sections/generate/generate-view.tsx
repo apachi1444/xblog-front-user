@@ -309,10 +309,21 @@ export function GeneratingView() {
 
     // Also update the generatedSections directly to ensure changes are persisted
     setGeneratedSections(prevSections => {
-      const newSections = prevSections.map(section =>
-        section.id === completeSection.id ? completeSection : section
-      );
-      console.log('Updated sections list:', newSections);
+      // Check if the section already exists
+      const sectionExists = prevSections.some(section => section.id === completeSection.id);
+
+      if (sectionExists) {
+        // Update existing section
+        const newSections = prevSections.map(section =>
+          section.id === completeSection.id ? completeSection : section
+        );
+        console.log('Updated sections list:', newSections);
+        return newSections;
+      }
+
+      // Add new section
+      const newSections = [...prevSections, completeSection];
+      console.log('Added new section to list:', newSections);
       return newSections;
     });
 
