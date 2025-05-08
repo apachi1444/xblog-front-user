@@ -184,7 +184,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                     component={RouterLink}
                     href={item.path}
                     sx={{
-                      pl: 2,
+                      pl: 1.5,
                       py: 1,
                       gap: 2,
                       pr: 1.5,
@@ -207,7 +207,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                       }),
                     }}
                   >
-                    <Box component="span" sx={{ width: 22, height: 22 }}>
+                    <Box component="span" sx={{ width: 22, height: 22, display: 'flex', justifyContent: 'center' }}>
                       {item.icon}
                     </Box>
 
@@ -233,7 +233,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                     component={RouterLink}
                     href={item.path}
                     sx={{
-                      pl: 2,
+                      pl: 1.5,
                       py: 1,
                       gap: 2,
                       pr: 1.5,
@@ -256,7 +256,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
                       }),
                     }}
                   >
-                    <Box component="span" sx={{ width: 22, height: 22}}>
+                    <Box component="span" sx={{ width: 22, height: 22, display: 'flex', justifyContent: 'center' }}>
                       {item.icon}
                     </Box>
 

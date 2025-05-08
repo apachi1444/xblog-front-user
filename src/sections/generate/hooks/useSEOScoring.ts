@@ -103,31 +103,6 @@ export const useSEOScoring = (form: UseFormReturn<any>): SEOScoringHookResult =>
 
   // Debug the form values
   useEffect(() => {
-    // Get raw values for debugging
-    const rawContentDescription = form.getValues('contentDescription') || form.getValues('step1.contentDescription') || '';
-    const rawPrimaryKeyword = form.getValues('primaryKeyword') || form.getValues('step1.primaryKeyword') || '';
-    const rawSecondaryKeywords = form.getValues('secondaryKeywords') || form.getValues('step1.secondaryKeywords') || [];
-    const rawMetaDescription = form.getValues('metaDescription') || form.getValues('step1.metaDescription') || '';
-    const rawUrlSlug = form.getValues('urlSlug') || form.getValues('step1.urlSlug') || '';
-
-    console.log('[SEO DEBUG] Form Values Changed:', {
-      metaDescription: rawMetaDescription,
-      urlSlug: rawUrlSlug,
-      contentDescription: rawContentDescription,
-      primaryKeyword: rawPrimaryKeyword,
-      secondaryKeywords: rawSecondaryKeywords,
-      // Log which field triggered the update
-      triggeredBy: {
-        metaDescription: watchMetaDescription !== undefined || watchStep1MetaDescription !== undefined,
-        urlSlug: watchUrlSlug !== undefined || watchStep1UrlSlug !== undefined,
-        contentDescription: watchContentDescription !== undefined || watchStep1ContentDescription !== undefined,
-        primaryKeyword: watchPrimaryKeyword !== undefined || watchStep1PrimaryKeyword !== undefined,
-        secondaryKeywords: watchSecondaryKeywords !== undefined || watchStep1SecondaryKeywords !== undefined
-      }
-    });
-
-    // Force a re-render of the component by updating a ref
-    // This is a hack to ensure the component re-renders when form values change
     prevValuesRef.current = {
       ...prevValuesRef.current,
       lastUpdate: Date.now()

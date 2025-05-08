@@ -383,12 +383,7 @@ const FullArticleModal = ({ open, onClose, articleInfo, sections }: FullArticleM
                 {new Date(articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
-              <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
-              <Typography variant="body2">
-                AI Generated
-              </Typography>
-            </Box>
+
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
               <Typography variant="body2">

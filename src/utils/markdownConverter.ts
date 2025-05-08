@@ -79,12 +79,12 @@ export const sectionToMarkdown = (section: ArticleSection): string => {
   // Add table data
   if (section.tableData && section.tableData.headers && section.tableData.rows) {
     // Table headers
-    markdown += '| ' + section.tableData.headers.join(' | ') + ' |\n';
+    markdown += `| ${  section.tableData.headers.join(' | ')  } |\n`;
     // Table separator
-    markdown += '| ' + section.tableData.headers.map(() => '---').join(' | ') + ' |\n';
+    markdown += `| ${  section.tableData.headers.map(() => '---').join(' | ')  } |\n`;
     // Table rows
     section.tableData.rows.forEach(row => {
-      markdown += '| ' + row.join(' | ') + ' |\n';
+      markdown += `| ${  row.join(' | ')  } |\n`;
     });
     markdown += '\n';
   }
