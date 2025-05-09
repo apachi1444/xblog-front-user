@@ -358,6 +358,7 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
 
       {!isCollapsed && slots?.bottomArea}
 
+      {/* Keep detailed resource usage in sidebar for comprehensive view */}
       {!isCollapsed && <ResourceUsage />}
       {!isCollapsed && <NavUpgrade />}
     </>
