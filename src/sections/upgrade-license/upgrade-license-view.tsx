@@ -1,6 +1,7 @@
 import toast from 'react-hot-toast';
-import { useEffect, useCallback, useState } from 'react';
-import { Eye, Check, Download, RefreshCw } from "lucide-react";
+import { Eye, Download, RefreshCw } from "lucide-react";
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   Box,
@@ -8,15 +9,12 @@ import {
   Chip,
   Table,
   Button,
-  Divider,
   TableRow,
-  useTheme,
   Container,
   TableBody,
   TableCell,
   TableHead,
   Typography,
-  CardContent,
   CircularProgress,
 } from "@mui/material";
 
@@ -27,11 +25,13 @@ import {
   useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
-export function UpgradeLicenseView() {
-  const theme = useTheme();
+import { ResponsivePricingPlans } from 'src/components/pricing';
+import { usePlanIcons } from 'src/hooks/usePlanIcons';
 
-  // State to track if we're refreshing data after user returns to the app
+export function UpgradeLicenseView() {
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
+  const { t } = useTranslation();
+  const { getPlanIcon, getLocalizedPlanName } = usePlanIcons();
 
   // Fetch subscription plans
   const {
@@ -173,94 +173,29 @@ export function UpgradeLicenseView() {
         </Box>
 
         <Box
-          display="grid"
-          gridTemplateColumns={{ xs: "1fr", md: "repeat(3, 1fr)" }}
-          gap={3}
           mb={4}
           mt={4}
         >
-          {plans.map((plan) => (
-            <Card
-              key={plan.id || plan.name}
-              variant="outlined"
-              sx={{
-                p: 0,
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                borderColor: plan.current ? 'primary.main' : 'divider',
-                bgcolor: plan.highlight ? 'primary.lighter' : 'background.paper',
-                position: 'relative',
-                ...(plan.current && {
-                  boxShadow: theme.customShadows?.z8,
-                }),
-              }}
-            >
-              {plan.current && (
-                <Chip
-                  label="Current Plan"
-                  color="primary"
-                  size="small"
-                  sx={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                  }}
-                />
-              )}
-              <CardContent sx={{ p: 3, flexGrow: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                  {plan.name}
-                </Typography>
-
-                <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'baseline' }}>
-                  ${plan.price}
-                  <Typography
-                    component="span"
-                    variant="body1"
-                    sx={{ ml: 1, opacity: 0.7 }}
-                  >
-                    /month
-                  </Typography>
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Box sx={{ my: 3, flexGrow: 1 }}>
-                  {plan.features.map((feature, index) => (
-                    <Box
-                      key={`${plan.id}-feature-${index}`}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        mb: 1
-                      }}
-                    >
-                      <Check
-                        size={18}
-                        color={theme.palette.success.main}
-                      />
-                      <Typography variant="body2">
-                        {feature}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-
-                <Button
-                  fullWidth
-                  variant={plan.current ? "outlined" : "contained"}
-                  color="primary"
-                  disabled={plan.current}
-                  sx={{ mt: 2 }}
-                  onClick={() => handleChoosePlan(plan.id || plan.name)}
-                >
-                  {plan.current ? "Current Plan" : "Choose Plan"}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Use the ResponsivePricingPlans component */}
+          <ResponsivePricingPlans
+            plans={plans.map(plan => ({
+              id: plan.id || plan.name,
+              name: getLocalizedPlanName(plan.name),
+              price: plan.price,
+              period: t('pricing.perMonth', '/month'),
+              features: plan.features,
+              current: plan.current || false,
+              highlight: plan.highlight || false,
+              icon: getPlanIcon(plan.name),
+              buttonText: plan.current ? t('pricing.currentPlan', 'Current Plan') : t('pricing.choosePlan', 'Choose Plan'),
+              buttonVariant: plan.current ? 'outlined' : 'contained',
+              disabled: plan.current || false,
+            }))}
+            onSelectPlan={handleChoosePlan}
+            gridColumns={{ xs: 1, sm: 1, md: 3 }}
+            title=""
+            subtitle=""
+          />
         </Box>
 
         <Box sx={{ mt: 6 }}>

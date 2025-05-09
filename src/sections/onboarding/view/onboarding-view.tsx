@@ -7,24 +7,23 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
+import { usePlanIcons } from 'src/hooks/usePlanIcons';
+
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
-import { selectAvailablePlans } from 'src/services/slices/subscription/subscriptionSlice';
+import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
-import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
+import { ResponsivePricingPlans } from 'src/components/pricing';
 
 // Define interest options
 const INTERESTS = [
@@ -50,6 +49,7 @@ export function OnBoardingView() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { getPlanIcon, getLocalizedPlanName } = usePlanIcons();
 
     // Fetch subscription plans
     const {
@@ -57,66 +57,66 @@ export function OnBoardingView() {
     } = useGetSubscriptionPlansQuery();
 
   const plans = plansData?.plans || [];
-  
+
   // Initialize the updateUser mutation
   const [updateUser] = useUpdateUserMutation();
-  
+
   // Check if onboarding is already completed
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // State for current step
   const [step, setStep] = useState(1);
-  
+
   // State for selected interests and referral source
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [referralSource, setReferralSource] = useState<string | null>(null);
-  
+
   // State for selected plan
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  
+
   // Check if user has already completed onboarding
   useEffect(() => {
     // Simulate checking if onboarding is completed
     const checkOnboardingStatus = () => {
       setIsLoading(false);
-      
+
       // If onboarding is already completed, redirect to dashboard
       if (onboardingCompleted) {
         navigate('/');
       }
     };
-    
+
     // Add a small delay to simulate API call
     const timer = setTimeout(checkOnboardingStatus, 500);
-    
+
     return () => clearTimeout(timer);
   }, [navigate, onboardingCompleted]);
-  
+
   // Handle interest selection
   const handleInterestToggle = (interestId: string) => {
-    setSelectedInterests((prev) => 
+    setSelectedInterests((prev) =>
       prev.includes(interestId)
         ? prev.filter(id => id !== interestId)
         : [...prev, interestId]
     );
   };
-  
+
   // Handle referral source selection
   const handleReferralSelect = (sourceId: string) => {
     setReferralSource(sourceId);
   };
-  
+
   // Handle plan selection
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
   };
-  
+
   // Handle next step
   const handleNextStep = () => {
     setStep(2);
   };
-  
+
   // Handle complete onboarding
   const handleComplete = async () => {
     // Save user preferences and mark onboarding as completed
@@ -125,7 +125,7 @@ export function OnBoardingView() {
       heard_about_us: referralSource,
       is_completed_onboarding: true,
     };
-    
+
     try {
       // Send the user preferences to the API
       await updateUser({
@@ -133,12 +133,12 @@ export function OnBoardingView() {
         heard_about_us: referralSource,
         is_completed_onboarding: true,
       }).unwrap();
-      
+
       console.log('Saved user preferences:', userPreferences);
-      
+
       // Mark onboarding as completed in Redux store
       dispatch(setOnboardingCompleted(true));
-      
+
       // Navigate to dashboard
       navigate('/');
     } catch (error) {
@@ -149,7 +149,7 @@ export function OnBoardingView() {
       navigate('/');
     }
   };
-  
+
   // Show loading state
   if (isLoading) {
     return (
@@ -171,7 +171,7 @@ export function OnBoardingView() {
       </Box>
     );
   }
-  
+
   return (
     <Box
       sx={{
@@ -192,19 +192,19 @@ export function OnBoardingView() {
           px: { xs: 2, sm: 3, md: 4 },
           position: 'relative',
         }}
-      >  
+      >
         {/* Header */}
         <Stack spacing={2} sx={{ mb: 5, textAlign: 'center' }}>
           <Typography variant="h3">
             {step === 1 ? 'Welcome to XBlog!' : 'Choose Your Plan'}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            {step === 1 
+            {step === 1
               ? 'Let\'s get to know you better so we can personalize your experience.'
               : 'Select a plan that works best for your content creation needs.'}
           </Typography>
         </Stack>
-        
+
         {/* Progress indicator */}
         <Box sx={{ width: '100%', mb: 5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -216,18 +216,18 @@ export function OnBoardingView() {
             </Typography>
           </Box>
           <Box sx={{ width: '100%', height: 8, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 4 }}>
-            <Box 
-              sx={{ 
-                width: step === 1 ? '50%' : '100%', 
-                height: '100%', 
+            <Box
+              sx={{
+                width: step === 1 ? '50%' : '100%',
+                height: '100%',
                 bgcolor: 'primary.main',
                 borderRadius: 4,
                 transition: 'width 0.5s ease-in-out',
-              }} 
+              }}
             />
           </Box>
         </Box>
-        
+
         {/* Step 1: Interests and Referral */}
         {step === 1 && (
           <Stack spacing={5}>
@@ -242,29 +242,29 @@ export function OnBoardingView() {
               <Grid container spacing={2}>
                 {INTERESTS.map((interest) => (
                   <Grid xs={12} sm={6} md={4} key={interest.id}>
-                    <Card 
-                      sx={{ 
+                    <Card
+                      sx={{
                         height: '100%',
-                        borderColor: selectedInterests.includes(interest.id) 
-                          ? 'primary.main' 
+                        borderColor: selectedInterests.includes(interest.id)
+                          ? 'primary.main'
                           : 'divider',
                         borderWidth: 2,
                         borderStyle: 'solid',
-                        boxShadow: selectedInterests.includes(interest.id) 
-                          ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.3)}` 
+                        boxShadow: selectedInterests.includes(interest.id)
+                          ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.3)}`
                           : 'none',
                         transition: 'all 0.2s ease-in-out',
                       }}
                     >
-                      <CardActionArea 
+                      <CardActionArea
                         onClick={() => handleInterestToggle(interest.id)}
                         sx={{ height: '100%', p: 2 }}
                       >
                         <Stack direction="row" spacing={2} alignItems="center">
-                          <Box 
-                            sx={{ 
-                              p: 1.5, 
-                              borderRadius: 2, 
+                          <Box
+                            sx={{
+                              p: 1.5,
+                              borderRadius: 2,
                               bgcolor: alpha(theme.palette.primary.main, 0.1),
                               color: 'primary.main',
                             }}
@@ -273,11 +273,11 @@ export function OnBoardingView() {
                           </Box>
                           <Typography variant="subtitle1">{interest.label}</Typography>
                           {selectedInterests.includes(interest.id) && (
-                            <CheckCircleOutlineIcon 
-                              sx={{ 
-                                ml: 'auto', 
+                            <CheckCircleOutlineIcon
+                              sx={{
+                                ml: 'auto',
                                 color: 'primary.main',
-                              }} 
+                              }}
                             />
                           )}
                         </Stack>
@@ -287,7 +287,7 @@ export function OnBoardingView() {
                 ))}
               </Grid>
             </Box>
-            
+
             {/* Referral section */}
             <Box>
               <Typography variant="h5" sx={{ mb: 3 }}>
@@ -296,29 +296,29 @@ export function OnBoardingView() {
               <Grid container spacing={2}>
                 {REFERRAL_SOURCES.map((source) => (
                   <Grid xs={12} sm={6} md={4} key={source.id}>
-                    <Card 
-                      sx={{ 
+                    <Card
+                      sx={{
                         height: '100%',
-                        borderColor: referralSource === source.id 
-                          ? 'primary.main' 
+                        borderColor: referralSource === source.id
+                          ? 'primary.main'
                           : 'divider',
                         borderWidth: 2,
                         borderStyle: 'solid',
-                        boxShadow: referralSource === source.id 
-                          ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.3)}` 
+                        boxShadow: referralSource === source.id
+                          ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.3)}`
                           : 'none',
                         transition: 'all 0.2s ease-in-out',
                       }}
                     >
-                      <CardActionArea 
+                      <CardActionArea
                         onClick={() => handleReferralSelect(source.id)}
                         sx={{ height: '100%', p: 2 }}
                       >
                         <Stack direction="row" spacing={2} alignItems="center">
-                          <Box 
-                            sx={{ 
-                              p: 1.5, 
-                              borderRadius: 2, 
+                          <Box
+                            sx={{
+                              p: 1.5,
+                              borderRadius: 2,
                               bgcolor: alpha(theme.palette.primary.main, 0.1),
                               color: 'primary.main',
                             }}
@@ -327,11 +327,11 @@ export function OnBoardingView() {
                           </Box>
                           <Typography variant="subtitle1">{source.label}</Typography>
                           {referralSource === source.id && (
-                            <CheckCircleOutlineIcon 
-                              sx={{ 
-                                ml: 'auto', 
+                            <CheckCircleOutlineIcon
+                              sx={{
+                                ml: 'auto',
                                 color: 'primary.main',
-                              }} 
+                              }}
                             />
                           )}
                         </Stack>
@@ -341,11 +341,11 @@ export function OnBoardingView() {
                 ))}
               </Grid>
             </Box>
-            
+
             {/* Next button */}
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 size="large"
                 onClick={handleNextStep}
                 disabled={selectedInterests.length === 0 || !referralSource}
@@ -356,74 +356,40 @@ export function OnBoardingView() {
             </Box>
           </Stack>
         )}
-        
+
         {step === 2 && (
           <Stack spacing={5}>
-            <Grid container spacing={3}>
-              {plans.map((plan) => (
-                <Grid xs={12} md={4} key={plan.id}>
-                  <Card 
-                    sx={{ 
-                      height: '100%',
-                      position: 'relative',
-                      borderWidth: 2,
-                      borderStyle: 'solid',
-                      boxShadow: selectedPlan === plan.id 
-                        ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.3)}` 
-                        : 'none',
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                  >
-                    <CardActionArea 
-                      onClick={() => handlePlanSelect(plan.id)}
-                      sx={{ height: '100%' }}
-                    >
-                      <CardContent sx={{ p: 3 }}>
-                        <Typography variant="h5" component="div" gutterBottom>
-                          {plan.name}
-                        </Typography>
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
-                          <Typography variant="h3" component="span">
-                            ${plan.price}
-                          </Typography>
-                          <Typography variant="subtitle1" component="span" color="text.secondary" sx={{ ml: 1 }}>
-                            /{plan.price}
-                          </Typography>
-                        </Box>
-                        
-                        <Divider sx={{ my: 2 }} />
-                        
-                        <Stack spacing={2}>
-                          {plan.features.map((feature, index) => (
-                            <Stack direction="row" spacing={1.5} alignItems="center" key={index}>
-                              <Iconify 
-                                icon="mdi:check-circle" 
-                                sx={{ color: 'success.main', width: 20, height: 20 }} 
-                              />
-                              <Typography variant="body2">{feature}</Typography>
-                            </Stack>
-                          ))}
-                        </Stack>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-            
+            <ResponsivePricingPlans
+              plans={plans.map(plan => ({
+                id: plan.id,
+                name: getLocalizedPlanName(plan.name),
+                price: plan.price,
+                period: '/month',
+                features: plan.features,
+                current: false,
+                highlight: false,
+                icon: getPlanIcon(plan.name),
+                buttonText: 'Choose Plan',
+                buttonVariant: 'contained',
+              }))}
+              onSelectPlan={handlePlanSelect}
+              selectedPlan={selectedPlan}
+              title=""
+              subtitle=""
+            />
+
             {/* Action buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
-              <Button 
-                variant="outlined" 
+              <Button
+                variant="outlined"
                 size="large"
                 onClick={() => setStep(1)}
                 sx={{ px: 3 }}
               >
                 Back
               </Button>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 size="large"
                 onClick={handleComplete}
                 sx={{ px: 5 }}

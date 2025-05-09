@@ -159,9 +159,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
   // Get the simulateFieldChange function from the useSEOScoring hook
   const { simulateFieldChange } = useSEOScoring(form);
 
-  const { getValues } = form;
+  // getValues is used in the commented debug code
+  // const { getValues } = form;
 
-  // Log all form values to debug
+  // Debug logging has been disabled for better performance
+  // If you need to debug form values, uncomment the following code:
+  /*
   useEffect(() => {
     // Get all form values
     const allValues = getValues();
@@ -180,6 +183,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
     // Log all available keys in the form
     console.log("Available form keys:", Object.keys(allValues));
   }, [getValues]);
+  */
 
 
   const hasNewChanges = useMemo(() => changedCriteriaIds.length > 0 &&
@@ -253,7 +257,9 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
   // Check if the updateFieldInAllForms function is available
   // We'll use this directly in the syncFormField function
 
-  // Debug: Log form values when component renders
+  // Debug logging has been disabled for better performance
+  // If you need to debug form values, uncomment the following code:
+  /*
   useEffect(() => {
     if (formContext) {
       // Log the main form values
@@ -266,18 +272,20 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       console.log('metaDescription:', formContext.getValues('step1.metaDescription'));
     }
   }, [formContext]);
+  */
 
   // Utility function to update a field in all forms
   const syncFormField = useCallback((fieldType: string, value: any) => {
-    console.log(`Syncing field ${fieldType} with value:`, value);
+    // Debug logging disabled for better performance
+    // console.log(`Syncing field ${fieldType} with value:`, value);
 
     // If we have the custom synchronization function, use it
     if ((formContext as any)?.updateFieldInAllForms) {
-      console.log(`Using custom updateFieldInAllForms for ${fieldType}`);
+      // console.log(`Using custom updateFieldInAllForms for ${fieldType}`);
       (formContext as any).updateFieldInAllForms(fieldType, value);
     } else {
       // Otherwise, update in all possible locations
-      console.log(`Manually updating ${fieldType} in all forms`);
+      // console.log(`Manually updating ${fieldType} in all forms`);
 
       const updateOptions = {
         shouldValidate: true,
@@ -289,7 +297,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       try {
         // Update direct field
         formContext?.setValue(fieldType, value, updateOptions);
-        console.log(`Updated direct field: ${fieldType}`);
+        // console.log(`Updated direct field: ${fieldType}`);
       } catch (err) {
         console.warn(`Failed to update direct field: ${fieldType}`, err);
       }
@@ -297,7 +305,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       try {
         // Update in step1
         formContext?.setValue(`step1.${fieldType}`, value, updateOptions);
-        console.log(`Updated step1.${fieldType}`);
+        // console.log(`Updated step1.${fieldType}`);
       } catch (err) {
         console.warn(`Failed to update step1.${fieldType}`, err);
       }
@@ -305,7 +313,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       try {
         // Update in step2
         formContext?.setValue(`step2.${fieldType}`, value, updateOptions);
-        console.log(`Updated step2.${fieldType}`);
+        // console.log(`Updated step2.${fieldType}`);
       } catch (err) {
         console.warn(`Failed to update step2.${fieldType}`, err);
       }
@@ -313,7 +321,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       try {
         // Update in step3
         formContext?.setValue(`step3.${fieldType}`, value, updateOptions);
-        console.log(`Updated step3.${fieldType}`);
+        // console.log(`Updated step3.${fieldType}`);
       } catch (err) {
         console.warn(`Failed to update step3.${fieldType}`, err);
       }
@@ -343,14 +351,14 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           // Use the first non-empty value found
           fieldValue = directValue || step1Value || step2Value || step3Value || '';
 
-          // Log the current form values
-          console.log(`Current form values for ${fieldType}:`, {
-            directValue,
-            step1Value,
-            step2Value,
-            step3Value,
-            fieldValue
-          });
+          // Debug logging disabled for better performance
+          // console.log(`Current form values for ${fieldType}:`, {
+          //   directValue,
+          //   step1Value,
+          //   step2Value,
+          //   step3Value,
+          //   fieldValue
+          // });
         } catch (error) {
           console.error(`Error getting form value for ${fieldType}:`, error);
         }
@@ -442,7 +450,8 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
 
   // --- Define the Optimization Handler ---
   const handleOptimizeField = useCallback(async (fieldType: string, currentValue: string): Promise<string> => {
-    console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
+    // Debug logging disabled for better performance
+    // console.log(`Optimizing field: ${fieldType} with value: ${currentValue}`);
 
     try {
       // Show loading toast

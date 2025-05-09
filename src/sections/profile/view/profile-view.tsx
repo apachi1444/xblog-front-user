@@ -33,6 +33,7 @@ import {
   useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
+import { ResponsivePricingPlans } from 'src/components/pricing';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
 import { SecurityForm } from 'src/components/profile/SecurityForm';
 
@@ -272,84 +273,30 @@ export function ProfileView() {
                 {t('profile.subscription.choosePlan')}
               </Typography>
 
-              <Grid container spacing={3} sx={{ mt: 2 }}>
-                {plansData?.plans.map((plan, planIndex) => (
-                  <Grid item xs={12} md={4} key={plan.name}>
-                    <Card
-                      variant="outlined"
-                      sx={{
-                        p: 3,
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        borderColor: plan.current ? 'primary.main' : 'divider',
-                        bgcolor: plan.highlight ? 'primary.lighter' : 'background.paper',
-                        position: 'relative',
-                        ...(plan.current && {
-                          boxShadow: theme.customShadows.z8,
-                        }),
-                      }}
-                    >
-                      {plan.current && (
-                        <Chip
-                          label={t('profile.subscription.currentPlan')}
-                          color="primary"
-                          size="small"
-                          sx={{
-                            position: 'absolute',
-                            top: 12,
-                            right: 12,
-                          }}
-                        />
-                      )}
-
-                      <Typography variant="h6" gutterBottom>
-                        {t(`profile.subscription.planNames.${plan.name.toLowerCase()}`, { defaultValue: plan.name })}
-                      </Typography>
-
-                      <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
-                        <Typography variant="h4" component="span">
-                          ${plan.price}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                          {t('profile.subscription.perMonth')}
-                        </Typography>
-                      </Box>
-
-                      <Divider sx={{ my: 2 }} />
-
-                      <Box sx={{ flexGrow: 1 }}>
-                        {plan.features.map((feature, index) => (
-                          <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: '50%',
-                                bgcolor: 'primary.main',
-                                mr: 1.5,
-                              }}
-                            />
-                            <Typography variant="body2">
-                              {t(`profile.subscription.planFeatures.${planIndex}.${index}`, { defaultValue: feature })}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-
-                      <Button
-                        variant={plan.current ? "outlined" : "contained"}
-                        color="primary"
-                        fullWidth
-                        sx={{ mt: 3 }}
-                        disabled={plan.current}
-                      >
-                        {plan.current ? t('profile.subscription.currentPlan') : t('profile.subscription.upgrade')}
-                      </Button>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+              <Box sx={{ mt: 2 }}>
+                {/* Use the ResponsivePricingPlans component */}
+                <ResponsivePricingPlans
+                  plans={plansData?.plans.map(plan => ({
+                    id: plan.id || plan.name,
+                    name: plan.name,
+                    price: plan.price,
+                    period: '/month',
+                    description: '',
+                    features: plan.features,
+                    popular: plan.highlight || false,
+                    current: plan.current || false,
+                    highlight: plan.highlight || false,
+                    icon: 'mdi:check-circle',
+                    buttonText: plan.current ? t('profile.subscription.currentPlan', 'Current Plan') : t('profile.subscription.upgrade', 'Upgrade'),
+                    buttonVariant: plan.current ? 'outlined' : 'contained',
+                    disabled: plan.current || false,
+                  })) || []}
+                  onSelectPlan={(planId) => navigate(`/subscription/upgrade?plan=${planId}`)}
+                  gridColumns={{ xs: 1, sm: 1, md: 3 }}
+                  title=""
+                  subtitle=""
+                />
+              </Box>
 
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h6" gutterBottom>
