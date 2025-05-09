@@ -392,6 +392,14 @@
         "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
         "notify_me": "Notify Me When Available"
       },
+      "support": {
+        "title": "Customer Support",
+        "status": "Online",
+        "openChat": "Open support chat",
+        "inputPlaceholder": "Type a message...",
+        "welcomeMessage": "Hello! How can I help you today?",
+        "sendMessage": "Send message"
+      },
       "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",
