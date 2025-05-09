@@ -377,9 +377,15 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
 
   // Handle optimize button click
   const handleOptimizeClick = (item: ChecklistItem) => {
-    // Only allow optimization for items that aren't already at 100% (success status)
+    // Only allow optimization for items with warning or error status
     if (item.status === 'success') {
       toast.success(`This item is already optimized!`);
+      return;
+    }
+
+    // Don't allow optimization for pending items
+    if (item.status === 'pending' || item.status === 'inactive') {
+      toast.error(`This item is not ready for optimization yet.`);
       return;
     }
 
@@ -706,7 +712,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
                     onActionClick={() => handleActionClick(convertToNotificationItem(item))}
                     onOptimizeClick={() => handleOptimizeClick(convertToNotificationItem(item))}
                     isHighlighted={highlightedItems.includes(item.id)}
-                    showOptimizeButton={!!FIELD_MAPPING[item.id]} // Only show optimize button if there's a field mapping
+                    showOptimizeButton={!!FIELD_MAPPING[item.id] && (item.status === 'warning' || item.status === 'error')} // Only show optimize button if there's a field mapping and status is warning or error
                   />
                 ))}
               </Stack>

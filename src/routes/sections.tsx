@@ -35,6 +35,7 @@ export const TemplatePage = lazy(() => import('src/pages/templates'));
 export const AddStorePage = lazy(() => import('src/pages/add-store'));
 export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
 export const ErrorTestPage = lazy(() => import('src/pages/error-test'));
+export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-preview-demo'));
 
 // ----------------------------------------------------------------------
 
@@ -210,6 +211,14 @@ export function Router() {
               element: (
                 <ErrorBoundary FallbackComponent={ErrorFallback}>
                   <ErrorTestPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'article-preview-demo',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ArticlePreviewDemoPage />
                 </ErrorBoundary>
               )
             },

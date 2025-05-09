@@ -1,6 +1,6 @@
+import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -9,13 +9,13 @@ import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 
-import { Iconify } from 'src/components/iconify';
+import { useBannerDisplay } from 'src/hooks/useBannerDisplay';
 import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
 import { useSubscriptionExpiration } from 'src/hooks/useSubscriptionExpiration';
-import { useBannerDisplay } from 'src/hooks/useBannerDisplay';
-import { BannerType } from 'src/services/slices/banners/bannerSlice';
+
+import { Iconify } from 'src/components/iconify';
 
 interface BannerProps {
   onClose?: () => void;
@@ -234,12 +234,151 @@ export function ScheduledArticleBanner({ onClose }: BannerProps) {
 }
 
 /**
+ * Compact version of the subscription expiration banner for header display
+ */
+function CompactSubscriptionBanner({ onClose }: BannerProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  // Get subscription expiration information
+  const { isExpiringSoon, daysRemaining } = useSubscriptionExpiration(3);
+
+  // Don't show if not expiring soon
+  if (!isExpiringSoon || !daysRemaining || daysRemaining < 0) return null;
+
+  // Navigate to profile/subscription page
+  const handleNavigateToSubscription = () => {
+    navigate('/profile?tab=subscription');
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        px: 1.5,
+        py: 0.5,
+        height: 36,
+        borderRadius: 18,
+        bgcolor: alpha(theme.palette.error.main, 0.1),
+        color: theme.palette.error.main,
+        fontSize: '0.75rem',
+        fontWeight: 'medium',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+      }}
+    >
+      <Iconify icon="mdi:alert-circle" width={16} height={16} />
+      <Box component="span" sx={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {t('subscription.expirationWarningShort', 'Subscription expires in {{days}} days', { days: daysRemaining })}
+      </Box>
+      <Button
+        size="small"
+        variant="text"
+        color="error"
+        onClick={handleNavigateToSubscription}
+        sx={{
+          minWidth: 'auto',
+          px: 1,
+          py: 0.25,
+          fontSize: '0.75rem',
+          lineHeight: 1,
+        }}
+      >
+        {t('subscription.renewNowShort', 'Renew')}
+      </Button>
+    </Box>
+  );
+}
+
+/**
+ * Compact version of the scheduled article banner for header display
+ */
+function CompactScheduledBanner({ onClose }: BannerProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  // Get scheduled articles using our custom hook
+  const { nextScheduledArticle } = useScheduledArticles('scheduled');
+
+  // Navigate to calendar page
+  const handleNavigate = () => {
+    navigate(nextScheduledArticle ? '/calendar' : '/generate');
+  };
+
+  const color = nextScheduledArticle ? theme.palette.info.main : theme.palette.warning.main;
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        px: 1.5,
+        py: 0.5,
+        height: 36,
+        borderRadius: 18,
+        bgcolor: alpha(color, 0.1),
+        color,
+        fontSize: '0.75rem',
+        fontWeight: 'medium',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+        border: `1px solid ${alpha(color, 0.2)}`,
+      }}
+    >
+      <Iconify
+        icon={nextScheduledArticle ? "mdi:calendar-clock" : "mdi:calendar-plus"}
+        width={16}
+        height={16}
+      />
+      <Box component="span" sx={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {nextScheduledArticle
+          ? t('dashboard.nextArticleShort', 'Next: "{{title}}"', {
+              title: nextScheduledArticle.title
+            })
+          : t('dashboard.noScheduledArticlesShort', 'No scheduled articles')
+        }
+      </Box>
+      <Button
+        size="small"
+        variant="text"
+        color={nextScheduledArticle ? "info" : "warning"}
+        onClick={handleNavigate}
+        sx={{
+          minWidth: 'auto',
+          px: 1,
+          py: 0.25,
+          fontSize: '0.75rem',
+          lineHeight: 1,
+        }}
+      >
+        {nextScheduledArticle
+          ? t('dashboard.viewShort', 'View')
+          : t('dashboard.createShort', 'Create')
+        }
+      </Button>
+    </Box>
+  );
+}
+
+/**
  * Combined dashboard banners component
  * Shows subscription expiration banner and scheduled article banner
  * Only shows banners when the page is first loaded, not on navigation
  * Banners remain dismissed until the page is reloaded
+ *
+ * @param compact - Whether to show compact version for header display
  */
-export default function DashboardBanners() {
+export default function DashboardBanners({ compact = false }: { compact?: boolean }) {
   const {
     isSubscriptionBannerVisible,
     isScheduledArticleBannerVisible,
@@ -252,19 +391,27 @@ export default function DashboardBanners() {
     return null;
   }
 
-  // Log banner visibility for debugging
-  console.log('Banner visibility:', {
-    subscription: isSubscriptionBannerVisible,
-    scheduledArticle: isScheduledArticleBannerVisible
-  });
+  // For compact mode (header display)
+  if (compact) {
+    // Show only one banner at a time in compact mode, prioritizing subscription
+    if (isSubscriptionBannerVisible) {
+      return <CompactSubscriptionBanner onClose={() => dismissSubscriptionBanner()} />;
+    }
 
+    if (isScheduledArticleBannerVisible) {
+      return <CompactScheduledBanner onClose={() => dismissScheduledArticleBanner()} />;
+    }
+
+    return null;
+  }
+
+  // Standard mode (full banners)
   return (
     <Stack spacing={2}>
       {isSubscriptionBannerVisible && (
         <Collapse in={isSubscriptionBannerVisible}>
           <SubscriptionExpirationBanner
             onClose={() => {
-              console.log('Dismissing subscription banner');
               dismissSubscriptionBanner();
             }}
           />
@@ -275,7 +422,6 @@ export default function DashboardBanners() {
         <Collapse in={isScheduledArticleBannerVisible}>
           <ScheduledArticleBanner
             onClose={() => {
-              console.log('Dismissing scheduled article banner');
               dismissScheduledArticleBanner();
             }}
           />

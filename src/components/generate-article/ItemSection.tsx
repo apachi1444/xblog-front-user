@@ -276,7 +276,7 @@ export function ItemSection({
 
           <Box sx={{ display: 'flex', gap: 1 }}>
             {/* Optimize button */}
-            {showOptimizeButton && !isPending && status !== 'success' && (
+            {showOptimizeButton && !isPending && (
               <Button
                 variant="outlined"
                 size="small"
@@ -295,7 +295,7 @@ export function ItemSection({
                 }}
                 startIcon={<OptimizeIcon fontSize="small" />}
               >
-                {t('common.Optimize')}
+                {t('seo.optimize', 'Optimize')}
               </Button>
             )}
 
@@ -322,7 +322,7 @@ export function ItemSection({
                 }}
                 startIcon={status === "error" ? <AutoFixHighIcon fontSize="small" /> : undefined}
               >
-                {isPending ? t('common.Waiting') : action}
+                {isPending ? t('seo.waiting', 'Waiting') : action}
               </Button>
             )}
           </Box>

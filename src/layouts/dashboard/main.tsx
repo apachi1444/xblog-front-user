@@ -22,7 +22,8 @@ export function Main({ children, sx, ...other }: BoxProps) {
         display: 'flex',
         flex: '1 1 auto',
         flexDirection: 'column',
-        bgcolor: theme.palette.background.default, // Add background color to main container
+        bgcolor: theme.palette.background.default,
+        pt: '64px', // Add padding top to account for the top header
         ...sx,
       }}
       {...other}
@@ -51,8 +52,8 @@ export function DashboardContent({
 
   return (
     <>
-      {/* Banners above the content with margin-top for spacing from header */}
-      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, mb: 2, mt: 3, mx: { xs: 2, sm: 3, md: 5 } }}>
+      {/* Banners above the content */}
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, mb: 2, mt: 1, mx: { xs: 2, sm: 3, md: 5 } }}>
         <DashboardBanners />
       </Box>
 

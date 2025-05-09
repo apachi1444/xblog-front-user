@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Chip,
+  Grid,
   List,
   Modal,
   Paper,
@@ -52,8 +53,8 @@ export interface ArticleSection {
   id: string;
   title: string;
   content?: string;
-  type?: 'introduction' | 'regular' | 'conclusion' | 'faq' | string;
-  contentType?: 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery' | string;
+  type?: 'introduction' | 'regular' | 'conclusion' | 'faq' | 'toc' | string;
+  contentType?: 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery' | 'toc' | string;
   bulletPoints?: string[];
   internalLinks?: SectionLink[];
   externalLinks?: SectionLink[];
@@ -249,49 +250,82 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
                   {section.title || `${t('preview.section', 'Section')} ${index + 1}`}
                 </Typography>
 
+                {/* Content Type Badge */}
+                {(section.type || section.contentType) && (
+                  <Chip
+                    label={
+                      section.type === 'introduction'
+                        ? t('preview.introductionSection', 'Introduction')
+                        : section.type === 'conclusion'
+                          ? t('preview.conclusionSection', 'Conclusion')
+                          : section.type === 'faq' || section.contentType === 'faq'
+                            ? t('preview.faqSection', 'FAQ Section')
+                            : section.type === 'toc' || section.contentType === 'toc'
+                              ? t('preview.tocSection', 'Table of Contents')
+                              : section.contentType === 'bullet-list'
+                                ? t('preview.listSection', 'List Section')
+                                : section.contentType === 'table'
+                                  ? t('preview.tableSection', 'Table Section')
+                                  : section.contentType === 'image-gallery'
+                                    ? t('preview.imageGallery', 'Image Gallery')
+                                    : section.contentType || t('preview.paragraph', 'Paragraph')
+                    }
+                    size="small"
+                    sx={{
+                      mb: 1.5,
+                      bgcolor: 'background.neutral',
+                      color: 'text.secondary',
+                      fontWeight: 500,
+                      fontSize: '0.75rem'
+                    }}
+                  />
+                )}
+
                 {/* Main Content - Display based on content type */}
                 {section.content && (
                   <Box sx={{ mb: 2 }}>
-                    {/* Content Type Badge */}
-                    {(section.type === 'faq' || section.contentType) && (
-                      <Chip
-                        label={
-                          section.type === 'faq'
-                            ? t('preview.faqSection', 'FAQ Section')
-                            : section.contentType === 'bullet-list'
-                              ? t('preview.listSection', 'List Section')
-                              : section.contentType === 'table'
-                                ? t('preview.tableSection', 'Table Section')
-                                : section.contentType === 'image-gallery'
-                                  ? t('preview.imageGallery', 'Image Gallery')
-                                  : section.contentType || t('preview.paragraph', 'Paragraph')
-                        }
-                        size="small"
-                        sx={{
-                          mb: 1.5,
-                          bgcolor: 'background.neutral',
-                          color: 'text.secondary',
-                          fontWeight: 500,
-                          fontSize: '0.75rem'
-                        }}
-                      />
-                    )}
                     <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
                       {section.content}
                     </Typography>
                   </Box>
                 )}
 
-                {/* Bullet Points */}
+                {/* Bullet Points - Special handling for TOC */}
                 {section.bulletPoints && section.bulletPoints.length > 0 && (
                   <Box sx={{ mb: 2 }}>
                     <List disablePadding>
                       {section.bulletPoints.map((point, i) => (
-                        <ListItem key={i} sx={{ py: 0.5 }}>
+                        <ListItem
+                          key={i}
+                          sx={{
+                            py: 0.5,
+                            ...(section.type === 'toc' || section.contentType === 'toc') && {
+                              cursor: 'pointer',
+                              '&:hover': {
+                                bgcolor: 'action.hover',
+                                borderRadius: 1,
+                              }
+                            }
+                          }}
+                          component={section.type === 'toc' || section.contentType === 'toc' ? 'a' : 'li'}
+                          href={section.type === 'toc' || section.contentType === 'toc' ? `#${point.toLowerCase().replace(/\s+/g, '-')}` : undefined}
+                        >
                           <ListItemIcon sx={{ minWidth: 36 }}>
-                            <Iconify icon="mdi:circle-small" />
+                            <Iconify
+                              icon={section.type === 'toc' || section.contentType === 'toc'
+                                ? "mdi:chevron-right"
+                                : "mdi:circle-small"}
+                            />
                           </ListItemIcon>
-                          <ListItemText primary={point} />
+                          <ListItemText
+                            primary={point}
+                            primaryTypographyProps={{
+                              ...(section.type === 'toc' || section.contentType === 'toc') && {
+                                color: 'primary.main',
+                                fontWeight: 500
+                              }
+                            }}
+                          />
                         </ListItem>
                       ))}
                     </List>
@@ -324,6 +358,70 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
                   </TableContainer>
                 )}
 
+                {/* Internal and External Links */}
+                {((section.internalLinks && section.internalLinks.length > 0) ||
+                  (section.externalLinks && section.externalLinks.length > 0)) && (
+                  <Box sx={{ mb: 2, mt: 2 }}>
+                    {/* Internal Links */}
+                    {section.internalLinks && section.internalLinks.length > 0 && (
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          {t('preview.relatedContent', 'Related Content:')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          {section.internalLinks.map((link, i) => (
+                            <Box
+                              key={i}
+                              component="a"
+                              href={link.url}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: 'primary.main',
+                                textDecoration: 'none',
+                                '&:hover': { textDecoration: 'underline' }
+                              }}
+                            >
+                              <Iconify icon="mdi:link-variant" width={16} height={16} sx={{ mr: 0.5 }} />
+                              <Typography variant="body2">{link.text}</Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* External Links */}
+                    {section.externalLinks && section.externalLinks.length > 0 && (
+                      <Box>
+                        <Typography variant="subtitle2" gutterBottom>
+                          {t('preview.externalResources', 'External Resources:')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          {section.externalLinks.map((link, i) => (
+                            <Box
+                              key={i}
+                              component="a"
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: 'primary.main',
+                                textDecoration: 'none',
+                                '&:hover': { textDecoration: 'underline' }
+                              }}
+                            >
+                              <Iconify icon="mdi:open-in-new" width={16} height={16} sx={{ mr: 0.5 }} />
+                              <Typography variant="body2">{link.text}</Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
                 {/* FAQ Items */}
                 {section.faqItems && section.faqItems.length > 0 && (
                   <Box sx={{ mb: 2 }}>
@@ -340,6 +438,62 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
                     ))}
                   </Box>
                 )}
+
+                {/* Image Gallery */}
+                {section.images && section.images.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Grid container spacing={2}>
+                      {section.images.map((image, i) => (
+                        <Grid item xs={12} key={i}>
+                          <Box
+                            sx={{
+                              borderRadius: 2,
+                              overflow: 'hidden',
+                              position: 'relative',
+                              boxShadow: (theme) => theme.customShadows?.z8 || '0 8px 16px 0 rgba(0,0,0,0.1)',
+                              transition: 'transform 0.3s ease-in-out',
+                              '&:hover': {
+                                transform: 'scale(1.02)',
+                              }
+                            }}
+                          >
+                            <Box
+                              component="img"
+                              src={image.url}
+                              alt={image.alt}
+                              sx={{
+                                width: '100%',
+                                height: 'auto',
+                                display: 'block',
+                                objectFit: 'cover',
+                                aspectRatio: '16/9',
+                              }}
+                            />
+                            {image.caption && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  bgcolor: 'rgba(0, 0, 0, 0.6)',
+                                  color: 'white',
+                                  p: 1,
+                                  fontSize: '0.875rem'
+                                }}
+                              >
+                                {image.caption}
+                              </Box>
+                            )}
+                          </Box>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Add ID for TOC navigation */}
+                <Box id={section.title.toLowerCase().replace(/\s+/g, '-')} />
 
                 {index < sections.length - 1 && <Divider sx={{ my: 3 }} />}
               </Box>
@@ -363,3 +517,4 @@ export const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({
     </Modal>
   );
 };
+

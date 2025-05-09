@@ -10,28 +10,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
 
-import { _langs, _notifications } from 'src/_mock';
-import { setThemeMode } from 'src/services/slices/globalSlice';
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlice';
 import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
-import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 
 import { Main } from './main';
+import { NavDesktop } from './nav';
+import { TopHeader } from './top-header';
 import { layoutClasses } from '../classes';
-import { NavMobile, NavDesktop } from './nav';
-import { MenuButton } from '../components/menu-button';
 import { LayoutSection } from '../core/layout-section';
-import { HeaderSection } from '../core/header-section';
-import { AccountPopover } from '../components/account-popover';
 import { navData, bottomNavData } from '../config-nav-dashboard';
-import { LanguagePopover } from '../components/language-popover';
-import { NotificationsPopover } from '../components/notifications-popover';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +41,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const isDarkMode = useSelector((state: RootState) => state.global);
   const currentStore = useSelector((state: RootState) => state.stores.currentStore);
 
   const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery();
@@ -57,6 +48,36 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const { data: storesData, error: storesError } = useGetStoresQuery();
 
   const storesCount = storesData?.count ?? 0
+
+  // Get sidebar collapsed state from localStorage
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    return savedState ? JSON.parse(savedState) : false;
+  });
+
+  // Listen for sidebar collapse state changes
+  useEffect(() => {
+    const handleSidebarCollapsedChange = (event: CustomEvent<{isCollapsed: boolean}>) => {
+      setIsSidebarCollapsed(event.detail.isCollapsed);
+    };
+
+    window.addEventListener('sidebarCollapsedChange', handleSidebarCollapsedChange as EventListener);
+
+    // Also listen for storage events (for cross-tab synchronization)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'sidebarCollapsed') {
+        const newValue = event.newValue ? JSON.parse(event.newValue) : false;
+        setIsSidebarCollapsed(newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('sidebarCollapsedChange', handleSidebarCollapsedChange as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (subscriptionData) {
@@ -84,13 +105,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     }
   }, [storesData, storesError, dispatch, t, currentStore]);
 
-  const [navOpen, setNavOpen] = useState(false);
   const layoutQuery: Breakpoint = 'lg';
-
-  // Handle theme mode toggle
-  const handleToggleTheme = () => {
-    dispatch(setThemeMode());
-  };
 
   // Handle navigation to add new website
   const handleAddNewWebsite = () => {
@@ -108,105 +123,15 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     : [];
 
   return (
-    <LayoutSection
-      /** **************************************
-       * Header
-       *************************************** */
-      headerSection={
-        <HeaderSection
-          layoutQuery={layoutQuery}
-          slotProps={{
-            container: {
-              maxWidth: false,
-              sx: {
-                px: { [layoutQuery]: 5 },
-                backgroundColor: `${theme.palette.secondary.lighter}`,
-                borderRadius: 40,
-                marginTop: 3,
-                marginX: 10,
-                paddingY: 2
-              },
-            },
-          }}
-          sx={header?.sx}
-          slots={{
-            topArea: null,
-            // Update the leftArea in the HeaderSection to use the Logo component
-            leftArea: (
-              <>
-                <MenuButton
-                  onClick={() => setNavOpen(true)}
-                  sx={{
-                    ml: -1,
-                    [theme.breakpoints.up(layoutQuery)]: { display: 'none' },
-                  }}
-                />
-                <NavMobile
-                  bottomNavData={bottomNavData}
-                  data={navData}
-                  open={navOpen}
-                  onClose={() => setNavOpen(false)}
-                  workspaces={storesCount > 0 ? customWorkspaces : []}
-                />
-              </>
-            ),
-            rightArea: (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <RegenerateCountDisplay />
+    <>
+      {/* Top header with profile, notifications, etc. */}
+      <TopHeader />
 
-                <IconButton
-                  onClick={handleToggleTheme}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      bgcolor: (themee) => themee.palette.action.hover,
-                    },
-                  }}
-                >
-                  <Iconify
-                    icon={isDarkMode ? 'material-symbols:light-mode' : 'material-symbols:dark-mode'}
-                    width={24}
-                    height={24}
-                    sx={{
-                      color: isDarkMode ? 'warning.main' : 'text.primary',
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                  />
-                </IconButton>
-
-                <LanguagePopover data={_langs} />
-                <NotificationsPopover data={_notifications} />
-                <AccountPopover
-                  data={[
-                    {
-                      label: 'Home',
-                      href: '/',
-                      icon: <Iconify width={22} icon="material-symbols:home-outline-rounded" />,
-                    },
-                    {
-                      label: 'Profile',
-                      href: '/profile',
-                      icon: <Iconify width={22} icon="material-symbols:supervised-user-circle-outline" />,
-                    },
-                    {
-                      label: 'Settings',
-                      href: '/settings',
-                      icon: <Iconify width={22} icon="material-symbols:settings-outline" />,
-                    },
-                    {
-                      label: 'My websites',
-                      href: '/stores',
-                      icon: <Iconify width={22} icon="material-symbols:storefront-outline-sharp" />,
-                    },
-                  ]}
-                />
-              </Box>
-            ),
-          }}
-        />
-      }
+      <LayoutSection
+        /** **************************************
+         * Header
+         *************************************** */
+        headerSection={null}
       /** **************************************
        * Sidebar
        *************************************** */
@@ -248,14 +173,18 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        *************************************** */
       cssVars={{
         '--layout-nav-vertical-width': '240px',
-        '--layout-dashboard-content-pt': theme.spacing(5),
+        '--layout-nav-vertical-width-collapsed': '64px',
+        '--layout-dashboard-content-pt': theme.spacing(2), // Reduced top padding
         '--layout-dashboard-content-pb': theme.spacing(8),
         '--layout-dashboard-content-px': theme.spacing(5),
       }}
       sx={{
         [`& .${layoutClasses.hasSidebar}`]: {
           [theme.breakpoints.up(layoutQuery)]: {
-            pl: 'var(--layout-nav-vertical-width)',
+            pl: isSidebarCollapsed ? 'var(--layout-nav-vertical-width-collapsed)' : 'var(--layout-nav-vertical-width)',
+            transition: theme.transitions.create(['padding-left'], {
+              duration: theme.transitions.duration.standard,
+            }),
           },
         },
         ...sx,
@@ -263,5 +192,6 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     >
       <Main sx={{bgcolor : `${theme.palette.background.paper}`}}>{children}</Main>
     </LayoutSection>
+    </>
   );
 }

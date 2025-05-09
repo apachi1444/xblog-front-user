@@ -44,17 +44,24 @@ export function LayoutSection({
       {inputGlobalStyles}
 
       <Box id="root__layout" className={layoutClasses.root} sx={{ bgcolor: theme.palette.background.default, ...sx }}>
-        {sidebarSection}
-        <Box
-          display="flex"
-          flex="1 1 auto"
-          flexDirection="column"
-          className={layoutClasses.hasSidebar}
-          sx={{ bgcolor: theme.palette.background.default }}
-        >
-          {headerSection}
-          {children}
-          {footerSection}
+        {/* Header now spans the full width */}
+        {headerSection}
+
+        <Box sx={{ display: 'flex', flex: '1 1 auto', position: 'relative' }}>
+          {/* Sidebar */}
+          {sidebarSection}
+
+          {/* Main content */}
+          <Box
+            display="flex"
+            flex="1 1 auto"
+            flexDirection="column"
+            className={layoutClasses.hasSidebar}
+            sx={{ bgcolor: theme.palette.background.default }}
+          >
+            {children}
+            {footerSection}
+          </Box>
         </Box>
       </Box>
     </>
