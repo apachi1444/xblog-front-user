@@ -68,9 +68,21 @@ export function TopHeader() {
             justifyContent: 'space-between', // Space between logo and right elements
           }}
         >
-          {/* Logo on the left */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Logo />
+          {/* Logo at the beginning of the header */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mr: 2,
+            pl: 0 
+          }}>
+            <Logo
+              variant="full"
+              sx={{
+                height: 40,
+                width: 'auto',
+                maxHeight: '100%'
+              }}
+            />
           </Box>
 
           {/* Right side elements */}

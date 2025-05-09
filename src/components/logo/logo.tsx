@@ -1,11 +1,10 @@
 import { forwardRef } from 'react';
+
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
-import { useTheme } from '@mui/material/styles';
 
 import { RouterLink } from 'src/routes/components';
 
-import { logoClasses } from './classes';
 
 // ----------------------------------------------------------------------
 

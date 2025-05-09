@@ -1,14 +1,20 @@
 import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
+import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
+
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { fDate } from 'src/utils/format-time';
-import { fShortenNumber } from 'src/utils/format-number';
 
 import { varAlpha } from 'src/theme/styles';
 
@@ -45,6 +51,37 @@ export type PostItemProps = {
   };
 };
 
+// Platform icons mapping
+const PLATFORM_ICONS = {
+  wordpress: { icon: 'mdi:wordpress', color: '#21759b', name: 'WordPress' },
+  medium: { icon: 'mdi:medium', color: '#00ab6c', name: 'Medium' },
+  ghost: { icon: 'simple-icons:ghost', color: '#15171a', name: 'Ghost' },
+  webflow: { icon: 'simple-icons:webflow', color: '#4353ff', name: 'Webflow' },
+  shopify: { icon: 'mdi:shopify', color: '#7ab55c', name: 'Shopify' },
+  wix: { icon: 'simple-icons:wix', color: '#0c6efc', name: 'Wix' },
+  squarespace: { icon: 'simple-icons:squarespace', color: '#000000', name: 'Squarespace' },
+  default: { icon: 'mdi:web', color: '#6e7681', name: 'Website' }
+};
+
+// Function to determine which platform icons to show (in a real app, this would use actual data)
+const getPlatformIcons = (post: Article) => {
+  // This is a placeholder - in a real app, you would get this from the post data
+  // For now, we'll randomly assign platforms based on the post ID to simulate different platforms
+  const postIdSum = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+
+  if (post.status !== 'published') return [];
+
+  // Simulate different platform combinations
+  const platforms = [];
+  if (postIdSum % 2 === 0) platforms.push('wordpress');
+  if (postIdSum % 3 === 0) platforms.push('medium');
+  if (postIdSum % 5 === 0) platforms.push('ghost');
+  if (postIdSum % 7 === 0) platforms.push('webflow');
+
+  // If no platforms were selected, use the default
+  return platforms.length ? platforms : ['default'];
+};
+
 export function PostItem({
   sx,
   post,
@@ -56,6 +93,44 @@ export function PostItem({
   latestPost: boolean;
   latestPostLarge: boolean;
 }) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // Get platform icons for this post
+  const platforms = getPlatformIcons(post);
+
+  // Determine status color and icon
+  const getStatusConfig = () => {
+    switch (post.status) {
+      case 'published':
+        return {
+          color: 'success',
+          icon: 'mdi:check-circle',
+          label: t('blog.published', 'Published')
+        };
+      case 'draft':
+        return {
+          color: 'warning',
+          icon: 'mdi:file-document-outline',
+          label: t('blog.draft', 'Draft')
+        };
+      case 'scheduled':
+        return {
+          color: 'info',
+          icon: 'mdi:clock-outline',
+          label: t('blog.scheduled', 'Scheduled')
+        };
+      default:
+        return {
+          color: 'default',
+          icon: 'mdi:help-circle-outline',
+          label: t('blog.unknown', 'Unknown')
+        };
+    }
+  };
+
+  const statusConfig = getStatusConfig();
+
   const renderAvatar = (
     <Avatar
       alt={post.author?.name || 'Unknown'}
@@ -93,35 +168,177 @@ export function PostItem({
     </Link>
   );
 
-  const renderInfo = (
-    <Box
-      gap={1.5}
-      display="flex"
-      flexWrap="wrap"
-      justifyContent="flex-end"
+  // Render status badge
+  const renderStatus = (
+    <Chip
+      size="small"
+      icon={<Iconify icon={statusConfig.icon} />}
+      label={statusConfig.label}
+      color={statusConfig.color as any}
       sx={{
-        mt: 3,
-        color: 'text.disabled',
+        height: 24,
+        fontSize: '0.75rem',
+        fontWeight: 'bold',
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        zIndex: 10,
+        ...(post.status === 'scheduled' && {
+          '& .MuiChip-icon': { animation: 'pulse 2s infinite' },
+          '@keyframes pulse': {
+            '0%': { opacity: 0.6 },
+            '50%': { opacity: 1 },
+            '100%': { opacity: 0.6 }
+          }
+        })
+      }}
+    />
+  );
+
+  // Render platform icons for published posts
+  const renderPlatforms = (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        zIndex: 10,
+        display: 'flex',
+        gap: 0.5,
       }}
     >
-      {[
-        { number: 0, icon: 'solar:chat-round-dots-bold' },
-      ].map((info, _index) => (
-        <Box
-          key={_index}
-          display="flex"
-          sx={{
-            ...((latestPostLarge || latestPost) && {
-              opacity: 0.64,
-              color: 'common.white',
-            }),
-          }}
-        >
-          <Iconify width={16} icon={info.icon} sx={{ mr: 0.5 }} />
-          <Typography variant="caption">{fShortenNumber(info.number)}</Typography>
-        </Box>
-      ))}
+      {platforms.map((platform) => {
+        const { icon, color, name } = PLATFORM_ICONS[platform as keyof typeof PLATFORM_ICONS] || PLATFORM_ICONS.default;
+        return (
+          <Tooltip key={platform} title={name} arrow>
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                backgroundColor: alpha(color, 0.9),
+                color: '#fff',
+                boxShadow: `0 2px 4px ${alpha(color, 0.4)}`,
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.1)',
+                }
+              }}
+            >
+              <Iconify icon={icon} width={16} height={16} />
+            </Box>
+          </Tooltip>
+        );
+      })}
     </Box>
+  );
+
+  // Render scheduled info
+  const renderScheduledInfo = post.status === 'scheduled' && post.scheduledAt && (
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: 16,
+        right: 16,
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.5,
+        backgroundColor: alpha(theme.palette.info.main, 0.9),
+        color: '#fff',
+        borderRadius: 1,
+        px: 1,
+        py: 0.5,
+        fontSize: '0.75rem',
+        fontWeight: 'medium',
+        boxShadow: `0 2px 4px ${alpha(theme.palette.info.main, 0.4)}`,
+      }}
+    >
+      <Iconify icon="mdi:calendar-clock" width={14} height={14} />
+      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+        {format(new Date(post.scheduledAt), 'MMM d, yyyy')}
+      </Typography>
+    </Box>
+  );
+
+  // Render draft creative element
+  const renderDraftCreative = post.status === 'draft' && (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 80,
+        height: 80,
+        overflow: 'hidden',
+        zIndex: 9,
+      }}
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -5,
+          right: -5,
+          width: 120,
+          height: 36,
+          backgroundColor: theme.palette.warning.main,
+          transform: 'rotate(45deg)',
+          transformOrigin: 'bottom right',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          boxShadow: `0 2px 4px ${alpha(theme.palette.warning.main, 0.4)}`,
+        }}
+      >
+        <Typography variant="caption" sx={{ color: '#fff', fontWeight: 'bold', fontSize: '0.65rem' }}>
+          {t('blog.inProgress', 'IN PROGRESS')}
+        </Typography>
+      </Box>
+    </Box>
+  );
+
+  const renderInfo = (
+    <Stack
+      direction="row"
+      spacing={2}
+      alignItems="center"
+      sx={{
+        mt: 2,
+        color: 'text.secondary',
+        ...((latestPostLarge || latestPost) && {
+          color: 'common.white',
+          opacity: 0.64,
+        }),
+      }}
+    >
+      {/* Keywords */}
+      {post.keywords?.primary && (
+        <Tooltip title={t('blog.primaryKeyword', 'Primary Keyword')}>
+          <Chip
+            size="small"
+            label={post.keywords.primary}
+            sx={{
+              height: 20,
+              fontSize: '0.65rem',
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              color: theme.palette.primary.main,
+              '& .MuiChip-label': { px: 1 }
+            }}
+          />
+        </Tooltip>
+      )}
+
+      {/* Last updated */}
+      <Box display="flex" alignItems="center">
+        <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ mr: 0.5 }} />
+        <Typography variant="caption">
+          {t('blog.updated', 'Updated {{date}}', { date: fDate(post.updatedAt || post.createdAt) })}
+        </Typography>
+      </Box>
+    </Stack>
   );
 
   const renderCover = (
@@ -152,7 +369,12 @@ export function PostItem({
         }),
       }}
     >
-      {fDate(post.publishedAt || post.createdAt)}
+      {post.status === 'published'
+        ? t('blog.publishedOn', 'Published on {{date}}', { date: fDate(post.publishedAt || post.createdAt) })
+        : post.status === 'scheduled'
+          ? t('blog.scheduledFor', 'Scheduled for {{date}}', { date: fDate(post.scheduledAt || '') })
+          : t('blog.createdOn', 'Created on {{date}}', { date: fDate(post.createdAt) })
+      }
     </Typography>
   );
 
@@ -172,10 +394,43 @@ export function PostItem({
     />
   );
 
+  // Render a short excerpt of the description
+  const renderExcerpt = (
+    <Typography
+      variant="body2"
+      sx={{
+        mt: 1,
+        color: 'text.secondary',
+        height: 40,
+        overflow: 'hidden',
+        WebkitLineClamp: 2,
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        ...((latestPostLarge || latestPost) && {
+          color: 'common.white',
+          opacity: 0.8,
+        }),
+      }}
+    >
+      {post.description}
+    </Typography>
+  );
+
   return (
-    <Card sx={sx} {...other}>
+    <Card
+      sx={{
+        position: 'relative',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: theme.shadows[10],
+        },
+        ...sx
+      }}
+      {...other}
+    >
       <Box
-        sx={(theme) => ({
+        sx={() => ({
           position: 'relative',
           pt: 'calc(100% * 3 / 4)',
           ...((latestPostLarge || latestPost) && {
@@ -198,13 +453,16 @@ export function PostItem({
         })}
       >
         {renderShape}
-        {renderAvatar}
         {renderCover}
+        {renderStatus}
+        {platforms.length > 0 && renderPlatforms}
+        {renderScheduledInfo}
+        {renderDraftCreative}
       </Box>
 
       <Box
-        sx={(theme) => ({
-          p: theme.spacing(6, 3, 3, 3),
+        sx={() => ({
+          p: theme.spacing(4, 3, 3, 3),
           ...((latestPostLarge || latestPost) && {
             width: 1,
             bottom: 0,
@@ -214,6 +472,7 @@ export function PostItem({
       >
         {renderDate}
         {renderTitle}
+        {renderExcerpt}
         {renderInfo}
       </Box>
     </Card>
