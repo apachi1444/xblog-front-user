@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { differenceInDays, differenceInHours, differenceInMinutes, isAfter } from 'date-fns';
+import { isAfter, differenceInDays, differenceInHours, differenceInMinutes } from 'date-fns';
 
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
@@ -78,9 +78,7 @@ export function useScheduledArticles(status: string = 'scheduled'): UseScheduled
   }, [articlesData, status]);
   
   // Get the next scheduled article (the first one after sorting)
-  const nextScheduledArticle = useMemo(() => {
-    return scheduledArticles.length > 0 ? scheduledArticles[0] : null;
-  }, [scheduledArticles]);
+  const nextScheduledArticle = useMemo(() => scheduledArticles.length > 0 ? scheduledArticles[0] : null, [scheduledArticles]);
   
   return {
     nextScheduledArticle,
