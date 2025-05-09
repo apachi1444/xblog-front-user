@@ -77,12 +77,10 @@ export const usePlanIcons = () => {
    * @param plan - The plan object
    * @returns The plan object with icon added
    */
-  const enrichPlanWithIcon = <T extends { name: string; icon?: string }>(plan: T): T => {
-    return {
+  const enrichPlanWithIcon = <T extends { name: string; icon?: string }>(plan: T): T => ({
       ...plan,
       icon: plan.icon || getPlanIcon(plan.name)
-    };
-  };
+    });
 
   return {
     getPlanIcon,
