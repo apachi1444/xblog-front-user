@@ -23,105 +23,6 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 
 // ----------------------------------------------------------------------
 
-// Upgrade License Card Component
-function UpgradeLicenseCard() {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  const navigate = useNavigate();
-
-  const handleUpgrade = () => {
-    navigate('/upgrade-license');
-  };
-
-  return (
-    <Card
-      sx={{
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100%',
-        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-        boxShadow: theme.shadows[10],
-        borderRadius: 2,
-      }}
-    >
-      {/* Background pattern */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '100%',
-          height: '100%',
-          opacity: 0.1,
-          background: 'url(/assets/illustrations/pattern-1.svg) no-repeat top right',
-          backgroundSize: 'cover',
-        }}
-      />
-
-      <CardContent sx={{ position: 'relative', height: '100%', p: 3 }}>
-        <Box sx={{ mb: 2 }}>
-          <Chip
-            label="Pro Plan"
-            color="warning"
-            size="small"
-            icon={<Iconify icon="mdi:crown" width={16} />}
-            sx={{
-              fontWeight: 'bold',
-              background: alpha(theme.palette.warning.main, 0.2),
-              color: theme.palette.warning.light,
-              '& .MuiChip-icon': { color: theme.palette.warning.light },
-            }}
-          />
-        </Box>
-
-        <Typography variant="h5" sx={{ color: 'common.white', mb: 1, fontWeight: 'bold' }}>
-          {t('upgrade.unlockPremiumFeatures', 'Unlock Premium Features')}
-        </Typography>
-
-        <Typography variant="body2" sx={{ color: alpha(theme.palette.common.white, 0.7), mb: 3 }}>
-          {t('upgrade.upgradeDescription', 'Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.')}
-        </Typography>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
-          {[
-            { icon: 'mdi:check-circle', text: t('upgrade.benefits.unlimited', 'Unlimited article generation') },
-            { icon: 'mdi:check-circle', text: t('upgrade.benefits.seo', 'Advanced SEO optimization tools') },
-            { icon: 'mdi:check-circle', text: t('upgrade.benefits.support', 'Priority customer support') },
-          ].map((item, index) => (
-            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Iconify icon={item.icon} width={20} height={20} sx={{ color: theme.palette.warning.light }} />
-              <Typography variant="body2" sx={{ color: alpha(theme.palette.common.white, 0.9) }}>
-                {item.text}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-
-        <Button
-          variant="contained"
-          color="warning"
-          size="large"
-          fullWidth
-          onClick={handleUpgrade}
-          sx={{
-            fontWeight: 'bold',
-            borderRadius: 2,
-            py: 1.5,
-            boxShadow: theme.shadows[5],
-            '&:hover': {
-              boxShadow: theme.shadows[8],
-              transform: 'translateY(-2px)',
-            },
-            transition: 'all 0.3s',
-          }}
-        >
-          {t('upgrade.upgradeToPro', 'Upgrade to Pro 🚀')}
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
 // Generate Content Card Component
 function GenerateContentCard() {
   const { t } = useTranslation();
@@ -152,6 +53,8 @@ function GenerateContentCard() {
         position: 'relative',
         overflow: 'hidden',
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
         borderRadius: 2,
         boxShadow: theme.shadows[3],
         background: theme.palette.mode === 'dark'
@@ -295,50 +198,6 @@ function GenerateContentCard() {
               }}
             >
               <Box
-                component="img"
-                src="/assets/illustrations/illustration_dashboard.png"
-                alt="Content Creation"
-                sx={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  maxHeight: 280,
-                  filter: theme.palette.mode === 'dark' ? 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.5))' : 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.1))',
-                  animation: 'float 6s ease-in-out infinite',
-                  '@keyframes float': {
-                    '0%': { transform: 'translateY(0px)' },
-                    '50%': { transform: 'translateY(-10px)' },
-                    '100%': { transform: 'translateY(0px)' }
-                  }
-                }}
-              />
-
-              {/* Floating elements */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '10%',
-                  right: '5%',
-                  p: 1.5,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.background.paper,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
-                  animation: 'pulse 3s ease-in-out infinite',
-                  '@keyframes pulse': {
-                    '0%': { transform: 'scale(1)' },
-                    '50%': { transform: 'scale(1.05)' },
-                    '100%': { transform: 'scale(1)' }
-                  },
-                  zIndex: 2
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify icon="mdi:check-circle" width={18} height={18} sx={{ color: theme.palette.success.main, mr: 0.8 }} />
-                  <Typography variant="body2" fontWeight="bold" sx={{ color: theme.palette.success.main }}>SEO Ready</Typography>
-                </Box>
-              </Box>
-
-              <Box
                 sx={{
                   position: 'absolute',
                   bottom: '15%',
@@ -395,13 +254,15 @@ function ComingSoonCard() {
     <Card
       sx={{
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
         borderRadius: 2,
         boxShadow: theme.shadows[3],
         background: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Iconify
             icon="mdi:rocket-launch"
@@ -514,19 +375,14 @@ export function OverviewAnalyticsView() {
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Supercharge Your Content Creation - Full width and first */}
-        <Grid xs={12}>
+        {/* Supercharge Your Content Creation and Coming Soon in the same row */}
+        <Grid xs={12} md={6} lg={6}>
           <GenerateContentCard />
         </Grid>
 
-        {/* Coming Soon Features - Moved up to highlight future improvements */}
+        {/* Coming Soon Features - Placed next to Generate Content */}
         <Grid xs={12} md={6} lg={6}>
           <ComingSoonCard />
-        </Grid>
-
-        {/* Upgrade License Section - Placed next to Coming Soon for better flow */}
-        <Grid xs={12} md={6} lg={6}>
-          <UpgradeLicenseCard />
         </Grid>
 
         {/* Key Metrics Row - Condensed and moved after promotional content */}

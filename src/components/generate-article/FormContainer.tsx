@@ -24,7 +24,7 @@ export function FormContainer({
 }: FormContainerProps) {
   const [expanded, setExpanded] = useState(true);
   const theme = useTheme();
-  
+
   const toggleExpand = () => {
     if(isCollapsible){
       setExpanded(!expanded);
@@ -37,14 +37,21 @@ export function FormContainer({
         <Box
           sx={{
             position: 'relative',
-            bgcolor: theme.palette.secondary.light ,
+            bgcolor: theme.palette.mode === 'dark'
+              ? theme.palette.background.neutral
+              : theme.palette.secondary.light,
             borderRadius: '8px',
-            borderColor: theme.palette.primary.lighter,
+            border: `1px solid ${theme.palette.mode === 'dark'
+              ? theme.palette.grey[700]
+              : theme.palette.primary.lighter}`,
             pt: 4,
             pb: 2,
             px: 2,
             mt: 2.5,
             width: '100%',
+            boxShadow: theme.palette.mode === 'dark'
+              ? '0 4px 12px rgba(0,0,0,0.2)'
+              : 'none',
           }}
           onClick={toggleExpand} // Make the entire box clickable
         >
@@ -59,34 +66,52 @@ export function FormContainer({
                 height: '39px',
                 px: 2,
                 py: 1.5,
-                bgcolor: theme.palette.secondary.lighter,
-                color: theme.palette.primary.main,
+                bgcolor: theme.palette.mode === 'dark'
+                  ? theme.palette.primary.dark
+                  : theme.palette.secondary.lighter,
+                color: theme.palette.mode === 'dark'
+                  ? theme.palette.common.white
+                  : theme.palette.primary.main,
                 borderRadius: '20px',
-                border: `0.3px solid ${theme.palette.primary.lighter}`,
+                border: `0.3px solid ${theme.palette.mode === 'dark'
+                  ? theme.palette.primary.main
+                  : theme.palette.primary.lighter}`,
                 fontWeight: 'bold',
                 fontSize: '13px',
                 letterSpacing: '0.5px',
                 fontFamily: theme.typography.fontFamily,
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0 2px 8px rgba(0,0,0,0.3)'
+                  : 'none',
               }}
               onClick={(e) => e.stopPropagation()} // Prevent chip clicks from toggling
             />
-            
-            { isCollapsible && ( 
-            <IconButton 
+
+            { isCollapsible && (
+            <IconButton
               onClick={(e) => {
                 e.stopPropagation(); // Prevent event bubbling
                 toggleExpand();
               }}
-              sx={{ 
+              sx={{
                 position: 'absolute',
-                top: -20, 
+                top: -20,
                 right: 18,
-                bgcolor: theme.palette.primary.lighter,
-                color: theme.palette.primary.dark,
-                border: `1px solid ${theme.palette.primary.light}`,
+                bgcolor: theme.palette.mode === 'dark'
+                  ? theme.palette.primary.dark
+                  : theme.palette.primary.lighter,
+                color: theme.palette.mode === 'dark'
+                  ? theme.palette.common.white
+                  : theme.palette.primary.dark,
+                border: `1px solid ${theme.palette.mode === 'dark'
+                  ? theme.palette.primary.main
+                  : theme.palette.primary.light}`,
                 width: '39px',
                 height: '39px',
                 zIndex: 1, // Ensure button stays above the clickable area
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0 2px 8px rgba(0,0,0,0.3)'
+                  : 'none'
               }}
             >
               {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -95,17 +120,19 @@ export function FormContainer({
 
           {/* Collapsed message when form is hidden */}
           {!expanded && (
-            <Box 
-              sx={{ 
-                py: 2, 
+            <Box
+              sx={{
+                py: 2,
                 textAlign: 'center',
                 transition: 'background-color 0.2s',
               }}
             >
-              <Typography 
+              <Typography
                 variant="body2"
-                sx={{ 
-                  color: theme.palette.primary.dark,
+                sx={{
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.primary.light
+                    : theme.palette.primary.dark,
                   fontFamily: theme.typography.fontFamily,
                   fontStyle: 'italic',
                   cursor: 'pointer'
@@ -115,10 +142,10 @@ export function FormContainer({
               </Typography>
             </Box>
           )}
-          
+
           {/* Collapsible form fields container */}
           <Collapse in={expanded} timeout="auto">
-            <Box 
+            <Box
               sx={{
                 display: 'flex',
                 flexDirection: layout === 'column' ? 'column' : 'row',

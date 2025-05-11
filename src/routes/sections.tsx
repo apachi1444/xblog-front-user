@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
+import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
@@ -9,6 +9,7 @@ import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { AuthGuard } from 'src/guards/AuthGuard';
 import { DashboardLayout } from 'src/layouts/dashboard';
+
 import { ErrorFallback } from 'src/components/error-boundary';
 
 // ----------------------------------------------------------------------

@@ -30,16 +30,16 @@ interface SEODashboardProps {
   isCollapsed?: boolean;
 }
 
-// Constants
-const COLORS = {
-  error: "#d81d1d",
-  warning: "#ffb20d",
-  success: "#2dc191",
-  inactive: "#f7f7fa",
-  primary: "#5969cf",
-  border: "#acb9f9",
-  background: "#dbdbfa",
-};
+// Constants - using theme-aware colors
+const getColors = (theme: any) => ({
+  error: theme.palette.error.main,
+  warning: theme.palette.warning.main,
+  success: theme.palette.success.main,
+  inactive: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
+  primary: theme.palette.primary.main,
+  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.primary.lighter,
+  background: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.primary.lighter,
+});
 
 export function SEODashboard({
   state,
@@ -71,6 +71,7 @@ export function SEODashboard({
     };
   }, [form]);
   const theme = useTheme();
+  const COLORS = getColors(theme);
 
   const { progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds } = useSEOScoring(form);
   const [tabValue, setTabValue] = useState(defaultTab);
@@ -223,7 +224,7 @@ export function SEODashboard({
           <Box
             sx={{
               flexGrow: 1, // Take all available space
-              bgcolor: "white",
+              bgcolor: theme.palette.background.paper,
               borderRadius: "0 0 10px 10px",
               overflow: "auto",
               borderLeft: `0.5px solid ${COLORS.border}`,
@@ -241,7 +242,7 @@ export function SEODashboard({
           <Box
             sx={{
               flexGrow: 1, // Take all available space
-              bgcolor: "white",
+              bgcolor: theme.palette.background.paper,
               borderRadius: "0 0 10px 10px",
               display: "flex",
               justifyContent: "center",

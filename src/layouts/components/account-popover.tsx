@@ -15,10 +15,10 @@ import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { useRouter } from 'src/routes/hooks';
+import { useThemeMode } from 'src/hooks/useThemeMode';
 
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
-import { setThemeMode } from 'src/services/slices/globalSlice';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 
@@ -39,10 +39,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const router = useRouter();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const { isDarkMode, toggleTheme } = useThemeMode();
 
   const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
-  const isDarkMode = useSelector((state: any) => state.global.isDarkMode);
 
   // Simple state for popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -78,7 +78,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   // Handle theme toggle
   const handleToggleTheme = () => {
-    dispatch(setThemeMode());
+    toggleTheme();
   };
 
   return (

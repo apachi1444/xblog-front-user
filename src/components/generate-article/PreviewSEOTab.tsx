@@ -44,11 +44,12 @@ export function PreviewSEOTab({
               width: 120,
               height: 120,
               borderRadius: '50%',
-              bgcolor: 'primary.lighter',
+              bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.2) : 'primary.lighter',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              mb: 2
+              mb: 2,
+              boxShadow: theme.palette.mode === 'dark' ? '0 0 15px rgba(0,0,0,0.2)' : 'none'
             }}
           >
             <Iconify
@@ -69,9 +70,14 @@ export function PreviewSEOTab({
                 mb: 2,
                 p: 1.5,
                 borderRadius: 1,
-                bgcolor: () => alpha(theme.palette.warning.main, 0.08),
+                bgcolor: theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.warning.main, 0.15)
+                  : alpha(theme.palette.warning.main, 0.08),
                 border: '1px solid',
-                borderColor: () => alpha(theme.palette.warning.main, 0.24),
+                borderColor: theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.warning.main, 0.4)
+                  : alpha(theme.palette.warning.main, 0.24),
+                boxShadow: theme.palette.mode === 'dark' ? '0 0 8px rgba(0,0,0,0.15)' : 'none',
               }}
             >
               <Typography
@@ -154,13 +160,14 @@ export function PreviewSEOTab({
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 1,
-                bgcolor: 'background.paper'
+                bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.neutral : 'background.paper',
+                boxShadow: theme.palette.mode === 'dark' ? '0 0 8px rgba(0,0,0,0.15)' : 'none'
               }}
             >
               <Typography
                 variant="subtitle2"
                 sx={{
-                  color: '#1a0dab',
+                  color: theme.palette.mode === 'dark' ? theme.palette.primary.light : '#1a0dab',
                   fontSize: '18px',
                   mb: 0.5,
                   overflow: 'hidden',
@@ -176,7 +183,7 @@ export function PreviewSEOTab({
               <Typography
                 variant="body2"
                 sx={{
-                  color: '#006621',
+                  color: theme.palette.mode === 'dark' ? theme.palette.success.light : '#006621',
                   fontSize: '14px',
                   mb: 0.5
                 }}
@@ -215,10 +222,11 @@ export function PreviewSEOTab({
                 <Box
                   sx={{
                     p: 1.5,
-                    bgcolor: 'background.neutral',
+                    bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.neutral : 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
-                    borderColor: 'divider'
+                    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : 'divider',
+                    boxShadow: theme.palette.mode === 'dark' ? '0 0 4px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   <Typography variant="body2">
@@ -234,10 +242,11 @@ export function PreviewSEOTab({
                 <Box
                   sx={{
                     p: 1.5,
-                    bgcolor: 'background.neutral',
+                    bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.neutral : 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
-                    borderColor: 'divider'
+                    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : 'divider',
+                    boxShadow: theme.palette.mode === 'dark' ? '0 0 4px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   <Typography variant="body2">
@@ -253,10 +262,11 @@ export function PreviewSEOTab({
                 <Box
                   sx={{
                     p: 1.5,
-                    bgcolor: 'background.neutral',
+                    bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.neutral : 'background.neutral',
                     borderRadius: 1,
                     border: '1px solid',
-                    borderColor: 'divider'
+                    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[700] : 'divider',
+                    boxShadow: theme.palette.mode === 'dark' ? '0 0 4px rgba(0,0,0,0.1)' : 'none'
                   }}
                 >
                   <Typography variant="body2">

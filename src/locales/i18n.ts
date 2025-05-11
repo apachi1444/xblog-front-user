@@ -10,6 +10,17 @@ import arJSON from './ar/ar.json'
 import ruJSON from './ru/ru.json'
 import esJSON from './es/es.json'
 
+// Get language from localStorage or default to 'en'
+const getInitialLanguage = (): string => {
+  try {
+    const storedLanguage = localStorage.getItem('language');
+    return storedLanguage || 'en';
+  } catch (error) {
+    console.error('Error reading language from localStorage:', error);
+    return 'en';
+  }
+};
+
 i18n.use(initReactI18next).init({
   resources: {
     en: { ...enJSON },
@@ -19,7 +30,7 @@ i18n.use(initReactI18next).init({
     ru: {...ruJSON },
     es: {...esJSON }
   },
-  lng: "en",
+  lng: getInitialLanguage(),
   fallbackLng: "en",
   interpolation: {
     escapeValue: false // React already escapes values

@@ -1,8 +1,6 @@
-import type { RootState } from 'src/services/store';
 
 // Third-party imports
 import { useTranslation } from 'react-i18next';
-import { useSelector, useDispatch } from 'react-redux';
 // React imports
 import { memo, useMemo, useState, useCallback } from 'react';
 
@@ -16,16 +14,18 @@ import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
 
+// Custom hooks
+import { useThemeMode } from 'src/hooks/useThemeMode';
+
 // Redux and API
-import { setThemeMode } from 'src/services/slices/globalSlice';
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 
 // Components
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
-import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 import { LanguageSwitcher } from 'src/components/language/language-switcher';
+import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 
 // Local components
 import { NavMobile } from './nav';
@@ -76,9 +76,8 @@ const ThemeToggle = memo(({ isDarkMode, onToggle }: { isDarkMode: boolean; onTog
 
 export function TopHeader() {
   const theme = useTheme();
-  const dispatch = useDispatch();
   const { t } = useTranslation();
-  const isDarkMode = useSelector((state: RootState) => state.global.isDarkMode);
+  const { isDarkMode, toggleTheme } = useThemeMode();
   const [openNav, setOpenNav] = useState(false);
 
   // Fetch stores data for the workspaces popover
@@ -100,8 +99,8 @@ export function TopHeader() {
 
   // Memoized event handlers to prevent unnecessary re-renders
   const handleToggleTheme = useCallback(() => {
-    dispatch(setThemeMode());
-  }, [dispatch]);
+    toggleTheme();
+  }, [toggleTheme]);
 
   const handleOpenNav = useCallback(() => {
     setOpenNav(true);

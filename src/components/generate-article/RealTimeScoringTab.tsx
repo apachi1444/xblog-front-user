@@ -36,18 +36,17 @@ interface RealTimeScoringTabProps {
   changedCriteriaIds?: number[];
 }
 
-// Constants
-// Update the COLORS constant to include a new color for pending items
-const COLORS = {
-  error: "#d81d1d",
-  warning: "#ffb20d",
-  success: "#2dc191",
-  inactive: "#f7f7fa",
-  pending: "#e0e0e0", // Light gray for pending items
-  primary: "#5969cf",
-  border: "#acb9f9",
-  background: "#dbdbfa",
-};
+// Constants - using theme-aware colors
+const getColors = (theme: any) => ({
+  error: theme.palette.error.main,
+  warning: theme.palette.warning.main,
+  success: theme.palette.success.main,
+  inactive: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
+  pending: theme.palette.mode === 'dark' ? theme.palette.grey[700] : "#e0e0e0", // Adjusted for dark mode
+  primary: theme.palette.primary.main,
+  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.primary.lighter,
+  background: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.primary.lighter,
+});
 
 
 // Field mapping type
@@ -139,6 +138,7 @@ for (let i = 101; i <= 406; i++) {
 
 export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 100, formattedScore, changedCriteriaIds = [] }: RealTimeScoringTabProps) {
   const theme = useTheme();
+  const COLORS = getColors(theme);
   // State management
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
   const [modalOpen, setModalOpen] = useState(false);
@@ -500,7 +500,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
         border: `0.5px solid ${COLORS.border}`,
         borderTop: "none",
         borderRadius: "0 0 10px 10px",
-        bgcolor: "white",
+        bgcolor: theme.palette.background.paper,
       }}
     >
       {/* SEO Score - Enhanced Version */}
@@ -513,8 +513,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           mb: 3,
           p: 2,
           borderRadius: 2,
-          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
-          boxShadow: `0 4px 20px 0 rgba(0,0,0,0.05)`,
+          background: theme.palette.mode === 'dark'
+            ? `linear-gradient(135deg, ${theme.palette.background.neutral} 0%, ${theme.palette.grey[800]} 100%)`
+            : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+          boxShadow: theme.palette.mode === 'dark'
+            ? `0 4px 20px 0 rgba(0,0,0,0.2)`
+            : `0 4px 20px 0 rgba(0,0,0,0.05)`,
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -549,12 +553,12 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
             borderRadius: '50%',
             background: `conic-gradient(
               ${getScoreColor()} ${Math.min(100, (score / totalMaxScore) * 100)}%,
-              ${theme.palette.grey[200]} ${Math.min(100, (score / totalMaxScore) * 100)}% 100%
+              ${theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[200]} ${Math.min(100, (score / totalMaxScore) * 100)}% 100%
             )`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: `0 0 15px 0 ${getScoreColor()}40`,
+            boxShadow: `0 0 15px 0 ${getScoreColor()}${theme.palette.mode === 'dark' ? '60' : '40'}`,
             transition: 'all 0.5s ease-in-out',
           }}>
             {/* Inner white circle */}
@@ -562,12 +566,14 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
               width: 120,
               height: 120,
               borderRadius: '50%',
-              bgcolor: 'white',
+              bgcolor: theme.palette.mode === 'dark' ? theme.palette.background.paper : 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'column',
-              boxShadow: '0 0 10px 0 rgba(0,0,0,0.1) inset',
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 0 10px 0 rgba(0,0,0,0.3) inset'
+                : '0 0 10px 0 rgba(0,0,0,0.1) inset',
               position: 'relative',
             }}>
               <Typography
@@ -621,10 +627,13 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
           py: 0.5,
           px: 2,
           borderRadius: 10,
-          bgcolor: `${getScoreColor()}20`,
+          bgcolor: theme.palette.mode === 'dark'
+            ? `${getScoreColor()}30`
+            : `${getScoreColor()}20`,
           display: 'flex',
           alignItems: 'center',
-          gap: 1
+          gap: 1,
+          boxShadow: theme.palette.mode === 'dark' ? '0 2px 8px rgba(0,0,0,0.2)' : 'none'
         }}>
           <Box
             component="span"
@@ -694,6 +703,9 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
                 "& .MuiLinearProgress-bar": {
                   bgcolor: COLORS[section.type],
                 },
+                ...(theme.palette.mode === 'dark' && {
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                }),
               }}
             />
 

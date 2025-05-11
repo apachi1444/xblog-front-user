@@ -72,12 +72,29 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
               startAdornment: icon,
               sx: {
                 minHeight: theme.spacing(6.25), // 50px equivalent using theme spacing
-                bgcolor: theme.palette.background.paper,
+                bgcolor: theme.palette.mode === 'dark'
+                  ? theme.palette.background.neutral
+                  : theme.palette.background.paper,
                 borderRadius: theme.shape.borderRadius / 8,
-                border: `0.5px solid ${error ? theme.palette.error.main : theme.palette.primary.main}`,
+                border: `0.5px solid ${error
+                  ? theme.palette.error.main
+                  : theme.palette.mode === 'dark'
+                    ? theme.palette.grey[600]
+                    : theme.palette.primary.main}`,
                 fontSize: theme.typography.button.fontSize,
+                color: theme.palette.text.primary,
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none'
+                },
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? theme.palette.background.neutral
+                    : theme.palette.background.paper,
+                  border: `0.5px solid ${error
+                    ? theme.palette.error.main
+                    : theme.palette.mode === 'dark'
+                      ? theme.palette.primary.main
+                      : theme.palette.primary.dark}`
                 }
               }
             }}

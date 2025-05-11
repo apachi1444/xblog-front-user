@@ -1,9 +1,6 @@
-import type { RootState } from 'src/services/store';
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
@@ -11,7 +8,8 @@ import { alpha } from '@mui/material/styles';
 import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
-import { setLanguage } from 'src/services/slices/globalSlice';
+
+import { useLanguage } from 'src/hooks/useLanguage';
 
 
 // Updated languages configuration with all requested languages
@@ -59,22 +57,10 @@ export type LanguagePopoverProps = IconButtonProps & {
 };
 
 export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: LanguagePopoverProps) {
-  const dispatch = useDispatch();
-  const { i18n } = useTranslation();
-  
-  const storedLanguage = useSelector((state: RootState) => state.global.language);
-  
+  // Use the language hook directly
+  const { language, setLanguage } = useLanguage();
+
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
-
-  // Initialize locale from Redux store or fallback to i18n current language
-  const [locale, setLocale] = useState<string>(storedLanguage || i18n.language || data[0].value);
-
-  // Sync Redux language with i18n when component mounts
-  useEffect(() => {
-    if (storedLanguage && storedLanguage !== i18n.language) {
-      i18n.changeLanguage(storedLanguage);
-    }
-  }, [storedLanguage, i18n]);
 
   const handleOpenPopover = useCallback((event: any) => {
     setOpenPopover(event.currentTarget);
@@ -86,21 +72,16 @@ export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: Lang
 
   const handleChangeLang = useCallback(
     (newLang: string) => {
-      setLocale(newLang);
-      
-      // Update Redux store
-      dispatch(setLanguage(newLang));
-      
-      // Update i18n language
-      i18n.changeLanguage(newLang);
-      
+      // Update language using the custom hook
+      setLanguage(newLang);
+
       // Force close the popover immediately
       setOpenPopover(null);
     },
-    [dispatch, i18n]
+    [setLanguage]
   );
 
-  const currentLang = data.find((lang) => lang.value === locale) || data[0];
+  const currentLang = data.find((lang) => lang.value === language) || data[0];
 
   const renderFlag = (label?: string, icon?: string) => (
     <Box
@@ -119,10 +100,10 @@ export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: Lang
           width: 40,
           height: 40,
           transition: 'all 0.2s ease-in-out',
-          ...(openPopover && { 
+          ...(openPopover && {
             bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
           }),
-          '&:hover': { 
+          '&:hover': {
             bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
           },
           ...sx,
@@ -140,7 +121,7 @@ export function LanguagePopover({ data = DEFAULT_LANGUAGES, sx, ...other }: Lang
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{
           paper: {
-            sx: { 
+            sx: {
               mt: 1.5,
               overflow: 'hidden',
               boxShadow: (theme) => theme.customShadows?.dropdown || '0 0 24px rgba(0,0,0,0.08)',

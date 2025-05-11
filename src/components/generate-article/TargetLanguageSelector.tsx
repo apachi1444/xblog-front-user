@@ -4,6 +4,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 
 import SearchIcon from '@mui/icons-material/Search';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { alpha } from '@mui/material/styles';
 import {
   Box,
   Grid,
@@ -143,11 +144,20 @@ export function TargetLanguageSelector() {
                   textAlign: 'left',
                   py: 1.5,
                   color: 'text.primary',
-                  bgcolor: 'background.paper',
+                  bgcolor: (theme) => theme.palette.mode === 'dark'
+                    ? theme.palette.background.neutral
+                    : theme.palette.background.paper,
+                  border: (theme) => `1px solid ${theme.palette.mode === 'dark'
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300]}`,
                   '& .MuiButton-startIcon': { marginRight: 1 },
                   '&:hover': {
-                    bgcolor: 'background.paper', // Keep the same background on hover
-                    borderColor: 'divider' // Keep the same border color on hover
+                    bgcolor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.background.neutral
+                      : theme.palette.background.paper,
+                    borderColor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.grey[600]
+                      : 'divider'
                   }
                 }}
               >
@@ -174,7 +184,17 @@ export function TargetLanguageSelector() {
                 }}
                 slotProps={{
                   paper: {
-                    sx: { width: 320, maxHeight: 400, p: 2 }
+                    sx: {
+                      width: 320,
+                      maxHeight: 400,
+                      p: 2,
+                      bgcolor: (theme) => theme.palette.mode === 'dark'
+                        ? theme.palette.background.neutral
+                        : theme.palette.background.paper,
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 8px 16px rgba(0,0,0,0.4)'
+                        : '0 8px 16px rgba(0,0,0,0.1)'
+                    }
                   }
                 }}
               >
@@ -198,11 +218,16 @@ export function TargetLanguageSelector() {
                   sx={{
                     maxHeight: 300,
                     overflow: 'auto',
+                    bgcolor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.background.neutral
+                      : theme.palette.background.paper,
                     '&::-webkit-scrollbar': {
                       width: '8px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: 'rgba(0,0,0,0.2)',
+                      backgroundColor: (theme) => theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(0,0,0,0.2)',
                       borderRadius: '4px',
                     }
                   }}
@@ -223,7 +248,17 @@ export function TargetLanguageSelector() {
                           py: 1,
                           px: 2,
                           borderRadius: 1,
-                          backgroundColor: selectedCountry === country.code ? 'action.selected' : 'transparent'
+                          backgroundColor: (theme) => selectedCountry === country.code
+                            ? theme.palette.mode === 'dark'
+                              ? alpha(theme.palette.primary.main, 0.2)
+                              : theme.palette.action.selected
+                            : 'transparent',
+                          color: 'text.primary',
+                          '&:hover': {
+                            backgroundColor: (theme) => theme.palette.mode === 'dark'
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : theme.palette.action.hover
+                          }
                         }}
                       >
                         {country.name}
@@ -268,11 +303,20 @@ export function TargetLanguageSelector() {
                   textAlign: 'left',
                   py: 1.5,
                   color: 'text.primary',
-                  bgcolor: 'background.paper',
+                  bgcolor: (theme) => theme.palette.mode === 'dark'
+                    ? theme.palette.background.neutral
+                    : theme.palette.background.paper,
+                  border: (theme) => `1px solid ${theme.palette.mode === 'dark'
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300]}`,
                   '& .MuiButton-startIcon': { marginRight: 1 },
                   '&:hover': {
-                    bgcolor: 'background.paper', // Keep the same background on hover
-                    borderColor: 'divider' // Keep the same border color on hover
+                    bgcolor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.background.neutral
+                      : theme.palette.background.paper,
+                    borderColor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.grey[600]
+                      : 'divider'
                   }
                 }}
               >
@@ -299,7 +343,17 @@ export function TargetLanguageSelector() {
                 }}
                 slotProps={{
                   paper: {
-                    sx: { width: 320, maxHeight: 400, p: 2 }
+                    sx: {
+                      width: 320,
+                      maxHeight: 400,
+                      p: 2,
+                      bgcolor: (theme) => theme.palette.mode === 'dark'
+                        ? theme.palette.background.neutral
+                        : theme.palette.background.paper,
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 8px 16px rgba(0,0,0,0.4)'
+                        : '0 8px 16px rgba(0,0,0,0.1)'
+                    }
                   }
                 }}
               >
@@ -323,11 +377,16 @@ export function TargetLanguageSelector() {
                   sx={{
                     maxHeight: 300,
                     overflow: 'auto',
+                    bgcolor: (theme) => theme.palette.mode === 'dark'
+                      ? theme.palette.background.neutral
+                      : theme.palette.background.paper,
                     '&::-webkit-scrollbar': {
                       width: '8px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: 'rgba(0,0,0,0.2)',
+                      backgroundColor: (theme) => theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(0,0,0,0.2)',
                       borderRadius: '4px',
                     }
                   }}
@@ -350,7 +409,17 @@ export function TargetLanguageSelector() {
                           py: 1,
                           px: 2,
                           borderRadius: 1,
-                          backgroundColor: selectedLanguage === language.code ? 'action.selected' : 'transparent'
+                          backgroundColor: (theme) => selectedLanguage === language.code
+                            ? theme.palette.mode === 'dark'
+                              ? alpha(theme.palette.primary.main, 0.2)
+                              : theme.palette.action.selected
+                            : 'transparent',
+                          color: 'text.primary',
+                          '&:hover': {
+                            backgroundColor: (theme) => theme.palette.mode === 'dark'
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : theme.palette.action.hover
+                          }
                         }}
                       >
                         {language.name}
