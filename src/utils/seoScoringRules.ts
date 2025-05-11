@@ -1,20 +1,13 @@
-/**
- * Detailed SEO scoring rules with specific criteria for each scoring item
- */
-
-// Import shared types from seoTypes
-import {
+import type {
   ScoringRule,
-  DetailedScoringItem,
   ScoringRules,
-  UserInputKey
+  DetailedScoringItem
 } from './seoTypes';
 
-// Re-export types for backward compatibility
 export type {
   ScoringRule,
-  DetailedScoringItem,
-  ScoringRules
+  ScoringRules,
+  DetailedScoringItem
 };
 
 export const SEO_SCORING_RULES: ScoringRules = {

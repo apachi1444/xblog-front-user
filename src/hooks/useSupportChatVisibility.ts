@@ -23,6 +23,6 @@ export const useSupportChatVisibility = (): boolean => {
   // or if it's a sub-route of one of those routes (e.g., /templates/123)
   return SUPPORT_CHAT_VISIBLE_ROUTES.some(route => 
     currentPath === route || 
-    (route !== '/' && currentPath.startsWith(route + '/'))
+    (route !== '/' && currentPath.startsWith(`${route  }/`))
   );
 };

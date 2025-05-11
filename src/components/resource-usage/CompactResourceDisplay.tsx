@@ -1,9 +1,8 @@
-import type { RootState } from 'src/services/store';
-
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
 import { Box, alpha, Tooltip, useTheme, Typography } from '@mui/material';
+
+import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -15,8 +14,8 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  // Get subscription details from Redux store
-  const subscriptionDetails = useSelector((state: RootState) => state.subscription.subscriptionDetails);
+  // Get subscription details from API
+  const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery();
 
   let used = 0;
   let total = 0;
@@ -26,23 +25,32 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   let label = '';
   let tooltipTitle = '';
 
-  // Set values based on type
-  if (type === 'articles') {
-    used = subscriptionDetails?.articles_created || 0;
-    total = subscriptionDetails?.articles_limit || 100;
-    remaining = total - used;
-    percentage = Math.min((used / total) * 100, 100);
-    icon = 'mdi:file-document-outline';
-    label = `${remaining}/${total}`;
-    tooltipTitle = t('resources.articles', 'Articles');
+  // Set default icon and tooltip based on type
+  icon = type === 'articles' ? 'mdi:file-document-outline' : 'mdi:web';
+  tooltipTitle = type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Websites');
+
+  // Show loading state
+  if (isLoading) {
+    label = '...';
+  }
+  // Set values based on type if not loading
+  else if (subscriptionDetails) {
+    if (type === 'articles') {
+      used = subscriptionDetails.articles_created || 0;
+      total = subscriptionDetails.articles_limit || 100;
+      remaining = total - used;
+      percentage = Math.min((used / total) * 100, 100);
+      label = `${remaining}/${total}`;
+    } else {
+      used = subscriptionDetails.connected_websites || 0;
+      total = subscriptionDetails.websites_limit || 5;
+      remaining = total - used;
+      percentage = Math.min((used / total) * 100, 100);
+      label = `${remaining}/${total}`;
+    }
   } else {
-    used = subscriptionDetails?.connected_websites || 0;
-    total = subscriptionDetails?.websites_limit || 5;
-    remaining = total - used;
-    percentage = Math.min((used / total) * 100, 100);
-    icon = 'mdi:web';
-    label = `${remaining}/${total}`;
-    tooltipTitle = t('resources.websites', 'Websites');
+    // Fallback if no data
+    label = '0/0';
   }
 
   // Determine color based on percentage

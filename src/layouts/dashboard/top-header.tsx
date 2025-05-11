@@ -24,7 +24,6 @@ import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
-import { LanguageSwitcher } from 'src/components/language/language-switcher';
 import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 
 // Local components
@@ -242,9 +241,6 @@ export function TopHeader() {
             }}>
               {/* Use the extracted ResourceDisplays component */}
               <ResourceDisplays />
-
-              {/* Language Switcher */}
-              <LanguageSwitcher />
 
               {/* Use the extracted ThemeToggle component */}
               <ThemeToggle isDarkMode={isDarkMode} onToggle={handleToggleTheme} />
