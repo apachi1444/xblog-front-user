@@ -25,6 +25,7 @@ import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
 import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
+import { LanguageSwitcher } from 'src/components/language/language-switcher';
 
 // Local components
 import { NavMobile } from './nav';
@@ -241,6 +242,9 @@ export function TopHeader() {
             }}>
               {/* Use the extracted ResourceDisplays component */}
               <ResourceDisplays />
+
+              {/* Language Switcher */}
+              <LanguageSwitcher />
 
               {/* Use the extracted ThemeToggle component */}
               <ThemeToggle isDarkMode={isDarkMode} onToggle={handleToggleTheme} />
