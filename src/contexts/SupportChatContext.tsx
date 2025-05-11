@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';
+import { useSupportChatVisibility } from 'src/hooks/useSupportChatVisibility';
 
 // Define message types
 export interface ChatMessage {
@@ -16,6 +17,7 @@ interface SupportChatContextType {
   isOpen: boolean;
   messages: ChatMessage[];
   unreadCount: number;
+  isVisible: boolean; // Whether the chat is visible on the current route
   openChat: () => void;
   closeChat: () => void;
   toggleChat: () => void;
@@ -28,6 +30,7 @@ const SupportChatContext = createContext<SupportChatContextType>({
   isOpen: false,
   messages: [],
   unreadCount: 0,
+  isVisible: false,
   openChat: () => {},
   closeChat: () => {},
   toggleChat: () => {},
@@ -85,16 +88,22 @@ export const SupportChatProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Check if the chat should be visible on the current route
+  const isChatVisibleOnRoute = useSupportChatVisibility();
+
   // Initialize with welcome message
   useEffect(() => {
-    const welcomeMessage: ChatMessage = {
-      id: 'welcome',
-      text: t('support.welcomeMessage', 'Hello! How can I help you today?'),
-      sender: 'support',
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
-  }, [t]);
+    // Only initialize if the chat is visible on this route
+    if (isChatVisibleOnRoute) {
+      const welcomeMessage: ChatMessage = {
+        id: 'welcome',
+        text: t('support.welcomeMessage', 'Hello! How can I help you today?'),
+        sender: 'support',
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [t, isChatVisibleOnRoute]);
 
   // Mark all messages as read
   const markAllAsRead = useCallback(() => {
@@ -159,12 +168,13 @@ export const SupportChatProvider: React.FC<{ children: ReactNode }> = ({ childre
         isOpen,
         messages,
         unreadCount,
+        isVisible: isChatVisibleOnRoute,
         openChat,
         closeChat,
         toggleChat,
         sendMessage,
         markAllAsRead,
-      }), [isOpen, messages, unreadCount, openChat, closeChat, toggleChat, sendMessage, markAllAsRead])}
+      }), [isOpen, messages, unreadCount, isChatVisibleOnRoute, openChat, closeChat, toggleChat, sendMessage, markAllAsRead])}
     >
       {children}
     </SupportChatContext.Provider>

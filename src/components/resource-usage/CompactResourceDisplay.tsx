@@ -34,10 +34,7 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
     percentage = Math.min((used / total) * 100, 100);
     icon = 'mdi:file-document-outline';
     label = `${remaining}/${total}`;
-    tooltipTitle = t('resources.articlesRemaining', 'Remaining: {{remaining}}/{{total}} articles', {
-      remaining,
-      total
-    });
+    tooltipTitle = t('resources.articles', 'Articles');
   } else {
     used = subscriptionDetails?.connected_websites || 0;
     total = subscriptionDetails?.websites_limit || 5;
@@ -45,10 +42,7 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
     percentage = Math.min((used / total) * 100, 100);
     icon = 'mdi:web';
     label = `${remaining}/${total}`;
-    tooltipTitle = t('resources.websitesRemaining', 'Remaining: {{remaining}}/{{total}} websites', {
-      remaining,
-      total
-    });
+    tooltipTitle = t('resources.websites', 'Websites');
   }
 
   // Determine color based on percentage

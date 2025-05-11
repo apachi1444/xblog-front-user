@@ -53,6 +53,15 @@ export function CreateView() {
       locked: true,
       comingSoon: true
     },
+    {
+      id: 'bulk',
+      title: t('create.options.bulk.title', 'Bulk Generate'),
+      description: t('create.options.bulk.description', 'Generate multiple articles in a single batch'),
+      icon: 'mdi:file-multiple-outline',
+      color: '#C8E6C9',
+      locked: true,
+      comingSoon: true
+    },
   ];
 
   const handleOptionSelect = (optionId: string, isLocked: boolean = false) => {
@@ -321,7 +330,7 @@ export function CreateView() {
 
       <Grid container spacing={3} justifyContent="center" sx={{ mb: 8 }}>
         {createOptions.map((option) => (
-          <Grid key={option.id} xs={12} sm={4}>
+          <Grid key={option.id} xs={12} sm={6} md={4}>
             <Card
               sx={{
                 height: '100%',

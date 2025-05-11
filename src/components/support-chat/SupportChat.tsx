@@ -42,9 +42,9 @@ const ChatMessageItem = ({ message }: { message: ChatMessage }) => {
         <Avatar
           src="/assets/images/support-avatar.png"
           alt="Support"
-          sx={{ 
-            width: 32, 
-            height: 32, 
+          sx={{
+            width: 32,
+            height: 32,
             mr: 1,
             bgcolor: theme.palette.primary.main,
           }}
@@ -52,7 +52,7 @@ const ChatMessageItem = ({ message }: { message: ChatMessage }) => {
           <Iconify icon="mdi:headset" width={20} />
         </Avatar>
       )}
-      
+
       <Box
         sx={{
           maxWidth: '75%',
@@ -85,12 +85,12 @@ const ChatMessageItem = ({ message }: { message: ChatMessage }) => {
           {format(new Date(message.timestamp), 'HH:mm')}
         </Typography>
       </Box>
-      
+
       {!isSupport && (
         <Avatar
-          sx={{ 
-            width: 32, 
-            height: 32, 
+          sx={{
+            width: 32,
+            height: 32,
             ml: 1,
             bgcolor: theme.palette.secondary.main,
           }}
@@ -106,33 +106,40 @@ const ChatMessageItem = ({ message }: { message: ChatMessage }) => {
 export const SupportChat = () => {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { 
-    isOpen, 
-    messages, 
-    unreadCount, 
-    closeChat, 
-    toggleChat, 
-    sendMessage  } = useSupportChat();
-  
+  const {
+    isOpen,
+    messages,
+    unreadCount,
+    isVisible,
+    closeChat,
+    toggleChat,
+    sendMessage
+  } = useSupportChat();
+
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
+    if (isOpen && messagesEndRef.current && isVisible) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isVisible]);
 
   // Focus input when chat opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen && inputRef.current && isVisible) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 300);
     }
-  }, [isOpen]);
+  }, [isOpen, isVisible]);
+
+  // Don't render anything if the chat shouldn't be visible on this route
+  if (!isVisible) {
+    return null;
+  }
 
   // Handle sending a message
   const handleSendMessage = () => {
@@ -142,8 +149,8 @@ export const SupportChat = () => {
     }
   };
 
-  // Handle key press (Enter to send)
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  // Handle key down (Enter to send)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -281,7 +288,7 @@ export const SupportChat = () => {
               placeholder={t('support.inputPlaceholder', 'Type a message...')}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               inputRef={inputRef}
               size="small"
               multiline
@@ -306,3 +313,5 @@ export const SupportChat = () => {
     </>
   );
 };
+
+

@@ -15,7 +15,6 @@ import { RouterLink } from 'src/routes/components';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-import { ResourceUsage } from 'src/components/resource-usage';
 
 import { NavUpgrade } from '../components/nav-upgrade';
 import { WorkspacesPopover } from '../components/workspaces-popover';
@@ -214,9 +213,9 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
         <Box
           sx={{
             position: 'absolute',
-            right: isCollapsed ? '50%' : -12,
+            right: -12,
             top: '50%',
-            transform: isCollapsed ? 'translate(50%, -50%)' : 'translateY(-50%)',
+            transform: 'translateY(-50%)',
             zIndex: 10,
             display: 'flex',
             justifyContent: 'center',
@@ -357,9 +356,6 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
       </Scrollbar>
 
       {!isCollapsed && slots?.bottomArea}
-
-      {/* Keep detailed resource usage in sidebar for comprehensive view */}
-      {!isCollapsed && <ResourceUsage />}
       {!isCollapsed && <NavUpgrade />}
     </>
   );
