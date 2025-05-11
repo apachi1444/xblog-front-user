@@ -231,23 +231,17 @@ function ComingSoonCard() {
 
   const features = [
     {
-      icon: 'mdi:brain',
-      title: t('comingSoon.features.ai.title', 'Enhanced AI Assistant'),
-      description: t('comingSoon.features.ai.description', 'Advanced AI writing assistant with more customization options'),
+      icon: 'mdi:content-paste',
+      title: t('comingSoon.features.templates.title', 'Built-in Templates'),
+      description: t('comingSoon.features.templates.description', 'Create articles from pre-designed templates for various content types'),
       eta: t('comingSoon.eta.soon', 'Coming soon')
     },
     {
-      icon: 'mdi:chart-timeline-variant',
-      title: t('comingSoon.features.analytics.title', 'Advanced Analytics'),
-      description: t('comingSoon.features.analytics.description', 'Detailed performance metrics and content insights'),
-      eta: t('comingSoon.eta.nextMonth', 'Next month')
+      icon: 'mdi:file-multiple-outline',
+      title: t('comingSoon.features.bulk.title', 'Bulk Generation'),
+      description: t('comingSoon.features.bulk.description', 'Generate multiple articles in a single batch to save time'),
+      eta: t('comingSoon.eta.soon', 'Coming soon')
     },
-    {
-      icon: 'mdi:api',
-      title: t('comingSoon.features.api.title', 'API Access'),
-      description: t('comingSoon.features.api.description', 'Integrate our content generation with your applications'),
-      eta: t('comingSoon.eta.inProgress', 'In progress')
-    }
   ];
 
   return (
@@ -306,7 +300,10 @@ function ComingSoonCard() {
                     borderRadius: 1,
                     background: alpha(theme.palette.primary.main, 0.1),
                     color: theme.palette.primary.main,
-                    mr: 1.5
+                    mr: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                 >
                   <Iconify icon={feature.icon} width={20} height={20} />

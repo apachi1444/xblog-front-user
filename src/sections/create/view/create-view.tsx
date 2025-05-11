@@ -394,23 +394,27 @@ export function CreateView() {
                       borderRadius: 1,
                     }}
                   >
-                    <Iconify
-                      icon="mdi:lock"
-                      width={40}
-                      height={40}
-                      sx={{ color: 'white', mb: 1 }}
-                    />
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        color: 'white',
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                        px: 2
-                      }}
-                    >
-                      {t('create.comingSoon', 'Coming Soon')}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                      <Iconify
+                        icon="mdi:lock"
+                        width={40}
+                        height={40}
+                        sx={{ color: 'white', mb: 1 }}
+                      />
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          color: 'white',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          px: 2
+                        }}
+                      >
+                        {option.id === 'template'
+                          ? t('create.comingSoonTemplate', 'Built-in Templates Coming Soon')
+                          : t('create.comingSoonBulk', 'Bulk Generation Coming Soon')}
+                      </Typography>
+                    </Box>
                   </Box>
                 )}
 
