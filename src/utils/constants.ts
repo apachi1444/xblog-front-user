@@ -178,7 +178,6 @@ export const COUNTRIES: CountryOption[] = [
   { code: 'lk', name: 'Sri Lanka' },
   { code: 'sd', name: 'Sudan' },
   { code: 'sr', name: 'Suriname' },
-  { code: 'sz', name: 'Eswatini' },
   { code: 'se', name: 'Sweden' },
   { code: 'ch', name: 'Switzerland' },
 ]
