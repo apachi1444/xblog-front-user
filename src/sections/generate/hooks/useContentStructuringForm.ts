@@ -3,8 +3,6 @@ import type { SectionItem } from 'src/components/generate-article/DraggableSecti
 import toast from 'react-hot-toast';
 import { useState, useEffect, useCallback } from 'react';
 
-import { generateSections } from 'src/utils/aiGeneration';
-
 
 // Sample content for mock sections
 const SAMPLE_CONTENT = [
@@ -135,29 +133,6 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
           toneOfVoice: toneOfVoice || 'professional',
           targetCountry: targetCountry || 'United States'
         });
-
-        const result = await generateSections(
-          title,
-          primaryKeyword || title,
-          secondaryKeywords || [],
-          language || 'en',
-          contentType || 'blog',
-          articleSize || 'medium',
-          toneOfVoice || 'professional',
-          targetCountry || 'United States'
-        );
-
-        console.log('Generated sections result:', result);
-
-        // Map the generated sections to the format expected by the app
-        const formattedSections = result.sections.map(section => ({
-          id: section.id,
-          status: 'Completed',
-          title: section.title,
-          content: section.content
-        })) as SectionItem[];
-
-        setSections(formattedSections);
         setIsGenerated(true);
 
         if (onGenerate) {

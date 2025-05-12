@@ -2,7 +2,7 @@ import Axios from 'axios';
 
 // Create Axios instance without the token initially
 const customRequest = Axios.create({
-  baseURL: `https://lasting-bunny-selected.ngrok-free.app/api/v1`,
+  baseURL: `https://api.xlog.ai/api/v1`,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -22,7 +22,7 @@ export const updateAxiosToken = (token: string | null) => {
       
       // Ensure Content-Type is set for all requests
       tempConf.headers['Content-Type'] = 'application/json';
-      tempConf.headers['ngrok-skip-browser-warning'] = 'true';
+      // tempConf.headers['ngrok-skip-browser-warning'] = 'true';
       
       return tempConf;
     },

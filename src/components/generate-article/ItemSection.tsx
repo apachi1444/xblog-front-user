@@ -1,12 +1,13 @@
 import type { ChecklistItem } from "src/utils/seoScoring";
 
 import { useState, useEffect } from "react";
-
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import OptimizeIcon from '@mui/icons-material/Tune';
-import { Box, Button, Tooltip, useTheme, Typography, Chip } from "@mui/material";
-import { formatPoints } from "src/utils/seoScoringPoints";
 import { useTranslation } from 'react-i18next';
+
+import OptimizeIcon from '@mui/icons-material/Tune';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import { Box, Chip, Button, Tooltip, useTheme, Typography } from "@mui/material";
+
+import { formatPoints } from "src/utils/seoScoringPoints";
 
 // Constants
 const COLORS = {

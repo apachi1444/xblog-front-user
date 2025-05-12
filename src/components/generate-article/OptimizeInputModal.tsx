@@ -1,24 +1,23 @@
 import { useState } from 'react';
-import {
-  Box,
-  Modal,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-  IconButton,
-  Chip,
-  Divider,
-  Paper,
-  Stack,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
-import { optimizeInputForSEO } from 'src/utils/aiGeneration';
-import { DetailedScoringItem } from 'src/utils/seoScoringRules';
+import { useTheme } from '@mui/material/styles';
+import CloseIcon from '@mui/icons-material/Close';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import {
+  Box,
+  Chip,
+  Modal,
+  Paper,
+  Stack,
+  Button,
+  Divider,
+  TextField,
+  Typography,
+  IconButton,
+  CircularProgress,
+} from '@mui/material';
+
 import { getScoringRulesForItem } from 'src/utils/seoScoringCalculator';
 
 interface OptimizeInputModalProps {
@@ -53,21 +52,7 @@ export function OptimizeInputModal({
   const scoringRules = getScoringRulesForItem(scoringItemId);
   
   const handleOptimize = async () => {
-    setIsOptimizing(true);
-    try {
-      const optimizedValue = await optimizeInputForSEO(
-        inputType,
-        value,
-        scoringItemId,
-        context
-      );
-      setValue(optimizedValue);
-      setOptimizationComplete(true);
-    } catch (error) {
-      console.error('Error optimizing input:', error);
-    } finally {
-      setIsOptimizing(false);
-    }
+    console.log('Optimizing with AI...');
   };
   
   const handleSave = () => {

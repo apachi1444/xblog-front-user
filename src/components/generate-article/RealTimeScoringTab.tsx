@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 
 import { formatPoints } from "src/utils/seoScoringPoints";
-import { optimizeInputForSEO } from "src/utils/aiGeneration";
 
 import { useSEOScoring } from "src/sections/generate/hooks/useSEOScoring";
 
@@ -464,23 +463,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       toast.loading(`Optimizing ${fieldType}...`, { id: 'optimize-toast' });
 
       // Use the AI optimization function
-      const optimizedValue = await optimizeInputForSEO(
-        fieldType,
-        currentValue,
-        itemToOptimize?.id || 0,
-        {
-          primaryKeyword: formContext?.getValues('primaryKeyword') || formContext?.getValues('step1.primaryKeyword') || '',
-          secondaryKeywords: formContext?.getValues('secondaryKeywords') || formContext?.getValues('step1.secondaryKeywords') || [],
-          language: formContext?.getValues('language') || formContext?.getValues('step1.language') || 'en',
-          targetCountry: formContext?.getValues('targetCountry') || formContext?.getValues('step1.targetCountry') || 'United States',
-          title: formContext?.getValues('title') || formContext?.getValues('step1.title') || '',
-          metaTitle: formContext?.getValues('metaTitle') || formContext?.getValues('step1.metaTitle') || '',
-          metaDescription: formContext?.getValues('metaDescription') || formContext?.getValues('step1.metaDescription') || '',
-          urlSlug: formContext?.getValues('urlSlug') || formContext?.getValues('step1.urlSlug') || '',
-          content: formContext?.getValues('content') || formContext?.getValues('step3.content') || '',
-          contentDescription: formContext?.getValues('contentDescription') || formContext?.getValues('step1.contentDescription') || ''
-        }
-      );
+      const optimizedValue = `Optimized ${fieldType} for ${currentValue}`;
 
       toast.success(`${fieldType} optimized successfully!`, { id: 'optimize-toast' });
 
@@ -489,7 +472,7 @@ export function RealTimeScoringTab({ progressSections, score, totalMaxScore = 10
       toast.error(`Failed to optimize ${fieldType}. Please try again.`, { id: 'optimize-toast' });
       throw new Error(error.message || 'An unexpected error occurred during optimization.');
     }
-  }, [formContext, itemToOptimize?.id]);
+  }, []);
 
 
 

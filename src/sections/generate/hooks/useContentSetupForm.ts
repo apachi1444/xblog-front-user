@@ -5,13 +5,14 @@ import { useForm, useFormContext } from 'react-hook-form';
 
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
-import { step1Schema } from '../schemas';
 import {
-  generateMeta,
-  generateTitle,
-  generateSecondaryKeywords,
-  optimizeContentDescription
-} from '../../../utils/aiGeneration';
+  useTitleGeneration,
+  useTopicGeneration,
+  useKeywordGeneration,
+  useMetaTagsGeneration
+} from 'src/utils/generation';
+
+import { step1Schema } from '../schemas';
 
 import type { Step1FormData } from '../schemas';
 
@@ -26,6 +27,12 @@ export const useContentSetupForm = () => {
     setShowRegenerationDialog,
     regenerationsAvailable
   } = useRegenerationCheck();
+
+  // Initialize API hooks for content generation
+  const { generateSecondaryKeywords, isGenerating: isGeneratingKeywords } = useKeywordGeneration();
+  const { generateArticleTitle, isGenerating: isGeneratingTitle } = useTitleGeneration();
+  const { generateMetaTags, isGenerating: isGeneratingMeta } = useMetaTagsGeneration();
+  const { generateContentDescription, isGenerating: isGeneratingTopic } = useTopicGeneration();
 
   // Generation states
   const [generationState, setGenerationState] = useState({
@@ -118,47 +125,39 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
+      const { primaryKeyword, secondaryKeywords, contentDescription } = step1Form.getValues();
 
-      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry'])) {
+      if (!validateRequiredFields(['primaryKeyword', 'contentDescription'])) {
         return;
       }
 
-      // Call the Gemini API to generate a title, including content description if available
-      const generatedTitle = await generateTitle(
+      // Call the API to generate a title
+      // Example response: { "title": "What is SEO? A Beginner's Guide to Ranking #1", "success": true, "message": null }
+      const generatedTitle = await generateArticleTitle(
         primaryKeyword,
-        targetCountry,
-        language,
-        contentDescription // Pass content description to provide more context
+        secondaryKeywords,
+        contentDescription
       );
 
-      // Update form values
-      step1Form.setValue('title', generatedTitle, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      if (generatedTitle) {
+        // Update form values
+        step1Form.setValue('title', generatedTitle, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
 
-      setGenerationState(prev => ({
-        ...prev,
-        title: { isGenerating: false, isGenerated: true }
-      }));
+        setGenerationState(prev => ({
+          ...prev,
+          title: { isGenerating: false, isGenerated: true }
+        }));
 
-      toast.success('Title generated successfully');
-
+        toast.success('Title generated successfully');
+      } else {
+        throw new Error('No title returned from API');
+      }
     } catch (error) {
       toast.error('Failed to generate title');
-
-      // Fallback title in case of API failure
-      const { primaryKeyword, targetCountry } = step1Form.getValues();
-      const fallbackTitle = `Best ${primaryKeyword} Guide for ${targetCountry}`;
-
-      step1Form.setValue('title', fallbackTitle, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-
     } finally {
       setGenerationState(prev => ({
         ...prev,
@@ -180,74 +179,48 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
+      const { primaryKeyword, secondaryKeywords, title, contentDescription } = step1Form.getValues();
 
-      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription'])) {
+      if (!validateRequiredFields(['primaryKeyword', 'title', 'contentDescription'])) {
         return;
       }
 
-      // Call the Gemini API to generate meta information
-      const metaData = await generateMeta(
+      const metaData = await generateMetaTags(
         primaryKeyword,
-        targetCountry,
-        language,
-        contentDescription
+        secondaryKeywords,
+        contentDescription,
+        title || ""
       );
 
-      // Update form values
-      step1Form.setValue('metaTitle', metaData.metaTitle, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-      step1Form.setValue('metaDescription', metaData.metaDescription, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-      step1Form.setValue('urlSlug', metaData.urlSlug, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      if (metaData && metaData.success) {
+        // Update form values - map API response fields to form fields
+        step1Form.setValue('metaTitle', metaData.metaTitle, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+        step1Form.setValue('metaDescription', metaData.metaDescription, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+        step1Form.setValue('urlSlug', metaData.urlSlug, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
 
-      setGenerationState(prev => ({
-        ...prev,
-        meta: { isGenerating: false, isGenerated: true }
-      }));
+        setGenerationState(prev => ({
+          ...prev,
+          meta: { isGenerating: false, isGenerated: true }
+        }));
 
-      toast.success('Meta information generated successfully');
-
+        toast.success('Meta information generated successfully');
+      } else {
+        throw new Error('Meta generation failed or returned invalid data');
+      }
     } catch (error) {
-      console.error('Meta generation error:', error);
       toast.error('Failed to generate meta information');
-
-      // Fallback data if API fails
-      const { primaryKeyword, targetCountry } = step1Form.getValues();
-      const fallbackMetaData = {
-        metaTitle: `${primaryKeyword} - Complete Guide ${new Date().getFullYear()}`,
-        metaDescription: `Learn everything about ${primaryKeyword}. Comprehensive guide with tips, examples, and best practices for ${targetCountry}.`,
-        urlSlug: primaryKeyword.toLowerCase().replace(/\s+/g, '-'),
-      };
-
-      // Update form values with fallback data
-      step1Form.setValue('metaTitle', fallbackMetaData.metaTitle, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-      step1Form.setValue('metaDescription', fallbackMetaData.metaDescription, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-      step1Form.setValue('urlSlug', fallbackMetaData.urlSlug, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-
-      toast.success('Generated meta with fallback data');
     } finally {
       setGenerationState(prev => ({
         ...prev,
@@ -275,44 +248,25 @@ export const useContentSetupForm = () => {
         return;
       }
 
-      // Call the Gemini API to generate secondary keywords
-      const keywords = await generateSecondaryKeywords(
-        primaryKeyword,
-        targetCountry,
-        language
-      );
+      // Call the API to generate secondary keywords
+      const keywords = await generateSecondaryKeywords(primaryKeyword);
 
-      step1Form.setValue('secondaryKeywords', keywords, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      // Example response: "what is SEO, SEO meaning, how does SEO work, SEO basics for beginners, SEO strategies for 2024, SEO tutorial for small business, SEO optimization techniques, what is on page SEO, learn SEO online, best SEO tools for beginners"
 
-      toast.success('Generated keywords successfully');
+      if (keywords && keywords.length > 0) {
+        step1Form.setValue('secondaryKeywords', keywords, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
+
+        toast.success('Generated keywords successfully');
+      } else {
+        throw new Error('No keywords returned from API');
+      }
     } catch (error) {
-      console.error('Secondary keywords generation error:', error);
       toast.error('Failed to generate keywords');
-
-      // Fallback keywords in case of API failure
-      const { primaryKeyword } = step1Form.getValues();
-      const fallbackKeywords = [
-        `${primaryKeyword} guide`,
-        `best ${primaryKeyword}`,
-        `${primaryKeyword} tips`,
-        `${primaryKeyword} tutorial`,
-        `${primaryKeyword} examples`,
-        `${primaryKeyword} for beginners`,
-        `professional ${primaryKeyword}`,
-        `${primaryKeyword} ${new Date().getFullYear()}`
-      ];
-
-      step1Form.setValue('secondaryKeywords', fallbackKeywords, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
-
-      toast.success('Generated keywords with fallback data');
+      
     } finally {
       setGenerationState(prev => ({
         ...prev,
@@ -369,31 +323,34 @@ export const useContentSetupForm = () => {
     }));
 
     try {
-      const { primaryKeyword, language, targetCountry, contentDescription } = step1Form.getValues();
+      const { primaryKeyword, secondaryKeywords } = step1Form.getValues();
 
-      if (!validateRequiredFields(['primaryKeyword', 'language', 'targetCountry', 'contentDescription'])) {
+      if (!validateRequiredFields(['primaryKeyword'])) {
         return;
       }
 
-      // Call the Gemini API to optimize content description
-      const optimizedContent = await optimizeContentDescription(
-        contentDescription,
-        primaryKeyword,
-        targetCountry,
-        language
-      );
+      // Call the API to generate content description
+      // Example response: {
+      //   "content": "Explain \"what is SEO\" for beginners. Define SEO meaning, and generally how it works. Touch on ranking factors or SEO benefits.",
+      //   "success": true,
+      //   "message": null
+      // }
+      const generatedContent = await generateContentDescription(primaryKeyword, secondaryKeywords);
 
-      // Update form value
-      step1Form.setValue('contentDescription', optimizedContent, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true
-      });
+      if (generatedContent) {
+        // Update form value
+        step1Form.setValue('contentDescription', generatedContent, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true
+        });
 
-      toast.success('Content description optimized successfully');
+        toast.success('Content description generated successfully');
+      } else {
+        throw new Error('Content description generation failed');
+      }
     } catch (error) {
-      console.error('Content description optimization error:', error);
-      toast.error('Failed to optimize content description');
+      toast.error('Failed to generate content description');
     } finally {
       setGenerationState(prev => ({
         ...prev,
