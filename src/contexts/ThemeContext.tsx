@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import type { ReactNode} from 'react';
+
+import React, { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';
 
 // Local storage key for theme preference
 const THEME_STORAGE_KEY = 'theme_mode';
@@ -58,11 +60,11 @@ export function ThemeContextProvider({ children }: ThemeProviderProps) {
   }, []);
 
   // Create the context value object
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     isDarkMode,
     toggleTheme,
     setTheme,
-  };
+  }), [isDarkMode, toggleTheme, setTheme]);
 
   return (
     <ThemeContext.Provider value={contextValue}>
@@ -79,3 +81,4 @@ export function useThemeContext() {
   }
   return context;
 }
+
