@@ -17,6 +17,8 @@ import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlic
 import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
+import { useWelcomePopup } from 'src/hooks/useWelcomePopup';
+import { WelcomeVideoPopup } from 'src/components/welcome/WelcomeVideoPopup';
 
 import { Main } from './main';
 import { NavDesktop } from './nav';
@@ -122,10 +124,19 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       }))
     : [];
 
+  // Use the welcome popup hook (which now uses the context)
+  const { showPopup, closePopup } = useWelcomePopup();
+
   return (
     <>
       {/* Top header with profile, notifications, etc. */}
       <TopHeader />
+
+      {/* Welcome Video Popup */}
+      <WelcomeVideoPopup
+        open={showPopup}
+        onClose={closePopup}
+      />
 
       <LayoutSection
         /** **************************************

@@ -400,6 +400,26 @@
         "welcomeMessage": "Hello! How can I help you today?",
         "sendMessage": "Send message"
       },
+      "welcome": {
+        "title": "Welcome to XBlog!",
+        "videoTitle": "How to use XBlog",
+        "learnTitle": "Learn how to use XBlog in minutes",
+        "description": "This quick tutorial will show you how to generate high-quality content, publish to your website, and schedule posts for maximum impact.",
+        "dontShowAgain": "Don't show this again",
+        "getStarted": "Get Started",
+        "feature1": {
+          "title": "Generate Content",
+          "description": "Create SEO-optimized articles with AI"
+        },
+        "feature2": {
+          "title": "Publish",
+          "description": "Publish directly to your website"
+        },
+        "feature3": {
+          "title": "Schedule",
+          "description": "Plan your content calendar"
+        }
+      },
       "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",
