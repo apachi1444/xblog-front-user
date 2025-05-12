@@ -14,8 +14,8 @@ import { Router } from 'src/routes/sections';
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
 
 import { CustomThemeProvider } from 'src/theme/theme-provider';
-import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
+import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
 
 import i18n from './locales/i18n';
 import { ToastProvider } from './contexts/ToastContext';

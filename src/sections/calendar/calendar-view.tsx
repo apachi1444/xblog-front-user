@@ -1,24 +1,26 @@
 
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { useMemo, useState, useCallback } from 'react';
 import { X, Plus, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 
 import {
   Box,
+  Chip,
   Grid,
   List,
-  Chip,
-  Paper,
+  alpha,
   Modal,
+  Paper,
   Button,
   Divider,
   Checkbox,
   ListItem,
   useTheme,
-  Typography,
   IconButton,
+  Typography,
   ListItemText
 } from '@mui/material';
 
@@ -31,6 +33,7 @@ import { LoadingSpinner } from 'src/components/loading';
 
 export default function CalendarPage() {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -75,7 +78,7 @@ export default function CalendarPage() {
         store_id: storeId
       }).unwrap();
 
-      toast.success('Article unscheduled successfully');
+      toast.success(t('calendar.unscheduledSuccessfully', 'Article unscheduled successfully'));
       setIsArticleDetailsModalOpen(false);
       setSelectedArticleDetails(null);
 
@@ -83,9 +86,9 @@ export default function CalendarPage() {
       refetchArticles();
     } catch (error) {
       console.error('Error unscheduling article:', error);
-      toast.error('Failed to unschedule article. Please try again.');
+      toast.error(t('calendar.unschedulingFailed', 'Failed to unschedule article. Please try again.'));
     }
-  }, [selectedArticleDetails, storeId, unscheduleArticle, refetchArticles]);
+  }, [selectedArticleDetails, storeId, unscheduleArticle, refetchArticles, t]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -120,7 +123,7 @@ export default function CalendarPage() {
   };
 
   // Submit scheduled articles
-  const handleScheduleSubmit = async () => {
+  const handleScheduleSubmit = useCallback(async () => {
     if (!selectedDay || selectedArticles.length === 0) return;
 
     try {
@@ -137,7 +140,7 @@ export default function CalendarPage() {
         })
       ));
 
-      toast.success('Articles scheduled successfully!');
+      toast.success(t('calendar.scheduledSuccessfully', 'Articles scheduled successfully!'));
       setIsModalOpen(false);
       setSelectedArticles([]);
 
@@ -145,9 +148,9 @@ export default function CalendarPage() {
       refetchArticles();
 
     } catch (error) {
-      toast.error('Failed to schedule articles. Please try again.');
+      toast.error(t('calendar.schedulingFailed', 'Failed to schedule articles. Please try again.'));
     }
-  };
+  }, [selectedDay, selectedArticles, storeId, scheduleArticle, refetchArticles, t]);
 
   // Memoize the scheduled articles for each day to avoid recalculating on every render
   const getScheduledArticlesForDay = useCallback((day: Date) => {
@@ -189,7 +192,7 @@ export default function CalendarPage() {
   if (isLoadingArticles) {
     return (
       <DashboardContent>
-        <LoadingSpinner message="Loading your calendar..." fullHeight />
+        <LoadingSpinner message={t('calendar.loading', 'Loading your calendar...')} fullHeight />
       </DashboardContent>
     );
   }
@@ -197,9 +200,13 @@ export default function CalendarPage() {
   return (
     <DashboardContent>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={prevMonth}><ChevronLeft /></IconButton>
+        <IconButton onClick={prevMonth} aria-label={t('calendar.previousMonth', 'Previous month')}>
+          <ChevronLeft />
+        </IconButton>
         <Typography variant="h5">{format(currentDate, 'MMMM yyyy')}</Typography>
-        <IconButton onClick={nextMonth}><ChevronRight /></IconButton>
+        <IconButton onClick={nextMonth} aria-label={t('calendar.nextMonth', 'Next month')}>
+          <ChevronRight />
+        </IconButton>
       </Box>
 
       {/* Calendar Grid */}
@@ -208,11 +215,24 @@ export default function CalendarPage() {
         borderRadius: 2,
         height: 'calc(100vh - 200px)',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        bgcolor: theme.palette.background.paper
       }}>
         <Grid container>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-            <Grid item xs={12 / 7} key={index} sx={{ textAlign: 'center', p: 1 }}>
+          {[
+            t('calendar.days.sunday', 'Sun'),
+            t('calendar.days.monday', 'Mon'),
+            t('calendar.days.tuesday', 'Tue'),
+            t('calendar.days.wednesday', 'Wed'),
+            t('calendar.days.thursday', 'Thu'),
+            t('calendar.days.friday', 'Fri'),
+            t('calendar.days.saturday', 'Sat')
+          ].map((day, index) => (
+            <Grid item xs={12 / 7} key={index} sx={{
+              textAlign: 'center',
+              p: 1,
+              borderBottom: `1px solid ${theme.palette.divider}`
+            }}>
               <Typography variant="subtitle2">{day}</Typography>
             </Grid>
           ))}
@@ -226,15 +246,15 @@ export default function CalendarPage() {
 
             let bgColor = 'transparent';
             if (isToday(day)) {
-              bgColor = 'rgba(25, 118, 210, 0.08)';
+              bgColor = alpha(theme.palette.primary.main, 0.08);
             } else if (dayStatus === 'published') {
-              bgColor = 'rgba(76, 175, 80, 0.08)';
+              bgColor = alpha(theme.palette.success.main, 0.08);
             } else if (dayStatus === 'upcoming') {
-              bgColor = 'rgba(255, 152, 0, 0.08)';
+              bgColor = alpha(theme.palette.warning.main, 0.08);
             } else if (dayStatus === 'past-missed') {
-              bgColor = 'rgba(244, 67, 54, 0.08)';
+              bgColor = alpha(theme.palette.error.main, 0.08);
             } else if (dayStatus === 'past-empty') {
-              bgColor = 'rgba(158, 158, 158, 0.15)';
+              bgColor = alpha(theme.palette.grey[500], 0.15);
             }
 
             return (
@@ -243,7 +263,7 @@ export default function CalendarPage() {
                 xs={12 / 7}
                 key={index}
                 sx={{
-                  border: '1px solid #ddd',
+                  border: `1px solid ${theme.palette.divider}`,
                   height: 'auto',
                   minHeight: 100, // Increased minimum height
                   position: 'relative',
@@ -275,15 +295,16 @@ export default function CalendarPage() {
                   {isInteractive && (
                     <IconButton
                       size="small"
+                      aria-label={t('calendar.addArticle', 'Add article')}
                       sx={{
                         width: 24,
                         height: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        backgroundColor: alpha(theme.palette.background.paper, 0.8),
                         '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          backgroundColor: alpha(theme.palette.background.paper, 0.95),
                           cursor: 'pointer',
                           transform: 'scale(1.1)',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                          boxShadow: theme.shadows[2]
                         },
                         transition: 'all 0.2s ease-in-out'
                       }}
@@ -310,7 +331,9 @@ export default function CalendarPage() {
                       onClick={() => handleArticleClick(article)}
                       sx={{
                         bgcolor: article.status === 'published' ? theme.palette.success.main : theme.palette.warning.main,
-                        color: '#fff',
+                        color: theme.palette.getContrastText(
+                          article.status === 'published' ? theme.palette.success.main : theme.palette.warning.main
+                        ),
                         p: 0.75, // Slightly more padding
                         borderRadius: 1,
                         textAlign: 'center',
@@ -319,16 +342,16 @@ export default function CalendarPage() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         cursor: 'pointer',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        boxShadow: theme.shadows[1],
                         '&:hover': {
                           filter: 'brightness(1.1)',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                          boxShadow: theme.shadows[2],
                           transform: 'translateY(-1px)'
                         },
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      {article.title || `Article #${article.id}`}
+                      {article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
                     </Box>
                   ))}
                 </Box>
@@ -351,16 +374,22 @@ export default function CalendarPage() {
           transform: 'translate(-50%, -50%)',
           width: 500,
           maxWidth: '90vw',
-          bgcolor: 'background.paper',
-          boxShadow: 24,
+          bgcolor: theme.palette.background.paper,
+          boxShadow: theme.shadows[24],
           p: 4,
           borderRadius: 2
         }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography id="schedule-modal-title" variant="h6" component="h2">
-              Schedule Articles for {selectedDay ? format(selectedDay, 'MMMM d, yyyy') : ''}
+              {t('calendar.scheduleArticles', 'Schedule Articles for {{date}}', {
+                date: selectedDay ? format(selectedDay, 'MMMM d, yyyy') : ''
+              })}
             </Typography>
-            <IconButton size="small" onClick={handleCloseModal}>
+            <IconButton
+              size="small"
+              onClick={handleCloseModal}
+              aria-label={t('common.close', 'Close')}
+            >
               <X size={18} />
             </IconButton>
           </Box>
@@ -368,7 +397,7 @@ export default function CalendarPage() {
           <Divider sx={{ mb: 2 }} />
 
           <Typography variant="subtitle2" gutterBottom>
-            Select articles to schedule:
+            {t('calendar.selectArticles', 'Select articles to schedule:')}
           </Typography>
 
           <Paper
@@ -403,8 +432,8 @@ export default function CalendarPage() {
                   }}
                 >
                   <ListItemText
-                    primary={article.title || `Article #${article.id}`}
-                    secondary={article.status}
+                    primary={article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
+                    secondary={t(`common.statuses.${article.status}`, article.status)}
                   />
                 </ListItem>
               ))}
@@ -416,14 +445,14 @@ export default function CalendarPage() {
               variant="outlined"
               onClick={handleCloseModal}
             >
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
             <Button
               variant="contained"
               disabled={selectedArticles.length === 0}
               onClick={handleScheduleSubmit}
             >
-              Schedule
+              {t('calendar.schedule', 'Schedule')}
             </Button>
           </Box>
         </Box>
@@ -442,16 +471,20 @@ export default function CalendarPage() {
           transform: 'translate(-50%, -50%)',
           width: 500,
           maxWidth: '90vw',
-          bgcolor: 'background.paper',
-          boxShadow: 24,
+          bgcolor: theme.palette.background.paper,
+          boxShadow: theme.shadows[24],
           p: 4,
           borderRadius: 2
         }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography id="article-details-modal-title" variant="h6" component="h2">
-              Article Details
+              {t('calendar.articleDetails', 'Article Details')}
             </Typography>
-            <IconButton size="small" onClick={handleCloseArticleDetails}>
+            <IconButton
+              size="small"
+              onClick={handleCloseArticleDetails}
+              aria-label={t('common.close', 'Close')}
+            >
               <X size={18} />
             </IconButton>
           </Box>
@@ -461,16 +494,15 @@ export default function CalendarPage() {
           {selectedArticleDetails && (
             <>
               <Typography variant="h5" gutterBottom>
-                {selectedArticleDetails.title || `Article #${selectedArticleDetails.id}`}
+                {selectedArticleDetails.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: selectedArticleDetails.id })}
               </Typography>
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', mr: 2 }}>
                     <Info size={16} style={{ marginRight: 4 }} />
-                    Status: <Chip
+                    {t('common.status', 'Status')}: <Chip
                       size="small"
-                      label={selectedArticleDetails.status}
                       color={selectedArticleDetails.status === 'published' ? 'success' : 'warning'}
                       sx={{ ml: 1 }}
                     />
@@ -480,26 +512,26 @@ export default function CalendarPage() {
 
               {selectedArticleDetails.description && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" gutterBottom>Description:</Typography>
+                  <Typography variant="subtitle2" gutterBottom>{t('common.description', 'Description')}:</Typography>
                   <Typography variant="body2">{selectedArticleDetails.description}</Typography>
                 </Box>
               )}
 
               <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>Schedule Information:</Typography>
+                <Typography variant="subtitle2" gutterBottom>{t('calendar.scheduleInfo', 'Schedule Information')}:</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Typography variant="body2">
-                    <strong>Scheduled Date:</strong> {selectedArticleDetails.scheduledAt ?
+                    <strong>{t('calendar.scheduledDate', 'Scheduled Date')}:</strong> {selectedArticleDetails.scheduledAt ?
                       format(new Date(selectedArticleDetails.scheduledAt), 'MMMM d, yyyy') :
-                      'Not scheduled'}
+                      t('calendar.notScheduled', 'Not scheduled')}
                   </Typography>
                   {selectedArticleDetails.publishedAt && (
                     <Typography variant="body2">
-                      <strong>Published Date:</strong> {format(new Date(selectedArticleDetails.publishedAt), 'MMMM d, yyyy')}
+                      <strong>{t('calendar.publishedDate', 'Published Date')}:</strong> {format(new Date(selectedArticleDetails.publishedAt), 'MMMM d, yyyy')}
                     </Typography>
                   )}
                   <Typography variant="body2">
-                    <strong>Created:</strong> {format(new Date(selectedArticleDetails.createdAt), 'MMMM d, yyyy')}
+                    <strong>{t('common.created', 'Created')}:</strong> {format(new Date(selectedArticleDetails.createdAt), 'MMMM d, yyyy')}
                   </Typography>
                 </Box>
               </Box>
@@ -514,14 +546,14 @@ export default function CalendarPage() {
                     disabled={isUnscheduling}
                     startIcon={isUnscheduling ? <LoadingSpinner size={16} /> : null}
                   >
-                    {isUnscheduling ? 'Unscheduling...' : 'Unschedule'}
+                    {isUnscheduling ? t('calendar.unscheduling', 'Unscheduling...') : t('calendar.unschedule', 'Unschedule')}
                   </Button>
                 )}
                 <Button
                   variant="outlined"
                   onClick={handleCloseArticleDetails}
                 >
-                  Close
+                  {t('common.close', 'Close')}
                 </Button>
               </Box>
             </>
