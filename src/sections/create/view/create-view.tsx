@@ -12,8 +12,6 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
 
-import { generateFeaturedImage } from 'src/utils/aiGeneration';
-
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -284,26 +282,6 @@ export function CreateView() {
         // Show loading state
         setSelectedPrompt(prompt);
         setPreviewModalOpen(true);
-
-        // Generate a featured image using the Stability AI API
-        const featuredImage = await generateFeaturedImage(
-          prompt.articleInfo.title,
-          prompt.articleInfo.primaryKeyword || '',
-          prompt.articleInfo.targetCountry,
-          prompt.articleInfo.secondaryKeywords
-        );
-
-        // Update the prompt with the generated image
-        const updatedPrompt = {
-          ...prompt,
-          articleInfo: {
-            ...prompt.articleInfo,
-            featuredImage
-          }
-        };
-
-        // Update the selected prompt
-        setSelectedPrompt(updatedPrompt);
       } catch (error) {
         console.error('Error generating featured image:', error);
         // Still show the modal even if image generation fails

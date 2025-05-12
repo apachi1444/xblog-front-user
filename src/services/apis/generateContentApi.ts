@@ -1,5 +1,6 @@
 import { api } from '.';
-import { GeminiTitleRequest, GeminiTitleResponse } from './aiGenerateApi';
+
+import type { GeminiTitleRequest, GeminiTitleResponse } from './aiGenerateApi';
 
 const GENERATE_BASE_URL = '/generate';
 

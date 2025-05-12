@@ -5,13 +5,6 @@ const API_KEY = 'AIzaSyBsP8gk4n7fEhqNdtSQ7B2laq0Rb5r9dE4';
 
 // Base URL for Gemini API
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-
-// Stability AI API key (placeholder - replace with your actual key when available)
-const STABILITY_AI_KEY = 'sk-3k81dQzoDQn34HDZP8sr2e9xlchSD5psQKWEceWLOdphTpMZ';
-
-// Stability AI API URL
-const STABILITY_AI_URL = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
-
 /**
  * Interface for Gemini API request
  */
@@ -222,6 +215,15 @@ URL_SLUG: [your generated URL slug]`;
 };
 
 /**
+ * Interface for the secondary keywords API response
+ */
+interface SecondaryKeywordsResponse {
+  keywords: string;
+  success: boolean;
+  message: string;
+}
+
+/**
  * Generate secondary keywords using Gemini API
  * @param primaryKeyword - The primary keyword for the article
  * @param targetCountry - The target country for the article
@@ -291,6 +293,37 @@ Return only the keywords as a comma-separated list, without any additional text,
   } catch (error) {
     console.error('Error generating secondary keywords:', error);
     throw error;
+  }
+};
+
+/**
+ * Parse secondary keywords from the API response
+ * @param response - The API response containing comma-separated keywords
+ * @returns Array of secondary keywords
+ */
+export const parseSecondaryKeywordsResponse = (response: SecondaryKeywordsResponse): string[] => {
+  try {
+    if (!response.success) {
+      console.error('API returned unsuccessful response:', response.message);
+      return [];
+    }
+
+    // Check if keywords exist in the response
+    if (!response.keywords) {
+      console.error('No keywords found in the API response');
+      return [];
+    }
+
+    // Split the comma-separated list into an array of keywords
+    const keywords = response.keywords
+      .split(',')
+      .map(keyword => keyword.trim())
+      .filter(keyword => keyword.length > 0);
+
+    return keywords;
+  } catch (error) {
+    console.error('Error parsing secondary keywords response:', error);
+    return [];
   }
 };
 
@@ -940,109 +973,5 @@ Please provide an optimized version that follows these rules. Return ONLY the op
     console.error(`Error optimizing ${inputType}:`, error);
     // Return the original value if optimization fails
     return currentValue;
-  }
-};
-
-export const generateFeaturedImage = async (
-  title: string,
-  primaryKeyword: string,
-  targetCountry?: string,
-  secondaryKeywords?: string[]
-): Promise<FeaturedImageResponse> => {
-  try {
-    // Create a more detailed prompt for the image generation
-    let imagePrompt = `Create a professional, high-quality featured image for an article titled "${title}" about ${primaryKeyword}`;
-
-    // Add secondary keywords if available
-    if (secondaryKeywords && secondaryKeywords.length > 0) {
-      imagePrompt += ` with focus on ${secondaryKeywords.slice(0, 3).join(', ')}`;
-    }
-
-    // Add target country if available
-    if (targetCountry) {
-      imagePrompt += ` for ${targetCountry}`;
-    }
-
-    // Add style guidance
-    imagePrompt += `. The image should be photorealistic, professional, with good lighting, high resolution, and suitable for a business article.`;
-
-
-    try {
-      // Use the Stability AI API to generate the image
-      const response = await axios.post(
-        STABILITY_AI_URL,
-        {
-          text_prompts: [
-            {
-              text: imagePrompt,
-              weight: 1
-            }
-          ],
-          cfg_scale: 7,
-          height: 1024,
-          width: 1024,
-          samples: 1,
-          steps: 30,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization: `Bearer ${STABILITY_AI_KEY}`,
-          },
-        }
-      );
-
-      // Extract the image data from the response
-      const base64Image = response.data.artifacts[0].base64;
-      const imageUrl = `data:image/png;base64,${base64Image}`;
-
-      return {
-        url: imageUrl,
-        alt: `Featured image for article about ${primaryKeyword}`,
-        caption: `${title} - ${new Date().toLocaleDateString()}`
-      };
-    } catch (apiError) {
-      console.error('Stability AI API error:', apiError);
-      console.log('Falling back to static images due to API error');
-
-      // Fallback to static images if the API call fails
-      const staticImages = [
-        {
-          url: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1170&auto=format&fit=crop',
-          alt: `Featured image for article about ${primaryKeyword}`,
-          caption: `${title} - ${new Date().toLocaleDateString()}`
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1170&auto=format&fit=crop',
-          alt: `${primaryKeyword} - Featured image`,
-          caption: `Exploring ${primaryKeyword} - ${new Date().toLocaleDateString()}`
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1170&auto=format&fit=crop',
-          alt: `${primaryKeyword} concept image`,
-          caption: `Understanding ${primaryKeyword} - ${new Date().toLocaleDateString()}`
-        }
-      ];
-
-      // Select a random image from the static images
-      const randomIndex = Math.floor(Math.random() * staticImages.length);
-      const selectedImage = staticImages[randomIndex];
-
-      return {
-        url: selectedImage.url,
-        alt: selectedImage.alt,
-        caption: selectedImage.caption
-      };
-    }
-  } catch (error) {
-    console.error('Error generating featured image:', error);
-
-    // Return a fallback image in case of error
-    return {
-      url: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1172&auto=format&fit=crop',
-      alt: `Fallback image for ${primaryKeyword}`,
-      caption: `Article about ${primaryKeyword}`
-    };
   }
 };
