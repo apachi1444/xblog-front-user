@@ -27,7 +27,8 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
 
   // Set default icon and tooltip based on type
   icon = type === 'articles' ? 'mdi:file-document-outline' : 'mdi:web';
-  tooltipTitle = type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Websites');
+
+  // We'll set the tooltip title later when we have the data
 
   // Show loading state
   if (isLoading) {
@@ -40,13 +41,13 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
       total = subscriptionDetails.articles_limit || 100;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining}/${total}`;
+      label = `${remaining}/${total} ${t('resources.availableLabel', 'available')}`;
     } else {
       used = subscriptionDetails.connected_websites || 0;
       total = subscriptionDetails.websites_limit || 5;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining}/${total}`;
+      label = `${remaining}/${total} ${t('resources.availableLabel', 'available')}`;
     }
   } else {
     // Fallback if no data
@@ -69,8 +70,54 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   // Get the label text based on type
   const labelText = type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Sites');
 
+  // Set detailed tooltip content
+  if (subscriptionDetails) {
+    tooltipTitle = type === 'articles'
+      ? `${t('resources.articlesUsed', 'Articles Used')}: ${used}/${total}\n${t('resources.articlesRemaining', 'Articles Remaining')}: ${remaining}`
+      : `${t('resources.websitesUsed', 'Websites Used')}: ${used}/${total}\n${t('resources.websitesRemaining', 'Websites Remaining')}: ${remaining}`;
+  } else {
+    tooltipTitle = type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Websites');
+  }
+
+  // Create tooltip content with proper formatting
+  const tooltipContent = (
+    <Box sx={{ p: 1, maxWidth: 220 }}>
+      {subscriptionDetails ? (
+        type === 'articles' ? (
+          <>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+              {t('resources.articles', 'Articles')}
+            </Typography>
+            <Typography variant="body2">
+              {t('resources.used', 'Used')}: {used}/{total}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
+              {t('resources.available', 'Available')}: {remaining}
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+              {t('resources.websites', 'Websites')}
+            </Typography>
+            <Typography variant="body2">
+              {t('resources.used', 'Used')}: {used}/{total}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
+              {t('resources.available', 'Available')}: {remaining}
+            </Typography>
+          </>
+        )
+      ) : (
+        <Typography variant="body2">
+          {type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Websites')}
+        </Typography>
+      )}
+    </Box>
+  );
+
   return (
-    <Tooltip title={tooltipTitle} placement="bottom">
+    <Tooltip title={tooltipContent} placement="bottom">
       <Box
         sx={{
           display: 'flex',

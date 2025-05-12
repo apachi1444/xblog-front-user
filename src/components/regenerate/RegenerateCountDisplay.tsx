@@ -39,16 +39,31 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
 
   const regenerateColor = getRegenerateColor();
 
+  // Create tooltip content with proper formatting
+  const tooltipContent = (
+    <Box sx={{ p: 1, maxWidth: 220 }}>
+      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+        {t('regenerate.title', 'Regenerations')}
+      </Typography>
+      <Typography variant="body2">
+        {t('regenerate.used', 'Used')}: {regenerationsUsed}/{regenerationsTotal}
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
+        {t('regenerate.available', 'Available')}: {regenerationsAvailable}
+      </Typography>
+      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
+        {t('regenerate.info', 'Regenerations allow you to recreate content.')}
+      </Typography>
+    </Box>
+  );
+
   // Compact version (for mobile or sidebar)
   if (compact) {
     return (
-      <Tooltip title={t('regenerate.remaining', 'Used: {{used}}/{{total}} regenerations', {
-        used: regenerationsUsed,
-        total: regenerationsTotal
-      })}>
+      <Tooltip title={tooltipContent}>
         <Chip
           icon={<AutorenewIcon fontSize="small" />}
-          label={`${regenerationsUsed}/${regenerationsTotal}`}
+          label={`${regenerationsAvailable}/${regenerationsTotal} ${t('regenerate.availableLabel', 'available')}`}
           size="small"
           sx={{
             bgcolor: alpha(regenerateColor, 0.1),
@@ -66,7 +81,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
   // Full version
   return (
     <Tooltip
-      title={t('regenerate.info', 'Regenerations allow you to recreate content. Each regeneration decreases your available count.')}
+      title={tooltipContent}
       placement="bottom"
     >
       <Box
@@ -96,7 +111,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
               fontWeight: 600,
             }}
           >
-            {regenerationsUsed}/{regenerationsTotal}
+            {regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
           </Typography>
           <Typography
             variant="caption"
@@ -106,7 +121,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
               display: 'block',
             }}
           >
-            {t('regenerate.label', 'Used Regenerations')}
+            {t('regenerate.label', 'Regenerations')}
           </Typography>
         </Box>
       </Box>

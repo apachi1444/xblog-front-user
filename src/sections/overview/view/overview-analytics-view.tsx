@@ -372,17 +372,7 @@ export function OverviewAnalyticsView() {
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Supercharge Your Content Creation and Coming Soon in the same row */}
-        <Grid xs={12} md={6} lg={6}>
-          <GenerateContentCard />
-        </Grid>
 
-        {/* Coming Soon Features - Placed next to Generate Content */}
-        <Grid xs={12} md={6} lg={6}>
-          <ComingSoonCard />
-        </Grid>
-
-        {/* Key Metrics Row - Condensed and moved after promotional content */}
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title={t('analytics.articlesGenerated', 'Articles Generated')}
@@ -420,6 +410,16 @@ export function OverviewAnalyticsView() {
             color="secondary"
             icon={<Iconify icon="mdi:web" width={48} height={48} />}
           />
+        </Grid>
+
+        {/* Supercharge Your Content Creation and Coming Soon in the same row */}
+        <Grid xs={12} md={6} lg={6}>
+          <GenerateContentCard />
+        </Grid>
+
+        {/* Coming Soon Features - Placed next to Generate Content */}
+        <Grid xs={12} md={6} lg={6}>
+          <ComingSoonCard />
         </Grid>
 
         {/* Detailed Analytics Section - Moved to bottom as supplementary information */}
