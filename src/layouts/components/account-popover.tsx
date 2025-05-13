@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { useRouter } from 'src/routes/hooks';
+// Router import removed as we're using direct navigation
 import { useThemeMode } from 'src/hooks/useThemeMode';
 
 import { _myAccount } from 'src/_mock';
@@ -36,7 +36,6 @@ export type AccountPopoverProps = IconButtonProps & {
 };
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
-  const router = useRouter();
   const dispatch = useDispatch();
   const theme = useTheme();
   const { isDarkMode, toggleTheme } = useThemeMode();
@@ -47,33 +46,53 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   // Simple state for popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // Simple open handler
+  // Enhanced open handler with proper anchor element handling
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    // Prevent default behavior to avoid any navigation
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Set the anchor element to the current target (the avatar button)
     setAnchorEl(event.currentTarget);
   };
 
-  // Simple close handler
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // Close handler is now directly using setAnchorEl(null) where needed
 
-  // Handle menu item click
+  // Handle menu item click with improved navigation and proper closing
   const handleClickItem = (path: string) => {
-    handleClose();
+    // First close the popover
+    setAnchorEl(null);
+
+    // Force immediate closing of the popover
+    document.body.click();
+
+    // Navigate after a very short delay to ensure popover is closed
     setTimeout(() => {
-      router.push(path);
-    }, 100);
+      // Use direct navigation to ensure proper routing
+      window.location.href = path;
+    }, 10);
   };
 
-  // Handle logout
+  // Handle logout with improved navigation and proper closing
   const handleLogOut = () => {
-    handleClose();
+    // First close the popover
+    setAnchorEl(null);
+
+    // Force immediate closing of the popover
+    document.body.click();
+
+    // Navigate after a very short delay to ensure popover is closed
     setTimeout(() => {
+      // Dispatch logout action
       dispatch(logout());
-      router.push('/sign-in');
+
+      // Clear storage
       localStorage.removeItem('auth');
       sessionStorage.removeItem('access_token');
-    }, 100);
+
+      // Use direct navigation for more reliable routing
+      window.location.href = '/sign-in';
+    }, 10);
   };
 
   // Handle theme toggle
@@ -82,7 +101,12 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        position: 'relative',
+        zIndex: 1200, // Higher z-index for the container
+      }}
+    >
       <IconButton
         onClick={handleOpen}
         sx={{
@@ -110,19 +134,26 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
-        onClose={handleClose}
+        onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: {
-            width: 240,
-            maxHeight: '85vh',
-            mt: 1.5,
-            overflow: 'hidden',
-            boxShadow: theme.customShadows.z16,
-            borderRadius: 2,
-            border: `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
-            bgcolor: theme.palette.background.paper,
+        disableRestoreFocus // Prevents focus issues that can cause reopening
+        disableScrollLock // Prevents scroll issues
+        disablePortal={false} // Use portal for better positioning
+        keepMounted={false} // Don't keep in DOM when closed
+        slotProps={{
+          paper: {
+            sx: {
+              width: 240,
+              maxHeight: '85vh',
+              mt: 1.5,
+              overflow: 'hidden',
+              boxShadow: theme.customShadows.z16,
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
+              bgcolor: theme.palette.background.paper,
+              zIndex: 1300, // Higher z-index to ensure it appears above other elements
+            },
           },
         }}
       >
@@ -338,6 +369,6 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Button>
         </Box>
       </Popover>
-    </>
+    </Box>
   );
 }
