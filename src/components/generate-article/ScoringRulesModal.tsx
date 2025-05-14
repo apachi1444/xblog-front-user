@@ -1,30 +1,26 @@
 import { useState } from 'react';
+
+import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Tab,
   Tabs,
-  Card,
   Chip,
   Modal,
   Table,
   Button,
-  Divider,
   TableRow,
   TableBody,
   TableCell,
   TableHead,
   Typography,
   IconButton,
-  CardContent,
-  CardHeader,
   TableContainer,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import InfoIcon from '@mui/icons-material/Info';
-import { useTheme } from '@mui/material/styles';
 
-import { SEO_SCORING_RULES } from 'src/utils/seoScoringRules';
 import { sectionScores } from 'src/utils/seoScoringPoints';
+import { SEO_SCORING_RULES } from 'src/utils/seoScoringRules';
 
 interface ScoringRulesModalProps {
   open: boolean;
@@ -32,7 +28,6 @@ interface ScoringRulesModalProps {
 }
 
 export function ScoringRulesModal({ open, onClose }: ScoringRulesModalProps) {
-  const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
