@@ -1,6 +1,6 @@
-import type { Step1State } from "src/sections/generate/generate-steps/steps/step-one-content-setup";
+import type { GenerateArticleFormData } from "src/sections/generate/schemas";
 
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useFormContext } from "react-hook-form";
 import { useMemo, useState, useEffect, useCallback } from "react";
 
 // Icons
@@ -24,8 +24,9 @@ import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";
 
 // Types
 interface SEODashboardProps {
-  state: Step1State;
   defaultTab?: number; // 0 for Preview SEO, 1 for Real-time Scoring
+  isGeneratingMeta?: boolean;
+  onGenerateMeta?: () => Promise<void>;
   onCollapseChange?: (collapsed: boolean) => void;
   isCollapsed?: boolean;
 }
@@ -42,34 +43,17 @@ const getColors = (theme: any) => ({
 });
 
 export function SEODashboard({
-  state,
   defaultTab = 0,
   onCollapseChange,
-  isCollapsed
+  isCollapsed,
+  isGeneratingMeta,
+  onGenerateMeta,
 }: SEODashboardProps) {
-  const {
-    form,
-    generation: {
-      meta: { isGenerating: isGeneratingMeta, onGenerate: onGenerateMeta },
-    },
-  } = state;
 
-  // Use the form values directly from the state object but memoize them
-  // This ensures we're using the correct form context and prevents unnecessary re-renders
-  const formValues = useMemo(() => {
-    const values = form.getValues();
-    return {
-      primaryKeyword: values.primaryKeyword || '',
-      secondaryKeywords: values.secondaryKeywords || [],
-      contentDescription: values.contentDescription || '',
-      language: values.language || '',
-      targetCountry: values.targetCountry || '',
-      title: values.title || '',
-      metaTitle: values.metaTitle || '',
-      metaDescription: values.metaDescription || '',
-      urlSlug: values.urlSlug || ''
-    };
-  }, [form]);
+  const form = useFormContext<GenerateArticleFormData>()
+  const formValuesGlobal = form.getValues();
+  const formValues = formValuesGlobal.step1
+
   const theme = useTheme();
   const COLORS = getColors(theme);
 
@@ -92,7 +76,7 @@ export function SEODashboard({
   // Effect to evaluate all criteria whenever form values change
   useEffect(() => {
     evaluateAllCriteria();
-  }, [evaluateAllCriteria, formValues]);
+  }, [evaluateAllCriteria]);
 
   const [tabValue, setTabValue] = useState(defaultTab);
 

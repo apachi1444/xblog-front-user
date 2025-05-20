@@ -6,15 +6,15 @@ import { Box, useTheme } from '@mui/material';
 
 import { SEODashboard } from 'src/components/generate-article/SEODashboard';
 
-import type { Step1State } from '../generate-steps/steps/step-one-content-setup';
 
 interface ContentLayoutProps {
+  isGeneratingMeta: boolean;
+  onGenerateMeta: () => Promise<void>;
   children: ReactNode;
   activeStep: number;
-  state: Step1State;
 }
 
-export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProps) => {
+export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenerateMeta }: ContentLayoutProps) => {
   const theme = useTheme();
   const [isSEODashboardCollapsed, setIsSEODashboardCollapsed] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
@@ -118,7 +118,8 @@ export const ContentLayout = ({ children, activeStep, state }: ContentLayoutProp
             }}
           >
             <SEODashboard
-              state={state}
+              isGeneratingMeta={isGeneratingMeta}
+              onGenerateMeta={onGenerateMeta}
               defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
               onCollapseChange={handleSEODashboardCollapseChange}
               isCollapsed={isSEODashboardCollapsed}

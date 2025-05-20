@@ -1,34 +1,9 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { zodResolver } from '@hookform/resolvers/zod';
 
-import { step2Schema } from '../schemas';
 
-import type { Step2FormData } from '../schemas';
 
 export const useArticleSettingsForm = () => {
   const { t } = useTranslation();
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const step2Form = useForm<Step2FormData>({
-    resolver: zodResolver(step2Schema) as any,
-    defaultValues: {
-      articleType: 'how-to',
-      articleSize: 'small',
-      toneOfVoice: 'friendly',
-      pointOfView: 'first-person',
-      aiContentCleaning: 'no-removal',
-      imageSettingsQuality: 'high',
-      imageSettingsPlacement: 'each-section',
-      imageSettingsStyle: 'normal',
-      imageSettingsCount: 2,
-      internalLinking: 'none',
-      externalLinking: 'none',
-      includeVideos: false,
-      numberOfVideos: 1,
-    },
-  });
 
   // Options for dropdowns
   const articleTypeOptions = [
@@ -115,33 +90,7 @@ export const useArticleSettingsForm = () => {
     { value: "news", label: t('article.externalLinking.news', "News Sources") }
   ];
 
-  // Handle generate table of contents
-  const handleGenerateTableOfContents = async (onGenerate?: () => Promise<void>) => {
-    // Skip generation if onGenerate is empty (which happens when coming back from step 3)
-    if (!onGenerate) {
-      return;
-    }
-
-    setIsGenerating(true);
-
-    try {
-      // Call the parent's onGenerate function if provided
-      if (onGenerate) {
-        await onGenerate();
-      }
-    } catch (error) {
-      console.error('Error generating table of contents:', error);
-    } finally {
-      // Make sure to set isGenerating to false when done
-      setIsGenerating(false);
-    }
-  };
-
   return {
-    step2Form,
-    isGenerating,
-    setIsGenerating,
-    handleGenerateTableOfContents,
     options: {
       articleTypeOptions,
       articleSizeOptions,

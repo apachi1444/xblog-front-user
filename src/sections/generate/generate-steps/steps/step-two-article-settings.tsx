@@ -1,7 +1,6 @@
-import type { UseFormReturn } from 'react-hook-form';
 
-import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useWatch, Controller, useFormContext } from 'react-hook-form';
 
 import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, CircularProgress } from '@mui/material';
 
@@ -13,36 +12,18 @@ import { FormDropdown } from '../../../../components/generate-article/FormDropdo
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
 import { FormAutocompleteDropdown } from '../../../../components/generate-article/FormAutocompleteDropdown';
 
-import type { Step2FormData } from '../../schemas';
+import type { GenerateArticleFormData } from '../../schemas';
 
-export interface Step2State {
-  form: UseFormReturn<Step2FormData>
-  generation: {
-    tableOfContents: {
-      isGenerating: boolean
-      isGenerated: boolean
-      onGenerate: () => Promise<void>
-    }
-  }
-}
 interface Step2ArticleSettingsProps {
-  state : Step2State
+  isGenerating: boolean
+  isGenerated: boolean
+  onGenerate: () => Promise<void>
+  onRegenerateRequest?: () => void
 }
 
-export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
+export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest }: Step2ArticleSettingsProps) {
   const { t } = useTranslation();
-  // Get options and form handling from the hook
-  const { options, handleGenerateTableOfContents: hookGenerateTableOfContents } = useArticleSettingsForm();
-
-  const {
-    form,
-    generation: {
-      tableOfContents: { isGenerating: isGeneratingTableOfContents, isGenerated: isGeneratedTableOfContents, onGenerate: onGenerateTableOfContents },
-    },
-  } = state
-
-  // Define variables for button state
-  const isGenerating = isGeneratingTableOfContents;
+  const { options } = useArticleSettingsForm();
 
   const {
     register,
@@ -50,12 +31,33 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
     formState: { errors },
     setValue,
     control,
-  } = form
+    getValues
+  } = useFormContext<GenerateArticleFormData>()
 
-  const articleType = watch("articleType")
-  const articleSize = watch("articleSize")
-  const toneOfVoice = watch("toneOfVoice")
-  const includeVideos = watch('includeVideos');
+  const formData = getValues();
+
+  // Check if sections have already been generated
+  const hasGeneratedSections = formData.step3?.sections && formData.step3.sections.length > 0;
+
+  const articleType = useWatch({
+    control,
+    name: 'step2.articleType'
+  })
+
+  const articleSize = useWatch({
+    control,
+    name: 'step2.articleSize'
+  })
+
+  const toneOfVoice = useWatch({
+    control,
+    name: 'step2.toneOfVoice'
+  })
+
+  const includeVideos = useWatch({
+    control,
+    name: 'step2.includeVideos'
+  })
 
   // Use options from the hook
   const {
@@ -77,16 +79,8 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
   return (
     <Grid container spacing={3}>
       <SectionGenerationAnimation
-        show={isGeneratingTableOfContents && !isGeneratedTableOfContents}
-        onComplete={() => {
-          // Automatically navigate to next step when generation is complete
-          if (isGeneratedTableOfContents) {
-            // Use setTimeout to ensure the animation completes before navigating
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('generate-next-step'));
-            }, 500);
-          }
-        }}
+        show={isGenerating}
+        onComplete={() => {}}
       />
 
       <Grid item xs={12}>
@@ -114,14 +108,14 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.articleType', "Article Type")}
                   tooltipText={t('article.tooltips.articleType', "Choose the type of article that best fits your content goals")}
                   options={articleTypeOptions}
-                  {...register("articleType", {
+                  {...register("step2.articleType", {
                     onChange: (e) => {
-                      setValue("articleType", e.target.value, { shouldValidate: true });
+                      setValue("step2.articleType", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select article type")}
-                  error={!!errors.articleType}
-                  helperText={errors.articleType?.message}
+                  error={!!errors.step2?.articleType}
+                  helperText={errors.step2?.articleType?.message}
                   value={articleType}
                 />
               </Grid>
@@ -132,13 +126,13 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                     tooltipText={t('article.tooltips.articleSize', "Determines the length and depth of your article")}
                     placeholder={t('article.placeholders.select', "Select article size")}
                     options={articleSizeOptions}
-                    {...register("articleSize", {
+                    {...register("step2.articleSize", {
                       onChange: (e) => {
-                        setValue("articleSize", e.target.value, { shouldValidate: true });
+                        setValue("step2.articleSize", e.target.value, { shouldValidate: true });
                       }
                     })}
-                    error={!!errors.articleSize}
-                    helperText={errors.articleSize?.message}
+                    error={!!errors.step2?.articleSize}
+                    helperText={errors.step2?.articleSize?.message}
                     value={articleSize}
                 />
               </Grid>
@@ -149,13 +143,13 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   tooltipText={t('article.tooltips.toneOfVoice', "Sets the overall tone and style of writing for your article")}
                   placeholder={t('article.placeholders.select', "Select tone")}
                   options={toneOptions}
-                  {...register("toneOfVoice", {
+                  {...register("step2.toneOfVoice", {
                     onChange: (e) => {
-                      setValue("toneOfVoice", e.target.value, { shouldValidate: true });
+                      setValue("step2.toneOfVoice", e.target.value, { shouldValidate: true });
                     }
                   })}
-                  error={!!errors.toneOfVoice}
-                  helperText={errors.toneOfVoice?.message}
+                  error={!!errors.step2?.toneOfVoice}
+                  helperText={errors.step2?.toneOfVoice?.message}
                   value={toneOfVoice}
                 />
               </Grid>
@@ -165,15 +159,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.pointOfView', "Point of View")}
                   tooltipText={t('article.tooltips.pointOfView', "Determines the perspective from which your article is written")}
                   options={povOptions}
-                  {...register("pointOfView", {
+                  {...register("step2.pointOfView", {
                     onChange: (e) => {
-                      setValue("pointOfView", e.target.value, { shouldValidate: true });
+                      setValue("step2.pointOfView", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select point of view")}
-                  error={!!errors.pointOfView}
-                  helperText={errors.pointOfView?.message}
-                  value={watch("pointOfView")}
+                  error={!!errors.step2?.pointOfView}
+                  helperText={errors.step2?.pointOfView?.message}
+                  value={watch("step2.pointOfView")}
                 />
               </Grid>
 
@@ -182,15 +176,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.aiContentCleaning', "AI Content Cleaning")}
                   tooltipText={t('article.tooltips.aiContentCleaning', "Controls how AI-generated text is processed to sound more natural")}
                   options={aiCleaningOptions}
-                  {...register("aiContentCleaning", {
+                  {...register("step2.aiContentCleaning", {
                     onChange: (e) => {
-                      setValue("aiContentCleaning", e.target.value, { shouldValidate: true });
+                      setValue("step2.aiContentCleaning", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select cleaning level")}
-                  error={!!errors.aiContentCleaning}
-                  helperText={errors.aiContentCleaning?.message}
-                  value={watch("aiContentCleaning")}
+                  error={!!errors.step2?.aiContentCleaning}
+                  helperText={errors.step2?.aiContentCleaning?.message}
+                  value={watch("step2.aiContentCleaning")}
                 />
               </Grid>
             </Grid>
@@ -222,15 +216,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.imageQuality', "Image Quality")}
                   tooltipText={t('article.tooltips.imageQuality', "Sets the resolution and quality of generated images")}
                   options={imageQualityOptions}
-                  {...register("imageSettingsQuality", {
+                  {...register("step2.imageSettingsQuality", {
                     onChange: (e) => {
-                      setValue("imageSettingsQuality", e.target.value, { shouldValidate: true });
+                      setValue("step2.imageSettingsQuality", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select image quality")}
-                  error={!!errors.imageSettingsQuality}
-                  helperText={errors.imageSettingsQuality?.message}
-                  value={watch("imageSettingsQuality")}
+                  error={!!errors.step2?.imageSettingsQuality}
+                  helperText={errors.step2?.imageSettingsQuality?.message}
+                  value={watch("step2.imageSettingsQuality")}
                 />
               </Grid>
 
@@ -239,15 +233,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.imagePlacement', "Image Placement")}
                   tooltipText={t('article.tooltips.imagePlacement', "Determines where images will be placed within your article")}
                   options={imagePlacementOptions}
-                  {...register("imageSettingsPlacement", {
+                  {...register("step2.imageSettingsPlacement", {
                     onChange: (e) => {
-                      setValue("imageSettingsPlacement", e.target.value, { shouldValidate: true });
+                      setValue("step2.imageSettingsPlacement", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select image placement")}
-                  error={!!errors.imageSettingsPlacement}
-                  helperText={errors.imageSettingsPlacement?.message}
-                  value={watch("imageSettingsPlacement")}
+                  error={!!errors.step2?.imageSettingsPlacement}
+                  helperText={errors.step2?.imageSettingsPlacement?.message}
+                  value={watch("step2.imageSettingsPlacement")}
                 />
               </Grid>
 
@@ -256,15 +250,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.imageStyle', "Image Style")}
                   tooltipText={t('article.tooltips.imageStyle', "Sets the visual style for generated images")}
                   options={imageStyleOptions}
-                  {...register("imageSettingsStyle", {
+                  {...register("step2.imageSettingsStyle", {
                     onChange: (e) => {
-                      setValue("imageSettingsStyle", e.target.value, { shouldValidate: true });
+                      setValue("step2.imageSettingsStyle", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select image style")}
-                  error={!!errors.imageSettingsStyle}
-                  helperText={errors.imageSettingsStyle?.message}
-                  value={watch("imageSettingsStyle")}
+                  error={!!errors.step2?.imageSettingsStyle}
+                  helperText={errors.step2?.imageSettingsStyle?.message}
+                  value={watch("step2.imageSettingsStyle")}
                 />
               </Grid>
 
@@ -273,28 +267,28 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.numberOfImages', "Number of Images")}
                   tooltipText={t('article.tooltips.numberOfImages', "Total number of images to include in your article")}
                   options={numberOptions}
-                  {...register("imageSettingsCount", {
+                  {...register("step2.imageSettingsCount", {
                     onChange: (e) => {
-                      setValue("imageSettingsCount", e.target.value, { shouldValidate: true });
+                      setValue("step2.imageSettingsCount", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select number")}
-                  error={!!errors.imageSettingsCount}
-                  helperText={errors.imageSettingsCount?.message}
-                  value={watch("imageSettingsCount")}
+                  error={!!errors.step2?.imageSettingsCount}
+                  helperText={errors.step2?.imageSettingsCount?.message}
+                  value={watch("step2.imageSettingsCount")}
                 />
               </Grid>
 
               <Grid item xs={12} sm={6} md={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <Controller
-                    name="includeVideos"
+                    name="step2.includeVideos"
                     control={control}
                     render={({ field }) => (
                       <FormControlLabel
                         control={
                           <Switch
-                            checked={field.value}
+                            checked={Boolean(field.value)}
                             onChange={field.onChange}
                             color="primary"
                           />
@@ -311,14 +305,14 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.numberOfVideos', "Number of Videos")}
                   tooltipText={t('article.tooltips.numberOfVideos', "Specify how many videos should be embedded in your article")}
                   options={videoNumberOptions}
-                  {...register("numberOfVideos", {
+                  {...register("step2.numberOfVideos", {
                     onChange: (e) => {
-                      setValue("numberOfVideos", e.target.value, { shouldValidate: true });
+                      setValue("step2.numberOfVideos", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select number")}
                   disabled={!includeVideos}
-                  value={watch("numberOfVideos")}
+                  value={watch("step2.numberOfVideos")}
                 />
               </Grid>
             </Grid>
@@ -350,15 +344,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   label={t('article.settings.internalLinking', "Internal Linking")}
                   tooltipText={t('article.tooltips.internalLinking', "Select which of your websites to link to within the article")}
                   options={linkingOptions}
-                  {...register("internalLinking", {
+                  {...register("step2.internalLinking", {
                     onChange: (e) => {
-                      setValue("internalLinking", e.target.value, { shouldValidate: true });
+                      setValue("step2.internalLinking", e.target.value, { shouldValidate: true });
                     }
                   })}
                   placeholder={t('article.placeholders.select', "Select internal linking")}
-                  error={!!errors.internalLinking}
-                  helperText={errors.internalLinking?.message}
-                  value={watch("internalLinking")}
+                  error={!!errors.step2?.internalLinking}
+                  helperText={errors.step2?.internalLinking?.message}
+                  value={watch("step2.internalLinking")}
                 />
               </Grid>
 
@@ -368,11 +362,11 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
                   tooltipText={t('article.tooltips.externalLinking', "Choose which external sources to reference in your article or type your own")}
                   options={externalLinkingOptions}
                   placeholder={t('article.placeholders.selectOrType', "Select or type external linking")}
-                  error={!!errors.externalLinking}
-                  helperText={errors.externalLinking?.message}
-                  value={watch("externalLinking")}
+                  error={!!errors.step2?.externalLinking}
+                  helperText={errors.step2?.externalLinking?.message}
+                  value={watch("step2.externalLinking") || ""}
                   onChange={(newValue) => {
-                    setValue("externalLinking", newValue, { shouldValidate: true });
+                    setValue("step2.externalLinking", newValue, { shouldValidate: true });
                   }}
                   freeSolo
                 />
@@ -386,7 +380,15 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
               variant="contained"
               color="primary"
               size="large"
-              onClick={() => hookGenerateTableOfContents(onGenerateTableOfContents)}
+              onClick={() => {
+                if (hasGeneratedSections && onRegenerateRequest) {
+                  // If sections already exist and we have a regenerate request handler, call it
+                  onRegenerateRequest();
+                } else {
+                  // If no sections exist, generate directly
+                  onGenerate();
+                }
+              }}
               disabled={isGenerating}
               startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="mdi:table-of-contents" />}
               sx={{
@@ -396,7 +398,9 @@ export function Step2ArticleSettings({ state }: Step2ArticleSettingsProps) {
             >
               {isGenerating
                 ? t('article.buttons.generating', 'Generating...')
-                : t('article.buttons.generateTableOfContents', 'Generate Table of Contents')}
+                : hasGeneratedSections
+                  ? t('article.buttons.regenerateTableOfContents', 'Regenerate Table of Contents')
+                  : t('article.buttons.generateTableOfContents', 'Generate Table of Contents')}
             </Button>
           </Box>
         </FormContainer>

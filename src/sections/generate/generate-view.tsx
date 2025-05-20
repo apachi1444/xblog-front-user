@@ -1,92 +1,67 @@
 // Types
-import type { SectionItem } from 'src/components/generate-article/DraggableSectionList';
 
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { FormProvider } from 'react-hook-form';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect, useCallback } from 'react';
+import { FormProvider, useFormContext } from 'react-hook-form';
 
 // Layout components
+import { Box, Button, Typography } from '@mui/material';
+
+// Custom hooks
+import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 
 // Custom components
 import { ContentLayout } from './components/ContentLayout';
 import { StepNavigation } from './components/StepNavigation';
 // Custom hooks
-import { useContentSetupForm } from './hooks/useContentSetupForm';
+import {useCriteriaEvaluation} from './hooks/useCriteriaEvaluation';
 // Custom hook for form synchronization
-import { useFormSynchronization } from './hooks/useFormSynchronization';
-import { useArticleSettingsForm } from './hooks/useArticleSettingsForm';
 import { useGenerateArticleForm } from './hooks/useGenerateArticleForm';
 import { Step4Publish } from './generate-steps/steps/step-four-publish';
-import { SectionEditorScreen } from './edit-section/SectionEditorScreen';
-import { useContentStructuringForm } from './hooks/useContentStructuringForm';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 // Step components
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
-import type { Step1State } from './generate-steps/steps/step-one-content-setup';
-import type { Step2State } from './generate-steps/steps/step-two-article-settings';
-import type { Step3State } from './generate-steps/steps/step-three-content-structuring';
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const {
+    handleSubmit,
+  } = useFormContext<FormData>()
+
+  const onSubmit = useCallback(async (data: FormData) => {
+    console.log("Form submitted:", data)
+    // Return a resolved promise to ensure proper async handling
+    return Promise.resolve();
+  }, []);
+
 
   // Additional states
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isGeneratingSections, setIsGeneratingSections] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+
+  // Use the regeneration check hook to check for available regenerations
+  const {
+    checkRegenerationCredits,
+    regenerationsAvailable
+  } = useRegenerationCheck();
 
   // Initialize the main form
   const { methods } = useGenerateArticleForm();
-
-  const {
-    step1Form,
-    generationState,
-    handleGenerateTitle,
-    handleGenerateMeta,
-    handleGenerateSecondaryKeywords,
-    handleAddKeyword,
-    handleDeleteKeyword,
-    handleOptimizeContentDescription,
-  } = useContentSetupForm();
-
-  const { step2Form } = useArticleSettingsForm();
-
-  // Define field mappings for synchronization
-  const fieldMappings = useMemo(() => ({
-    'step1.contentDescription': ['contentDescription'],
-    'step1.primaryKeyword': ['primaryKeyword'],
-    'step1.secondaryKeywords': ['secondaryKeywords'],
-    'step1.language': ['language'],
-    'step1.targetCountry': ['targetCountry'],
-    'step1.title': ['title'],
-    'step1.metaTitle': ['metaTitle'],
-    'step1.metaDescription': ['metaDescription'],
-    'step1.urlSlug': ['urlSlug'],
-  }), []);
-
-  // Set up form synchronization
-  const { updateFieldInAllForms } = useFormSynchronization(
-    methods,
-    [step1Form],
-    fieldMappings
-  );
-
-  const {
-    sections: generatedSections,
-    setSections: setGeneratedSections,
-    isGenerating: isGeneratingSections,
-    isGenerated,
-    editDialogOpen,
-    handleGenerateTableOfContents,
-    handleSaveSection: contentStructuringHandleSaveSection,
-    handleEditSection,
-    handleCancelSectionChanges
-  } = useContentStructuringForm();
 
   const steps = [
     { id: 1, label: "Content Setup" },
@@ -125,7 +100,7 @@ export function GeneratingView() {
         isStepValid = await step2Form.trigger();
 
         // Check if table of contents has been generated
-        if (isStepValid && !isGenerated) {
+        if (isStepValid && !hasGeneratedTOC) {
           toast.error('Please generate a table of contents before proceeding');
           isStepValid = false;
         }
@@ -146,295 +121,109 @@ export function GeneratingView() {
     if (isStepValid) {
       if (activeStep === steps.length - 1) {
         try {
-          setIsPublishing(true);
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          navigate('/blog');
+          // Call handleSubmit with the onSubmit callback
+          // This will execute the form submission logic
+          handleSubmit(async (data) => {
+            setIsPublishing(true);
+            try {
+              // Execute the onSubmit function with the form data
+              await onSubmit(data);
+              // Wait for the publishing animation
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              // Navigate to the blog page after successful submission
+              navigate('/blog');
+            } finally {
+              setIsPublishing(false);
+            }
+          })();
         } catch (error) {
           toast.error('Failed to generate article');
-        } finally {
           setIsPublishing(false);
         }
       } else {
         setActiveStep((prev) => prev + 1);
       }
-    } else if (!(activeStep === 0 && (!generationState.title.isGenerated || !generationState.meta.isGenerated))) {
-      toast.error('Please fill in all required fields for this step');
     }
-  }, [activeStep, generationState.meta.isGenerated, generationState.title.isGenerated, isGenerated, navigate, setActiveStep, setIsPublishing, step1Form, step2Form, steps.length]);
-
-
-
-  // Track if we're navigating backwards
-  const [isNavigatingBack, setIsNavigatingBack] = useState(false);
+  }, [activeStep, handleSubmit, navigate, onSubmit, setIsPublishing, steps.length]);
 
   // Update the handleBack function to set the navigating back flag
   const handleBackWithFlag = useCallback(() => {
-    // Set the flag to indicate we're navigating backwards
-    setIsNavigatingBack(true);
-
-    // If we're going back from step 3 (Content Structuring) to step 2 (Article Settings)
-    if (activeStep === 2) {
-      // Make sure we're not showing the generating UI when going back
-      if (isGenerated) {
-        // If sections are already generated, we don't need to show the generating UI
-        setIsPublishing(false);
-      }
-    }
-
     setActiveStep((prev) => prev - 1);
+  }, []);
 
-    setTimeout(() => {
-      setIsNavigatingBack(false);
-    }, 500);
-  }, [activeStep, isGenerated]);
+  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
 
-  // Add event listener for custom navigation event
-  useEffect(() => {
-    const handleGenerateNextStep = () => {
-      if (activeStep === 1) {
-        handleNext();
-      }
-    };
+  const handleGenerateMeta = async () => {
 
-    window.addEventListener('generate-next-step', handleGenerateNextStep);
+  }
 
-    return () => {
-      window.removeEventListener('generate-next-step', handleGenerateNextStep);
-    };
-  }, [activeStep, handleNext]);
+  const handleGenerateTitle = async () => {
 
-  // Automatic navigation after generation (as a fallback)
-  useEffect(() => {
-    if (isGenerated && !isGeneratingSections && generatedSections.length > 0) {
-      if (activeStep === 1 && !isNavigatingBack) {
-        // This is a fallback in case the custom event doesn't work
-        setTimeout(() => {
-          handleNext();
-        }, 4000);
-      }
-    }
-  }, [isGenerated, isGeneratingSections, generatedSections, activeStep, handleNext, isNavigatingBack]);
+  }
 
-  const step1State: Step1State = {
-    form: step1Form,
-    generation: {
-      title: {
-        isGenerating: generationState.title.isGenerating,
-        isGenerated: generationState.title.isGenerated,
-        onGenerate: handleGenerateTitle,
-      },
-      meta: {
-        isGenerating: generationState.meta.isGenerating,
-        isGenerated: generationState.meta.isGenerated,
-        onGenerate: handleGenerateMeta,
-      },
-      secondaryKeywords: {
-        isGenerating: generationState.secondaryKeywords.isGenerating,
-        onGenerate: handleGenerateSecondaryKeywords,
-        handleAddKeyword,
-        handleDeleteKeyword,
-      },
-      contentDescription: {
-        isOptimizing: generationState.contentDescription.isOptimizing,
-        onOptimize: handleOptimizeContentDescription,
-      },
-    },
-  };
+  const handleGenerateSecondaryKeywords = async () => {
 
-  const step2State: Step2State = {
-    form: step2Form,
-    generation: {
-      tableOfContents: {
-        isGenerating: isGeneratingSections,
-        isGenerated,
-        onGenerate: async () => {
-          // Get all the necessary values from step1Form and step2Form
-          const step1Values = step1Form.getValues();
-          const step2Values = step2Form.getValues();
+  }
 
-          const title = step1Values.title || 'Topic';
-          const primaryKeyword = step1Values.primaryKeyword || title;
-          const secondaryKeywords = step1Values.secondaryKeywords || [];
-          const language = step1Values.language || 'en';
-          const targetCountry = step1Values.targetCountry || 'United States';
-          const contentType = step2Values.articleType || 'blog';
-          const articleSize = step2Values.articleSize || 'medium';
-          const toneOfVoice = step2Values.toneOfVoice || 'professional';
+  const handleOptimizeContentDescription = async () => {
 
-          console.log('Generating table of contents with:', {
-            title,
-            primaryKeyword,
-            secondaryKeywords,
-            language,
-            targetCountry,
-            contentType,
-            articleSize,
-            toneOfVoice
-          });
+  }
 
-          // Pass all the values to the handleGenerateTableOfContents function
-          await handleGenerateTableOfContents(
-            title,
-            undefined, // onGenerate callback
-            primaryKeyword,
-            secondaryKeywords,
-            language,
-            contentType,
-            articleSize,
-            toneOfVoice,
-            targetCountry
-          );
-        },
-      }
-    },
-  };
+  const onGenerateTableOfContents = useCallback(async () => {
+    setIsGeneratingSections(true);
 
-  // Custom function to handle saving sections
-  const handleSaveSection = useCallback((updatedSection: SectionItem) => {
-    console.log('Custom handleSaveSection in generate-view:', updatedSection);
+    // Get form values from methods instead of using useFormContext directly
+    const formData = methods.getValues();
+    const step1Values = formData.step1 || {};
+    const step2Values = formData.step2 || {};
 
-    // Make sure the section has all required properties
-    const completeSection = {
-      ...updatedSection,
-      id: updatedSection.id,
-      title: updatedSection.title || 'Untitled Section',
-      description: updatedSection.description || '',
-      content: updatedSection.content || ''
-    };
+    const title = step1Values.title || 'Topic';
+    const primaryKeyword = step1Values.primaryKeyword || title;
+    const secondaryKeywords = step1Values.secondaryKeywords || [];
+    const language = step1Values.language || 'en';
+    const targetCountry = step1Values.targetCountry || 'United States';
+    const contentType = step2Values.articleType || 'blog';
+    const articleSize = step2Values.articleSize || 'medium';
+    const toneOfVoice = step2Values.toneOfVoice || 'professional';
 
-    console.log('Saving complete section:', completeSection);
-
-    // Update the sections in the content structuring form
-    contentStructuringHandleSaveSection(completeSection);
-
-    // Also update the generatedSections directly to ensure changes are persisted
-    setGeneratedSections(prevSections => {
-      // Check if the section already exists
-      const sectionExists = prevSections.some(section => section.id === completeSection.id);
-
-      if (sectionExists) {
-        // Update existing section
-        const newSections = prevSections.map(section =>
-          section.id === completeSection.id ? completeSection : section
-        );
-        console.log('Updated sections list:', newSections);
-        return newSections;
-      }
-
-      // Add new section
-      const newSections = [...prevSections, completeSection];
-      console.log('Added new section to list:', newSections);
-      return newSections;
+    console.log('Generating sections with:', {
+      title,
+      primaryKeyword: primaryKeyword || title,
+      secondaryKeywords: secondaryKeywords || [],
+      language: language || 'en',
+      contentType: contentType || 'blog',
+      articleSize: articleSize || 'medium',
+      toneOfVoice: toneOfVoice || 'professional',
+      targetCountry: targetCountry || 'United States'
     });
 
-    // Close the edit dialog after saving
-    handleCancelSectionChanges();
+    // Mock generating sections
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Show success message
-    toast.success('Section updated successfully!');
-  }, [contentStructuringHandleSaveSection, setGeneratedSections, handleCancelSectionChanges]);
+    setIsGenerated(true);
+    setIsGeneratingSections(false);
+  }, [methods, setIsGenerated, setIsGeneratingSections]);
 
-  const step3State: Step3State = {
-    tableOfContents: {
-      generatedSections,
-      onSaveSection: handleSaveSection,
-      onEditSection: (section) => {
-        // Store the section being edited
-        setCurrentEditingSection(section);
-        // Call the edit handler
-        handleEditSection(section);
-      }
-    }
-  };
-
-
-  // State to track the section being edited
-  const [currentEditingSection, setCurrentEditingSection] = useState<any>(null);
-
-  // Pass form values to step 4 for article preview
-  const step4State = useMemo(() => {
-    // Get values from all forms
-    const step1Values = step1Form.getValues();
-    const step2Values = step2Form.getValues();
-
-    return {
-      articleInfo: {
-        title: step1Values.title || '',
-        metaTitle: step1Values.metaTitle || '',
-        metaDescription: step1Values.metaDescription || '',
-        urlSlug: step1Values.urlSlug || '',
-        primaryKeyword: step1Values.primaryKeyword || '',
-        secondaryKeywords: step1Values.secondaryKeywords || [],
-        language: step1Values.language || 'en-us',
-        targetCountry: step1Values.targetCountry || 'us',
-        contentDescription: step1Values.contentDescription || '',
-        createdAt: new Date().toISOString(),
-      },
-      articleSettings: {
-        articleType: step2Values.articleType || 'how-to',
-        articleSize: step2Values.articleSize || 'medium',
-        toneOfVoice: step2Values.toneOfVoice || 'friendly',
-      },
-      sections: generatedSections,
-    };
-  }, [step1Form, step2Form, generatedSections]);
-
-  // Update the current editing section when handleEditSection is called
-  useEffect(() => {
-    if (editDialogOpen && generatedSections.length > 0) {
-      if (currentEditingSection) {
-        // If we already have a section being edited, make sure it's the complete object
-        const fullSection = generatedSections.find(s => s.id === currentEditingSection.id);
-        if (fullSection) {
-          console.log('Setting current editing section with full data:', fullSection);
-          setCurrentEditingSection(fullSection);
-        } else {
-          console.log('Setting current editing section:', currentEditingSection);
-          setCurrentEditingSection(currentEditingSection);
-        }
-      } else {
-        // Default to the first section if none is selected
-        console.log('No section selected, defaulting to first section:', generatedSections[0]);
-        setCurrentEditingSection(generatedSections[0]);
-      }
-    } else if (!editDialogOpen) {
-      // Only clear the current editing section when the dialog is closed
-      console.log('Clearing current editing section');
-      setCurrentEditingSection(null);
-    }
-  }, [editDialogOpen, generatedSections, currentEditingSection]);
 
   const renderStepContent = () => {
-    if (activeStep === 2 && editDialogOpen) {
-      // Make sure we have the full section data
-      const fullSection = currentEditingSection ?
-        generatedSections.find(s => s.id === currentEditingSection.id) || currentEditingSection :
-        null;
-
-      console.log('Rendering editor with section:', fullSection);
-
-      return (
-        <SectionEditorScreen
-          section={fullSection}
-          onSave={(updatedSection) => {
-            console.log('Saving section from SectionEditorScreen:', updatedSection);
-
-            // Call the handleSaveSection function to update the state
-            handleSaveSection(updatedSection);
-          }}
-          onCancel={() => {
-            handleCancelSectionChanges();
-          }}
-        />
-      );
-    }
 
     // Regular steps
     switch (activeStep) {
       case 0:
-        return <Step1ContentSetup state={step1State} />;
+        return <Step1ContentSetup 
+        onGenerateTitle={handleGenerateTitle}
+        onGenerateSecondaryKeywords={handleGenerateSecondaryKeywords}
+        onOptimizeContentDescription={handleOptimizeContentDescription}      
+        onGenerateMeta={handleGenerateMeta}
+        isGeneratingMeta={isGeneratingMeta}
+        />;
       case 1:
-        return <Step2ArticleSettings state={step2State} />;
+        return <Step2ArticleSettings
+                  isGenerated={isGenerated}
+                  isGenerating={isGeneratingSections}
+                  onGenerate={onGenerateTableOfContents}
+                  onRegenerateRequest={handleRegenerateRequest}
+                />;
       case 2:
         return <Step3ContentStructuring state={step3State} />;
       case 3:
@@ -444,23 +233,41 @@ export function GeneratingView() {
     }
   };
 
-  const submitSteppedForm = async (data: any) => {
-    try {
-      console.log('Submitting form data:', data);
-    } catch (error) {
-      console.error('Form submission error:', error);
-    }
-  };
+  const { evaluateAllCriteria } = useCriteriaEvaluation(methods)
 
-  // Create a context value to pass the updateFieldInAllForms function to child components
-  const formSyncContextValue = useMemo(() => ({
-    updateFieldInAllForms
-  }), [updateFieldInAllForms]);
+    // Evaluate all criteria on initial load
+  useEffect(() => {
+    evaluateAllCriteria()
+  }, [evaluateAllCriteria])
+
+
+  // Handle regenerate request from Step2ArticleSettings
+  const handleRegenerateRequest = useCallback(() => {
+    // Show the regeneration confirmation dialog
+    setShowRegenerateDialog(true);
+  }, []);
+
+  // Handle regenerate confirmation
+  const handleRegenerateConfirm = useCallback(() => {
+    // Check if user has regeneration credits
+    if (checkRegenerationCredits()) {
+      // Close dialog and generate
+      setShowRegenerateDialog(false);
+
+      // Call the generate table of contents function
+      if (activeStep === 1) {
+        onGenerateTableOfContents();
+      }
+    } else {
+      // If no credits, the checkRegenerationCredits function will show the no credits dialog
+      setShowRegenerateDialog(false);
+    }
+  }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
 
   return (
     <DashboardContent>
       {/* Pass the methods and our custom form sync context to FormProvider */}
-      <FormProvider {...methods} {...formSyncContextValue}>
+      <FormProvider {...methods}>
         {/* Publishing animation overlay */}
         {isPublishing && (
           <LoadingAnimation message="Publishing your content..." />
@@ -468,6 +275,10 @@ export function GeneratingView() {
 
         {/* Stepper */}
         <StepperComponent steps={steps} activeStep={activeStep} />
+
+        <ContentLayout activeStep={activeStep} isGeneratingMeta={isGeneratingMeta} onGenerateMeta={handleGenerateMeta}>
+          {renderStepContent()}
+        </ContentLayout>
 
         {/* Navigation buttons */}
         <StepNavigation
@@ -477,11 +288,31 @@ export function GeneratingView() {
           onBack={handleBackWithFlag}
         />
 
-        <form onSubmit={methods.handleSubmit(submitSteppedForm)}>
-          <ContentLayout activeStep={activeStep} state={step1State}>
-            {renderStepContent()}
-          </ContentLayout>
-        </form>
+        {/* Regeneration Confirmation Dialog */}
+        <ConfirmDialog
+          open={showRegenerateDialog}
+          onClose={() => setShowRegenerateDialog(false)}
+          title={t('regenerate.confirmTitle', 'Confirm Regeneration')}
+          content={
+            <Box>
+              <Typography variant="body1" paragraph>
+                {t('regenerate.confirmMessage', 'Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.')}
+              </Typography>
+              <Typography variant="body2" color="warning.main">
+                {t('regenerate.availableCredits', 'You have {{count}} regeneration credits available.', { count: regenerationsAvailable })}
+              </Typography>
+            </Box>
+          }
+          action={
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleRegenerateConfirm}
+            >
+              {t('regenerate.confirm', 'Regenerate')}
+            </Button>
+          }
+        />
       </FormProvider>
     </DashboardContent>
   );

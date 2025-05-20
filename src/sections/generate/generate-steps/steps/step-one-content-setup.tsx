@@ -1,7 +1,9 @@
 import type React from "react";
-import type { UseFormReturn } from "react-hook-form";
 
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
+import { useWatch, useFormContext } from "react-hook-form";
 
 import { useTheme } from "@mui/material/styles";
 import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material";
@@ -17,111 +19,133 @@ import { KeywordChip } from "../../components/KeywordChip";
 // Custom components
 import { RegenerateButton } from "../../components/RegenerateButton";
 // Custom hooks
-import { useKeywordManagement } from "../../hooks/useKeywordManagement";
 import { GenerationPlaceholder } from "../../components/GenerationPlaceholder";
 
 // Types
-import type { Step1FormData } from "../../schemas";
+import type { GenerateArticleFormData } from "../../schemas";
 
-export interface Step1State {
-  form: UseFormReturn<Step1FormData>
-  generation: {
-    title: {
-      isGenerating: boolean
-      isGenerated: boolean
-      onGenerate: () => Promise<void>
-    }
-    meta: {
-      isGenerating: boolean
-      isGenerated: boolean
-      onGenerate: () => Promise<void>
-    }
-    secondaryKeywords: {
-      isGenerating: boolean
-      handleAddKeyword: (arg: string) => void
-      handleDeleteKeyword: (arg: string) => void
-      onGenerate: () => Promise<void>
-    }
-    contentDescription?: {
-      isOptimizing: boolean
-      onOptimize: () => Promise<void>
-    }
-  }
+export interface Step1ContentSetupProps {
+  onGenerateTitle: () => Promise<void>;
+  onGenerateSecondaryKeywords: () => Promise<void>;
+  onOptimizeContentDescription: () => Promise<void>;
+  onGenerateMeta: () => Promise<void>;
+  isGeneratingMeta: boolean;
 }
 
-interface Step1ContentSetupProps {
-  state: Step1State
-}
+export function Step1ContentSetup({ onGenerateMeta, onGenerateSecondaryKeywords, onGenerateTitle, onOptimizeContentDescription, isGeneratingMeta }: Step1ContentSetupProps) {
 
-export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
-  const {
-    form,
-    generation: {
-      title: { isGenerating: isGeneratingTitle, isGenerated: isTitleGenerated, onGenerate: onGenerateTitle },
-      meta: { isGenerating: isGeneratingMeta, isGenerated: isMetaGenerated, onGenerate: onGenerateMeta },
-      secondaryKeywords: {
-        isGenerating: isGeneratingSecondaryKeywords,
-        onGenerate: onGenerateSecondaryKeywords,
-        handleAddKeyword: originalHandleAddKeyword,
-        handleDeleteKeyword,
-      },
-    },
-  } = state
+  // Get the form from the state prop
+  const form = useFormContext<GenerateArticleFormData>()
 
   const {
     register,
-    watch,
     formState: { errors },
     setValue,
+    control
   } = form
 
   const theme = useTheme()
 
-  // Watch form fields for conditional rendering
-  const primaryKeyword = watch("primaryKeyword")
-  const secondaryKeywords = watch("secondaryKeywords")
-  const contentDescription = watch("contentDescription")
+  const contentDescription = useWatch({
+    control,
+    name: "step1.contentDescription",
+  })
 
-  const title = watch("title")
-  const metaTitle = watch("metaTitle")
-  const metaDescription = watch("metaDescription")
-  const urlSlug = watch("urlSlug")
+  const primaryKeyword = useWatch({
+    control,
+    name: "step1.primaryKeyword",
+  })
+
+  const secondaryKeywords = useWatch({
+    control,
+    name: "step1.secondaryKeywords",
+  })
+
+
+  const title = useWatch({
+    control,
+    name: "step1.title",
+  })
+
+  const metaTitle = useWatch({
+    control,
+    name: "step1.metaTitle",
+  })
+
+  const metaDescription = useWatch({
+    control,
+    name: "step1.metaDescription",
+  })
+
+  const urlSlug = useWatch({
+    control,
+    name: "step1.urlSlug",
+  })
+
+  const metaInformation = !!metaTitle && !!metaDescription && !!urlSlug
 
   // Primary keyword should always be enabled since we have default values for language and targetCountry
   const isPrimaryKeywordDisabled = false
   const isSecondaryKeywordsDisabled = !primaryKeyword
 
-  // Handler for generating secondary keywords with validation
+  // Add state for keyword input
+  const [keywordInput, setKeywordInput] = useState("");
+
+  const [isGeneratingTitle , setIsGeneratingTitle] = useState(false);
+  const [isGeneratingSecondaryKeywords , setIsGeneratingSecondaryKeywords] = useState(false);
+  const [isOptimizingContentDescription , setIsOptimizingContentDescription] = useState(false);
+
+  const handleDeleteKeyword = (keyword: string) => {
+    setValue("step1.secondaryKeywords", secondaryKeywords.filter((k) => k !== keyword));
+    toast.error(`Keyword "${keyword}" removed`);
+  };
+
+  const handleAddKeyword = (keyword: string) => {
+    if (!keyword.trim()) return;
+    setValue("step1.secondaryKeywords", [...secondaryKeywords, keyword]);
+    setKeywordInput("");
+    toast.success(`Keyword "${keyword}" added`);
+  };
+
+  const isGenerateDisabled = !primaryKeyword;
+
+  const handleGenerateTitle = async () => {
+    setIsGeneratingTitle(true);
+    try {
+      await onGenerateTitle();
+    } catch (error) {
+      console.error("Error generating title:", error);
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  };
+
+  // Update the secondary keywords generation handler to use the state prop
   const handleGenerateSecondaryKeywordsWithValidation = () => {
-    const primaryKeywordValid = !!primaryKeyword
+    setIsGeneratingSecondaryKeywords(true);
+    const primaryKeywordValid = !!primaryKeyword;
     if (primaryKeywordValid) {
       onGenerateSecondaryKeywords()
     }
-  }
+    setIsGeneratingSecondaryKeywords(false);
+  };
 
+  const handleOptimizeContentDescription = async () => {
+    setIsOptimizingContentDescription(true);
+    try {
+      await onOptimizeContentDescription();
+    } catch (error) {
+      console.error("Error optimizing content description:", error);
+    } finally {
+      setIsOptimizingContentDescription(false);
+    }
+  };
 
+  const handleGenerateMeta = async () => {
+    await onGenerateMeta();
+  };
 
-  const isLoadingSecondaryKeywords = isGeneratingSecondaryKeywords
-
-  // Handle primary keyword change explicitly
-  const handlePrimaryKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {value} = e.target
-    setValue("primaryKeyword", value, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true
-    })
-  }
-
-  // Use the keyword management hook
-  const {
-    keywordInput,
-    setKeywordInput,
-    handleAddKeyword,
-    handleDeleteKeyword: handleDeleteKeywordWithToast, // Rename to avoid conflict
-  } = useKeywordManagement(form, originalHandleAddKeyword, handleDeleteKeyword);
-
-  const isGenerateDisabled = false;
+  // handle also the handle regenerate by of course doing the calculation of remaining generations number 
 
   return (
     <Grid container spacing={1}>
@@ -137,9 +161,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
         <FormContainer title="Keywords" layout="column">
           <Box sx={{ width: "100%" }}>
             <FormInput
-              {...register("primaryKeyword", {
+              {...register("step1.primaryKeyword", {
                 onChange: (e) => {
-                  setValue("primaryKeyword", e.target.value, {
+                  setValue("step1.primaryKeyword", e.target.value, {
                     shouldValidate: true,
                     shouldDirty: true,
                     shouldTouch: true
@@ -151,9 +175,8 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               tooltipText="Enter the main keyword for your content"
               placeholder="Enter primary keyword"
               fullWidth
-              error={!!errors.primaryKeyword}
-              onChange={handlePrimaryKeywordChange}
-              helperText={errors.primaryKeyword ? "Primary keyword is required" : ""}
+              error={!!errors.step1?.primaryKeyword}
+              helperText={errors.step1?.primaryKeyword ? "Primary keyword is required" : ""}
               value={primaryKeyword} // Explicitly set the value
             />
           </Box>
@@ -168,9 +191,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 tooltipText="Add relevant secondary keywords to improve SEO ranking"
                 fullWidth
                 onChange={(e) => { setKeywordInput(e.target.value)} }
-                error={errors.secondaryKeywords && secondaryKeywords.length === 0}
+                error={errors.step1?.secondaryKeywords && secondaryKeywords.length === 0}
                 helperText={
-                  errors.secondaryKeywords && secondaryKeywords.length === 0
+                  errors.step1?.secondaryKeywords && secondaryKeywords.length === 0
                     ? "Add or generate at least one secondary keyword"
                     : ""
                 }
@@ -214,9 +237,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   color="secondary"
                   size="small"
                   onClick={handleGenerateSecondaryKeywordsWithValidation}
-                  disabled={isLoadingSecondaryKeywords}
+                  disabled={isGeneratingSecondaryKeywords}
                   startIcon={
-                    isLoadingSecondaryKeywords ? (
+                    isGeneratingSecondaryKeywords ? (
                       <CircularProgress
                         size={16}
                         color="inherit"
@@ -238,7 +261,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                     textTransform: "none",
                     fontSize: theme.typography.pxToRem(12),
                     transition: "all 0.3s ease",
-                    opacity: isLoadingSecondaryKeywords ? 0.8 : 1,
+                    opacity: isGeneratingTitle ? 0.8 : 1,
                     color: theme.palette.secondary.dark,
                     "&:hover": {
                       color: theme.palette.secondary.dark,
@@ -252,7 +275,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                       fontWeight: 500,
                     }}
                   >
-                    {isLoadingSecondaryKeywords ? "Generating Suggestions..." : "Generate Suggestions with AI"}
+                    {isGeneratingSecondaryKeywords ? "Generating Suggestions..." : "Generate Suggestions with AI"}
                   </Typography>
                 </Button>
               </Box>
@@ -277,7 +300,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   key={index}
                   keyword={keyword}
                   index={index}
-                  onDelete={handleDeleteKeywordWithToast}
+                  onDelete={handleDeleteKeyword}
                 />
               ))}
             </Box>
@@ -290,10 +313,10 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
         <FormContainer title="Content Description">
           <Box sx={{ width: "100%" }}>
             <FormInput
-              {...register("contentDescription", {
+              {...register("step1.contentDescription", {
                 required: true,
                 onChange: (e) => {
-                  setValue("contentDescription", e.target.value, {
+                  setValue("step1.contentDescription", e.target.value, {
                     shouldValidate: true,
                     shouldDirty: true,
                     shouldTouch: true
@@ -307,8 +330,8 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
               rows={4}
               value={contentDescription}
               fullWidth
-              error={!!errors.contentDescription}
-              helperText={errors.contentDescription ? "Content description is required" : ""}
+              error={!!errors.step1?.contentDescription}
+              helperText={errors.step1?.contentDescription ? "Content description is required" : ""}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   bgcolor: theme.palette.background.paper,
@@ -324,10 +347,10 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   variant="outlined"
                   color="secondary"
                   size="small"
-                  onClick={state.generation.contentDescription?.onOptimize}
-                  disabled={state.generation.contentDescription?.isOptimizing}
+                  onClick={handleOptimizeContentDescription}
+                  disabled={isOptimizingContentDescription}
                   startIcon={
-                    state.generation.contentDescription?.isOptimizing ? (
+                    isOptimizingContentDescription ? (
                       <CircularProgress
                         size={16}
                         color="inherit"
@@ -349,7 +372,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                     textTransform: "none",
                     fontSize: theme.typography.pxToRem(12),
                     transition: "all 0.3s ease",
-                    opacity: state.generation.contentDescription?.isOptimizing ? 0.8 : 1,
+                    opacity: isOptimizingContentDescription ? 0.8 : 1,
                     color: theme.palette.secondary.dark,
                     "&:hover": {
                       color: theme.palette.secondary.dark,
@@ -363,7 +386,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                       fontWeight: 500,
                     }}
                   >
-                    {state.generation.contentDescription?.isOptimizing ? "Optimizing..." : "Optimize with AI"}
+                    {isOptimizingContentDescription ? "Optimizing..." : "Optimize with AI"}
                   </Typography>
                 </Button>
               </Box>
@@ -371,10 +394,10 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
 
             {/* Content Description Optimization Loading Animation */}
             <AnimatePresence>
-              {state.generation.contentDescription?.isOptimizing && (
+              {isOptimizingContentDescription && (
                 <Box sx={{ mt: 2, position: 'relative' }}>
                   <GenerationLoadingAnimation
-                    isLoading={state.generation.contentDescription.isOptimizing}
+                    isLoading={isOptimizingContentDescription}
                     message="Optimizing your content description..."
                     size="medium"
                   />
@@ -386,7 +409,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
       </Grid>
 
       <Grid item xs={12} sx={{ mt: -2 }}>
-        {!isTitleGenerated ? (
+        {!title ? (
           <Box
             sx={{
               width: "100%",
@@ -412,7 +435,7 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <Button
               variant="contained"
               color="primary"
-              onClick={onGenerateTitle}
+              onClick={handleGenerateTitle}
               disabled={isGeneratingTitle || isGenerateDisabled}
               startIcon={
                 isGeneratingTitle ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />
@@ -442,9 +465,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <FormContainer title="Generated Title">
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
-                  {...register("title", {
+                  {...register("step1.title", {
                     onChange: (e) => {
-                      setValue("title", e.target.value, {
+                      setValue("step1.title", e.target.value, {
                         shouldValidate: true,
                         shouldDirty: true,
                         shouldTouch: true
@@ -455,11 +478,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                   tooltipText="Article Title"
                   label="Article Title"
                   fullWidth
-                  helperText={errors.title?.message}
+                  helperText={errors.step1?.title?.message}
                 />
                 {/* Regenerate Button */}
                 <RegenerateButton
-                  onClick={onGenerateTitle}
+                  onClick={handleGenerateTitle}
                   isGenerating={isGeneratingTitle}
                   label="Regenerate Article Title"
                 />
@@ -482,11 +505,11 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
         )}
 
         {/* Meta information generation section */}
-        {!isMetaGenerated ? (
+        {!metaInformation ? (
           <GenerationPlaceholder
             title="Generate SEO meta information for your content"
             buttonLabel="Generate Meta Info"
-            onGenerate={onGenerateMeta}
+            onGenerate={handleGenerateMeta}
             isGenerating={isGeneratingMeta}
             isDisabled={isGenerateDisabled}
             height={16}
@@ -496,9 +519,9 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
             <Stack spacing={1} sx={{ width: "100%" }}>
               {/* Meta Title */}
               <FormInput
-                {...register("metaTitle", {
+                {...register("step1.metaTitle", {
                   onChange: (e) => {
-                    setValue("metaTitle", e.target.value, {
+                    setValue("step1.metaTitle", e.target.value, {
                       shouldValidate: true,
                       shouldDirty: true,
                       shouldTouch: true
@@ -509,14 +532,14 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 tooltipText="Meta title"
                 label="Meta Title"
                 fullWidth
-                helperText={errors.metaTitle?.message}
+                helperText={errors.step1?.metaTitle?.message}
               />
 
               {/* Meta Description */}
               <FormInput
-                {...register("metaDescription", {
+                {...register("step1.metaDescription", {
                   onChange: (e) => {
-                    setValue("metaDescription", e.target.value, {
+                    setValue("step1.metaDescription", e.target.value, {
                       shouldValidate: true,
                       shouldDirty: true,
                       shouldTouch: true
@@ -529,14 +552,14 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 fullWidth
                 multiline
                 rows={3}
-                helperText={errors.metaDescription?.message}
+                helperText={errors.step1?.metaDescription?.message}
               />
 
               {/* URL Slug */}
               <FormInput
-                {...register("urlSlug", {
+                {...register("step1.urlSlug", {
                   onChange: (e) => {
-                    setValue("urlSlug", e.target.value, {
+                    setValue("step1.urlSlug", e.target.value, {
                       shouldValidate: true,
                       shouldDirty: true,
                       shouldTouch: true
@@ -547,12 +570,12 @@ export function Step1ContentSetup({ state }: Step1ContentSetupProps) {
                 value={urlSlug}
                 label="URL Slug"
                 fullWidth
-                helperText={errors.urlSlug?.message}
+                helperText={errors.step1?.urlSlug?.message}
               />
 
               {/* Regenerate Button */}
               <RegenerateButton
-                onClick={onGenerateMeta}
+                onClick={handleGenerateMeta}
                 isGenerating={isGeneratingMeta}
                 label="Regenerate All"
               />

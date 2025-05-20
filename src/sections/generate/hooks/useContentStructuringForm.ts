@@ -141,31 +141,6 @@ export const useContentStructuringForm = (initialSections: SectionItem[] = []) =
 
         toast.success('Generated table of contents successfully');
       } catch (apiError) {
-        const keyword = title || 'Topic';
-        const fallbackSections = [
-          {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            content: `This section provides an overview of ${keyword} and why it's important.`
-          },
-          {
-            id: 'section-2',
-            title: `Benefits of ${keyword}`,
-            content: `This section explores the main benefits and advantages of ${keyword}.`
-          },
-          {
-            id: 'section-3',
-            title: `How to Implement ${keyword}`,
-            content: `This section provides practical steps for implementing ${keyword} effectively.`
-          },
-          {
-            id: 'section-4',
-            title: `${keyword} Best Practices`,
-            content: `This section covers the best practices and tips for optimizing ${keyword}.`
-          },
-        ] as SectionItem[];
-
-        setSections(fallbackSections);
         setIsGenerated(true);
       }
     } catch (error) {

@@ -12,7 +12,7 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
   const theme = useTheme();
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
-  
+
   // Animation steps
   useEffect(() => {
     if (!show) {
@@ -20,27 +20,31 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
       setShowCheckmark(false);
       return;
     }
-    
+
+    // Reset animation state when shown again
+    setStep(0);
+    setShowCheckmark(false);
+
     // Step 1: Show the initial animation
     const timer1 = setTimeout(() => setStep(1), 500);
-    
+
     // Step 2: Show sections being generated
     const timer2 = setTimeout(() => setStep(2), 1500);
-    
+
     // Step 3: Show sections being organized
     const timer3 = setTimeout(() => setStep(3), 3000);
-    
+
     // Step 4: Show checkmark
     const timer4 = setTimeout(() => {
       setStep(4);
       setShowCheckmark(true);
     }, 4500);
-    
+
     // Step 5: Complete animation
     const timer5 = setTimeout(() => {
       if (onComplete) onComplete();
     }, 5500);
-    
+
     // eslint-disable-next-line consistent-return
     return () => {
       clearTimeout(timer1);
@@ -50,9 +54,9 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
       clearTimeout(timer5);
     };
   }, [show, onComplete]);
-  
+
   if (!show) return null;
-  
+
   return (
     <AnimatePresence>
       <motion.div
@@ -115,7 +119,7 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                     borderTopColor: 'transparent',
                   }}
                 />
-                
+
                 {/* Document icon in the middle */}
                 <Box
                   sx={{
@@ -135,16 +139,16 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
               </Box>
             )}
           </Box>
-          
+
           <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
             {step === 4 ? 'Sections Generated!' : 'Generating Article Sections...'}
           </Typography>
-          
+
           <Box sx={{ mb: 3 }}>
-            <Typography 
-              variant="body1" 
+            <Typography
+              variant="body1"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 opacity: step >= 1 ? 1 : 0.3,
                 transition: 'opacity 0.3s ease-in-out',
                 display: 'flex',
@@ -153,22 +157,22 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                 mb: 1
               }}
             >
-              <Iconify 
-                icon={step >= 1 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"} 
-                width={20} 
-                height={20} 
-                sx={{ 
-                  mr: 1, 
-                  color: step >= 1 ? theme.palette.success.main : theme.palette.text.secondary 
-                }} 
+              <Iconify
+                icon={step >= 1 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
+                width={20}
+                height={20}
+                sx={{
+                  mr: 1,
+                  color: step >= 1 ? theme.palette.success.main : theme.palette.text.secondary
+                }}
               />
               Analyzing content requirements
             </Typography>
-            
-            <Typography 
-              variant="body1" 
+
+            <Typography
+              variant="body1"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 opacity: step >= 2 ? 1 : 0.3,
                 transition: 'opacity 0.3s ease-in-out',
                 display: 'flex',
@@ -177,22 +181,22 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                 mb: 1
               }}
             >
-              <Iconify 
-                icon={step >= 2 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"} 
-                width={20} 
-                height={20} 
-                sx={{ 
-                  mr: 1, 
-                  color: step >= 2 ? theme.palette.success.main : theme.palette.text.secondary 
-                }} 
+              <Iconify
+                icon={step >= 2 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
+                width={20}
+                height={20}
+                sx={{
+                  mr: 1,
+                  color: step >= 2 ? theme.palette.success.main : theme.palette.text.secondary
+                }}
               />
               Creating optimized sections
             </Typography>
-            
-            <Typography 
-              variant="body1" 
+
+            <Typography
+              variant="body1"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 opacity: step >= 3 ? 1 : 0.3,
                 transition: 'opacity 0.3s ease-in-out',
                 display: 'flex',
@@ -201,22 +205,22 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                 mb: 1
               }}
             >
-              <Iconify 
-                icon={step >= 3 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"} 
-                width={20} 
-                height={20} 
-                sx={{ 
-                  mr: 1, 
-                  color: step >= 3 ? theme.palette.success.main : theme.palette.text.secondary 
-                }} 
+              <Iconify
+                icon={step >= 3 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
+                width={20}
+                height={20}
+                sx={{
+                  mr: 1,
+                  color: step >= 3 ? theme.palette.success.main : theme.palette.text.secondary
+                }}
               />
               Organizing content structure
             </Typography>
-            
-            <Typography 
-              variant="body1" 
+
+            <Typography
+              variant="body1"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 opacity: step >= 4 ? 1 : 0.3,
                 transition: 'opacity 0.3s ease-in-out',
                 display: 'flex',
@@ -224,19 +228,19 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                 justifyContent: 'center'
               }}
             >
-              <Iconify 
-                icon={step >= 4 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"} 
-                width={20} 
-                height={20} 
-                sx={{ 
-                  mr: 1, 
-                  color: step >= 4 ? theme.palette.success.main : theme.palette.text.secondary 
-                }} 
+              <Iconify
+                icon={step >= 4 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
+                width={20}
+                height={20}
+                sx={{
+                  mr: 1,
+                  color: step >= 4 ? theme.palette.success.main : theme.palette.text.secondary
+                }}
               />
               Finalizing article structure
             </Typography>
           </Box>
-          
+
           {/* Progress bar */}
           <Box sx={{ position: 'relative', height: 6, bgcolor: theme.palette.grey[200], borderRadius: 3, overflow: 'hidden' }}>
             <motion.div

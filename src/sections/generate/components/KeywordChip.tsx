@@ -1,5 +1,6 @@
-import { Box, useTheme } from '@mui/material';
 import toast from 'react-hot-toast';
+
+import { Box, useTheme } from '@mui/material';
 
 interface KeywordChipProps {
   keyword: string;
