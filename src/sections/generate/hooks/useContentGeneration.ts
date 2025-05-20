@@ -1,6 +1,7 @@
+import type { UseFormReturn } from 'react-hook-form';
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import type { UseFormReturn } from 'react-hook-form';
 
 import {
   type GeneratedSection,

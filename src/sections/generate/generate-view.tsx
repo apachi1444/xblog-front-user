@@ -1,12 +1,11 @@
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { FormProvider } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 
 // Layout components
 import { Box, Button, Typography } from '@mui/material';
-
-import { useRouter } from 'src/routes/hooks';
 
 // Custom hooks
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
@@ -37,7 +36,7 @@ import type { GenerateArticleFormData } from './schemas';
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const { t } = useTranslation();
-  const navigate = useRouter();
+  const navigate = useNavigate();
 
   // Initialize the main form
   const { methods } = useGenerateArticleForm();
@@ -80,8 +79,7 @@ export function GeneratingView() {
     // Trigger validation for the current step's fields
     const isStepValid = await methods.trigger(currentStepFields as any)
 
-    // Additional validation for specific steps
-    let shouldProceed = isStepValid;
+    console.log(isStepValid , " is step valid ! " , activeStep);
 
     if (isStepValid) {
       const values = methods.getValues();
@@ -90,21 +88,20 @@ export function GeneratingView() {
         // Check for title and meta information in step 1
         if (!values.step1?.title) {
           toast.error("Please generate a title before proceeding");
-          shouldProceed = false;
         } else if (!values.step1?.metaTitle || !values.step1?.metaDescription) {
           toast.error("Please generate meta information before proceeding");
-          shouldProceed = false;
         }
       } else if (activeStep === 1) {
         // Check if table of contents has been generated in step 2
         if (!values.step3?.sections?.length) {
           toast.error("Please generate a table of contents before proceeding");
-          shouldProceed = false;
+        }
+      } else if (activeStep === 2) {
+        // Check if sections have been generated before proceeding to step 3
+        if (!values.step3?.sections?.length) {
+          toast.error("Please generate sections before proceeding");
         }
       }
-
-      // Handle final step submission
-      if (shouldProceed) {
         if (activeStep === steps.length - 1) {
           // Final step - handle submission
           try {
@@ -117,15 +114,13 @@ export function GeneratingView() {
                 await onSubmit(data);
                 // Wait for the publishing animation
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                // Navigate to the blog page after successful submission
-                // navigate('/blog');
+
+                navigate('/blog');
               } catch (error) {
-                console.error('Submission error:', error);
                 toast.error('Failed to publish article');
               }
             })();
           } catch (error) {
-            console.error('Form submission error:', error);
             toast.error('Failed to process the form');
           } finally {
             setIsPublishing(false);
@@ -134,10 +129,7 @@ export function GeneratingView() {
           // Not the final step, just move to the next step
           setActiveStep((prev) => prev + 1);
         }
-      }
-    } else {
-      toast.error("Please fill out all required fields before proceeding.")
-    }
+    } 
   }
 
   // Helper function to get the field names for a specific step
@@ -198,6 +190,7 @@ export function GeneratingView() {
   const onGenerateTableOfContents = useCallback(async () => {
     try {
       await contentGeneration.handleGenerateSections();
+      setActiveStep(2);
     }
     catch (error) {
       toast.error('Failed to generate table of contents');
@@ -205,7 +198,6 @@ export function GeneratingView() {
     finally {
       setIsGenerated(true);
     }
-
   }, [contentGeneration, setIsGenerated]);
 
 
@@ -263,13 +255,15 @@ export function GeneratingView() {
       // Call the generate table of contents function
       if (activeStep === 1) {
         try {
-          await contentGeneration.handleGenerateSections();
+          const success = await contentGeneration.handleGenerateSections();
+          // Only set isGenerated to true if the generation was successful
+          if (success) {
+            setIsGenerated(true);
+          }
         }
         catch (error) {
+          console.error('Error generating table of contents:', error);
           toast.error('Failed to generate table of contents');
-        }
-        finally {
-          setIsGenerated(true);
         }
       }
     } else {
