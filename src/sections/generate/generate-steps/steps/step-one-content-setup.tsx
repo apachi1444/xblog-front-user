@@ -30,9 +30,21 @@ export interface Step1ContentSetupProps {
   onOptimizeContentDescription: () => Promise<void>;
   onGenerateMeta: () => Promise<void>;
   isGeneratingMeta: boolean;
+  isGeneratingTitle?: boolean;
+  isGeneratingKeywords?: boolean;
+  isOptimizingDescription?: boolean;
 }
 
-export function Step1ContentSetup({ onGenerateMeta, onGenerateSecondaryKeywords, onGenerateTitle, onOptimizeContentDescription, isGeneratingMeta }: Step1ContentSetupProps) {
+export function Step1ContentSetup({
+  onGenerateMeta,
+  onGenerateSecondaryKeywords,
+  onGenerateTitle,
+  onOptimizeContentDescription,
+  isGeneratingMeta,
+  isGeneratingTitle: externalIsGeneratingTitle,
+  isGeneratingKeywords: externalIsGeneratingKeywords,
+  isOptimizingDescription: externalIsOptimizingDescription
+}: Step1ContentSetupProps) {
 
   // Get the form from the state prop
   const form = useFormContext<GenerateArticleFormData>()
@@ -91,9 +103,15 @@ export function Step1ContentSetup({ onGenerateMeta, onGenerateSecondaryKeywords,
   // Add state for keyword input
   const [keywordInput, setKeywordInput] = useState("");
 
-  const [isGeneratingTitle , setIsGeneratingTitle] = useState(false);
-  const [isGeneratingSecondaryKeywords , setIsGeneratingSecondaryKeywords] = useState(false);
-  const [isOptimizingContentDescription , setIsOptimizingContentDescription] = useState(false);
+  // Use external state if provided, otherwise use local state
+  const [localIsGeneratingTitle, setLocalIsGeneratingTitle] = useState(false);
+  const [localIsGeneratingSecondaryKeywords, setLocalIsGeneratingSecondaryKeywords] = useState(false);
+  const [localIsOptimizingContentDescription, setLocalIsOptimizingContentDescription] = useState(false);
+
+  // Use external values if provided, otherwise use local state
+  const isGeneratingTitle = externalIsGeneratingTitle !== undefined ? externalIsGeneratingTitle : localIsGeneratingTitle;
+  const isGeneratingSecondaryKeywords = externalIsGeneratingKeywords !== undefined ? externalIsGeneratingKeywords : localIsGeneratingSecondaryKeywords;
+  const isOptimizingContentDescription = externalIsOptimizingDescription !== undefined ? externalIsOptimizingDescription : localIsOptimizingContentDescription;
 
   const handleDeleteKeyword = (keyword: string) => {
     setValue("step1.secondaryKeywords", secondaryKeywords.filter((k) => k !== keyword));
@@ -110,42 +128,72 @@ export function Step1ContentSetup({ onGenerateMeta, onGenerateSecondaryKeywords,
   const isGenerateDisabled = !primaryKeyword;
 
   const handleGenerateTitle = async () => {
-    setIsGeneratingTitle(true);
+    // Only set local state if external state is not provided
+    if (externalIsGeneratingTitle === undefined) {
+      setLocalIsGeneratingTitle(true);
+    }
+
     try {
       await onGenerateTitle();
     } catch (error) {
       console.error("Error generating title:", error);
     } finally {
-      setIsGeneratingTitle(false);
+      // Only set local state if external state is not provided
+      if (externalIsGeneratingTitle === undefined) {
+        setLocalIsGeneratingTitle(false);
+      }
     }
   };
 
   // Update the secondary keywords generation handler to use the state prop
-  const handleGenerateSecondaryKeywordsWithValidation = () => {
-    setIsGeneratingSecondaryKeywords(true);
+  const handleGenerateSecondaryKeywordsWithValidation = async () => {
+    // Only set local state if external state is not provided
+    if (externalIsGeneratingKeywords === undefined) {
+      setLocalIsGeneratingSecondaryKeywords(true);
+    }
+
     const primaryKeywordValid = !!primaryKeyword;
     if (primaryKeywordValid) {
-      onGenerateSecondaryKeywords()
+      try {
+        await onGenerateSecondaryKeywords();
+      } catch (error) {
+        console.error("Error generating secondary keywords:", error);
+      } finally {
+        // Only set local state if external state is not provided
+        if (externalIsGeneratingKeywords === undefined) {
+          setLocalIsGeneratingSecondaryKeywords(false);
+        }
+      }
     }
-    setIsGeneratingSecondaryKeywords(false);
   };
 
   const handleOptimizeContentDescription = async () => {
-    setIsOptimizingContentDescription(true);
+    // Only set local state if external state is not provided
+    if (externalIsOptimizingDescription === undefined) {
+      setLocalIsOptimizingContentDescription(true);
+    }
+
     try {
       await onOptimizeContentDescription();
     } catch (error) {
       console.error("Error optimizing content description:", error);
     } finally {
-      setIsOptimizingContentDescription(false);
+      // Only set local state if external state is not provided
+      if (externalIsOptimizingDescription === undefined) {
+        setLocalIsOptimizingContentDescription(false);
+      }
     }
   };
 
   const handleGenerateMeta = async () => {
-    await onGenerateMeta();
+    try {
+      await onGenerateMeta();
+    } catch (error) {
+      console.error("Error generating meta information:", error);
+    }
   };
 
-  // handle also the handle regenerate by of course doing the calculation of remaining generations number 
+  // handle also the handle regenerate by of course doing the calculation of remaining generations number
 
   return (
     <Grid container spacing={1}>

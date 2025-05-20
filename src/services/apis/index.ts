@@ -463,9 +463,9 @@ const setupMocks = () => {
         return [
           200,
           {
-            meta_title,
-            meta_description,
-            url_slug,
+            metaTitle: meta_title,
+            metaDescription: meta_description,
+            urlSlug: url_slug,
             success: true,
             message: null
           }

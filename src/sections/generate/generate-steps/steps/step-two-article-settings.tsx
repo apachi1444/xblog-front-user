@@ -25,6 +25,9 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
   const { t } = useTranslation();
   const { options } = useArticleSettingsForm();
 
+  console.log(isGenerating , " is generating !");
+  
+
   const {
     register,
     watch,

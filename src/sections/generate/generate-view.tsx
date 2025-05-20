@@ -19,8 +19,9 @@ import { LoadingAnimation } from 'src/components/generate-article/PublishingLoad
 // Custom components
 import { ContentLayout } from './components/ContentLayout';
 import { StepNavigation } from './components/StepNavigation';
+import { useContentGeneration } from './hooks/useContentGeneration';
 // Custom hooks
-import {useCriteriaEvaluation} from './hooks/useCriteriaEvaluation';
+import { useCriteriaEvaluation } from './hooks/useCriteriaEvaluation';
 // Custom hook for form synchronization
 import { useGenerateArticleForm } from './hooks/useGenerateArticleForm';
 import { Step4Publish } from './generate-steps/steps/step-four-publish';
@@ -41,6 +42,9 @@ export function GeneratingView() {
   // Initialize the main form
   const { methods } = useGenerateArticleForm();
 
+  // Use the content generation hook with the form methods
+  const contentGeneration = useContentGeneration(methods);
+
   const onSubmit = useCallback(async (data: GenerateArticleFormData) => {
     console.log("Form submitted:", data)
     // Return a resolved promise to ensure proper async handling
@@ -50,9 +54,11 @@ export function GeneratingView() {
 
   // Additional states
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isGeneratingSections, setIsGeneratingSections] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+
+  // Get the isGeneratingSections state from the contentGeneration hook
+  const { isGeneratingSections } = contentGeneration;
 
   // Use the regeneration check hook to check for available regenerations
   const {
@@ -177,62 +183,33 @@ export function GeneratingView() {
     setActiveStep((prev) => prev - 1);
   }, []);
 
-  const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
-
-  const handleGenerateMeta = async () => {
-    setIsGeneratingMeta(true);
-  }
-
-  const handleGenerateTitle = async () => {
-
-  }
-
-  const handleGenerateSecondaryKeywords = async () => {
-
-  }
-
-  const handleOptimizeContentDescription = async () => {
-
-  }
+  // Use the loading states and handler functions from the contentGeneration hook
+  const {
+    isGeneratingTitle,
+    isGeneratingMeta,
+    isGeneratingKeywords,
+    isOptimizingDescription,
+    handleGenerateTitle,
+    handleGenerateMeta,
+    handleGenerateSecondaryKeywords,
+    handleOptimizeContentDescription
+  } = contentGeneration;
 
   const onGenerateTableOfContents = useCallback(async () => {
-    setIsGeneratingSections(true);
+    try {
+      await contentGeneration.handleGenerateSections();
+    }
+    catch (error) {
+      toast.error('Failed to generate table of contents');
+    }
+    finally {
+      setIsGenerated(true);
+    }
 
-    // Get form values from methods instead of using useFormContext directly
-    const formData = methods.getValues();
-    const step1Values = formData.step1 || {};
-    const step2Values = formData.step2 || {};
-
-    const title = step1Values.title || 'Topic';
-    const primaryKeyword = step1Values.primaryKeyword || title;
-    const secondaryKeywords = step1Values.secondaryKeywords || [];
-    const language = step1Values.language || 'en';
-    const targetCountry = step1Values.targetCountry || 'United States';
-    const contentType = step2Values.articleType || 'blog';
-    const articleSize = step2Values.articleSize || 'medium';
-    const toneOfVoice = step2Values.toneOfVoice || 'professional';
-
-    console.log('Generating sections with:', {
-      title,
-      primaryKeyword: primaryKeyword || title,
-      secondaryKeywords: secondaryKeywords || [],
-      language: language || 'en',
-      contentType: contentType || 'blog',
-      articleSize: articleSize || 'medium',
-      toneOfVoice: toneOfVoice || 'professional',
-      targetCountry: targetCountry || 'United States'
-    });
-
-    // Mock generating sections
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    setIsGenerated(true);
-    setIsGeneratingSections(false);
-  }, [methods, setIsGenerated, setIsGeneratingSections]);
+  }, [contentGeneration, setIsGenerated]);
 
 
   const renderStepContent = () => {
-
     // Regular steps
     switch (activeStep) {
       case 0:
@@ -242,6 +219,9 @@ export function GeneratingView() {
                 onOptimizeContentDescription={handleOptimizeContentDescription}
                 onGenerateMeta={handleGenerateMeta}
                 isGeneratingMeta={isGeneratingMeta}
+                isGeneratingTitle={isGeneratingTitle}
+                isGeneratingKeywords={isGeneratingKeywords}
+                isOptimizingDescription={isOptimizingDescription}
               />;
       case 1:
         return <Step2ArticleSettings
@@ -274,7 +254,7 @@ export function GeneratingView() {
   }, []);
 
   // Handle regenerate confirmation
-  const handleRegenerateConfirm = useCallback(() => {
+  const handleRegenerateConfirm = useCallback(async () => {
     // Check if user has regeneration credits
     if (checkRegenerationCredits()) {
       // Close dialog and generate
@@ -282,13 +262,21 @@ export function GeneratingView() {
 
       // Call the generate table of contents function
       if (activeStep === 1) {
-        onGenerateTableOfContents();
+        try {
+          await contentGeneration.handleGenerateSections();
+        }
+        catch (error) {
+          toast.error('Failed to generate table of contents');
+        }
+        finally {
+          setIsGenerated(true);
+        }
       }
     } else {
       // If no credits, the checkRegenerationCredits function will show the no credits dialog
       setShowRegenerateDialog(false);
     }
-  }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
+  }, [activeStep, checkRegenerationCredits, contentGeneration, setIsGenerated]);
 
   return (
     <DashboardContent>

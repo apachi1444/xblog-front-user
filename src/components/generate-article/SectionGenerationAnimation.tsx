@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Typography, Paper, useTheme } from '@mui/material';
+
+import { Box, Paper, useTheme, Typography } from '@mui/material';
+
 import { Iconify } from 'src/components/iconify';
 
 interface SectionGenerationAnimationProps {
