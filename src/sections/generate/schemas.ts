@@ -30,20 +30,55 @@ export const step2Schema = z.object({
   numberOfVideos: z.number().default(1),
 });
 
+// Section content type schemas
+export const sectionLinkSchema = z.object({
+  text: z.string(),
+  url: z.string(),
+});
+
+export const sectionImageSchema = z.object({
+  url: z.string(),
+  alt: z.string(),
+  caption: z.string().optional(),
+});
+
+export const sectionFaqItemSchema = z.object({
+  question: z.string(),
+  answer: z.string(),
+});
+
+export const sectionTableDataSchema = z.object({
+  headers: z.array(z.string()),
+  rows: z.array(z.array(z.string())),
+});
+
+// Enhanced section schema
+export const sectionSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, 'Section title is required'),
+  content: z.string().min(1, 'Section content is required'),
+  status: z.string(),
+  // Additional properties from step four
+  type: z.enum(['introduction', 'regular', 'conclusion', 'faq']).optional(),
+  contentType: z.enum(['paragraph', 'bullet-list', 'table', 'faq', 'image-gallery']).optional(),
+  bulletPoints: z.array(z.string()).optional(),
+  internalLinks: z.array(sectionLinkSchema).optional(),
+  externalLinks: z.array(sectionLinkSchema).optional(),
+  tableData: sectionTableDataSchema.optional(),
+  faqItems: z.array(sectionFaqItemSchema).optional(),
+  images: z.array(sectionImageSchema).optional(),
+  // Keep subsections for backward compatibility
+  subsections: z.array(z.object({
+    id: z.string(),
+    title: z.string().min(1, 'Subsection title is required'),
+    content: z.string().min(1, 'Subsection content is required'),
+    status: z.string(),
+  })).optional(),
+});
+
 // Step 3: Content Structure Schema
 export const step3Schema = z.object({
-  sections: z.array(z.object({
-    id: z.string(),
-    title: z.string().min(1, 'Section title is required'),
-    content: z.string().min(1, 'Section content is required'),
-    status: z.string(),
-    subsections: z.array(z.object({
-      id: z.string(),
-      title: z.string().min(1, 'Subsection title is required'),
-      content: z.string().min(1, 'Subsection content is required'),
-      status: z.string(),
-    })).optional(),
-  })).min(1, 'At least one section is required'),
+  sections: z.array(sectionSchema).min(1, 'At least one section is required'),
 });
 
 
@@ -54,6 +89,14 @@ export const generateArticleSchema = z.object({
   step3: step3Schema,
 });
 
+// Export types for section content
+export type SectionLink = z.infer<typeof sectionLinkSchema>;
+export type SectionImage = z.infer<typeof sectionImageSchema>;
+export type SectionFaqItem = z.infer<typeof sectionFaqItemSchema>;
+export type SectionTableData = z.infer<typeof sectionTableDataSchema>;
+export type ArticleSection = z.infer<typeof sectionSchema>;
+
+// Export form data types
 export type Step1FormData = z.infer<typeof step1Schema>;
 export type Step2FormData = z.infer<typeof step2Schema>;
 export type Step3FormData = z.infer<typeof step3Schema>;

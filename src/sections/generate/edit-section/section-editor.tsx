@@ -2,7 +2,7 @@ import type { EditorOptions } from "@tiptap/core";
 
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useRef, useState, forwardRef, useCallback, useEffect } from "react";
+import { useRef, useState, useEffect, forwardRef, useCallback } from "react";
 import {
   MenuDivider,
   insertImages,
@@ -40,7 +40,7 @@ interface EditorProps {
 }
 
 export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
-  initialContent = "<p>Start writing here...</p>",
+  initialContent,
   onChange
 }, ref) => {
   const rteRef = useRef<RichTextEditorRef>(null);
@@ -49,18 +49,11 @@ export const Editor = forwardRef<RichTextEditorRef, EditorProps>(({
 
   // Update content when initialContent changes
   useEffect(() => {
-    console.log('initialContent changed in Editor component:', initialContent);
     if (initialContent) {
-      console.log('Updating editor content from initialContent:', initialContent);
       setContent(initialContent);
       if (rteRef.current?.editor) {
-        console.log('Setting editor content via commands.setContent');
         rteRef.current.editor.commands.setContent(initialContent);
-      } else {
-        console.log('Editor reference not available yet');
       }
-    } else {
-      console.log('initialContent is empty or undefined');
     }
   }, [initialContent]);
 

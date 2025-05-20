@@ -1,24 +1,18 @@
-import React, { useState } from 'react';
+import type { ArticleSection } from 'src/sections/generate/schemas';
+
+import React from 'react';
 import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
 
-import { 
+import {
   Box
 } from '@mui/material';
 
 import { SectionBox } from './SectionBox';
 
-// Add the content property to the SectionItem interface
-export interface SectionItem {
-  id: string;
-  title: string;
-  description?: string;
-  content?: string; // Add this line to include the content property
-}
-
 interface DraggableSectionListProps {
-  sections: SectionItem[];
-  onSectionsChange: (newSections: SectionItem[]) => void;
-  onEditSection?: (section: SectionItem) => void;
+  sections: ArticleSection[];
+  onSectionsChange: (newSections: ArticleSection[]) => void;
+  onEditSection?: (section: ArticleSection) => void;
   onDeleteSection?: (sectionId: string) => void;
 }
 
@@ -30,15 +24,15 @@ export const DraggableSectionList: React.FC<DraggableSectionListProps> = ({
 }) => {
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-    
+
     const items = Array.from(sections);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    
+
     onSectionsChange(items);
   };
 
-  const handleEditClick = (section: SectionItem) => {
+  const handleEditClick = (section: ArticleSection) => {
     if (onEditSection) {
       onEditSection(section);
     }
@@ -63,7 +57,7 @@ export const DraggableSectionList: React.FC<DraggableSectionListProps> = ({
                     >
                       <Box sx={{ position: 'relative' }}>
                         <Box sx={{ pl: 4 }}>
-                          <SectionBox 
+                          <SectionBox
                             section={section}
                             onEditSection={handleEditClick}
                             onDeleteSection={onDeleteSection}

@@ -3,6 +3,7 @@
 import type { Store } from 'src/types/store';
 
 import toast from 'react-hot-toast';
+import { useFormContext } from 'react-hook-form';
 import React, { useMemo, useState, useEffect } from 'react';
 
 // Material UI imports
@@ -58,41 +59,10 @@ import { FormDropdown } from 'src/components/generate-article/FormDropdown';
 
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
-// Section content types
-interface SectionLink {
-  text: string;
-  url: string;
-}
-
-interface SectionImage {
-  url: string;
-  alt: string;
-  caption?: string;
-}
-
-interface SectionFaqItem {
-  question: string;
-  answer: string;
-}
-
-interface SectionTableData {
-  headers: string[];
-  rows: string[][];
-}
-
-interface ArticleSection {
-  id: string;
-  title: string;
-  content?: string;
-  type?: 'introduction' | 'regular' | 'conclusion' | 'faq';
-  contentType?: 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery' | string;
-  bulletPoints?: string[];
-  internalLinks?: SectionLink[];
-  externalLinks?: SectionLink[];
-  tableData?: SectionTableData;
-  faqItems?: SectionFaqItem[];
-  images?: SectionImage[];
-}
+import type {
+  ArticleSection,
+  GenerateArticleFormData
+} from '../../schemas';
 
 
 
@@ -969,37 +939,32 @@ const StoreSelectionModal = ({ open, onClose, onSelect, stores }: StoreSelection
   );
 };
 
-
-
-interface Step4Props {
-  state: {
-    articleInfo: {
-      title: string;
-      metaTitle: string;
-      metaDescription: string;
-      urlSlug: string;
-      primaryKeyword: string;
-      secondaryKeywords: string[];
-      language: string;
-      targetCountry: string;
-      contentDescription: string;
-      createdAt: string;
-    };
-    articleSettings: {
-      articleType: string;
-      articleSize: string;
-      toneOfVoice: string;
-    };
-    sections: ArticleSection[];
-  };
-}
-
-export function Step4Publish({ state }: Step4Props) {
+export function Step4Publish() {
   // API hooks
   const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
   const [publishWordPress] = usePublishWordPressMutation();
   const [publishWix] = usePublishWixMutation();
   const [publishShopify] = usePublishShopifyMutation();
+
+  // Get form data from context
+  const { getValues } = useFormContext<GenerateArticleFormData>();
+  const formData = getValues();
+
+  // Extract article info from form data
+  const articleInfo = useMemo(() => ({
+    title: formData.step1?.title || '',
+    urlSlug: formData.step1?.urlSlug || '',
+    metaTitle: formData.step1?.metaTitle || '',
+    metaDescription: formData.step1?.metaDescription || '',
+    primaryKeyword: formData.step1?.primaryKeyword || '',
+    secondaryKeywords: formData.step1?.secondaryKeywords || [],
+    language: formData.step1?.language || 'en-us',
+    targetCountry: formData.step1?.targetCountry || 'us',
+    contentDescription: formData.step1?.contentDescription || '',
+    createdAt: new Date().toISOString(),
+  }), [formData.step1]);
+
+  const {sections} = formData.step3
 
   // State for modals
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -1013,7 +978,6 @@ export function Step4Publish({ state }: Step4Props) {
   // Get stores from API using useMemo to avoid re-renders
   const stores = useMemo(() => storesData?.stores || [], [storesData]);
 
-  // Set default store if available
   useEffect(() => {
     if (stores.length > 0 && !selectedStore) {
       setSelectedStore(stores[0].id);
@@ -1084,7 +1048,6 @@ export function Step4Publish({ state }: Step4Props) {
         throw new Error(publishResult.message || 'Unknown error');
       }
     } catch (error) {
-      console.error('Publish error:', error);
       toast.error('Failed to publish content. Please try again.');
     } finally {
       setIsPublishing(false);
@@ -1113,7 +1076,7 @@ export function Step4Publish({ state }: Step4Props) {
                 color: 'text.primary',
                 fontSize: { xs: '1.5rem', md: '2rem' }
               }}>
-                {state.articleInfo.title || 'Your Article Title'}
+                {articleInfo.title || 'Your Article Title'}
               </Typography>
 
               {/* Article Meta */}
@@ -1127,7 +1090,7 @@ export function Step4Publish({ state }: Step4Props) {
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
                   <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {new Date(state.articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
@@ -1139,7 +1102,7 @@ export function Step4Publish({ state }: Step4Props) {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
                   <Typography variant="body2">
-                    {state.articleInfo.language.toUpperCase()} | {state.articleInfo.targetCountry.toUpperCase()}
+                    {articleInfo.language.toUpperCase()} | {articleInfo.targetCountry.toUpperCase()}
                   </Typography>
                 </Box>
               </Box>
@@ -1165,27 +1128,27 @@ export function Step4Publish({ state }: Step4Props) {
               />
 
               {/* Article Content - Display generated sections */}
-              {state.sections && state.sections.length > 0 ? (
+              {sections && sections.length > 0 ? (
                 <>
                   {/* Display first section as introduction */}
                   <Box sx={{ mb: 4 }}>
                     <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                      {state.sections[0]?.title || 'Introduction'}
+                      {sections[0]?.title || 'Introduction'}
                     </Typography>
 
                     {/* Content Type Badge */}
-                    {(state.sections[0]?.type === 'faq' || state.sections[0]?.contentType) && (
+                    {(sections[0]?.type === 'faq' || sections[0]?.contentType) && (
                       <Chip
                         label={
-                          state.sections[0]?.type === 'faq'
+                          sections[0]?.type === 'faq'
                             ? 'FAQ Section'
-                            : state.sections[0]?.contentType === 'bullet-list'
+                            : sections[0]?.contentType === 'bullet-list'
                               ? 'List Section'
-                              : state.sections[0]?.contentType === 'table'
+                              : sections[0]?.contentType === 'table'
                                 ? 'Table Section'
-                                : state.sections[0]?.contentType === 'image-gallery'
+                                : sections[0]?.contentType === 'image-gallery'
                                   ? 'Image Gallery'
-                                  : state.sections[0]?.contentType || 'Paragraph'
+                                  : sections[0]?.contentType || 'Paragraph'
                         }
                         size="small"
                         sx={{
@@ -1199,28 +1162,28 @@ export function Step4Publish({ state }: Step4Props) {
                     )}
 
                     {/* Display content based on type */}
-                    {state.sections[0]?.type === 'faq' ? (
+                    {sections[0]?.type === 'faq' ? (
                       <Box sx={{ mb: 2 }}>
-                        {state.sections[0]?.faqItems && state.sections[0]?.faqItems.length > 0 ? (
+                        {sections[0]?.faqItems && sections[0]?.faqItems.length > 0 ? (
                           <Accordion sx={{ mb: 1 }}>
                             <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
-                              <Typography variant="subtitle2">{state.sections[0].faqItems[0].question}</Typography>
+                              <Typography variant="subtitle2">{sections[0].faqItems[0].question}</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                              <Typography variant="body2">{state.sections[0].faqItems[0].answer}</Typography>
+                              <Typography variant="body2">{sections[0].faqItems[0].answer}</Typography>
                             </AccordionDetails>
                           </Accordion>
                         ) : (
                           <Typography variant="body1" paragraph>
-                            {state.sections[0]?.content || 'No content available for this section.'}
+                            {sections[0]?.content || 'No content available for this section.'}
                           </Typography>
                         )}
                       </Box>
-                    ) : state.sections[0]?.contentType === 'bullet-list' || (state.sections[0]?.bulletPoints && state.sections[0]?.bulletPoints.length > 0) ? (
+                    ) : sections[0]?.contentType === 'bullet-list' || (sections[0]?.bulletPoints && sections[0]?.bulletPoints.length > 0) ? (
                       <Box sx={{ mb: 2 }}>
                         <List disablePadding>
-                          {state.sections[0]?.bulletPoints && state.sections[0]?.bulletPoints.length > 0 ? (
-                            state.sections[0].bulletPoints.slice(0, 2).map((point, i) => (
+                          {sections[0]?.bulletPoints && sections[0]?.bulletPoints.length > 0 ? (
+                            sections[0].bulletPoints.slice(0, 2).map((point, i) => (
                               <ListItem key={i} sx={{ py: 0.5 }}>
                                 <ListItemIcon sx={{ minWidth: 36 }}>
                                   <Iconify icon="mdi:circle-small" />
@@ -1230,19 +1193,19 @@ export function Step4Publish({ state }: Step4Props) {
                             ))
                           ) : (
                             <Typography variant="body1" paragraph>
-                              {state.sections[0]?.content || 'No content available for this section.'}
+                              {sections[0]?.content || 'No content available for this section.'}
                             </Typography>
                           )}
                         </List>
                       </Box>
-                    ) : state.sections[0]?.contentType === 'table' ? (
+                    ) : sections[0]?.contentType === 'table' ? (
                       <Box sx={{ mb: 2 }}>
-                        {state.sections[0]?.tableData ? (
+                        {sections[0]?.tableData ? (
                           <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
                             <Table size="small">
                               <TableHead>
                                 <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                                  {state.sections[0].tableData.headers.map((header, i) => (
+                                  {sections[0].tableData.headers.map((header, i) => (
                                     <TableCell key={i} sx={{ fontWeight: 'bold' }}>
                                       {header}
                                     </TableCell>
@@ -1250,7 +1213,7 @@ export function Step4Publish({ state }: Step4Props) {
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {state.sections[0].tableData.rows.slice(0, 2).map((row, rowIndex) => (
+                                {sections[0].tableData.rows.slice(0, 2).map((row, rowIndex) => (
                                   <TableRow key={rowIndex}>
                                     {row.map((cell, cellIndex) => (
                                       <TableCell key={cellIndex}>{cell}</TableCell>
@@ -1262,37 +1225,37 @@ export function Step4Publish({ state }: Step4Props) {
                           </TableContainer>
                         ) : (
                           <Typography variant="body1" paragraph>
-                            {state.sections[0]?.content || 'No content available for this section.'}
+                            {sections[0]?.content || 'No content available for this section.'}
                           </Typography>
                         )}
                       </Box>
                     ) : (
                       <Typography variant="body1" paragraph>
-                        {state.sections[0]?.content || 'No content available for this section.'}
+                        {sections[0]?.content || 'No content available for this section.'}
                       </Typography>
                     )}
                   </Box>
 
                   {/* Display second section if available */}
-                  {state.sections.length > 1 && (
+                  {sections.length > 1 && (
                     <Box sx={{ mb: 4 }}>
                       <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                        {state.sections[1]?.title || 'Section 2'}
+                        {sections[1]?.title || 'Section 2'}
                       </Typography>
 
                       {/* Content Type Badge */}
-                      {(state.sections[1]?.type === 'faq' || state.sections[1]?.contentType) && (
+                      {(sections[1]?.type === 'faq' || sections[1]?.contentType) && (
                         <Chip
                           label={
-                            state.sections[1]?.type === 'faq'
+                            sections[1]?.type === 'faq'
                               ? 'FAQ Section'
-                              : state.sections[1]?.contentType === 'bullet-list'
+                              : sections[1]?.contentType === 'bullet-list'
                                 ? 'List Section'
-                                : state.sections[1]?.contentType === 'table'
+                                : sections[1]?.contentType === 'table'
                                   ? 'Table Section'
-                                  : state.sections[1]?.contentType === 'image-gallery'
+                                  : sections[1]?.contentType === 'image-gallery'
                                     ? 'Image Gallery'
-                                    : state.sections[1]?.contentType || 'Paragraph'
+                                    : sections[1]?.contentType || 'Paragraph'
                           }
                           size="small"
                           sx={{
@@ -1306,28 +1269,28 @@ export function Step4Publish({ state }: Step4Props) {
                       )}
 
                       {/* Display content based on type */}
-                      {state.sections[1]?.type === 'faq' ? (
+                      {sections[1]?.type === 'faq' ? (
                         <Box sx={{ mb: 2 }}>
-                          {state.sections[1]?.faqItems && state.sections[1]?.faqItems.length > 0 ? (
+                          {sections[1]?.faqItems && sections[1]?.faqItems.length > 0 ? (
                             <Accordion sx={{ mb: 1 }}>
                               <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
-                                <Typography variant="subtitle2">{state.sections[1].faqItems[0].question}</Typography>
+                                <Typography variant="subtitle2">{sections[1].faqItems[0].question}</Typography>
                               </AccordionSummary>
                               <AccordionDetails>
-                                <Typography variant="body2">{state.sections[1].faqItems[0].answer}</Typography>
+                                <Typography variant="body2">{sections[1].faqItems[0].answer}</Typography>
                               </AccordionDetails>
                             </Accordion>
                           ) : (
                             <Typography variant="body1" paragraph>
-                              {state.sections[1]?.content || 'No content available for this section.'}
+                              {sections[1]?.content || 'No content available for this section.'}
                             </Typography>
                           )}
                         </Box>
-                      ) : state.sections[1]?.contentType === 'bullet-list' || (state.sections[1]?.bulletPoints && state.sections[1]?.bulletPoints.length > 0) ? (
+                      ) : sections[1]?.contentType === 'bullet-list' || (sections[1]?.bulletPoints && sections[1]?.bulletPoints.length > 0) ? (
                         <Box sx={{ mb: 2 }}>
                           <List disablePadding>
-                            {state.sections[1]?.bulletPoints && state.sections[1]?.bulletPoints.length > 0 ? (
-                              state.sections[1].bulletPoints.slice(0, 2).map((point, i) => (
+                            {sections[1]?.bulletPoints && sections[1]?.bulletPoints.length > 0 ? (
+                              sections[1].bulletPoints.slice(0, 2).map((point, i) => (
                                 <ListItem key={i} sx={{ py: 0.5 }}>
                                   <ListItemIcon sx={{ minWidth: 36 }}>
                                     <Iconify icon="mdi:circle-small" />
@@ -1337,19 +1300,19 @@ export function Step4Publish({ state }: Step4Props) {
                               ))
                             ) : (
                               <Typography variant="body1" paragraph>
-                                {state.sections[1]?.content || 'No content available for this section.'}
+                                {sections[1]?.content || 'No content available for this section.'}
                               </Typography>
                             )}
                           </List>
                         </Box>
-                      ) : state.sections[1]?.contentType === 'table' ? (
+                      ) : sections[1]?.contentType === 'table' ? (
                         <Box sx={{ mb: 2 }}>
-                          {state.sections[1]?.tableData ? (
+                          {sections[1]?.tableData ? (
                             <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
                               <Table size="small">
                                 <TableHead>
                                   <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                                    {state.sections[1].tableData.headers.map((header, i) => (
+                                    {sections[1].tableData.headers.map((header, i) => (
                                       <TableCell key={i} sx={{ fontWeight: 'bold' }}>
                                         {header}
                                       </TableCell>
@@ -1357,7 +1320,7 @@ export function Step4Publish({ state }: Step4Props) {
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {state.sections[1].tableData.rows.slice(0, 2).map((row, rowIndex) => (
+                                  {sections[1].tableData.rows.slice(0, 2).map((row, rowIndex) => (
                                     <TableRow key={rowIndex}>
                                       {row.map((cell, cellIndex) => (
                                         <TableCell key={cellIndex}>{cell}</TableCell>
@@ -1369,20 +1332,20 @@ export function Step4Publish({ state }: Step4Props) {
                             </TableContainer>
                           ) : (
                             <Typography variant="body1" paragraph>
-                              {state.sections[1]?.content || 'No content available for this section.'}
+                              {sections[1]?.content || 'No content available for this section.'}
                             </Typography>
                           )}
                         </Box>
                       ) : (
                         <Typography variant="body1" paragraph>
-                          {state.sections[1]?.content || 'No content available for this section.'}
+                          {sections[1]?.content || 'No content available for this section.'}
                         </Typography>
                       )}
                     </Box>
                   )}
 
                   {/* Show a message for remaining sections */}
-                  {state.sections.length > 2 && (
+                  {sections.length > 2 && (
                     <Box sx={{
                       textAlign: 'center',
                       color: 'text.secondary',
@@ -1392,10 +1355,10 @@ export function Step4Publish({ state }: Step4Props) {
                       borderRadius: 1
                     }}>
                       <Typography variant="body2">
-                        +{state.sections.length - 2} more sections in the full article
+                        +{sections.length - 2} more sections in the full article
                       </Typography>
                       <Box sx={{ mt: 1 }}>
-                        {state.sections.slice(2).map((section, index) => (
+                        {sections.slice(2).map((section, index) => (
                           <Chip
                             key={index}
                             label={section.title}
@@ -1436,22 +1399,22 @@ export function Step4Publish({ state }: Step4Props) {
                 startIcon={<Iconify icon="mdi:content-copy" />}
                 onClick={() => {
                   // Check if we have sections to copy
-                  if (state.sections && state.sections.length > 0) {
+                  if (sections && sections.length > 0) {
                     // Import the markdown converter
                     import('src/utils/markdownConverter').then(({ articleToMarkdown }) => {
                       // Convert article to markdown
                       const markdownContent = articleToMarkdown(
                         {
-                          title: state.articleInfo.title,
-                          metaTitle: state.articleInfo.metaTitle,
-                          metaDescription: state.articleInfo.metaDescription,
-                          primaryKeyword: state.articleInfo.primaryKeyword,
-                          secondaryKeywords: state.articleInfo.secondaryKeywords,
-                          language: state.articleInfo.language,
-                          targetCountry: state.articleInfo.targetCountry,
-                          createdAt: state.articleInfo.createdAt
+                          title: articleInfo.title,
+                          metaTitle: articleInfo.metaTitle,
+                          metaDescription: articleInfo.metaDescription,
+                          primaryKeyword: articleInfo.primaryKeyword,
+                          secondaryKeywords: articleInfo.secondaryKeywords,
+                          language: articleInfo.language,
+                          targetCountry: articleInfo.targetCountry,
+                          createdAt: articleInfo.createdAt
                         },
-                        state.sections
+                        sections
                       );
 
                       // Copy markdown content to clipboard
@@ -1460,7 +1423,7 @@ export function Step4Publish({ state }: Step4Props) {
                     }).catch(error => {
                       console.error("Error converting to markdown:", error);
                       // Fallback to simple text format if markdown conversion fails
-                      const content = `${state.articleInfo.title}\n\n${state.sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
+                      const content = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
                       navigator.clipboard.writeText(content);
                       toast.success("Article content copied to clipboard");
                     });
@@ -1546,14 +1509,14 @@ export function Step4Publish({ state }: Step4Props) {
                   label="Article Title"
                   disabled
                   fullWidth
-                  value={state.articleInfo.title || 'No title available'}
+                  value={articleInfo.title || 'No title available'}
                 />
               </Grid>
 
               <Grid item xs={12}>
                 <FormInput
                     label="Meta Title"
-                    value={state.articleInfo.metaTitle || 'No meta title available'}
+                    value={articleInfo.metaTitle || 'No meta title available'}
                     disabled
                     fullWidth
                 />
@@ -1562,7 +1525,7 @@ export function Step4Publish({ state }: Step4Props) {
               <Grid item xs={12}>
                 <FormInput
                   label="Meta Description"
-                  value={state.articleInfo.metaDescription || 'No meta description available'}
+                  value={articleInfo.metaDescription || 'No meta description available'}
                   disabled
                   fullWidth
                 />
@@ -1571,7 +1534,7 @@ export function Step4Publish({ state }: Step4Props) {
               <Grid item xs={12}>
                 <FormInput
                   label="URL Slug"
-                  value={state.articleInfo.urlSlug || 'No URL slug available'}
+                  value={articleInfo.urlSlug || 'No URL slug available'}
                   disabled
                   fullWidth
                 />
@@ -1582,7 +1545,7 @@ export function Step4Publish({ state }: Step4Props) {
                   Primary Keyword
                 </Typography>
                 <Chip
-                  label={state.articleInfo.primaryKeyword || 'No primary keyword'}
+                  label={articleInfo.primaryKeyword || 'No primary keyword'}
                   sx={{
                     bgcolor: 'success.lighter',
                     color: 'success.dark',
@@ -1598,8 +1561,8 @@ export function Step4Publish({ state }: Step4Props) {
                   Secondary Keywords
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {state.articleInfo.secondaryKeywords && state.articleInfo.secondaryKeywords.length > 0 ? (
-                    state.articleInfo.secondaryKeywords.map((keyword, index) => (
+                  {articleInfo.secondaryKeywords && articleInfo.secondaryKeywords.length > 0 ? (
+                    articleInfo.secondaryKeywords.map((keyword, index) => (
                       <Chip
                         key={index}
                         label={keyword}
@@ -1624,7 +1587,7 @@ export function Step4Publish({ state }: Step4Props) {
                   Content Description
                 </Typography>
                 <Typography variant="body2" sx={{ p: 1, bgcolor: 'background.neutral', borderRadius: 1 }}>
-                  {state.articleInfo.contentDescription || 'No content description available'}
+                  {articleInfo.contentDescription || 'No content description available'}
                 </Typography>
               </Grid>
             </Grid>
@@ -1708,14 +1671,14 @@ export function Step4Publish({ state }: Step4Props) {
       <CopyModal
         open={copyModalOpen}
         onClose={handleCloseCopyModal}
-        articleInfo={state.articleInfo}
-        sections={state.sections}
+        articleInfo={articleInfo}
+        sections={sections}
       />
       <ExportModal
         open={exportModalOpen}
         onClose={handleCloseExportModal}
-        articleInfo={state.articleInfo}
-        sections={state.sections}
+        articleInfo={articleInfo}
+        sections={sections}
       />
       <StoreSelectionModal
         open={storeSelectionOpen}
@@ -1726,8 +1689,8 @@ export function Step4Publish({ state }: Step4Props) {
       <FullArticleModal
         open={fullArticleModalOpen}
         onClose={handleCloseFullArticleModal}
-        articleInfo={state.articleInfo}
-        sections={state.sections}
+        articleInfo={articleInfo}
+        sections={sections}
       />
     </Box>
   );

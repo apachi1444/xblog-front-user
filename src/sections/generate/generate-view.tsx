@@ -1,13 +1,12 @@
-// Types
-
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { FormProvider } from 'react-hook-form';
 import { useState, useEffect, useCallback } from 'react';
-import { FormProvider, useFormContext } from 'react-hook-form';
 
 // Layout components
 import { Box, Button, Typography } from '@mui/material';
+
+import { useRouter } from 'src/routes/hooks';
 
 // Custom hooks
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
@@ -31,17 +30,18 @@ import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
+import type { GenerateArticleFormData } from './schemas';
+
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const navigate = useRouter();
 
-  const {
-    handleSubmit,
-  } = useFormContext<FormData>()
+  // Initialize the main form
+  const { methods } = useGenerateArticleForm();
 
-  const onSubmit = useCallback(async (data: FormData) => {
+  const onSubmit = useCallback(async (data: GenerateArticleFormData) => {
     console.log("Form submitted:", data)
     // Return a resolved promise to ensure proper async handling
     return Promise.resolve();
@@ -60,9 +60,6 @@ export function GeneratingView() {
     regenerationsAvailable
   } = useRegenerationCheck();
 
-  // Initialize the main form
-  const { methods } = useGenerateArticleForm();
-
   const steps = [
     { id: 1, label: "Content Setup" },
     { id: 2, label: "Article Settings" },
@@ -70,81 +67,110 @@ export function GeneratingView() {
     { id: 4, label: "Publish" }
   ];
 
-  // Navigation handlers
-  const handleNext = useCallback(async () => {
-    let isStepValid = false;
+  const handleNextStep = async () => {
+    // Get the fields for the current step
+    const currentStepFields = getFieldsForStep(activeStep)
 
-    switch (activeStep) {
-      case 0:
-        // Step 1: Content Setup validation
-        isStepValid = await step1Form.trigger([
-          'contentDescription',
-          'primaryKeyword',
-          'secondaryKeywords',
-          'language',
-          'targetCountry'
-        ]);
+    // Trigger validation for the current step's fields
+    const isStepValid = await methods.trigger(currentStepFields as any)
 
-        if (isStepValid) {
-          if (!generationState.title.isGenerated) {
-            toast.error('Please generate a title before proceeding');
-            isStepValid = false;
-          } else if (!generationState.meta.isGenerated) {
-            toast.error('Please generate meta information before proceeding');
-            isStepValid = false;
-          }
-        }
-        break;
-
-      case 1:
-        isStepValid = await step2Form.trigger();
-
-        // Check if table of contents has been generated
-        if (isStepValid && !hasGeneratedTOC) {
-          toast.error('Please generate a table of contents before proceeding');
-          isStepValid = false;
-        }
-        break;
-
-      case 2:
-        isStepValid = true;
-        break;
-
-      case 3:
-        isStepValid = true;
-        break;
-
-      default:
-        isStepValid = false;
-    }
+    // Additional validation for specific steps
+    let shouldProceed = isStepValid;
 
     if (isStepValid) {
-      if (activeStep === steps.length - 1) {
-        try {
-          // Call handleSubmit with the onSubmit callback
-          // This will execute the form submission logic
-          handleSubmit(async (data) => {
-            setIsPublishing(true);
-            try {
-              // Execute the onSubmit function with the form data
-              await onSubmit(data);
-              // Wait for the publishing animation
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              // Navigate to the blog page after successful submission
-              navigate('/blog');
-            } finally {
-              setIsPublishing(false);
-            }
-          })();
-        } catch (error) {
-          toast.error('Failed to generate article');
-          setIsPublishing(false);
+      const values = methods.getValues();
+
+      if (activeStep === 0) {
+        // Check for title and meta information in step 1
+        if (!values.step1?.title) {
+          toast.error("Please generate a title before proceeding");
+          shouldProceed = false;
+        } else if (!values.step1?.metaTitle || !values.step1?.metaDescription) {
+          toast.error("Please generate meta information before proceeding");
+          shouldProceed = false;
         }
-      } else {
-        setActiveStep((prev) => prev + 1);
+      } else if (activeStep === 1) {
+        // Check if table of contents has been generated in step 2
+        if (!values.step3?.sections?.length) {
+          toast.error("Please generate a table of contents before proceeding");
+          shouldProceed = false;
+        }
       }
+
+      // Handle final step submission
+      if (shouldProceed) {
+        if (activeStep === steps.length - 1) {
+          // Final step - handle submission
+          try {
+            setIsPublishing(true);
+
+            // Submit the form
+            await methods.handleSubmit(async (data) => {
+              try {
+                // Execute the submission logic
+                await onSubmit(data);
+                // Wait for the publishing animation
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Navigate to the blog page after successful submission
+                // navigate('/blog');
+              } catch (error) {
+                console.error('Submission error:', error);
+                toast.error('Failed to publish article');
+              }
+            })();
+          } catch (error) {
+            console.error('Form submission error:', error);
+            toast.error('Failed to process the form');
+          } finally {
+            setIsPublishing(false);
+          }
+        } else {
+          // Not the final step, just move to the next step
+          setActiveStep((prev) => prev + 1);
+        }
+      }
+    } else {
+      toast.error("Please fill out all required fields before proceeding.")
     }
-  }, [activeStep, handleSubmit, navigate, onSubmit, setIsPublishing, steps.length]);
+  }
+
+  // Helper function to get the field names for a specific step
+  const getFieldsForStep = (step: number): string[] => {
+    switch (step) {
+      case 0:
+        return [
+          'step1.contentDescription',
+          'step1.primaryKeyword',
+          'step1.secondaryKeywords',
+          'step1.language',
+          'step1.targetCountry'
+        ];
+      case 1:
+        return [
+          'step2.articleType',
+          'step2.articleSize',
+          'step2.toneOfVoice',
+          'step2.pointOfView',
+          'step2.aiContentCleaning',
+          'step2.imageSettingsQuality',
+          'step2.imageSettingsPlacement',
+          'step2.imageSettingsStyle',
+          'step2.imageSettingsCount',
+          'step2.internalLinking',
+          'step2.externalLinking',
+          'step2.includeVideos',
+          'step2.numberOfVideos',
+          'step3.sections'
+        ];
+      case 2:
+        return [];
+      case 3:
+        return [];
+      default:
+        return [];
+
+    }
+  }
 
   // Update the handleBack function to set the navigating back flag
   const handleBackWithFlag = useCallback(() => {
@@ -154,7 +180,7 @@ export function GeneratingView() {
   const [isGeneratingMeta, setIsGeneratingMeta] = useState(false);
 
   const handleGenerateMeta = async () => {
-
+    setIsGeneratingMeta(true);
   }
 
   const handleGenerateTitle = async () => {
@@ -210,13 +236,13 @@ export function GeneratingView() {
     // Regular steps
     switch (activeStep) {
       case 0:
-        return <Step1ContentSetup 
-        onGenerateTitle={handleGenerateTitle}
-        onGenerateSecondaryKeywords={handleGenerateSecondaryKeywords}
-        onOptimizeContentDescription={handleOptimizeContentDescription}      
-        onGenerateMeta={handleGenerateMeta}
-        isGeneratingMeta={isGeneratingMeta}
-        />;
+        return <Step1ContentSetup
+                onGenerateTitle={handleGenerateTitle}
+                onGenerateSecondaryKeywords={handleGenerateSecondaryKeywords}
+                onOptimizeContentDescription={handleOptimizeContentDescription}
+                onGenerateMeta={handleGenerateMeta}
+                isGeneratingMeta={isGeneratingMeta}
+              />;
       case 1:
         return <Step2ArticleSettings
                   isGenerated={isGenerated}
@@ -225,9 +251,9 @@ export function GeneratingView() {
                   onRegenerateRequest={handleRegenerateRequest}
                 />;
       case 2:
-        return <Step3ContentStructuring state={step3State} />;
+        return <Step3ContentStructuring />;
       case 3:
-        return <Step4Publish state={step4State} />;
+        return <Step4Publish />;
       default:
         return null;
     }
@@ -284,7 +310,7 @@ export function GeneratingView() {
         <StepNavigation
           activeStep={activeStep}
           totalSteps={steps.length}
-          onNext={handleNext}
+          onNext={handleNextStep}
           onBack={handleBackWithFlag}
         />
 

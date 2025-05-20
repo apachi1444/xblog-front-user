@@ -1,3 +1,5 @@
+import type { ArticleSection } from "src/sections/generate/schemas";
+
 import React, { useState } from "react";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -5,21 +7,19 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { Box, Stack, Divider, Collapse, Typography, IconButton } from "@mui/material";
-
-import type { SectionItem } from "./DraggableSectionList";
-
-type Status = "Not Started" | "In Progress" | "Completed";
-
-interface StatusStyle {
-  bgcolor: string;
-  color: string;
-  borderColor: string;
-}
+import {
+  Box,
+  Chip,
+  Stack,
+  Divider,
+  Collapse,
+  IconButton,
+  Typography
+} from "@mui/material";
 
 interface SectionBoxProps {
-  section: SectionItem;
-  onEditSection?: (section: SectionItem) => void;
+  section: ArticleSection;
+  onEditSection?: (section: ArticleSection) => void;
   onDeleteSection?: (sectionId: string) => void;
 }
 
@@ -29,24 +29,6 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
   onDeleteSection
 }) => {
   const [expanded, setExpanded] = useState(false);
-
-  const statusStyles: Record<Status, StatusStyle> = {
-    "Not Started": {
-      bgcolor: '#FFEBEE',
-      color: '#D32F2F',
-      borderColor: '#FFCDD2',
-    },
-    "In Progress": {
-      bgcolor: '#FFF8E1',
-      color: '#FFA000',
-      borderColor: '#FFECB3',
-    },
-    "Completed": {
-      bgcolor: '#E8F5E9',
-      color: '#4CAF50',
-      borderColor: '#C8E6C9',
-    },
-  };
 
 
   const handleToggleExpand = (e: React.MouseEvent) => {
@@ -156,86 +138,148 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
             p: 2,
           }}
         >
-          {section.description && (
+          {/* Content Type Badge */}
+          {section.contentType && (
             <>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: 'text.secondary',
-                  mb: 0.5,
-                }}
-              >
-                Description:
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "12px",
-                  color: 'text.secondary',
-                  mb: 1.5,
-                }}
-              >
-                {section.description}
-              </Typography>
+              <Box sx={{ display: 'flex', mb: 1.5 }}>
+                <Chip
+                  label={
+                    section.type === 'faq'
+                      ? 'FAQ Section'
+                      : section.contentType === 'bullet-list'
+                        ? 'List Section'
+                        : section.contentType === 'table'
+                          ? 'Table Section'
+                          : section.contentType === 'image-gallery'
+                            ? 'Image Gallery'
+                            : section.contentType || 'Paragraph'
+                  }
+                  size="small"
+                  sx={{
+                    bgcolor: 'background.neutral',
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    fontSize: '0.75rem'
+                  }}
+                />
+              </Box>
               <Divider sx={{ my: 1.5 }} />
             </>
           )}
 
-          {section.content ? (
-            <>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: 'text.secondary',
-                  mb: 0.5,
-                }}
-              >
-                Content Preview:
-              </Typography>
-              <Box
-                sx={{
-                  mb: 1,
-                  p: 1.5,
-                  borderRadius: 1,
-                  bgcolor: 'background.neutral',
-                  maxHeight: '300px',
-                  overflow: 'auto'
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "13px",
-                    color: 'text.primary',
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {section.content || 'No content available for this section.'}
-                </Typography>
-              </Box>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontSize: "11px",
+              fontWeight: 600,
+              color: 'text.secondary',
+              mb: 0.5,
+            }}
+          >
+            Content Preview:
+          </Typography>
 
-              <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'primary.main',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onEditSection) onEditSection(section);
-                  }}
-                >
-                  Edit full content
+          {/* Display content based on type */}
+          {section.contentType === 'bullet-list' && section.bulletPoints && section.bulletPoints.length > 0 ? (
+            <Box
+              sx={{
+                mb: 1,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: 'background.neutral',
+                maxHeight: '300px',
+                overflow: 'auto'
+              }}
+            >
+              <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                {section.bulletPoints.slice(0, 3).map((point, index) => (
+                  <li key={index} style={{ marginBottom: '8px' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "13px",
+                        color: 'text.primary',
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {point}
+                    </Typography>
+                  </li>
+                ))}
+                {section.bulletPoints.length > 3 && (
+                  <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
+                    + {section.bulletPoints.length - 3} more items
+                  </Typography>
+                )}
+              </ul>
+            </Box>
+          ) : section.contentType === 'faq' && section.faqItems && section.faqItems.length > 0 ? (
+            <Box
+              sx={{
+                mb: 1,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: 'background.neutral',
+                maxHeight: '300px',
+                overflow: 'auto'
+              }}
+            >
+              {section.faqItems.slice(0, 2).map((faq, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: 'text.primary',
+                      mb: 0.5,
+                    }}
+                  >
+                    Q: {faq.question}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: "13px",
+                      color: 'text.secondary',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    A: {faq.answer.length > 100 ? `${faq.answer.substring(0, 100)}...` : faq.answer}
+                  </Typography>
+                </Box>
+              ))}
+              {section.faqItems.length > 2 && (
+                <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
+                  + {section.faqItems.length - 2} more FAQ items
                 </Typography>
-              </Box>
-            </>
+              )}
+            </Box>
+          ) : section.content ? (
+            <Box
+              sx={{
+                mb: 1,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor: 'background.neutral',
+                maxHeight: '300px',
+                overflow: 'auto'
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "13px",
+                  color: 'text.primary',
+                  whiteSpace: 'pre-wrap',
+                  lineHeight: 1.6,
+                }}
+              >
+                {section.content.length > 300
+                  ? `${section.content.substring(0, 300)}...`
+                  : section.content || 'No content available for this section.'}
+              </Typography>
+            </Box>
           ) : (
             <Typography
               variant="body2"
@@ -248,6 +292,23 @@ export const SectionBox: React.FC<SectionBoxProps> = ({
               No content has been added to this section yet. Click the edit button to add content.
             </Typography>
           )}
+
+          <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'primary.main',
+                cursor: 'pointer',
+                fontWeight: 500,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onEditSection) onEditSection(section);
+              }}
+            >
+              Edit full content
+            </Typography>
+          </Box>
         </Box>
       </Collapse>
     </Box>
