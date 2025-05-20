@@ -270,7 +270,8 @@
       "save": "Enregistrer",
       "cancel": "Annuler",
       "select": "Sélectionner",
-      "selected": "Sélectionné"
+      "selected": "Sélectionné",
+      "waiting": "en attente de saisie"
     },
     "calendar": {
       "schedule": "Planifier",
@@ -284,6 +285,144 @@
       "unscheduledSuccessfully": "Article déplanifié avec succès",
       "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",
       "unschedulingFailed": "Échec de la déplanification de l'article. Veuillez réessayer."
+    },
+    "seo": {
+      "sections": {
+        "core_essentials": "Fondamentaux SEO",
+        "boosters": "Boosters SEO",
+        "title_optimization": "Optimisation du Titre",
+        "content_clarity": "Clarté du Contenu"
+      },
+      "status": {
+        "pending": "Cette vérification attend que vous remplissiez les champs requis",
+        "error": "Cet élément nécessite une attention pour améliorer votre score SEO",
+        "warning": "Cet élément pourrait être amélioré pour un meilleur SEO",
+        "success": "Cet élément est optimisé pour le SEO"
+      },
+      "performance_score": "Score de Performance SEO",
+      "points": "points",
+      "tooltip": {
+        "score": "{{score}} sur {{total}} points possibles",
+        "progress": "{{progress}}% complété"
+      },
+      "rating": {
+        "needs_improvement": "À Améliorer",
+        "good": "Bon",
+        "excellent": "Excellent"
+      },
+      "toast": {
+        "already_optimized": "Cet élément est déjà optimisé !",
+        "optimization_not_available": "L'optimisation n'est pas encore disponible pour cet élément.",
+        "not_ready": "Cet élément n'est pas encore prêt pour l'optimisation.",
+        "optimizing": "Optimisation de {{field}}...",
+        "optimized_success": "{{field}} optimisé avec succès !",
+        "optimization_failed": "Échec de l'optimisation de {{field}}. Veuillez réessayer."
+      },
+      "criteria": {
+        "core": {
+          "keyword_in_title": {
+            "description": "Mot-clé principal utilisé dans le titre SEO",
+            "success": "Le mot-clé principal est utilisé dans le titre SEO.",
+            "error": "Le mot-clé principal n'est pas présent dans le titre SEO."
+          },
+          "keyword_in_meta": {
+            "description": "Mot-clé principal utilisé dans la méta description",
+            "success": "Le mot-clé principal est présent dans la méta description.",
+            "error": "Le mot-clé principal n'est pas présent dans la méta description."
+          },
+          "keyword_in_url": {
+            "description": "Mot-clé principal utilisé dans l'URL",
+            "success": "Le mot-clé principal est utilisé dans l'URL.",
+            "error": "Le mot-clé principal n'est pas utilisé dans l'URL."
+          },
+          "keyword_in_first_10": {
+            "description": "Mot-clé principal apparaît dans les 10% premiers du contenu",
+            "success": "Le mot-clé principal apparaît dans les 10% premiers du contenu.",
+            "error": "Le mot-clé principal n'apparaît pas dans les 10% premiers du contenu."
+          },
+          "keyword_in_content": {
+            "description": "Mot-clé principal trouvé dans le contenu",
+            "success": "Le mot-clé principal est présent dans tout le contenu.",
+            "error": "Le mot-clé principal n'est pas trouvé dans le contenu."
+          },
+          "content_length": {
+            "description": "Longueur globale du contenu",
+            "success": "Le contenu fait 2500 mots ou plus.",
+            "warning": "Le contenu fait entre 1000 et 2499 mots.",
+            "error": "Le contenu fait moins de 1000 mots."
+          }
+        },
+        "boosters": {
+          "keyword_in_subheadings": {
+            "description": "Mot-clé principal utilisé dans les sous-titres",
+            "success": "Le mot-clé principal apparaît dans au moins un sous-titre.",
+            "error": "Le mot-clé principal n'est pas trouvé dans les sous-titres."
+          },
+          "keyword_density": {
+            "description": "Fréquence d'apparition du mot-clé principal",
+            "success": "La densité du mot-clé principal est entre 1% et 1,5%.",
+            "warning": "La densité du mot-clé principal est légèrement faible ou légèrement élevée (entre 0,5%–0,99% ou 1,51%–2,5%).",
+            "error": "La densité du mot-clé principal est très faible (moins de 0,5%) ou trop élevée (plus de 2,5%)."
+          },
+          "url_slug_length": {
+            "description": "Le slug d'URL contient un nombre raisonnable de mots descriptifs",
+            "success": "Le slug d'URL contient 3 à 5 mots.",
+            "warning": "Le slug d'URL contient 2 ou 6 mots.",
+            "error": "Le slug d'URL contient moins de 2 mots ou plus de 6 mots."
+          },
+          "external_links": {
+            "description": "Des liens externes sont inclus",
+            "success": "Au moins un lien externe est inclus.",
+            "error": "Aucun lien externe trouvé."
+          },
+          "dofollow_links": {
+            "description": "Au moins un lien externe avec DoFollow trouvé dans votre contenu",
+            "success": "Un lien externe DoFollow est présent.",
+            "error": "Aucun lien externe DoFollow trouvé."
+          },
+          "internal_links": {
+            "description": "Des liens internes sont inclus",
+            "success": "Au moins un lien interne est inclus.",
+            "error": "Aucun lien interne trouvé."
+          }
+        },
+        "title": {
+          "keyword_at_start": {
+            "description": "Mot-clé principal au début du titre SEO",
+            "success": "Le titre SEO commence par le mot-clé principal.",
+            "error": "Le mot-clé principal n'est pas au début du titre SEO."
+          },
+          "sentiment": {
+            "description": "Le titre a un sentiment positif ou négatif",
+            "success": "Le titre SEO inclut un sentiment émotionnel.",
+            "error": "Le titre SEO manque de sentiment émotionnel."
+          },
+          "power_words": {
+            "description": "Le titre contient 2 mots puissants",
+            "success": "Le titre contient 2 mots puissants ou plus.",
+            "warning": "Le titre contient 1 mot puissant.",
+            "error": "Aucun mot puissant dans le titre."
+          }
+        },
+        "clarity": {
+          "table_of_contents": {
+            "description": "Une table des matières est incluse",
+            "success": "Une table des matières est présente.",
+            "error": "Aucune table des matières trouvée."
+          },
+          "short_paragraphs": {
+            "description": "Des paragraphes courts sont utilisés",
+            "success": "Les paragraphes sont concis (≤5 lignes).",
+            "warning": "Certains paragraphes dépassent 6-7 lignes.",
+            "error": "La plupart des paragraphes sont longs et difficiles à parcourir."
+          },
+          "media_content": {
+            "description": "Le contenu contient des images et/ou des vidéos",
+            "success": "Le contenu inclut au moins une image ou une vidéo.",
+            "error": "Aucune image ou vidéo incluse dans le contenu."
+          }
+        }
+      }
     }
   }
 }

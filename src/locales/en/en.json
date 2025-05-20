@@ -160,7 +160,8 @@
         "next": "Next",
         "previous": "Previous",
         "Optimize": "Optimize",
-        "Waiting": "Waiting"
+        "Waiting": "Waiting",
+        "waiting": "waiting for input"
       },
       "dashboard": {
         "nextScheduledArticle": "Next Scheduled Article",
@@ -302,6 +303,145 @@
         "locked_message": "Templates feature is currently in development and will be available soon. Stay tuned for updates!",
         "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
         "notify_me": "Notify Me When Available"
+      },
+      "seo": {
+        "sections": {
+          "core_essentials": "SEO Core Essentials",
+          "boosters": "SEO Boosters",
+          "title_optimization": "Title Optimization",
+          "content_clarity": "Content Clarity"
+        },
+        "status": {
+          "pending": "This check is waiting for you to fill in required fields",
+          "error": "This item needs attention to improve your SEO score",
+          "warning": "This item could be improved for better SEO",
+          "success": "This item is optimized for SEO"
+        },
+        "performance_score": "SEO Performance Score",
+        "points": "points",
+        "tooltip": {
+          "score": "{{score}} out of {{total}} possible points",
+          "progress": "{{progress}}% complete"
+        },
+        "rating": {
+          "needs_improvement": "Needs Improvement",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "toast": {
+          "already_optimized": "This item is already optimized!",
+          "optimization_not_available": "Optimization not available for this item yet.",
+          "not_ready": "This item is not ready for optimization yet.",
+          "optimizing": "Optimizing {{field}}...",
+          "optimized_success": "{{field}} optimized successfully!",
+          "optimization_failed": "Failed to optimize {{field}}. Please try again."
+        },
+        "criteria": {
+          "core": {
+            "keyword_in_title": {
+              "description": "Focus keyword used in the SEO title",
+              "success": "Focus keyword is used in the SEO title.",
+              "error": "Focus keyword is not present in the SEO title."
+            },
+            "keyword_in_meta": {
+              "description": "Focus keyword used in the meta description",
+              "success": "Focus keyword is in the meta description.",
+              "error": "Focus keyword is not in the meta description."
+            },
+            "keyword_in_url": {
+              "description": "Focus keyword used in the URL",
+              "success": "Focus keyword is used in the URL.",
+              "error": "Focus keyword is not used in the URL."
+            },
+            "keyword_in_first_10": {
+              "description": "Focus keyword appears in the first 10% of the content",
+              "success": "Focus keyword appears within the first 10% of the content.",
+              "error": "Focus keyword does not appear in the first 10% of the content."
+            },
+            "keyword_in_content": {
+              "description": "Focus keyword found in the content",
+              "success": "Focus keyword is found throughout the content.",
+              "error": "Focus keyword is not found in the content."
+            },
+            "content_length": {
+              "description": "Overall Content Length",
+              "success": "Content is 2500 words or more.",
+              "warning": "Content is between 1000 and 2499 words.",
+              "error": "Content is less than 1000 words."
+            }
+          },
+          "boosters": {
+            "keyword_in_subheadings": {
+              "description": "Focus keyword used in the subheadings",
+              "success": "Focus keyword appears in at least one subheading.",
+              "error": "Focus keyword is not found in subheadings."
+            },
+            "keyword_density": {
+              "description": "Focus keyword appearing times",
+              "success": "Focus keyword density is between 1% and 1.5%.",
+              "warning": "Focus keyword density is slightly low or slightly high (between 0.5%–0.99% or 1.51%–2.5%).",
+              "error": "Focus keyword density is very low (under 0.5%) or too high (over 2.5%)."
+            },
+            "url_slug_length": {
+              "description": "URL slug contains a reasonable number of descriptive words",
+              "success": "URL slug contains 3 to 5 words.",
+              "warning": "URL slug contains 2 or 6 words.",
+              "error": "URL slug contains less than 2 words or more than 6 words."
+            },
+            "external_links": {
+              "description": "External links are included",
+              "success": "At least one external link is included.",
+              "error": "No external links found."
+            },
+            "dofollow_links": {
+              "description": "At least one external link with DoFollow found in your content",
+              "success": "A DoFollow external link is present.",
+              "error": "No DoFollow external link found."
+            },
+            "internal_links": {
+              "description": "Internal links are included",
+              "success": "At least one internal link is included.",
+              "error": "No internal links found."
+            }
+          },
+          "title": {
+            "keyword_at_start": {
+              "description": "Focus keyword at the start of the SEO title",
+              "success": "SEO title starts with the focus keyword.",
+              "error": "Focus keyword is not at the beginning of the SEO title."
+            },
+            "sentiment": {
+              "description": "Title has a positive or a negative sentiment",
+              "success": "SEO title includes emotional sentiment.",
+              "error": "SEO title lacks any emotional sentiment."
+            },
+            "power_words": {
+              "description": "Title contains 2 power words",
+              "success": "Title contains 2 or more power words.",
+              "warning": "Title contains 1 power word.",
+              "error": "No power words in title."
+            }
+          },
+          "clarity": {
+            "table_of_contents": {
+              "description": "Table of content is included",
+              "success": "Table of content is present.",
+              "error": "No table of content found."
+            },
+            "short_paragraphs": {
+              "description": "Short paragraphs are used",
+              "success": "Paragraphs are concise (≤5 lines).",
+              "warning": "Some paragraphs exceed 6–7 lines.",
+              "error": "Most paragraphs are long and hard to scan."
+            },
+            "media_content": {
+              "description": "Content contains images and/or videos",
+              "success": "Content includes at least one image or video.",
+              "error": "No images or videos included in content."
+            }
+          }
+        }
+      }
       },
       "profile": {
         "title": "Profile",
@@ -553,6 +693,5 @@
           "complete": "Complete Setup"
         }
       }
-    }
     }
 }

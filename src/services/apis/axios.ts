@@ -3,9 +3,6 @@ import Axios from 'axios';
 // Create Axios instance without the token initially
 const customRequest = Axios.create({
   baseURL: `https://api.xlog.ai/api/v1`,
-  headers: {
-    'Content-Type': 'application/json'
-  }
 });
 
 // Create a function to update the token
@@ -22,7 +19,9 @@ export const updateAxiosToken = (token: string | null) => {
       
       // Ensure Content-Type is set for all requests
       tempConf.headers['Content-Type'] = 'application/json';
-      // tempConf.headers['ngrok-skip-browser-warning'] = 'true';
+      tempConf.headers.Connection = 'keep-alive';
+      tempConf.headers['access-control-allow-origin'] = '*';
+      tempConf.headers['access-control-allow-credentials'] = 'true';
       
       return tempConf;
     },
@@ -36,6 +35,9 @@ customRequest.interceptors.request.use(
     const updatedConfig = { ...config };
     // Ensure Content-Type is set in the default interceptor as well
     updatedConfig.headers['Content-Type'] = 'application/json';
+    updatedConfig.headers.Connection = 'keep-alive';
+    updatedConfig.headers['access-control-allow-origin'] = '*';
+    updatedConfig.headers['access-control-allow-credentials'] = 'true';
     return updatedConfig;
   },
   async (error) => error,

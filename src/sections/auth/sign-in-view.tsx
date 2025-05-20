@@ -23,12 +23,10 @@ import { useRouter } from 'src/routes/hooks';
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
 import { signInSchema } from 'src/validation/auth-schemas';
-import { useGetPlansQuery } from 'src/services/apis/plansApi';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
 import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
-import { setAvailablePlans } from 'src/services/slices/subscription/subscriptionSlice';
 import { setCredentials, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 
 import { Logo } from 'src/components/logo/logo';
@@ -102,9 +100,6 @@ export function SignInView() {
   }, [dispatch, t]);
 
 
-  // Inside the SignInView component, add this hook
-  const  { data : plansData } = useGetPlansQuery();
-
   // Update the handleAuthSuccess function to fetch plans
   const handleAuthSuccess = useCallback(async (accessToken: string) => {
     if (testMode) {
@@ -120,13 +115,6 @@ export function SignInView() {
       dispatch(setCredentials({accessToken, user: userData}));
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
 
-      try {
-        if (plansData && plansData.plans) {
-          dispatch(setAvailablePlans(plansData.plans));
-        }
-      } catch (error) {
-        toast.error('Failed to fetch plans. Using fallback plans.');
-      }
 
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
     } catch (error) {
@@ -137,7 +125,7 @@ export function SignInView() {
         console.error('Failed to fetch user data:', error);
       }
     }
-  }, [testMode, handleTestModeLogin, router, getCurrentUser, dispatch, plansData]);
+  }, [testMode, handleTestModeLogin, router, getCurrentUser, dispatch]);
 
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {

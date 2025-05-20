@@ -17,10 +17,10 @@ import {
 
 import { Iconify } from "src/components/iconify";
 
-import { useSEOScoring } from "src/sections/generate/hooks/useSEOScoring";
+import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEvaluation";
 
 import { PreviewSEOTab } from "./PreviewSEOTab";
-import { RealTimeScoringTab } from "./RealTimeScoringTab";
+import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";
 
 // Types
 interface SEODashboardProps {
@@ -73,15 +73,28 @@ export function SEODashboard({
   const theme = useTheme();
   const COLORS = getColors(theme);
 
-  const { progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds } = useSEOScoring(form);
-  const [tabValue, setTabValue] = useState(defaultTab);
+  // Use criteria evaluation hook to get score information
+  const { totalScore, evaluateAllCriteria } = useCriteriaEvaluation(form);
 
-  // Auto-switch to real-time scoring tab when criteria change
+
+  // Calculate normalized score (out of 100)
+  const normalizedScore = useMemo(() =>
+    Math.round((totalScore / 98) * 100) || 0,
+    [totalScore]
+  );
+
+  // Format the score for display - always show as X/100
+  const formattedScore = useMemo(() =>
+    `${normalizedScore}/100`,
+    [normalizedScore]
+  );
+
+  // Effect to evaluate all criteria whenever form values change
   useEffect(() => {
-    if (changedCriteriaIds.length > 0) {
-      setTabValue(1); // Switch to real-time scoring tab
-    }
-  }, [changedCriteriaIds]);
+    evaluateAllCriteria();
+  }, [evaluateAllCriteria, formValues]);
+
+  const [tabValue, setTabValue] = useState(defaultTab);
 
   // Use the isCollapsed prop if provided, otherwise use internal state
   const [internalShowContent, setInternalShowContent] = useState(true);
@@ -124,20 +137,14 @@ export function SEODashboard({
       case 1:
         return (
           <FormProvider {...form}>
-            <RealTimeScoringTab
-              progressSections={progressSections}
-              score={overallScore}
-              totalMaxScore={totalMaxScore}
-              formattedScore={formattedScore}
-              changedCriteriaIds={changedCriteriaIds}
-            />
+            <RealTimeScoringTabNew/>
           </FormProvider>
         );
 
       default:
         return null;
     }
-  }, [tabValue, formValues, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, progressSections, overallScore, totalMaxScore, formattedScore, changedCriteriaIds]);
+  }, [tabValue, formValues, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form]);
 
   return (
     <Box sx={{
@@ -215,7 +222,7 @@ export function SEODashboard({
               }}
             >
               <Tab label="Preview SEO" />
-              <Tab label={`Real-time Scoring (${formattedScore || overallScore}/${totalMaxScore} pts)`} />
+              <Tab label={`Real-time Scoring (${formattedScore})`} />
             </Tabs>
           )}
         </Box>
