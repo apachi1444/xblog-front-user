@@ -73,7 +73,6 @@ export function SEODashboard({
     [normalizedScore]
   );
 
-  // Effect to evaluate all criteria whenever form values change
   useEffect(() => {
     evaluateAllCriteria();
   }, [evaluateAllCriteria]);

@@ -167,7 +167,7 @@ export function ItemSectionNew({
         borderRadius: 1,
         bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start', // Changed from 'center' to 'flex-start' to align with the top of content
         justifyContent: 'space-between',
         transition: 'all 0.2s ease-in-out',
         opacity: isPending ? 0.7 : 1,
@@ -190,7 +190,7 @@ export function ItemSectionNew({
                    `3px solid ${COLORS.pending}`,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
         <Box
           sx={{
             width: 32,
@@ -203,6 +203,7 @@ export function ItemSectionNew({
                     status === 'warning' ? 'transparent' :
                     status === 'error' ? 'rgba(244, 67, 54, 0.1)' :
                     'transparent',
+            mt: 0.5, // Add a small top margin to align with the text
           }}
         >
           {getCriterionIcon()}
@@ -214,17 +215,37 @@ export function ItemSectionNew({
           arrow
           disableHoverListener={tooltipText === ""}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 500,
-              color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
-              fontStyle: isPending ? "italic" : "normal",
-              cursor: tooltipText ? 'help' : 'default'
-            }}
-          >
-            {isPending ? `${text} (waiting for input)` : text}
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+                color: isPending ? theme.palette.text.secondary : theme.palette.text.primary,
+                fontStyle: isPending ? "italic" : "normal",
+                cursor: tooltipText ? 'help' : 'default'
+              }}
+            >
+              {isPending ? `${text} (waiting for input)` : text}
+            </Typography>
+
+            {/* Status message */}
+            {!isPending && tooltipText && (
+              <Typography
+                variant="caption"
+                sx={{
+                  color: status === 'success' ? COLORS.success :
+                         status === 'warning' ? COLORS.warning :
+                         status === 'error' ? COLORS.error :
+                         theme.palette.text.secondary,
+                  mt: 0.5,
+                  fontSize: '0.75rem',
+                  opacity: 0.9
+                }}
+              >
+                {tooltipText}
+              </Typography>
+            )}
+          </Box>
         </Tooltip>
 
         {isPending && (

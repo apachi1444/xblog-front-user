@@ -10,9 +10,8 @@ import {
   getAffectedCriteriaByField
 } from '../../../utils/seo-criteria-evaluators';
 
+import type { GenerateArticleFormData } from '../schemas';
 import type { CriterionStatus } from '../../../types/criteria.types';
-import type { 
-  FormData} from '../../../utils/seo-criteria-evaluators';
 
 // Type for criteria evaluation result
 export interface CriteriaResult {
@@ -32,7 +31,7 @@ export function useInputCriteriaMapping() {
   const getCriterionInputFields = useCallback((criterionId: number): string[] => getInputFieldsByCriterion(criterionId), []);
 
   // Evaluate a specific input field
-  const evaluateInput = useCallback((inputKey: string, value: any, formData: FormData): CriteriaResult[] => {
+  const evaluateInput = useCallback((inputKey: string, value: any, formData: GenerateArticleFormData): CriteriaResult[] => {
     const criteriaIds = getInputCriteriaIds(inputKey);
     
     return criteriaIds.map((criterionId: any) => {
@@ -51,7 +50,7 @@ export function useInputCriteriaMapping() {
   }, [getInputCriteriaIds]);
 
   // Get improvement suggestion for a specific criterion
-  const getImprovement = useCallback((criterionId: number, formData: FormData): any => {
+  const getImprovement = useCallback((criterionId: number, formData: GenerateArticleFormData): any => {
     const improvementFn = IMPROVEMENT_FUNCTIONS[criterionId];
     
     if (!improvementFn) {

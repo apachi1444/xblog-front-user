@@ -51,13 +51,7 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
     criteriaState,
     totalScore,
     improveCriterion,
-    evaluateAllCriteria
   } = useCriteriaEvaluation(formMethods);
-
-  // Evaluate all criteria when component mounts
-  useEffect(() => {
-    evaluateAllCriteria();
-  }, [evaluateAllCriteria]);
 
   // We're using a hardcoded value of 98 as the actual max score
   // but we'll display it as 100 for better user understanding

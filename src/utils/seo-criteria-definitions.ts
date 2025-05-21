@@ -5,7 +5,7 @@ import type { Criterion, CriteriaStructure, CriteriaStatusType } from '../types/
  */
 const SEO_CORE_ESSENTIALS: Criterion[] = [
   {
-    id: 1,
+    id: 101,
     description: "seo.criteria.core.keyword_in_title.description",
     weight: 30,
     statusType: "binary" as CriteriaStatusType,
@@ -16,7 +16,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     inputKeys: ["title", "primaryKeyword"]
   },
   {
-    id: 2,
+    id: 102,
     description: "seo.criteria.core.keyword_in_meta.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -27,7 +27,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     inputKeys: ["metaDescription", "primaryKeyword"]
   },
   {
-    id: 3,
+    id: 103,
     description: "seo.criteria.core.keyword_in_url.description",
     weight: 3,
     statusType: "binary" as CriteriaStatusType,
@@ -38,7 +38,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     inputKeys: ["urlSlug", "primaryKeyword"]
   },
   {
-    id: 4,
+    id: 104,
     description: "seo.criteria.core.keyword_in_first_10.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -49,7 +49,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     inputKeys: ["content", "primaryKeyword"]
   },
   {
-    id: 5,
+    id: 105,
     description: "seo.criteria.core.keyword_in_content.description",
     weight: 3,
     statusType: "binary" as CriteriaStatusType,
@@ -60,7 +60,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     inputKeys: ["content", "primaryKeyword"]
   },
   {
-    id: 6,
+    id: 106,
     description: "seo.criteria.core.content_length.description",
     weight: 4,
     statusType: "ternary" as CriteriaStatusType,
@@ -79,7 +79,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
  */
 const SEO_BOOSTERS: Criterion[] = [
   {
-    id: 1,
+    id: 201,
     description: "seo.criteria.boosters.keyword_in_subheadings.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -90,7 +90,7 @@ const SEO_BOOSTERS: Criterion[] = [
     inputKeys: ["content", "primaryKeyword"]
   },
   {
-    id: 2,
+    id: 202,
     description: "seo.criteria.boosters.keyword_density.description",
     weight: 3,
     statusType: "ternary" as CriteriaStatusType,
@@ -103,7 +103,7 @@ const SEO_BOOSTERS: Criterion[] = [
     warningScore: 2 // ~67% of the weight
   },
   {
-    id: 3,
+    id: 203,
     description: "seo.criteria.boosters.url_slug_length.description",
     weight: 4,
     statusType: "ternary" as CriteriaStatusType,
@@ -116,7 +116,7 @@ const SEO_BOOSTERS: Criterion[] = [
     warningScore: 3 // 75% of the weight
   },
   {
-    id: 4,
+    id: 204,
     description: "seo.criteria.boosters.external_links.description",
     weight: 3,
     statusType: "binary" as CriteriaStatusType,
@@ -127,7 +127,7 @@ const SEO_BOOSTERS: Criterion[] = [
     inputKeys: ["content"]
   },
   {
-    id: 5,
+    id: 205,
     description: "seo.criteria.boosters.dofollow_links.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -138,7 +138,7 @@ const SEO_BOOSTERS: Criterion[] = [
     inputKeys: ["content"]
   },
   {
-    id: 6,
+    id: 206,
     description: "seo.criteria.boosters.internal_links.description",
     weight: 3,
     statusType: "binary" as CriteriaStatusType,
@@ -155,7 +155,7 @@ const SEO_BOOSTERS: Criterion[] = [
  */
 const TITLE_OPTIMIZATION: Criterion[] = [
   {
-    id: 1,
+    id: 301,
     description: "seo.criteria.title.keyword_at_start.description",
     weight: 10,
     statusType: "binary" as CriteriaStatusType,
@@ -166,7 +166,7 @@ const TITLE_OPTIMIZATION: Criterion[] = [
     inputKeys: ["title", "primaryKeyword"]
   },
   {
-    id: 2,
+    id: 302,
     description: "seo.criteria.title.sentiment.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -177,7 +177,7 @@ const TITLE_OPTIMIZATION: Criterion[] = [
     inputKeys: ["title"]
   },
   {
-    id: 3,
+    id: 303,
     description: "seo.criteria.title.power_words.description",
     weight: 3,
     statusType: "ternary" as CriteriaStatusType,
@@ -196,7 +196,7 @@ const TITLE_OPTIMIZATION: Criterion[] = [
  */
 const CONTENT_CLARITY: Criterion[] = [
   {
-    id: 1,
+    id: 401,
     description: "seo.criteria.clarity.table_of_contents.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -207,7 +207,7 @@ const CONTENT_CLARITY: Criterion[] = [
     inputKeys: ["content"]
   },
   {
-    id: 2,
+    id: 402,
     description: "seo.criteria.clarity.short_paragraphs.description",
     weight: 4,
     statusType: "ternary" as CriteriaStatusType,
@@ -220,7 +220,7 @@ const CONTENT_CLARITY: Criterion[] = [
     warningScore: 3 // 75% of the weight
   },
   {
-    id: 3,
+    id: 403,
     description: "seo.criteria.clarity.media_content.description",
     weight: 4,
     statusType: "binary" as CriteriaStatusType,
@@ -259,29 +259,35 @@ export const SEO_CRITERIA: CriteriaStructure = [
 ]
 
 
-// Create a mapping from input keys to criteria IDs
-export const INPUT_TO_CRITERIA_MAP: Record<string, number[]> = {};
+// Total possible score (calculated from criteria definitions)
+export const TOTAL_POSSIBLE_SCORE = SEO_CRITERIA.reduce(
+  (total, group) => total + group.criteria.reduce((groupTotal, criterion) => groupTotal + criterion.weight, 0),
+  0,
+)
 
-// Populate the input to criteria map
-Object.values(SEO_CRITERIA).forEach((section) => {
-  section.criteria.forEach((criterion) => {
+// Create a mapping from input keys to criteria IDs
+export const INPUT_TO_CRITERIA_MAP: Record<string, number[]> = {}
+SEO_CRITERIA.forEach((group) => {
+  group.criteria.forEach((criterion) => {
     criterion.inputKeys.forEach((inputKey) => {
       if (!INPUT_TO_CRITERIA_MAP[inputKey]) {
-        INPUT_TO_CRITERIA_MAP[inputKey] = [];
+        INPUT_TO_CRITERIA_MAP[inputKey] = []
       }
-      INPUT_TO_CRITERIA_MAP[inputKey].push(criterion.id);
-    });
-  });
-});
+      INPUT_TO_CRITERIA_MAP[inputKey].push(criterion.id)
+    })
+  })
+})
 
 // Create a mapping from criteria IDs to input keys
-export const CRITERIA_TO_INPUT_MAP: Record<number, string[]> = {};
+export const CRITERIA_TO_INPUT_MAP: Record<string, string[]> = {}
+SEO_CRITERIA.forEach((group) => {
+  group.criteria.forEach((criterion) => {
+    CRITERIA_TO_INPUT_MAP[criterion.id] = criterion.inputKeys
+  })
+})
 
-// Populate the criteria to input map
-Object.values(SEO_CRITERIA).forEach((section) => {
-  section.criteria.forEach((criterion) => {
-    CRITERIA_TO_INPUT_MAP[criterion.id] = criterion.inputKeys;
-  });
-});
+export const sections = Object.values(SEO_CRITERIA);
+
+
 
 export default SEO_CRITERIA;

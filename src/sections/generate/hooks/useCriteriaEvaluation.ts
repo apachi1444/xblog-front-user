@@ -1,7 +1,6 @@
 'use client';
 
-import type { UseFormReturn } from 'react-hook-form';
-
+import { useFormContext } from 'react-hook-form';
 import { useMemo, useState, useCallback } from 'react';
 
 import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP } from '../../../utils/seo-criteria-definitions';
@@ -11,9 +10,8 @@ import {
   getAffectedCriteriaByField
 } from '../../../utils/seo-criteria-evaluators';
 
+import type { GenerateArticleFormData } from '../schemas';
 import type { CriterionStatus } from '../../../types/criteria.types';
-import type { 
-  FormData} from '../../../utils/seo-criteria-evaluators';
 
 // Type for criteria evaluation results
 interface CriterionResult {
@@ -23,45 +21,66 @@ interface CriterionResult {
 }
 
 // Type for criteria state
-interface CriteriaState {
+export interface CriteriaState {
   [criterionId: number]: CriterionResult;
 }
 
 /**
  * Hook for evaluating SEO criteria based on form input
  */
-export function useCriteriaEvaluation(formMethods: UseFormReturn<any>) {
+export function useCriteriaEvaluation() {
+  const formMethods = useFormContext<GenerateArticleFormData>();
   const [criteriaState, setCriteriaState] = useState<CriteriaState>({});
 
   // Calculate total score
-  const totalScore = useMemo(() => Object.values(criteriaState).reduce((total, result) => total + (result.score || 0), 0), [criteriaState]);
+  const totalScore = useMemo(() => 
+    Object.values(criteriaState).reduce((total, result) => total + (result.score || 0), 0), 
+    [criteriaState]
+  );
 
   // Calculate maximum possible score
-  const maxScore = useMemo(() => {
-    let total = 0;
+  const maxScore = useMemo(() => Object.values(SEO_CRITERIA).reduce((total, section) => 
+      total + section.criteria.reduce((sectionTotal, criterion) => 
+        sectionTotal + criterion.weight, 0), 0), []);
+
+  // Get form data by combining all possible field locations
+  const getFormData = useCallback((): GenerateArticleFormData => {
+    const fieldKeys = [
+      'title', 'metaTitle', 'metaDescription', 'urlSlug', 'primaryKeyword',
+      'secondaryKeywords', 'content', 'contentDescription', 'language', 'targetCountry'
+    ];
     
-    // Sum up the weights of all criteria
-    Object.values(SEO_CRITERIA).forEach(section => {
-      section.criteria.forEach(criterion => {
-        total += criterion.weight;
-      });
-    });
-    
-    return total;
-  }, []);
+    return fieldKeys.reduce((data, key) => {
+      const fieldKey = key as keyof GenerateArticleFormData;
+      data[fieldKey] = 
+        formMethods.getValues(fieldKey) || 
+        formMethods.getValues(`step1.${fieldKey}` as any) || 
+        formMethods.getValues(`step2.${fieldKey}` as any) || 
+        formMethods.getValues(`step3.${fieldKey}` as any) || 
+        (Array.isArray(data[fieldKey]) ? [] : '');
+      return data;
+    }, {} as GenerateArticleFormData);
+  }, [formMethods]);
 
   // Get criteria affected by an input field
-  const getInputCriteria = useCallback((inputKey: string) => getAffectedCriteriaByField(inputKey), []);
+  const getInputCriteria = useCallback((inputKey: string) => 
+    getAffectedCriteriaByField(inputKey), 
+    []
+  );
 
   // Get input fields that affect a criterion
-  const getCriterionInputFields = useCallback((criterionId: number) => CRITERIA_TO_INPUT_MAP[criterionId] || [], []);
+  const getCriterionInputFields = useCallback((criterionId: number) => 
+    CRITERIA_TO_INPUT_MAP[criterionId] || [], 
+    []
+  );
 
   // Evaluate criteria based on input changes
   const evaluateCriteria = useCallback(
     (inputKey: string, value: any) => {
       const criteriaIds = getInputCriteria(inputKey);
-
       if (!criteriaIds.length) return;
+
+      const formData = getFormData();
 
       setCriteriaState((prevState) => {
         const newState = { ...prevState };
@@ -69,20 +88,6 @@ export function useCriteriaEvaluation(formMethods: UseFormReturn<any>) {
         criteriaIds.forEach((criterionId) => {
           const evaluationFn = EVALUATION_FUNCTIONS[criterionId];
           if (evaluationFn) {
-            // Get form values for evaluation
-            const formData: FormData = {
-              title: formMethods.getValues('title') || formMethods.getValues('step1.title') || '',
-              metaTitle: formMethods.getValues('metaTitle') || formMethods.getValues('step2.metaTitle') || '',
-              metaDescription: formMethods.getValues('metaDescription') || formMethods.getValues('step2.metaDescription') || '',
-              urlSlug: formMethods.getValues('urlSlug') || formMethods.getValues('step2.urlSlug') || '',
-              primaryKeyword: formMethods.getValues('primaryKeyword') || formMethods.getValues('step1.primaryKeyword') || '',
-              secondaryKeywords: formMethods.getValues('secondaryKeywords') || formMethods.getValues('step1.secondaryKeywords') || [],
-              content: formMethods.getValues('content') || formMethods.getValues('step3.content') || '',
-              contentDescription: formMethods.getValues('contentDescription') || formMethods.getValues('step1.contentDescription') || '',
-              language: formMethods.getValues('language') || formMethods.getValues('step1.language') || '',
-              targetCountry: formMethods.getValues('targetCountry') || formMethods.getValues('step1.targetCountry') || '',
-            };
-
             const result = evaluationFn(value, formData);
             newState[criterionId] = result;
           }
@@ -91,7 +96,7 @@ export function useCriteriaEvaluation(formMethods: UseFormReturn<any>) {
         return newState;
       });
     },
-    [getInputCriteria, formMethods]
+    [getInputCriteria, getFormData]
   );
 
   // Improve input based on criterion
@@ -101,83 +106,60 @@ export function useCriteriaEvaluation(formMethods: UseFormReturn<any>) {
       if (!inputFields.length) return;
 
       const improvementFn = IMPROVEMENT_FUNCTIONS[criterionId];
-      if (improvementFn) {
-        // Get form values for improvement
-        const formData: FormData = {
-          title: formMethods.getValues('title') || formMethods.getValues('step1.title') || '',
-          metaTitle: formMethods.getValues('metaTitle') || formMethods.getValues('step2.metaTitle') || '',
-          metaDescription: formMethods.getValues('metaDescription') || formMethods.getValues('step2.metaDescription') || '',
-          urlSlug: formMethods.getValues('urlSlug') || formMethods.getValues('step2.urlSlug') || '',
-          primaryKeyword: formMethods.getValues('primaryKeyword') || formMethods.getValues('step1.primaryKeyword') || '',
-          secondaryKeywords: formMethods.getValues('secondaryKeywords') || formMethods.getValues('step1.secondaryKeywords') || [],
-          content: formMethods.getValues('content') || formMethods.getValues('step3.content') || '',
-          contentDescription: formMethods.getValues('contentDescription') || formMethods.getValues('step1.contentDescription') || '',
-          language: formMethods.getValues('language') || formMethods.getValues('step1.language') || '',
-          targetCountry: formMethods.getValues('targetCountry') || formMethods.getValues('step1.targetCountry') || '',
-        };
+      if (!improvementFn) return;
+      
+      const formData = getFormData();
+      const result = improvementFn(null, formData);
 
-        const result = improvementFn(null, formData);
-
-        // Handle composite criteria that return an object with field and value
-        if (result && typeof result === 'object' && 'field' in result) {
-          formMethods.setValue(result.field as any, result.value, {
-            shouldValidate: true,
-            shouldDirty: true,
-            shouldTouch: true,
-          });
-
-          // Re-evaluate the criteria
-          evaluateCriteria(result.field as string, result.value);
-          return;
-        }
-
-        // Handle simple criteria that return a direct value
-        const primaryInputField = inputFields[0]; // Use the first input field as primary
-        
-        // Get the path to the field (handling nested fields)
-        let fieldPath = primaryInputField;
-        if (formMethods.getValues(`step1.${primaryInputField}`) !== undefined) {
-          fieldPath = `step1.${primaryInputField}`;
-        } else if (formMethods.getValues(`step2.${primaryInputField}`) !== undefined) {
-          fieldPath = `step2.${primaryInputField}`;
-        } else if (formMethods.getValues(`step3.${primaryInputField}`) !== undefined) {
-          fieldPath = `step3.${primaryInputField}`;
-        }
-
-        // Update the form value
-        formMethods.setValue(fieldPath as any, result, {
+      // Handle composite criteria that return an object with field and value
+      if (result && typeof result === 'object' && 'field' in result) {
+        formMethods.setValue(result.field as any, result.value, {
           shouldValidate: true,
           shouldDirty: true,
           shouldTouch: true,
         });
 
         // Re-evaluate the criteria
-        evaluateCriteria(primaryInputField, result);
+        evaluateCriteria(result.field as string, result.value);
+        return;
       }
+
+      // Handle simple criteria that return a direct value
+      const primaryInputField = inputFields[0]; // Use the first input field as primary
+      
+      // Find the correct field path
+      const possiblePaths = [
+        primaryInputField,
+        `step1.${primaryInputField}`,
+        `step2.${primaryInputField}`,
+        `step3.${primaryInputField}`
+      ];
+      
+      const fieldPath = possiblePaths.find(path => 
+        formMethods.getValues(path as any) !== undefined
+      ) || primaryInputField;
+
+      // Update the form value
+      formMethods.setValue(fieldPath as any, result, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+
+      // Re-evaluate the criteria
+      evaluateCriteria(primaryInputField, result);
     },
-    [getCriterionInputFields, formMethods, evaluateCriteria]
+    [getCriterionInputFields, formMethods, evaluateCriteria, getFormData]
   );
 
   // Evaluate all criteria at once (useful for initial load or form submission)
   const evaluateAllCriteria = useCallback(() => {
-    // Get all form values
-    const formData: FormData = {
-      title: formMethods.getValues('title') || formMethods.getValues('step1.title') || '',
-      metaTitle: formMethods.getValues('metaTitle') || formMethods.getValues('step2.metaTitle') || '',
-      metaDescription: formMethods.getValues('metaDescription') || formMethods.getValues('step2.metaDescription') || '',
-      urlSlug: formMethods.getValues('urlSlug') || formMethods.getValues('step2.urlSlug') || '',
-      primaryKeyword: formMethods.getValues('primaryKeyword') || formMethods.getValues('step1.primaryKeyword') || '',
-      secondaryKeywords: formMethods.getValues('secondaryKeywords') || formMethods.getValues('step1.secondaryKeywords') || [],
-      content: formMethods.getValues('content') || formMethods.getValues('step3.content') || '',
-      contentDescription: formMethods.getValues('contentDescription') || formMethods.getValues('step1.contentDescription') || '',
-      language: formMethods.getValues('language') || formMethods.getValues('step1.language') || '',
-      targetCountry: formMethods.getValues('targetCountry') || formMethods.getValues('step1.targetCountry') || '',
-    };
+    const formData = getFormData();
 
     // Process all input fields
     Object.keys(formData).forEach((key) => {
-      if (formData[key as keyof FormData] !== undefined) {
-        evaluateCriteria(key, formData[key as keyof FormData]);
+      if (formData[key as keyof GenerateArticleFormData] !== undefined) {
+        evaluateCriteria(key, formData[key as keyof GenerateArticleFormData]);
       }
     });
 
@@ -198,23 +180,15 @@ export function useCriteriaEvaluation(formMethods: UseFormReturn<any>) {
 
       return newState;
     });
-  }, [formMethods, evaluateCriteria]);
+  }, [getFormData, evaluateCriteria]);
 
   // Get overall status based on criteria state
   const overallStatus = useMemo((): CriterionStatus => {
     const statuses = Object.values(criteriaState).map(result => result.status);
     
-    if (statuses.includes('error')) {
-      return 'error';
-    }
-    
-    if (statuses.includes('warning')) {
-      return 'warning';
-    }
-    
-    if (statuses.length > 0) {
-      return 'success';
-    }
+    if (statuses.includes('error')) return 'error';
+    if (statuses.includes('warning')) return 'warning';
+    if (statuses.length > 0) return 'success';
     
     return 'pending';
   }, [criteriaState]);

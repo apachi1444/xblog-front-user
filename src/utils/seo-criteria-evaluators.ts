@@ -1,25 +1,14 @@
-import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from './seo-criteria-definitions';
+import type { GenerateArticleFormData } from 'src/sections/generate/schemas';
+
+import { sections, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from './seo-criteria-definitions';
 
 import type { CriterionStatus } from '../types/criteria.types';
 
-// Type for form data
-export interface FormData {
-  title?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  urlSlug?: string;
-  primaryKeyword?: string;
-  secondaryKeywords?: string;
-  content?: string;
-  contentDescription?: string;
-  language?: string;
-  targetCountry?: string;
-}
 
 // Type for evaluation functions
 export type EvaluationFunction = (
   value: any,
-  formData: FormData,
+  formData: GenerateArticleFormData,
 ) => {
   status: CriterionStatus;
   message: string;
@@ -27,28 +16,16 @@ export type EvaluationFunction = (
 }
 
 // Type for improvement functions
-export type ImprovementFunction = (value: any, formData: FormData) => any;
-
-// Helper function to get criterion by ID - used internally
-export const getCriterionById = (id: number) => {
-  const sections = Object.values(SEO_CRITERIA);
-
-  // Find the first criterion that matches the ID
-  const foundCriterion = sections
-    .map(section => section.criteria.find(c => c.id === id))
-    .filter(Boolean)[0];
-
-  return foundCriterion || null;
-};
+export type ImprovementFunction = (value: any, formData: GenerateArticleFormData) => any;
 
 // Evaluation functions for each criteria
 export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   // SEO Core Essentials
   1: (_, formData) => { // keyword_in_title
-    const criterion = getCriterionById(1);
+    const criterion = sections[0].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { title, primaryKeyword } = formData;
+    const { title, primaryKeyword } = formData.step1;
 
     if (!title || !primaryKeyword) {
       return {
@@ -74,10 +51,11 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   },
 
   2: (_, formData) => { // keyword_in_meta
-    const criterion = getCriterionById(2);
+    const criterion = sections[0].criteria[1]
+
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { metaDescription, primaryKeyword } = formData;
+    const { metaDescription, primaryKeyword } = formData.step1;
 
     if (!metaDescription || !primaryKeyword) {
       return {
@@ -103,10 +81,10 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   },
 
   3: (_, formData) => { // keyword_in_url
-    const criterion = getCriterionById(3);
+    const criterion = sections[0].criteria[2]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { urlSlug, primaryKeyword } = formData;
+    const { urlSlug, primaryKeyword } = formData.step1;
 
     if (!urlSlug || !primaryKeyword) {
       return {
@@ -132,12 +110,13 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   },
 
   4: (_, formData) => { // keyword_in_first_10
-    const criterion = getCriterionById(4);
+    const criterion = sections[0].criteria[3]
+
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { content, primaryKeyword } = formData;
+    const { contentDescription, primaryKeyword } = formData.step1;
 
-    if (!content || !primaryKeyword) {
+    if (!contentDescription || !primaryKeyword) {
       return {
         status: 'pending',
         message: 'Waiting for content and primary keyword',
@@ -146,7 +125,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     }
 
     // Get first 10% of content
-    const firstTenPercent = content.substring(0, Math.floor(content.length * 0.1));
+    const firstTenPercent = contentDescription.substring(0, Math.floor(contentDescription.length * 0.1));
 
     if (firstTenPercent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
@@ -164,12 +143,13 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   },
 
   5: (_, formData) => { // keyword_in_content
-    const criterion = getCriterionById(5);
+    const criterion = sections[0].criteria[4]
+
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { content, primaryKeyword } = formData;
+    const { contentDescription, primaryKeyword } = formData.step1;
 
-    if (!content || !primaryKeyword) {
+    if (!contentDescription || !primaryKeyword) {
       return {
         status: 'pending',
         message: 'Waiting for content and primary keyword',
@@ -177,7 +157,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    if (content.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+    if (contentDescription.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -193,12 +173,13 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   },
 
   6: (_, formData) => { // content_length
-    const criterion = getCriterionById(6);
+    const criterion = sections[0].criteria[5]
+
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { content } = formData;
+    const { contentDescription } = formData.step1;
 
-    if (!content) {
+    if (!contentDescription) {
       return {
         status: 'pending',
         message: 'Waiting for content',
@@ -207,7 +188,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     }
 
     // Count words
-    const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
+    const wordCount = contentDescription.split(/\s+/).filter(word => word.length > 0).length;
 
     if (wordCount >= 2500) {
       return {
@@ -233,13 +214,11 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   }
 };
 
-// More evaluation functions will be added for other criteria categories
-
 // Improvement functions for each criteria
 export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   // SEO Core Essentials
   1: (_, formData) => { // keyword_in_title
-    const { title, primaryKeyword } = formData;
+    const { title, primaryKeyword } = formData.step1;
     if (!title) return primaryKeyword;
     if (!primaryKeyword) return title;
 
@@ -251,7 +230,7 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   },
 
   2: (_, formData) => { // keyword_in_meta
-    const { metaDescription, primaryKeyword } = formData;
+    const { metaDescription, primaryKeyword } = formData.step1;
     if (!metaDescription) return `Learn about ${primaryKeyword} in this comprehensive guide.`;
     if (!primaryKeyword) return metaDescription;
 
@@ -263,7 +242,7 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   },
 
   3: (_, formData) => { // keyword_in_url
-    const { urlSlug, primaryKeyword } = formData;
+    const { urlSlug, primaryKeyword } = formData.step1;
     if (!urlSlug) return primaryKeyword?.toLowerCase().replace(/\s+/g, '-');
     if (!primaryKeyword) return urlSlug;
 
@@ -274,7 +253,6 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
     return urlSlug;
   },
 
-  // More improvement functions will be added for other criteria
 };
 
 // Function to get affected criteria by input field
