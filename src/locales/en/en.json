@@ -328,6 +328,17 @@
           "good": "Good",
           "excellent": "Excellent"
         },
+        "optimization": {
+          "title": "Optimize SEO Criterion",
+          "current_value": "Current Value",
+          "optimized_value": "Optimized Value",
+          "current_score": "Current Score",
+          "potential_score": "Potential Score",
+          "success": "Optimization applied successfully!",
+          "optimizing": "Optimizing...",
+          "generate": "Generate Optimization",
+          "apply": "Apply Optimization"
+        },
 
         "toast": {
           "already_optimized": "This item is already optimized!",

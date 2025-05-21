@@ -265,27 +265,16 @@ export function ItemSectionNew({
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
-        {/* Advanced optimization button - hidden but still accessible for functionality */}
-        {status !== 'success' && !isPending && (
-          <Box sx={{ display: 'none' }}>
-            <IconButton
-              size="small"
-              onClick={() => onAdvancedOptimize(id)}
-              disabled={isPending}
-            >
-              <SettingsIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        )}
-
         {/* Fix button */}
-        {status === 'error' && !isPending && (
+        {status !== 'success' && !isPending && (
           <Button
             variant="contained"
             size="small"
             onClick={() => onImprove(id)}
             sx={{
-              bgcolor: COLORS.fix,
+              bgcolor: status === 'warning' ? COLORS.warning :
+                      status === 'error' ? COLORS.error :
+                      theme.palette.text.secondary,
               color: '#fff',
               textTransform: 'none',
               px: 2,
@@ -293,7 +282,9 @@ export function ItemSectionNew({
               minWidth: 'auto',
               fontSize: '0.75rem',
               '&:hover': {
-                bgcolor: 'rgba(244, 67, 54, 0.8)',
+                bgcolor: status === 'warning' ? 'rgba(255, 179, 0, 0.8)' :
+                        status === 'error' ? 'rgba(244, 67, 54, 0.8)' :
+                        'rgba(158, 158, 158, 0.8)'
               }
             }}
           >

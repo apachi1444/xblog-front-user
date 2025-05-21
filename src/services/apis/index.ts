@@ -881,9 +881,17 @@ const axiosBaseQuery =
       method = 'GET',
       body,
       params,
-      headers,
+      headers = {}, // Initialize headers as empty object if undefined
       responseType,
     } = getRequestConfig(requestConfig);
+
+    // Add the X-API-KEY header for authentication
+    const requestHeaders = {
+      ...headers,
+      'Access-Control-Allow-Origin': '*'
+    };
+
+    console.log('Request headers:', requestHeaders);
 
     try {
       const result = await customRequest({
@@ -891,11 +899,14 @@ const axiosBaseQuery =
         method,
         data: body,
         params,
-        headers,
+        headers: requestHeaders,
         responseType,
       });
       return { data: result.data };
     } catch (axiosError) {
+      console.log('Error occurred. Headers sent:', requestHeaders);
+      console.error('Error details:', axiosError);
+
       const err = axiosError as AxiosError;
       return {
         error: {

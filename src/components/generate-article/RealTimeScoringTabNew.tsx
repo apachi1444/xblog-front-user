@@ -16,6 +16,7 @@ import {
 import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEvaluation";
 
 import { ItemSectionNew } from "./ItemSectionNew";
+import { OptimizationModal } from "./OptimizationModal";
 import { SEO_CRITERIA } from "../../utils/seo-criteria-definitions";
 
 // Types
@@ -36,13 +37,14 @@ interface RealTimeScoringTabNewProps {
   totalMaxScore?: number;
 }
 
-export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }: RealTimeScoringTabNewProps) {
+export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTabNewProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const COLORS = getColors(theme);
 
-  // State for the optimization modal (not currently used but kept for future implementation)
-  const [, setSelectedCriterionId] = useState<number | null>(null);
+  // State for the optimization modal
+  const [selectedCriterionId, setSelectedCriterionId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Use criteria evaluation hook
   const {
@@ -88,11 +90,19 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
     return COLORS.success;
   };
 
-  // Handle opening the optimization modal (simplified for now)
+  // Handle opening the optimization modal
   const handleOpenModal = useCallback((criterionId: number) => {
-    console.log(`Would open optimization modal for criterion ${criterionId}`);
+    console.log(`Opening optimization modal for criterion ${criterionId}`);
     setSelectedCriterionId(criterionId);
+    setIsModalOpen(true);
   }, []);
+
+  // Handle closing the optimization modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    // Re-evaluate criteria after modal closes
+    evaluateAllCriteria();
+  }, [evaluateAllCriteria]);
 
 
   return (
@@ -226,7 +236,7 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
                   text={t(criterion.description)}
                   score={score}
                   tooltip={needsTranslation ? t(message) : message}
-                  onImprove={() => {}}
+                  onImprove={() => handleOpenModal(criterion.id)}
                   onAdvancedOptimize={handleOpenModal}
                   isHighlighted={false}
                 />
@@ -235,6 +245,13 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
           </Stack>
         </Box>
       ))}
+
+      {/* Optimization Modal */}
+      <OptimizationModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        criterionId={selectedCriterionId}
+      />
     </CardContent>
   );
 }

@@ -26,7 +26,7 @@ import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";
 interface SEODashboardProps {
   defaultTab?: number; // 0 for Preview SEO, 1 for Real-time Scoring
   isGeneratingMeta?: boolean;
-  onGenerateMeta?: () => Promise<void>;
+  onGenerateMeta?: () => Promise<{ metaTitle: string; metaDescription: string; urlSlug: string }>;
   onCollapseChange?: (collapsed: boolean) => void;
   isCollapsed?: boolean;
 }

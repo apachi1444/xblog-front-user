@@ -28,7 +28,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const { title, primaryKeyword } = formData.step1;
 
     console.log(title, primaryKeyword, " title and primary keyword");
-    
+
 
     if (!title || !primaryKeyword) {
       return {
@@ -391,6 +391,23 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
     }
 
     return title;
+  },
+
+  106: (_, formData) => { // content_length
+    const { contentDescription, primaryKeyword } = formData.step1;
+    if (!contentDescription) return `This is a comprehensive guide about ${primaryKeyword || 'the topic'}. [Add more content here to reach at least 1000 words]`;
+
+    // Count words
+    const wordCount = contentDescription.split(/\s+/).filter(word => word.length > 0).length;
+
+    if (wordCount < 1000) {
+      // Add more content to reach at least 1000 words
+      const primaryKeywordText = primaryKeyword || 'this topic';
+
+      return `${contentDescription}\n\n## Additional Information About ${primaryKeywordText}\n\nTo provide more comprehensive information about ${primaryKeywordText}, let's explore some additional aspects that are important to understand.\n\n### Benefits of ${primaryKeywordText}\n\nThere are several key benefits to consider when exploring ${primaryKeywordText}. First, it can significantly improve your understanding of the subject matter. Second, it provides practical applications that can be implemented in various contexts. Third, it offers a foundation for further learning and development in related areas.\n\n### Common Misconceptions About ${primaryKeywordText}\n\nDespite its importance, there are several misconceptions about ${primaryKeywordText} that should be addressed. Many people incorrectly assume that it's overly complicated or difficult to implement. However, with the right approach and understanding, it becomes much more accessible. Another common misconception is that it's only relevant in specific contexts, when in fact its applications are much broader.\n\n### Future Developments in ${primaryKeywordText}\n\nLooking ahead, we can expect to see significant developments in how ${primaryKeywordText} is understood and applied. Emerging research continues to expand our knowledge, and new methodologies are being developed to enhance its effectiveness. Staying informed about these developments will be crucial for anyone interested in this field.`;
+    }
+
+    return contentDescription;
   },
 };
 

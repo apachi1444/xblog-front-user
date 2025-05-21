@@ -9,7 +9,7 @@ import {
 import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from '../../../utils/seo-criteria-definitions';
 
 import type { GenerateArticleFormData } from '../schemas';
-import type { CriterionStatus } from '../../../types/criteria.types';
+import type { InputKey, CriterionStatus } from '../../../types/criteria.types';
 
 // Type for criteria evaluation results
 interface CriterionResult {
@@ -68,7 +68,7 @@ export function useCriteriaEvaluation() {
 }, []);
   // Evaluate criteria based on input changes
   const evaluateCriteria = useCallback(
-    (inputKey: string, value: any) => {
+    (inputKey: InputKey, value: any) => {
 
       const criteriaKeys = INPUT_TO_CRITERIA_MAP[inputKey] || []
       console.log(criteriaKeys);

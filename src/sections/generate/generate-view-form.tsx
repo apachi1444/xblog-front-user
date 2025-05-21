@@ -74,6 +74,11 @@ export function GenerateViewForm({
     await simulateDelay(1000);
     console.log('Fake meta generated');
     setGenerationState((s) => ({ ...s, isGeneratingMeta: false }));
+    return {
+      metaTitle: "meta title",
+      metaDescription: "meta description",
+      urlSlug: "url slug"
+    }
   };
 
   const onGenerateTableOfContents = useCallback(async () => {

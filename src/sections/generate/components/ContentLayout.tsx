@@ -9,7 +9,14 @@ import { SEODashboard } from 'src/components/generate-article/SEODashboard';
 
 interface ContentLayoutProps {
   isGeneratingMeta: boolean;
-  onGenerateMeta: () => Promise<void>;
+  onGenerateMeta: () => Promise<
+    {
+        metaTitle: string;
+        metaDescription: string;
+        urlSlug: string;
+      }
+
+  >;
   children: ReactNode;
   activeStep: number;
 }

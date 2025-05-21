@@ -1,7 +1,8 @@
 import type React from "react";
+import type { InputKey } from "src/types/criteria.types";
 
-import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useWatch, useFormContext } from "react-hook-form";
 
@@ -28,12 +29,12 @@ export interface Step1ContentSetupProps {
   onGenerateTitle: () => Promise<string>;
   onGenerateSecondaryKeywords: () => Promise<void>;
   onOptimizeContentDescription: () => Promise<void>;
-  onGenerateMeta: () => Promise<void>;
+  onGenerateMeta: () => Promise<{ metaTitle: string; metaDescription: string; urlSlug: string }>;
   isGeneratingMeta: boolean;
   isGeneratingTitle?: boolean;
   isGeneratingKeywords?: boolean;
   isOptimizingDescription?: boolean;
-  evaluateCriteria: (id: string, value: string) => void;
+  evaluateCriteria: (id: InputKey, value: string) => void;
 }
 
 export function Step1ContentSetup({
@@ -189,7 +190,10 @@ export function Step1ContentSetup({
 
   const handleGenerateMeta = async () => {
     try {
-      await onGenerateMeta();
+      const generatedMeta = await onGenerateMeta();
+      setValue("step1.metaTitle", generatedMeta.metaTitle);
+      setValue("step1.metaDescription", generatedMeta.metaDescription);
+      setValue("step1.urlSlug", generatedMeta.urlSlug);
     } catch (error) {
       console.error("Error generating meta information:", error);
     }
@@ -212,13 +216,7 @@ export function Step1ContentSetup({
           <Box sx={{ width: "100%" }}>
             <FormInput
               {...register("step1.primaryKeyword", {
-                onChange: (e) => {
-                  setValue("step1.primaryKeyword", e.target.value, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                    shouldTouch: true
-                  });
-                }
+                onChange: (e) => evaluateCriteria("primaryKeyword", e.target.value)
               })}
               label="Primary Keyword"
               disabled={isPrimaryKeywordDisabled}
@@ -365,13 +363,7 @@ export function Step1ContentSetup({
             <FormInput
               {...register("step1.contentDescription", {
                 required: true,
-                onChange: (e) => {
-                  setValue("step1.contentDescription", e.target.value, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                    shouldTouch: true
-                  });
-                }
+                onChange: (e) => evaluateCriteria("contentDescription", e.target.value)
               })}
               label="Content Description"
               tooltipText="Describe what your content is about"
@@ -516,13 +508,7 @@ export function Step1ContentSetup({
               <Box sx={{ position: "relative", width: "100%" }}>
                 <FormInput
                   {...register("step1.title", {
-                    onChange: (e) => {
-                      setValue("step1.title", e.target.value, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                        shouldTouch: true
-                      });
-                    }
+                    onChange: (e) => evaluateCriteria("title", e.target.value)
                   })}
                   value={title}
                   tooltipText="Article Title"
@@ -570,13 +556,7 @@ export function Step1ContentSetup({
               {/* Meta Title */}
               <FormInput
                 {...register("step1.metaTitle", {
-                  onChange: (e) => {
-                    setValue("step1.metaTitle", e.target.value, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                      shouldTouch: true
-                    });
-                  }
+                  onChange: (e) => evaluateCriteria("metaTitle", e.target.value)
                 })}
                 value={metaTitle}
                 tooltipText="Meta title"
@@ -588,13 +568,7 @@ export function Step1ContentSetup({
               {/* Meta Description */}
               <FormInput
                 {...register("step1.metaDescription", {
-                  onChange: (e) => {
-                    setValue("step1.metaDescription", e.target.value, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                      shouldTouch: true
-                    });
-                  }
+                  onChange: (e) => evaluateCriteria("metaDescription", e.target.value)
                 })}
                 tooltipText="Meta Description"
                 value={metaDescription}
@@ -608,13 +582,7 @@ export function Step1ContentSetup({
               {/* URL Slug */}
               <FormInput
                 {...register("step1.urlSlug", {
-                  onChange: (e) => {
-                    setValue("step1.urlSlug", e.target.value, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                      shouldTouch: true
-                    });
-                  }
+                  onChange: (e) => evaluateCriteria("urlSlug", e.target.value)
                 })}
                 tooltipText="URL Slug"
                 value={urlSlug}

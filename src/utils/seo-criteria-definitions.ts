@@ -13,7 +13,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_title.success",
       error: "seo.criteria.core.keyword_in_title.error"
     },
-    inputKeys: ["title", "primaryKeyword"]
+    inputKeys: ["title"]
   },
   {
     id: 102,
@@ -24,7 +24,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_meta.success",
       error: "seo.criteria.core.keyword_in_meta.error"
     },
-    inputKeys: ["metaDescription", "primaryKeyword"]
+    inputKeys: ["metaDescription"]
   },
   {
     id: 103,
@@ -35,7 +35,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_url.success",
       error: "seo.criteria.core.keyword_in_url.error"
     },
-    inputKeys: ["urlSlug", "primaryKeyword"]
+    inputKeys: ["urlSlug"]
   },
   {
     id: 104,
@@ -46,7 +46,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_first_10.success",
       error: "seo.criteria.core.keyword_in_first_10.error"
     },
-    inputKeys: ["content", "primaryKeyword"]
+    inputKeys: ["contentDescription"]
   },
   {
     id: 105,
@@ -57,7 +57,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_content.success",
       error: "seo.criteria.core.keyword_in_content.error"
     },
-    inputKeys: ["content", "primaryKeyword"]
+    inputKeys: ["contentDescription", "primaryKeyword"]
   },
   {
     id: 106,
@@ -69,7 +69,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       warning: "seo.criteria.core.content_length.warning",
       error: "seo.criteria.core.content_length.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["contentDescription"],
     warningScore: 3 // 75% of the weight
   }
 ];

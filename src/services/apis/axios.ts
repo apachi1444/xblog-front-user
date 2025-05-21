@@ -2,7 +2,7 @@ import Axios from 'axios';
 
 // Create Axios instance without the token initially
 const customRequest = Axios.create({
-  baseURL: `https://api.xlog.ai/api/v1`,
+  baseURL: `https://168.231.83.107/api/v1`,
 });
 
 // Create a function to update the token
