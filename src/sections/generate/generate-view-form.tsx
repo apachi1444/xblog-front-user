@@ -2,6 +2,7 @@ import { Box } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useFormContext } from 'react-hook-form';
 
 import { Button, Typography } from '@mui/material';
 
@@ -19,7 +20,7 @@ import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
-import type { ArticleSection } from './schemas';
+import type { ArticleSection, GenerateArticleFormData } from './schemas';
 
 
 interface GenerateViewFormProps {
@@ -34,6 +35,7 @@ export function GenerateViewForm({
   setActiveStep
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
+  const methods = useFormContext<GenerateArticleFormData>();
 
   const [generationState, setGenerationState] = useState({
     isGeneratingTitle: false,
@@ -87,10 +89,9 @@ export function GenerateViewForm({
 
   const onGenerateTableOfContents = useCallback(async () => {
     setGenerationState((s) => ({ ...s, isGeneratingSections: true }));
-    await simulateDelay(1000);
-    console.log('Fake table of contents generated');
-    setGenerationState((s) => ({ ...s, isGeneratingSections: false, isGenerated: true }));
-    return [
+
+    // Generate mock sections
+    const sections = [
       {
         id: 'section-1',
         title: 'Introduction',
@@ -107,13 +108,27 @@ export function GenerateViewForm({
         status: 'completed'
       }
     ] as ArticleSection[];
-  }, []);
+
+    // Save the sections to the form state
+    methods.setValue('step3.sections', sections);
+
+    // Wait for 6 seconds to ensure the animation completes
+    // The animation takes 5.5 seconds to complete
+    await simulateDelay(6000);
+
+    console.log('Fake table of contents generated');
+
+    // Only set isGeneratingSections to false after the animation has had time to complete
+    setGenerationState((s) => ({ ...s, isGeneratingSections: false, isGenerated: true }));
+
+    return sections;
+  }, [methods]);
 
   const handleRegenerateRequest = () => {
     setGenerationState((s) => ({ ...s, showRegenerateDialog: true }));
   };
 
-  
+
   // Use the regeneration check hook to check for available regenerations
   const {
     checkRegenerationCredits,
@@ -143,7 +158,7 @@ export function GenerateViewForm({
     }
   }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
 
-  
+
     const renderStepContent = () => {
         // Regular steps
         switch (activeStep) {
