@@ -86,6 +86,7 @@ export function GeneratingView() {
         <GenerateViewForm
           activeStep={activeStep}
           steps={steps}
+          setActiveStep={setActiveStep}
         />
         {/* Navigation buttons with internal validation logic */}
         <StepNavigation

@@ -183,12 +183,19 @@
         "success": "{{type}} regenerated successfully!",
         "available": "Regenerate ({{count}} remaining)",
         "button": "Regenerate",
+        "confirm": "Regenerate",
+        "confirmTitle": "Confirm Regeneration",
+        "confirmMessage": "Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.",
+        "availableCredits": "You have {{count}} regeneration credits available.",
         "example": {
           "title": "Regeneration System Example",
           "description": "This is an example of how to use the regeneration system. You have {{count}} regenerations available.",
           "content": "Example Content",
           "contentDescription": "This is some example content that can be regenerated."
         }
+      },
+      "publishing": {
+        "message": "Publishing your content..."
       },
       "points": {
         "label": "Points",
@@ -264,6 +271,7 @@
         "buttons": {
           "generating": "Generating...",
           "generateTableOfContents": "Generate Table of Contents",
+          "regenerateTableOfContents": "Regenerate Table of Contents",
           "tableOfContentsGenerated": "Table of Contents Generated"
         }
       },

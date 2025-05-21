@@ -12,21 +12,19 @@ import { FormDropdown } from '../../../../components/generate-article/FormDropdo
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
 import { FormAutocompleteDropdown } from '../../../../components/generate-article/FormAutocompleteDropdown';
 
-import type { GenerateArticleFormData } from '../../schemas';
+import type { ArticleSection, GenerateArticleFormData } from '../../schemas';
 
 interface Step2ArticleSettingsProps {
   isGenerating: boolean
   isGenerated: boolean
-  onGenerate: () => Promise<void>
+  onGenerate: () => Promise<ArticleSection[]>
   onRegenerateRequest?: () => void
+  setActiveStep: (step: number) => void
 }
 
-export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest }: Step2ArticleSettingsProps) {
+export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest, setActiveStep }: Step2ArticleSettingsProps) {
   const { t } = useTranslation();
   const { options } = useArticleSettingsForm();
-
-  console.log(isGenerating , " is generating !");
-  
 
   const {
     register,
@@ -83,7 +81,9 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     <Grid container spacing={3}>
       <SectionGenerationAnimation
         show={isGenerating}
-        onComplete={() => {}}
+        onComplete={() => {
+          setActiveStep(2);
+        }}
       />
 
       <Grid item xs={12}>

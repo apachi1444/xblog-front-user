@@ -19,15 +19,19 @@ import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
+import type { ArticleSection } from './schemas';
+
 
 interface GenerateViewFormProps {
   activeStep: number;
   steps: { id: number; label: string }[];
+  setActiveStep: (step: number) => void;
 }
 
 export function GenerateViewForm({
   activeStep,
   steps,
+  setActiveStep
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
 
@@ -82,6 +86,27 @@ export function GenerateViewForm({
   };
 
   const onGenerateTableOfContents = useCallback(async () => {
+    setGenerationState((s) => ({ ...s, isGeneratingSections: true }));
+    await simulateDelay(1000);
+    console.log('Fake table of contents generated');
+    setGenerationState((s) => ({ ...s, isGeneratingSections: false, isGenerated: true }));
+    return [
+      {
+        id: 'section-1',
+        title: 'Introduction',
+        status: 'completed'
+      },
+      {
+        id: 'section-2',
+        title: 'What is SEO?',
+        status: 'completed'
+      },
+      {
+        id: 'section-3',
+        title: 'Why is SEO Important?',
+        status: 'completed'
+      }
+    ] as ArticleSection[];
   }, []);
 
   const handleRegenerateRequest = () => {
@@ -140,6 +165,7 @@ export function GenerateViewForm({
                     isGenerating={generationState.isGeneratingSections}
                     onGenerate={onGenerateTableOfContents}
                     onRegenerateRequest={handleRegenerateRequest}
+                    setActiveStep={setActiveStep}
                     />;
         case 2:
           return <Step3ContentStructuring />;
