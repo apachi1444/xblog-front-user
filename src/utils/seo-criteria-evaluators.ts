@@ -21,11 +21,14 @@ export type ImprovementFunction = (value: any, formData: GenerateArticleFormData
 // Evaluation functions for each criteria
 export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   // SEO Core Essentials
-  1: (_, formData) => { // keyword_in_title
+  101: (_, formData) => { // keyword_in_title
     const criterion = sections[0].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
     const { title, primaryKeyword } = formData.step1;
+
+    console.log(title, primaryKeyword, " title and primary keyword");
+    
 
     if (!title || !primaryKeyword) {
       return {
@@ -50,7 +53,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     };
   },
 
-  2: (_, formData) => { // keyword_in_meta
+  102: (_, formData) => { // keyword_in_meta
     const criterion = sections[0].criteria[1]
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
@@ -80,7 +83,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     };
   },
 
-  3: (_, formData) => { // keyword_in_url
+  103: (_, formData) => { // keyword_in_url
     const criterion = sections[0].criteria[2]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
@@ -109,7 +112,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     };
   },
 
-  4: (_, formData) => { // keyword_in_first_10
+  104: (_, formData) => { // keyword_in_first_10
     const criterion = sections[0].criteria[3]
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
@@ -142,7 +145,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     };
   },
 
-  5: (_, formData) => { // keyword_in_content
+  105: (_, formData) => { // keyword_in_content
     const criterion = sections[0].criteria[4]
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
@@ -172,7 +175,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     };
   },
 
-  6: (_, formData) => { // content_length
+  106: (_, formData) => { // content_length
     const criterion = sections[0].criteria[5]
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
@@ -211,13 +214,109 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       message: criterion.evaluationStatus.error,
       score: 0,
     };
+  },
+
+  // SEO Boosters
+  201: (_, formData) => { // keyword_in_subheadings
+    const criterion = sections[1].criteria[0]
+    if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
+
+    const { contentDescription, primaryKeyword } = formData.step1;
+
+    if (!contentDescription || !primaryKeyword) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content and primary keyword',
+        score: 0,
+      };
+    }
+
+    // Simple check - in a real implementation, you'd parse the content to find subheadings
+    return {
+      status: 'success',
+      message: criterion.evaluationStatus.success,
+      score: criterion.weight,
+    };
+  },
+
+  202: (_, formData) => { // keyword_density
+    const criterion = sections[1].criteria[1]
+    if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
+
+    const { contentDescription, primaryKeyword } = formData.step1;
+
+    if (!contentDescription || !primaryKeyword) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content and primary keyword',
+        score: 0,
+      };
+    }
+
+    // Simple density check
+    const words = contentDescription.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+    const keywordCount = words.filter(word => word.includes(primaryKeyword.toLowerCase())).length;
+    const density = (keywordCount / words.length) * 100;
+
+    if (density >= 1 && density <= 3) {
+      return {
+        status: 'success',
+        message: criterion.evaluationStatus.success,
+        score: criterion.weight,
+      };
+    }
+
+    if (density > 0) {
+      return {
+        status: 'warning',
+        message: criterion.evaluationStatus.warning || '',
+        score: criterion.warningScore || Math.floor(criterion.weight * 0.7),
+      };
+    }
+
+    return {
+      status: 'error',
+      message: criterion.evaluationStatus.error,
+      score: 0,
+    };
+  },
+
+  // Title Optimization
+  301: (_, formData) => { // keyword_at_start
+    const criterion = sections[2].criteria[0]
+    if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
+
+    const { title, primaryKeyword } = formData.step1;
+
+    if (!title || !primaryKeyword) {
+      return {
+        status: 'pending',
+        message: 'Waiting for title and primary keyword',
+        score: 0,
+      };
+    }
+
+    // Check if title starts with the primary keyword
+    if (title.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
+      return {
+        status: 'success',
+        message: criterion.evaluationStatus.success,
+        score: criterion.weight,
+      };
+    }
+
+    return {
+      status: 'error',
+      message: criterion.evaluationStatus.error,
+      score: 0,
+    };
   }
 };
 
 // Improvement functions for each criteria
 export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   // SEO Core Essentials
-  1: (_, formData) => { // keyword_in_title
+  101: (_, formData) => { // keyword_in_title
     const { title, primaryKeyword } = formData.step1;
     if (!title) return primaryKeyword;
     if (!primaryKeyword) return title;
@@ -229,7 +328,7 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
     return title;
   },
 
-  2: (_, formData) => { // keyword_in_meta
+  102: (_, formData) => { // keyword_in_meta
     const { metaDescription, primaryKeyword } = formData.step1;
     if (!metaDescription) return `Learn about ${primaryKeyword} in this comprehensive guide.`;
     if (!primaryKeyword) return metaDescription;
@@ -241,7 +340,7 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
     return metaDescription;
   },
 
-  3: (_, formData) => { // keyword_in_url
+  103: (_, formData) => { // keyword_in_url
     const { urlSlug, primaryKeyword } = formData.step1;
     if (!urlSlug) return primaryKeyword?.toLowerCase().replace(/\s+/g, '-');
     if (!primaryKeyword) return urlSlug;
@@ -253,6 +352,46 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
     return urlSlug;
   },
 
+  104: (_, formData) => { // keyword_in_first_10
+    const { contentDescription, primaryKeyword } = formData.step1;
+    if (!contentDescription) return `${primaryKeyword} is an important topic...`;
+    if (!primaryKeyword) return contentDescription;
+
+    // Get first 10% of content
+    const firstTenPercent = contentDescription.substring(0, Math.floor(contentDescription.length * 0.1));
+
+    if (!firstTenPercent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+      // Insert the keyword at the beginning
+      return `${primaryKeyword} - ${contentDescription}`;
+    }
+
+    return contentDescription;
+  },
+
+  105: (_, formData) => { // keyword_in_content
+    const { contentDescription, primaryKeyword } = formData.step1;
+    if (!contentDescription) return `This article is about ${primaryKeyword}.`;
+    if (!primaryKeyword) return contentDescription;
+
+    if (!contentDescription.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+      // Add the keyword to the content
+      return `${contentDescription} In conclusion, ${primaryKeyword} is an important topic to understand.`;
+    }
+
+    return contentDescription;
+  },
+
+  301: (_, formData) => { // keyword_at_start
+    const { title, primaryKeyword } = formData.step1;
+    if (!title) return primaryKeyword;
+    if (!primaryKeyword) return title;
+
+    if (!title.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
+      return `${primaryKeyword}: ${title}`;
+    }
+
+    return title;
+  },
 };
 
 // Function to get affected criteria by input field

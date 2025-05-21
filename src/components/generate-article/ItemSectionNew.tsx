@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from "@mui/material/styles";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -13,7 +14,7 @@ import {
   IconButton,
 } from "@mui/material";
 
-import { getCriterionById } from "../../utils/seo-criteria-evaluators";
+import {useCriteriaEvaluation} from "src/sections/generate/hooks/useCriteriaEvaluation";
 
 // Types
 import type { CriterionStatus } from "../../types/criteria.types";
@@ -81,12 +82,10 @@ interface ItemSectionNewProps {
   status: CriterionStatus;
   text: string;
   score: number;
-  maxScore: number;
   tooltip?: string;
   onImprove: (id: number) => void;
   onAdvancedOptimize: (id: number) => void;
   isHighlighted?: boolean;
-  hasWarningState?: boolean;
 }
 
 export function ItemSectionNew({
@@ -94,14 +93,13 @@ export function ItemSectionNew({
   status,
   text,
   score,
-  maxScore,
   tooltip,
   onImprove,
   onAdvancedOptimize,
   isHighlighted = false,
-  hasWarningState = true
 }: ItemSectionNewProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   // Animation for highlighting
   const [highlight, setHighlight] = useState(isHighlighted);
@@ -117,6 +115,8 @@ export function ItemSectionNew({
       return () => clearTimeout(timer);
     }
   }, [isHighlighted]);
+
+  const {getCriterionById} = useCriteriaEvaluation()
 
   // Get criterion details
   const criterion = getCriterionById(id);
@@ -148,9 +148,9 @@ export function ItemSectionNew({
 
   // Use custom tooltip if provided, otherwise use criterion evaluation message or default
   const tooltipText = tooltip ||
-    (criterion && status === "success" ? criterion.evaluationStatus.success :
-     criterion && status === "error" ? criterion.evaluationStatus.error :
-     criterion && status === "warning" && criterion.evaluationStatus.warning ? criterion.evaluationStatus.warning :
+    (criterion && status === "success" ? t(criterion.evaluationStatus.success) :
+     criterion && status === "error" ? t(criterion.evaluationStatus.error) :
+     criterion && status === "warning" && criterion.evaluationStatus.warning ? t(criterion.evaluationStatus.warning) :
      status === "error" ? "This item needs attention to improve your SEO score" :
      status === "warning" ? "This item could be improved for better SEO" :
      status === "success" ? "This item is optimized for SEO" : "");
@@ -297,7 +297,7 @@ export function ItemSectionNew({
               }
             }}
           >
-            Fix
+            Optimize
           </Button>
         )}
       </Box>

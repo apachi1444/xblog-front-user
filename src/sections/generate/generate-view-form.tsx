@@ -12,30 +12,22 @@ import { LoadingAnimation } from 'src/components/generate-article/PublishingLoad
 
 // Custom components
 import { ContentLayout } from './components/ContentLayout';
+import {useCriteriaEvaluation} from './hooks/useCriteriaEvaluation';
 import { Step4Publish } from './generate-steps/steps/step-four-publish';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
-import type { CriteriaState } from './hooks/useCriteriaEvaluation';
 
 interface GenerateViewFormProps {
   activeStep: number;
   steps: { id: number; label: string }[];
-  criteriaState: CriteriaState;
-  totalScore: number;
-  evaluateCriteria: (inputKey: string, value :any) => void;
-  evaluateAllCriteria: () => void;
 }
 
 export function GenerateViewForm({
   activeStep,
   steps,
-  criteriaState,
-  totalScore,
-  evaluateCriteria,
-  evaluateAllCriteria,
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
 
@@ -50,6 +42,8 @@ export function GenerateViewForm({
     showRegenerateDialog: false,
   });
 
+  const { evaluateCriteria} = useCriteriaEvaluation()
+
   const simulateDelay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -58,6 +52,7 @@ export function GenerateViewForm({
     await simulateDelay(1000);
     console.log('Fake title generated');
     setGenerationState((s) => ({ ...s, isGeneratingTitle: false }));
+    return "title"
   };
 
   const handleGenerateSecondaryKeywords = async () => {
@@ -124,6 +119,7 @@ export function GenerateViewForm({
         switch (activeStep) {
         case 0:
           return <Step1ContentSetup
+                    evaluateCriteria={evaluateCriteria}
                     onGenerateTitle={handleGenerateTitle}
                     onGenerateSecondaryKeywords={handleGenerateSecondaryKeywords}
                     onOptimizeContentDescription={handleOptimizeContentDescription}

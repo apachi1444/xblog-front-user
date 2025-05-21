@@ -328,6 +328,7 @@
           "good": "Good",
           "excellent": "Excellent"
         },
+
         "toast": {
           "already_optimized": "This item is already optimized!",
           "optimization_not_available": "Optimization not available for this item yet.",

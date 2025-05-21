@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Button, Tooltip } from '@mui/material';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
-import {CriteriaOptimizationModal} from './CriteriaOptimizationModal';
 
 interface CriteriaOptimizationButtonProps {
   criterionId: number;
@@ -28,8 +27,7 @@ export function CriteriaOptimizationButton({
   }
   
   return (
-    <>
-      <Tooltip title={t('Optimize this criterion')}>
+    <Tooltip title={t('Optimize this criterion')}>
         <Button
           size="small"
           variant="outlined"
@@ -41,13 +39,6 @@ export function CriteriaOptimizationButton({
           {t('Optimize')}
         </Button>
       </Tooltip>
-      
-      <CriteriaOptimizationModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        criterionId={criterionId}
-      />
-    </>
   );
 }
 

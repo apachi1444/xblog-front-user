@@ -1,5 +1,3 @@
-import toast from 'react-hot-toast';
-
 import { Box, useTheme } from '@mui/material';
 
 interface KeywordChipProps {
@@ -34,9 +32,6 @@ export function KeywordChip({ keyword, index, onDelete }: KeywordChipProps) {
       <Box
         component="span"
         onClick={() => {
-          // Show error toast when keyword is removed
-          toast.error(`Keyword "${keyword}" removed`);
-          // Call the onDelete function
           onDelete(keyword);
         }}
         sx={{

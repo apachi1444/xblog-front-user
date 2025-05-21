@@ -1,4 +1,6 @@
-import toast from "react-hot-toast";
+// Custom hooks
+import type { GenerateArticleFormData } from "src/sections/generate/schemas";
+
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from "react-hook-form";
 import { useMemo, useState, useEffect, useCallback } from "react";
@@ -11,12 +13,10 @@ import {
   CardContent,
 } from "@mui/material";
 
-// Custom hooks
 import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEvaluation";
 
 import { ItemSectionNew } from "./ItemSectionNew";
 import { SEO_CRITERIA } from "../../utils/seo-criteria-definitions";
-import { CriteriaOptimizationModal } from "./CriteriaOptimizationModal";
 
 // Types
 
@@ -40,18 +40,37 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
   const theme = useTheme();
   const { t } = useTranslation();
   const COLORS = getColors(theme);
-  const formMethods = useFormContext();
 
-  // State for the optimization modal
-  const [selectedCriterionId, setSelectedCriterionId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // State for the optimization modal (not currently used but kept for future implementation)
+  const [, setSelectedCriterionId] = useState<number | null>(null);
 
   // Use criteria evaluation hook
   const {
     criteriaState,
     totalScore,
-    improveCriterion,
-  } = useCriteriaEvaluation(formMethods);
+    evaluateAllCriteria
+  } = useCriteriaEvaluation();
+
+  console.log(criteriaState, " criteria state ! ");
+
+  // Get form data to watch for changes
+  const form = useFormContext<GenerateArticleFormData>();
+  const formValues = form.watch();
+
+  // Initialize criteria evaluation when the component mounts or form data changes
+  useEffect(() => {
+    console.log("RealTimeScoringTabNew: Initializing criteria evaluation");
+    evaluateAllCriteria();
+  }, [
+    evaluateAllCriteria,
+    formValues?.step1?.primaryKeyword,
+    formValues?.step1?.title,
+    formValues?.step1?.metaTitle,
+    formValues?.step1?.metaDescription,
+    formValues?.step1?.urlSlug,
+    formValues?.step1?.contentDescription
+  ]);
+
 
   // We're using a hardcoded value of 98 as the actual max score
   // but we'll display it as 100 for better user understanding
@@ -69,23 +88,12 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
     return COLORS.success;
   };
 
-  // Handle opening the optimization modal
+  // Handle opening the optimization modal (simplified for now)
   const handleOpenModal = useCallback((criterionId: number) => {
+    console.log(`Would open optimization modal for criterion ${criterionId}`);
     setSelectedCriterionId(criterionId);
-    setIsModalOpen(true);
   }, []);
 
-  // Handle closing the optimization modal
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedCriterionId(null);
-  }, []);
-
-  // Handle improving a criterion
-  const handleImproveCriterion = useCallback((criterionId: number) => {
-    improveCriterion(criterionId);
-    toast.success('Optimizing...');
-  }, [improveCriterion]);
 
   return (
     <CardContent
@@ -202,11 +210,13 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
           <Stack spacing={1}>
             {group.criteria.map((criterion) => {
               const result = criteriaState[criterion.id];
-              const status = result?.status || 'error';
+              const status = result?.status || 'pending';
+              // Get the message from the result or use a default
               const message = result?.message || 'Not evaluated';
+
+              // Check if the message is a translation key (starts with 'seo.')
+              const needsTranslation = message.startsWith('seo.');
               const score = result?.score || 0;
-              // Default to true for hasWarningState if not specified
-              const hasWarningState = true;
 
               return (
                 <ItemSectionNew
@@ -215,11 +225,9 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
                   status={status}
                   text={t(criterion.description)}
                   score={score}
-                  maxScore={criterion.weight}
-                  tooltip={message}
-                  onImprove={handleImproveCriterion}
+                  tooltip={needsTranslation ? t(message) : message}
+                  onImprove={() => {}}
                   onAdvancedOptimize={handleOpenModal}
-                  hasWarningState={hasWarningState}
                   isHighlighted={false}
                 />
               );
@@ -227,15 +235,6 @@ export function RealTimeScoringTabNew({ totalMaxScore: propTotalMaxScore = 100 }
           </Stack>
         </Box>
       ))}
-
-      {/* Optimization Modal */}
-      {selectedCriterionId !== null && (
-        <CriteriaOptimizationModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
-          criterionId={selectedCriterionId}
-        />
-      )}
     </CardContent>
   );
 }

@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { AnimatePresence } from "framer-motion";
 import { useWatch, useFormContext } from "react-hook-form";
@@ -25,7 +25,7 @@ import { GenerationPlaceholder } from "../../components/GenerationPlaceholder";
 import type { GenerateArticleFormData } from "../../schemas";
 
 export interface Step1ContentSetupProps {
-  onGenerateTitle: () => Promise<void>;
+  onGenerateTitle: () => Promise<string>;
   onGenerateSecondaryKeywords: () => Promise<void>;
   onOptimizeContentDescription: () => Promise<void>;
   onGenerateMeta: () => Promise<void>;
@@ -33,6 +33,7 @@ export interface Step1ContentSetupProps {
   isGeneratingTitle?: boolean;
   isGeneratingKeywords?: boolean;
   isOptimizingDescription?: boolean;
+  evaluateCriteria: (id: string, value: string) => void;
 }
 
 export function Step1ContentSetup({
@@ -43,7 +44,8 @@ export function Step1ContentSetup({
   isGeneratingMeta,
   isGeneratingTitle: externalIsGeneratingTitle,
   isGeneratingKeywords: externalIsGeneratingKeywords,
-  isOptimizingDescription: externalIsOptimizingDescription
+  isOptimizingDescription: externalIsOptimizingDescription,
+  evaluateCriteria,
 }: Step1ContentSetupProps) {
 
   // Get the form from the state prop
@@ -94,6 +96,10 @@ export function Step1ContentSetup({
     name: "step1.urlSlug",
   })
 
+  useEffect(() => {
+    evaluateCriteria("primaryKeyword", primaryKeyword);
+  }, [primaryKeyword, evaluateCriteria]);
+
   const metaInformation = !!metaTitle && !!metaDescription && !!urlSlug
 
   // Primary keyword should always be enabled since we have default values for language and targetCountry
@@ -134,15 +140,11 @@ export function Step1ContentSetup({
     }
 
     try {
-      await onGenerateTitle();
+      const generatedTitle = await onGenerateTitle();
+      setValue("step1.title", generatedTitle);
     } catch (error) {
-      console.error("Error generating title:", error);
-    } finally {
-      // Only set local state if external state is not provided
-      if (externalIsGeneratingTitle === undefined) {
-        setLocalIsGeneratingTitle(false);
-      }
-    }
+      toast.error("Error generating title:");
+    } 
   };
 
   // Update the secondary keywords generation handler to use the state prop

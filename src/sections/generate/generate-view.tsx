@@ -1,7 +1,7 @@
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
 
 // Layout components
 
@@ -13,7 +13,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { GenerateViewForm } from './generate-view-form';
 // Custom components
 import { StepNavigation } from './components/StepNavigation';
-import {useCriteriaEvaluation} from './hooks/useCriteriaEvaluation';
 // Types
 import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 // Step components
@@ -58,9 +57,6 @@ export function GeneratingView() {
     },
   });
 
-  const { criteriaState, totalScore, evaluateCriteria, evaluateAllCriteria } = useCriteriaEvaluation()
-
-
   const onSubmit = useCallback(async (data: GenerateArticleFormData) => {
     console.log("Form submitted:", data)
     // Return a resolved promise to ensure proper async handling
@@ -74,10 +70,6 @@ export function GeneratingView() {
     { id: 3, label: "Content Structuring" },
     { id: 4, label: "Publish" }
   ];
-
-  useEffect(() => {
-    evaluateAllCriteria()
-  }, [evaluateAllCriteria])
 
   const handleNextStep = () => {
     setActiveStep((prev) => Math.min(prev + 1, 4))
@@ -94,10 +86,6 @@ export function GeneratingView() {
         <GenerateViewForm
           activeStep={activeStep}
           steps={steps}
-          totalScore={totalScore}
-          criteriaState={criteriaState}
-          evaluateCriteria={evaluateCriteria}
-          evaluateAllCriteria={evaluateAllCriteria}
         />
         {/* Navigation buttons with internal validation logic */}
         <StepNavigation

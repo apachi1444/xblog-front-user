@@ -58,7 +58,7 @@ export function SEODashboard({
   const COLORS = getColors(theme);
 
   // Use criteria evaluation hook to get score information
-  const { totalScore, evaluateAllCriteria } = useCriteriaEvaluation(form);
+  const { totalScore, evaluateAllCriteria } = useCriteriaEvaluation();
 
 
   // Calculate normalized score (out of 100)
@@ -87,7 +87,12 @@ export function SEODashboard({
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-  }, []);
+
+    // If switching to the Real-time Scoring tab, re-evaluate all criteria
+    if (newValue === 1) {
+      evaluateAllCriteria();
+    }
+  }, [evaluateAllCriteria]);
 
   const handleToggleContent = useCallback(() => {
     if (isCollapsed !== undefined && onCollapseChange) {
