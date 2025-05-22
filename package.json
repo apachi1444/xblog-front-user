@@ -84,6 +84,7 @@
     "dayjs": "^1.11.13",
     "framer-motion": "^12.7.2",
     "history": "^5.3.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.475.0",
     "mui-tiptap": "^1.18.1",
     "notistack": "^3.0.2",

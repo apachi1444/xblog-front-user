@@ -23,6 +23,7 @@ export const StoresPage = lazy(() => import('src/pages/stores'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const SignUpPage = lazy(() => import('src/pages/sign-up'));
+export const VerifyEmailPage = lazy(() => import('src/pages/verify-email'));
 export const ForgotPasswordPage = lazy(() => import('src/pages/forgot-password'));
 export const ResetPasswordPage = lazy(() => import('src/pages/reset-password'));
 export const SettingsPage = lazy(() => import('src/pages/settings'));
@@ -245,6 +246,16 @@ export function Router() {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <AuthLayout>
             <SignUpPage />
+          </AuthLayout>
+        </ErrorBoundary>
+      ),
+    },
+    {
+      path: 'verify-email',
+      element: (
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <AuthLayout>
+            <VerifyEmailPage />
           </AuthLayout>
         </ErrorBoundary>
       ),
