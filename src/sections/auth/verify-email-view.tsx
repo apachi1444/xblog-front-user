@@ -1,6 +1,5 @@
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -19,7 +18,6 @@ import { Logo } from 'src/components/logo';
 export function VerifyEmailView() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
   // Get token from URL query parameters
@@ -93,6 +91,7 @@ export function VerifyEmailView() {
         sx={{
           p: 4,
           maxWidth: 480,
+          minWidth: 350,
           width: '100%',
           textAlign: 'center',
           borderRadius: 2,

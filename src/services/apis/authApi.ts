@@ -49,7 +49,7 @@ interface RequestPasswordResetResponse {
 
 interface ResetPasswordRequest {
   token: string;
-  password: string;
+  new_password: string;
 }
 
 interface ResetPasswordResponse {
