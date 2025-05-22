@@ -50,7 +50,7 @@ export function SignUpView() {
       email: '',
       password: '',
     },
-    mode: 'onBlur', // Validate on blur for better UX
+    mode: 'onChange', // Validate on blur for better UX
   });
 
   // Use the form error handler hook
@@ -73,10 +73,18 @@ export function SignUpView() {
       // Redirect to sign in page after a delay
       setTimeout(() => {
         router.push('/sign-in');
-      }, 2000);
-    } catch (error) {
+      }, 500);
+    } catch (error: any) {
       console.error('Sign up error:', error);
-      toast.error('Failed to create account. Please try again.');
+
+      // Check if the error has a detail field (common in API validation errors)
+      if (error.data && error.data.detail) {
+        // Display the specific error message from the API
+        toast.error(error.data.detail);
+      } else {
+        // Fallback to generic error message
+        toast.error('Failed to create account. Please try again.');
+      }
     }
   }, [signUp, router]);
 
@@ -102,9 +110,17 @@ export function SignUpView() {
       setTimeout(() => {
         router.push('/');
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google sign up error:', error);
-      toast.error('Failed to sign up with Google. Please try again.');
+
+      // Check if the error has a detail field (common in API validation errors)
+      if (error.data && error.data.detail) {
+        // Display the specific error message from the API
+        toast.error(error.data.detail);
+      } else {
+        // Fallback to generic error message
+        toast.error('Failed to sign up with Google. Please try again.');
+      }
     }
   };
 
@@ -148,6 +164,7 @@ export function SignUpView() {
         {/* Updated form with react-hook-form */}
         <FormContainer formContext={formMethods} onSuccess={handleSignUp}>
           <TextFieldElement
+            {...formMethods.register('name')}
             name="name"
             label={t('auth.signup.fullName', "Full Name")}
             fullWidth
@@ -156,6 +173,7 @@ export function SignUpView() {
           />
 
           <TextFieldElement
+            {...formMethods.register('email')}
             name="email"
             label={t('auth.signup.email', "Email address")}
             fullWidth
@@ -164,6 +182,7 @@ export function SignUpView() {
           />
 
           <PasswordElement
+            {...formMethods.register('password')}
             name="password"
             label={t('auth.signup.password', "Password")}
             fullWidth

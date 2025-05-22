@@ -43,6 +43,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
 
+
+  console.log(user , " user " , subscriptionDetails , " subscriptionDetails ");
+  
+
   // Simple state for popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -87,8 +91,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       dispatch(logout());
 
       // Clear storage
-      localStorage.removeItem('auth');
-      sessionStorage.removeItem('access_token');
+      localStorage.removeItem('xblog_auth_session_v2');
 
       // Use direct navigation for more reliable routing
       window.location.href = '/sign-in';
@@ -120,15 +123,14 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         {...other}
       >
         <Avatar
-          src={user?.avatar || _myAccount.photoURL}
+          src={user?.avatar?.includes('http') ? user?.avatar : _myAccount.photoURL}
           alt={_myAccount.displayName}
           sx={{
             width: 40,
             height: 40,
           }}
-        >
-          {_myAccount.displayName.charAt(0).toUpperCase()}
-        </Avatar>
+        />
+        
       </IconButton>
 
       <Popover
@@ -167,12 +169,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar
-              src={user?.avatar || _myAccount.photoURL}
+              src={user?.avatar?.includes('http') ? user?.avatar : _myAccount.photoURL}
               alt={_myAccount.displayName}
               sx={{ width: 36, height: 36, mr: 1.5 }}
-            >
-              {_myAccount.displayName.charAt(0).toUpperCase()}
-            </Avatar>
+            />
             <Box>
               <Typography variant="subtitle2" noWrap>
                 {user?.name || _myAccount?.displayName}

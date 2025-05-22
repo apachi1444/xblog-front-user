@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 import type { RootState } from 'src/services/store';
 import type { CredentialResponse} from '@react-oauth/google';
 import type { SignInFormData} from 'src/validation/auth-schemas';
@@ -112,7 +113,8 @@ export function SignInView() {
       // First set the credentials to ensure the token is available for the next API call
       dispatch(setCredentials({accessToken, user: null}));
 
-      // Now fetch user data with the token already in place
+      // The token is now available in localStorage and will be manually injected
+      // in the getCurrentUser query even if Redux state hasn't updated yet
       const userData = await getCurrentUser().unwrap();
       const isOnboardingCompleted = userData?.is_completed_onboarding ?? false;
 
@@ -121,11 +123,17 @@ export function SignInView() {
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
 
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
-    } catch (error) {
+    } catch (error: any) {
       if (testMode) {
         handleTestModeLogin();
       } else {
-        console.error('Failed to fetch user data:', error);
+        // Check if the error has a detail field (common in API validation errors)
+        if (error.data && error.data.detail) {
+          // Display the specific error message from the API
+          toast.error(error.data.detail);
+        } else {
+          toast.error('Failed to fetch user data. Please try again.');
+        }
         // Token is already set in the first dispatch
       }
     }
@@ -155,8 +163,16 @@ export function SignInView() {
 
       toast.success('Successfully signed in!');
       await handleAuthSuccess(result.token_access);
-    } catch (error) {
-      toast.error('Login failed. Please check your credentials and try again.');
+    } catch (error: any) {
+      // Check if the error has a detail field (common in API validation errors)
+      if (error.data && error.data.detail) {
+        // Display the specific error message from the API
+        toast.error(error.data.detail);
+      } else {
+        // Fallback to generic error message
+        toast.error('Login failed. Please check your credentials and try again.');
+      }
+      console.error('Login error:', error);
     }
   }, [login, handleAuthSuccess, testMode, handleTestModeLogin]);
 
@@ -182,8 +198,16 @@ export function SignInView() {
 
       toast.success('Successfully signed in with Google!');
       await handleAuthSuccess(result.token_access);
-    } catch (error) {
-      toast.error('Failed to authenticate with Google. Please try again.');
+    } catch (error: any) {
+      // Check if the error has a detail field (common in API validation errors)
+      if (error.data && error.data.detail) {
+        // Display the specific error message from the API
+        toast.error(error.data.detail);
+      } else {
+        // Fallback to generic error message
+        toast.error('Failed to authenticate with Google. Please try again.');
+      }
+      console.error('Google auth error:', error);
     }
   }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
 
@@ -278,6 +302,7 @@ export function SignInView() {
       {/* Update form labels with translations */}
       <FormContainer formContext={formMethods} onSuccess={handleSignIn}>
         <TextFieldElement
+          {...formMethods.register('email')}
           name="email"
           label={t('auth.signin.email', 'Email address')}
           fullWidth
@@ -287,6 +312,7 @@ export function SignInView() {
         />
 
         <PasswordElement
+          {...formMethods.register('password')}
           name="password"
           label={t('auth.signin.password', 'Password')}
           fullWidth

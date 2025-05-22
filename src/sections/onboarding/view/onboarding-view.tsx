@@ -14,11 +14,16 @@ import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
+import LoadingButton from '@mui/lab/LoadingButton';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import toast from 'react-hot-toast';
 
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
-import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
+import {
+  useGetSubscriptionPlansQuery,
+  useCreateSubscriptionMutation
+} from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 import { ResponsivePricingPlans } from 'src/components/pricing';
@@ -48,13 +53,10 @@ export function OnBoardingView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const {
-    data: plansData,
-  } = useGetSubscriptionPlansQuery();
-  console.log(plansData, " data !");
-
-  // Initialize the updateUser mutation
+  // Initialize the queries and mutations
+  useGetSubscriptionPlansQuery(); // This is used by ResponsivePricingPlans component
   const [updateUser] = useUpdateUserMutation();
+  const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
 
   // Check if onboarding is already completed
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
@@ -115,13 +117,19 @@ export function OnBoardingView() {
   // Handle complete onboarding
   const handleComplete = async () => {
     // Save user preferences and mark onboarding as completed
-    const userPreferences = {
-      interests: selectedInterests,
-      heard_about_us: referralSource,
-      is_completed_onboarding: true,
-    };
 
     try {
+      // First, create a subscription if a plan was selected
+      if (selectedPlan) {
+        try {
+          await createSubscription({ plan_id: selectedPlan }).unwrap();
+          toast.success('Subscription created successfully!');
+        } catch (subscriptionError) {
+          console.error('Failed to create subscription:', subscriptionError);
+          toast.error('Failed to create subscription. You can select a plan later.');
+        }
+      }
+
       // Send the user preferences to the API
       await updateUser({
         interests: selectedInterests.join(","),
@@ -129,7 +137,7 @@ export function OnBoardingView() {
         is_completed_onboarding: true,
       }).unwrap();
 
-      console.log('Saved user preferences:', userPreferences);
+      toast.success('Onboarding completed successfully!');
 
       // Mark onboarding as completed in Redux store
       dispatch(setOnboardingCompleted(true));
@@ -138,6 +146,8 @@ export function OnBoardingView() {
       navigate('/');
     } catch (error) {
       console.error('Failed to save user preferences:', error);
+      toast.error('Failed to save preferences, but we\'ll continue anyway.');
+
       // Still mark as completed in the local store and navigate
       // to avoid blocking the user
       dispatch(setOnboardingCompleted(true));
@@ -368,17 +378,19 @@ export function OnBoardingView() {
                 size="large"
                 onClick={() => setStep(1)}
                 sx={{ px: 3 }}
+                disabled={isCreatingSubscription}
               >
                 Back
               </Button>
-              <Button
+              <LoadingButton
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
+                loading={isCreatingSubscription}
                 sx={{ px: 5 }}
               >
                 {selectedPlan ? 'Get Started' : 'Continue with Free Plan'}
-              </Button>
+              </LoadingButton>
             </Box>
           </Stack>
         )}
