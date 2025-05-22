@@ -132,6 +132,10 @@ export function OnBoardingView() {
 
       // Send the user preferences to the API
       await updateUser({
+        name: 'John Doe',
+        avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=John%20Doe',
+        telephone: '1234567890',
+        is_active: true,
         interests: selectedInterests.join(","),
         heard_about_us: referralSource,
         is_completed_onboarding: true,
