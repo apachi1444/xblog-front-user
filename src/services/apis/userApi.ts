@@ -28,14 +28,13 @@ export const userApi = api.injectEndpoints({
         url: `${USER_BASE_URL}/me`,
         method: 'GET',
       }),
-      providesTags: ['User'],
     }),
 
     // Update user information
     updateUser: builder.mutation<AuthUser, UpdateUserRequest>({
       query: (userData) => ({
         url: `${USER_BASE_URL}/me`,
-        method: 'PUT',
+        method: 'PATCH',
         body: userData,
       }),
       invalidatesTags: ['User'],
@@ -45,7 +44,6 @@ export const userApi = api.injectEndpoints({
 
 // Export hooks
 export const {
-  useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
   useUpdateUserMutation,
 } = userApi;

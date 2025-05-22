@@ -109,20 +109,24 @@ export function SignInView() {
     }
 
     try {
+      // First set the credentials to ensure the token is available for the next API call
+      dispatch(setCredentials({accessToken, user: null}));
+
+      // Now fetch user data with the token already in place
       const userData = await getCurrentUser().unwrap();
       const isOnboardingCompleted = userData?.is_completed_onboarding ?? false;
 
+      // Update with complete user data
       dispatch(setCredentials({accessToken, user: userData}));
       dispatch(setOnboardingCompleted(isOnboardingCompleted));
-
 
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
     } catch (error) {
       if (testMode) {
         handleTestModeLogin();
       } else {
-        dispatch(setCredentials({accessToken, user: null}));
         console.error('Failed to fetch user data:', error);
+        // Token is already set in the first dispatch
       }
     }
   }, [testMode, handleTestModeLogin, router, getCurrentUser, dispatch]);
@@ -143,6 +147,11 @@ export function SignInView() {
       if (!result?.token_access) {
         throw new Error('Invalid login response');
       }
+
+      // Save token to localStorage immediately (no delay)
+      localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
+        accessToken: result.token_access,
+      }));
 
       toast.success('Successfully signed in!');
       await handleAuthSuccess(result.token_access);
@@ -165,6 +174,11 @@ export function SignInView() {
       if (!result?.token_access) {
         throw new Error('Invalid authentication response');
       }
+
+      // Save token to localStorage immediately
+      localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
+        accessToken: result.token_access,
+      }));
 
       toast.success('Successfully signed in with Google!');
       await handleAuthSuccess(result.token_access);

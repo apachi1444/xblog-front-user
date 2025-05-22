@@ -849,7 +849,7 @@ const setupMocks = () => {
 };
 
 // Initial setup
-setupMocks();
+// setupMocks();
 
 const getRequestConfig = (
   args: string | (AxiosRequestConfig & { body?: AxiosRequestConfig['data'] }),
@@ -888,10 +888,7 @@ const axiosBaseQuery =
     // Add the X-API-KEY header for authentication
     const requestHeaders = {
       ...headers,
-      'Access-Control-Allow-Origin': '*'
     };
-
-    console.log('Request headers:', requestHeaders);
 
     try {
       const result = await customRequest({
@@ -904,9 +901,6 @@ const axiosBaseQuery =
       });
       return { data: result.data };
     } catch (axiosError) {
-      console.log('Error occurred. Headers sent:', requestHeaders);
-      console.error('Error details:', axiosError);
-
       const err = axiosError as AxiosError;
       return {
         error: {

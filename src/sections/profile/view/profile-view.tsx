@@ -30,7 +30,6 @@ import {
 import { DashboardContent } from 'src/layouts/dashboard';
 import {
   useGetUserInvoicesQuery,
-  useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
 import { ResponsivePricingPlans } from 'src/components/pricing';
@@ -65,12 +64,8 @@ export function ProfileView() {
 
   const { data: invoicesData, isLoading: isLoadingInvoices } = useGetUserInvoicesQuery();
 
-  // Fetch subscription plans
-  const { data: plansData, isLoading: isLoadingPlans } = useGetSubscriptionPlansQuery();
 
-
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
@@ -140,14 +135,14 @@ export function ProfileView() {
                         size="small"
                         onClick={handleSaveProfile}
                       >
-                        {t('common.save')}
+                        Save
                       </Button>
                       <Button
                         variant="outlined"
                         size="small"
                         onClick={() => setIsEditing(false)}
                       >
-                        {t('common.cancel')}
+                        Cancel
                       </Button>
                     </Box>
                   </Box>
@@ -212,35 +207,6 @@ export function ProfileView() {
           </Grid>
         </Card>
 
-        {/* Subscription Details (Expandable) */}
-        {showSubscriptionDetails && plansData?.plans && (
-          <Card sx={{ mb: 5, p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('profile.subscription.planFeatures', { plan: 'Professional' })}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            <Grid container spacing={2}>
-              {plansData.plans.find(plan => plan.name === 'Professional')?.features.map((feature, index) => (
-                <Grid item xs={12} sm={6} key={index}>
-                  <Box display="flex" alignItems="center">
-                    <Box
-                      sx={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        bgcolor: 'primary.main',
-                        mr: 1.5,
-                      }}
-                    />
-                    <Typography variant="body2">{feature}</Typography>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Card>
-        )}
-
         {/* Tabs for different sections */}
         <Box sx={{ width: '100%', mb: 3 }}>
           <Tabs
@@ -276,21 +242,6 @@ export function ProfileView() {
               <Box sx={{ mt: 2 }}>
                 {/* Use the ResponsivePricingPlans component */}
                 <ResponsivePricingPlans
-                  plans={plansData?.plans.map(plan => ({
-                    id: plan.id || plan.name,
-                    name: plan.name,
-                    price: plan.price,
-                    period: '/month',
-                    description: '',
-                    features: plan.features,
-                    popular: plan.highlight || false,
-                    current: plan.current || false,
-                    highlight: plan.highlight || false,
-                    icon: 'mdi:check-circle',
-                    buttonText: plan.current ? t('profile.subscription.currentPlan', 'Current Plan') : t('profile.subscription.upgrade', 'Upgrade'),
-                    buttonVariant: plan.current ? 'outlined' : 'contained',
-                    disabled: plan.current || false,
-                  })) || []}
                   onSelectPlan={(planId) => navigate(`/subscription/upgrade?plan=${planId}`)}
                   gridColumns={{ xs: 1, sm: 1, md: 3 }}
                   title=""

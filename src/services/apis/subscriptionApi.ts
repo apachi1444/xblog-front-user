@@ -1,7 +1,7 @@
 import { api } from '.';
 
 // Define the base URL for subscription endpoints
-const SUBSCRIPTION_BASE_URL = '/subscriptions';
+const SUBSCRIPTION_BASE_URL = 'subscriptions';
 
 // Interface for invoice data
 export interface Invoice {
@@ -41,14 +41,11 @@ export interface SubscriptionPlan {
   id: string;
   name: string;
   price: string;
-  features: string[];
-  current: boolean;
+  features: string[] | null; // Features might be null from the backend
+  url: string;
+  // Additional properties that might be used in the UI
+  current?: boolean;
   highlight?: boolean;
-}
-
-// Interface for subscription plans response
-export interface SubscriptionPlansResponse {
-  plans: SubscriptionPlan[];
 }
 
 // RTK Query endpoints for subscription operations
@@ -71,16 +68,16 @@ export const subscriptionApi = api.injectEndpoints({
     }),
 
     // Get subscription plans
-    getSubscriptionPlans: builder.query<SubscriptionPlansResponse, void>({
+    getSubscriptionPlans: builder.query<SubscriptionPlan[], void>({
       query: () => ({
-        url: `${SUBSCRIPTION_BASE_URL}/plans`,
+        url: '/all/plans',
         method: 'GET',
       }),
     }),
 
-    createSubscription: builder.mutation<void, { planId: string }>({
+    createSubscription: builder.mutation<void, { plan_id: string }>({
       query: (data) => ({
-        url: `${SUBSCRIPTION_BASE_URL}/create`,
+        url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'POST',
         body: data,
       }),
@@ -102,7 +99,6 @@ export const {
   useGetUserInvoicesQuery,
   useLazyGetUserInvoicesQuery,
   useGetSubscriptionDetailsQuery,
-  useLazyGetSubscriptionDetailsQuery,
   useGetSubscriptionPlansQuery,
   useLazyGetSubscriptionPlansQuery,
   useUpgradeSubscriptionMutation,

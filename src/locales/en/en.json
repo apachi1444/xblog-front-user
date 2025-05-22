@@ -463,6 +463,25 @@
         }
       }
       },
+      "pricing": {
+        "title": "Pricing",
+        "subtitle": "Choose a plan that works for you",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "savePercent": "Save {{percent}}%",
+        "perMonth": "/month",
+        "perYear": "/year",
+        "mostPopular": "Most Popular",
+        "getStarted": "Get Started",
+        "currentPlanLabel": "Your Current Plan",
+        "currentPlan": "Current Plan",
+        "choosePlan": "Choose Plan",
+        "upgradePlan": "Upgrade Plan",
+        "contactSales": "Contact Sales",
+        "comparePlans": "Compare Plans",
+        "faq": "Frequently Asked Questions",
+        "faqSubtitle": "Have questions? We're here to help."
+      },
       "profile": {
         "title": "Profile",
         "subtitle": "Manage your account settings and subscription",

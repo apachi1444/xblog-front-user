@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { differenceInDays } from 'date-fns';
 
-import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 
 export interface SubscriptionExpirationResult {
   isExpiringSoon: boolean;

@@ -13,17 +13,17 @@ import { alpha, useTheme } from '@mui/material/styles';
 
 import { usePlanIcons } from 'src/hooks/usePlanIcons';
 
+import { useGetSubscriptionPlansQuery, type SubscriptionPlan as ApiSubscriptionPlan } from 'src/services/apis/subscriptionApi';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export interface PricingPlan {
-  id: string;
-  name: string;
-  price: string | number;
+// Extended interface for UI display purposes
+export interface PricingPlan extends Omit<ApiSubscriptionPlan, 'features'> {
   period?: string;
   description?: string;
-  features: string[];
+  features: string[] | null; // Make features nullable to match backend response
   popular?: boolean;
   current?: boolean;
   highlight?: boolean;
@@ -34,61 +34,70 @@ export interface PricingPlan {
 }
 
 export interface PricingPlansProps {
-  plans: PricingPlan[];
   title?: string;
   subtitle?: string;
   onSelectPlan?: (planId: string) => void;
   selectedPlan?: string | null;
   layout?: 'grid' | 'list';
   gridColumns?: { xs?: number; sm?: number; md?: number; lg?: number };
+  plans?: PricingPlan[]; // Allow passing plans directly to the component
   sx?: any;
 }
 
 export function PricingPlans({
-  plans,
   title = 'Flexible plans for your community\'s size and needs',
   subtitle = 'Choose your plan and start creating content today',
   onSelectPlan,
   selectedPlan: externalSelectedPlan,
   layout = 'grid',
   gridColumns = { xs: 1, sm: 1, md: 3 },
+  plans: externalPlans,
   sx = {},
 }: PricingPlansProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { getPlanIcon } = usePlanIcons();
-  
+
+  const {
+    data,
+    isLoading,
+    error
+  } = useGetSubscriptionPlansQuery();
+
+  // Use external plans if provided, otherwise fetch from API
+  const plans: PricingPlan[] = externalPlans || (data || [])
+
   // Use external selectedPlan if provided, otherwise manage internally
   const [internalSelectedPlan, setInternalSelectedPlan] = useState<string | null>(
     externalSelectedPlan || (plans.find(plan => plan.current)?.id || null)
   );
-  
+
   // Use the appropriate selectedPlan value
   const selectedPlanValue = externalSelectedPlan !== undefined ? externalSelectedPlan : internalSelectedPlan;
-  
+
   const handleSelectPlan = useCallback((planId: string) => {
     if (externalSelectedPlan === undefined) {
       setInternalSelectedPlan(planId);
     }
-    
+
     if (onSelectPlan) {
       onSelectPlan(planId);
     }
   }, [externalSelectedPlan, onSelectPlan]);
-  
+
   // Render a single plan card
   const renderPlanCard = (plan: PricingPlan) => {
     const isSelected = selectedPlanValue === plan.id;
     const buttonVariant = plan.buttonVariant || (isSelected ? 'contained' : 'outlined');
     const buttonText = plan.buttonText || (plan.current ? t('pricing.currentPlan', 'Current Plan') : t('pricing.choosePlan', 'Choose Plan'));
-    
+
     // Get icon based on plan type if not provided
     const iconToUse = plan.icon || getPlanIcon(plan.name);
-    
+
     return (
-      <Card 
+      <Card
         key={plan.id}
-        sx={{ 
+        sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -129,7 +138,7 @@ export function PricingPlans({
             <Iconify icon="mdi:star" sx={{ color: 'common.white', fontSize: 16 }} />
           </Box>
         )}
-        
+
         {plan.current && (
           <Box
             sx={{
@@ -149,14 +158,14 @@ export function PricingPlans({
             {t('pricing.currentPlan', 'Current Plan')}
           </Box>
         )}
-        
+
         <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Plan Icon - Always show an icon */}
-          <Box 
-            sx={{ 
-              mb: 2, 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Box
+            sx={{
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               width: 48,
               height: 48,
@@ -166,19 +175,19 @@ export function PricingPlans({
           >
             <Iconify icon={iconToUse} sx={{ color: 'primary.main', fontSize: 24 }} />
           </Box>
-          
+
           {/* Plan Name */}
           <Typography variant="h6" gutterBottom>
             {plan.name}
           </Typography>
-          
+
           {/* Plan Description */}
           {plan.description && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               {plan.description}
             </Typography>
           )}
-          
+
           {/* Plan Price */}
           <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
             <Typography variant="h4" component="span">
@@ -190,26 +199,67 @@ export function PricingPlans({
               </Typography>
             )}
           </Box>
-          
+
           <Divider sx={{ my: 2 }} />
-          
+
           {/* Plan Features */}
           <Stack spacing={1.5} sx={{ mb: 3, flexGrow: 1 }}>
-            {plan.features.map((feature, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Iconify 
-                  icon="mdi:check-circle" 
-                  sx={{ 
-                    color: 'success.main', 
-                    mr: 1.5,
-                    fontSize: 20,
-                  }} 
-                />
-                <Typography variant="body2">{feature}</Typography>
-              </Box>
-            ))}
+            {/* Show default features if none are provided from the backend */}
+            {(!plan.features || plan.features.length === 0) ? (
+              // Default features based on plan type
+              <>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 20,
+                    }}
+                  />
+                  <Typography variant="body2">{plan.name === 'Free' ? 'Basic content generation' : 'Advanced content generation'}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 20,
+                    }}
+                  />
+                  <Typography variant="body2">{plan.name === 'Free' ? 'Limited articles per month' : 'Unlimited articles'}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 20,
+                    }}
+                  />
+                  <Typography variant="body2">{plan.name === 'Free' ? 'Basic support' : 'Priority support'}</Typography>
+                </Box>
+              </>
+            ) : (
+              // Show actual features from the backend if available
+              plan.features.map((feature, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 20,
+                    }}
+                  />
+                  <Typography variant="body2">{feature}</Typography>
+                </Box>
+              ))
+            )}
           </Stack>
-          
+
           {/* Action Button */}
           <Button
             fullWidth
@@ -225,7 +275,40 @@ export function PricingPlans({
       </Card>
     );
   };
-  
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="text.secondary">
+          Loading subscription plans...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="error.main">
+          Failed to load subscription plans. Please try again later.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Handle empty plans
+  if (!plans || plans.length === 0) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="text.secondary">
+          No subscription plans available at the moment.
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ py: 4, ...sx }}>
       {/* Header */}
@@ -243,7 +326,7 @@ export function PricingPlans({
           )}
         </Box>
       )}
-      
+
       {/* Plans */}
       {layout === 'grid' ? (
         <Grid container spacing={3}>

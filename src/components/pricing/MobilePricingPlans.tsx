@@ -15,36 +15,60 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 
 import { usePlanIcons } from 'src/hooks/usePlanIcons';
 
+import { useGetSubscriptionPlansQuery, type SubscriptionPlan as ApiSubscriptionPlan } from 'src/services/apis/subscriptionApi';
+
 import { Iconify } from 'src/components/iconify';
 
-import type { PricingPlan } from './PricingPlans';
+// Extended interface for UI display purposes
+export interface PricingPlan extends Omit<ApiSubscriptionPlan, 'features'> {
+  period?: string;
+  description?: string;
+  features: string[] | null; // Make features nullable to match backend response
+  popular?: boolean;
+  current?: boolean;
+  highlight?: boolean;
+  icon?: string;
+  buttonText?: string;
+  buttonVariant?: 'contained' | 'outlined' | 'text';
+  disabled?: boolean;
+}
+
 
 // ----------------------------------------------------------------------
 
 export interface MobilePricingPlansProps {
-  plans: PricingPlan[];
   title?: string;
   subtitle?: string;
   onSelectPlan?: (planId: string) => void;
   selectedPlan?: string | null;
+  plans?: PricingPlan[]; // Allow passing plans directly to the component
   sx?: any;
 }
 
 export function MobilePricingPlans({
-  plans,
   title = 'Flexible plans for your community\'s size and needs',
   subtitle = 'Choose your plan and start creating content today',
   onSelectPlan,
   selectedPlan: externalSelectedPlan,
+  plans: externalPlans,
   sx = {},
 }: MobilePricingPlansProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { getPlanIcon, getLocalizedPlanName } = usePlanIcons();
+  const { getPlanIcon } = usePlanIcons();
+
+  const {
+    data,
+    isLoading,
+    error
+  } = useGetSubscriptionPlansQuery();
+
+  // Use external plans if provided, otherwise fetch from API
+  const plans: PricingPlan[] = externalPlans || data || [];
 
   // State for the carousel
   const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = plans.length;
+  const maxSteps = plans.length || 0;
 
   // Use external selectedPlan if provided, otherwise manage internally
   const [internalSelectedPlan, setInternalSelectedPlan] = useState<string | null>(
@@ -71,6 +95,39 @@ export function MobilePricingPlans({
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="text.secondary">
+          Loading subscription plans...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="error.main">
+          Failed to load subscription plans. Please try again later.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Handle empty plans
+  if (!plans || plans.length === 0) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center', ...sx }}>
+        <Typography variant="h6" color="text.secondary">
+          No subscription plans available at the moment.
+        </Typography>
+      </Box>
+    );
+  }
 
   // Current plan being displayed
   const currentPlan = plans[activeStep];
@@ -198,19 +255,60 @@ export function MobilePricingPlans({
 
           {/* Plan Features */}
           <Stack spacing={1.5} sx={{ mb: 3 }}>
-            {currentPlan.features.map((feature, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Iconify
-                  icon="mdi:check-circle"
-                  sx={{
-                    color: 'success.main',
-                    mr: 1.5,
-                    fontSize: 18,
-                  }}
-                />
-                <Typography variant="body2">{feature}</Typography>
-              </Box>
-            ))}
+            {/* Show default features if none are provided from the backend */}
+            {(!currentPlan.features || currentPlan.features.length === 0) ? (
+              // Default features based on plan type
+              <>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 18,
+                    }}
+                  />
+                  <Typography variant="body2">{currentPlan.name === 'Free' ? 'Basic content generation' : 'Advanced content generation'}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 18,
+                    }}
+                  />
+                  <Typography variant="body2">{currentPlan.name === 'Free' ? 'Limited articles per month' : 'Unlimited articles'}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 18,
+                    }}
+                  />
+                  <Typography variant="body2">{currentPlan.name === 'Free' ? 'Basic support' : 'Priority support'}</Typography>
+                </Box>
+              </>
+            ) : (
+              // Show actual features from the backend if available
+              currentPlan.features.map((feature, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Iconify
+                    icon="mdi:check-circle"
+                    sx={{
+                      color: 'success.main',
+                      mr: 1.5,
+                      fontSize: 18,
+                    }}
+                  />
+                  <Typography variant="body2">{feature}</Typography>
+                </Box>
+              ))
+            )}
           </Stack>
 
           {/* Action Button */}

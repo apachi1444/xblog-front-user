@@ -1,18 +1,23 @@
+
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
+
+import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 import { PricingPlans } from './PricingPlans';
 import { MobilePricingPlans } from './MobilePricingPlans';
 
-import type { PricingPlan } from './PricingPlans';
 
 // ----------------------------------------------------------------------
 
 export interface ResponsivePricingPlansProps {
-  plans: PricingPlan[];
   title?: string;
   subtitle?: string;
   onSelectPlan?: (planId: string) => void;
@@ -22,7 +27,6 @@ export interface ResponsivePricingPlansProps {
 }
 
 export function ResponsivePricingPlans({
-  plans,
   title,
   subtitle,
   onSelectPlan,
@@ -32,28 +36,65 @@ export function ResponsivePricingPlans({
 }: ResponsivePricingPlansProps) {
   const theme = useTheme();
   const { t } = useTranslation();
-  
+
+  // State to track whether monthly or yearly plans are selected
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
   // Use media query to determine if we should show mobile or desktop view
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
+  const { data:  plans} = useGetSubscriptionPlansQuery()
+
+  // Filter plans based on the billing cycle
+  const filteredPlans = useMemo(() => {
+    if (!plans) return [];
+
+    return plans.filter(plan => {
+      const planName = plan.name.toLowerCase();
+      return billingCycle === 'monthly'
+        ? planName.includes('monthly') || (!planName.includes('yearly') && !planName.includes('monthly'))
+        : planName.includes('yearly');
+    });
+  }, [plans, billingCycle]);
+
   return (
     <Box sx={{ width: '100%', ...sx }}>
+      {/* Billing Cycle Toggle */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body1" color={billingCycle === 'monthly' ? 'primary' : 'text.secondary'}>
+            {t('pricing.monthly', 'Monthly')}
+          </Typography>
+          <Switch
+            checked={billingCycle === 'yearly'}
+            onChange={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+            color="primary"
+          />
+          <Typography variant="body1" color={billingCycle === 'yearly' ? 'primary' : 'text.secondary'}>
+            {t('pricing.yearly', 'Yearly')}
+            <Box component="span" sx={{ ml: 1, px: 1, py: 0.5, bgcolor: 'success.light', color: 'success.contrastText', borderRadius: 1, fontSize: '0.75rem' }}>
+              {t('pricing.savePercent', 'Save 20%')}
+            </Box>
+          </Typography>
+        </Stack>
+      </Box>
+
       {isMobile ? (
         <MobilePricingPlans
-          plans={plans}
           title={title}
           subtitle={subtitle}
           onSelectPlan={onSelectPlan}
           selectedPlan={selectedPlan}
+          plans={filteredPlans} // Pass filtered plans
           sx={sx}
         />
       ) : (
         <PricingPlans
-          plans={plans}
           title={title}
           subtitle={subtitle}
           onSelectPlan={onSelectPlan}
           selectedPlan={selectedPlan}
+          plans={filteredPlans} // Pass filtered plans
           gridColumns={gridColumns}
           sx={sx}
         />

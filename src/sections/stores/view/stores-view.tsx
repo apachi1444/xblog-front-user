@@ -63,9 +63,7 @@ export function StoresView() {
     data,
     isLoading,
     isFetching
-  } = useGetStoresQuery(undefined, {
-    refetchOnMountOrArgChange: true
-  });
+  } = useGetStoresQuery();
 
   const currentStore = useSelector((state: RootState) => state.stores.currentStore);
   const [filterName, setFilterName] = useState('');

@@ -11,13 +11,14 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 
+import { useWelcomePopup } from 'src/hooks/useWelcomePopup';
+
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlice';
 import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
-import { useWelcomePopup } from 'src/hooks/useWelcomePopup';
 import { WelcomeVideoPopup } from 'src/components/welcome/WelcomeVideoPopup';
 
 import { Main } from './main';

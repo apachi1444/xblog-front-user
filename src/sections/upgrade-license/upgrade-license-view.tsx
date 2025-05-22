@@ -1,7 +1,6 @@
 import toast from 'react-hot-toast';
 import { Eye, Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import {
   Box,
@@ -26,16 +25,12 @@ import {
 } from 'src/services/apis/subscriptionApi';
 
 import { ResponsivePricingPlans } from 'src/components/pricing';
-import { usePlanIcons } from 'src/hooks/usePlanIcons';
 
 export function UpgradeLicenseView() {
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
-  const { t } = useTranslation();
-  const { getPlanIcon, getLocalizedPlanName } = usePlanIcons();
 
   // Fetch subscription plans
   const {
-    data: plansData,
     isLoading: isLoadingPlans,
     refetch: refetchPlans
   } = useGetSubscriptionPlansQuery();
@@ -115,7 +110,6 @@ export function UpgradeLicenseView() {
     };
   }, [refreshAllData]);
 
-  const plans = plansData?.plans || [];
 
   return (
     <DashboardContent>
@@ -178,19 +172,6 @@ export function UpgradeLicenseView() {
         >
           {/* Use the ResponsivePricingPlans component */}
           <ResponsivePricingPlans
-            plans={plans.map(plan => ({
-              id: plan.id || plan.name,
-              name: getLocalizedPlanName(plan.name),
-              price: plan.price,
-              period: t('pricing.perMonth', '/month'),
-              features: plan.features,
-              current: plan.current || false,
-              highlight: plan.highlight || false,
-              icon: getPlanIcon(plan.name),
-              buttonText: plan.current ? t('pricing.currentPlan', 'Current Plan') : t('pricing.choosePlan', 'Choose Plan'),
-              buttonVariant: plan.current ? 'outlined' : 'contained',
-              disabled: plan.current || false,
-            }))}
             onSelectPlan={handleChoosePlan}
             gridColumns={{ xs: 1, sm: 1, md: 3 }}
             title=""

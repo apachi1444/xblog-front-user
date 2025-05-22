@@ -13,10 +13,9 @@ export const storesApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getStores: builder.query<StoreState, void>({
       query: () => ({
-        url: `${STORES_BASE_URL}/`,
+        url: `${STORES_BASE_URL}`,
         method: 'GET',
       }),
-      providesTags : ['Stores']
     }),
     
     deleteStore: builder.mutation<void, number>({

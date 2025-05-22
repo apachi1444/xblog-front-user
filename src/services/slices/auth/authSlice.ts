@@ -41,22 +41,15 @@ const authSlice = createSlice({
         isAuthenticated: state.isAuthenticated,
         onboardingCompleted: state.onboardingCompleted
       }));
+
+      console.log(
+        localStorage.getItem('xblog_auth_session_v2')
+      );
     },
 
     rehydrateAuth: (state) => {
       // Try to get auth from new secure key first
-      let savedAuth = localStorage.getItem('xblog_auth_session_v2');
-
-      // If not found, try the old key for backward compatibility
-      if (!savedAuth) {
-        savedAuth = localStorage.getItem('auth');
-
-        // If found in old storage, migrate to new secure key and remove old one
-        if (savedAuth) {
-          localStorage.setItem('xblog_auth_session_v2', savedAuth);
-          localStorage.removeItem('auth');
-        }
-      }
+      const savedAuth = localStorage.getItem('xblog_auth_session_v2');
 
       if (savedAuth) {
         try {
@@ -66,10 +59,7 @@ const authSlice = createSlice({
           state.isAuthenticated = parsedAuth.isAuthenticated;
           state.onboardingCompleted = parsedAuth.onboardingCompleted;
         } catch (error) {
-          // If parsing fails, clear the storage to prevent future errors
           localStorage.removeItem('xblog_auth_session_v2');
-          localStorage.removeItem('auth');
-          console.error('Failed to parse auth data:', error);
         }
       }
     },
@@ -92,7 +82,6 @@ const authSlice = createSlice({
             isAuthenticated: state.isAuthenticated,
             onboardingCompleted: action.payload
           }));
-          console.error('Failed to parse auth data:', error);
         }
       }
     },
@@ -100,7 +89,6 @@ const authSlice = createSlice({
     logout: (state) => {
       // Remove both old and new keys for complete cleanup
       localStorage.removeItem('xblog_auth_session_v2');
-      localStorage.removeItem('auth');
 
       // Clear state
       state.user = null;

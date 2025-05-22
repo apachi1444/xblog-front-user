@@ -16,8 +16,6 @@ import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import { usePlanIcons } from 'src/hooks/usePlanIcons';
-
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
@@ -49,14 +47,11 @@ export function OnBoardingView() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { getPlanIcon, getLocalizedPlanName } = usePlanIcons();
 
-    // Fetch subscription plans
-    const {
-      data: plansData,
-    } = useGetSubscriptionPlansQuery();
-
-  const plans = plansData?.plans || [];
+  const {
+    data: plansData,
+  } = useGetSubscriptionPlansQuery();
+  console.log(plansData, " data !");
 
   // Initialize the updateUser mutation
   const [updateUser] = useUpdateUserMutation();
@@ -360,18 +355,6 @@ export function OnBoardingView() {
         {step === 2 && (
           <Stack spacing={5}>
             <ResponsivePricingPlans
-              plans={plans.map(plan => ({
-                id: plan.id,
-                name: getLocalizedPlanName(plan.name),
-                price: plan.price,
-                period: '/month',
-                features: plan.features,
-                current: false,
-                highlight: false,
-                icon: getPlanIcon(plan.name),
-                buttonText: 'Choose Plan',
-                buttonVariant: 'contained',
-              }))}
               onSelectPlan={handlePlanSelect}
               selectedPlan={selectedPlan}
               title=""
