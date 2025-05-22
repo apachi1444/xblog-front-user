@@ -24,12 +24,16 @@ import {
   ListItemText
 } from '@mui/material';
 
+import { useRouter } from 'src/routes/hooks';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/apis/articlesApi';
 
+import { Iconify } from 'src/components/iconify';
 import { LoadingSpinner } from 'src/components/loading';
+import { useNavigate } from 'react-router-dom';
 
 export default function CalendarPage() {
   const theme = useTheme();
@@ -53,6 +57,9 @@ export default function CalendarPage() {
     isLoading: isLoadingArticles,
     refetch: refetchArticles
   } = useGetArticlesQuery({ store_id: storeId });
+
+  const navigate = useNavigate();
+  
 
   // Memoize articles to prevent unnecessary re-renders
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
@@ -409,35 +416,84 @@ export default function CalendarPage() {
               mb: 2
             }}
           >
-            <List disablePadding>
-              {getAvailableArticles().map((article) => (
-                <ListItem
-                  key={article.id}
-                  disablePadding
-                  divider
-                  secondaryAction={
-                    <Checkbox
-                      edge="end"
-                      checked={selectedArticles.includes(article.id)}
-                      onChange={() => handleArticleToggle(article.id)}
-                      inputProps={{ 'aria-labelledby': `article-${article.id}` }}
+            {getAvailableArticles().length > 0 ? (
+              <List disablePadding>
+                {getAvailableArticles().map((article) => (
+                  <ListItem
+                    key={article.id}
+                    disablePadding
+                    divider
+                    secondaryAction={
+                      <Checkbox
+                        edge="end"
+                        checked={selectedArticles.includes(article.id)}
+                        onChange={() => handleArticleToggle(article.id)}
+                        inputProps={{ 'aria-labelledby': `article-${article.id}` }}
+                      />
+                    }
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      ...(selectedArticles.includes(article.id) && {
+                        bgcolor: 'primary.lighter',
+                      }),
+                    }}
+                  >
+                    <ListItemText
+                      primary={article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
+                      secondary={t(`common.statuses.${article.status}`, article.status)}
                     />
-                  }
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 4,
+                  px: 3,
+                  textAlign: 'center'
+                }}
+              >
+                <Iconify
+                  icon="mdi:file-document-plus-outline"
+                  width={60}
+                  height={60}
                   sx={{
-                    px: 2,
-                    py: 1,
-                    ...(selectedArticles.includes(article.id) && {
-                      bgcolor: 'primary.lighter',
-                    }),
+                    color: 'text.secondary',
+                    opacity: 0.6,
+                    mb: 2
+                  }}
+                />
+
+                <Typography variant="h6" gutterBottom>
+                  {t('calendar.noArticlesTitle', 'No Articles Available')}
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 3, maxWidth: 300 }}
+                >
+                  {t('calendar.noArticlesDescription', 'You don\'t have any articles ready for scheduling. Generate new content first.')}
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Iconify icon="mdi:plus" />}
+                  onClick={() => {
+                    handleCloseModal();
+                    navigate('/generate');
                   }}
                 >
-                  <ListItemText
-                    primary={article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
-                    secondary={t(`common.statuses.${article.status}`, article.status)}
-                  />
-                </ListItem>
-              ))}
-            </List>
+                  {t('calendar.generateArticleButton', 'Generate New Article')}
+                </Button>
+              </Box>
+            )}
           </Paper>
 
           <Box display="flex" justifyContent="flex-end" gap={1}>

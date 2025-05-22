@@ -166,6 +166,40 @@
         "prioritySupport": "Support client prioritaire"
       }
     },
+    "calendar": {
+      "schedule": "Planifier",
+      "unschedule": "Déplanifier",
+      "unscheduling": "Déplanification...",
+      "articleDetails": "Détails de l'Article",
+      "scheduleArticles": "Planifier des Articles pour le {{date}}",
+      "selectArticles": "Sélectionnez les articles à planifier :",
+      "noArticles": "Aucun article disponible pour la planification",
+      "scheduledSuccessfully": "Articles planifiés avec succès",
+      "unscheduledSuccessfully": "Article déplanifié avec succès",
+      "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",
+      "unschedulingFailed": "Échec de la déplanification de l'article. Veuillez réessayer.",
+      "loading": "Chargement de votre calendrier...",
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "addArticle": "Ajouter un article",
+      "articlePlaceholder": "Article #{{id}}",
+      "scheduleInfo": "Informations de Planification",
+      "scheduledDate": "Date Planifiée",
+      "notScheduled": "Non planifié",
+      "publishedDate": "Date de Publication",
+      "noArticlesTitle": "Aucun Article Disponible",
+      "noArticlesDescription": "Vous n'avez aucun article prêt pour la planification. Générez d'abord du nouveau contenu.",
+      "generateArticleButton": "Générer un Nouvel Article",
+      "days": {
+        "sunday": "Dim",
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mer",
+        "thursday": "Jeu",
+        "friday": "Ven",
+        "saturday": "Sam"
+      }
+    },
     "resources": {
       "websites": "Sites Web",
       "articles": "Articles",
@@ -282,7 +316,11 @@
       "cancel": "Annuler",
       "select": "Sélectionner",
       "selected": "Sélectionné",
-      "waiting": "en attente de saisie"
+      "waiting": "en attente de saisie",
+      "close": "Fermer",
+      "status": "Statut",
+      "description": "Description",
+      "created": "Créé le"
     },
     "calendar": {
       "schedule": "Planifier",
