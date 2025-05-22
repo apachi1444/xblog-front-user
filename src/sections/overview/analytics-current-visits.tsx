@@ -3,8 +3,12 @@ import type { ChartOptions } from 'src/components/chart';
 
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+import { Iconify } from 'src/components/iconify';
 
 import { fNumber } from 'src/utils/format-number';
 
@@ -15,6 +19,7 @@ import { Chart, useChart, ChartLegends } from 'src/components/chart';
 type Props = CardProps & {
   title?: string;
   subheader?: string;
+  emptyText?: string;
   chart: {
     colors?: string[];
     series: {
@@ -25,7 +30,13 @@ type Props = CardProps & {
   };
 };
 
-export function AnalyticsCurrentVisits({ title, subheader, chart, ...other }: Props) {
+export function AnalyticsCurrentVisits({
+  title,
+  subheader,
+  chart,
+  emptyText = 'No data available',
+  ...other
+}: Props) {
   const theme = useTheme();
 
   const chartSeries = chart.series.map((item) => item.value);
@@ -96,35 +107,71 @@ export function AnalyticsCurrentVisits({ title, subheader, chart, ...other }: Pr
         }}
       />
 
-      <Chart
-        type="pie"
-        series={chartSeries}
-        options={chartOptions}
-        width={{ xs: 240, xl: 260 }}
-        height={{ xs: 240, xl: 260 }}
-        sx={{
-          my: 6,
-          mx: 'auto',
-          filter: isDarkMode ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' : 'none'
-        }}
-      />
+      {chartSeries.length === 0 || chartSeries.every(value => value === 0) ? (
+        <Box
+          sx={{
+            height: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            p: 5,
+          }}
+        >
+          <Iconify
+            icon="mdi:web-off"
+            width={60}
+            height={60}
+            sx={{
+              mb: 3,
+              color: isDarkMode ? alpha(theme.palette.primary.main, 0.6) : theme.palette.primary.light,
+              opacity: 0.8,
+            }}
+          />
+          <Typography
+            variant="body1"
+            sx={{
+              color: isDarkMode ? theme.palette.grey[400] : theme.palette.text.secondary,
+              textAlign: 'center',
+              maxWidth: 250,
+            }}
+          >
+            {emptyText}
+          </Typography>
+        </Box>
+      ) : (
+        <>
+          <Chart
+            type="pie"
+            series={chartSeries}
+            options={chartOptions}
+            width={{ xs: 240, xl: 260 }}
+            height={{ xs: 240, xl: 260 }}
+            sx={{
+              my: 6,
+              mx: 'auto',
+              filter: isDarkMode ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' : 'none'
+            }}
+          />
 
-      <Divider sx={{
-        borderStyle: 'dashed',
-        borderColor: isDarkMode ? theme.palette.grey[700] : 'inherit'
-      }} />
+          <Divider sx={{
+            borderStyle: 'dashed',
+            borderColor: isDarkMode ? theme.palette.grey[700] : 'inherit'
+          }} />
 
-      <ChartLegends
-        labels={chartOptions?.labels}
-        colors={chartOptions?.colors}
-        sx={{
-          p: 3,
-          justifyContent: 'center',
-          '& .MuiTypography-root': {
-            color: isDarkMode ? theme.palette.grey[300] : 'inherit'
-          }
-        }}
-      />
+          <ChartLegends
+            labels={chartOptions?.labels}
+            colors={chartOptions?.colors}
+            sx={{
+              p: 3,
+              justifyContent: 'center',
+              '& .MuiTypography-root': {
+                color: isDarkMode ? theme.palette.grey[300] : 'inherit'
+              }
+            }}
+          />
+        </>
+      )}
     </Card>
   );
 }

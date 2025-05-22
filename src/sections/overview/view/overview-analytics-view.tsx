@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,10 +11,15 @@ import {
   Button,
   useTheme,
   Typography,
-  CardContent
+  CardContent,
+  CircularProgress
 } from '@mui/material';
 
+import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useGetStoresQuery } from 'src/services/apis/storesApi';
+import { useGetUserInvoicesQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -340,6 +346,54 @@ export function OverviewAnalyticsView() {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
+  // Fetch subscription details from API
+  const { data: subscriptionDetails, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
+
+  // Fetch stores data for platform distribution
+  const { data: storesData } = useGetStoresQuery();
+
+  // Fetch invoices data for purchase history
+  const { data: invoicesData } = useGetUserInvoicesQuery();
+
+  const articles_limit = subscriptionDetails?.articles_limit || 0;
+
+  // Get scheduled articles count
+  const { scheduledArticles } = useScheduledArticles('scheduled');
+
+  // Calculate platform distribution
+  const platformCounts = useMemo(() => {
+    if (!storesData?.stores || storesData.stores.length === 0) {
+      return {
+        wordpress: 0,
+        shopify: 0,
+        wix: 0,
+        other: 0
+      };
+    }
+
+    const counts = {
+      wordpress: 0,
+      shopify: 0,
+      wix: 0,
+      other: 0
+    };
+
+    storesData.stores.forEach(store => {
+      const platform = (store.platform || '').toLowerCase();
+      if (platform.includes('wordpress')) {
+        counts.wordpress += 1;
+      } else if (platform.includes('shopify')) {
+        counts.shopify += 1;
+      } else if (platform.includes('wix')) {
+        counts.wix += 1;
+      } else {
+        counts.other += 1;
+      }
+    });
+
+    return counts;
+  }, [storesData]);
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography
@@ -372,45 +426,78 @@ export function OverviewAnalyticsView() {
       </Typography>
 
       <Grid container spacing={3}>
+        {isLoadingSubscription ? (
+          // Show loading spinner in the center while data is being fetched
+          <Grid xs={12} sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+            <CircularProgress />
+          </Grid>
+        ) : (
+          <>
+            <Grid xs={12} sm={6} md={3}>
+              <AnalyticsWidgetSummary
+                title={t('analytics.articlesGenerated', 'Articles Generated')}
+                percent={
+                  subscriptionDetails &&
+                  subscriptionDetails.articles_created > 0 &&
+                  subscriptionDetails.articles_limit > 0
+                    ? Number(((subscriptionDetails.articles_created / subscriptionDetails.articles_limit) * 100).toFixed(1))
+                    : 0
+                }
+                total={subscriptionDetails?.articles_created || 0}
+                icon={<Iconify icon="mdi:file-document-edit-outline" width={48} height={48} />}
+              />
+            </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title={t('analytics.articlesGenerated', 'Articles Generated')}
-            percent={8.5}
-            total={42}
-            icon={<Iconify icon="mdi:file-document-edit-outline" width={48} height={48} />}
-          />
-        </Grid>
+            {/* For scheduled articles, we use the scheduledArticles hook */}
+            <Grid xs={12} sm={6} md={3}>
+              <AnalyticsWidgetSummary
+                title={t('analytics.scheduledArticles', 'Scheduled Articles')}
+                percent={
+                  scheduledArticles &&
+                  scheduledArticles.length > 0 &&
+                  articles_limit > 0
+                    ? Number(((scheduledArticles.length / articles_limit) * 100).toFixed(1))
+                    : 0
+                }
+                total={scheduledArticles?.length || 0}
+                color="warning"
+                icon={<Iconify icon="mdi:calendar-clock" width={48} height={48} />}
+              />
+            </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title={t('analytics.scheduledArticles', 'Scheduled Articles')}
-            percent={16.7}
-            total={14}
-            color="warning"
-            icon={<Iconify icon="mdi:calendar-clock" width={48} height={48} />}
-          />
-        </Grid>
+            <Grid xs={12} sm={6} md={3}>
+              <AnalyticsWidgetSummary
+                title={t('analytics.regenerationsAvailable', 'Regenerations Available')}
+                percent={
+                  subscriptionDetails &&
+                  subscriptionDetails.regeneration_number > 0 &&
+                  subscriptionDetails.regeneration_limit > 0
+                    ? Number(((subscriptionDetails.regeneration_number / subscriptionDetails.regeneration_limit) * 100).toFixed(1))
+                    : 0
+                }
+                total={subscriptionDetails?.regeneration_number || 0}
+                color="info"
+                icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
+              />
+            </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title={t('analytics.regenerationsAvailable', 'Regenerations Available')}
-            percent={-5.2}
-            total={24}
-            color="info"
-            icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title={t('analytics.totalWebsites', 'Connected Websites')}
-            percent={12.5}
-            total={8}
-            color="secondary"
-            icon={<Iconify icon="mdi:web" width={48} height={48} />}
-          />
-        </Grid>
+            <Grid xs={12} sm={6} md={3}>
+              <AnalyticsWidgetSummary
+                title={t('analytics.totalWebsites', 'Connected Websites')}
+                percent={
+                  subscriptionDetails &&
+                  subscriptionDetails.connected_websites > 0 &&
+                  subscriptionDetails.websites_limit > 0
+                    ? Number(((subscriptionDetails.connected_websites / subscriptionDetails.websites_limit) * 100).toFixed(1))
+                    : 0
+                }
+                total={subscriptionDetails?.connected_websites || 0}
+                color="secondary"
+                icon={<Iconify icon="mdi:web" width={48} height={48} />}
+              />
+            </Grid>
+          </>
+        )}
 
         {/* Supercharge Your Content Creation and Coming Soon in the same row */}
         <Grid xs={12} md={6} lg={6}>
@@ -427,6 +514,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsCurrentVisits
             title={t('analytics.websiteIntegrations', 'Website Integrations')}
             subheader={t('analytics.websiteIntegrationsSubheader', 'Distribution by platform')}
+            emptyText={t('analytics.noWebsiteIntegrations', 'No website integrations yet. Connect your first website to see platform distribution.')}
             chart={{
               colors: [
                 '#0073aa', // WordPress blue
@@ -435,10 +523,22 @@ export function OverviewAnalyticsView() {
                 '#7d7d7d', // Other platforms gray
               ],
               series: [
-                { label: t('platforms.wordpress', 'WordPress'), value: 65 },
-                { label: t('platforms.shopify', 'Shopify'), value: 20 },
-                { label: t('platforms.wix', 'Wix'), value: 12 },
-                { label: t('platforms.other', 'Other'), value: 3 },
+                {
+                  label: t('platforms.wordpress', 'WordPress'),
+                  value: platformCounts.wordpress || 0
+                },
+                {
+                  label: t('platforms.shopify', 'Shopify'),
+                  value: platformCounts.shopify || 0
+                },
+                {
+                  label: t('platforms.wix', 'Wix'),
+                  value: platformCounts.wix || 0
+                },
+                {
+                  label: t('platforms.other', 'Other'),
+                  value: platformCounts.other || 0
+                },
               ],
             }}
           />
@@ -448,36 +548,18 @@ export function OverviewAnalyticsView() {
           <AnalyticsOrderTable
             title={t('analytics.purchaseHistory', 'Purchase History')}
             subheader={t('analytics.purchaseHistorySubheader', 'Recent subscription activity')}
-            list={[
-              {
-                id: '1',
-                title: t('analytics.purchases.premium', 'Premium Plan Subscription'),
-                type: 'order1',
-                status: 'completed',
-                time: new Date().getTime() - 7 * 24 * 60 * 60 * 1000, // 7 days ago
-              },
-              {
-                id: '2',
-                title: t('analytics.purchases.regenerationCredits', 'Purchased 50 Regeneration Credits'),
-                type: 'order2',
-                status: 'completed',
-                time: new Date().getTime() - 14 * 24 * 60 * 60 * 1000, // 14 days ago
-              },
-              {
-                id: '3',
-                title: t('analytics.purchases.starter', 'Starter Plan Subscription'),
-                type: 'order3',
-                status: 'completed',
-                time: new Date().getTime() - 45 * 24 * 60 * 60 * 1000, // 45 days ago
-              },
-              {
-                id: '4',
-                title: t('analytics.purchases.trial', 'Free Trial Started'),
-                type: 'order4',
-                status: 'completed',
-                time: new Date().getTime() - 60 * 24 * 60 * 60 * 1000, // 60 days ago
-              },
-            ]}
+            emptyText={t('analytics.noPurchaseHistory', 'No billing history available yet. Your purchase records will appear here.')}
+            list={
+              invoicesData?.invoices && invoicesData.invoices.length > 0
+                ? invoicesData.invoices.map((invoice, index) => ({
+                    id: invoice.id || String(index + 1),
+                    title: invoice.plan || 'Subscription Payment',
+                    type: `order${index + 1}`,
+                    status: invoice.status === 'paid' ? 'completed' : 'pending',
+                    time: invoice.createdAt ? new Date(invoice.createdAt).getTime() : new Date().getTime(),
+                  }))
+                : []
+            }
           />
         </Grid>
       </Grid>

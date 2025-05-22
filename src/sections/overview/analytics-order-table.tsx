@@ -8,6 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 import TableContainer from '@mui/material/TableContainer';
 
@@ -19,6 +20,7 @@ import { fCurrency } from 'src/utils/format-number';
 type Props = CardProps & {
   title?: string;
   subheader?: string;
+  emptyText?: string;
   list: {
     id: string;
     type: string;
@@ -31,7 +33,7 @@ type Props = CardProps & {
   }[];
 };
 
-export function AnalyticsOrderTable({ title, subheader, list, ...other }: Props) {
+export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No data available', ...other }: Props) {
   const theme = useTheme();
 
   // Determine color based on type
@@ -134,20 +136,29 @@ export function AnalyticsOrderTable({ title, subheader, list, ...other }: Props)
             </TableRow>
           </TableHead>
           <TableBody>
-            {list.map((item) => (
-              <TableRow
-                key={item.id}
-                hover
-                sx={{
-                  transition: 'background-color 0.2s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: isDarkMode
-                      ? alpha(theme.palette.primary.main, 0.08)
-                      : alpha(theme.palette.primary.main, 0.04)
-                  },
-                  borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.16) : 'inherit'
-                }}
-              >
+            {list.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} align="center" sx={{ py: 5 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    {emptyText}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              list.map((item) => (
+                <TableRow
+                  key={item.id}
+                  hover
+                  sx={{
+                    transition: 'background-color 0.2s ease-in-out',
+                    '&:hover': {
+                      backgroundColor: isDarkMode
+                        ? alpha(theme.palette.primary.main, 0.08)
+                        : alpha(theme.palette.primary.main, 0.04)
+                    },
+                    borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.16) : 'inherit'
+                  }}
+                >
                 <TableCell
                   sx={{
                     borderLeft: `4px solid ${getTypeColor(item.type)}`,
@@ -219,7 +230,8 @@ export function AnalyticsOrderTable({ title, subheader, list, ...other }: Props)
                   )}
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
