@@ -599,6 +599,17 @@
           "description": "Plan your content calendar"
         }
       },
+      "premium": {
+        "label": "Pro Plan",
+        "title": "Unlock Premium Features",
+        "description": "Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.",
+        "upgradeButton": "Upgrade to Pro",
+        "features": {
+          "unlimitedArticles": "Unlimited article generation",
+          "seoTools": "Advanced SEO optimization tools",
+          "prioritySupport": "Priority customer support"
+        }
+      },
       "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",

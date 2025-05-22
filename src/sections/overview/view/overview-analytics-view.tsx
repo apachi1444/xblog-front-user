@@ -230,6 +230,169 @@ function GenerateContentCard() {
   );
 }
 
+// Premium Features Card Component
+function PremiumFeaturesCard() {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  const handleUpgrade = () => {
+    navigate('/upgrade-license');
+  };
+
+  const features = [
+    {
+      icon: 'mdi:text-box-check-outline',
+      text: t('premium.features.unlimitedArticles', 'Unlimited article generation')
+    },
+    {
+      icon: 'mdi:search-web',
+      text: t('premium.features.seoTools', 'Advanced SEO optimization tools')
+    },
+    {
+      icon: 'mdi:headset',
+      text: t('premium.features.prioritySupport', 'Priority customer support')
+    }
+  ];
+
+  const isDarkMode = theme.palette.mode === 'dark';
+
+  return (
+    <Card
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 2,
+        boxShadow: theme.shadows[3],
+        background: isDarkMode
+          ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.95)}, ${alpha('#5e35b1', 0.85)})`
+          : `linear-gradient(135deg, ${alpha('#5e35b1', 0.95)}, ${alpha('#7c4dff', 0.85)})`,
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+      }}
+    >
+      {/* Premium icon badge */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: alpha('#000', 0.2),
+          color: '#ffffff',
+          borderRadius: 1,
+          px: 1,
+          py: 0.5,
+        }}
+      >
+        <Iconify icon="mdi:crown" width={16} height={16} sx={{ color: '#ffc107', mr: 0.5 }} />
+        <Typography variant="caption" fontWeight="bold">
+          {t('premium.label', 'Pro Plan')}
+        </Typography>
+      </Box>
+
+      {/* Decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -20,
+          right: -20,
+          width: 120,
+          height: 120,
+          borderRadius: '50%',
+          background: alpha('#fff', 0.1),
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: -30,
+          left: '30%',
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          background: alpha('#fff', 0.08),
+          zIndex: 0,
+        }}
+      />
+
+      <CardContent sx={{ position: 'relative', zIndex: 1, p: 3, flexGrow: 1 }}>
+        <Typography
+          variant="h5"
+          component="h3"
+          fontWeight="bold"
+          color="#ffffff"
+          sx={{ mb: 1, mt: 3 }}
+        >
+          {t('premium.title', 'Unlock Premium Features')}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color={alpha('#ffffff', 0.9)}
+          sx={{ mb: 2 }}
+        >
+          {t('premium.description', 'Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.')}
+        </Typography>
+
+        <Box sx={{ mb: 3 }}>
+          {features.map((feature, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mb: 1.5
+              }}
+            >
+              <Iconify
+                icon={feature.icon}
+                width={20}
+                height={20}
+                sx={{
+                  color: '#ffc107',
+                  mr: 1.5,
+                  filter: `drop-shadow(0 2px 3px ${alpha('#000', 0.2)})`,
+                }}
+              />
+              <Typography
+                variant="body2"
+                color="#ffffff"
+                sx={{ textShadow: `0 1px 2px ${alpha('#000', 0.2)}` }}
+              >
+                {feature.text}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        <Button
+          variant="contained"
+          onClick={handleUpgrade}
+          endIcon={<Iconify icon="mdi:arrow-right" />}
+          fullWidth
+          sx={{
+            bgcolor: '#f9a825',
+            color: '#212121',
+            fontWeight: 'bold',
+            '&:hover': {
+              bgcolor: '#f57f17',
+            },
+            boxShadow: `0 4px 8px ${alpha('#000', 0.25)}`,
+            py: 1,
+          }}
+        >
+          {t('premium.upgradeButton', 'Upgrade to Pro')}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Coming Soon Features Card Component
 function ComingSoonCard() {
   const { t } = useTranslation();
@@ -500,12 +663,15 @@ export function OverviewAnalyticsView() {
         )}
 
         {/* Supercharge Your Content Creation and Coming Soon in the same row */}
-        <Grid xs={12} md={6} lg={6}>
+        <Grid xs={12} md={6} lg={4}>
           <GenerateContentCard />
         </Grid>
 
-        {/* Coming Soon Features - Placed next to Generate Content */}
-        <Grid xs={12} md={6} lg={6}>
+        <Grid xs={12} md={6} lg={4}>
+          <PremiumFeaturesCard />
+        </Grid>
+
+        <Grid xs={12} md={6} lg={4}>
           <ComingSoonCard />
         </Grid>
 

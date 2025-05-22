@@ -155,6 +155,17 @@
       "unlockFeatures": "Vous voulez débloquer plus de fonctionnalités ?",
       "upgradeToPro": "Passer à Pro 🚀"
     },
+    "premium": {
+      "label": "Plan Pro",
+      "title": "Débloquez les Fonctionnalités Premium",
+      "description": "Passez à Pro et obtenez des articles illimités, des outils SEO avancés et un support prioritaire.",
+      "upgradeButton": "Passer à Pro",
+      "features": {
+        "unlimitedArticles": "Génération d'articles illimitée",
+        "seoTools": "Outils d'optimisation SEO avancés",
+        "prioritySupport": "Support client prioritaire"
+      }
+    },
     "resources": {
       "websites": "Sites Web",
       "articles": "Articles",
