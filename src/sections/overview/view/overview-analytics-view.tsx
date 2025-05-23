@@ -679,10 +679,10 @@ export function OverviewAnalyticsView() {
             emptyText={t('analytics.noWebsiteIntegrations', 'No website integrations yet. Connect your first website to see platform distribution.')}
             chart={{
               colors: [
-                '#0073aa', // WordPress blue
-                '#96bf48', // Shopify green
-                '#faad4d', // Wix orange
-                '#7d7d7d', // Other platforms gray
+                theme.palette.mode === 'dark' ? theme.palette.info.main : '#0073aa', // WordPress blue
+                theme.palette.mode === 'dark' ? theme.palette.success.main : '#96bf48', // Shopify green
+                theme.palette.mode === 'dark' ? theme.palette.warning.main : '#faad4d', // Wix orange
+                theme.palette.mode === 'dark' ? theme.palette.grey[500] : '#7d7d7d', // Other platforms gray
               ],
               series: [
                 {

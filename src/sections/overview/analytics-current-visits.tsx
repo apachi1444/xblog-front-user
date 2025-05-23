@@ -43,7 +43,7 @@ export function AnalyticsCurrentVisits({
 
   const isDarkMode = theme.palette.mode === 'dark';
 
-  // Use more vibrant colors in dark mode
+  // Use more vibrant colors in dark mode or use provided colors
   const chartColors = chart.colors ?? (
     isDarkMode ? [
       '#6366F1', // Indigo
@@ -82,7 +82,7 @@ export function AnalyticsCurrentVisits({
         boxShadow: isDarkMode ? `0 8px 16px 0 ${theme.palette.common.black}20` : theme.customShadows.card,
         ...(isDarkMode && {
           backgroundImage: 'none',
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.background.paper, 0.9),
           backdropFilter: 'blur(8px)'
         }),
         '&:hover': {
@@ -91,6 +91,10 @@ export function AnalyticsCurrentVisits({
             ? `0 12px 20px 0 ${theme.palette.common.black}30`
             : theme.customShadows.z12,
         },
+        backgroundColor: theme.palette.background.paper,
+        backgroundImage: isDarkMode
+          ? `linear-gradient(to bottom, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 1)})`
+          : 'none',
       }}
     >
       <CardHeader
@@ -98,11 +102,13 @@ export function AnalyticsCurrentVisits({
         subheader={subheader}
         sx={{
           '& .MuiCardHeader-title': {
-            color: isDarkMode ? theme.palette.grey[100] : 'inherit',
-            fontWeight: 600
+            color: isDarkMode ? theme.palette.grey[100] : theme.palette.text.primary,
+            fontWeight: 600,
+            transition: 'color 0.3s ease-in-out'
           },
           '& .MuiCardHeader-subheader': {
-            color: isDarkMode ? theme.palette.grey[500] : 'inherit'
+            color: isDarkMode ? theme.palette.grey[500] : theme.palette.text.secondary,
+            transition: 'color 0.3s ease-in-out'
           }
         }}
       />
@@ -124,8 +130,9 @@ export function AnalyticsCurrentVisits({
             height={60}
             sx={{
               mb: 3,
-              color: isDarkMode ? alpha(theme.palette.primary.main, 0.6) : theme.palette.primary.light,
+              color: isDarkMode ? alpha(theme.palette.primary.main, 0.7) : theme.palette.primary.light,
               opacity: 0.8,
+              transition: 'color 0.3s ease-in-out' // Add transition for smoother theme changes
             }}
           />
           <Typography
@@ -134,6 +141,7 @@ export function AnalyticsCurrentVisits({
               color: isDarkMode ? theme.palette.grey[400] : theme.palette.text.secondary,
               textAlign: 'center',
               maxWidth: 250,
+              transition: 'color 0.3s ease-in-out' // Add transition for smoother theme changes
             }}
           >
             {emptyText}
@@ -150,13 +158,16 @@ export function AnalyticsCurrentVisits({
             sx={{
               my: 6,
               mx: 'auto',
-              filter: isDarkMode ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' : 'none'
+              filter: isDarkMode ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' : 'none',
+              transition: 'all 0.3s ease-in-out' // Add transition for smoother theme changes
             }}
           />
 
           <Divider sx={{
             borderStyle: 'dashed',
-            borderColor: isDarkMode ? theme.palette.grey[700] : 'inherit'
+            borderColor: isDarkMode ? theme.palette.grey[700] : theme.palette.divider,
+            opacity: isDarkMode ? 0.6 : 0.8,
+            transition: 'border-color 0.3s ease-in-out, opacity 0.3s ease-in-out'
           }} />
 
           <ChartLegends
@@ -166,7 +177,11 @@ export function AnalyticsCurrentVisits({
               p: 3,
               justifyContent: 'center',
               '& .MuiTypography-root': {
-                color: isDarkMode ? theme.palette.grey[300] : 'inherit'
+                color: isDarkMode ? theme.palette.grey[300] : 'inherit',
+                transition: 'color 0.3s ease-in-out' // Add transition for smoother theme changes
+              },
+              '& .MuiBox-root': {
+                transition: 'background-color 0.3s ease-in-out' // Add transition for color boxes
               }
             }}
           />
