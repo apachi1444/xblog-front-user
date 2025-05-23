@@ -23,6 +23,7 @@ export interface ResponsivePricingPlansProps {
   onSelectPlan?: (planId: string) => void;
   selectedPlan?: string | null;
   gridColumns?: { xs?: number; sm?: number; md?: number; lg?: number };
+  dynamicLayout?: boolean; // New prop to control dynamic layout
   sx?: any;
 }
 
@@ -32,6 +33,7 @@ export function ResponsivePricingPlans({
   onSelectPlan,
   selectedPlan,
   gridColumns,
+  dynamicLayout = true, // Default to true for dynamic layout
   sx = {},
 }: ResponsivePricingPlansProps) {
   const theme = useTheme();
@@ -95,7 +97,7 @@ export function ResponsivePricingPlans({
           onSelectPlan={onSelectPlan}
           selectedPlan={selectedPlan}
           plans={filteredPlans} // Pass filtered plans
-          gridColumns={gridColumns}
+          gridColumns={!dynamicLayout ? gridColumns : undefined} // Only pass gridColumns if dynamicLayout is false
           sx={sx}
         />
       )}

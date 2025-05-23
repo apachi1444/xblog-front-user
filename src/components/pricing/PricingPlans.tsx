@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
@@ -50,7 +50,7 @@ export function PricingPlans({
   onSelectPlan,
   selectedPlan: externalSelectedPlan,
   layout = 'grid',
-  gridColumns = { xs: 1, sm: 1, md: 3 },
+  gridColumns,
   plans: externalPlans,
   sx = {},
 }: PricingPlansProps) {
@@ -65,7 +65,34 @@ export function PricingPlans({
   } = useGetSubscriptionPlansQuery();
 
   // Use external plans if provided, otherwise fetch from API
-  const plans: PricingPlan[] = externalPlans || (data || [])
+  const plans: PricingPlan[] = externalPlans || (data || []);
+
+  // Calculate dynamic grid columns based on number of plans
+  const dynamicGridColumns = useMemo(() => {
+    if (gridColumns) return gridColumns;
+
+    const planCount = plans.length;
+    if (planCount === 0) return { xs: 12, sm: 12, md: 12, lg: 12 };
+
+    // Ensure we don't divide by zero and handle edge cases
+    const getColumnSize = (count: number): number => {
+      if (count <= 0) return 12;
+      // Ensure we get whole numbers that divide 12 evenly
+      if (12 % count === 0) return 12 / count;
+      // For odd numbers or numbers that don't divide 12 evenly, find the closest divisor
+      if (count <= 2) return 6;  // 2 columns
+      if (count <= 4) return 3;  // 4 columns
+      if (count <= 6) return 2;  // 6 columns
+      return 1;  // Default to 12 columns for many plans
+    };
+
+    return {
+      xs: 12,                      // One plan per row on extra small screens
+      sm: planCount > 2 ? 6 : getColumnSize(planCount), // One or two plans per row on small screens
+      md: getColumnSize(planCount), // All plans in one row on medium screens
+      lg: getColumnSize(planCount)  // All plans in one row on large screens
+    };
+  }, [plans.length, gridColumns]);
 
   // Use external selectedPlan if provided, otherwise manage internally
   const [internalSelectedPlan, setInternalSelectedPlan] = useState<string | null>(
@@ -331,7 +358,14 @@ export function PricingPlans({
       {layout === 'grid' ? (
         <Grid container spacing={3}>
           {plans.map((plan) => (
-            <Grid item xs={gridColumns.xs || 12} sm={gridColumns.sm || 6} md={gridColumns.md || 4} lg={gridColumns.lg || 4} key={plan.id}>
+            <Grid
+              item
+              xs={dynamicGridColumns.xs}
+              sm={dynamicGridColumns.sm}
+              md={dynamicGridColumns.md}
+              lg={dynamicGridColumns.lg}
+              key={plan.id}
+            >
               {renderPlanCard(plan)}
             </Grid>
           ))}
