@@ -23,10 +23,25 @@ export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get current user information
     getCurrentUser: builder.query<AuthUser, void>({
-      query: () => ({
-        url: `${USER_BASE_URL}/me`,
-        method: 'GET',
-      }),
+      query: () => {
+        // Force usage of token from localStorage
+        let token = null;
+        try {
+          const authData = localStorage.getItem('xblog_auth_session_v2');
+          if (authData) {
+            const parsedData = JSON.parse(authData);
+            token = parsedData.accessToken;
+          }
+        } catch (error) {
+          console.error('Error retrieving token from localStorage:', error);
+        }
+
+        return {
+          url: `${USER_BASE_URL}/me`,
+          method: 'GET',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        };
+      },
     }),
 
     // Update user information
