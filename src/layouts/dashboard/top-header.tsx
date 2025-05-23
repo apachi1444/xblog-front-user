@@ -31,6 +31,7 @@ import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCoun
 import { NavMobile } from './nav';
 import { AccountPopover } from '../components/account-popover';
 import { navData, bottomNavData } from '../config-nav-dashboard';
+import { ComingSoonPopover } from '../components/coming-soon-popover';
 
 // ----------------------------------------------------------------------
 
@@ -244,6 +245,9 @@ export function TopHeader() {
 
               {/* Language Switcher */}
               <LanguageSwitcher />
+
+              {/* Coming Soon Features Popover */}
+              <ComingSoonPopover />
 
               {/* Use the extracted ThemeToggle component */}
               <ThemeToggle isDarkMode={isDarkMode} onToggle={handleToggleTheme} />

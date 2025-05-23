@@ -2,6 +2,7 @@
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useCallback } from 'react';
 import { X, Plus, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, isToday, isBefore, addMonths, subMonths, endOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
@@ -24,8 +25,6 @@ import {
   ListItemText
 } from '@mui/material';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
@@ -33,7 +32,6 @@ import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/
 
 import { Iconify } from 'src/components/iconify';
 import { LoadingSpinner } from 'src/components/loading';
-import { useNavigate } from 'react-router-dom';
 
 export default function CalendarPage() {
   const theme = useTheme();

@@ -166,6 +166,30 @@
         "prioritySupport": "Support client prioritaire"
       }
     },
+    "comingSoon": {
+      "title": "Bientôt Disponible",
+      "description": "Nous améliorons constamment notre plateforme. Voici ce qui arrive prochainement :",
+      "stayTuned": "Restez à l'écoute pour plus de fonctionnalités passionnantes !",
+      "eta": {
+        "soon": "Bientôt disponible",
+        "inProgress": "En cours",
+        "beta": "Bêta"
+      },
+      "features": {
+        "templates": {
+          "title": "Modèles Intégrés",
+          "description": "Créez des articles à partir de modèles préconçus pour différents types de contenu"
+        },
+        "bulk": {
+          "title": "Génération en Masse",
+          "description": "Générez plusieurs articles en une seule fois pour gagner du temps"
+        },
+        "analytics": {
+          "title": "Analyses Avancées",
+          "description": "Obtenez des informations détaillées sur les performances de votre contenu"
+        }
+      }
+    },
     "calendar": {
       "schedule": "Planifier",
       "unschedule": "Déplanifier",

@@ -663,16 +663,12 @@ export function OverviewAnalyticsView() {
         )}
 
         {/* Supercharge Your Content Creation and Coming Soon in the same row */}
-        <Grid xs={12} md={6} lg={4}>
+        <Grid xs={12} md={6} lg={6}>
           <GenerateContentCard />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        <Grid xs={12} md={6} lg={6}>
           <PremiumFeaturesCard />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <ComingSoonCard />
         </Grid>
 
         {/* Detailed Analytics Section - Moved to bottom as supplementary information */}

@@ -614,6 +614,30 @@
           "prioritySupport": "Priority customer support"
         }
       },
+      "comingSoon": {
+        "title": "Coming Soon",
+        "description": "We're constantly improving our platform. Here's what's coming next:",
+        "stayTuned": "Stay tuned for more exciting features!",
+        "eta": {
+          "soon": "Coming soon",
+          "inProgress": "In progress",
+          "beta": "Beta"
+        },
+        "features": {
+          "templates": {
+            "title": "Built-in Templates",
+            "description": "Create articles from pre-designed templates for various content types"
+          },
+          "bulk": {
+            "title": "Bulk Generation",
+            "description": "Generate multiple articles in a single batch to save time"
+          },
+          "analytics": {
+            "title": "Advanced Analytics",
+            "description": "Get detailed insights into your content performance"
+          }
+        }
+      },
       "calendar": {
         "schedule": "Schedule",
         "unschedule": "Unschedule",
