@@ -44,20 +44,18 @@ export default function CalendarPage() {
   const [selectedArticleDetails, setSelectedArticleDetails] = useState<any>(null);
   const [isArticleDetailsModalOpen, setIsArticleDetailsModalOpen] = useState(false);
 
-  const currentStore = useSelector(selectCurrentStore);
-  const storeId = currentStore?.id || 1;
-
+  const navigate = useNavigate();
+  
   const [scheduleArticle] = useScheduleArticleMutation();
   const [unscheduleArticle, { isLoading: isUnscheduling }] = useUnscheduleArticleMutation();
-
+  
+  const currentStore = useSelector(selectCurrentStore);
+  const storeId = currentStore?.id || 1;
   const {
     data: articlesData,
     isLoading: isLoadingArticles,
     refetch: refetchArticles
   } = useGetArticlesQuery({ store_id: storeId });
-
-  const navigate = useNavigate();
-  
 
   // Memoize articles to prevent unnecessary re-renders
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);

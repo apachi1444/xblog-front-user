@@ -1,9 +1,7 @@
-import type { Article } from 'src/types/article';
 
-import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -17,7 +15,7 @@ import Pagination from '@mui/material/Pagination';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useLazyGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 import { Iconify } from 'src/components/iconify';
@@ -29,48 +27,19 @@ import { PostItem } from '../post-item';
 
 export function BlogView() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [sortBy, setSortBy] = useState('latest');
   const [page, setPage] = useState(1);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTab, setCurrentTab] = useState('all');
-  const [articles, setArticles] = useState<Article[]>([]);
   const currentStore = useSelector(selectCurrentStore);
-  const [doGetArticles, { isLoading , isFetching }] = useLazyGetArticlesQuery();
+  const storeId = currentStore?.id || 1;
+  const {
+    data: articlesData,
+    isLoading: isLoadingArticles,
+  } = useGetArticlesQuery({ store_id: storeId });
 
-  const [hasFetched, setHasFetched] = useState(false);
-
-  useEffect(() => {
-    if (currentStore?.id) {
-      setHasFetched(true);
-      doGetArticles({ store_id: currentStore.id })
-        .unwrap()
-        .then((result) => {
-          console.log("Articles fetched successfully:", result.articles.length);
-          toast.success("Successfully get blogs");
-          setArticles(result.articles);
-        })
-        .catch((err) => {
-          console.error("Error fetching articles:", err);
-          toast.error(err.error?.data?.message || "Failed to fetch articles");
-        });
-    } else if (!hasFetched) {
-
-      setHasFetched(true);
-      doGetArticles({ store_id: 1 })
-        .unwrap()
-        .then((result) => {
-          console.log("Articles fetched with default store ID:", result.articles.length);
-          toast.success("Successfully get blogs");
-          setArticles(result.articles);
-        })
-        .catch((err) => {
-          console.error("Error fetching articles with default store:", err);
-          // Don't show error toast here as this is a fallback attempt
-        });
-    }
-  }, [currentStore?.id, doGetArticles, dispatch, currentStore, hasFetched]);
+  const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
 
   useEffect(() => {
     let sorted = [...articles];
@@ -151,7 +120,7 @@ export function BlogView() {
         </Button>
       </Box>
 
-      {isLoading ? (
+      {isLoadingArticles ? (
         <LoadingSpinner
           message="Loading your blogs..."
           fullHeight
@@ -220,7 +189,7 @@ export function BlogView() {
             </Tabs>
           </Box>
 
-          {!isLoading && (notFound || isDataEmpty) && !isFetching  && (
+          {!isLoadingArticles && (notFound || isDataEmpty)  && (
             <Box textAlign="center" py={5}>
               <Typography variant="h6">No articles found</Typography>
               <Typography variant="body2" color="text.secondary">

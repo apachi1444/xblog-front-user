@@ -1,6 +1,6 @@
 import type { Article } from 'src/types/article';
 
-import { api } from '.';
+import { api, CACHE_DURATION } from '.';
 
 const ARTICLES_BASE_URL = '/articles';
 
@@ -27,14 +27,9 @@ export const articlesApi = api.injectEndpoints({
         method: 'GET',
         params: params || {},
       }),
+      // Cache the articles for 1 hour
+      keepUnusedDataFor: CACHE_DURATION.ARTICLES,
       providesTags : ['Articles'],
-    }),
-
-    getArticleById: builder.query<Article, string>({
-      query: (id) => ({
-        url: `${ARTICLES_BASE_URL}/${id}`,
-        method: 'GET',
-      }),
     }),
 
     createArticle: builder.mutation<Article, Partial<Article>>({
@@ -43,6 +38,7 @@ export const articlesApi = api.injectEndpoints({
         method: 'POST',
         body: article,
       }),
+      invalidatesTags: ['Articles'],
     }),
 
 
@@ -51,6 +47,7 @@ export const articlesApi = api.injectEndpoints({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Articles'],
     }),
 
     unscheduleArticle: builder.mutation<Article, { article_id: string; store_id: number }>({
@@ -66,8 +63,6 @@ export const articlesApi = api.injectEndpoints({
 
 export const {
   useGetArticlesQuery,
-  useLazyGetArticlesQuery,
-  useGetArticleByIdQuery,
   useCreateArticleMutation,
   useDeleteArticleMutation,
   useUnscheduleArticleMutation,

@@ -911,10 +911,23 @@ const axiosBaseQuery =
     }
   };
 
+// Cache duration constants (in seconds)
+export const CACHE_DURATION = {
+  SUBSCRIPTIONS: 3600, // 1 hour
+  ARTICLES: 3600,      // 1 hour
+  STORES: 3600,        // 1 hour
+  USER: 3600,          // 1 hour
+  PLANS: 3600,         // 1 hour
+};
+
 export const api = createApi({
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Articles', 'Stores','User'],
+  tagTypes: ['Articles', 'Stores', 'User', 'Subscription', 'Plans'],
   endpoints: () => ({}),
+  // Global configuration for all queries
+  keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS, // Default cache duration
+  refetchOnFocus: false,     // Don't refetch when window regains focus
+  refetchOnReconnect: false, // Don't refetch when reconnecting
 });
 
 export interface Page<T> {

@@ -1,4 +1,4 @@
-import { api } from '.';
+import { api, CACHE_DURATION } from '.';
 
 // Define the base URL for subscription endpoints
 const SUBSCRIPTION_BASE_URL = 'subscriptions';
@@ -64,6 +64,9 @@ export const subscriptionApi = api.injectEndpoints({
       query: () => ({
         url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'GET',
+        providesTags: ['Subscription'],
+        // Cache the subscription details for 1 hour
+        keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS,
       }),
     }),
 
@@ -72,6 +75,9 @@ export const subscriptionApi = api.injectEndpoints({
       query: () => ({
         url: '/all/plans',
         method: 'GET',
+        providesTags: ['Plans'],
+        // Cache the plans for 1 hour
+        keepUnusedDataFor: CACHE_DURATION.PLANS,
       }),
     }),
 
@@ -80,6 +86,7 @@ export const subscriptionApi = api.injectEndpoints({
         url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'POST',
         body: data,
+        invalidatesTags: ['Subscription', 'Plans'],
       }),
     }),
 
@@ -89,6 +96,7 @@ export const subscriptionApi = api.injectEndpoints({
         url: `${SUBSCRIPTION_BASE_URL}/upgrade`,
         method: 'PATCH',
         body: data,
+        invalidatesTags: ['Subscription', 'Plans'],
       }),
     }),
   }),
