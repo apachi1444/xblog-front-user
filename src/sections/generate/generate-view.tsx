@@ -42,13 +42,17 @@ export function GeneratingView() {
         toneOfVoice: 'friendly',
         pointOfView: 'first-person',
         aiContentCleaning: 'no-removal',
+        // Simplified media settings
+        includeImages: true,
+        includeVideos: false,
+        // Linking settings
+        internalLinking: 'none',
+        externalLinking: 'none',
+        // Legacy fields for backward compatibility
         imageSettingsQuality: 'high',
         imageSettingsPlacement: 'each-section',
         imageSettingsStyle: 'normal',
         imageSettingsCount: 2,
-        internalLinking: 'none',
-        externalLinking: 'none',
-        includeVideos: false,
         numberOfVideos: 1,
       },
       step3: {

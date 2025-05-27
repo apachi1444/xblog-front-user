@@ -20,13 +20,17 @@ export const step2Schema = z.object({
   toneOfVoice: z.string().min(1, 'Tone of voice is required'),
   pointOfView: z.string().min(1, 'Point of view is required'),
   aiContentCleaning: z.string().min(1, 'AI content cleaning is required'),
-  imageSettingsQuality: z.string().min(1, 'Image quality is required'),
-  imageSettingsPlacement: z.string().min(1, 'Image placement is required'),
-  imageSettingsStyle: z.string().min(1, 'Image style is required'),
-  imageSettingsCount: z.number().min(1, 'Number of images is required'),
-  internalLinking: z.string().min(1, 'Internal linking is required'),
-    externalLinking: z.string().min(1, 'External linking is required'),
+  // Simplified media settings
+  includeImages: z.boolean().default(true),
   includeVideos: z.boolean().default(false),
+  // Linking settings
+  internalLinking: z.string().min(1, 'Internal linking is required'),
+  externalLinking: z.string().min(1, 'External linking is required'),
+  // Legacy fields for backward compatibility (optional)
+  imageSettingsQuality: z.string().optional(),
+  imageSettingsPlacement: z.string().optional(),
+  imageSettingsStyle: z.string().optional(),
+  imageSettingsCount: z.number().optional(),
   numberOfVideos: z.number().default(1),
 });
 

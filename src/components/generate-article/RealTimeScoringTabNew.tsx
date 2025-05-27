@@ -134,6 +134,7 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
           position: 'relative',
           overflow: 'hidden',
           border: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.grey[800]}` : 'none',
+
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -145,8 +146,16 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
           }
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              textAlign: 'center',
+              letterSpacing: '0.5px'
+            }}
+          >
             SEO Performance Score
           </Typography>
         </Box>
@@ -156,7 +165,7 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          my: 1
+          my: 2
         }}>
           {/* Background circle */}
           <Box sx={{
@@ -174,20 +183,45 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
           }}>
             {/* Inner circle with score */}
             <Box sx={{
-              width: 110,
-              height: 110,
+              width: 120,
+              height: 120,
               borderRadius: '50%',
-              bgcolor: theme.palette.background.paper,
+              bgcolor: theme.palette.mode === 'dark'
+                ? theme.palette.grey[900]
+                : theme.palette.background.paper,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
+              boxShadow: theme.palette.mode === 'dark'
+                ? 'inset 0 0 15px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,255,0.1)'
+                : 'inset 0 0 10px rgba(0,0,0,0.1)',
+              border: theme.palette.mode === 'dark'
+                ? `3px solid ${theme.palette.grey[800]}`
+                : `2px solid ${theme.palette.grey[200]}`,
+              position: 'relative',
+              zIndex: 1,
             }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: getScoreColor() }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 700,
+                  color: getScoreColor(),
+                  textShadow: theme.palette.mode === 'dark'
+                    ? '0 0 10px currentColor'
+                    : 'none'
+                }}
+              >
                 {scorePercentage}
               </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  opacity: 0.8,
+                  color: theme.palette.text.secondary,
+                  fontWeight: 500
+                }}
+              >
                 {`${totalScore} / 100`}
               </Typography>
             </Box>

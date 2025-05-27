@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Edit, Award, CreditCard, ChevronRight } from 'lucide-react';
+import { Edit, User, Bell, Award, Shield, CreditCard, ChevronRight } from 'lucide-react';
 
 import {
   Box,
@@ -14,9 +14,10 @@ import {
   Chip,
   Grid,
   Table,
+  Stack,
+  alpha,
   Avatar,
   Button,
-  Divider,
   useTheme,
   TableRow,
   Container,
@@ -25,6 +26,7 @@ import {
   TableCell,
   TableHead,
   Typography,
+  IconButton,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -32,6 +34,7 @@ import {
   useGetUserInvoicesQuery,
 } from 'src/services/apis/subscriptionApi';
 
+import { Iconify } from 'src/components/iconify';
 import { ResponsivePricingPlans } from 'src/components/pricing';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
 import { SecurityForm } from 'src/components/profile/SecurityForm';
@@ -79,244 +82,410 @@ export function ProfileView() {
 
   return (
     <DashboardContent>
-      <Container maxWidth="lg">
-        {/* Profile Overview */}
-        <Box mb={5}>
-          <Typography variant="h4" gutterBottom>
-            {t('profile.title')}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            {t('profile.subtitle')}
-          </Typography>
+      <Container maxWidth="xl">
+        {/* Modern Header with Gradient Background */}
+        <Box
+          sx={{
+            position: 'relative',
+            mb: 4,
+            borderRadius: 3,
+            overflow: 'hidden',
+            background: theme.palette.mode === 'dark'
+              ? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`
+              : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 50%, ${theme.palette.secondary.light} 100%)`,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: theme.palette.mode === 'dark'
+                ? 'rgba(0,0,0,0.2)'
+                : 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+            }
+          }}
+        >
+          <Box sx={{ position: 'relative', p: 4 }}>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item xs={12} md={8}>
+                <Stack spacing={1}>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      color: 'white',
+                      fontWeight: 700,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    {t('profile.title', 'My Profile')}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: 'rgba(255,255,255,0.9)',
+                      fontWeight: 400
+                    }}
+                  >
+                    {t('profile.subtitle', 'Manage your account settings and preferences')}
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' } }}>
+                  <Avatar
+                    src={authUser?.avatar || '/assets/images/avatar/avatar-default.jpg'}
+                    alt={authUser?.name || 'User'}
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      border: `4px solid rgba(255,255,255,0.2)`,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
         </Box>
 
-        {/* Profile Summary Card */}
-        <Card sx={{ mb: 5, p: 3, borderRadius: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Avatar
-                  src={authUser?.avatar || '/assets/images/avatar/avatar-default.jpg'}
-                  alt={authUser?.name || 'User'}
-                  sx={{
-                    width: 120,
-                    height: 120,
-                    mb: 2,
-                    border: `4px solid ${theme.palette.background.paper}`,
-                    boxShadow: theme.customShadows.z8
-                  }}
-                />
-
-                {isEditing ? (
-                  <Box sx={{ width: '100%', mt: 2 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" gutterBottom>{t('profile.form.firstName')}</Typography>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" gutterBottom>{t('profile.form.lastName')}</Typography>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                        />
-                      </Grid>
+        {/* Profile Summary Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={8}>
+            <Card
+              sx={{
+                p: 3,
+                borderRadius: 3,
+                background: theme.palette.mode === 'dark'
+                  ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
+                  : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0 8px 32px rgba(0,0,0,0.3)'
+                  : '0 4px 20px rgba(0,0,0,0.08)',
+              }}
+            >
+              {isEditing ? (
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <User size={20} />
+                    Edit Profile Information
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="First Name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                          }
+                        }}
+                      />
                     </Grid>
-                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 1 }}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={handleSaveProfile}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => setIsEditing(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <>
-                    <Typography variant="h6" gutterBottom>
-                      {authUser?.name || `${firstName} ${lastName}`}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {authUser?.email || 'user@example.com'}
-                    </Typography>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Last Name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleSaveProfile}
+                      startIcon={<Iconify icon="eva:checkmark-fill" />}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Save Changes
+                    </Button>
                     <Button
                       variant="outlined"
-                      size="small"
-                      startIcon={<Edit />}
-                      sx={{ mt: 1 }}
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => setIsEditing(false)}
+                      startIcon={<Iconify icon="eva:close-fill" />}
+                      sx={{ borderRadius: 2 }}
                     >
-                      {t('profile.editProfile')}
+                      Cancel
                     </Button>
-                  </>
-                )}
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={8}>
-              <Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h6">
-                    {t('profile.subscription.current')}
-                  </Typography>
-                  <Button
-                    variant="text"
-                    color="primary"
-                    endIcon={<ChevronRight />}
-                    onClick={() => setShowSubscriptionDetails(!showSubscriptionDetails)}
-                  >
-                    {showSubscriptionDetails ? t('profile.subscription.hideDetails') : t('profile.subscription.viewDetails')}
-                  </Button>
+                  </Stack>
                 </Box>
-
-                <Box mt={3} display="flex" gap={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<CreditCard />}
-                    onClick={handleManageSubscription}
-                  >
-                    {t('profile.subscription.manage')}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Award />}
-                    onClick={handleManageSubscription}
-                  >
-                    {t('profile.subscription.upgrade', 'Upgrade Plan')}
-                  </Button>
+              ) : (
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <User size={20} />
+                      Profile Information
+                    </Typography>
+                    <IconButton
+                      onClick={() => setIsEditing(true)}
+                      sx={{
+                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.2),
+                        }
+                      }}
+                    >
+                      <Edit size={18} />
+                    </IconButton>
+                  </Box>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Full Name
+                        </Typography>
+                        <Typography variant="h6">
+                          {authUser?.name || `${firstName} ${lastName}`}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Email Address
+                        </Typography>
+                        <Typography variant="h6">
+                          {authUser?.email || 'user@example.com'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </Box>
-              </Box>
-            </Grid>
+              )}
+            </Card>
           </Grid>
-        </Card>
 
-        {/* Tabs for different sections */}
-        <Box sx={{ width: '100%', mb: 3 }}>
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
+          <Grid item xs={12} md={4}>
+            {/* Quick Stats Card */}
+            <Card
+              sx={{
+                p: 3,
+                borderRadius: 3,
+                background: theme.palette.mode === 'dark'
+                  ? `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`
+                  : `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+                border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0 8px 32px rgba(0,0,0,0.3)'
+                  : '0 4px 20px rgba(0,0,0,0.08)',
+              }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                <Award size={20} />
+                Account Stats
+              </Typography>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Articles Created
+                  </Typography>
+                  <Chip
+                    label="12"
+                    size="small"
+                    color="primary"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Current Plan
+                  </Typography>
+                  <Chip
+                    label="Pro"
+                    size="small"
+                    color="success"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Member Since
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600}>
+                    Jan 2024
+                  </Typography>
+                </Box>
+              </Stack>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Modern Tabs */}
+        <Card
+          sx={{
+            borderRadius: 3,
+            overflow: 'hidden',
+            boxShadow: theme.palette.mode === 'dark'
+              ? '0 8px 32px rgba(0,0,0,0.3)'
+              : '0 4px 20px rgba(0,0,0,0.08)',
+          }}
+        >
+          <Box
             sx={{
-              '& .MuiTabs-indicator': {
-                backgroundColor: 'primary.main',
-              },
-              borderBottom: 1,
-              borderColor: 'divider',
+              bgcolor: theme.palette.mode === 'dark'
+                ? alpha(theme.palette.background.paper, 0.8)
+                : alpha(theme.palette.grey[50], 0.8),
+              borderBottom: `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Tab label={t('profile.tabs.account')} />
-            <Tab label={t('profile.tabs.subscription')} />
-            <Tab label={t('profile.tabs.security')} />
-          </Tabs>
-        </Box>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              sx={{
+                px: 2,
+                '& .MuiTab-root': {
+                  minHeight: 64,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.95rem',
+                  '&.Mui-selected': {
+                    color: theme.palette.primary.main,
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                  backgroundColor: theme.palette.primary.main,
+                },
+              }}
+            >
+              <Tab
+                icon={<User size={18} />}
+                iconPosition="start"
+                label={t('profile.tabs.account', 'Account Details')}
+              />
+              <Tab
+                icon={<CreditCard size={18} />}
+                iconPosition="start"
+                label={t('profile.tabs.subscription', 'Subscription')}
+              />
+              <Tab
+                icon={<Shield size={18} />}
+                iconPosition="start"
+                label={t('profile.tabs.security', 'Security')}
+              />
+              <Tab
+                icon={<Bell size={18} />}
+                iconPosition="start"
+                label={t('profile.tabs.notifications', 'Notifications')}
+              />
+            </Tabs>
+          </Box>
 
-        {/* Tab Content */}
-        <Box sx={{ mt: 3 }}>
-          {activeTab === 0 && <ProfileForm />}
+          {/* Tab Content */}
+          <Box sx={{ p: 4 }}>
+            {activeTab === 0 && (
+              <Box>
+                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+                  {t('profile.tabs.account', 'Account Details')}
+                </Typography>
+                <ProfileForm />
+              </Box>
+            )}
 
-          {activeTab === 1 && (
-            <Box ref={subscriptionTabRef}>
-              <Typography variant="h5" gutterBottom>
-                {t('profile.subscription.plans')}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                {t('profile.subscription.choosePlan')}
-              </Typography>
+            {activeTab === 1 && (
+              <Box ref={subscriptionTabRef}>
+                <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+                  {t('profile.subscription.plans', 'Subscription Plans')}
+                </Typography>
+                <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
+                  {t('profile.subscription.choosePlan', 'Choose the plan that best fits your needs')}
+                </Typography>
 
-              <Box sx={{ mt: 2 }}>
-                {/* Use the ResponsivePricingPlans component */}
                 <ResponsivePricingPlans
                   onSelectPlan={(planId) => navigate(`/subscription/upgrade?plan=${planId}`)}
                   gridColumns={{ xs: 1, sm: 1, md: 3 }}
                   title=""
                   subtitle=""
                 />
-              </Box>
 
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom>
-                  {t('profile.billing.history')}
-                </Typography>
-                <Card variant="outlined">
-                  {isLoadingInvoices ? (
-                    <Box sx={{ py: 4, textAlign: 'center' }}>
-                      <Typography variant="body2">
-                        {t('profile.billing.loading', 'Loading invoices...')}
-                      </Typography>
-                    </Box>
-                  ) : invoicesData?.invoices && invoicesData.invoices.length > 0 ? (
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>{t('profile.billing.date', 'Date')}</TableCell>
-                          <TableCell>{t('profile.billing.invoiceNumber', 'Invoice Number')}</TableCell>
-                          <TableCell>{t('profile.billing.plan', 'Plan')}</TableCell>
-                          <TableCell align="right">{t('profile.billing.amount', 'Amount')}</TableCell>
-                          <TableCell align="right">{t('profile.billing.status', 'Status')}</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {invoicesData.invoices.map((invoice) => (
-                          <TableRow key={invoice.id} hover>
-                            <TableCell>
-                              {new Date(invoice.createdAt).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>{invoice.invoiceNumber}</TableCell>
-                            <TableCell>
-                              <Typography variant="body2">
-                                {invoice.plan}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography variant="subtitle2">
-                                ${invoice.amount}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                              <Chip
-                                size="small"
-                                label={invoice.status}
-                                color={invoice.status === 'paid' ? 'success' : 'warning'}
-                                sx={{
-                                  textTransform: 'capitalize',
-                                  fontWeight: 'medium'
-                                }}
-                              />
-                            </TableCell>
+                {/* Billing History */}
+                <Box sx={{ mt: 6 }}>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+                    {t('profile.billing.history', 'Billing History')}
+                  </Typography>
+                  {invoicesData?.invoices?.length ? (
+                    <Card sx={{ borderRadius: 2 }}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{t('profile.billing.date', 'Date')}</TableCell>
+                            <TableCell>{t('profile.billing.amount', 'Amount')}</TableCell>
+                            <TableCell>{t('profile.billing.status', 'Status')}</TableCell>
+                            <TableCell align="right">{t('profile.billing.actions', 'Actions')}</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHead>
+                        <TableBody>
+                          {invoicesData?.invoices?.map((invoice :any) => (
+                            <TableRow key={invoice.id}>
+                              <TableCell>{new Date(invoice.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>${invoice.amount}</TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={invoice.status}
+                                  color={invoice.status === 'paid' ? 'success' : 'warning'}
+                                  size="small"
+                                />
+                              </TableCell>
+                              <TableCell align="right">
+                                <Button
+                                  size="small"
+                                  endIcon={<ChevronRight size={16} />}
+                                  onClick={() => window.open(invoice.invoice_url, '_blank')}
+                                >
+                                  {t('profile.billing.view', 'View')}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </Card>
                   ) : (
-                    <Box sx={{ py: 4, textAlign: 'center' }}>
-                      <Typography variant="body2" color="text.secondary">
-                        {t('profile.billing.noHistory')}
+                    <Card sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
+                      <Typography variant="body1" color="text.secondary">
+                        {t('profile.billing.noHistory', 'No billing history available')}
                       </Typography>
-                    </Box>
+                    </Card>
                   )}
+                </Box>
+              </Box>
+            )}
+
+            {activeTab === 2 && (
+              <Box>
+                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+                  {t('profile.tabs.security', 'Security Settings')}
+                </Typography>
+                <SecurityForm />
+              </Box>
+            )}
+
+            {activeTab === 3 && (
+              <Box>
+                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+                  {t('profile.tabs.notifications', 'Notification Preferences')}
+                </Typography>
+                <Card sx={{ p: 3, borderRadius: 2 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    {t('profile.notifications.comingSoon', 'Notification settings will be available soon.')}
+                  </Typography>
                 </Card>
               </Box>
-            </Box>
-          )}
-
-          {activeTab === 2 && <SecurityForm />}
-        </Box>
+            )}
+          </Box>
+        </Card>
       </Container>
     </DashboardContent>
   );

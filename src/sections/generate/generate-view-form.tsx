@@ -146,10 +146,10 @@ export function GenerateViewForm({
       // Call the generate table of contents function
       if (activeStep === 1) {
         try {
-          onGenerateTableOfContents()
+          await onGenerateTableOfContents();
         }
         catch (error) {
-          toast.error('Failed to generate table of contents');
+          console.error('Failed to generate table of contents:', error);
         }
       }
     } else {

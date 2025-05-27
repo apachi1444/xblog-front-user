@@ -55,11 +55,6 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     name: 'step2.toneOfVoice'
   })
 
-  const includeVideos = useWatch({
-    control,
-    name: 'step2.includeVideos'
-  })
-
   // Use options from the hook
   const {
     articleTypeOptions,
@@ -67,13 +62,8 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     toneOptions,
     povOptions,
     aiCleaningOptions,
-    imageQualityOptions,
-    imagePlacementOptions,
-    imageStyleOptions,
     linkingOptions,
-    externalLinkingOptions,
-    numberOptions,
-    videoNumberOptions
+    externalLinkingOptions
   } = options;
 
 
@@ -195,7 +185,7 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
 
           <Divider sx={{ my: 1, width: '100%' }} />
 
-          {/* Media Settings Section - Grid of 4 */}
+          {/* Media Settings Section - Simplified */}
           <Box sx={{ width: '100%', mb: 4 }}>
             <Typography
               variant="subtitle1"
@@ -214,75 +204,34 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.imageQuality', "Image Quality")}
-                  tooltipText={t('article.tooltips.imageQuality', "Sets the resolution and quality of generated images")}
-                  options={imageQualityOptions}
-                  {...register("step2.imageSettingsQuality", {
-                    onChange: (e) => {
-                      setValue("step2.imageSettingsQuality", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select image quality")}
-                  error={!!errors.step2?.imageSettingsQuality}
-                  helperText={errors.step2?.imageSettingsQuality?.message}
-                  value={watch("step2.imageSettingsQuality")}
-                />
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                  <Controller
+                    name="step2.includeImages"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={Boolean(field.value)}
+                            onChange={field.onChange}
+                            color="primary"
+                          />
+                        }
+                        label={t('article.settings.includeImages', "Include Images")}
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            fontSize: '1rem',
+                            fontWeight: 500
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.imagePlacement', "Image Placement")}
-                  tooltipText={t('article.tooltips.imagePlacement', "Determines where images will be placed within your article")}
-                  options={imagePlacementOptions}
-                  {...register("step2.imageSettingsPlacement", {
-                    onChange: (e) => {
-                      setValue("step2.imageSettingsPlacement", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select image placement")}
-                  error={!!errors.step2?.imageSettingsPlacement}
-                  helperText={errors.step2?.imageSettingsPlacement?.message}
-                  value={watch("step2.imageSettingsPlacement")}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.imageStyle', "Image Style")}
-                  tooltipText={t('article.tooltips.imageStyle', "Sets the visual style for generated images")}
-                  options={imageStyleOptions}
-                  {...register("step2.imageSettingsStyle", {
-                    onChange: (e) => {
-                      setValue("step2.imageSettingsStyle", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select image style")}
-                  error={!!errors.step2?.imageSettingsStyle}
-                  helperText={errors.step2?.imageSettingsStyle?.message}
-                  value={watch("step2.imageSettingsStyle")}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.numberOfImages', "Number of Images")}
-                  tooltipText={t('article.tooltips.numberOfImages', "Total number of images to include in your article")}
-                  options={numberOptions}
-                  {...register("step2.imageSettingsCount", {
-                    onChange: (e) => {
-                      setValue("step2.imageSettingsCount", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select number")}
-                  error={!!errors.step2?.imageSettingsCount}
-                  helperText={errors.step2?.imageSettingsCount?.message}
-                  value={watch("step2.imageSettingsCount")}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <Controller
                     name="step2.includeVideos"
@@ -297,26 +246,16 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                           />
                         }
                         label={t('article.settings.includeVideos', "Include Videos")}
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            fontSize: '1rem',
+                            fontWeight: 500
+                          }
+                        }}
                       />
                     )}
                   />
                 </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.numberOfVideos', "Number of Videos")}
-                  tooltipText={t('article.tooltips.numberOfVideos', "Specify how many videos should be embedded in your article")}
-                  options={videoNumberOptions}
-                  {...register("step2.numberOfVideos", {
-                    onChange: (e) => {
-                      setValue("step2.numberOfVideos", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select number")}
-                  disabled={!includeVideos}
-                  value={watch("step2.numberOfVideos")}
-                />
               </Grid>
             </Grid>
           </Box>
