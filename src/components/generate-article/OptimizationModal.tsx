@@ -35,9 +35,11 @@ interface OptimizationModalProps {
   open: boolean;
   onClose: () => void;
   criterionId: number | null;
+  fieldPath: string; // e.g., "step1.contentDescription", "step2.toneOfVoice"
+  currentValue: string; // Current value of the field
 }
 
-export function OptimizationModal({ open, onClose, criterionId }: OptimizationModalProps) {
+export function OptimizationModal({ open, onClose, criterionId, fieldPath, currentValue }: OptimizationModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const form = useFormContext<GenerateArticleFormData>();
@@ -47,13 +49,11 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
   const isPremiumUser = subscriptionDetails?.subscription_name &&
     !subscriptionDetails.subscription_name.toLowerCase().includes('free');
 
-  // Consolidated state
+  // Simplified state - no need to track field info since it's passed as props
   const [state, setState] = useState({
     // Content values
     currentValue: '',
     optimizedValue: '',
-    originalValue: '',
-    fieldToUpdate: '',
 
     // UI states
     isOptimizing: false,
@@ -79,42 +79,56 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // Evaluation function
+  // Simple evaluation function - uses fieldPath prop directly
   const evaluateCriterion = useCallback((criterionIdToEvaluate: number, value: string) => {
-    if (!criterionIdToEvaluate || !criterion || !state.fieldToUpdate) {
+    if (!criterionIdToEvaluate || !criterion || !fieldPath) {
       return { status: 'pending', score: 0, message: '' };
     }
 
     try {
       const formValues = form.getValues();
-      const updatedFormValues = { ...formValues };
-      
-      const evaluationFn = EVALUATION_FUNCTIONS[criterionIdToEvaluate];
-      if (evaluationFn) {
-        return evaluationFn(null, updatedFormValues);
+      console.log('Original form values:', formValues);
+
+      // Create a deep copy of form values to simulate the change (NOT updating actual form)
+      const simulatedFormValues = JSON.parse(JSON.stringify(formValues));
+
+      // Parse the fieldPath (e.g., "step1.contentDescription")
+      const [stepName, fieldName] = fieldPath.split('.');
+
+      // Ensure the step exists
+      if (!simulatedFormValues[stepName]) {
+        simulatedFormValues[stepName] = {};
       }
 
+      // Update the specific field
+      simulatedFormValues[stepName][fieldName] = value;
+      console.log(`Updated field "${fieldPath}" to:`, value);
+      console.log('Simulated form values for evaluation:', simulatedFormValues);
+
+      const evaluationFn = EVALUATION_FUNCTIONS[criterionIdToEvaluate];
+      if (evaluationFn) {
+        const result = evaluationFn(null, simulatedFormValues);
+        console.log('Evaluation function result:', result);
+        return result;
+      }
+
+      console.log('No evaluation function found for criterion:', criterionIdToEvaluate);
       return { status: 'pending', score: 0, message: '' };
     } catch (error) {
+      console.error('Evaluation error:', error);
       return { status: 'error', score: 0, message: 'Evaluation error' };
     }
-  }, [criterion, state.fieldToUpdate, form]);
+  }, [criterion, fieldPath, form]);
 
-  // Initialize modal when opened
+  // Initialize modal when opened - much simpler now!
   useEffect(() => {
     if (open && criterion) {
-      const primaryField = criterion.inputKeys?.find(key => key !== 'primaryKeyword') || criterion.inputKeys?.[0] || '';
-      const formValues = form.getValues();
-      const formCurrentValue = formValues.step1?.[primaryField as keyof typeof formValues.step1] as string || '';
-
-      // Evaluate initial score
-      const result = criterionId ? evaluateCriterion(criterionId, formCurrentValue) : { score: 0, status: 'pending' };
+      // Evaluate initial score using the passed currentValue
+      const result = criterionId ? evaluateCriterion(criterionId, currentValue) : { score: 0, status: 'pending' };
 
       setState({
-        currentValue: formCurrentValue,
+        currentValue,
         optimizedValue: '',
-        originalValue: formCurrentValue,
-        fieldToUpdate: primaryField,
         isOptimizing: false,
         isApplying: false,
         optimizationSuccess: false,
@@ -128,30 +142,36 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
         potentialStatus: 'pending',
       });
     }
-  }, [open, criterion, criterionId, form, evaluateCriterion]);
+  }, [open, criterion, criterionId, currentValue, evaluateCriterion]);
 
-  // Real-time evaluation for current value
+  // Real-time evaluation for current value changes (affects potential score)
   useEffect(() => {
-    if (criterionId && state.fieldToUpdate && state.currentValue !== undefined) {
+    if (criterionId && fieldPath && state.currentValue !== undefined) {
+      console.log('Evaluating current value for potential score:', state.currentValue);
       const result = evaluateCriterion(criterionId, state.currentValue);
+      console.log('Current value evaluation result:', result);
+
       updateState({
-        currentScore: result.score,
-        currentStatus: result.status as any,
-        hasChanges: state.currentValue !== state.originalValue,
+        potentialScore: result.score,
+        potentialStatus: result.status as any,
+        hasChanges: state.currentValue !== currentValue, // Compare with original passed value
       });
     }
-  }, [criterionId, state.currentValue, state.originalValue, state.fieldToUpdate, evaluateCriterion, updateState]);
+  }, [criterionId, state.currentValue, currentValue, fieldPath, evaluateCriterion, updateState]);
 
-  // Real-time evaluation for optimized value
+  // Real-time evaluation for optimized value (also affects potential score)
   useEffect(() => {
-    if (criterionId && state.fieldToUpdate && state.optimizedValue) {
+    if (criterionId && fieldPath && state.optimizedValue) {
+      console.log('Evaluating optimized value for potential score:', state.optimizedValue);
       const result = evaluateCriterion(criterionId, state.optimizedValue);
+      console.log('Optimized value evaluation result:', result);
+
       updateState({
         potentialScore: result.score,
         potentialStatus: result.status as any,
       });
     }
-  }, [criterionId, state.optimizedValue, state.fieldToUpdate, evaluateCriterion, updateState]);
+  }, [criterionId, state.optimizedValue, fieldPath, evaluateCriterion, updateState]);
 
   // Handle AI optimization
   const handleOptimize = async () => {
@@ -179,10 +199,16 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
       const improvementFn = IMPROVEMENT_FUNCTIONS[criterionId];
       const improved = improvementFn ? improvementFn(null, form.getValues()) : state.currentValue;
 
+      // Immediately evaluate the optimized value to get potential score
+      const optimizedResult = evaluateCriterion(criterionId, improved);
+      console.log('AI optimization result evaluation:', optimizedResult);
+
       clearInterval(progressInterval);
 
       updateState({
         optimizedValue: improved,
+        potentialScore: optimizedResult.score,
+        potentialStatus: optimizedResult.status as any,
         aiProgress: 100,
         showScoreAnimation: true,
       });
@@ -199,9 +225,9 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
     }
   };
 
-  // Handle apply changes
+  // Handle apply changes - super simple now!
   const handleApply = () => {
-    if (!state.fieldToUpdate || state.isApplying) return;
+    if (!fieldPath || state.isApplying) return;
 
     const valueToApply = state.optimizedValue || state.currentValue;
     if (!valueToApply) return;
@@ -209,8 +235,10 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
     updateState({ isApplying: true, showSuccessAnimation: true, optimizationSuccess: true });
 
     try {
-      // Update form
-      form.setValue(`step1.${state.fieldToUpdate}` as any, valueToApply, {
+      console.log(`Updating form field at path: ${fieldPath}`);
+
+      // Update form using the passed fieldPath
+      form.setValue(fieldPath as any, valueToApply, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -359,7 +387,7 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
               </Typography>
             </Box>
 
-            {/* Arrow */}
+            {/* Arrow - Show when there are changes or optimized value */}
             {(state.optimizedValue || state.hasChanges) && (
               <Fade in={!!(state.optimizedValue || state.hasChanges)}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -373,7 +401,7 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
               </Fade>
             )}
 
-            {/* Potential Score */}
+            {/* Potential Score - Show when there are changes or optimized value */}
             {(state.optimizedValue || state.hasChanges) && (
               <Zoom in={!!(state.optimizedValue || state.hasChanges)} style={{ transitionDelay: '200ms' }}>
                 <Box sx={{ textAlign: 'center' }}>
@@ -416,13 +444,21 @@ export function OptimizationModal({ open, onClose, criterionId }: OptimizationMo
                     </Typography>
                   </Box>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-                    Potential Score
+                    {state.optimizedValue ? 'AI Optimized Score' : 'Updated Score'}
                   </Typography>
                   {state.potentialScore > state.currentScore && (
                     <Chip
                       label={`+${state.potentialScore - state.currentScore} improvement`}
                       size="small"
                       color="success"
+                      sx={{ mt: 1, fontWeight: 600 }}
+                    />
+                  )}
+                  {state.potentialScore < state.currentScore && (
+                    <Chip
+                      label={`${state.potentialScore - state.currentScore} change`}
+                      size="small"
+                      color="warning"
                       sx={{ mt: 1, fontWeight: 600 }}
                     />
                   )}

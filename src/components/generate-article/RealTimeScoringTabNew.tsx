@@ -17,7 +17,7 @@ import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEv
 
 import { ItemSectionNew } from "./ItemSectionNew";
 import { OptimizationModal } from "./OptimizationModal";
-import { SEO_CRITERIA } from "../../utils/seo-criteria-definitions";
+import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP } from "../../utils/seo-criteria-definitions";
 
 // Types
 
@@ -89,6 +89,27 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
     if (scorePercentage < 66) return COLORS.warning;
     return COLORS.success;
   };
+
+  // Helper function to get field path and current value for a criterion
+  const getCriterionFieldInfo = useCallback((criterionId: number) => {
+    const inputKeys = CRITERIA_TO_INPUT_MAP[criterionId];
+    if (!inputKeys || inputKeys.length === 0) {
+      return { fieldPath: 'step1.title', currentValue: '' }; // fallback
+    }
+
+    // Get the primary field (first non-primaryKeyword field or first field)
+    const primaryField = inputKeys.find(key => key !== 'primaryKeyword') || inputKeys[0];
+
+    // All current fields are in step1
+    const fieldPath = `step1.${primaryField}`;
+
+    // Get current value from form
+    const currentValue = formValues?.step1?.[primaryField as keyof typeof formValues.step1] as string || '';
+
+    console.log(`Criterion ${criterionId}: fieldPath=${fieldPath}, currentValue="${currentValue}"`);
+
+    return { fieldPath, currentValue };
+  }, [formValues]);
 
   // Handle opening the optimization modal
   const handleOpenModal = useCallback((criterionId: number) => {
@@ -281,11 +302,15 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
       ))}
 
       {/* Optimization Modal */}
-      <OptimizationModal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        criterionId={selectedCriterionId}
-      />
+      {selectedCriterionId && (
+        <OptimizationModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          criterionId={selectedCriterionId}
+          fieldPath={getCriterionFieldInfo(selectedCriterionId).fieldPath}
+          currentValue={getCriterionFieldInfo(selectedCriterionId).currentValue}
+        />
+      )}
     </CardContent>
   );
 }
