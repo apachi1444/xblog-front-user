@@ -38,20 +38,20 @@ export function FormContainer({
           sx={{
             position: 'relative',
             bgcolor: theme.palette.mode === 'dark'
-              ? theme.palette.background.neutral
-              : theme.palette.secondary.light,
+              ? 'rgba(255, 255, 255, 0.02)'
+              : theme.palette.grey[50],
             borderRadius: '8px',
             border: `1px solid ${theme.palette.mode === 'dark'
               ? theme.palette.grey[700]
-              : theme.palette.primary.lighter}`,
+              : theme.palette.grey[300]}`,
             pt: 4,
             pb: 2,
             px: 2,
             mt: 2.5,
             width: '100%',
             boxShadow: theme.palette.mode === 'dark'
-              ? '0 4px 12px rgba(0,0,0,0.2)'
-              : 'none',
+              ? '0 4px 12px rgba(0,0,0,0.3)'
+              : '0 2px 8px rgba(0,0,0,0.05)',
           }}
           onClick={toggleExpand} // Make the entire box clickable
         >
@@ -67,15 +67,15 @@ export function FormContainer({
                 px: 2,
                 py: 1.5,
                 bgcolor: theme.palette.mode === 'dark'
-                  ? theme.palette.primary.dark
-                  : theme.palette.secondary.lighter,
-                color: theme.palette.mode === 'dark'
-                  ? theme.palette.common.white
-                  : theme.palette.primary.main,
-                borderRadius: '20px',
-                border: `0.3px solid ${theme.palette.mode === 'dark'
                   ? theme.palette.primary.main
-                  : theme.palette.primary.lighter}`,
+                  : theme.palette.primary.main,
+                color: theme.palette.mode === 'dark'
+                  ? theme.palette.primary.contrastText
+                  : theme.palette.primary.contrastText,
+                borderRadius: '20px',
+                border: `1px solid ${theme.palette.mode === 'dark'
+                  ? theme.palette.primary.light
+                  : theme.palette.primary.dark}`,
                 fontWeight: 'bold',
                 fontSize: '13px',
                 letterSpacing: '0.5px',

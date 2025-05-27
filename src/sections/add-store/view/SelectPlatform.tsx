@@ -9,7 +9,7 @@ import { Box, Grid, Card, Paper, alpha, Button, useTheme, Container, Typography 
 const PLATFORM_IMAGES = {
   wordpress: 'https://s.w.org/style/images/about/WordPress-logotype-standard.png',
   shopify: 'https://cdn.shopify.com/s/files/1/0070/7032/files/shopify-logo-green.png',
-  WrapTextOutlined: 'https://wix.com/wp-content/uploads/2023/10/wix-logo.svg',
+  WrapTextOutlined: 'https://clipground.com/images/wix-logo-png-9.jpg',
   magento: '/assets/images/platforms/magento.png',
   prestashop: '/assets/images/platforms/prestashop.png',
   custom: '/assets/images/platforms/custom-website.png',

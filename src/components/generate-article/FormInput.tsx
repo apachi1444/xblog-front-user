@@ -73,28 +73,36 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
               sx: {
                 minHeight: theme.spacing(6.25), // 50px equivalent using theme spacing
                 bgcolor: theme.palette.mode === 'dark'
-                  ? theme.palette.background.neutral
+                  ? 'rgba(255, 255, 255, 0.05)'
                   : theme.palette.background.paper,
                 borderRadius: theme.shape.borderRadius / 8,
-                border: `0.5px solid ${error
+                border: `1px solid ${error
                   ? theme.palette.error.main
                   : theme.palette.mode === 'dark'
-                    ? theme.palette.grey[600]
-                    : theme.palette.primary.main}`,
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300]}`,
                 fontSize: theme.typography.button.fontSize,
                 color: theme.palette.text.primary,
+                transition: 'all 0.2s ease',
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none'
                 },
                 '&:hover': {
                   bgcolor: theme.palette.mode === 'dark'
-                    ? theme.palette.background.neutral
-                    : theme.palette.background.paper,
-                  border: `0.5px solid ${error
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : theme.palette.grey[50],
+                  border: `1px solid ${error
                     ? theme.palette.error.main
                     : theme.palette.mode === 'dark'
                       ? theme.palette.primary.main
-                      : theme.palette.primary.dark}`
+                      : theme.palette.primary.main}`
+                },
+                '&.Mui-focused': {
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : theme.palette.background.paper,
+                  border: `2px solid ${theme.palette.primary.main}`,
+                  boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`
                 }
               }
             }}

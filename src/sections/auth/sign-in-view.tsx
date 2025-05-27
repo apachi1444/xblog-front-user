@@ -212,11 +212,13 @@ export function SignInView() {
   }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
 
   const handleToggleTestMode = useCallback(() => {
-    dispatch(setTestMode(!testMode));
+    const newTestMode = !testMode;
+    dispatch(setTestMode(newTestMode));
+
     toast.success(
-      !testMode
-        ? t('auth.testMode.enabled')
-        : t('auth.testMode.disabled')
+      newTestMode
+        ? t('auth.testMode.enabled', 'Test mode enabled - Mock API active')
+        : t('auth.testMode.disabled', 'Test mode disabled - Real API active')
     );
   }, [dispatch, t, testMode]);
 

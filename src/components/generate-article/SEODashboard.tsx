@@ -38,8 +38,8 @@ const getColors = (theme: any) => ({
   success: theme.palette.success.main,
   inactive: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
   primary: theme.palette.primary.main,
-  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.primary.lighter,
-  background: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.primary.lighter,
+  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300],
+  background: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
 });
 
 export function SEODashboard({
@@ -161,13 +161,16 @@ export function SEODashboard({
         {/* Tabs Header - Always visible */}
         <Box
           sx={{
-            bgcolor: COLORS.background,
+            bgcolor: theme.palette.mode === 'dark'
+              ? theme.palette.grey[800]
+              : theme.palette.grey[100],
             width: "100%",
             borderRadius: "10px 10px 0 0",
             p: 0.5,
             display: "flex",
             alignItems: "center",
             justifyContent: showContent ? "flex-start" : "center",
+            borderBottom: `1px solid ${COLORS.border}`,
           }}
         >
           <IconButton
@@ -193,16 +196,32 @@ export function SEODashboard({
                   borderRadius: "5px",
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: COLORS.primary,
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.text.primary
+                    : theme.palette.primary.main,
                   textTransform: "none",
                   py: 0.5,
                   px: 1.5,
                   flexGrow: 1,
                   maxWidth: 'none',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : 'rgba(0, 0, 0, 0.04)',
+                  }
                 },
                 "& .Mui-selected": {
-                  bgcolor: "white",
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? theme.palette.background.paper
+                    : "white",
                   borderRadius: "5px",
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.primary.main
+                    : theme.palette.primary.main,
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 2px 4px rgba(0,0,0,0.2)'
+                    : '0 1px 3px rgba(0,0,0,0.1)',
                 },
                 "& .MuiTabs-indicator": {
                   display: "none",

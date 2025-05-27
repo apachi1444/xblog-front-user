@@ -142,12 +142,31 @@ export const KeywordInput = forwardRef<HTMLInputElement, KeywordInputProps>(({
               ),
               sx: {
                 minHeight: theme.spacing(6.25),
-                bgcolor: theme.palette.background.paper,
+                bgcolor: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
+                  : theme.palette.background.paper,
                 borderRadius: theme.shape.borderRadius / 8,
-                border: `0.5px solid ${error ? theme.palette.error.main : theme.palette.primary.main}`,
+                border: `1px solid ${error
+                  ? theme.palette.error.main
+                  : theme.palette.mode === 'dark'
+                    ? theme.palette.grey[700]
+                    : theme.palette.grey[300]}`,
                 fontSize: theme.typography.button.fontSize,
+                transition: 'all 0.2s ease',
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none'
+                },
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : theme.palette.grey[50],
+                  border: `1px solid ${error
+                    ? theme.palette.error.main
+                    : theme.palette.primary.main}`
+                },
+                '&.Mui-focused': {
+                  border: `2px solid ${theme.palette.primary.main}`,
+                  boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`
                 },
                 flexWrap: 'wrap',
                 gap: 0.5,
@@ -181,8 +200,15 @@ export const KeywordInput = forwardRef<HTMLInputElement, KeywordInputProps>(({
                 deleteIcon={<Iconify icon="eva:close-fill" width={16} height={16} />}
                 onDelete={() => onDeleteKeyword(keyword)}
                 sx={{
-                  bgcolor: theme.palette.primary.lighter,
-                  color: theme.palette.primary.dark,
+                  bgcolor: theme.palette.mode === 'dark'
+                    ? `${theme.palette.primary.main}20`
+                    : theme.palette.primary.lighter,
+                  color: theme.palette.mode === 'dark'
+                    ? theme.palette.primary.light
+                    : theme.palette.primary.dark,
+                  border: theme.palette.mode === 'dark'
+                    ? `1px solid ${theme.palette.primary.main}40`
+                    : 'none',
                   borderRadius: theme.shape.borderRadius,
                   animation: `fadeIn 0.3s ease-in-out ${index * 0.05}s both`,
                   "@keyframes fadeIn": {
@@ -190,9 +216,13 @@ export const KeywordInput = forwardRef<HTMLInputElement, KeywordInputProps>(({
                     "100%": { opacity: 1, transform: "translateY(0)" },
                   },
                   '& .MuiChip-deleteIcon': {
-                    color: theme.palette.primary.dark,
+                    color: theme.palette.mode === 'dark'
+                      ? theme.palette.primary.light
+                      : theme.palette.primary.dark,
                     '&:hover': {
-                      color: theme.palette.primary.main,
+                      color: theme.palette.mode === 'dark'
+                        ? theme.palette.primary.main
+                        : theme.palette.primary.main,
                     },
                   },
                 }}

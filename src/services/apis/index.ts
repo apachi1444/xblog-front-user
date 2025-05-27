@@ -43,8 +43,18 @@ const mockCalendarEvents = [...Array(10)].map((_, index) => ({
 // Make sure BASE_URL is defined
 const ARTICLES_BASE_URL = '/articles';
 
-// Helper to check if mocking should be enabled
-const shouldUseMocks = () => true
+// Helper to check if mocking should be enabled based on test mode
+const shouldUseMocks = () => {
+  try {
+    // Check if test mode is enabled in localStorage
+    const isTestMode = localStorage.getItem('isTestMode') === 'true';
+    return isTestMode;
+  } catch (error) {
+    // If localStorage is not available (e.g., SSR), default to false
+    console.warn('Could not access localStorage for test mode check:', error);
+    return false;
+  }
+}
 
 // Setup mock endpoints
 const setupMocks = () => {
@@ -848,8 +858,30 @@ const setupMocks = () => {
   }
 };
 
-// Initial setup
-// setupMocks();
+// Function to enable/disable mocks dynamically
+export const toggleMocks = (enable: boolean) => {
+  if (enable) {
+    setupMocks();
+  } else {
+    mock.reset();
+    console.log('🔧 Mock API disabled');
+  }
+};
+
+// Function to initialize mocks based on current test mode
+export const initializeMocks = () => {
+  const isTestMode = shouldUseMocks();
+  toggleMocks(isTestMode);
+
+  if (isTestMode) {
+    console.log('🔧 Mock API initialized in test mode');
+  } else {
+    console.log('🔧 Mock API disabled - using real API');
+  }
+};
+
+// Initial setup based on test mode
+initializeMocks();
 
 const getRequestConfig = (
   args: string | (AxiosRequestConfig & { body?: AxiosRequestConfig['data'] }),

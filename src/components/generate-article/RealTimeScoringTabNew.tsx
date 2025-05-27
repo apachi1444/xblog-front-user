@@ -29,8 +29,8 @@ const getColors = (theme: any) => ({
   inactive: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
   pending: theme.palette.mode === 'dark' ? theme.palette.grey[700] : "#e0e0e0",
   primary: theme.palette.primary.main,
-  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.primary.lighter,
-  background: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.primary.lighter,
+  border: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300],
+  background: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.background.paper,
 });
 
 interface RealTimeScoringTabNewProps {

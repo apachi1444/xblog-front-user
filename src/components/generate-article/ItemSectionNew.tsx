@@ -19,16 +19,16 @@ import {useCriteriaEvaluation} from "src/sections/generate/hooks/useCriteriaEval
 // Types
 import type { CriterionStatus } from "../../types/criteria.types";
 
-// Constants
-const COLORS = {
-  error: "#f44336",
-  warning: "#ffb20d",
-  success: "#2dc191",
-  inactive: "#f7f7fa",
-  pending: "#9e9e9e",
-  optimize: "#0288d1",
-  fix: "#f44336"
-};
+// Theme-aware colors function
+const getColors = (theme: any) => ({
+  error: theme.palette.error.main,
+  warning: theme.palette.warning.main,
+  success: theme.palette.success.main,
+  inactive: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[100],
+  pending: theme.palette.mode === 'dark' ? theme.palette.grey[600] : theme.palette.grey[500],
+  optimize: theme.palette.primary.main,
+  fix: theme.palette.error.main
+});
 
 // Helper component for notification icon
 function NotificationIcon({ status }: { status: string }) {
@@ -100,6 +100,7 @@ export function ItemSectionNew({
 }: ItemSectionNewProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const COLORS = getColors(theme);
 
   // Animation for highlighting
   const [highlight, setHighlight] = useState(isHighlighted);
@@ -165,7 +166,12 @@ export function ItemSectionNew({
         px: 2,
         mb: 1,
         borderRadius: 1,
-        bgcolor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
+        bgcolor: theme.palette.mode === 'dark'
+          ? 'rgba(255, 255, 255, 0.05)'
+          : 'rgba(0, 0, 0, 0.02)',
+        border: theme.palette.mode === 'dark'
+          ? `1px solid ${theme.palette.grey[800]}`
+          : `1px solid ${theme.palette.grey[200]}`,
         display: 'flex',
         alignItems: 'flex-start', // Changed from 'center' to 'flex-start' to align with the top of content
         justifyContent: 'space-between',
@@ -174,13 +180,13 @@ export function ItemSectionNew({
         animation: highlight ? 'pulse 2s' : 'none',
         '@keyframes pulse': {
           '0%': {
-            boxShadow: '0 0 0 0 rgba(89, 105, 207, 0.7)'
+            boxShadow: `0 0 0 0 ${theme.palette.primary.main}70`
           },
           '70%': {
-            boxShadow: '0 0 0 10px rgba(89, 105, 207, 0)'
+            boxShadow: `0 0 0 10px ${theme.palette.primary.main}00`
           },
           '100%': {
-            boxShadow: '0 0 0 0 rgba(89, 105, 207, 0)'
+            boxShadow: `0 0 0 0 ${theme.palette.primary.main}00`
           }
         },
         transform: highlight ? 'scale(1.02)' : 'scale(1)',
@@ -201,7 +207,7 @@ export function ItemSectionNew({
             borderRadius: '4px',
             bgcolor: status === 'success' ? 'transparent' :
                     status === 'warning' ? 'transparent' :
-                    status === 'error' ? 'rgba(244, 67, 54, 0.1)' :
+                    status === 'error' ? `${COLORS.error}15` :
                     'transparent',
             mt: 0.5, // Add a small top margin to align with the text
           }}
@@ -255,8 +261,12 @@ export function ItemSectionNew({
               px: 1,
               py: 0.25,
               borderRadius: 1,
-              bgcolor: 'rgba(158, 158, 158, 0.1)',
-              fontSize: '0.75rem'
+              bgcolor: theme.palette.mode === 'dark'
+                ? `${COLORS.pending}20`
+                : `${COLORS.pending}15`,
+              color: COLORS.pending,
+              fontSize: '0.75rem',
+              fontWeight: 500
             }}
           >
             Waiting
@@ -274,17 +284,23 @@ export function ItemSectionNew({
             sx={{
               bgcolor: status === 'warning' ? COLORS.warning :
                       status === 'error' ? COLORS.error :
-                      theme.palette.text.secondary,
-              color: '#fff',
+                      COLORS.pending,
+              color: theme.palette.getContrastText(
+                status === 'warning' ? COLORS.warning :
+                status === 'error' ? COLORS.error :
+                COLORS.pending
+              ),
               textTransform: 'none',
               px: 2,
               py: 0.5,
               minWidth: 'auto',
               fontSize: '0.75rem',
+              boxShadow: 'none',
               '&:hover': {
-                bgcolor: status === 'warning' ? 'rgba(255, 179, 0, 0.8)' :
-                        status === 'error' ? 'rgba(244, 67, 54, 0.8)' :
-                        'rgba(158, 158, 158, 0.8)'
+                bgcolor: status === 'warning' ? `${COLORS.warning}CC` :
+                        status === 'error' ? `${COLORS.error}CC` :
+                        `${COLORS.pending}CC`,
+                boxShadow: theme.shadows[2]
               }
             }}
           >

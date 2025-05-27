@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { RootState } from '../store';
+import { toggleMocks } from '../apis';
 
 interface GlobalSliceState {
   isTestMode: boolean;
@@ -19,6 +20,14 @@ const globalSlice = createSlice({
     setTestMode: (state, action: PayloadAction<boolean>) => {
       state.isTestMode = action.payload;
       localStorage.setItem('isTestMode', action.payload.toString());
+
+      // Automatically toggle mocks when test mode changes
+      try {
+        toggleMocks(action.payload);
+        console.log(`🔧 Mock API ${action.payload ? 'enabled' : 'disabled'} via test mode toggle`);
+      } catch (error) {
+        console.warn('Failed to toggle mocks:', error);
+      }
     },
   },
 });
