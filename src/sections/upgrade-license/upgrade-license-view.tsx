@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import { usePDF } from 'react-to-pdf';
 import { useTranslation } from 'react-i18next';
 import { Eye, Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from 'react';
@@ -28,6 +29,7 @@ import {
   useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
+import Invoice from 'src/components/Invoice';
 import { ResponsivePricingPlans } from 'src/components/pricing';
 
 export function UpgradeLicenseView() {
@@ -37,6 +39,35 @@ export function UpgradeLicenseView() {
   // Invoice download hook
   const { downloadInvoice, isDownloading } = useInvoiceDownload();
 
+  const { toPDF, targetRef } = usePDF({
+    filename: 'invoice.pdf',
+    page: {
+      format: 'A4',
+      orientation: 'portrait',
+      margin: 0 // Reduced margin for better space utilization
+    },
+    canvas: {
+      mimeType: 'image/png',
+      qualityRatio: 1,
+      logging: true,
+      useCORS: true,
+    },
+    overrides: {
+      // Better PDF quality and sizing
+      pdf: {
+        compress: true,
+        unit: 'mm',
+        format: 'a4',
+      },
+      // Ensure proper styling
+      canvas: {
+        useCORS: true,
+        scale: 2, // Higher scale for better quality
+        width: 794, // A4 width in pixels at 96 DPI
+        height: 1123, // A4 height in pixels at 96 DPI
+      },
+    },
+  });
   // Fetch subscription plans
   const {
     isLoading: isLoadingPlans,
@@ -92,7 +123,12 @@ export function UpgradeLicenseView() {
     }
   };
 
-  // Handle invoice download
+  // Handle invoice download using JSX component
+  const handleDownloadInvoiceJsx =async (invoice: any) => {
+    await downloadInvoice(invoice.id, invoice.invoiceNumber, invoice.createdAt);
+  };
+
+  // Handle invoice download (legacy method)
   const handleDownloadInvoice = async (invoice: any) => {
     await downloadInvoice(invoice.id, invoice.invoiceNumber, invoice.createdAt);
   };
@@ -122,6 +158,13 @@ export function UpgradeLicenseView() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [refreshAllData]);
+
+  const invoiceData = {
+    planName: 'Professional Plan',
+    price: 299.99,
+    tax : 12,
+    total: 12
+  };
 
 
   return (
@@ -250,7 +293,18 @@ export function UpgradeLicenseView() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice')}>
+                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice (JSX)')}>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              sx={{ padding: '4px 8px' }}
+                              onClick={() => handleDownloadInvoiceJsx(invoice)}
+                            >
+                              <Download size={18} />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice (Legacy)')}>
                             <Button
                               size="small"
                               variant="outlined"
@@ -291,6 +345,19 @@ export function UpgradeLicenseView() {
             )}
           </Card>
         </Box>
+        <Button onClick={() => toPDF()} variant="contained" color="primary">
+            Download Invoice PDF
+        </Button>
+
+      <Box
+        ref={targetRef}
+        sx={{
+          position: 'absolute',
+          top: '-9999px',
+        }}
+      >
+        <Invoice {...invoiceData} />
+      </Box>
       </Container>
     </DashboardContent>
   );

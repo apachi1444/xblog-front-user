@@ -45,179 +45,392 @@ export interface InvoiceData {
  * Generate professional invoice HTML template using the exact template provided
  */
 export const generateInvoiceTemplate = (data: InvoiceData): string => {
-  const statusColor = data.status === 'paid' ? 'green' : data.status === 'overdue' ? 'red' : 'blue';
   const statusText = data.status === 'paid' ? 'Paid' : data.status === 'overdue' ? 'Overdue' : 'Due';
 
   return `
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Professional Invoice</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      padding: 20px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .invoice-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+    }
+
+    /* Header Table */
+    .header-table {
+      width: 100%;
+      margin-bottom: 30px;
+      border-collapse: collapse;
+    }
+
+    .header-table td {
+      vertical-align: top;
+      padding: 10px;
+    }
+
+    .company-info {
+      width: 60%;
+    }
+
+    .invoice-title-cell {
+      width: 40%;
+      text-align: right;
+    }
+
+    .company-name {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 5px;
+    }
+
+    .company-tagline {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .company-details {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .invoice-title {
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .status-badge {
+      background-color: #dbeafe;
+      color: #1e40af;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    /* Details Table */
+    .details-table {
+      width: 100%;
+      margin-bottom: 30px;
+      border-collapse: collapse;
+    }
+
+    .details-table td {
+      vertical-align: top;
+      padding: 15px;
+      width: 50%;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 5px;
+    }
+
+    .detail-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border-left: 4px solid #2563eb;
+    }
+
+    .customer-name {
+      font-weight: bold;
+      color: #333;
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+
+    .detail-box p {
+      margin-bottom: 3px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .meta-table td {
+      padding: 5px 0;
+      font-size: 13px;
+    }
+
+    .meta-label {
+      color: #666;
+      width: 60%;
+    }
+
+    .meta-value {
+      font-weight: bold;
+      color: #333;
+      text-align: right;
+    }
+
+    .due-date {
+      color: #dc2626;
+    }
+
+    /* Separator */
+    .separator {
+      border-top: 2px solid #e5e7eb;
+      margin: 25px 0;
+    }
+
+    /* Services Table */
+    .services-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .services-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 2px solid #333;
+      margin-bottom: 20px;
+    }
+
+    .services-table th {
+      background-color: #f8f9fa;
+      padding: 12px 8px;
+      text-align: left;
+      font-weight: bold;
+      color: #333;
+      font-size: 14px;
+      border: 1px solid #333;
+    }
+
+    .services-table th:nth-child(2),
+    .services-table th:nth-child(3) {
+      text-align: center;
+    }
+
+    .services-table th:nth-child(4) {
+      text-align: right;
+    }
+
+    .services-table td {
+      padding: 12px 8px;
+      font-size: 13px;
+      color: #333;
+      border: 1px solid #333;
+    }
+
+    .services-table td:nth-child(2),
+    .services-table td:nth-child(3) {
+      text-align: center;
+    }
+
+    .services-table td:nth-child(4) {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .item-description {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Summary Table */
+    .summary-table {
+      width: 300px;
+      margin-left: auto;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .summary-table td {
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .summary-label {
+      color: #666;
+      text-align: left;
+      width: 60%;
+    }
+
+    .summary-value {
+      text-align: right;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .total-row {
+      border-top: 2px solid #333;
+      padding-top: 10px;
+    }
+
+    .total-row td {
+      font-size: 18px;
+      font-weight: bold;
+      padding-top: 15px;
+    }
+
+    .total-amount {
+      color: #2563eb;
+    }
+
+    .payment-terms {
+      background-color: #f0f8ff;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      border-left: 4px solid #2563eb;
+    }
+
+    .payment-terms-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+
+    .payment-terms-text {
+      font-size: 12px;
+      color: #1e3a8a;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-gray-50 py-8">
-
-    <div class="max-w-4xl mx-auto">
-      <div class="bg-white shadow-lg border-0 overflow-hidden rounded-lg">
-        <div class="p-8 space-y-8">
-          <!-- Invoice Header -->
-          <div class="flex justify-between items-start">
-            <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <i data-lucide="building-2" class="w-6 h-6 text-white"></i>
-                </div>
-                <div>
-                  <h2 class="text-2xl font-bold text-gray-900">${data.companyName}</h2>
-                  <p class="text-gray-600">Professional Services</p>
-                </div>
-              </div>
-
-              <div class="space-y-2 text-sm text-gray-600">
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="building-2" class="w-4 h-4"></i>
-                  <span>${data.companyAddress}</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <span class="ml-6">${data.companyCity}</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="phone" class="w-4 h-4"></i>
-                  <span>${data.companyPhone}</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="mail" class="w-4 h-4"></i>
-                  <span>${data.companyEmail}</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="globe" class="w-4 h-4"></i>
-                  <span>${data.companyWebsite}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="text-right">
-              <h1 class="text-4xl font-bold text-gray-900 mb-2">INVOICE</h1>
-              <div class="bg-${statusColor === 'blue' ? 'blue' : statusColor === 'green' ? 'green' : 'red'}-50 px-4 py-2 rounded-lg">
-                <p class="text-${statusColor === 'blue' ? 'blue' : statusColor === 'green' ? 'green' : 'red'}-800 font-medium">Status: ${statusText}</p>
-              </div>
-            </div>
+<body>
+  <div class="invoice-container">
+    <!-- Header -->
+    <table class="header-table">
+      <tr>
+        <td class="company-info">
+          <div class="company-name">🏢 ${data.companyName}</div>
+          <div class="company-tagline">Professional Services</div>
+          <div class="company-details">
+            📍 ${data.companyAddress}<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;${data.companyCity}<br>
+            📞 ${data.companyPhone}<br>
+            ✉️ ${data.companyEmail}<br>
+            🌐 ${data.companyWebsite}
           </div>
+        </td>
+        <td class="invoice-title-cell">
+          <div class="invoice-title">INVOICE</div>
+          <div class="status-badge">Status: ${statusText}</div>
+        </td>
+      </tr>
+    </table>
 
-          <!-- Invoice Details -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                Bill To
-              </h3>
-              <div class="bg-gray-50 p-4 rounded-lg space-y-2">
-                <p class="font-medium text-gray-900">${data.customerName}</p>
-                <p class="text-gray-600">${data.customerAddress}</p>
-                <p class="text-gray-600">${data.customerCity}</p>
-                <p class="text-gray-600">${data.customerEmail}</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
-                Invoice Details
-              </h3>
-              <div class="space-y-3">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Invoice Number:</span>
-                  <span class="font-medium text-gray-900">${data.invoiceNumber}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Invoice Date:</span>
-                  <span class="font-medium text-gray-900">${data.invoiceDate}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Due Date:</span>
-                  <span class="font-medium text-red-600">${data.dueDate}</span>
-                </div>
-              </div>
-            </div>
+    <!-- Details -->
+    <table class="details-table">
+      <tr>
+        <td>
+          <div class="section-title">👤 Bill To</div>
+          <div class="detail-box">
+            <div class="customer-name">${data.customerName}</div>
+            <p>${data.customerAddress}</p>
+            <p>${data.customerCity}</p>
+            <p>${data.customerEmail}</p>
           </div>
+        </td>
+        <td>
+          <div class="section-title">📅 Invoice Details</div>
+          <table class="meta-table">
+            <tr>
+              <td class="meta-label">Invoice Number:</td>
+              <td class="meta-value">${data.invoiceNumber}</td>
+            </tr>
+            <tr>
+              <td class="meta-label">Invoice Date:</td>
+              <td class="meta-value">${data.invoiceDate}</td>
+            </tr>
+            <tr>
+              <td class="meta-label">Due Date:</td>
+              <td class="meta-value due-date">${data.dueDate}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-          <!-- Separator -->
-          <div class="border-t border-gray-200"></div>
+    <!-- Separator -->
+    <div class="separator"></div>
 
-          <!-- Invoice Items -->
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Services Provided</h3>
-            <div class="border rounded-lg overflow-hidden">
-              <table class="w-full">
-                <thead>
-                  <tr class="bg-gray-50">
-                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Description</th>
-                    <th class="px-4 py-3 text-center font-semibold text-gray-900">Qty</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-900">Tax</th>
-                    <th class="px-4 py-3 text-right font-semibold text-gray-900">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${data.items.map(item => `
-                  <tr class="border-t hover:bg-gray-50">
-                    <td class="px-4 py-4 font-medium">${item.description}</td>
-                    <td class="px-4 py-4 text-center">${item.quantity}</td>
-                    <td class="px-4 py-4 text-right">${item.tax}%</td>
-                    <td class="px-4 py-4 text-right font-medium">$${item.amount.toFixed(2)}</td>
-                  </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
+    <!-- Services -->
+    <div class="services-title">Services Provided</div>
+    <table class="services-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Tax</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.items.map(item => `
+        <tr>
+          <td class="item-description">${item.description}</td>
+          <td>${item.quantity}</td>
+          <td>${item.tax}%</td>
+          <td>$${item.amount.toFixed(2)}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
 
-          <!-- Separator -->
-          <div class="border-t border-gray-200"></div>
+    <!-- Summary -->
+    <table class="summary-table">
+      <tr>
+        <td class="summary-label">Subtotal:</td>
+        <td class="summary-value">$${data.subtotal.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td class="summary-label">Tax (${data.items[0]?.tax || 0}%):</td>
+        <td class="summary-value">$${data.totalTax.toFixed(2)}</td>
+      </tr>
+      <tr class="total-row">
+        <td class="summary-label">Total:</td>
+        <td class="summary-value total-amount">$${data.total.toFixed(2)}</td>
+      </tr>
+    </table>
 
-          <!-- Invoice Summary -->
-          <div class="flex justify-end">
-            <div class="w-full max-w-sm space-y-4">
-              <div class="space-y-2">
-                <div class="flex justify-between text-gray-600">
-                  <span>Subtotal:</span>
-                  <span>$${data.subtotal.toFixed(2)}</span>
-                </div>
-                <div class="flex justify-between text-gray-600">
-                  <span>Tax (${data.items[0]?.tax || 0}%):</span>
-                  <span>$${data.totalTax.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div class="border-t pt-4">
-                <div class="flex justify-between text-xl font-bold text-gray-900">
-                  <span>Total:</span>
-                  <span class="text-blue-600">$${data.total.toFixed(2)}</span>
-                </div>
-              </div>
-
-              ${data.paymentTerms ? `
-              <div class="bg-blue-50 p-4 rounded-lg mt-4">
-                <p class="text-sm text-blue-800 font-medium">Payment Terms</p>
-                <p class="text-sm text-blue-700 mt-1">${data.paymentTerms}</p>
-              </div>
-              ` : ''}
-            </div>
-          </div>
-
-        </div>
-      </div>
+    ${data.paymentTerms ? `
+    <div class="payment-terms">
+      <div class="payment-terms-title">Payment Terms</div>
+      <div class="payment-terms-text">${data.paymentTerms}</div>
     </div>
-  <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
-  </script>
-</body>
+    ` : ''}
 
+  </div>
+</body>
 </html>`;
 };

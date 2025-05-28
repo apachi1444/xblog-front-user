@@ -217,20 +217,17 @@ export const createAuthSession = (
   user: AuthUser,
   accessToken: string,
   isAuthenticated: boolean = true
-): AuthSession => {
-  return {
+): AuthSession => ({
     user,
     accessToken,
     isAuthenticated,
     onboardingCompleted: user.is_completed_onboarding,
-  };
-};
+  });
 
 /**
  * Validate auth session data
  */
-export const isValidAuthSession = (session: any): session is AuthSession => {
-  return (
+export const isValidAuthSession = (session: any): session is AuthSession => (
     session &&
     typeof session === 'object' &&
     session.user &&
@@ -241,4 +238,3 @@ export const isValidAuthSession = (session: any): session is AuthSession => {
     typeof session.isAuthenticated === 'boolean' &&
     typeof session.onboardingCompleted === 'boolean'
   );
-};

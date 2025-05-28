@@ -102,6 +102,7 @@
     "react-hot-toast": "^2.5.2",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.26.1",
+    "react-to-pdf": "^2.0.0",
     "react-world-flags": "^1.6.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-persist": "^6.0.0",
