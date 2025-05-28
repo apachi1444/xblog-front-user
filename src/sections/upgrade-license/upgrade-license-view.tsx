@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Eye, Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from 'react';
 
@@ -8,6 +9,7 @@ import {
   Chip,
   Table,
   Button,
+  Tooltip,
   TableRow,
   Container,
   TableBody,
@@ -16,6 +18,8 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
+
+import { useInvoiceDownload } from 'src/hooks/useInvoiceDownload';
 
 import { DashboardContent } from "src/layouts/dashboard";
 import {
@@ -27,7 +31,11 @@ import {
 import { ResponsivePricingPlans } from 'src/components/pricing';
 
 export function UpgradeLicenseView() {
+  const { t } = useTranslation();
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
+
+  // Invoice download hook
+  const { downloadInvoice, isDownloading } = useInvoiceDownload();
 
   // Fetch subscription plans
   const {
@@ -35,7 +43,7 @@ export function UpgradeLicenseView() {
     refetch: refetchPlans
   } = useGetSubscriptionPlansQuery();
 
-  // Fetch user invoices
+  // Fetch user invoices with user_id
   const {
     data: invoicesData,
     isLoading: isLoadingInvoices,
@@ -78,10 +86,15 @@ export function UpgradeLicenseView() {
   const handleRefreshInvoices = async () => {
     try {
       await triggerRefreshInvoices().unwrap();
-      toast.success('Invoices refreshed successfully');
+      toast.success(t('upgrade.invoicesRefreshed', 'Invoices refreshed successfully'));
     } catch (error) {
-      toast.error('Failed to refresh invoices');
+      toast.error(t('upgrade.invoicesRefreshError', 'Failed to refresh invoices'));
     }
+  };
+
+  // Handle invoice download
+  const handleDownloadInvoice = async (invoice: any) => {
+    await downloadInvoice(invoice.id, invoice.invoiceNumber, invoice.createdAt);
   };
 
   // Handle opening plan in new tab
@@ -237,22 +250,32 @@ export function UpgradeLicenseView() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            sx={{ padding: '4px 8px' }}
-                          >
-                            <Download size={18} />
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            sx={{ padding: '4px 8px' }}
-                          >
-                            <Eye size={18} />
-                          </Button>
+                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice')}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              sx={{ padding: '4px 8px' }}
+                              onClick={() => handleDownloadInvoice(invoice)}
+                              disabled={isDownloading}
+                            >
+                              {isDownloading ? (
+                                <CircularProgress size={16} />
+                              ) : (
+                                <Download size={18} />
+                              )}
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title={t('upgrade.viewInvoice', 'View Invoice Details')}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              sx={{ padding: '4px 8px' }}
+                            >
+                              <Eye size={18} />
+                            </Button>
+                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>

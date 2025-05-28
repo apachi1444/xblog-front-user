@@ -39,7 +39,8 @@ const authSlice = createSlice({
         user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
-        onboardingCompleted: state.onboardingCompleted
+        onboardingCompleted: state.onboardingCompleted,
+        avatar: state.user?.avatar
       }));
 
       console.log(

@@ -1,7 +1,5 @@
-import type { RootState } from 'src/services/store';
 
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Edit, User, Bell, Award, Shield, CreditCard, ChevronRight } from 'lucide-react';
@@ -29,6 +27,8 @@ import {
   IconButton,
 } from '@mui/material';
 
+import { useAuth } from 'src/hooks/useAuth';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import {
   useGetUserInvoicesQuery,
@@ -44,14 +44,13 @@ export function ProfileView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // Get the authenticated user from Redux
-  const authUser = useSelector((state: RootState) => state.auth.user);
+  // Get user data from auth hook
+  const { user, userName, userEmail, userAvatar, updateProfile } = useAuth();
 
   // Parse the user's name into first and last name
   const getUserNames = () => {
-    if (!authUser?.name) return { firstName: 'User', lastName: 'Name' };
-
-    const nameParts = authUser.name.split(' ');
+    if (!userName) return { firstName: 'User', lastName: 'Name' };
+    const nameParts = userName.split(' ');
     return {
       firstName: nameParts[0] || 'User',
       lastName: nameParts.slice(1).join(' ') || 'Name'
@@ -59,24 +58,27 @@ export function ProfileView() {
   };
 
   const [activeTab, setActiveTab] = useState(0);
-  const [showSubscriptionDetails, setShowSubscriptionDetails] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState(getUserNames().firstName);
   const [lastName, setLastName] = useState(getUserNames().lastName);
   const subscriptionTabRef = React.useRef<HTMLDivElement>(null);
 
-  const { data: invoicesData, isLoading: isLoadingInvoices } = useGetUserInvoicesQuery();
+  // Use userId from auth hook, fallback to '1' for demo
+  const { data: invoicesData } = useGetUserInvoicesQuery();
 
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
-  const handleManageSubscription = () => {
-    navigate('/subscription/manage');
-  };
-
   const handleSaveProfile = () => {
+    // Update profile using auth hook
+    if (user) {
+      updateProfile({
+        ...user,
+        name: `${firstName} ${lastName}`.trim(),
+      });
+    }
     setIsEditing(false);
   };
 
@@ -135,8 +137,8 @@ export function ProfileView() {
               <Grid item xs={12} md={4}>
                 <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' } }}>
                   <Avatar
-                    src={authUser?.avatar || '/assets/images/avatar/avatar-default.jpg'}
-                    alt={authUser?.name || 'User'}
+                    src={userAvatar}
+                    alt={userName || 'User'}
                     sx={{
                       width: 100,
                       height: 100,
@@ -246,7 +248,7 @@ export function ProfileView() {
                           Full Name
                         </Typography>
                         <Typography variant="h6">
-                          {authUser?.name || `${firstName} ${lastName}`}
+                          {userName || 'User Name'}
                         </Typography>
                       </Box>
                     </Grid>
@@ -256,7 +258,7 @@ export function ProfileView() {
                           Email Address
                         </Typography>
                         <Typography variant="h6">
-                          {authUser?.email || 'user@example.com'}
+                          {userEmail || 'user@example.com'}
                         </Typography>
                       </Box>
                     </Grid>

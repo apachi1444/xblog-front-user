@@ -51,11 +51,34 @@ export interface SubscriptionPlan {
 // RTK Query endpoints for subscription operations
 export const subscriptionApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // Get user invoices
+    // Get user invoices - Updated to new endpoint
     getUserInvoices: builder.query<InvoicesResponse, void>({
-      query: () => ({
-        url: `${SUBSCRIPTION_BASE_URL}/invoices`,
+        query: () => {
+          let userId = null;
+          try {
+            const authData = localStorage.getItem('xblog_auth_session_v2');
+            if (authData) {
+              const parsedData = JSON.parse(authData);
+              userId = parsedData.user?.id;
+            }
+          } catch (error) {
+            console.error('Error retrieving user ID from localStorage:', error);
+          }
+
+        return {
+          url: `/api/v1/user/invoices/${userId}`,
+          method: 'GET',
+        };
+      },
+    }),
+
+
+    // Download invoice PDF
+    downloadInvoicePdf: builder.mutation<string, { payment_id: string }>({
+      query: ({ payment_id }) => ({
+        url: `/api/v1/${payment_id}/download`,
         method: 'GET',
+        responseType: 'text', // We expect HTML response
       }),
     }),
 
@@ -106,6 +129,7 @@ export const subscriptionApi = api.injectEndpoints({
 export const {
   useGetUserInvoicesQuery,
   useLazyGetUserInvoicesQuery,
+  useDownloadInvoicePdfMutation,
   useGetSubscriptionDetailsQuery,
   useGetSubscriptionPlansQuery,
   useLazyGetSubscriptionPlansQuery,

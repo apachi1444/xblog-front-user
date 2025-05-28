@@ -6,6 +6,7 @@ import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { _posts } from 'src/_mock/_data';
 import { _fakeStores } from 'src/_mock/stores';
+import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
 
 import customRequest from './axios';
 
@@ -182,8 +183,8 @@ const setupMocks = () => {
       }
     });
 
-    // Mock invoices endpoint
-    mock.onGet('/subscriptions/invoices').reply(200, {
+    // Mock new user invoices endpoint
+    mock.onGet(/\/api\/v1\/user\/invoices\/(.+)/).reply(200, {
       invoices: [
         {
           id: '1',
@@ -204,9 +205,71 @@ const setupMocks = () => {
           createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
           plan: 'Pro',
           downloadUrl: 'https://example.com/invoices/INV-002.pdf'
+        },
+        {
+          id: '3',
+          invoiceNumber: 'INV-003',
+          amount: 49.99,
+          currency: 'USD',
+          status: 'paid',
+          createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+          plan: 'Premium',
+          downloadUrl: 'https://example.com/invoices/INV-003.pdf'
         }
       ],
-      count: 2
+      count: 3
+    });
+
+    // Mock invoice PDF download endpoint
+    mock.onGet(/\/api\/v1\/(.+)\/download/).reply((config) => {
+      // Extract payment ID from URL
+      const paymentId = config.url?.match(/\/api\/v1\/(.+)\/download/)?.[1] || '1';
+
+      // Create mock invoice data based on payment ID
+      const invoiceData = {
+        // Invoice details
+        invoiceNumber: `INV-${paymentId.padStart(3, '0')}`,
+        invoiceDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+        status: 'due' as const,
+
+        // Company details
+        companyName: 'XBlog AI Platform',
+        companyAddress: '456 Business Park, Suite 100',
+        companyCity: 'San Francisco, CA 94102',
+        companyPhone: '+44 7383 596325',
+        companyEmail: 'contact@xblog.ai',
+        companyWebsite: 'xblog.ai',
+
+        // Customer details
+        customerName: 'Acme Corporation',
+        customerAddress: '123 Business Ave',
+        customerCity: 'New York, NY 10001',
+        customerEmail: 'billing@acme.com',
+
+        // Invoice items
+        items: [
+          {
+            description: paymentId === '1' ? 'Starter Plan' : paymentId === '2' ? 'Pro Plan' : 'Premium Plan',
+            quantity: 1,
+            tax: 10,
+            amount: paymentId === '1' ? 29.00 : paymentId === '2' ? 29.99 : 49.99
+          }
+        ],
+
+        // Totals
+        subtotal: paymentId === '1' ? 29.00 : paymentId === '2' ? 29.99 : 49.99,
+        totalTax: paymentId === '1' ? 2.90 : paymentId === '2' ? 3.00 : 5.00,
+        total: paymentId === '1' ? 31.90 : paymentId === '2' ? 32.99 : 54.99,
+
+        // Payment terms
+        paymentTerms: 'Net 30 days. Late payments subject to 1.5% monthly service charge.'
+      };
+
+      // Generate the beautiful invoice HTML
+      const invoiceHtml = generateInvoiceTemplate(invoiceData);
+
+      return [200, invoiceHtml];
     });
 
     // Mock create subscription endpoint

@@ -676,6 +676,68 @@
           "saturday": "Sat"
         }
       },
+      "upgrade": {
+        "refreshSuccess": "Data refreshed successfully!",
+        "refreshError": "Failed to refresh data. Please try again.",
+        "invoicesRefreshed": "Invoices refreshed successfully",
+        "invoicesRefreshError": "Failed to refresh invoices",
+        "downloadInvoice": "Download PDF Invoice",
+        "viewInvoice": "View Invoice Details"
+      },
+      "invoice": {
+        "downloadNotSupported": "PDF download is not supported in your browser",
+        "downloadingPdf": "Generating PDF invoice...",
+        "downloadSuccess": "Invoice downloaded successfully!",
+        "downloadError": "Failed to download invoice. Please try again.",
+        "notFound": "Invoice not found.",
+        "accessDenied": "Access denied. You do not have permission to download this invoice.",
+        "serverError": "Server error. Please try again later."
+      },
+      "common": {
+        "cancel": "Cancel",
+        "close": "Close",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "status": "Status",
+        "description": "Description",
+        "created": "Created",
+        "updated": "Updated",
+        "published": "Published",
+        "scheduled": "Scheduled",
+        "draft": "Draft",
+        "author": "Author",
+        "title": "Title",
+        "content": "Content",
+        "details": "Details"
+      },
+      "profile": {
+        "title": "My Profile",
+        "subtitle": "Manage your account settings and preferences",
+        "tabs": {
+          "account": "Account Details",
+          "subscription": "Subscription",
+          "security": "Security",
+          "notifications": "Notifications"
+        },
+        "subscription": {
+          "plans": "Subscription Plans",
+          "choosePlan": "Choose the plan that best fits your needs"
+        },
+        "billing": {
+          "history": "Billing History",
+          "date": "Date",
+          "amount": "Amount",
+          "status": "Status",
+          "actions": "Actions",
+          "view": "View",
+          "noHistory": "No billing history available"
+        },
+        "notifications": {
+          "comingSoon": "Notification settings will be available soon."
+        }
+      },
       "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",
