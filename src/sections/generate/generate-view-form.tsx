@@ -1,5 +1,4 @@
 import { Box } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
@@ -78,7 +77,6 @@ export function GenerateViewForm({
   const handleGenerateMeta = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingMeta: true }));
     await simulateDelay(1000);
-    console.log('Fake meta generated');
     setGenerationState((s) => ({ ...s, isGeneratingMeta: false }));
     return {
       metaTitle: "meta title",
