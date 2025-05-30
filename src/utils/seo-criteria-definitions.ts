@@ -37,6 +37,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     },
     inputKeys: ["urlSlug"]
   },
+  // this one !
   {
     id: 104,
     description: "seo.criteria.core.keyword_in_first_10.description",
@@ -48,6 +49,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     },
     inputKeys: ["contentDescription"]
   },
+  // this one also !
   {
     id: 105,
     description: "seo.criteria.core.keyword_in_content.description",
@@ -59,6 +61,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     },
     inputKeys: ["contentDescription", "primaryKeyword"]
   },
+  // this one !
   {
     id: 106,
     description: "seo.criteria.core.content_length.description",
@@ -78,6 +81,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
  * SEO Boosters criteria
  */
 const SEO_BOOSTERS: Criterion[] = [
+  // this one !
   {
     id: 201,
     description: "seo.criteria.boosters.keyword_in_subheadings.description",
@@ -195,6 +199,7 @@ const TITLE_OPTIMIZATION: Criterion[] = [
  * Content Clarity criteria
  */
 const CONTENT_CLARITY: Criterion[] = [
+  // this one !
   {
     id: 401,
     description: "seo.criteria.clarity.table_of_contents.description",
@@ -206,6 +211,7 @@ const CONTENT_CLARITY: Criterion[] = [
     },
     inputKeys: ["content"]
   },
+  // this one !
   {
     id: 402,
     description: "seo.criteria.clarity.short_paragraphs.description",
@@ -219,6 +225,7 @@ const CONTENT_CLARITY: Criterion[] = [
     inputKeys: ["content"],
     warningScore: 3 // 75% of the weight
   },
+  // this one !
   {
     id: 403,
     description: "seo.criteria.clarity.media_content.description",

@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
 import { usePDF } from 'react-to-pdf';
 import { useTranslation } from 'react-i18next';
-import { Eye, Download, RefreshCw } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from 'react';
 
 import {
@@ -20,8 +20,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import { useInvoiceDownload } from 'src/hooks/useInvoiceDownload';
-
 import { DashboardContent } from "src/layouts/dashboard";
 import {
   useGetUserInvoicesQuery,
@@ -30,14 +28,14 @@ import {
 } from 'src/services/apis/subscriptionApi';
 
 import Invoice from 'src/components/Invoice';
+import CleanInvoice from 'src/components/CleanInvoice';
+import { type InvoiceData } from 'src/components/CleanInvoice';
 import { ResponsivePricingPlans } from 'src/components/pricing';
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
-
-  // Invoice download hook
-  const { downloadInvoice, isDownloading } = useInvoiceDownload();
+  const [showInvoicePdf, setShowInvoicePdf] = useState<InvoiceData | null>(null);
 
   const { toPDF, targetRef } = usePDF({
     filename: 'invoice.pdf',
@@ -123,14 +121,30 @@ export function UpgradeLicenseView() {
     }
   };
 
-  // Handle invoice download using JSX component
-  const handleDownloadInvoiceJsx =async (invoice: any) => {
-    await downloadInvoice(invoice.id, invoice.invoiceNumber, invoice.createdAt);
-  };
+  // Handle PDF download for specific invoice
+  const handleDownloadInvoicePdf = async (invoice: any) => {
+    try {
+      // Convert invoice data for PDF generation
+      const cleanInvoiceData = convertToInvoiceData(invoice);
+      setShowInvoicePdf(cleanInvoiceData);
 
-  // Handle invoice download (legacy method)
-  const handleDownloadInvoice = async (invoice: any) => {
-    await downloadInvoice(invoice.id, invoice.invoiceNumber, invoice.createdAt);
+      // Small delay to ensure content is rendered
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Ensure fonts are loaded
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+
+      // Generate PDF
+      toPDF();
+
+      // Clear the invoice data after generation
+      setTimeout(() => setShowInvoicePdf(null), 1000);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
   // Handle opening plan in new tab
@@ -165,6 +179,47 @@ export function UpgradeLicenseView() {
     tax : 12,
     total: 12
   };
+
+  // Convert invoice data for CleanInvoice component
+  const convertToInvoiceData = (invoice: any): InvoiceData => ({
+      // Invoice details
+      invoiceNumber: invoice.invoiceNumber || 'INV-2024-001',
+      invoiceDate: invoice.createdAt || '10-02-2023',
+      dueDate: invoice.dueDate || '10-16-2023',
+      status: invoice.status || 'paid',
+
+      // Company details
+      companyName: 'Your Company Inc.',
+      companyAddress: '1234 Company St.',
+      companyCity: 'Company Town, ST 12345',
+      companyPhone: '+1 (555) 123-4567',
+      companyEmail: 'contact@yourcompany.com',
+      companyWebsite: 'www.yourcompany.com',
+
+      // Customer details
+      customerName: 'Customer Name',
+      customerAddress: '1234 Customer St.',
+      customerCity: 'Customer Town, ST 12345',
+      customerEmail: 'customer@email.com',
+
+      // Invoice items
+      items: [
+        {
+          description: invoice.planName || 'Professional Plan',
+          quantity: 1.00,
+          tax: 10,
+          amount: invoice.amount || 299.99,
+        }
+      ],
+
+      // Totals
+      subtotal: invoice.amount || 299.99,
+      totalTax: (invoice.amount || 299.99) * 0.05, // 5% tax
+      total: (invoice.amount || 299.99) * 1.05,
+
+      // Payment terms
+      paymentTerms: 'Payment is due in 14 days',
+    });
 
 
   return (
@@ -263,13 +318,13 @@ export function UpgradeLicenseView() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>No</TableCell>
-                    <TableCell>Invoice Number</TableCell>
+                    <TableCell>#</TableCell>
+                    <TableCell>Invoice</TableCell>
                     <TableCell>Date</TableCell>
-                    <TableCell>Plan</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Status</TableCell>
-                    <TableCell>Action</TableCell>
+                    <TableCell>Subscription</TableCell>
+                    <TableCell align="right">Total</TableCell>
+                    <TableCell align="center">Status</TableCell>
+                    <TableCell align="center">Download</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -291,46 +346,18 @@ export function UpgradeLicenseView() {
                           }}
                         />
                       </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice (JSX)')}>
-                            <Button
-                              size="small"
-                              variant="contained"
-                              color="primary"
-                              sx={{ padding: '4px 8px' }}
-                              onClick={() => handleDownloadInvoiceJsx(invoice)}
-                            >
-                              <Download size={18} />
-                            </Button>
-                          </Tooltip>
-                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice (Legacy)')}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                              sx={{ padding: '4px 8px' }}
-                              onClick={() => handleDownloadInvoice(invoice)}
-                              disabled={isDownloading}
-                            >
-                              {isDownloading ? (
-                                <CircularProgress size={16} />
-                              ) : (
-                                <Download size={18} />
-                              )}
-                            </Button>
-                          </Tooltip>
-                          <Tooltip title={t('upgrade.viewInvoice', 'View Invoice Details')}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                              sx={{ padding: '4px 8px' }}
-                            >
-                              <Eye size={18} />
-                            </Button>
-                          </Tooltip>
-                        </Box>
+                      <TableCell align="center">
+                        <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice')}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            sx={{ padding: '6px 12px', minWidth: 'auto' }}
+                            onClick={() => handleDownloadInvoicePdf(invoice)}
+                          >
+                            <Download size={18} />
+                          </Button>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -345,18 +372,46 @@ export function UpgradeLicenseView() {
             )}
           </Card>
         </Box>
-        <Button onClick={() => toPDF()} variant="contained" color="primary">
-            Download Invoice PDF
-        </Button>
 
       <Box
         ref={targetRef}
         sx={{
           position: 'absolute',
           top: '-9999px',
+          left: '-9999px',
+          width: '210mm', // A4 width
+          height: '297mm', // A4 height
+          backgroundColor: 'white',
+          padding: '0', // Remove all padding
+          margin: '0', // Remove all margin
+          boxSizing: 'border-box',
+          overflow: 'hidden', // Prevent content overflow
+          // Ensure the content fills the available space
+          '& > *': {
+            width: '100%',
+            height: '100%',
+            maxWidth: 'none',
+            maxHeight: 'none',
+            margin: '0 !important',
+            padding: '0 !important',
+          },
+          // Override any responsive styles that might interfere
+          '@media print': {
+            position: 'static',
+            top: 'auto',
+            left: 'auto',
+            width: '100%',
+            height: '100%',
+            padding: '0',
+            margin: '0',
+          }
         }}
       >
-        <Invoice {...invoiceData} />
+        {showInvoicePdf ? (
+          <CleanInvoice data={showInvoicePdf} />
+        ) : (
+          <Invoice {...invoiceData} />
+        )}
       </Box>
       </Container>
     </DashboardContent>
