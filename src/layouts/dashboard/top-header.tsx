@@ -23,6 +23,7 @@ import { useGetStoresQuery } from 'src/services/apis/storesApi';
 // Components
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
+import { SupportButton } from 'src/components/support';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
 import { LanguageSwitcher } from 'src/components/language/language-switcher';
 import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
@@ -248,6 +249,9 @@ export function TopHeader() {
 
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />
+
+              {/* Support Button */}
+              <SupportButton />
 
               {/* Use the extracted ThemeToggle component */}
               <ThemeToggle isDarkMode={isDarkMode} onToggle={handleToggleTheme} />

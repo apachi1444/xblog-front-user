@@ -255,6 +255,12 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
 
   if (!criterion) return null;
 
+  // This modal should only handle optimizable criteria
+  if (criterion.optimizable === false) {
+    console.warn('OptimizationModal should not be used for non-optimizable criteria');
+    return null;
+  }
+
   return (
     <Dialog
       open={open}
@@ -648,29 +654,29 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
             </Card>
           )}
 
-          {/* Success Animation */}
-          {state.showSuccessAnimation && (
-            <Fade in={state.showSuccessAnimation}>
-              <Alert
-                severity="success"
-                sx={{
-                  borderRadius: 2,
-                  '& .MuiAlert-icon': {
-                    fontSize: '1.5rem',
-                  }
-                }}
-                icon={<Iconify icon="eva:checkmark-circle-2-fill" width={24} height={24} />}
-              >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Optimization Applied Successfully!
-                </Typography>
-                <Typography variant="body2">
-                  Your content has been updated and SEO scores have been recalculated.
-                </Typography>
-              </Alert>
-            </Fade>
-          )}
-        </Stack>
+        {/* Success Animation */}
+        {state.showSuccessAnimation && (
+          <Fade in={state.showSuccessAnimation}>
+            <Alert
+              severity="success"
+              sx={{
+                borderRadius: 2,
+                '& .MuiAlert-icon': {
+                  fontSize: '1.5rem',
+                }
+              }}
+              icon={<Iconify icon="eva:checkmark-circle-2-fill" width={24} height={24} />}
+            >
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                Optimization Applied Successfully!
+              </Typography>
+              <Typography variant="body2">
+                Your content has been updated and SEO scores have been recalculated.
+              </Typography>
+            </Alert>
+          </Fade>
+        )}
+      </Stack>
       </DialogContent>
 
       {/* Footer */}

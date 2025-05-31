@@ -1,8 +1,9 @@
+import jsPDF  from 'jspdf';
 import toast from 'react-hot-toast';
-import { usePDF } from 'react-to-pdf';
+import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw } from "lucide-react";
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -28,40 +29,14 @@ import {
 } from 'src/services/apis/subscriptionApi';
 
 import { ResponsivePricingPlans } from 'src/components/pricing';
+import ExactInvoice, { type ExactInvoiceData } from 'src/components/ExactInvoice';
+import { generatePDF } from '.';
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
-
-  const { toPDF } = usePDF({
-    filename: 'invoice.pdf',
-    page: {
-      format: 'A4',
-      orientation: 'portrait',
-      margin: 0 // Reduced margin for better space utilization
-    },
-    canvas: {
-      mimeType: 'image/png',
-      qualityRatio: 1,
-      logging: true,
-      useCORS: true,
-    },
-    overrides: {
-      // Better PDF quality and sizing
-      pdf: {
-        compress: true,
-        unit: 'mm',
-        format: 'a4',
-      },
-      // Ensure proper styling
-      canvas: {
-        useCORS: true,
-        scale: 2, // Higher scale for better quality
-        width: 794, // A4 width in pixels at 96 DPI
-        height: 1123, // A4 height in pixels at 96 DPI
-      },
-    },
-  });
+  const [showInvoiceForPdf, setShowInvoiceForPdf] = useState<ExactInvoiceData | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
   // Fetch subscription plans
   const {
     isLoading: isLoadingPlans,
@@ -107,6 +82,47 @@ export function UpgradeLicenseView() {
     }
   }, [refetchPlans, refetchInvoices]);
 
+  // Convert invoice data to ExactInvoiceData format
+  const convertToExactInvoiceData = useCallback((invoice: any): ExactInvoiceData => ({
+      // Company details
+      companyName: 'Your Company Inc.',
+      companyAddress: '1234 Company St.',
+      companyCity: 'Company Town, ST 12345',
+
+      // Customer details
+      customerName: 'Customer Name',
+      customerAddress: '1234 Customer St.',
+      customerCity: 'Customer Town, ST 12345',
+
+      // Invoice details
+      invoiceNumber: invoice.invoiceNumber || '0000007',
+      invoiceDate: invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      }) : '10-02-2023',
+      dueDate: invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      }) : '10-16-2023',
+
+      // Invoice items - using the exact format from your image
+      items: [
+        {
+          quantity: 1.00,
+          description: invoice.plan || 'Professional Plan Subscription',
+          unitPrice: invoice.amount || 40.00,
+          amount: invoice.amount || 40.00,
+        }
+      ],
+
+      // Totals
+      subtotal: invoice.amount || 40.00,
+      salesTax: (invoice.amount || 40.00) * 0.05, // 5% tax
+      total: (invoice.amount || 40.00) * 1.05,
+    }), []);
+
   // Handle refreshing invoices
   const handleRefreshInvoices = async () => {
     try {
@@ -120,21 +136,69 @@ export function UpgradeLicenseView() {
   // Handle PDF download for specific invoice
   const handleDownloadInvoicePdf = async (invoice: any) => {
     try {
+      // Convert invoice data
+      const exactInvoiceData = convertToExactInvoiceData(invoice);
+
+      // Set the invoice data to render the component
+      setShowInvoiceForPdf(exactInvoiceData);
 
       // Small delay to ensure content is rendered
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Ensure fonts are loaded
       if (document.fonts) {
         await document.fonts.ready;
       }
 
-      // Generate PDF
-      toPDF();
+      // Get the invoice element
+      const invoiceElement = invoiceRef.current;
+      if (!invoiceElement) {
+        throw new Error('Invoice element not found');
+      }
 
+      // Generate canvas from the invoice element
+      const canvas = await html2canvas(invoiceElement, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794, // A4 width in pixels at 96 DPI (210mm)
+        height: 1123, // A4 height in pixels at 96 DPI (297mm)
+      });
+
+      // Create PDF
+      // eslint-disable-next-line new-cap
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Calculate dimensions to fit the canvas exactly to A4
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = 297; // A4 height in mm
+
+      // Convert canvas to image data
+      const imgData = canvas.toDataURL('image/png');
+
+      // Add image to PDF with exact A4 dimensions
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      // Download the PDF
+      const fileName = `invoice-${exactInvoiceData.invoiceNumber}.pdf`;
+      pdf.save(fileName);
+
+      // Clear the invoice data after a short delay
+      setTimeout(() => {
+        setShowInvoiceForPdf(null);
+      }, 1000);
+
+      toast.success('Invoice PDF downloaded successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      // toast.error('Failed to generate PDF. Please try again.');
+      toast.error('Failed to generate PDF. Please try again.');
+      // Clear the invoice data on error
+      setShowInvoiceForPdf(null);
     }
   };
 
@@ -316,6 +380,28 @@ export function UpgradeLicenseView() {
           </Card>
         </Box>
       </Container>
+
+      <Card />
+      <button type="button" title="Generate Card PDF" onClick={() => generatePDF("card")}>
+        Generate Card PDF
+      </button>
+
+
+      {/* Hidden invoice component for PDF generation */}
+      {showInvoiceForPdf && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            zIndex: -1,
+            visibility: 'hidden',
+            pointerEvents: 'none',
+          }}
+        >
+          <ExactInvoice ref={invoiceRef} data={showInvoiceForPdf} />
+        </Box>
+      )}
     </DashboardContent>
   );
 }

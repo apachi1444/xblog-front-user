@@ -576,12 +576,42 @@
         "notify_me": "Notify Me When Available"
       },
       "support": {
-        "title": "Customer Support",
+        "title": "Contact Support",
+        "subtitle": "Complete the form below to file a ticket and our support team will get back to you as soon as possible.",
         "status": "Online",
         "openChat": "Open support chat",
         "inputPlaceholder": "Type a message...",
         "welcomeMessage": "Hello! How can I help you today?",
-        "sendMessage": "Send message"
+        "sendMessage": "Send message",
+        "button": {
+          "tooltip": "Contact Support"
+        },
+        "form": {
+          "email": "Email Address",
+          "emailPlaceholder": "Enter your email address",
+          "subject": "Subject",
+          "subjectPlaceholder": "Brief description of your issue",
+          "category": "Category",
+          "categoryPlaceholder": "Select a category",
+          "message": "Message",
+          "messagePlaceholder": "Please describe your issue in detail...",
+          "submit": "Send Support Request",
+          "submitting": "Sending..."
+        },
+        "categories": {
+          "technical": "Technical Issue",
+          "billing": "Billing & Subscription",
+          "feature": "Feature Request",
+          "bug": "Bug Report",
+          "account": "Account Management",
+          "integration": "Platform Integration",
+          "other": "Other"
+        },
+        "success": {
+          "title": "Request Sent Successfully!",
+          "message": "We have received your question and our support team will answer you soon!",
+          "note": "You will receive a confirmation email shortly."
+        }
       },
       "welcome": {
         "title": "Welcome to XBlog!",

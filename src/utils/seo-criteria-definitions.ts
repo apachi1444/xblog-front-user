@@ -47,7 +47,8 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_first_10.success",
       error: "seo.criteria.core.keyword_in_first_10.error"
     },
-    inputKeys: ["contentDescription"]
+    inputKeys: ["content"],
+    optimizable: false // Cannot be automatically optimized
   },
   // this one also !
   {
@@ -59,7 +60,8 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_content.success",
       error: "seo.criteria.core.keyword_in_content.error"
     },
-    inputKeys: ["contentDescription", "primaryKeyword"]
+    inputKeys: ["content", "primaryKeyword"],
+    optimizable: false // Cannot be automatically optimized
   },
   // this one !
   {
@@ -72,8 +74,9 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       warning: "seo.criteria.core.content_length.warning",
       error: "seo.criteria.core.content_length.error"
     },
-    inputKeys: ["contentDescription"],
-    warningScore: 3 // 75% of the weight
+    inputKeys: ["content"],
+    warningScore: 3, // 75% of the weight
+    optimizable: false // Cannot be automatically optimized
   }
 ];
 
@@ -91,8 +94,10 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.keyword_in_subheadings.success",
       error: "seo.criteria.boosters.keyword_in_subheadings.error"
     },
-    inputKeys: ["content", "primaryKeyword"]
+    inputKeys: ["content", "primaryKeyword"],
+    optimizable: false // Cannot be automatically optimized
   },
+  // this one !
   {
     id: 202,
     description: "seo.criteria.boosters.keyword_density.description",
@@ -104,7 +109,8 @@ const SEO_BOOSTERS: Criterion[] = [
       error: "seo.criteria.boosters.keyword_density.error"
     },
     inputKeys: ["content", "primaryKeyword"],
-    warningScore: 2 // ~67% of the weight
+    warningScore: 2, // ~67% of the weight
+    optimizable: false // Cannot be automatically optimized
   },
   {
     id: 203,
@@ -209,7 +215,8 @@ const CONTENT_CLARITY: Criterion[] = [
       success: "seo.criteria.clarity.table_of_contents.success",
       error: "seo.criteria.clarity.table_of_contents.error"
     },
-    inputKeys: ["content"]
+    inputKeys: ["content"],
+    optimizable: false // Cannot be automatically optimized
   },
   // this one !
   {
@@ -223,7 +230,8 @@ const CONTENT_CLARITY: Criterion[] = [
       error: "seo.criteria.clarity.short_paragraphs.error"
     },
     inputKeys: ["content"],
-    warningScore: 3 // 75% of the weight
+    warningScore: 3, // 75% of the weight
+    optimizable: false // Cannot be automatically optimized
   },
   // this one !
   {
@@ -235,7 +243,8 @@ const CONTENT_CLARITY: Criterion[] = [
       success: "seo.criteria.clarity.media_content.success",
       error: "seo.criteria.clarity.media_content.error"
     },
-    inputKeys: ["content"]
+    inputKeys: ["content"],
+    optimizable: false // Cannot be automatically optimized
   }
 ];
 

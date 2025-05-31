@@ -7,7 +7,7 @@
  */
 export type CriteriaStatusType = 'binary' | 'ternary';
 
-export type InputKey = 'title' | 'metaDescription' | 'urlSlug' | 'contentDescription' | 'primaryKeyword' | 'secondaryKeywords' 
+export type InputKey = 'title' | 'metaDescription' | 'urlSlug' | 'contentDescription' | 'primaryKeyword' | 'secondaryKeywords'
 | 'content' | 'metaTitle'
 
 /**
@@ -30,6 +30,7 @@ export interface Criterion {
   evaluationStatus: EvaluationStatus;
   inputKeys: InputKey[]; // Array of input field keys that affect this criterion
   warningScore?: number; // Score to assign when status is 'warning' (for ternary criteria)
+  optimizable?: boolean; // Whether this criterion can be automatically optimized (default: true)
 }
 
 /**

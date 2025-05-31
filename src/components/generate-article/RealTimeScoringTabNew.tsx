@@ -17,6 +17,7 @@ import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEv
 
 import { ItemSectionNew } from "./ItemSectionNew";
 import { OptimizationModal } from "./OptimizationModal";
+import { CriterionDetailsModal } from "./CriterionDetailsModal";
 import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP } from "../../utils/seo-criteria-definitions";
 
 // Types
@@ -42,9 +43,10 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
   const { t } = useTranslation();
   const COLORS = getColors(theme);
 
-  // State for the optimization modal
+  // State for the modals
   const [selectedCriterionId, setSelectedCriterionId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOptimizationModalOpen, setIsOptimizationModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // Use criteria evaluation hook
   const {
@@ -111,16 +113,37 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
     return { fieldPath, currentValue };
   }, [formValues]);
 
-  // Handle opening the optimization modal
+  // Handle opening the appropriate modal based on criterion type
   const handleOpenModal = useCallback((criterionId: number) => {
-    console.log(`Opening optimization modal for criterion ${criterionId}`);
+    console.log(`Opening modal for criterion ${criterionId}`);
+
+    // Find the criterion to check if it's optimizable
+    const criterion = SEO_CRITERIA
+      .flatMap(section => section.criteria)
+      .find(c => c.id === criterionId);
+
     setSelectedCriterionId(criterionId);
-    setIsModalOpen(true);
+
+    if (criterion?.optimizable === false) {
+      // Open details modal for non-optimizable criteria
+      setIsDetailsModalOpen(true);
+    } else {
+      // Open optimization modal for optimizable criteria
+      setIsOptimizationModalOpen(true);
+    }
   }, []);
 
-  // Handle closing the optimization modal
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
+  // Handle closing modals
+  const handleCloseOptimizationModal = useCallback(() => {
+    setIsOptimizationModalOpen(false);
+    setSelectedCriterionId(null);
+    // Re-evaluate criteria after modal closes
+    evaluateAllCriteria();
+  }, [evaluateAllCriteria]);
+
+  const handleCloseDetailsModal = useCallback(() => {
+    setIsDetailsModalOpen(false);
+    setSelectedCriterionId(null);
     // Re-evaluate criteria after modal closes
     evaluateAllCriteria();
   }, [evaluateAllCriteria]);
@@ -301,11 +324,22 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
         </Box>
       ))}
 
-      {/* Optimization Modal */}
+      {/* Optimization Modal for optimizable criteria */}
       {selectedCriterionId && (
         <OptimizationModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
+          open={isOptimizationModalOpen}
+          onClose={handleCloseOptimizationModal}
+          criterionId={selectedCriterionId}
+          fieldPath={getCriterionFieldInfo(selectedCriterionId).fieldPath}
+          currentValue={getCriterionFieldInfo(selectedCriterionId).currentValue}
+        />
+      )}
+
+      {/* Details Modal for non-optimizable criteria */}
+      {selectedCriterionId && (
+        <CriterionDetailsModal
+          open={isDetailsModalOpen}
+          onClose={handleCloseDetailsModal}
           criterionId={selectedCriterionId}
           fieldPath={getCriterionFieldInfo(selectedCriterionId).fieldPath}
           currentValue={getCriterionFieldInfo(selectedCriterionId).currentValue}

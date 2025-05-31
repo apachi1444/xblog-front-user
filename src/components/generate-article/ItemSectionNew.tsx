@@ -275,7 +275,7 @@ export function ItemSectionNew({
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
-        {/* Fix button */}
+        {/* Optimize button - only show for non-success, non-pending criteria */}
         {status !== 'success' && !isPending && (
           <Button
             variant="contained"
@@ -304,7 +304,8 @@ export function ItemSectionNew({
               }
             }}
           >
-            Optimize
+            {/* Show different text based on whether criterion is optimizable */}
+            {criterion?.optimizable === false ? 'View Details' : 'Optimize'}
           </Button>
         )}
       </Box>

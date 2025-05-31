@@ -496,6 +496,39 @@
           }
         }
       }
+    },
+    "support": {
+      "title": "Contacter le Support",
+      "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",
+      "button": {
+        "tooltip": "Contacter le Support"
+      },
+      "form": {
+        "email": "Adresse Email",
+        "emailPlaceholder": "Entrez votre adresse email",
+        "subject": "Sujet",
+        "subjectPlaceholder": "Brève description de votre problème",
+        "category": "Catégorie",
+        "categoryPlaceholder": "Sélectionnez une catégorie",
+        "message": "Message",
+        "messagePlaceholder": "Veuillez décrire votre problème en détail...",
+        "submit": "Envoyer la Demande de Support",
+        "submitting": "Envoi en cours..."
+      },
+      "categories": {
+        "technical": "Problème Technique",
+        "billing": "Facturation et Abonnement",
+        "feature": "Demande de Fonctionnalité",
+        "bug": "Rapport de Bug",
+        "account": "Gestion de Compte",
+        "integration": "Intégration de Plateforme",
+        "other": "Autre"
+      },
+      "success": {
+        "title": "Demande Envoyée avec Succès !",
+        "message": "Nous avons reçu votre question et notre équipe de support vous répondra bientôt !",
+        "note": "Vous recevrez un email de confirmation sous peu."
+      }
     }
   }
 }
