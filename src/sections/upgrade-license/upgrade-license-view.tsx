@@ -27,17 +27,13 @@ import {
   useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
-import Invoice from 'src/components/Invoice';
-import CleanInvoice from 'src/components/CleanInvoice';
-import { type InvoiceData } from 'src/components/CleanInvoice';
 import { ResponsivePricingPlans } from 'src/components/pricing';
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
-  const [showInvoicePdf, setShowInvoicePdf] = useState<InvoiceData | null>(null);
 
-  const { toPDF, targetRef } = usePDF({
+  const { toPDF } = usePDF({
     filename: 'invoice.pdf',
     page: {
       format: 'A4',
@@ -124,9 +120,6 @@ export function UpgradeLicenseView() {
   // Handle PDF download for specific invoice
   const handleDownloadInvoicePdf = async (invoice: any) => {
     try {
-      // Convert invoice data for PDF generation
-      const cleanInvoiceData = convertToInvoiceData(invoice);
-      setShowInvoicePdf(cleanInvoiceData);
 
       // Small delay to ensure content is rendered
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -139,8 +132,6 @@ export function UpgradeLicenseView() {
       // Generate PDF
       toPDF();
 
-      // Clear the invoice data after generation
-      setTimeout(() => setShowInvoicePdf(null), 1000);
     } catch (error) {
       console.error('Error generating PDF:', error);
       // toast.error('Failed to generate PDF. Please try again.');
@@ -172,54 +163,6 @@ export function UpgradeLicenseView() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [refreshAllData]);
-
-  const invoiceData = {
-    planName: 'Professional Plan',
-    price: 299.99,
-    tax : 12,
-    total: 12
-  };
-
-  // Convert invoice data for CleanInvoice component
-  const convertToInvoiceData = (invoice: any): InvoiceData => ({
-      // Invoice details
-      invoiceNumber: invoice.invoiceNumber || 'INV-2024-001',
-      invoiceDate: invoice.createdAt || '10-02-2023',
-      dueDate: invoice.dueDate || '10-16-2023',
-      status: invoice.status || 'paid',
-
-      // Company details
-      companyName: 'Your Company Inc.',
-      companyAddress: '1234 Company St.',
-      companyCity: 'Company Town, ST 12345',
-      companyPhone: '+1 (555) 123-4567',
-      companyEmail: 'contact@yourcompany.com',
-      companyWebsite: 'www.yourcompany.com',
-
-      // Customer details
-      customerName: 'Customer Name',
-      customerAddress: '1234 Customer St.',
-      customerCity: 'Customer Town, ST 12345',
-      customerEmail: 'customer@email.com',
-
-      // Invoice items
-      items: [
-        {
-          description: invoice.planName || 'Professional Plan',
-          quantity: 1.00,
-          tax: 10,
-          amount: invoice.amount || 299.99,
-        }
-      ],
-
-      // Totals
-      subtotal: invoice.amount || 299.99,
-      totalTax: (invoice.amount || 299.99) * 0.05, // 5% tax
-      total: (invoice.amount || 299.99) * 1.05,
-
-      // Payment terms
-      paymentTerms: 'Payment is due in 14 days',
-    });
 
 
   return (
@@ -372,47 +315,6 @@ export function UpgradeLicenseView() {
             )}
           </Card>
         </Box>
-
-      <Box
-        ref={targetRef}
-        sx={{
-          position: 'absolute',
-          top: '-9999px',
-          left: '-9999px',
-          width: '210mm', // A4 width
-          height: '297mm', // A4 height
-          backgroundColor: 'white',
-          padding: '0', // Remove all padding
-          margin: '0', // Remove all margin
-          boxSizing: 'border-box',
-          overflow: 'hidden', // Prevent content overflow
-          // Ensure the content fills the available space
-          '& > *': {
-            width: '100%',
-            height: '100%',
-            maxWidth: 'none',
-            maxHeight: 'none',
-            margin: '0 !important',
-            padding: '0 !important',
-          },
-          // Override any responsive styles that might interfere
-          '@media print': {
-            position: 'static',
-            top: 'auto',
-            left: 'auto',
-            width: '100%',
-            height: '100%',
-            padding: '0',
-            margin: '0',
-          }
-        }}
-      >
-        {showInvoicePdf ? (
-          <CleanInvoice data={showInvoicePdf} />
-        ) : (
-          <Invoice {...invoiceData} />
-        )}
-      </Box>
       </Container>
     </DashboardContent>
   );
