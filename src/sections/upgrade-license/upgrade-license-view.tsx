@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw } from "lucide-react";
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -29,14 +29,12 @@ import {
 } from 'src/services/apis/subscriptionApi';
 
 import { ResponsivePricingPlans } from 'src/components/pricing';
-import ExactInvoice, { type ExactInvoiceData } from 'src/components/ExactInvoice';
-import { generatePDF } from '.';
+
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
   const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
-  const [showInvoiceForPdf, setShowInvoiceForPdf] = useState<ExactInvoiceData | null>(null);
-  const invoiceRef = useRef<HTMLDivElement>(null);
+
   // Fetch subscription plans
   const {
     isLoading: isLoadingPlans,
@@ -82,46 +80,7 @@ export function UpgradeLicenseView() {
     }
   }, [refetchPlans, refetchInvoices]);
 
-  // Convert invoice data to ExactInvoiceData format
-  const convertToExactInvoiceData = useCallback((invoice: any): ExactInvoiceData => ({
-      // Company details
-      companyName: 'Your Company Inc.',
-      companyAddress: '1234 Company St.',
-      companyCity: 'Company Town, ST 12345',
 
-      // Customer details
-      customerName: 'Customer Name',
-      customerAddress: '1234 Customer St.',
-      customerCity: 'Customer Town, ST 12345',
-
-      // Invoice details
-      invoiceNumber: invoice.invoiceNumber || '0000007',
-      invoiceDate: invoice.createdAt ? new Date(invoice.createdAt).toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      }) : '10-02-2023',
-      dueDate: invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      }) : '10-16-2023',
-
-      // Invoice items - using the exact format from your image
-      items: [
-        {
-          quantity: 1.00,
-          description: invoice.plan || 'Professional Plan Subscription',
-          unitPrice: invoice.amount || 40.00,
-          amount: invoice.amount || 40.00,
-        }
-      ],
-
-      // Totals
-      subtotal: invoice.amount || 40.00,
-      salesTax: (invoice.amount || 40.00) * 0.05, // 5% tax
-      total: (invoice.amount || 40.00) * 1.05,
-    }), []);
 
   // Handle refreshing invoices
   const handleRefreshInvoices = async () => {
@@ -136,35 +95,169 @@ export function UpgradeLicenseView() {
   // Handle PDF download for specific invoice
   const handleDownloadInvoicePdf = async (invoice: any) => {
     try {
-      // Convert invoice data
-      const exactInvoiceData = convertToExactInvoiceData(invoice);
+      toast.success('Generating PDF...');
 
-      // Set the invoice data to render the component
-      setShowInvoiceForPdf(exactInvoiceData);
+      // Create a temporary container for the invoice
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.width = '210mm';
+      tempContainer.style.height = '297mm';
+      tempContainer.style.backgroundColor = 'white';
+      tempContainer.style.fontFamily = 'Arial, sans-serif';
+      tempContainer.style.fontSize = '14px';
+      tempContainer.style.lineHeight = '1.4';
+      tempContainer.style.color = '#000';
+      tempContainer.style.padding = '20mm';
+      tempContainer.style.boxSizing = 'border-box';
 
-      // Small delay to ensure content is rendered
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Create the invoice HTML content
+      tempContainer.innerHTML = `
+        <div style="width: 100%; height: 100%; background: white; font-family: Arial, sans-serif;">
+          <!-- Header Section -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
+            <!-- Company Info -->
+            <div>
+              <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #000;">
+                Your Company Inc.
+              </div>
+              <div style="font-size: 14px; margin-bottom: 4px; color: #000;">
+                1234 Company St.
+              </div>
+              <div style="font-size: 14px; color: #000;">
+                Company Town, ST 12345
+              </div>
+            </div>
 
-      // Ensure fonts are loaded
-      if (document.fonts) {
-        await document.fonts.ready;
-      }
+            <!-- Upload Logo Box -->
+            <div style="border: 2px solid #ddd; border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 200px; background-color: #fafafa;">
+              <div style="margin-bottom: 8px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 2V8H20" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 13L12 17L8 13" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 17V9" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div style="font-size: 14px; color: #666; font-weight: 500;">
+                Upload Logo
+              </div>
+            </div>
+          </div>
 
-      // Get the invoice element
-      const invoiceElement = invoiceRef.current;
-      if (!invoiceElement) {
-        throw new Error('Invoice element not found');
-      }
+          <!-- INVOICE Title -->
+          <div style="text-align: right; margin-bottom: 40px;">
+            <div style="font-size: 48px; font-weight: bold; letter-spacing: 0.2em; color: #000; line-height: 1;">
+              INVOICE
+            </div>
+          </div>
 
-      // Generate canvas from the invoice element
-      const canvas = await html2canvas(invoiceElement, {
-        scale: 2, // Higher quality
+          <!-- Bill To and Invoice Details -->
+          <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
+            <!-- Bill To -->
+            <div style="flex: 1;">
+              <div style="font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #000;">
+                Bill To
+              </div>
+              <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #000;">
+                Customer Name
+              </div>
+              <div style="font-size: 14px; margin-bottom: 4px; color: #000;">
+                1234 Customer St.
+              </div>
+              <div style="font-size: 14px; color: #000;">
+                Customer Town, ST 12345
+              </div>
+            </div>
+
+            <!-- Invoice Details -->
+            <div style="text-align: right; min-width: 200px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Invoice #</span>
+                <span style="font-size: 14px; color: #000;">${invoice.invoiceNumber || '0000007'}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Invoice date</span>
+                <span style="font-size: 14px; color: #000;">${new Date(invoice.createdAt || Date.now()).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Due date</span>
+                <span style="font-size: 14px; color: #000;">${new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services Table -->
+          <div style="margin-bottom: 40px;">
+            <!-- Table Header -->
+            <div style="display: flex; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 16px;">
+              <div style="font-size: 14px; font-weight: bold; color: #000; width: 60px;">QTY</div>
+              <div style="font-size: 14px; font-weight: bold; color: #000; flex: 1; margin-left: 16px;">Description</div>
+              <div style="font-size: 14px; font-weight: bold; color: #000; width: 100px; text-align: right;">Unit Price</div>
+              <div style="font-size: 14px; font-weight: bold; color: #000; width: 100px; text-align: right; margin-left: 16px;">Amount</div>
+            </div>
+
+            <!-- Table Rows -->
+            <div style="display: flex; padding: 8px 0; align-items: center;">
+              <div style="font-size: 14px; color: #000; width: 60px;">1.00</div>
+              <div style="font-size: 14px; color: #000; flex: 1; margin-left: 16px;">${invoice.plan || 'Professional Plan Subscription'}</div>
+              <div style="font-size: 14px; color: #000; width: 100px; text-align: right;">${(invoice.amount || 40).toFixed(2)}</div>
+              <div style="font-size: 14px; color: #000; width: 100px; text-align: right; margin-left: 16px;">$${(invoice.amount || 40).toFixed(2)}</div>
+            </div>
+          </div>
+
+          <!-- Totals Section -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 60px;">
+            <div style="min-width: 250px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 14px; color: #000;">Subtotal</span>
+                <span style="font-size: 14px; color: #000;">$${(invoice.amount || 40).toFixed(2)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                <span style="font-size: 14px; color: #000;">Sales Tax (5%)</span>
+                <span style="font-size: 14px; color: #000;">$${((invoice.amount || 40) * 0.05).toFixed(2)}</span>
+              </div>
+              <div style="border-top: 2px solid #000; padding-top: 8px; display: flex; justify-content: space-between;">
+                <span style="font-size: 16px; font-weight: bold; color: #000;">Total (USD)</span>
+                <span style="font-size: 16px; font-weight: bold; color: #000;">$${((invoice.amount || 40) * 1.05).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div>
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #000;">
+              Terms and Conditions
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px; color: #000;">
+              Payment is due in 14 days
+            </div>
+            <div style="font-size: 14px; color: #000;">
+              Please make checks payable to: Your Company Inc.
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add to document
+      document.body.appendChild(tempContainer);
+
+      // Wait for fonts and rendering
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Generate canvas
+      const canvas = await html2canvas(tempContainer, {
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels at 96 DPI (210mm)
-        height: 1123, // A4 height in pixels at 96 DPI (297mm)
+        width: 794, // A4 width in pixels
+        height: 1123, // A4 height in pixels
       });
+
+      // Remove temporary container
+      document.body.removeChild(tempContainer);
 
       // Create PDF
       // eslint-disable-next-line new-cap
@@ -174,31 +267,17 @@ export function UpgradeLicenseView() {
         format: 'a4',
       });
 
-      // Calculate dimensions to fit the canvas exactly to A4
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = 297; // A4 height in mm
-
-      // Convert canvas to image data
+      // Add image to PDF
       const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
 
-      // Add image to PDF with exact A4 dimensions
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-
-      // Download the PDF
-      const fileName = `invoice-${exactInvoiceData.invoiceNumber}.pdf`;
-      pdf.save(fileName);
-
-      // Clear the invoice data after a short delay
-      setTimeout(() => {
-        setShowInvoiceForPdf(null);
-      }, 1000);
+      // Download
+      pdf.save(`invoice-${invoice.invoiceNumber || '0000007'}.pdf`);
 
       toast.success('Invoice PDF downloaded successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Failed to generate PDF. Please try again.');
-      // Clear the invoice data on error
-      setShowInvoiceForPdf(null);
     }
   };
 
@@ -381,27 +460,7 @@ export function UpgradeLicenseView() {
         </Box>
       </Container>
 
-      <Card />
-      <button type="button" title="Generate Card PDF" onClick={() => generatePDF("card")}>
-        Generate Card PDF
-      </button>
 
-
-      {/* Hidden invoice component for PDF generation */}
-      {showInvoiceForPdf && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: '-9999px',
-            left: '-9999px',
-            zIndex: -1,
-            visibility: 'hidden',
-            pointerEvents: 'none',
-          }}
-        >
-          <ExactInvoice ref={invoiceRef} data={showInvoiceForPdf} />
-        </Box>
-      )}
     </DashboardContent>
   );
 }
