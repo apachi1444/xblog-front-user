@@ -553,9 +553,9 @@ const setupMocks = () => {
     mock.onPost('/generate-internal-links').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { websiteUrl } = requestData;
+        const { website_url } = requestData;
 
-        if (!websiteUrl) {
+        if (!website_url) {
           return [400, { success: false, message: 'Website URL is required' }];
         }
 
@@ -563,15 +563,15 @@ const setupMocks = () => {
         const internalLinks = [
           {
             link_text: 'Home',
-            link_url: websiteUrl
+            link_url: website_url
           },
           {
             link_text: 'About Us',
-            link_url: `${websiteUrl}/about`
+            link_url: `${website_url}/about`
           },
           {
             link_text: 'Contact Us',
-            link_url: `${websiteUrl}/contact`
+            link_url: `${website_url}/contact`
           }
         ];
 

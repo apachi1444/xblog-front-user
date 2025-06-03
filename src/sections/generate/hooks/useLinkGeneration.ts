@@ -1,3 +1,5 @@
+import type { InternalLinksRequest } from 'src/services/apis/generateContentApi';
+
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
@@ -29,10 +31,16 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
   const generateInternalLinks = async (websiteUrl?: string) => {
     try {
 
-      const response = await generateInternalLinksMutation({
-        website_url: websiteUrl || '',
-      }).unwrap();
+      console.log(websiteUrl, " url");
 
+      const payload: InternalLinksRequest = {
+        website_url: websiteUrl || ''
+      };
+      
+      const response = await generateInternalLinksMutation(payload).unwrap();
+
+      console.log(response, " response");
+      
       // Convert API response to our Link format
       const newLinks: Link[] = response.internal_links.map(link => ({
         id: generateId('internal'),
