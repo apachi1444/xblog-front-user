@@ -5,14 +5,14 @@ import { Check, ChevronRight } from 'lucide-react';
 
 import { Box, Grid, Card, Paper, alpha, Button, useTheme, Container, Typography } from '@mui/material';
 
-// Real platform images
+// Platform images with working URLs
 const PLATFORM_IMAGES = {
-  wordpress: 'https://s.w.org/style/images/about/WordPress-logotype-standard.png',
-  shopify: 'https://cdn.shopify.com/s/files/1/0070/7032/files/shopify-logo-green.png',
-  WrapTextOutlined: 'https://clipground.com/images/wix-logo-png-9.jpg',
-  magento: '/assets/images/platforms/magento.png',
-  prestashop: '/assets/images/platforms/prestashop.png',
-  custom: '/assets/images/platforms/custom-website.png',
+  wordpress: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/WordPress_blue_logo.svg/512px-WordPress_blue_logo.svg.png',
+  shopify: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/512px-Shopify_logo_2018.svg.png',
+  wix: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Wix.com_website_logo.svg/512px-Wix.com_website_logo.svg.png',
+  magento: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Magento_Logo.svg/512px-Magento_Logo.svg.png',
+  prestashop: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/PrestaShop_logo.svg/512px-PrestaShop_logo.svg.png',
+  custom: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/512px-HTML5_logo_and_wordmark.svg.png',
 };
 
 interface SelectPlatformProps {

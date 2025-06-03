@@ -1,51 +1,58 @@
 
 import type { Store } from 'src/types/store';
-import type { Article } from 'src/types/article';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
 
+// Helper functions for localStorage persistence
+const CURRENT_STORE_KEY = 'currentStore';
+
+const loadCurrentStoreFromStorage = (): Store | null => {
+  try {
+    const stored = localStorage.getItem(CURRENT_STORE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.warn('Failed to load current store from localStorage:', error);
+    return null;
+  }
+};
+
+const saveCurrentStoreToStorage = (store: Store | null): void => {
+  try {
+    if (store) {
+      localStorage.setItem(CURRENT_STORE_KEY, JSON.stringify(store));
+    } else {
+      localStorage.removeItem(CURRENT_STORE_KEY);
+    }
+  } catch (error) {
+    console.warn('Failed to save current store to localStorage:', error);
+  }
+};
 
 interface StoreState {
-  stores: Store[];
-  count: number;
   currentStore: Store | null;
 }
 
 const initialState: StoreState = {
-  stores: [],
-  count: 0,
-  currentStore: null,
+  currentStore: loadCurrentStoreFromStorage(),
 };
 
 const storeSlice = createSlice({
   name: 'store',
   initialState,
   reducers: {
-    getStores: (state, action: PayloadAction<Store[]>) => {
-      state.stores = action.payload;
-      state.count = action.payload.length;
-    },
-    addStore: (state, action: PayloadAction<Store>) => {
-      state.stores.push(action.payload);
-      state.count += 1;
-    },
-    deleteStore: (state, action: PayloadAction<number>) => {
-      state.stores = state.stores.filter(store => store.id !== action.payload) || [];
-      state.count = state.stores.length;
-    },
     setCurrentStore: (state, action: PayloadAction<Store>) => {
       state.currentStore = action.payload;
+      // Persist to localStorage
+      saveCurrentStoreToStorage(action.payload);
     },
-    setArticlesForCurrentStore: (state, action: PayloadAction<Article[]>) => {
-      if (state.currentStore) {
-        state.currentStore.articles_list = action.payload.map(article => ({
-          ...article,
-        }));
-      }
+    clearCurrentStore: (state) => {
+      state.currentStore = null;
+      // Remove from localStorage
+      saveCurrentStoreToStorage(null);
     },
   },
 });
 
-export const { getStores, addStore, deleteStore , setCurrentStore, setArticlesForCurrentStore } = storeSlice.actions;
+export const { setCurrentStore, clearCurrentStore } = storeSlice.actions;
 export default storeSlice.reducer;

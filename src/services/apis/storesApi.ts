@@ -16,6 +16,9 @@ export const storesApi = api.injectEndpoints({
         url: `${STORES_BASE_URL}`,
         method: 'GET',
       }),
+      providesTags: ['Stores'],
+      // Cache stores data for 5 minutes to reduce unnecessary refetches
+      keepUnusedDataFor: 300, // 5 minutes
     }),
     
     deleteStore: builder.mutation<void, number>({
@@ -43,13 +46,24 @@ export const storesApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Stores'],
     }),
+
+    // Add store mutation endpoint
+    addStore: builder.mutation<Store, Partial<Store>>({
+      query: (store) => ({
+        url: `${STORES_BASE_URL}`,
+        method: 'POST',
+        body: store,
+      }),
+      invalidatesTags: ['Stores'],
+    }),
   }),
 });
 
-export const { 
-  useGetStoresQuery, 
+export const {
+  useGetStoresQuery,
   useLazyGetStoresQuery,
   useDeleteStoreMutation,
   useDisconnectStoreMutation,
-  useReconnectStoreMutation
+  useReconnectStoreMutation,
+  useAddStoreMutation
 } = storesApi;

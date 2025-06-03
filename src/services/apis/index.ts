@@ -4,9 +4,10 @@ import MockAdapter from 'axios-mock-adapter';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
+import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
+
 import { _posts } from 'src/_mock/_data';
 import { _fakeStores } from 'src/_mock/stores';
-import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
 
 import customRequest from './axios';
 
@@ -61,7 +62,7 @@ const shouldUseMocks = () => {
 const setupMocks = () => {
   if (shouldUseMocks()) {
 
-    mock.onGet('/stores/').reply(() => [
+    mock.onGet('/stores').reply(() => [
         200,
         {
           stores: _fakeStores,

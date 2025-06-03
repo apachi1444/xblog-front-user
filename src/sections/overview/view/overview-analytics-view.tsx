@@ -6,8 +6,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import {
   Box,
   Card,
-  Chip,
-  alpha,
   Button,
   useTheme,
   Typography,
@@ -17,6 +15,7 @@ import {
 
 import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
 
+import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { useGetUserInvoicesQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
@@ -53,6 +52,8 @@ function GenerateContentCard() {
     }
   ];
 
+  const isDarkMode = theme.palette.mode === 'dark';
+
   return (
     <Card
       sx={{
@@ -62,35 +63,44 @@ function GenerateContentCard() {
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
-        boxShadow: theme.shadows[3],
-        background: theme.palette.mode === 'dark'
-          ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.8)}, ${alpha(theme.palette.background.paper, 0.9)})`
-          : `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)}, ${alpha(theme.palette.background.paper, 0.9)})`,
-        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        background: isDarkMode
+          ? theme.palette.background.paper
+          : theme.palette.common.white,
+        border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.2) : varAlpha(theme.palette.grey['500Channel'], 0.15)}`,
+        boxShadow: isDarkMode
+          ? `0 8px 20px ${varAlpha(theme.palette.common.blackChannel, 0.4)}`
+          : `0 4px 16px ${varAlpha(theme.palette.grey['500Channel'], 0.12)}`,
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: isDarkMode
+            ? `0 12px 32px ${varAlpha(theme.palette.common.blackChannel, 0.5)}`
+            : `0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.16)}`,
+        },
       }}
     >
-      {/* Decorative elements */}
+      {/* Subtle background decoration */}
       <Box
         sx={{
           position: 'absolute',
-          top: -50,
-          right: -50,
-          width: 200,
-          height: 200,
+          top: -20,
+          right: -20,
+          width: 120,
+          height: 120,
           borderRadius: '50%',
-          background: alpha(theme.palette.primary.main, 0.1),
+          background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.03)}, transparent)`,
           zIndex: 0,
         }}
       />
       <Box
         sx={{
           position: 'absolute',
-          bottom: -30,
-          left: -30,
-          width: 120,
-          height: 120,
+          bottom: -15,
+          left: -15,
+          width: 80,
+          height: 80,
           borderRadius: '50%',
-          background: alpha(theme.palette.secondary.main, 0.1),
+          background: `linear-gradient(135deg, ${varAlpha(theme.palette.secondary.mainChannel, 0.02)}, transparent)`,
           zIndex: 0,
         }}
       />
@@ -104,22 +114,20 @@ function GenerateContentCard() {
               <Typography
                 variant="h4"
                 sx={{
-                  fontWeight: 'bold',
+                  fontWeight: 700,
                   mb: 1,
-                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  display: 'inline-block'
+                  color: 'text.primary',
+                  lineHeight: 1.2,
                 }}
               >
                 {t('generate.startCreating', 'Supercharge Your Content Creation')}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
                 {t('generate.description', 'Our AI-powered platform helps you create high-quality, engaging content in minutes. Perfect for blogs, websites, and social media.')}
               </Typography>
             </Box>
 
-            {/* Benefits */}
+            {/* Refined Benefits */}
             <Box sx={{ mb: 3 }}>
               {benefits.map((benefit, index) => (
                 <Box
@@ -127,14 +135,19 @@ function GenerateContentCard() {
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    mb: 2,
+                    mb: 1.5,
                     p: 2,
                     borderRadius: 2,
-                    backgroundColor: alpha(theme.palette.primary.light, 0.05),
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    transition: 'all 0.2s',
+                    backgroundColor: isDarkMode
+                      ? varAlpha(theme.palette.background.defaultChannel, 0.4)
+                      : varAlpha(theme.palette.grey['50Channel'], 0.8),
+                    border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.08) : varAlpha(theme.palette.grey['500Channel'], 0.05)}`,
+                    transition: 'all 0.2s ease-in-out',
                     '&:hover': {
-                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.05)',
+                      backgroundColor: isDarkMode
+                        ? varAlpha(theme.palette.background.defaultChannel, 0.6)
+                        : varAlpha(theme.palette.grey['100Channel'], 0.8),
+                      transform: 'translateX(4px)',
                     }
                   }}
                 >
@@ -142,25 +155,25 @@ function GenerateContentCard() {
                     sx={{
                       mr: 2,
                       p: 1.5,
-                      borderRadius: 1.5,
-                      background: theme.palette.mode === 'dark'
-                        ? alpha(theme.palette.primary.main, 0.2)
-                        : alpha(theme.palette.primary.lighter || theme.palette.primary.light, 0.3),
+                      borderRadius: 2,
+                      backgroundColor: isDarkMode
+                        ? varAlpha(theme.palette.primary.mainChannel, 0.15)
+                        : varAlpha(theme.palette.primary.mainChannel, 0.08),
                       color: theme.palette.primary.main,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: 40,
-                      minHeight: 40
+                      minWidth: 44,
+                      minHeight: 44
                     }}
                   >
-                    <Iconify icon={benefit.icon} width={22} height={22} />
+                    <Iconify icon={benefit.icon} width={20} height={20} />
                   </Box>
                   <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.primary' }}>
                       {benefit.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                       {benefit.description}
                     </Typography>
                   </Box>
@@ -168,7 +181,7 @@ function GenerateContentCard() {
               ))}
             </Box>
 
-            {/* CTA Button */}
+            {/* Refined CTA Button */}
             <Button
               variant="contained"
               size="large"
@@ -179,13 +192,19 @@ function GenerateContentCard() {
                 px: 4,
                 py: 1.5,
                 borderRadius: 2,
-                fontWeight: 'bold',
-                boxShadow: theme.shadows[4],
+                fontWeight: 600,
+                fontSize: '1rem',
+                textTransform: 'none',
+                boxShadow: isDarkMode
+                  ? `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`
+                  : `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
                 '&:hover': {
-                  boxShadow: theme.shadows[8],
+                  boxShadow: isDarkMode
+                    ? `0 8px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`
+                    : `0 8px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`,
                   transform: 'translateY(-2px)',
                 },
-                transition: 'all 0.3s',
+                transition: 'all 0.3s ease-in-out',
               }}
             >
               {t('generate.createNow', 'Start Creating Now')}
@@ -212,7 +231,7 @@ function GenerateContentCard() {
                   borderRadius: 2,
                   bgcolor: theme.palette.background.paper,
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+                  border: `1px solid ${varAlpha(theme.palette.warning.mainChannel, 0.3)}`,
                   animation: 'pulse 3s ease-in-out 1.5s infinite',
                   zIndex: 2
                 }}
@@ -266,56 +285,68 @@ function PremiumFeaturesCard() {
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
-        boxShadow: theme.shadows[3],
         background: isDarkMode
-          ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.95)}, ${alpha('#5e35b1', 0.85)})`
-          : `linear-gradient(135deg, ${alpha('#5e35b1', 0.95)}, ${alpha('#7c4dff', 0.85)})`,
-        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+          ? `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darkerChannel, 0.15)}, ${varAlpha(theme.palette.background.paperChannel, 0.95)})`
+          : `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.08)}, ${varAlpha(theme.palette.common.whiteChannel, 0.95)})`,
+        border: `2px solid ${isDarkMode ? varAlpha(theme.palette.primary.mainChannel, 0.3) : varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
+        boxShadow: isDarkMode
+          ? `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}, 0 4px 12px ${varAlpha(theme.palette.common.blackChannel, 0.3)}`
+          : `0 6px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.15)}, 0 2px 8px ${varAlpha(theme.palette.grey['500Channel'], 0.1)}`,
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: isDarkMode
+            ? `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}, 0 8px 24px ${varAlpha(theme.palette.common.blackChannel, 0.4)}`
+            : `0 10px 28px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}, 0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.15)}`,
+        },
       }}
     >
-      {/* Premium icon badge */}
+      {/* Refined Premium badge */}
       <Box
         sx={{
           position: 'absolute',
-          top: 12,
-          left: 12,
+          top: 16,
+          left: 16,
           display: 'flex',
           alignItems: 'center',
-          bgcolor: alpha('#000', 0.2),
-          color: '#ffffff',
-          borderRadius: 1,
-          px: 1,
-          py: 0.5,
+          bgcolor: isDarkMode
+            ? varAlpha(theme.palette.warning.mainChannel, 0.15)
+            : varAlpha(theme.palette.warning.mainChannel, 0.1),
+          color: theme.palette.warning.main,
+          borderRadius: 2,
+          px: 1.5,
+          py: 0.75,
+          border: `1px solid ${varAlpha(theme.palette.warning.mainChannel, 0.2)}`,
         }}
       >
-        <Iconify icon="mdi:crown" width={16} height={16} sx={{ color: '#ffc107', mr: 0.5 }} />
-        <Typography variant="caption" fontWeight="bold">
+        <Iconify icon="mdi:crown" width={16} height={16} sx={{ color: theme.palette.warning.main, mr: 0.5 }} />
+        <Typography variant="caption" fontWeight="bold" sx={{ color: theme.palette.warning.main }}>
           {t('premium.label', 'Pro Plan')}
         </Typography>
       </Box>
 
-      {/* Decorative elements */}
+      {/* Subtle decorative elements */}
       <Box
         sx={{
           position: 'absolute',
-          top: -20,
-          right: -20,
-          width: 120,
-          height: 120,
+          top: -15,
+          right: -15,
+          width: 80,
+          height: 80,
           borderRadius: '50%',
-          background: alpha('#fff', 0.1),
+          background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.05)}, transparent)`,
           zIndex: 0,
         }}
       />
       <Box
         sx={{
           position: 'absolute',
-          bottom: -30,
-          left: '30%',
-          width: 80,
-          height: 80,
+          bottom: -20,
+          left: '20%',
+          width: 60,
+          height: 60,
           borderRadius: '50%',
-          background: alpha('#fff', 0.08),
+          background: `linear-gradient(135deg, ${varAlpha(theme.palette.secondary.mainChannel, 0.03)}, transparent)`,
           zIndex: 0,
         }}
       />
@@ -325,7 +356,7 @@ function PremiumFeaturesCard() {
           variant="h5"
           component="h3"
           fontWeight="bold"
-          color="#ffffff"
+          color="text.primary"
           sx={{ mb: 1, mt: 3 }}
         >
           {t('premium.title', 'Unlock Premium Features')}
@@ -333,8 +364,8 @@ function PremiumFeaturesCard() {
 
         <Typography
           variant="body2"
-          color={alpha('#ffffff', 0.9)}
-          sx={{ mb: 2 }}
+          color="text.secondary"
+          sx={{ mb: 2, lineHeight: 1.6 }}
         >
           {t('premium.description', 'Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.')}
         </Typography>
@@ -346,7 +377,19 @@ function PremiumFeaturesCard() {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                mb: 1.5
+                mb: 1.5,
+                p: 1.5,
+                borderRadius: 2,
+                backgroundColor: isDarkMode
+                  ? varAlpha(theme.palette.background.defaultChannel, 0.3)
+                  : varAlpha(theme.palette.grey['50Channel'], 0.6),
+                border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.05) : varAlpha(theme.palette.grey['500Channel'], 0.03)}`,
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: isDarkMode
+                    ? varAlpha(theme.palette.background.defaultChannel, 0.5)
+                    : varAlpha(theme.palette.grey['100Channel'], 0.6),
+                }
               }}
             >
               <Iconify
@@ -354,15 +397,14 @@ function PremiumFeaturesCard() {
                 width={20}
                 height={20}
                 sx={{
-                  color: '#ffc107',
+                  color: theme.palette.primary.main,
                   mr: 1.5,
-                  filter: `drop-shadow(0 2px 3px ${alpha('#000', 0.2)})`,
                 }}
               />
               <Typography
                 variant="body2"
-                color="#ffffff"
-                sx={{ textShadow: `0 1px 2px ${alpha('#000', 0.2)}` }}
+                color="text.primary"
+                sx={{ fontWeight: 500 }}
               >
                 {feature.text}
               </Typography>
@@ -376,128 +418,22 @@ function PremiumFeaturesCard() {
           endIcon={<Iconify icon="mdi:arrow-right" />}
           fullWidth
           sx={{
-            bgcolor: '#f9a825',
-            color: '#212121',
-            fontWeight: 'bold',
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            fontWeight: 600,
+            textTransform: 'none',
+            py: 1.5,
+            borderRadius: 2,
             '&:hover': {
-              bgcolor: '#f57f17',
+              bgcolor: theme.palette.primary.dark,
             },
-            boxShadow: `0 4px 8px ${alpha('#000', 0.25)}`,
-            py: 1,
+            boxShadow: isDarkMode
+              ? `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`
+              : `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
           }}
         >
           {t('premium.upgradeButton', 'Upgrade to Pro')}
         </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Coming Soon Features Card Component
-function ComingSoonCard() {
-  const { t } = useTranslation();
-  const theme = useTheme();
-
-  const features = [
-    {
-      icon: 'mdi:content-paste',
-      title: t('comingSoon.features.templates.title', 'Built-in Templates'),
-      description: t('comingSoon.features.templates.description', 'Create articles from pre-designed templates for various content types'),
-      eta: t('comingSoon.eta.soon', 'Coming soon')
-    },
-    {
-      icon: 'mdi:file-multiple-outline',
-      title: t('comingSoon.features.bulk.title', 'Bulk Generation'),
-      description: t('comingSoon.features.bulk.description', 'Generate multiple articles in a single batch to save time'),
-      eta: t('comingSoon.eta.soon', 'Coming soon')
-    },
-  ];
-
-  return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 2,
-        boxShadow: theme.shadows[3],
-        background: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.divider}`,
-      }}
-    >
-      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Iconify
-            icon="mdi:rocket-launch"
-            width={28}
-            height={28}
-            sx={{
-              color: theme.palette.info.main,
-              mr: 1.5
-            }}
-          />
-          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            {t('comingSoon.title', 'Coming Soon')}
-          </Typography>
-        </Box>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          {t('comingSoon.description', 'We\'re constantly improving our platform. Here\'s what\'s coming next:')}
-        </Typography>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {features.map((feature, index) => (
-            <Box
-              key={index}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                border: `1px solid ${theme.palette.divider}`,
-                background: alpha(theme.palette.background.default, 0.5),
-                transition: 'all 0.2s',
-                '&:hover': {
-                  boxShadow: theme.shadows[2],
-                  transform: 'translateY(-2px)',
-                  borderColor: theme.palette.primary.light,
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: 1,
-                    background: alpha(theme.palette.primary.main, 0.1),
-                    color: theme.palette.primary.main,
-                    mr: 1.5,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Iconify icon={feature.icon} width={20} height={20} />
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                      {feature.title}
-                    </Typography>
-                    <Chip
-                      label={feature.eta}
-                      size="small"
-                      color="info"
-                      variant="outlined"
-                      sx={{ height: 24, fontSize: '0.7rem' }}
-                    />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          ))}
-        </Box>
       </CardContent>
     </Card>
   );
@@ -558,7 +494,16 @@ export function OverviewAnalyticsView() {
   }, [storesData]);
 
   return (
-    <DashboardContent maxWidth="xl">
+    <DashboardContent
+      maxWidth="xl"
+      sx={{
+        backgroundColor: isDarkMode
+          ? varAlpha(theme.palette.background.defaultChannel, 0.4)
+          : varAlpha(theme.palette.grey['50Channel'], 0.3),
+        minHeight: '100vh',
+        borderRadius: 0,
+      }}
+    >
       <Typography
         variant="h4"
         sx={{
@@ -588,7 +533,7 @@ export function OverviewAnalyticsView() {
         {t('analytics.welcome', 'Hi, Welcome back xBlogger')}<span className="emoji">👋</span>
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         {isLoadingSubscription ? (
           // Show loading spinner in the center while data is being fetched
           <Grid xs={12} sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
@@ -662,6 +607,19 @@ export function OverviewAnalyticsView() {
           </>
         )}
 
+        {/* Section Divider */}
+        <Grid xs={12} sx={{ my: 2 }}>
+          <Box
+            sx={{
+              height: 1,
+              background: isDarkMode
+                ? `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.2)}, transparent)`
+                : `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.15)}, transparent)`,
+              mx: 2,
+            }}
+          />
+        </Grid>
+
         {/* Supercharge Your Content Creation and Coming Soon in the same row */}
         <Grid xs={12} md={6} lg={6}>
           <GenerateContentCard />
@@ -669,6 +627,19 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={6}>
           <PremiumFeaturesCard />
+        </Grid>
+
+        {/* Section Divider */}
+        <Grid xs={12} sx={{ my: 3 }}>
+          <Box
+            sx={{
+              height: 1,
+              background: isDarkMode
+                ? `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.2)}, transparent)`
+                : `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.15)}, transparent)`,
+              mx: 2,
+            }}
+          />
         </Grid>
 
         {/* Detailed Analytics Section - Moved to bottom as supplementary information */}
@@ -679,10 +650,10 @@ export function OverviewAnalyticsView() {
             emptyText={t('analytics.noWebsiteIntegrations', 'No website integrations yet. Connect your first website to see platform distribution.')}
             chart={{
               colors: [
-                theme.palette.mode === 'dark' ? theme.palette.info.main : '#0073aa', // WordPress blue
-                theme.palette.mode === 'dark' ? theme.palette.success.main : '#96bf48', // Shopify green
-                theme.palette.mode === 'dark' ? theme.palette.warning.main : '#faad4d', // Wix orange
-                theme.palette.mode === 'dark' ? theme.palette.grey[500] : '#7d7d7d', // Other platforms gray
+                theme.palette.primary.main,
+                theme.palette.secondary.main,
+                theme.palette.info.main,
+                theme.palette.warning.main,
               ],
               series: [
                 {

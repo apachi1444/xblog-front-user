@@ -17,7 +17,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
 import { DashboardContent } from "src/layouts/dashboard";
-import { setCurrentStore } from "src/services/slices/stores/storeSlice";
+import { setCurrentStore, clearCurrentStore } from "src/services/slices/stores/storeSlice";
 import {
   useGetStoresQuery,
   useDeleteStoreMutation,
@@ -79,15 +79,8 @@ export function StoresView() {
   // Get stores directly from the query result
   const stores = useMemo(() => data?.stores || [], [data]);
 
-  // This component no longer needs to set the current store
-  // as it's now handled in the dashboard layout
-  // We'll keep this as a fallback just in case
-  useEffect(() => {
-    if (stores.length > 0 && !currentStore) {
-      console.log('Setting current store in StoresView (fallback):', stores[0]);
-      dispatch(setCurrentStore(stores[0]));
-    }
-  }, [stores, currentStore, dispatch]);
+  // Store selection is now handled in the dashboard layout
+  // No need for fallback logic here
 
   const dataFiltered = useMemo(() =>
     applyFilter({
@@ -106,12 +99,17 @@ export function StoresView() {
   const performDelete = useCallback(async (id: number) => {
     try {
       await deleteStore(id).unwrap();
-      toast.success(t('store.deleteSuccess'));
-    } catch (error) {
-      toast.error(t('store.deleteError'));
-    }
 
-  }, [deleteStore, t]);
+      // If we deleted the current store, clear it from Redux and localStorage
+      if (id === currentStore?.id) {
+        dispatch(clearCurrentStore());
+      }
+
+      toast.success(t('store.deleteSuccess', 'Store deleted successfully'));
+    } catch (error) {
+      toast.error(t('store.deleteError', 'Failed to delete store'));
+    }
+  }, [deleteStore, t, currentStore?.id, dispatch]);
 
   const handleDelete = useCallback(
     async (id: number) => {

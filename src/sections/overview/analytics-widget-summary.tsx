@@ -7,9 +7,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { fShortenNumber } from 'src/utils/format-number';
 
-import { varAlpha, bgGradient } from 'src/theme/styles';
+import { varAlpha } from 'src/theme/styles';
 
-import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
 
@@ -37,36 +36,47 @@ export function AnalyticsWidgetSummary({
   return (
     <Card
       sx={{
-        ...bgGradient({
-          color: isDarkMode
-            ? `135deg, ${varAlpha(theme.palette[color].darkerChannel, 0.8)}, ${varAlpha(theme.palette[color].darkChannel, 0.8)}`
-            : `135deg, ${varAlpha(theme.palette[color].lighterChannel, 0.48)}, ${varAlpha(theme.palette[color].lightChannel, 0.48)}`,
-        }),
         p: 3,
-        boxShadow: isDarkMode ? `0 8px 16px 0 ${varAlpha(theme.palette[color].darkChannel, 0.24)}` : 'none',
         position: 'relative',
-        color: isDarkMode ? `${color}.lighter` : `${color}.darker`,
-        backgroundColor: isDarkMode ? 'transparent' : 'common.white',
         transition: 'all 0.3s ease-in-out',
+        borderRadius: 2,
+        border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.2) : varAlpha(theme.palette.grey['500Channel'], 0.15)}`,
+        backgroundColor: isDarkMode
+          ? varAlpha(theme.palette.background.paperChannel, 0.8)
+          : theme.palette.common.white,
+        backgroundImage: isDarkMode
+          ? `linear-gradient(135deg, ${varAlpha(theme.palette[color].mainChannel, 0.05)} 0%, ${varAlpha(theme.palette.background.paperChannel, 0.95)} 100%)`
+          : `linear-gradient(135deg, ${varAlpha(theme.palette[color].mainChannel, 0.02)} 0%, ${varAlpha(theme.palette.common.whiteChannel, 1)} 100%)`,
+        boxShadow: isDarkMode
+          ? `0 6px 16px ${varAlpha(theme.palette.common.blackChannel, 0.3)}`
+          : `0 3px 12px ${varAlpha(theme.palette.grey['500Channel'], 0.12)}`,
         '&:hover': {
-          transform: 'translateY(-4px)',
+          transform: 'translateY(-2px)',
           boxShadow: isDarkMode
-            ? `0 12px 20px 0 ${varAlpha(theme.palette[color].darkChannel, 0.3)}`
-            : theme.customShadows.z8,
+            ? `0 10px 28px ${varAlpha(theme.palette.common.blackChannel, 0.5)}`
+            : `0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.18)}`,
         },
         ...sx,
       }}
       {...other}
     >
+      {/* Icon with refined styling */}
       <Box
         sx={{
-          width: 48,
-          height: 48,
+          width: 56,
+          height: 56,
           mb: 3,
-          color: isDarkMode ? `${color}.light` : `${color}.main`,
-          transition: 'transform 0.3s ease-in-out',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 2,
+          backgroundColor: isDarkMode
+            ? varAlpha(theme.palette[color].mainChannel, 0.15)
+            : varAlpha(theme.palette[color].mainChannel, 0.08),
+          color: theme.palette[color].main,
+          transition: 'all 0.3s ease-in-out',
           '& svg': {
-            filter: isDarkMode ? 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.2))' : 'none'
+            filter: isDarkMode ? `drop-shadow(0 2px 4px ${varAlpha(theme.palette[color].mainChannel, 0.3)})` : 'none'
           }
         }}
       >
@@ -85,51 +95,51 @@ export function AnalyticsWidgetSummary({
           <Box sx={{
             mb: 1,
             typography: 'subtitle2',
-            color: isDarkMode ? 'grey.100' : 'inherit'
+            color: 'text.secondary',
+            fontWeight: 500,
           }}>
             {title}
           </Box>
           <Box sx={{
             typography: 'h4',
-            color: isDarkMode ? 'common.white' : 'inherit',
-            textShadow: isDarkMode ? '0 0 8px rgba(255, 255, 255, 0.15)' : 'none'
+            color: 'text.primary',
+            fontWeight: 700,
           }}>
             {fShortenNumber(total)}
           </Box>
         </Box>
 
+        {/* Refined percentage indicator */}
         <Box
           sx={{
-            typography: 'subtitle2',
-            color: percent >= 0
-              ? (isDarkMode ? 'success.light' : 'success.main')
-              : (isDarkMode ? 'error.light' : 'error.main'),
+            typography: 'caption',
+            fontWeight: 600,
+            color: 'text.secondary',
             display: 'flex',
             alignItems: 'center',
-            padding: '4px 8px',
-            borderRadius: '12px',
-            backgroundColor: percent >= 0
-              ? (isDarkMode ? varAlpha(theme.palette.success.mainChannel, 0.16) : varAlpha(theme.palette.success.mainChannel, 0.08))
-              : (isDarkMode ? varAlpha(theme.palette.error.mainChannel, 0.16) : varAlpha(theme.palette.error.mainChannel, 0.08)),
+            padding: '6px 12px',
+            borderRadius: 2,
+            backgroundColor: isDarkMode
+              ? varAlpha(theme.palette.background.defaultChannel, 0.6)
+              : varAlpha(theme.palette.grey['100Channel'], 0.8),
+            border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.1) : varAlpha(theme.palette.grey['500Channel'], 0.05)}`,
           }}
         >
-          {percent > 0 && '+'}
           {percent}%
         </Box>
       </Box>
 
-      <SvgColor
-        src="/assets/background/shape-square.svg"
+      {/* Subtle background decoration */}
+      <Box
         sx={{
-          top: 0,
-          left: -20,
-          width: 240,
-          zIndex: -1,
-          height: 240,
-          opacity: isDarkMode ? 0.16 : 0.24,
           position: 'absolute',
-          color: `${color}.main`,
-          filter: isDarkMode ? 'blur(2px)' : 'none',
+          top: -10,
+          right: -10,
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          background: `linear-gradient(135deg, ${varAlpha(theme.palette[color].mainChannel, 0.03)}, transparent)`,
+          zIndex: -1,
         }}
       />
     </Card>

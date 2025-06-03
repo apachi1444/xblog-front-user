@@ -24,19 +24,19 @@ export const platforms = [
   {
     id: 'wordpress',
     name: 'WordPress',
-    icon: '/assets/icons/platforms/wordpress.svg',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/WordPress_blue_logo.svg/512px-WordPress_blue_logo.svg.png',
     description: 'Connect your WordPress site',
   },
   {
     id: 'shopify',
     name: 'Shopify',
-    icon: '/assets/icons/platforms/shopify.svg',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/512px-Shopify_logo_2018.svg.png',
     description: 'Connect your Shopify store',
   },
   {
     id: 'wix',
     name: 'Wix',
-    icon: '/assets/icons/platforms/wix.svg',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Wix.com_website_logo.svg/512px-Wix.com_website_logo.svg.png',
     description: 'Connect your Wix store',
   },
 ];

@@ -14,8 +14,8 @@ import { useTheme } from '@mui/material/styles';
 import { useWelcomePopup } from 'src/hooks/useWelcomePopup';
 
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
+import { setCurrentStore } from 'src/services/slices/stores/storeSlice';
 import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
-import { getStores, setCurrentStore } from 'src/services/slices/stores/storeSlice';
 import { setSubscriptionDetails} from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
@@ -93,13 +93,25 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
 
   useEffect(() => {
     if (storesData?.stores) {
-      dispatch(getStores(storesData.stores));
-
-      if (storesData.stores.length > 0 &&
-          (!currentStore || currentStore.id !== storesData.stores[0].id)) {
-        setTimeout(() => {
+      // Only auto-select the first store if:
+      // 1. There are stores available
+      // 2. No store is currently selected
+      // 3. The stored store from localStorage doesn't exist in the current stores list
+      if (storesData.stores.length > 0 && !currentStore) {
+        dispatch(setCurrentStore(storesData.stores[0]));
+      } else if (currentStore && storesData.stores.length > 0) {
+        // Validate that the current store still exists in the stores list
+        const storeExists = storesData.stores.some(store => store.id === currentStore.id);
+        if (!storeExists) {
+          // If the current store no longer exists, select the first available store
           dispatch(setCurrentStore(storesData.stores[0]));
-        }, 0);
+        } else {
+          // Update the current store data with fresh data from the API
+          const updatedStore = storesData.stores.find(store => store.id === currentStore.id);
+          if (updatedStore && JSON.stringify(updatedStore) !== JSON.stringify(currentStore)) {
+            dispatch(setCurrentStore(updatedStore));
+          }
+        }
       }
     }
 

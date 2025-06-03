@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 
+import { Box } from '@mui/material';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -21,6 +22,26 @@ import DialogContentText from '@mui/material/DialogContentText';
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+// Platform images mapping
+const PLATFORM_IMAGES = {
+  wordpress: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/WordPress_blue_logo.svg/512px-WordPress_blue_logo.svg.png',
+  shopify: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/512px-Shopify_logo_2018.svg.png',
+  wix: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Wix.com_website_logo.svg/512px-Wix.com_website_logo.svg.png',
+  default: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/512px-HTML5_logo_and_wordmark.svg.png',
+};
+
+
+// Helper function to get platform image
+const getPlatformImage = (platform: string): string => {
+  const platformKey = platform?.toLowerCase() as keyof typeof PLATFORM_IMAGES;
+  return PLATFORM_IMAGES[platformKey] || PLATFORM_IMAGES.default;
+};
+
+// Helper function to capitalize platform name
+const getPlatformDisplayName = (platform: string): string => {
+  if (!platform) return 'Unknown';
+  return platform.charAt(0).toUpperCase() + platform.slice(1);
+};
 
 // ----------------------------------------------------------------------
 
@@ -104,7 +125,24 @@ export function StoreTableRow({
           </Typography>
         </TableCell>
 
-        <TableCell>{platform}</TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              component="img"
+              src={getPlatformImage(platform)}
+              alt={getPlatformDisplayName(platform)}
+              sx={{
+                width: 24,
+                height: 24,
+                objectFit: 'contain',
+                borderRadius: 0.5,
+              }}
+            />
+            <Typography variant="body2" noWrap>
+              {getPlatformDisplayName(platform)}
+            </Typography>
+          </Box>
+        </TableCell>
 
         <TableCell>{business}</TableCell>
 
