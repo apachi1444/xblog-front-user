@@ -16,12 +16,14 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetDraftsQuery } from 'src/services/apis/draftsApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 import { Iconify } from 'src/components/iconify';
 import { LoadingSpinner } from 'src/components/loading';
 
 import { PostItem } from '../post-item';
+import { DraftItem } from '../draft-item';
 
 // ----------------------------------------------------------------------
 
@@ -39,10 +41,39 @@ export function BlogView() {
     isLoading: isLoadingArticles,
   } = useGetArticlesQuery({ store_id: storeId });
 
+  const {
+    data: draftsData,
+    isLoading: isLoadingDrafts,
+  } = useGetDraftsQuery({ store_id: storeId });
+
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
+  const drafts = useMemo(() => draftsData?.drafts || [], [draftsData]);
+
+  // Combine articles and drafts
+  const allPosts = useMemo(() => {
+    const combinedPosts = [
+      ...articles,
+      ...drafts.map(draft => ({
+        id: draft.id,
+        title: draft.title || 'Untitled Draft',
+        description: draft.content?.step1?.contentDescription || '',
+        status: 'draft',
+        createdAt: draft.created_at,
+        updatedAt: draft.updated_at,
+        keywords: {
+          primary: draft.content?.step1?.primaryKeyword || '',
+          secondary: draft.content?.step1?.secondaryKeywords || []
+        },
+        // Add draft-specific properties
+        isDraft: true,
+        draftContent: draft.content,
+      }))
+    ];
+    return combinedPosts;
+  }, [articles, drafts]);
 
   useEffect(() => {
-    let sorted = [...articles];
+    let sorted = [...allPosts];
 
     // Apply search filter
     if (searchQuery) {
@@ -70,7 +101,7 @@ export function BlogView() {
     }
 
     setFilteredPosts(sorted);
-  }, [articles, sortBy, searchQuery, currentTab]);
+  }, [allPosts, sortBy, searchQuery, currentTab]);
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort);
@@ -93,7 +124,8 @@ export function BlogView() {
   };
 
   const notFound = !filteredPosts.length;
-  const isDataEmpty = articles.length === 0;
+  const isDataEmpty = allPosts.length === 0;
+  const isLoading = isLoadingArticles || isLoadingDrafts;
 
   // Pagination
   const postsPerPage = 8;
@@ -120,7 +152,7 @@ export function BlogView() {
         </Button>
       </Box>
 
-      {isLoadingArticles ? (
+      {isLoading ? (
         <LoadingSpinner
           message="Loading your blogs..."
           fullHeight
@@ -189,7 +221,7 @@ export function BlogView() {
             </Tabs>
           </Box>
 
-          {!isLoadingArticles && (notFound || isDataEmpty)  && (
+          {!isLoading && (notFound || isDataEmpty)  && (
             <Box textAlign="center" py={5}>
               <Typography variant="h6">No articles found</Typography>
               <Typography variant="body2" color="text.secondary">
@@ -205,7 +237,19 @@ export function BlogView() {
 
               return (
                 <Grid key={post.id} xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
-                  <PostItem post={post} latestPost={latestPost} latestPostLarge={latestPostLarge} />
+                  {post.isDraft ? (
+                    <DraftItem
+                      draft={post}
+                      latestPost={latestPost}
+                      latestPostLarge={latestPostLarge}
+                    />
+                  ) : (
+                    <PostItem
+                      post={post}
+                      latestPost={latestPost}
+                      latestPostLarge={latestPostLarge}
+                    />
+                  )}
                 </Grid>
               );
             })}

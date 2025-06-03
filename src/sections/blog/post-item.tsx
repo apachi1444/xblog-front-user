@@ -63,11 +63,8 @@ const PLATFORM_ICONS = {
   default: { icon: 'mdi:web', color: '#6e7681', name: 'Website' }
 };
 
-// Function to determine which platform icons to show (in a real app, this would use actual data)
 const getPlatformIcons = (post: Article) => {
-  // This is a placeholder - in a real app, you would get this from the post data
-  // For now, we'll randomly assign platforms based on the post ID to simulate different platforms
-  const postIdSum = post.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const postIdSum = post.id.length
 
   if (post.status !== 'published') return [];
 
@@ -78,7 +75,6 @@ const getPlatformIcons = (post: Article) => {
   if (postIdSum % 5 === 0) platforms.push('ghost');
   if (postIdSum % 7 === 0) platforms.push('webflow');
 
-  // If no platforms were selected, use the default
   return platforms.length ? platforms : ['default'];
 };
 
@@ -131,21 +127,6 @@ export function PostItem({
 
   const statusConfig = getStatusConfig();
 
-  const renderAvatar = (
-    <Avatar
-      alt={post.author?.name || 'Unknown'}
-      src={post.author?.avatar || '/assets/images/avatars/avatar_default.jpg'}
-      sx={{
-        left: 24,
-        zIndex: 9,
-        bottom: -24,
-        position: 'absolute',
-        ...((latestPostLarge || latestPost) && {
-          top: 24,
-        }),
-      }}
-    />
-  );
 
   const renderTitle = (
     <Link
