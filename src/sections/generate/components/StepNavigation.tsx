@@ -35,15 +35,10 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
           'step2.toneOfVoice',
           'step2.pointOfView',
           'step2.aiContentCleaning',
-          'step2.imageSettingsQuality',
-          'step2.imageSettingsPlacement',
-          'step2.imageSettingsStyle',
-          'step2.imageSettingsCount',
           'step2.internalLinking',
           'step2.externalLinking',
+          'step2.includeImages',
           'step2.includeVideos',
-          'step2.numberOfVideos',
-          'step3.sections'
         ];
       case 2:
         return [];
@@ -61,6 +56,7 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
 
     // Trigger validation for the current step's fields
     const isStepValid = await methods.trigger(currentStepFields as any);
+
 
     if (isStepValid) {
       const values = methods.getValues();
@@ -92,7 +88,6 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
       }
 
       if (shouldProceed) {
-        // Move to the next step
         onNextStep()
       }
     } else {

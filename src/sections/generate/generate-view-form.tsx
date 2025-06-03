@@ -1,9 +1,8 @@
-import { Box } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
 
-import { Button, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
@@ -213,16 +212,7 @@ export function GenerateViewForm({
             setGenerationState((s) => ({ ...s, showRegenerateDialog: false }));
           }}
           title={t('regenerate.confirmTitle', 'Confirm Regeneration')}
-          content={
-            <Box>
-              <Typography variant="body1" paragraph>
-                {t('regenerate.confirmMessage', 'Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.')}
-              </Typography>
-              <Typography variant="body2" color="warning.main">
-                {t('regenerate.availableCredits', 'You have {{count}} regeneration credits available.', { count: regenerationsAvailable })}
-              </Typography>
-            </Box>
-          }
+          count={regenerationsAvailable}
           action={
             <Button
               variant="contained"

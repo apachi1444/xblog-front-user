@@ -72,16 +72,6 @@ export const subscriptionApi = api.injectEndpoints({
       },
     }),
 
-
-    // Download invoice PDF
-    downloadInvoicePdf: builder.mutation<string, { payment_id: string }>({
-      query: ({ payment_id }) => ({
-        url: `/api/v1/${payment_id}/download`,
-        method: 'GET',
-        responseType: 'text', // We expect HTML response
-      }),
-    }),
-
     // Get subscription details
     getSubscriptionDetails: builder.query<SubscriptionDetails, void>({
       query: () => ({
@@ -129,7 +119,6 @@ export const subscriptionApi = api.injectEndpoints({
 export const {
   useGetUserInvoicesQuery,
   useLazyGetUserInvoicesQuery,
-  useDownloadInvoicePdfMutation,
   useGetSubscriptionDetailsQuery,
   useGetSubscriptionPlansQuery,
   useLazyGetSubscriptionPlansQuery,
