@@ -13,6 +13,13 @@ export const step1Schema = z.object({
   urlSlug: z.string().optional(),
 });
 
+// Link management schemas
+export const linkSchema = z.object({
+  id: z.string(),
+  url: z.string().url('Please enter a valid URL'),
+  anchorText: z.string().min(1, 'Anchor text is required'),
+});
+
 // Step 2: Article Settings Schema
 export const step2Schema = z.object({
   articleType: z.string().min(1, 'Article type is required'),
@@ -26,6 +33,10 @@ export const step2Schema = z.object({
   // Linking settings
   internalLinking: z.string().min(1, 'Internal linking is required'),
   externalLinking: z.string().min(1, 'External linking is required'),
+  // Link management
+  websiteUrl: z.string().url('Please enter a valid website URL').optional(),
+  internalLinks: z.array(linkSchema).default([]),
+  externalLinks: z.array(linkSchema).default([]),
   // Legacy fields for backward compatibility (optional)
   imageSettingsQuality: z.string().optional(),
   imageSettingsPlacement: z.string().optional(),
@@ -92,6 +103,9 @@ export const generateArticleSchema = z.object({
   step2: step2Schema,
   step3: step3Schema,
 });
+
+// Export types for link management
+export type Link = z.infer<typeof linkSchema>;
 
 // Export types for section content
 export type SectionLink = z.infer<typeof sectionLinkSchema>;

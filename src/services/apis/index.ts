@@ -549,6 +549,81 @@ const setupMocks = () => {
       }
     });
 
+    // Mock generate-internal-links endpoint
+    mock.onPost('/generate-internal-links').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { websiteUrl } = requestData;
+
+        if (!websiteUrl) {
+          return [400, { success: false, message: 'Website URL is required' }];
+        }
+
+        // Generate mock internal links based on the website URL
+        const internalLinks = [
+          {
+            link_text: 'Home',
+            link_url: websiteUrl
+          },
+          {
+            link_text: 'About Us',
+            link_url: `${websiteUrl}/about`
+          },
+          {
+            link_text: 'Contact Us',
+            link_url: `${websiteUrl}/contact`
+          }
+        ];
+
+        return [
+          200,
+          {
+            internal_links: internalLinks,
+            success: true,
+            message: null
+          }
+        ];
+      } catch (error) {
+        return [500, { success: false, message: 'Internal server error in internal links generation' }];
+      }
+    });
+
+    // Mock generate-external-links endpoint
+
+    mock.onPost('/generate-external-links').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { primary_keyword, secondary_keywords, content_description, title } = requestData;
+
+        // Generate mock external links based on the primary keyword and content description
+        const externalLinks = [
+          {
+            link_text: 'Wikipedia',
+            link_url: `https://en.wikipedia.org/wiki/${primary_keyword}`
+          },
+          {
+            link_text: 'Google',
+            link_url: `https://www.google.com/search?q=${primary_keyword}`
+          },
+          {
+            link_text: 'Moz',
+            link_url: `https://moz.com/blog/${primary_keyword}`
+          }
+        ];
+        return [
+          200,
+          {
+            external_links: externalLinks,
+            success: true,
+            message: null
+          }
+        ];
+      }
+      catch (error) {
+        return [500, { success: false, message: 'Internal server error in external links generation' }];
+      }
+    });
+
     // Mock generate-table-of-contents endpoint
     mock.onPost('/generate-table-of-contents').reply((config) => {
       try {
@@ -648,97 +723,11 @@ const setupMocks = () => {
       }
     });
 
-    // Mock generate-internal-links endpoint
-    mock.onPost('/generate-internal-links').reply((config) => {
-      try {
-        const requestData = JSON.parse(config.data);
-        const { title, keyword } = requestData;
-
-        // Generate mock sections with internal links
-        const sections = [
-          {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            content: `This is an introduction to ${keyword}. It's important to understand [the basics of ${keyword}](#section-2) before diving deeper.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-2',
-            title: `What is ${keyword}?`,
-            content: `${keyword} is a methodology that helps businesses improve their online presence. Learn more about [why ${keyword} matters](#section-3) for your business.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-3',
-            title: `Why ${keyword} Matters`,
-            content: `${keyword} is crucial because it drives traffic and conversions. To implement it effectively, check out our [implementation guide](#section-5).`,
-            status: 'completed'
-          }
-        ];
-
-        return [
-          200,
-          {
-            sections,
-            success: true,
-            message: null,
-            score: 90
-          }
-        ];
-      } catch (error) {
-        console.error('Error in internal links generation mock:', error);
-        return [500, { success: false, message: 'Internal server error in internal links generation' }];
-      }
-    });
-
-    // Mock generate-external-links endpoint
-    mock.onPost('/generate-external-links').reply((config) => {
-      try {
-        const requestData = JSON.parse(config.data);
-        const { title, keyword } = requestData;
-
-        // Generate mock sections with external links
-        const sections = [
-          {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            content: `This is an introduction to ${keyword}. According to [Google](https://www.google.com), ${keyword} is one of the most searched topics.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-2',
-            title: `What is ${keyword}?`,
-            content: `${keyword} is defined by [Wikipedia](https://www.wikipedia.org) as a methodology that helps businesses improve their online presence.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-3',
-            title: `Why ${keyword} Matters`,
-            content: `${keyword} is crucial because it drives traffic and conversions. [Moz](https://moz.com) has published extensive research on this topic.`,
-            status: 'completed'
-          }
-        ];
-
-        return [
-          200,
-          {
-            sections,
-            success: true,
-            message: null,
-            score: 88
-          }
-        ];
-      } catch (error) {
-        console.error('Error in external links generation mock:', error);
-        return [500, { success: false, message: 'Internal server error in external links generation' }];
-      }
-    });
-
     // Mock generate-images endpoint
     mock.onPost('/generate-images').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { title, keyword } = requestData;
+        const { keyword } = requestData;
 
         // Generate mock sections with image suggestions
         const sections = [

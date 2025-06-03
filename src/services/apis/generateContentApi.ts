@@ -107,6 +107,37 @@ export interface GenerateSectionsResponse extends BaseGenerationResponse {
   score?: number;
 }
 
+// Internal Links API Types
+export interface InternalLinksRequest {
+  website_url: string;
+}
+
+export interface InternalLinksResponse {
+  success: boolean;
+  message: string;
+  internal_links: Array<{
+    link_text: string;
+    link_url: string;
+  }>;
+}
+
+// External Links API Types
+export interface ExternalLinksRequest {
+  primary_keyword: string;
+  secondary_keywords: string[];
+  content_description: string;
+  title: string;
+}
+
+export interface ExternalLinksResponse {
+  success: boolean;
+  message: string;
+  external_links: Array<{
+    link_text: string;
+    link_url: string;
+  }>;
+}
+
 /**
  * RTK Query endpoints for content generation
  */
@@ -170,7 +201,7 @@ export const generateContentApi = api.injectEndpoints({
     /**
      * Generate internal links for article sections
      */
-    generateInternalLinks: builder.mutation<GenerateSectionsResponse, GenerateSectionsRequest>({
+    generateInternalLinks: builder.mutation<InternalLinksResponse, InternalLinksRequest>({
       query: (body) => ({
         url: '/generate-internal-links',
         method: 'POST',
@@ -181,7 +212,7 @@ export const generateContentApi = api.injectEndpoints({
     /**
      * Generate external links for article sections
      */
-    generateExternalLinks: builder.mutation<GenerateSectionsResponse, GenerateSectionsRequest>({
+    generateExternalLinks: builder.mutation<ExternalLinksResponse, ExternalLinksRequest>({
       query: (body) => ({
         url: '/generate-external-links',
         method: 'POST',

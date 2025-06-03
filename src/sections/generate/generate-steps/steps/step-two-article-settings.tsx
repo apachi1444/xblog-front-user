@@ -5,12 +5,13 @@ import { useWatch, Controller, useFormContext } from 'react-hook-form';
 import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+import { LinkManagementSection } from 'src/components/generate-article/LinkManagementSection';
 import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
+import { useLinkGeneration } from '../../hooks/useLinkGeneration';
 import { useArticleSettingsForm } from '../../hooks/useArticleSettingsForm';
 import { FormDropdown } from '../../../../components/generate-article/FormDropdown';
 import { FormContainer } from '../../../../components/generate-article/FormContainer';
-import { FormAutocompleteDropdown } from '../../../../components/generate-article/FormAutocompleteDropdown';
 
 import type { ArticleSection, GenerateArticleFormData } from '../../schemas';
 
@@ -25,6 +26,12 @@ interface Step2ArticleSettingsProps {
 export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest, setActiveStep }: Step2ArticleSettingsProps) {
   const { t } = useTranslation();
   const { options } = useArticleSettingsForm();
+  const {
+    isGeneratingInternal,
+    isGeneratingExternal,
+    generateInternalLinks,
+    generateExternalLinks,
+  } = useLinkGeneration();
 
   const {
     register,
@@ -62,8 +69,6 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     toneOptions,
     povOptions,
     aiCleaningOptions,
-    linkingOptions,
-    externalLinkingOptions
   } = options;
 
 
@@ -259,18 +264,21 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
               </Grid>
             </Grid>
           </Box>
-
+          {
+            /*
           <Divider sx={{ my: 1, width: '100%' }} />
 
-          {/* Linking Settings Section - Grid of 2 */}
-          <Box sx={{ width: '100%', mb: 4 }}>
+          
+            
+            <Box sx={{ width: '100%', mb: 4 }}>
             <Typography
-              variant="subtitle1"
-              sx={{
-                mb: 2,
-                fontWeight: 600,
-                color: 'text.primary',
-                display: 'flex',
+            variant="subtitle1"
+            sx={{
+              mb: 2,
+              fontWeight: 600,
+              color: 'text.primary',
+              display: 'flex',
+              
                 alignItems: 'center',
                 gap: 1,
                 width: '100%'
@@ -311,6 +319,52 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                     setValue("step2.externalLinking", newValue, { shouldValidate: true });
                   }}
                   freeSolo
+                />
+              </Grid>
+            </Grid>
+            </Box>
+          */}
+
+          <Divider sx={{ my: 1, width: '100%' }} />
+
+          {/* Advanced Link Management Section */}
+          <Box sx={{ width: '100%', mb: 4 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 3,
+                fontWeight: 600,
+                color: 'text.primary',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%'
+              }}
+            >
+              <Iconify icon="mdi:link-variant" width={20} height={20} />
+              {t('links.management.title', "Advanced Link Management")}
+            </Typography>
+
+            {/* Link Management Sections */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} lg={6}>
+                <LinkManagementSection
+                  type="internal"
+                  title={t('links.internal.title', "Internal Links")}
+                  icon="mdi:link"
+                  onGenerateLinks={generateInternalLinks}
+                  isGenerating={isGeneratingInternal}
+                  showWebsiteUrlInput
+                />
+              </Grid>
+
+              <Grid item xs={12} lg={6}>
+                <LinkManagementSection
+                  type="external"
+                  title={t('links.external.title', "External Links")}
+                  icon="mdi:open-in-new"
+                  onGenerateLinks={generateExternalLinks}
+                  isGenerating={isGeneratingExternal}
                 />
               </Grid>
             </Grid>

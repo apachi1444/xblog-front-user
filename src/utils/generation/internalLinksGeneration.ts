@@ -1,4 +1,4 @@
-import type { GeneratedSection, GenerateSectionsRequest, GenerateSectionsResponse } from 'src/services/apis/generateContentApi';
+import type { InternalLinksRequest, InternalLinksResponse } from 'src/services/apis/generateContentApi';
 
 import { useGenerateInternalLinksMutation } from 'src/services/apis/generateContentApi';
 
@@ -11,29 +11,17 @@ export const useInternalLinksGeneration = () => {
   const [generateInternalLinks, { isLoading, isError, error }] = useGenerateInternalLinksMutation();
 
   /**
-   * Generate internal links for article sections
-   * @param title - The article title
-   * @param keyword - The main keyword for the article
-   * @param secondaryKeywords - Array of secondary keywords
-   * @param language - Optional language parameter
-   * @param contentType - Optional content type parameter
-   * @returns The generated sections with internal links or null if there was an error
+   * Generate internal links for article content
+   * @param websiteUrl - The website URL to generate internal links for
+   * @returns The generated internal links or null if there was an error
    */
   const generateArticleInternalLinks = async (
-    title: string,
-    keyword: string,
-    secondaryKeywords: string[] = [],
-    language: string = 'en-us',
-    contentType: string = 'how-to'
-  ): Promise<GeneratedSection[] | null> => {
+    websiteUrl: string
+  ): Promise<Array<{ link_text: string; link_url: string }> | null> => {
     try {
       // Prepare the request payload
-      const payload: GenerateSectionsRequest = {
-        title,
-        keyword,
-        secondaryKeywords,
-        language,
-        contentType
+      const payload: InternalLinksRequest = {
+        website_url: websiteUrl
       };
 
       // Call the API
@@ -45,8 +33,8 @@ export const useInternalLinksGeneration = () => {
         return null;
       }
 
-      // Return the sections with internal links
-      return response.sections;
+      // Return the internal links
+      return response.internal_links;
     } catch (err) {
       console.error('Error generating internal links:', err);
       return null;
@@ -64,13 +52,13 @@ export const useInternalLinksGeneration = () => {
 /**
  * Parse an internal links generation API response
  * @param response - The API response from the internal links generation endpoint
- * @returns The generated sections with internal links or null if unsuccessful
+ * @returns The generated internal links or null if unsuccessful
  */
-export const parseInternalLinksResponse = (response: GenerateSectionsResponse): GeneratedSection[] | null => {
+export const parseInternalLinksResponse = (response: InternalLinksResponse): Array<{ link_text: string; link_url: string }> | null => {
   if (!response.success) {
     console.error('Internal links generation failed:', response.message);
     return null;
   }
-  
-  return response.sections;
+
+  return response.internal_links;
 };

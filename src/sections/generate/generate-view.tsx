@@ -48,6 +48,10 @@ export function GeneratingView() {
         // Linking settings
         internalLinking: 'none',
         externalLinking: 'none',
+        // Link management
+        websiteUrl: '',
+        internalLinks: [],
+        externalLinks: [],
         // Legacy fields for backward compatibility
         imageSettingsQuality: 'high',
         imageSettingsPlacement: 'each-section',
