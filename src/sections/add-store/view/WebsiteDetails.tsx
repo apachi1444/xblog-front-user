@@ -74,10 +74,11 @@ export default function WebsiteDetails({
         return (
           <WordPressForm />
         );
+      case 'other':
       default:
         return (
           <Typography color="error" variant="body1" align="center">
-            {t('store.selectPlatformFirst')}
+            {t('store.selectPlatformFirst', 'Please select a platform first')}
           </Typography>
         );
     }
@@ -88,8 +89,8 @@ export default function WebsiteDetails({
 
   // Get platform display name
   const getPlatformDisplayName = () => {
-    if (!formData.platform) return '';
-    return t(`store.platforms.${formData.platform}`);
+    if (!formData.platform || formData.platform === 'other') return '';
+    return t(`store.platforms.${formData.platform}`, formData.platform);
   };
 
   // Make sure we're actually rendering content

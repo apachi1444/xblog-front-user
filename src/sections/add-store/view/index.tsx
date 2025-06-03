@@ -84,7 +84,7 @@ export default function AddStoreFlow() {
   const methods = useForm<StoreFormData>({
     resolver: zodResolver(storeFormSchema),
     defaultValues: {
-      platform: '',
+      platform: 'other',
       acceptTerms: false,
     },
     mode: 'onChange',
@@ -129,8 +129,9 @@ export default function AddStoreFlow() {
         case 'wix':
           await handleWixConnection(data);
           break;
+        case 'other':
         default:
-          throw new Error('Unsupported platform');
+          throw new Error('Please select a valid platform');
       }
       setTimeout(() => {
         setIntegrationSuccess(true);

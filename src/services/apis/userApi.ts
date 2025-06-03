@@ -58,6 +58,7 @@ export const userApi = api.injectEndpoints({
 
 // Export hooks
 export const {
+  useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
   useUpdateUserMutation,
 } = userApi;

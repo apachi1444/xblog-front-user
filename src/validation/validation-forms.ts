@@ -42,16 +42,6 @@ export const wixStoreSchema = baseStoreSchema.extend({
   consumerSecret: z.string().min(1, 'Consumer Secret is required'),
 });
 
-// Combined store schema with conditional validation
-export const storeSchema = z.discriminatedUnion('platform', [
-  z.object({ platform: z.literal('wordpress') }).merge(wordpressStoreSchema),
-  z.object({ platform: z.literal('shopify') }).merge(shopifyStoreSchema),
-  z.object({ platform: z.literal('wix') }).merge(wixStoreSchema),
-  z.object({ platform: z.literal('') }).merge(baseStoreSchema.partial()),
-]);
-
-export type StoreFormData = z.infer<typeof storeSchema>;
-
 // ==============================
 // Book Demo Schemas
 // ==============================

@@ -74,7 +74,7 @@ interface StoreFormData {
 export default function AddStoreModal({ open, onClose, onSuccess }: AddStoreModalProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState<StoreFormData>({
-    platform: '',
+    platform: 'other',
     name: '',
     domain: '',
     businessType: '',
@@ -162,7 +162,7 @@ export default function AddStoreModal({ open, onClose, onSuccess }: AddStoreModa
         
         // Reset form and close modal
         setFormData({
-          platform: '',
+          platform: 'other',
           name: '',
           domain: '',
           businessType: '',

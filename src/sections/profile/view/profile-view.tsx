@@ -1,86 +1,71 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Edit, User, Bell, Award, Shield, CreditCard, ChevronRight } from 'lucide-react';
+import { CreditCard, ExternalLink } from 'lucide-react';
 
 import {
   Box,
-  Tab,
-  Tabs,
   Card,
   Chip,
   Grid,
-  Table,
   Stack,
   alpha,
   Avatar,
   Button,
   useTheme,
-  TableRow,
   Container,
-  TextField,
-  TableBody,
-  TableCell,
-  TableHead,
   Typography,
-  IconButton,
+  CircularProgress,
 } from '@mui/material';
 
-import { useAuth } from 'src/hooks/useAuth';
-
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import {
-  useGetUserInvoicesQuery,
+  useGetSubscriptionDetailsQuery,
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
-import { ResponsivePricingPlans } from 'src/components/pricing';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
-import { SecurityForm } from 'src/components/profile/SecurityForm';
 
 export function ProfileView() {
   const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // Get user data from auth hook
-  const { user, userName, userEmail, userAvatar, updateProfile } = useAuth();
+  // Fetch user data from API
+  const { data: userData, isLoading: isLoadingUser } = useGetCurrentUserQuery();
 
-  // Parse the user's name into first and last name
-  const getUserNames = () => {
-    if (!userName) return { firstName: 'User', lastName: 'Name' };
-    const nameParts = userName.split(' ');
-    return {
-      firstName: nameParts[0] || 'User',
-      lastName: nameParts.slice(1).join(' ') || 'Name'
-    };
+  // Fetch subscription details
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
+
+  console.log(subscriptionData);
+  
+
+  // Handle upgrade license navigation
+  const handleUpgradeLicense = () => {
+    navigate('/upgrade-license');
   };
 
-  const [activeTab, setActiveTab] = useState(0);
-  const [isEditing, setIsEditing] = useState(false);
-  const [firstName, setFirstName] = useState(getUserNames().firstName);
-  const [lastName, setLastName] = useState(getUserNames().lastName);
-  const subscriptionTabRef = React.useRef<HTMLDivElement>(null);
-
-  // Use userId from auth hook, fallback to '1' for demo
-  const { data: invoicesData } = useGetUserInvoicesQuery();
-
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
-
-  const handleSaveProfile = () => {
-    // Update profile using auth hook
-    if (user) {
-      updateProfile({
-        ...user,
-        name: `${firstName} ${lastName}`.trim(),
-      });
+  // Handle manage subscription - open in new tab
+  const handleManageSubscription = () => {
+    if (subscriptionData?.subscription_url) {
+      window.open(subscriptionData.subscription_url, '_blank');
     }
-    setIsEditing(false);
   };
+
+  // Loading state
+  if (isLoadingUser || isLoadingSubscription) {
+    return (
+      <DashboardContent>
+        <Container maxWidth="xl">
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress />
+          </Box>
+        </Container>
+      </DashboardContent>
+    );
+  }
 
   return (
     <DashboardContent>
@@ -137,8 +122,8 @@ export function ProfileView() {
               <Grid item xs={12} md={4}>
                 <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' } }}>
                   <Avatar
-                    src={userAvatar}
-                    alt={userName || 'User'}
+                    src={userData?.avatar}
+                    alt={userData?.name || 'User'}
                     sx={{
                       width: 100,
                       height: 100,
@@ -146,19 +131,21 @@ export function ProfileView() {
                       boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                       backdropFilter: 'blur(10px)',
                     }}
-                  />
+                  >
+                    {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </Avatar>
                 </Box>
               </Grid>
             </Grid>
           </Box>
         </Box>
 
-        {/* Profile Summary Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Main Content */}
+        <Grid container spacing={3}>
+          {/* Profile Form Section */}
           <Grid item xs={12} md={8}>
             <Card
               sx={{
-                p: 3,
                 borderRadius: 3,
                 background: theme.palette.mode === 'dark'
                   ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
@@ -169,325 +156,117 @@ export function ProfileView() {
                   : '0 4px 20px rgba(0,0,0,0.08)',
               }}
             >
-              {isEditing ? (
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <User size={20} />
-                    Edit Profile Information
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="First Name"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                          }
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Last Name"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                          }
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                  <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                    <Button
-                      variant="contained"
-                      onClick={handleSaveProfile}
-                      startIcon={<Iconify icon="eva:checkmark-fill" />}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Save Changes
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={() => setIsEditing(false)}
-                      startIcon={<Iconify icon="eva:close-fill" />}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Cancel
-                    </Button>
-                  </Stack>
-                </Box>
-              ) : (
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <User size={20} />
-                      Profile Information
-                    </Typography>
-                    <IconButton
-                      onClick={() => setIsEditing(true)}
-                      sx={{
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        '&:hover': {
-                          bgcolor: alpha(theme.palette.primary.main, 0.2),
-                        }
-                      }}
-                    >
-                      <Edit size={18} />
-                    </IconButton>
-                  </Box>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Full Name
-                        </Typography>
-                        <Typography variant="h6">
-                          {userName || 'User Name'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Email Address
-                        </Typography>
-                        <Typography variant="h6">
-                          {userEmail || 'user@example.com'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
+              <ProfileForm userData={userData} />
             </Card>
           </Grid>
 
+          {/* Stats and Subscription Card */}
           <Grid item xs={12} md={4}>
-            {/* Quick Stats Card */}
-            <Card
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                background: theme.palette.mode === 'dark'
-                  ? `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`
-                  : `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
-                border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                boxShadow: theme.palette.mode === 'dark'
-                  ? '0 8px 32px rgba(0,0,0,0.3)'
-                  : '0 4px 20px rgba(0,0,0,0.08)',
-              }}
-            >
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <Award size={20} />
-                Account Stats
-              </Typography>
-              <Stack spacing={2}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Articles Created
-                  </Typography>
-                  <Chip
-                    label="12"
-                    size="small"
-                    color="primary"
-                    sx={{ fontWeight: 600 }}
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Current Plan
-                  </Typography>
-                  <Chip
-                    label="Pro"
-                    size="small"
-                    color="success"
-                    sx={{ fontWeight: 600 }}
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Member Since
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    Jan 2024
-                  </Typography>
-                </Box>
-              </Stack>
-            </Card>
+            <Stack spacing={3}>
+              {/* Account Stats Card */}
+              <Card
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  background: theme.palette.mode === 'dark'
+                    ? `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`
+                    : `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+                  border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 8px 32px rgba(0,0,0,0.3)'
+                    : '0 4px 20px rgba(0,0,0,0.08)',
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                  <Iconify icon="solar:award-bold" width={20} />
+                  {t('profile.stats.title', 'Account Stats')}
+                </Typography>
+                <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('profile.stats.articlesCreated', 'Articles Created')}
+                    </Typography>
+                    <Chip
+                      label={subscriptionData?.articles_created || 0}
+                      size="small"
+                      color="primary"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('profile.stats.currentPlan', 'Current Plan')}
+                    </Typography>
+                    <Chip
+                      label={subscriptionData?.subscription_name || 'Free'}
+                      size="small"
+                      color="success"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {t('profile.stats.memberSince', 'Member Since')}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {userData?.created_at ? new Date(userData.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Card>
+
+              {/* Subscription Management Card */}
+              <Card
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  background: theme.palette.mode === 'dark'
+                    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`
+                    : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 8px 32px rgba(0,0,0,0.3)'
+                    : '0 4px 20px rgba(0,0,0,0.08)',
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                  <CreditCard size={20} />
+                  {t('profile.subscription.title', 'Subscription')}
+                </Typography>
+                <Stack spacing={2}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleUpgradeLicense}
+                    startIcon={<Iconify icon="solar:rocket-bold" />}
+                    sx={{
+                      borderRadius: 2,
+                      py: 1.5,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                      '&:hover': {
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                      }
+                    }}
+                  >
+                    {t('profile.subscription.upgrade', 'Upgrade License')}
+                  </Button>
+                  {subscriptionData?.subscription_url && (
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={handleManageSubscription}
+                      startIcon={<ExternalLink size={16} />}
+                      sx={{ borderRadius: 2, py: 1.5 }}
+                    >
+                      {t('profile.subscription.manage', 'Manage Subscription')}
+                    </Button>
+                  )}
+                </Stack>
+              </Card>
+            </Stack>
           </Grid>
         </Grid>
 
-        {/* Modern Tabs */}
-        <Card
-          sx={{
-            borderRadius: 3,
-            overflow: 'hidden',
-            boxShadow: theme.palette.mode === 'dark'
-              ? '0 8px 32px rgba(0,0,0,0.3)'
-              : '0 4px 20px rgba(0,0,0,0.08)',
-          }}
-        >
-          <Box
-            sx={{
-              bgcolor: theme.palette.mode === 'dark'
-                ? alpha(theme.palette.background.paper, 0.8)
-                : alpha(theme.palette.grey[50], 0.8),
-              borderBottom: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              sx={{
-                px: 2,
-                '& .MuiTab-root': {
-                  minHeight: 64,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  fontSize: '0.95rem',
-                  '&.Mui-selected': {
-                    color: theme.palette.primary.main,
-                  }
-                },
-                '& .MuiTabs-indicator': {
-                  height: 3,
-                  borderRadius: '3px 3px 0 0',
-                  backgroundColor: theme.palette.primary.main,
-                },
-              }}
-            >
-              <Tab
-                icon={<User size={18} />}
-                iconPosition="start"
-                label={t('profile.tabs.account', 'Account Details')}
-              />
-              <Tab
-                icon={<CreditCard size={18} />}
-                iconPosition="start"
-                label={t('profile.tabs.subscription', 'Subscription')}
-              />
-              <Tab
-                icon={<Shield size={18} />}
-                iconPosition="start"
-                label={t('profile.tabs.security', 'Security')}
-              />
-              <Tab
-                icon={<Bell size={18} />}
-                iconPosition="start"
-                label={t('profile.tabs.notifications', 'Notifications')}
-              />
-            </Tabs>
-          </Box>
-
-          {/* Tab Content */}
-          <Box sx={{ p: 4 }}>
-            {activeTab === 0 && (
-              <Box>
-                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                  {t('profile.tabs.account', 'Account Details')}
-                </Typography>
-                <ProfileForm />
-              </Box>
-            )}
-
-            {activeTab === 1 && (
-              <Box ref={subscriptionTabRef}>
-                <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-                  {t('profile.subscription.plans', 'Subscription Plans')}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
-                  {t('profile.subscription.choosePlan', 'Choose the plan that best fits your needs')}
-                </Typography>
-
-                <ResponsivePricingPlans
-                  onSelectPlan={(planId) => navigate(`/subscription/upgrade?plan=${planId}`)}
-                  gridColumns={{ xs: 1, sm: 1, md: 3 }}
-                  title=""
-                  subtitle=""
-                />
-
-                {/* Billing History */}
-                <Box sx={{ mt: 6 }}>
-                  <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
-                    {t('profile.billing.history', 'Billing History')}
-                  </Typography>
-                  {invoicesData?.invoices?.length ? (
-                    <Card sx={{ borderRadius: 2 }}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>{t('profile.billing.date', 'Date')}</TableCell>
-                            <TableCell>{t('profile.billing.amount', 'Amount')}</TableCell>
-                            <TableCell>{t('profile.billing.status', 'Status')}</TableCell>
-                            <TableCell align="right">{t('profile.billing.actions', 'Actions')}</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {invoicesData?.invoices?.map((invoice :any) => (
-                            <TableRow key={invoice.id}>
-                              <TableCell>{new Date(invoice.created_at).toLocaleDateString()}</TableCell>
-                              <TableCell>${invoice.amount}</TableCell>
-                              <TableCell>
-                                <Chip
-                                  label={invoice.status}
-                                  color={invoice.status === 'paid' ? 'success' : 'warning'}
-                                  size="small"
-                                />
-                              </TableCell>
-                              <TableCell align="right">
-                                <Button
-                                  size="small"
-                                  endIcon={<ChevronRight size={16} />}
-                                  onClick={() => window.open(invoice.invoice_url, '_blank')}
-                                >
-                                  {t('profile.billing.view', 'View')}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </Card>
-                  ) : (
-                    <Card sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
-                      <Typography variant="body1" color="text.secondary">
-                        {t('profile.billing.noHistory', 'No billing history available')}
-                      </Typography>
-                    </Card>
-                  )}
-                </Box>
-              </Box>
-            )}
-
-            {activeTab === 2 && (
-              <Box>
-                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                  {t('profile.tabs.security', 'Security Settings')}
-                </Typography>
-                <SecurityForm />
-              </Box>
-            )}
-
-            {activeTab === 3 && (
-              <Box>
-                <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                  {t('profile.tabs.notifications', 'Notification Preferences')}
-                </Typography>
-                <Card sx={{ p: 3, borderRadius: 2 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    {t('profile.notifications.comingSoon', 'Notification settings will be available soon.')}
-                  </Typography>
-                </Card>
-              </Box>
-            )}
-          </Box>
-        </Card>
       </Container>
     </DashboardContent>
   );
