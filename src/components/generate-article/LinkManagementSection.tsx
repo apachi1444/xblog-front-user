@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
 import {
   Box,
@@ -24,13 +24,22 @@ import type { Link, GenerateArticleFormData } from '../../sections/generate/sche
 
 // ----------------------------------------------------------------------
 
+// Form data for manual link addition
+interface ManualLinkFormData {
+  url: string;
+  anchorText: string;
+}
+
+// ----------------------------------------------------------------------
+
 interface LinkManagementSectionProps {
   type: 'internal' | 'external';
   title: string;
   icon: string;
-  onGenerateLinks?: () => Promise<void>;
+  onGenerateLinks?: (websiteUrl?: string) => Promise<void>;
   isGenerating?: boolean;
   showWebsiteUrlInput?: boolean;
+  websiteUrlError?: string;
 }
 
 export function LinkManagementSection({
@@ -40,13 +49,15 @@ export function LinkManagementSection({
   onGenerateLinks,
   isGenerating = false,
   showWebsiteUrlInput = false,
+  websiteUrlError,
 }: LinkManagementSectionProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Collapsed by default
   const [isAddingLink, setIsAddingLink] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState('');
 
-  const { control, formState: { errors }, watch, register } = useFormContext<GenerateArticleFormData>();
+  const { control, formState: { errors }, watch } = useFormContext<GenerateArticleFormData>();
   
   const fieldName = type === 'internal' ? 'step2.internalLinks' : 'step2.externalLinks';
   const { fields, append, remove, update } = useFieldArray({
@@ -55,10 +66,32 @@ export function LinkManagementSection({
   });
 
   const links = watch(fieldName) || [];
-  const websiteUrl = watch("step2.websiteUrl");
 
   // Generate a unique ID for new links
   const generateId = () => `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // URL validation function (same as in manual link form)
+  const isValidUrl = (url: string) => {
+    if (!url || !url.trim()) return false;
+    try {
+      // eslint-disable-next-line no-new
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Real-time website URL validation for internal links
+  const websiteUrlHasValidationError = type === 'internal' && websiteUrl && websiteUrl.length > 0 && !isValidUrl(websiteUrl);
+  const finalWebsiteUrlError = websiteUrlHasValidationError
+    ? 'Please enter a valid URL (e.g., https://yourwebsite.com)'
+    : websiteUrlError;
+
+  // Check if generate button should be disabled for internal links
+  const isGenerateDisabled = type === 'internal'
+    ? (!websiteUrl || !websiteUrl.trim() || !isValidUrl(websiteUrl) || isGenerating)
+    : isGenerating;
 
   const handleAddManualLink = () => {
     setIsAddingLink(true);
@@ -92,7 +125,9 @@ export function LinkManagementSection({
 
   const handleGenerateLinks = async () => {
     if (onGenerateLinks) {
-      await onGenerateLinks();
+      // For internal links, pass the local websiteUrl state
+      const urlToPass = type === 'internal' ? websiteUrl : undefined;
+      await onGenerateLinks(urlToPass);
       setIsExpanded(true);
     }
   };
@@ -132,13 +167,25 @@ export function LinkManagementSection({
           {links.length > 0 && (
             <Box
               sx={{
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                color: 'primary.main',
-                fontSize: '0.75rem',
-                fontWeight: 600,
+                px: 1.5,
+                py: 0.75,
+                borderRadius: 2,
+                bgcolor: theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.primary.main, 0.2)
+                  : alpha(theme.palette.primary.main, 0.1),
+                color: theme.palette.mode === 'dark'
+                  ? theme.palette.primary.light
+                  : theme.palette.primary.main,
+                fontSize: '0.875rem', // Bigger font size
+                fontWeight: 700, // Bolder
+                minWidth: '24px',
+                textAlign: 'center',
+                border: theme.palette.mode === 'dark'
+                  ? `1px solid ${alpha(theme.palette.primary.main, 0.3)}`
+                  : `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                boxShadow: theme.palette.mode === 'dark'
+                  ? `0 2px 4px ${alpha(theme.palette.common.black, 0.3)}`
+                  : `0 2px 4px ${alpha(theme.palette.primary.main, 0.1)}`,
               }}
             >
               {links.length}
@@ -169,9 +216,9 @@ export function LinkManagementSection({
                 size="small"
                 label="Your Website URL"
                 value={websiteUrl || ''}
-                {...register("step2.websiteUrl")}
-                error={!!errors.step2?.websiteUrl}
-                helperText={errors.step2?.websiteUrl?.message}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                error={!!finalWebsiteUrlError}
+                helperText={finalWebsiteUrlError}
                 placeholder="https://yourwebsite.com"
               />
             </Box>
@@ -191,7 +238,7 @@ export function LinkManagementSection({
                   )
                 }
                 onClick={handleGenerateLinks}
-                disabled={isGenerating}
+                disabled={isGenerateDisabled}
                 sx={{
                   borderRadius: 6,
                   ...(links.length === 0 && {
@@ -261,39 +308,57 @@ interface NewLinkFormProps {
 function NewLinkForm({ type, onSave, onCancel }: NewLinkFormProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const [url, setUrl] = useState('');
-  const [anchorText, setAnchorText] = useState('');
 
-  // Real-time validation
-  const isValidUrl = (urlValue: string) => {
-    if (!urlValue.trim()) return false;
+  // React Hook Form setup
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+    reset,
+  } = useForm<ManualLinkFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      url: '',
+      anchorText: '',
+    },
+  });
+
+  // URL validation function
+  const validateUrl = (value: string) => {
+    if (!value.trim()) return 'URL is required';
     try {
+      // eslint-disable-next-line no-new
+      new URL(value);
       return true;
     } catch {
-      return false;
+      return 'Please enter a valid URL (e.g., https://example.com)';
     }
   };
 
-  const isValidAnchorText = (text: string) => text.trim().length > 0;
+  // Anchor text validation function
+  const validateAnchorText = (value: string) => {
+    if (!value.trim()) return 'Anchor text is required';
+    return true;
+  };
 
-  const urlError = url.length > 0 && !isValidUrl(url);
-  const anchorTextError = anchorText.length > 0 && !isValidAnchorText(anchorText);
-  const isFormValid = isValidUrl(url) && isValidAnchorText(anchorText);
+  const onSubmit = (data: ManualLinkFormData) => {
+    onSave({
+      url: data.url.trim(),
+      anchorText: data.anchorText.trim(),
+    });
+    reset();
+  };
 
-  const handleSave = () => {
-    if (isFormValid) {
-      onSave({
-        url: url.trim(),
-        anchorText: anchorText.trim(),
-      });
-    }
+  const handleCancel = () => {
+    reset();
+    onCancel();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && isFormValid) {
-      handleSave();
+    if (e.key === 'Enter' && isValid) {
+      handleSubmit(onSubmit)();
     } else if (e.key === 'Escape') {
-      onCancel();
+      handleCancel();
     }
   };
 
@@ -315,55 +380,59 @@ function NewLinkForm({ type, onSave, onCancel }: NewLinkFormProps) {
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField
-          fullWidth
-          size="small"
-          label={t('links.url', 'URL')}
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={handleKeyPress}
-          error={urlError}
-          helperText={
-            urlError
-              ? t('links.urlError', 'Please enter a valid URL (e.g., https://example.com)')
-              : ''
-          }
-          placeholder={
-            type === 'internal' 
-              ? 'https://yourwebsite.com/page' 
-              : 'https://example.com'
-          }
-          autoFocus
+        <Controller
+          name="url"
+          control={control}
+          rules={{ validate: validateUrl }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              fullWidth
+              size="small"
+              label={t('links.url', 'URL')}
+              onKeyDown={handleKeyPress}
+              error={!!error}
+              helperText={error?.message || ''}
+              placeholder={
+                type === 'internal'
+                  ? 'https://yourwebsite.com/page'
+                  : 'https://example.com'
+              }
+              autoFocus
+            />
+          )}
         />
 
-        <TextField
-          fullWidth
-          size="small"
-          label={t('links.anchorText', 'Anchor Text')}
-          value={anchorText}
-          onChange={(e) => setAnchorText(e.target.value)}
-          onKeyDown={handleKeyPress}
-          error={anchorTextError}
-          helperText={
-            anchorTextError
-              ? t('links.anchorTextError', 'Please enter anchor text')
-              : ''
-          }
-          placeholder={t('links.anchorTextPlaceholder', 'Click here to learn more')}
+        <Controller
+          name="anchorText"
+          control={control}
+          rules={{ validate: validateAnchorText }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              fullWidth
+              size="small"
+              label={t('links.anchorText', 'Anchor Text')}
+              onKeyDown={handleKeyPress}
+              error={!!error}
+              helperText={error?.message || ''}
+              placeholder={t('links.anchorTextPlaceholder', 'Click here to learn more')}
+            />
+          )}
         />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-        <Button size="small" onClick={onCancel}>
+        <Button size="small" onClick={handleCancel}>
           {t('common.cancel', 'Cancel')}
         </Button>
         <Button
           size="small"
           variant="contained"
-          onClick={handleSave}
-          disabled={!isFormValid}
+          onClick={handleSubmit(onSubmit)}
+          disabled={!isValid}
           sx={{
-            opacity: isFormValid ? 1 : 0.6,
+            opacity: isValid ? 1 : 0.6,
           }}
         >
           {t('common.save', 'Save')}

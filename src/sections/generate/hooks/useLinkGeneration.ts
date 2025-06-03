@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
@@ -11,15 +10,11 @@ import type { Link, GenerateArticleFormData } from '../schemas';
 interface UseLinkGenerationReturn {
   isGeneratingInternal: boolean;
   isGeneratingExternal: boolean;
-  websiteUrlError: string;
-  generateInternalLinks: () => Promise<void>;
+  generateInternalLinks: (websiteUrl?: string) => Promise<void>;
   generateExternalLinks: () => Promise<void>;
-  setWebsiteUrlError: (error: string) => void;
 }
 
 export function useLinkGeneration(): UseLinkGenerationReturn {
-  const [websiteUrlError, setWebsiteUrlError] = useState('');
-
   const { getValues, setValue } = useFormContext<GenerateArticleFormData>();
 
   // RTK Query mutations
@@ -31,25 +26,12 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
     `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // API call for internal links generation
-  const generateInternalLinks = async () => {
-    setWebsiteUrlError(''); // Clear any previous errors
-
+  const generateInternalLinks = async (websiteUrl?: string) => {
     try {
-      const formData = getValues();
-      const { websiteUrl } = formData.step2;
-
-      if (!websiteUrl) {
-        setWebsiteUrlError('Please enter your website URL first');
-        return;
-      }
 
       const response = await generateInternalLinksMutation({
-        website_url: websiteUrl,
+        website_url: websiteUrl || '',
       }).unwrap();
-
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to generate internal links');
-      }
 
       // Convert API response to our Link format
       const newLinks: Link[] = response.internal_links.map(link => ({
@@ -59,7 +41,8 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
       }));
 
       // Get existing internal links and append new ones
-      const existingLinks = formData.step2.internalLinks || [];
+      const currentFormData = getValues();
+      const existingLinks = currentFormData.step2.internalLinks || [];
       const updatedLinks = [...existingLinks, ...newLinks];
 
       setValue('step2.internalLinks', updatedLinks, { shouldValidate: true });
@@ -102,7 +85,6 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
 
       toast.success(`Generated ${newLinks.length} external links`);
     } catch (error) {
-      console.error('Error generating external links:', error);
       toast.error('Failed to generate external links');
     }
   };
@@ -110,9 +92,7 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
   return {
     isGeneratingInternal,
     isGeneratingExternal,
-    websiteUrlError,
     generateInternalLinks,
     generateExternalLinks,
-    setWebsiteUrlError,
   };
 }
