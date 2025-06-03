@@ -2,13 +2,13 @@ import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
 import { useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import { Typography } from '@mui/material';
+import Divider from '@mui/material/Divider';
 import Popover from '@mui/material/Popover';
 import MenuList from '@mui/material/MenuList';
 import ButtonBase from '@mui/material/ButtonBase';
