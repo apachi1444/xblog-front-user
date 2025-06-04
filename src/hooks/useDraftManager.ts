@@ -1,7 +1,6 @@
 import type { DraftManagerState } from 'src/types/draft';
 import type { GenerateArticleFormData } from 'src/sections/generate/schemas';
 
-import { useSelector } from 'react-redux';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { debounce } from 'src/utils/debounce';
@@ -12,12 +11,6 @@ import {
   setCurrentDraftId,
   getCurrentDraftId 
 } from 'src/utils/draftStorage';
-
-import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { 
-  useCreateDraftMutation, 
-  useUpdateDraftMutation 
-} from 'src/services/apis/draftsApi';
 
 import { DraftStatus } from 'src/types/draft';
 
@@ -60,14 +53,6 @@ export const useDraftManager = (options: UseDraftManagerOptions = {}): UseDraftM
   // Refs for tracking data
   const currentDataRef = useRef<Partial<GenerateArticleFormData>>({});
   const currentTitleRef = useRef<string>('');
-  
-  // Redux selectors
-  const currentStore = useSelector(selectCurrentStore);
-  const storeId = currentStore?.id || 1;
-  
-  // API mutations
-  const [createDraft] = useCreateDraftMutation();
-  const [updateDraft] = useUpdateDraftMutation();
 
   // Initialize draft on mount
   useEffect(() => {
@@ -101,21 +86,10 @@ export const useDraftManager = (options: UseDraftManagerOptions = {}): UseDraftM
 
       if (state.currentDraftId && !state.currentDraftId.startsWith('local_')) {
         // Update existing remote draft
-        await updateDraft({
-          id: state.currentDraftId,
-          data: { content: data, title: draftTitle }
-        }).unwrap();
+      
       } else {
         // Create new remote draft
-        const response = await createDraft({
-          content: data,
-          title: draftTitle,
-          store_id: storeId,
-        }).unwrap();
-        
-        const newDraftId = response.draft.id;
-        updateState({ currentDraftId: newDraftId });
-        setCurrentDraftId(newDraftId);
+    
       }
 
       updateState({
@@ -161,7 +135,7 @@ export const useDraftManager = (options: UseDraftManagerOptions = {}): UseDraftM
         });
       }
     }
-  }, [state.currentDraftId, storeId, createDraft, updateDraft, enableLocalFallback, updateState]);
+  }, [state.currentDraftId, enableLocalFallback, updateState]);
 
   /**
    * Debounced save function
@@ -185,21 +159,7 @@ export const useDraftManager = (options: UseDraftManagerOptions = {}): UseDraftM
     updateState({ status: DraftStatus.CREATING });
     
     try {
-      const response = await createDraft({
-        content: initialData,
-        store_id: storeId,
-      }).unwrap();
-      
-      const newDraftId = response.draft.id;
-      updateState({
-        currentDraftId: newDraftId,
-        status: DraftStatus.SAVED,
-        lastSaved: new Date(),
-      });
-      
-      setCurrentDraftId(newDraftId);
-      setIsFirstInput(false);
-      
+      // create new draft remote !
     } catch (error) {
       console.error('Failed to create draft:', error);
       
@@ -219,7 +179,7 @@ export const useDraftManager = (options: UseDraftManagerOptions = {}): UseDraftM
         });
       }
     }
-  }, [state.currentDraftId, storeId, createDraft, enableLocalFallback, updateState]);
+  }, [state.currentDraftId, enableLocalFallback, updateState]);
 
   /**
    * Save draft (debounced)
