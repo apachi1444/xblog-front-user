@@ -30,19 +30,9 @@ export const step2Schema = z.object({
   // Simplified media settings
   includeImages: z.boolean().default(true),
   includeVideos: z.boolean().default(false),
-  // Linking settings
-  internalLinking: z.string().min(1, 'Internal linking is required'),
-  externalLinking: z.string().min(1, 'External linking is required'),
-  // Link management
-  websiteUrl: z.string().url('Please enter a valid website URL').optional(),
+
   internalLinks: z.array(linkSchema).default([]),
   externalLinks: z.array(linkSchema).default([]),
-  // Legacy fields for backward compatibility (optional)
-  imageSettingsQuality: z.string().optional(),
-  imageSettingsPlacement: z.string().optional(),
-  imageSettingsStyle: z.string().optional(),
-  imageSettingsCount: z.number().optional(),
-  numberOfVideos: z.number().default(1),
 });
 
 // Section content type schemas

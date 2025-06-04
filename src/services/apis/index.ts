@@ -899,6 +899,146 @@ const setupMocks = () => {
       }
     });
 
+    // Mock endpoints for drafts
+    mock.onGet('/drafts').reply((config) => {
+      const { store_id = 1, page = 1, limit = 20 } = config.params || {};
+
+      // Mock drafts data
+      const mockDrafts = [
+        {
+          id: 'draft_1',
+          title: 'React Native vs React: Understanding the Key Differences',
+          content: {
+            step1: {
+              contentDescription: 'Presentation of React Native & difference between it and react native',
+              primaryKeyword: 'React Native vs React',
+              secondaryKeywords: ['mobile development', 'web development'],
+              language: 'en-us',
+              targetCountry: 'us',
+              title: 'React Native vs React: Understanding the Key Differences',
+            },
+            step2: {
+              articleType: 'how-to',
+              articleSize: 'medium',
+              toneOfVoice: 'friendly',
+              pointOfView: 'second-person',
+            },
+            step3: { sections: [] }
+          },
+          status: 'draft',
+          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          store_id: 1,
+          user_id: 'user_123'
+        },
+        {
+          id: 'draft_2',
+          title: 'SEO Optimization Tips for E-commerce',
+          content: {
+            step1: {
+              contentDescription: 'SEO Optimization Tips for E-commerce Websites',
+              primaryKeyword: 'e-commerce SEO optimization',
+              secondaryKeywords: ['product page SEO', 'online store optimization'],
+              language: 'en-us',
+              targetCountry: 'us',
+            },
+            step2: {
+              articleType: 'listicle',
+              articleSize: 'large',
+              toneOfVoice: 'professional',
+            },
+            step3: { sections: [] }
+          },
+          status: 'draft',
+          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          store_id: 1,
+          user_id: 'user_123'
+        }
+      ];
+
+      return [200, {
+        drafts: mockDrafts,
+        total: mockDrafts.length,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10)
+      }];
+    });
+
+    mock.onGet(/\/drafts\/(.+)/).reply((config) => {
+      const draftId = config.url?.split('/').pop();
+
+      const mockDraft = {
+        id: draftId,
+        title: 'Sample Draft',
+        content: {
+          step1: {
+            contentDescription: 'Sample content description',
+            primaryKeyword: 'sample keyword',
+            secondaryKeywords: ['keyword1', 'keyword2'],
+            language: 'en-us',
+            targetCountry: 'us',
+          },
+          step2: {
+            articleType: 'how-to',
+            articleSize: 'medium',
+            toneOfVoice: 'friendly',
+          },
+          step3: { sections: [] }
+        },
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        store_id: 1,
+        user_id: 'user_123'
+      };
+
+      return [200, { draft: mockDraft, success: true }];
+    });
+
+    mock.onPost('/drafts').reply((config) => {
+      const requestData = JSON.parse(config.data);
+      const draftId = `draft_${Date.now()}`;
+
+      const newDraft = {
+        id: draftId,
+        title: requestData.title || 'Untitled Draft',
+        content: requestData.content || {},
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        store_id: requestData.store_id || 1,
+        user_id: 'user_123'
+      };
+
+      return [200, { draft: newDraft, success: true }];
+    });
+
+    mock.onPatch(/\/drafts\/(.+)/).reply((config) => {
+      const draftId = config.url?.split('/').pop();
+      const requestData = JSON.parse(config.data);
+
+      const updatedDraft = {
+        id: draftId,
+        title: requestData.title || 'Updated Draft',
+        content: requestData.content || {},
+        status: 'draft',
+        created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+        store_id: 1,
+        user_id: 'user_123'
+      };
+
+      return [200, { draft: updatedDraft, success: true }];
+    });
+
+    mock.onDelete(/\/drafts\/(.+)/).reply(() => [200, { success: true }]);
+
+    mock.onPost(/\/drafts\/(.+)\/publish/).reply((config) => {
+      const draftId = config.url?.split('/')[2];
+      return [200, { success: true, article_id: `article_${Date.now()}` }];
+    });
+
     // Catch-all for unhandled requests
     mock.onAny().reply((config) => {
       console.log('Unhandled request:', config.url);
@@ -1007,7 +1147,7 @@ export const CACHE_DURATION = {
 
 export const api = createApi({
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Articles', 'Stores', 'User', 'Subscription', 'Plans'],
+  tagTypes: ['Articles', 'Stores', 'User', 'Subscription', 'Plans', 'Drafts'],
   endpoints: () => ({}),
   // Global configuration for all queries
   keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS, // Default cache duration
