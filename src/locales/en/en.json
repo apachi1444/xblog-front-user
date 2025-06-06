@@ -1,774 +1,540 @@
 {
-    "translation": {
-      "generate": {
-        "step1": {
-          "titles": {
-            "languageRegion": "Language & Region",
-            "keywords": "Keywords",
-            "contentDescription": "Content Description",
-            "generatedTitle": "Generated Title",
-            "seoMeta": "SEO Meta Information"
-          }
+  "translation": {
+    "generate": {
+      "step1": {
+        "titles": {
+          "languageRegion": "Language & Region",
+          "keywords": "Keywords",
+          "contentDescription": "Content Description",
+          "generatedTitle": "Generated Title",
+          "seoMeta": "SEO Meta Information"
         }
+      }
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "generate": "Generate",
+      "blogs": "Blogs",
+      "calendar": "Calendar",
+      "templates": "Templates",
+      "upgrade_license": "Upgrade license",
+      "book_demo": "Book Demo",
+      "ai_assistance_chat": "AI Assistance chat"
+    },
+    "upgrade": {
+      "unlockFeatures": "Want to unlock more features?",
+      "upgradeToPro": "Upgrade to Pro 🚀"
+    },
+    "resources": {
+      "websites": "Websites",
+      "articles": "Articles",
+      "websitesRemaining": "{{count}} websites remaining",
+      "articlesRemaining": "{{count}} articles remaining"
+    },
+    "websites": {
+      "addNew": "Add New Website"
+    },
+    "auth": {
+      "resetPassword": {
+        "title": "Reset Password",
+        "subtitle": "Enter your new password below",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "submit": "Reset Password",
+        "rememberPassword": "Remember your password?",
+        "success": "Password reset successfully! Please sign in with your new password.",
+        "error": "Failed to reset password. Please try again."
       },
-      "navigation": {
-        "dashboard": "Dashboard",
-        "generate": "Generate",
-        "blogs": "Blogs",
-        "calendar": "Calendar",
-        "templates": "Templates",
-        "upgrade_license": "Upgrade license",
-        "book_demo": "Book Demo",
-        "ai_assistance_chat": "AI Assistance chat"
+      "signup": {
+        "title": "Join Our Creative Community",
+        "subtitle": "Start your creative journey with exclusive features",
+        "haveAccount": "Already have an account?",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "John Doe",
+        "email": "Email Address",
+        "emailPlaceholder": "john.doe@creative.com",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "createAccount": "Create Account",
+        "termsPrefix": "By signing up, you agree to our",
+        "termsOfService": "Terms of Service",
+        "and": "and",
+        "privacyPolicy": "Privacy Policy",
+        "orContinueWith": "OR CONTINUE WITH",
+        "signupWithGoogle": "Sign up with Google",
+        "or":"OR"
       },
-      "upgrade": {
-        "unlockFeatures": "Want to unlock more features?",
-        "upgradeToPro": "Upgrade to Pro 🚀"
+      "signin": {
+        "title": "Sign In",
+        "email": "Email Address",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign In",
+        "or": "OR",
+        "noAccount": "Don't have an account?",
+        "signUp": "Sign up",
+        "enterTestMode": "Enter Test Mode"
       },
-      "resources": {
-        "websites": "Websites",
-        "articles": "Articles",
-        "websitesRemaining": "{{count}} websites remaining",
-        "articlesRemaining": "{{count}} articles remaining"
-      },
-      "websites": {
-        "addNew": "Add New Website"
-      },
-      "auth": {
-        "resetPassword": {
-          "title": "Reset Password",
-          "subtitle": "Enter your new password below",
-          "newPassword": "New Password",
-          "confirmPassword": "Confirm New Password",
-          "submit": "Reset Password",
-          "rememberPassword": "Remember your password?",
-          "success": "Password reset successfully! Please sign in with your new password.",
-          "error": "Failed to reset password. Please try again."
-        },
-        "signup": {
-          "title": "Join Our Creative Community",
-          "subtitle": "Start your creative journey with exclusive features",
-          "haveAccount": "Already have an account?",
-          "fullName": "Full Name",
-          "fullNamePlaceholder": "John Doe",
-          "email": "Email Address",
-          "emailPlaceholder": "john.doe@creative.com",
-          "password": "Password",
-          "confirmPassword": "Confirm Password",
-          "createAccount": "Create Account",
-          "termsPrefix": "By signing up, you agree to our",
-          "termsOfService": "Terms of Service",
-          "and": "and",
-          "privacyPolicy": "Privacy Policy",
-          "orContinueWith": "OR CONTINUE WITH",
-          "signupWithGoogle": "Sign up with Google",
-          "or":"OR"
-        },
-        "signin": {
-          "title": "Sign In",
-          "email": "Email Address",
-          "password": "Password",
-          "forgotPassword": "Forgot password?",
-          "signIn": "Sign In",
-          "or": "OR",
-          "noAccount": "Don't have an account?",
-          "signUp": "Sign up",
-          "enterTestMode": "Enter Test Mode"
-        },
-        "forgotPassword": {
-          "title": "Forgot Password",
-          "subtitle": "Enter your email address and we'll send you a link to reset your password",
-          "email": "Email Address",
-          "resetPassword": "Reset Password",
-          "backToSignIn": "Back to Sign In",
-          "checkEmail": "Check Your Email",
-          "emailSent": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions."
-        },
-        "common": {
-          "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
-          "emailInvalid": "Please enter a valid email address"
-        }
-      },
-      "store": {
-        "title": "Connect Your Store",
-        "subtitle": "Choose your platform and connect your store",
-        "selectPlatform": "Select Platform",
-        "selectPlatformSubtitle": "Choose the platform your website is built on to optimize integration",
-        "selectPlatformRequired": "Please select a platform to continue",
-        "selectPlatformFirst": "Please select a platform first",
-        "next": "Next",
-        "back": "Back",
-        "backToStores": "Back to Stores",
-        "connect": "Connect Store",
-        "connecting": "Connecting...",
-        "success": "Store connected successfully!",
-        "error": "Failed to connect store. Please try again.",
-        "formErrors": "Please fix the form errors before submitting",
-        "integrationTitle": "{{platform}} Integration",
-        "integrationSubtitle": "Please provide the details for your {{platform}} website.",
-        "platforms": {
-          "wordpress": "WordPress",
-          "shopify": "Shopify",
-          "wix": "Wix"
-        },
-        "wordpress": {
-          "url": "WordPress URL",
-          "urlPlaceholder": "https://your-wordpress-site.com",
-          "username": "WordPress Username",
-          "usernamePlaceholder": "admin",
-          "password": "WordPress Password",
-          "passwordPlaceholder": "••••••••",
-          "description": "Connect your WordPress site"
-        },
-        "shopify": {
-          "storeName": "Shopify Store Name",
-          "storeNamePlaceholder": "your-store",
-          "apiKey": "API Key",
-          "apiKeyPlaceholder": "Enter your API key",
-          "apiSecret": "API Secret",
-          "apiSecretPlaceholder": "Enter your API secret",
-          "description": "Connect your Shopify store"
-        },
-        "wix": {
-          "adminUrl": "Wix Admin URL",
-          "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
-          "consumerKey": "Consumer Key",
-          "consumerKeyPlaceholder": "Enter your consumer key",
-          "consumerSecret": "Consumer Secret",
-          "consumerSecretPlaceholder": "Enter your consumer secret",
-          "description": "Connect your Wix store"
-        },
-        "terms": {
-          "accept": "I agree to the terms and conditions and authorize XBlog to access my store"
-        },
-        "guide": {
-          "title": "Integration Guide",
-          "description": "This video shows how to find and set up the required credentials for your {{platform}} store integration.",
-          "dialogDescription": "Follow this guide to find and set up the required credentials for your {{platform}} store integration.",
-          "watchButton": "Watch Integration Guide",
-          "watchTooltip": "Watch integration guide",
-          "videoTitle": "{{platform}} Integration Guide",
-          "dialogTitle": "How to Connect Your {{platform}} Store"
-        }
+      "forgotPassword": {
+        "title": "Forgot Password",
+        "subtitle": "Enter your email address and we'll send you a link to reset your password",
+        "email": "Email Address",
+        "resetPassword": "Reset Password",
+        "backToSignIn": "Back to Sign In",
+        "checkEmail": "Check Your Email",
+        "emailSent": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions."
       },
       "common": {
-        "save": "Save",
-        "cancel": "Cancel",
-        "select": "Select",
-        "selected": "Selected",
-        "success": "Success!",
-        "next": "Next",
-        "previous": "Previous",
-        "Optimize": "Optimize",
-        "Waiting": "Waiting",
-        "waiting": "waiting for input",
-        "close": "Close",
-        "status": "Status",
-        "description": "Description",
-        "created": "Created"
+        "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
+        "emailInvalid": "Please enter a valid email address"
+      }
+    },
+    "store": {
+      "title": "Connect Your Store",
+      "subtitle": "Choose your platform and connect your store",
+      "selectPlatform": "Select Platform",
+      "selectPlatformSubtitle": "Choose the platform your website is built on to optimize integration",
+      "selectPlatformRequired": "Please select a platform to continue",
+      "selectPlatformFirst": "Please select a platform first",
+      "next": "Next",
+      "back": "Back",
+      "backToStores": "Back to Stores",
+      "connect": "Connect Store",
+      "connecting": "Connecting...",
+      "success": "Store connected successfully!",
+      "error": "Failed to connect store. Please try again.",
+      "formErrors": "Please fix the form errors before submitting",
+      "integrationTitle": "{{platform}} Integration",
+      "integrationSubtitle": "Please provide the details for your {{platform}} website.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
       },
-      "dashboard": {
-        "nextScheduledArticle": "Next Scheduled Article",
-        "articleScheduledFor": "\"{{title}}\" scheduled for {{date}}",
-        "timeRemaining": "Time remaining: {{days}}d {{hours}}h {{minutes}}m",
-        "noScheduledArticles": "No Scheduled Articles",
-        "scheduleArticlePrompt": "Schedule your next article to maintain consistent content publishing",
-        "viewCalendar": "View Calendar",
-        "createArticle": "Create Article"
+      "wordpress": {
+        "url": "WordPress URL",
+        "urlPlaceholder": "https://your-wordpress-site.com",
+        "username": "WordPress Username",
+        "usernamePlaceholder": "admin",
+        "password": "WordPress Password",
+        "passwordPlaceholder": "••••••••",
+        "description": "Connect your WordPress site"
       },
-      "regenerate": {
-        "label": "Regenerations",
-        "remaining": "{{count}} regenerations remaining",
-        "info": "Regenerations allow you to recreate content. Each regeneration decreases your available count.",
-        "notEnough": "No regenerations available. Please upgrade your plan for more.",
-        "upgradeMessage": "Upgrade your plan to get more regenerations.",
-        "error": "Failed to use regeneration. Please try again.",
-        "loading": "Regenerating {{type}}...",
-        "success": "{{type}} regenerated successfully!",
-        "available": "Regenerate ({{count}} remaining)",
-        "button": "Regenerate",
-        "confirm": "Regenerate",
-        "confirmTitle": "Confirm Regeneration",
-        "confirmMessage": "Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.",
-        "availableCredits": "You have {{count}} regeneration credits available.",
-        "example": {
-          "title": "Regeneration System Example",
-          "description": "This is an example of how to use the regeneration system. You have {{count}} regenerations available.",
-          "content": "Example Content",
-          "contentDescription": "This is some example content that can be regenerated."
-        }
+      "shopify": {
+        "storeName": "Shopify Store Name",
+        "storeNamePlaceholder": "your-store",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "Enter your API key",
+        "apiSecret": "API Secret",
+        "apiSecretPlaceholder": "Enter your API secret",
+        "description": "Connect your Shopify store"
       },
-      "publishing": {
-        "message": "Publishing your content..."
+      "wix": {
+        "adminUrl": "Wix Admin URL",
+        "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+        "consumerKey": "Consumer Key",
+        "consumerKeyPlaceholder": "Enter your consumer key",
+        "consumerSecret": "Consumer Secret",
+        "consumerSecretPlaceholder": "Enter your consumer secret",
+        "description": "Connect your Wix store"
       },
-      "points": {
-        "label": "Points",
-        "remaining": "{{count}} points remaining",
-        "info": "Points are used when generating content with AI. Each generation costs points based on the type of content.",
-        "notEnough": "Not enough points for this operation",
-        "notEnoughTitle": "Not Enough Points",
-        "insufficientPoints": "Insufficient Points for This Operation",
-        "generationRequires": "Generating {{type}} requires {{points}} points. You have {{remaining}} points remaining.",
-        "youHave": "You have",
-        "required": "Required",
-        "needed": "Needed",
-        "upgradeMessage": "Upgrade your plan to get more points or wait for your points to refresh.",
-        "upgradePlan": "Upgrade Plan",
-        "deducted": "{{cost}} points used. {{remaining}} remaining",
-        "generationTypes": {
-          "title": "title",
-          "metaTitle": "meta title",
-          "metaDescription": "meta description",
-          "keywords": "keywords",
-          "sections": "sections",
-          "sectionContent": "section content",
-          "fullArticle": "full article"
-        },
-        "reasons": {
-          "title": "Generate title",
-          "metaTitle": "Generate meta title",
-          "metaDescription": "Generate meta description",
-          "keywords": "Generate keywords",
-          "sections": "Generate sections",
-          "sectionContent": "Generate section content",
-          "fullArticle": "Generate full article"
-        }
+      "terms": {
+        "accept": "I agree to the terms and conditions and authorize XBlog to access my store"
       },
-      "article": {
-        "placeholders": {
-          "select": "Select an option",
-          "selectOrType": "Select or type an option"
-        },
-        "settings": {
-          "title": "Article Settings",
-          "mainSettings": "Main Settings",
-          "articleType": "Article Type",
-          "articleSize": "Article Size",
-          "toneOfVoice": "Tone of Voice",
-          "pointOfView": "Point of View",
-          "aiContentCleaning": "AI Content Cleaning",
-          "mediaSettings": "Media Settings",
-          "imageQuality": "Image Quality",
-          "imagePlacement": "Image Placement",
-          "imageStyle": "Image Style",
-          "numberOfImages": "Number of Images",
-          "includeVideos": "Include Videos",
-          "numberOfVideos": "Number of Videos",
-          "linkingSettings": "Linking Settings",
-          "internalLinking": "Internal Linking",
-          "externalLinking": "External Linking"
-        },
-        "tooltips": {
-          "articleType": "Choose the type of article that best fits your content goals",
-          "articleSize": "Determines the length and depth of your article",
-          "toneOfVoice": "Sets the overall tone and style of writing for your article",
-          "pointOfView": "Determines the perspective from which your article is written",
-          "aiContentCleaning": "Controls how AI-generated text is processed to sound more natural",
-          "imageQuality": "Sets the resolution and quality of generated images",
-          "imagePlacement": "Determines where images will be placed within your article",
-          "imageStyle": "Sets the visual style for generated images",
-          "numberOfImages": "Total number of images to include in your article",
-          "numberOfVideos": "Specify how many videos should be embedded in your article",
-          "internalLinking": "Select which of your websites to link to within the article",
-          "externalLinking": "Choose which external sources to reference in your article or type your own"
-        },
-        "buttons": {
-          "generating": "Generating...",
-          "generateTableOfContents": "Generate Table of Contents",
-          "regenerateTableOfContents": "Regenerate Table of Contents",
-          "tableOfContentsGenerated": "Table of Contents Generated"
-        }
+      "guide": {
+        "title": "Integration Guide",
+        "description": "This video shows how to find and set up the required credentials for your {{platform}} store integration.",
+        "dialogDescription": "Follow this guide to find and set up the required credentials for your {{platform}} store integration.",
+        "watchButton": "Watch Integration Guide",
+        "watchTooltip": "Watch integration guide",
+        "videoTitle": "{{platform}} Integration Guide",
+        "dialogTitle": "How to Connect Your {{platform}} Store"
+      }
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "select": "Select",
+      "selected": "Selected",
+      "success": "Success!",
+      "next": "Next",
+      "previous": "Previous",
+      "Optimize": "Optimize",
+      "Waiting": "Waiting",
+      "waiting": "waiting for input",
+      "close": "Close",
+      "status": "Status",
+      "description": "Description",
+      "created": "Created"
+    },
+    "dashboard": {
+      "nextScheduledArticle": "Next Scheduled Article",
+      "articleScheduledFor": "\"{{title}}\" scheduled for {{date}}",
+      "timeRemaining": "Time remaining: {{days}}d {{hours}}h {{minutes}}m",
+      "noScheduledArticles": "No Scheduled Articles",
+      "scheduleArticlePrompt": "Schedule your next article to maintain consistent content publishing",
+      "viewCalendar": "View Calendar",
+      "createArticle": "Create Article"
+    },
+    "regenerate": {
+      "label": "Regenerations",
+      "remaining": "{{count}} regenerations remaining",
+      "info": "Regenerations allow you to recreate content. Each regeneration decreases your available count.",
+      "notEnough": "No regenerations available. Please upgrade your plan for more.",
+      "upgradeMessage": "Upgrade your plan to get more regenerations.",
+      "error": "Failed to use regeneration. Please try again.",
+      "loading": "Regenerating {{type}}...",
+      "success": "{{type}} regenerated successfully!",
+      "available": "Regenerate ({{count}} remaining)",
+      "button": "Regenerate",
+      "confirm": "Regenerate",
+      "confirmTitle": "Confirm Regeneration",
+      "confirmMessage": "Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.",
+      "availableCredits": "You have {{count}} regeneration credits available.",
+      "example": {
+        "title": "Regeneration System Example",
+        "description": "This is an example of how to use the regeneration system. You have {{count}} regenerations available.",
+        "content": "Example Content",
+        "contentDescription": "This is some example content that can be regenerated."
+      }
+    },
+    "publishing": {
+      "message": "Publishing your content..."
+    },
+    "points": {
+      "label": "Points",
+      "remaining": "{{count}} points remaining",
+      "info": "Points are used when generating content with AI. Each generation costs points based on the type of content.",
+      "notEnough": "Not enough points for this operation",
+      "notEnoughTitle": "Not Enough Points",
+      "insufficientPoints": "Insufficient Points for This Operation",
+      "generationRequires": "Generating {{type}} requires {{points}} points. You have {{remaining}} points remaining.",
+      "youHave": "You have",
+      "required": "Required",
+      "needed": "Needed",
+      "upgradeMessage": "Upgrade your plan to get more points or wait for your points to refresh.",
+      "upgradePlan": "Upgrade Plan",
+      "deducted": "{{cost}} points used. {{remaining}} remaining",
+      "generationTypes": {
+        "title": "title",
+        "metaTitle": "meta title",
+        "metaDescription": "meta description",
+        "keywords": "keywords",
+        "sections": "sections",
+        "sectionContent": "section content",
+        "fullArticle": "full article"
       },
-      "error": {
-        "title": "Something went wrong",
-        "message": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
-        "retry": "Try Again",
-        "showDetails": "Show Details",
-        "hideDetails": "Hide Details",
-        "reportIssue": "If this issue persists, please report it to our support team.",
-        "copyToClipboard": "Copy to clipboard"
+      "reasons": {
+        "title": "Generate title",
+        "metaTitle": "Generate meta title",
+        "metaDescription": "Generate meta description",
+        "keywords": "Generate keywords",
+        "sections": "Generate sections",
+        "sectionContent": "Generate section content",
+        "fullArticle": "Generate full article"
+      }
+    },
+    "article": {
+      "placeholders": {
+        "select": "Select an option",
+        "selectOrType": "Select or type an option"
       },
-      "errors": {
-        "subscription": {
-          "fetch": "Failed to fetch subscription details"
-        },
-        "stores": {
-          "fetch": "Failed to fetch stores data"
-        }
+      "settings": {
+        "title": "Article Settings",
+        "mainSettings": "Main Settings",
+        "articleType": "Article Type",
+        "articleSize": "Article Size",
+        "toneOfVoice": "Tone of Voice",
+        "pointOfView": "Point of View",
+        "aiContentCleaning": "AI Content Cleaning",
+        "mediaSettings": "Media Settings",
+        "imageQuality": "Image Quality",
+        "imagePlacement": "Image Placement",
+        "imageStyle": "Image Style",
+        "numberOfImages": "Number of Images",
+        "includeVideos": "Include Videos",
+        "numberOfVideos": "Number of Videos",
+        "linkingSettings": "Linking Settings",
+        "internalLinking": "Internal Linking",
+        "externalLinking": "External Linking"
       },
-      "templates": {
-        "title": "Article Templates",
-        "subtitle": "Choose from our SEO-optimized templates to create high-quality content",
-        "createFromScratch": "Create from Scratch",
-        "searchPlaceholder": "Search templates...",
-        "tabs": {
-          "all": "All",
-          "popular": "Popular",
-          "new": "New"
-        },
-        "premiumOnly": "Premium Only",
-        "preview": "Preview",
-        "benefits": "Benefits",
-        "viewPreview": "View Preview",
-        "continueToPurchase": "Continue to Purchase",
-        "coming_soon": "Coming Soon!",
-        "locked_message": "Templates feature is currently in development and will be available soon. Stay tuned for updates!",
-        "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
-        "notify_me": "Notify Me When Available"
+      "tooltips": {
+        "articleType": "Choose the type of article that best fits your content goals",
+        "articleSize": "Determines the length and depth of your article",
+        "toneOfVoice": "Sets the overall tone and style of writing for your article",
+        "pointOfView": "Determines the perspective from which your article is written",
+        "aiContentCleaning": "Controls how AI-generated text is processed to sound more natural",
+        "imageQuality": "Sets the resolution and quality of generated images",
+        "imagePlacement": "Determines where images will be placed within your article",
+        "imageStyle": "Sets the visual style for generated images",
+        "numberOfImages": "Total number of images to include in your article",
+        "numberOfVideos": "Specify how many videos should be embedded in your article",
+        "internalLinking": "Select which of your websites to link to within the article",
+        "externalLinking": "Choose which external sources to reference in your article or type your own"
       },
-      "seo": {
-        "sections": {
-          "core_essentials": "SEO Core Essentials",
-          "boosters": "SEO Boosters",
-          "title_optimization": "Title Optimization",
-          "content_clarity": "Content Clarity"
-        },
-        "status": {
-          "pending": "This check is waiting for you to fill in required fields",
-          "error": "This item needs attention to improve your SEO score",
-          "warning": "This item could be improved for better SEO",
-          "success": "This item is optimized for SEO"
-        },
-        "performance_score": "SEO Performance Score",
-        "points": "points",
-        "tooltip": {
-          "score": "{{score}} out of {{total}} possible points",
-          "progress": "{{progress}}% complete"
-        },
-        "rating": {
-          "needs_improvement": "Needs Improvement",
-          "good": "Good",
-          "excellent": "Excellent"
-        },
-        "optimization": {
-          "title": "Optimize SEO Criterion",
-          "current_value": "Current Value",
-          "optimized_value": "Optimized Value",
-          "current_score": "Current Score",
-          "potential_score": "Potential Score",
-          "success": "Optimization applied successfully!",
-          "optimizing": "Optimizing...",
-          "generate": "Generate Optimization",
-          "apply": "Apply Optimization"
-        },
+      "buttons": {
+        "generating": "Generating...",
+        "generateTableOfContents": "Generate Table of Contents",
+        "regenerateTableOfContents": "Regenerate Table of Contents",
+        "tableOfContentsGenerated": "Table of Contents Generated"
+      }
+    },
+    "error": {
+      "title": "Something went wrong",
+      "message": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
+      "retry": "Try Again",
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details",
+      "reportIssue": "If this issue persists, please report it to our support team.",
+      "copyToClipboard": "Copy to clipboard"
+    },
+    "errors": {
+      "subscription": {
+        "fetch": "Failed to fetch subscription details"
+      },
+      "stores": {
+        "fetch": "Failed to fetch stores data"
+      }
+    },
+    "templates": {
+      "title": "Article Templates",
+      "subtitle": "Choose from our SEO-optimized templates to create high-quality content",
+      "createFromScratch": "Create from Scratch",
+      "searchPlaceholder": "Search templates...",
+      "tabs": {
+        "all": "All",
+        "popular": "Popular",
+        "new": "New"
+      },
+      "premiumOnly": "Premium Only",
+      "preview": "Preview",
+      "benefits": "Benefits",
+      "viewPreview": "View Preview",
+      "continueToPurchase": "Continue to Purchase",
+      "coming_soon": "Coming Soon!",
+      "locked_message": "Templates feature is currently in development and will be available soon. Stay tuned for updates!",
+      "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
+      "notify_me": "Notify Me When Available"
+    },
+    "seo": {
+      "sections": {
+        "core_essentials": "SEO Core Essentials",
+        "boosters": "SEO Boosters",
+        "title_optimization": "Title Optimization",
+        "content_clarity": "Content Clarity"
+      },
+      "status": {
+        "pending": "This check is waiting for you to fill in required fields",
+        "error": "This item needs attention to improve your SEO score",
+        "warning": "This item could be improved for better SEO",
+        "success": "This item is optimized for SEO"
+      },
+      "performance_score": "SEO Performance Score",
+      "points": "points",
+      "tooltip": {
+        "score": "{{score}} out of {{total}} possible points",
+        "progress": "{{progress}}% complete"
+      },
+      "rating": {
+        "needs_improvement": "Needs Improvement",
+        "good": "Good",
+        "excellent": "Excellent"
+      },
+      "optimization": {
+        "title": "Optimize SEO Criterion",
+        "current_value": "Current Value",
+        "optimized_value": "Optimized Value",
+        "current_score": "Current Score",
+        "potential_score": "Potential Score",
+        "success": "Optimization applied successfully!",
+        "optimizing": "Optimizing...",
+        "generate": "Generate Optimization",
+        "apply": "Apply Optimization"
+      },
 
-        "toast": {
-          "already_optimized": "This item is already optimized!",
-          "optimization_not_available": "Optimization not available for this item yet.",
-          "not_ready": "This item is not ready for optimization yet.",
-          "optimizing": "Optimizing {{field}}...",
-          "optimized_success": "{{field}} optimized successfully!",
-          "optimization_failed": "Failed to optimize {{field}}. Please try again."
+      "toast": {
+        "already_optimized": "This item is already optimized!",
+        "optimization_not_available": "Optimization not available for this item yet.",
+        "not_ready": "This item is not ready for optimization yet.",
+        "optimizing": "Optimizing {{field}}...",
+        "optimized_success": "{{field}} optimized successfully!",
+        "optimization_failed": "Failed to optimize {{field}}. Please try again."
+      },
+      "criteria": {
+        "core": {
+          "keyword_in_title": {
+            "description": "Focus keyword used in the SEO title",
+            "success": "Focus keyword is used in the SEO title.",
+            "error": "Focus keyword is not present in the SEO title."
+          },
+          "keyword_in_meta": {
+            "description": "Focus keyword used in the meta description",
+            "success": "Focus keyword is in the meta description.",
+            "error": "Focus keyword is not in the meta description."
+          },
+          "keyword_in_url": {
+            "description": "Focus keyword used in the URL",
+            "success": "Focus keyword is used in the URL.",
+            "error": "Focus keyword is not used in the URL."
+          },
+          "keyword_in_first_10": {
+            "description": "Focus keyword appears in the first 10% of the content",
+            "success": "Focus keyword appears within the first 10% of the content.",
+            "error": "Focus keyword does not appear in the first 10% of the content."
+          },
+          "keyword_in_content": {
+            "description": "Focus keyword found in the content",
+            "success": "Focus keyword is found throughout the content.",
+            "error": "Focus keyword is not found in the content."
+          },
+          "content_length": {
+            "description": "Overall Content Length",
+            "success": "Content is 2500 words or more.",
+            "warning": "Content is between 1000 and 2499 words.",
+            "error": "Content is less than 1000 words."
+          }
         },
-        "criteria": {
-          "core": {
-            "keyword_in_title": {
-              "description": "Focus keyword used in the SEO title",
-              "success": "Focus keyword is used in the SEO title.",
-              "error": "Focus keyword is not present in the SEO title."
-            },
-            "keyword_in_meta": {
-              "description": "Focus keyword used in the meta description",
-              "success": "Focus keyword is in the meta description.",
-              "error": "Focus keyword is not in the meta description."
-            },
-            "keyword_in_url": {
-              "description": "Focus keyword used in the URL",
-              "success": "Focus keyword is used in the URL.",
-              "error": "Focus keyword is not used in the URL."
-            },
-            "keyword_in_first_10": {
-              "description": "Focus keyword appears in the first 10% of the content",
-              "success": "Focus keyword appears within the first 10% of the content.",
-              "error": "Focus keyword does not appear in the first 10% of the content."
-            },
-            "keyword_in_content": {
-              "description": "Focus keyword found in the content",
-              "success": "Focus keyword is found throughout the content.",
-              "error": "Focus keyword is not found in the content."
-            },
-            "content_length": {
-              "description": "Overall Content Length",
-              "success": "Content is 2500 words or more.",
-              "warning": "Content is between 1000 and 2499 words.",
-              "error": "Content is less than 1000 words."
-            }
+        "boosters": {
+          "keyword_in_subheadings": {
+            "description": "Focus keyword used in the subheadings",
+            "success": "Focus keyword appears in at least one subheading.",
+            "error": "Focus keyword is not found in subheadings."
           },
-          "boosters": {
-            "keyword_in_subheadings": {
-              "description": "Focus keyword used in the subheadings",
-              "success": "Focus keyword appears in at least one subheading.",
-              "error": "Focus keyword is not found in subheadings."
-            },
-            "keyword_density": {
-              "description": "Focus keyword appearing times",
-              "success": "Focus keyword density is between 1% and 1.5%.",
-              "warning": "Focus keyword density is slightly low or slightly high (between 0.5%–0.99% or 1.51%–2.5%).",
-              "error": "Focus keyword density is very low (under 0.5%) or too high (over 2.5%)."
-            },
-            "url_slug_length": {
-              "description": "URL slug contains a reasonable number of descriptive words",
-              "success": "URL slug contains 3 to 5 words.",
-              "warning": "URL slug contains 2 or 6 words.",
-              "error": "URL slug contains less than 2 words or more than 6 words."
-            },
-            "external_links": {
-              "description": "External links are included",
-              "success": "At least one external link is included.",
-              "error": "No external links found."
-            },
-            "dofollow_links": {
-              "description": "At least one external link with DoFollow found in your content",
-              "success": "A DoFollow external link is present.",
-              "error": "No DoFollow external link found."
-            },
-            "internal_links": {
-              "description": "Internal links are included",
-              "success": "At least one internal link is included.",
-              "error": "No internal links found."
-            }
+          "keyword_density": {
+            "description": "Focus keyword appearing times",
+            "success": "Focus keyword density is between 1% and 1.5%.",
+            "warning": "Focus keyword density is slightly low or slightly high (between 0.5%–0.99% or 1.51%–2.5%).",
+            "error": "Focus keyword density is very low (under 0.5%) or too high (over 2.5%)."
           },
-          "title": {
-            "keyword_at_start": {
-              "description": "Focus keyword at the start of the SEO title",
-              "success": "SEO title starts with the focus keyword.",
-              "error": "Focus keyword is not at the beginning of the SEO title."
-            },
-            "sentiment": {
-              "description": "Title has a positive or a negative sentiment",
-              "success": "SEO title includes emotional sentiment.",
-              "error": "SEO title lacks any emotional sentiment."
-            },
-            "power_words": {
-              "description": "Title contains 2 power words",
-              "success": "Title contains 2 or more power words.",
-              "warning": "Title contains 1 power word.",
-              "error": "No power words in title."
-            }
+          "url_slug_length": {
+            "description": "URL slug contains a reasonable number of descriptive words",
+            "success": "URL slug contains 3 to 5 words.",
+            "warning": "URL slug contains 2 or 6 words.",
+            "error": "URL slug contains less than 2 words or more than 6 words."
           },
-          "clarity": {
-            "table_of_contents": {
-              "description": "Table of content is included",
-              "success": "Table of content is present.",
-              "error": "No table of content found."
-            },
-            "short_paragraphs": {
-              "description": "Short paragraphs are used",
-              "success": "Paragraphs are concise (≤5 lines).",
-              "warning": "Some paragraphs exceed 6–7 lines.",
-              "error": "Most paragraphs are long and hard to scan."
-            },
-            "media_content": {
-              "description": "Content contains images and/or videos",
-              "success": "Content includes at least one image or video.",
-              "error": "No images or videos included in content."
-            }
+          "external_links": {
+            "description": "External links are included",
+            "success": "At least one external link is included.",
+            "error": "No external links found."
+          },
+          "dofollow_links": {
+            "description": "At least one external link with DoFollow found in your content",
+            "success": "A DoFollow external link is present.",
+            "error": "No DoFollow external link found."
+          },
+          "internal_links": {
+            "description": "Internal links are included",
+            "success": "At least one internal link is included.",
+            "error": "No internal links found."
+          }
+        },
+        "title": {
+          "keyword_at_start": {
+            "description": "Focus keyword at the start of the SEO title",
+            "success": "SEO title starts with the focus keyword.",
+            "error": "Focus keyword is not at the beginning of the SEO title."
+          },
+          "sentiment": {
+            "description": "Title has a positive or a negative sentiment",
+            "success": "SEO title includes emotional sentiment.",
+            "error": "SEO title lacks any emotional sentiment."
+          },
+          "power_words": {
+            "description": "Title contains 2 power words",
+            "success": "Title contains 2 or more power words.",
+            "warning": "Title contains 1 power word.",
+            "error": "No power words in title."
+          }
+        },
+        "clarity": {
+          "table_of_contents": {
+            "description": "Table of content is included",
+            "success": "Table of content is present.",
+            "error": "No table of content found."
+          },
+          "short_paragraphs": {
+            "description": "Short paragraphs are used",
+            "success": "Paragraphs are concise (≤5 lines).",
+            "warning": "Some paragraphs exceed 6–7 lines.",
+            "error": "Most paragraphs are long and hard to scan."
+          },
+          "media_content": {
+            "description": "Content contains images and/or videos",
+            "success": "Content includes at least one image or video.",
+            "error": "No images or videos included in content."
           }
         }
       }
+    },
+    "pricing": {
+    "title": "Pricing",
+    "subtitle": "Choose a plan that works for you",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "savePercent": "Save {{percent}}%",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "mostPopular": "Most Popular",
+    "getStarted": "Get Started",
+    "currentPlanLabel": "Your Current Plan",
+    "currentPlan": "Current Plan",
+    "choosePlan": "Choose Plan",
+    "upgradePlan": "Upgrade Plan",
+    "contactSales": "Contact Sales",
+    "comparePlans": "Compare Plans",
+    "faq": "Frequently Asked Questions",
+    "faqSubtitle": "Have questions? We're here to help."
+    },
+    "ai_chat": {
+      "title": "AI Assistance Chat",
+      "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",
+      "sample_response": "I'm currently in development. Soon I'll be able to help you with content creation, SEO optimization, and more!",
+      "message_placeholder": "Type your message here...",
+      "typing": "AI is typing...",
+      "coming_soon": "Coming Soon!",
+      "locked_message": "This feature is currently in development and will be available soon. Stay tuned for updates!",
+      "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
+      "notify_me": "Notify Me When Available"
+    },
+    "support": {
+      "title": "Contact Support",
+      "subtitle": "Complete the form below to file a ticket and our support team will get back to you as soon as possible.",
+      "status": "Online",
+      "openChat": "Open support chat",
+      "inputPlaceholder": "Type a message...",
+      "welcomeMessage": "Hello! How can I help you today?",
+      "sendMessage": "Send message",
+      "button": {
+        "tooltip": "Contact Support"
       },
-      "pricing": {
-        "title": "Pricing",
-        "subtitle": "Choose a plan that works for you",
-        "monthly": "Monthly",
-        "yearly": "Yearly",
-        "savePercent": "Save {{percent}}%",
-        "perMonth": "/month",
-        "perYear": "/year",
-        "mostPopular": "Most Popular",
-        "getStarted": "Get Started",
-        "currentPlanLabel": "Your Current Plan",
-        "currentPlan": "Current Plan",
-        "choosePlan": "Choose Plan",
-        "upgradePlan": "Upgrade Plan",
-        "contactSales": "Contact Sales",
-        "comparePlans": "Compare Plans",
-        "faq": "Frequently Asked Questions",
-        "faqSubtitle": "Have questions? We're here to help."
+      "form": {
+        "email": "Email Address",
+        "emailPlaceholder": "Enter your email address",
+        "subject": "Subject",
+        "subjectPlaceholder": "Brief description of your issue",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "message": "Message",
+        "messagePlaceholder": "Please describe your issue in detail...",
+        "submit": "Send Support Request",
+        "submitting": "Sending..."
       },
-      "profile": {
-        "title": "Profile",
-        "subtitle": "Manage your account settings and subscription",
-        "editProfile": "Edit Profile",
-        "form": {
-          "firstName": "First Name",
-          "lastName": "Last Name"
-        },
-        "tabs": {
-          "account": "Account",
-          "subscription": "Subscription",
-          "security": "Security"
-        },
-        "subscription": {
-          "current": "Current Subscription",
-          "viewDetails": "View Details",
-          "hideDetails": "Hide Details",
-          "manage": "Manage Subscription",
-          "upgrade": "Upgrade Plan",
-          "plans": "Subscription Plans",
-          "choosePlan": "Choose the plan that works best for you",
-          "currentPlan": "Current Plan",
-          "perMonth": "per month",
-          "expirationWarning": "Your Subscription is Expiring Soon",
-          "daysRemaining": "Your subscription will expire in {{days}} days. Renew now to avoid service interruption.",
-          "renewNow": "Renew Now",
-          "planNames": {
-            "free": "Free",
-            "basic": "Basic",
-            "professional": "Professional"
-          },
-          "features": {
-            "0": "Basic Article Generation",
-            "1": "Limited Analytics",
-            "2": "Standard Support",
-            "3": "5 Articles per month",
-            "4": "1GB Storage"
-          },
-          "planFeatures": {
-            "0": {
-              "0": "Basic Article Generation",
-              "1": "Limited Analytics",
-              "2": "Standard Support",
-              "3": "5 Articles per month",
-              "4": "1GB Storage"
-            },
-            "1": {
-              "0": "Advanced Article Generation",
-              "1": "Basic Analytics",
-              "2": "Standard Support",
-              "3": "20 Articles per month",
-              "4": "5GB Storage"
-            },
-            "2": {
-              "0": "All Basic Features",
-              "1": "Unlimited Article Generation",
-              "2": "Advanced Analytics",
-              "3": "Priority Support",
-              "4": "Custom Publishing Schedule"
-            }
-          }
-        },
-        "billing": {
-          "history": "Billing History",
-          "loading": "Loading invoices...",
-          "noHistory": "No billing history available",
-          "date": "Date",
-          "invoiceNumber": "Invoice Number",
-          "plan": "Plan",
-          "amount": "Amount",
-          "status": "Status",
-          "planMonthly": "{{plan}} Plan - Monthly",
-          "refreshSuccess": "Invoices refreshed successfully"
-        },
-        "errors": {
-          "refreshInvoices": "Failed to refresh invoices"
-        }
+      "categories": {
+        "technical": "Technical Issue",
+        "billing": "Billing & Subscription",
+        "feature": "Feature Request",
+        "bug": "Bug Report",
+        "account": "Account Management",
+        "integration": "Platform Integration",
+        "other": "Other"
       },
-      "ai_chat": {
-        "title": "AI Assistance Chat",
-        "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",
-        "sample_response": "I'm currently in development. Soon I'll be able to help you with content creation, SEO optimization, and more!",
-        "message_placeholder": "Type your message here...",
-        "typing": "AI is typing...",
-        "coming_soon": "Coming Soon!",
-        "locked_message": "This feature is currently in development and will be available soon. Stay tuned for updates!",
-        "unlock_message": "This feature will be available in the next update. Thank you for your patience!",
-        "notify_me": "Notify Me When Available"
-      },
-      "support": {
-        "title": "Contact Support",
-        "subtitle": "Complete the form below to file a ticket and our support team will get back to you as soon as possible.",
-        "status": "Online",
-        "openChat": "Open support chat",
-        "inputPlaceholder": "Type a message...",
-        "welcomeMessage": "Hello! How can I help you today?",
-        "sendMessage": "Send message",
-        "button": {
-          "tooltip": "Contact Support"
-        },
-        "form": {
-          "email": "Email Address",
-          "emailPlaceholder": "Enter your email address",
-          "subject": "Subject",
-          "subjectPlaceholder": "Brief description of your issue",
-          "category": "Category",
-          "categoryPlaceholder": "Select a category",
-          "message": "Message",
-          "messagePlaceholder": "Please describe your issue in detail...",
-          "submit": "Send Support Request",
-          "submitting": "Sending..."
-        },
-        "categories": {
-          "technical": "Technical Issue",
-          "billing": "Billing & Subscription",
-          "feature": "Feature Request",
-          "bug": "Bug Report",
-          "account": "Account Management",
-          "integration": "Platform Integration",
-          "other": "Other"
-        },
-        "success": {
-          "title": "Request Sent Successfully!",
-          "message": "We have received your question and our support team will answer you soon!",
-          "note": "You will receive a confirmation email shortly."
-        }
-      },
-      "welcome": {
-        "title": "Welcome to XBlog!",
-        "videoTitle": "How to use XBlog",
-        "learnTitle": "Learn how to use XBlog in minutes",
-        "description": "This quick tutorial will show you how to generate high-quality content, publish to your website, and schedule posts for maximum impact.",
-        "dontShowAgain": "Don't show this again",
-        "getStarted": "Get Started",
-        "feature1": {
-          "title": "Generate Content",
-          "description": "Create SEO-optimized articles with AI"
-        },
-        "feature2": {
-          "title": "Publish",
-          "description": "Publish directly to your website"
-        },
-        "feature3": {
-          "title": "Schedule",
-          "description": "Plan your content calendar"
-        }
-      },
-      "premium": {
-        "label": "Pro Plan",
-        "title": "Unlock Premium Features",
-        "description": "Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.",
-        "upgradeButton": "Upgrade to Pro",
-        "features": {
-          "unlimitedArticles": "Unlimited article generation",
-          "seoTools": "Advanced SEO optimization tools",
-          "prioritySupport": "Priority customer support"
-        }
-      },
-      "comingSoon": {
-        "title": "Coming Soon",
-        "description": "We're constantly improving our platform. Here's what's coming next:",
-        "stayTuned": "Stay tuned for more exciting features!",
-        "eta": {
-          "soon": "Coming soon",
-          "inProgress": "In progress",
-          "beta": "Beta"
-        },
-        "features": {
-          "templates": {
-            "title": "Built-in Templates",
-            "description": "Create articles from pre-designed templates for various content types"
-          },
-          "bulk": {
-            "title": "Bulk Generation",
-            "description": "Generate multiple articles in a single batch to save time"
-          },
-          "analytics": {
-            "title": "Advanced Analytics",
-            "description": "Get detailed insights into your content performance"
-          }
-        }
-      },
-      "calendar": {
-        "schedule": "Schedule",
-        "scheduling": "Scheduling...",
-        "unschedule": "Unschedule",
-        "unscheduling": "Unscheduling...",
-        "articleDetails": "Article Details",
-        "scheduleArticles": "Schedule Articles",
-        "scheduledArticles": "Scheduled Articles",
-        "selectArticles": "Select articles to schedule:",
-        "noArticles": "No articles available for scheduling",
-        "noTime": "No specific time",
-        "clickToViewDetails": "Click on any article to view details",
-        "scheduledSuccessfully": "Articles scheduled successfully",
-        "unscheduledSuccessfully": "Article unscheduled successfully",
-        "schedulingFailed": "Failed to schedule articles. Please try again.",
-        "unschedulingFailed": "Failed to unschedule article. Please try again.",
-        "loading": "Loading your calendar...",
-        "previousMonth": "Previous month",
-        "nextMonth": "Next month",
-        "addArticle": "Add article",
-        "articlePlaceholder": "Article #{{id}}",
-        "scheduleInfo": "Schedule Information",
-        "scheduledDate": "Scheduled Date",
-        "notScheduled": "Not scheduled",
-        "publishedDate": "Published Date",
-        "noArticlesTitle": "No Articles Available",
-        "noArticlesDescription": "You don't have any articles ready for scheduling. Generate new content first.",
-        "generateArticleButton": "Generate New Article",
-        "days": {
-          "sunday": "Sun",
-          "monday": "Mon",
-          "tuesday": "Tue",
-          "wednesday": "Wed",
-          "thursday": "Thu",
-          "friday": "Fri",
-          "saturday": "Sat"
-        }
-      },
-      "upgrade": {
-        "refreshSuccess": "Data refreshed successfully!",
-        "refreshError": "Failed to refresh data. Please try again.",
-        "invoicesRefreshed": "Invoices refreshed successfully",
-        "invoicesRefreshError": "Failed to refresh invoices",
-        "downloadInvoice": "Download PDF Invoice",
-        "viewInvoice": "View Invoice Details"
-      },
-      "invoice": {
-        "downloadNotSupported": "PDF download is not supported in your browser",
-        "downloadingPdf": "Generating PDF invoice...",
-        "downloadSuccess": "Invoice downloaded successfully!",
-        "downloadError": "Failed to download invoice. Please try again.",
-        "notFound": "Invoice not found.",
-        "accessDenied": "Access denied. You do not have permission to download this invoice.",
-        "serverError": "Server error. Please try again later."
-      },
-      "common": {
-        "cancel": "Cancel",
-        "close": "Close",
-        "save": "Save",
-        "edit": "Edit",
-        "delete": "Delete",
-        "confirm": "Confirm",
-        "status": "Status",
-        "description": "Description",
-        "created": "Created",
-        "updated": "Updated",
-        "published": "Published",
-        "scheduled": "Scheduled",
-        "draft": "Draft",
-        "author": "Author",
-        "title": "Title",
-        "content": "Content",
-        "details": "Details"
-      },
-      "profile": {
-        "title": "My Profile",
-        "subtitle": "Manage your account settings and preferences",
-        "tabs": {
-          "account": "Account Details",
-          "subscription": "Subscription",
-          "security": "Security",
-          "notifications": "Notifications"
-        },
-        "subscription": {
-          "plans": "Subscription Plans",
-          "choosePlan": "Choose the plan that best fits your needs"
-        },
-        "billing": {
-          "history": "Billing History",
-          "date": "Date",
-          "amount": "Amount",
-          "status": "Status",
-          "actions": "Actions",
-          "view": "View",
-          "noHistory": "No billing history available"
-        },
-        "notifications": {
-          "comingSoon": "Notification settings will be available soon."
-        }
-      },
-      "demo": {
+      "success": {
+        "title": "Request Sent Successfully!",
+        "message": "We have received your question and our support team will answer you soon!",
+        "note": "You will receive a confirmation email shortly."
+      }
+    },
+    "demo": {
       "title": "Book a Demo",
       "subtitle": "Schedule a personalized demo with our team to see how we can help your business grow",
       "steps": {
@@ -825,81 +591,111 @@
         "benefit2": "See real-time examples of how our platform can solve your specific challenges",
         "benefit3": "Receive a custom implementation plan tailored to your business needs"
       },
+      "validation": {
+        "fullNameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "companyRequired": "Company name is required",
+        "teamSizeRequired": "Team size is required",
+        "dateTimeRequired": "Date and time is required"
+      },
       "onboarding": {
-        "welcome": "Welcome to XBlog!",
-        "choosePlan": "Choose Your Plan",
-        "welcomeSubtitle": "Let's get to know you better so we can personalize your experience.",
-        "planSubtitle": "Select a plan that works best for your content creation needs.",
-        "steps": {
-          "preferences": "Your Preferences",
-          "subscription": "Subscription Plan"
+        "title": "Guided Onboarding",
+        "description": "Our team will guide you step by step to set up your account and start using our platform effectively."
+      }
+    },
+    "welcome": {
+      "title": "Welcome to XBlog!",
+      "videoTitle": "How to use XBlog",
+      "learnTitle": "Learn how to use XBlog in minutes",
+      "description": "This quick tutorial will show you how to generate high-quality content, publish to your website, and schedule posts for maximum impact.",
+      "dontShowAgain": "Don't show this again",
+      "getStarted": "Get Started",
+      "feature1": {
+        "title": "Generate Content",
+        "description": "Create SEO-optimized articles with AI"
+      },
+      "feature2": {
+        "title": "Publish",
+        "description": "Publish directly to your website"
+      },
+      "feature3": {
+        "title": "Schedule",
+        "description": "Plan your content calendar"
+      }
+    },
+    "premium": {
+      "label": "Pro Plan",
+      "title": "Unlock Premium Features",
+      "description": "Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.",
+      "upgradeButton": "Upgrade to Pro",
+      "features": {
+        "unlimitedArticles": "Unlimited article generation",
+        "seoTools": "Advanced SEO optimization tools",
+        "prioritySupport": "Priority customer support"
+      }
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "description": "We're constantly improving our platform. Here's what's coming next:",
+      "stayTuned": "Stay tuned for more exciting features!",
+      "eta": {
+        "soon": "Coming soon",
+        "inProgress": "In progress",
+        "beta": "Beta"
+      },
+      "features": {
+        "templates": {
+          "title": "Built-in Templates",
+          "description": "Create articles from pre-designed templates for various content types"
         },
-        "interests": {
-          "title": "What are you interested in?",
-          "subtitle": "Select all that apply. This helps us personalize your dashboard.",
-          "options": {
-            "blogging": "Blogging",
-            "marketing": "Content Marketing",
-            "seo": "SEO Optimization",
-            "social": "Social Media",
-            "analytics": "Analytics",
-            "ecommerce": "E-commerce"
-          }
+        "bulk": {
+          "title": "Bulk Generation",
+          "description": "Generate multiple articles in a single batch to save time"
         },
-        "referral": {
-          "title": "How did you hear about us?",
-          "options": {
-            "search": "Search Engine",
-            "social": "Social Media",
-            "friend": "Friend/Colleague",
-            "ad": "Advertisement",
-            "blog": "Blog/Article",
-            "other": "Other"
-          }
-        },
-        "plans": {
-          "free": {
-            "name": "Free",
-            "price": "0",
-            "billing": "forever",
-            "features": [
-              "Basic article generation",
-              "Limited to 5 articles/month",
-              "Standard support",
-              "Basic analytics"
-            ]
-          },
-          "pro": {
-            "name": "Pro",
-            "price": "19",
-            "billing": "monthly",
-            "features": [
-              "Unlimited article generation",
-              "Advanced SEO tools",
-              "Priority support",
-              "Comprehensive analytics",
-              "Custom publishing schedule"
-            ]
-          },
-          "business": {
-            "name": "Business",
-            "price": "49",
-            "billing": "monthly",
-            "features": [
-              "Everything in Pro",
-              "Team collaboration",
-              "API access",
-              "White-label options",
-              "Dedicated account manager"
-            ]
-          },
-          "popular": "Popular"
-        },
-        "loading": "Preparing your experience...",
-        "buttons": {
-          "next": "Next",
-          "complete": "Complete Setup"
+        "analytics": {
+          "title": "Advanced Analytics",
+          "description": "Get detailed insights into your content performance"
         }
       }
+    },
+    "calendar": {
+      "schedule": "Schedule",
+      "scheduling": "Scheduling...",
+      "unschedule": "Unschedule",
+      "unscheduling": "Unscheduling...",
+      "articleDetails": "Article Details",
+      "scheduleArticles": "Schedule Articles",
+      "scheduledArticles": "Scheduled Articles",
+      "selectArticles": "Select articles to schedule:",
+      "noArticles": "No articles available for scheduling",
+      "noTime": "No specific time",
+      "clickToViewDetails": "Click on any article to view details",
+      "scheduledSuccessfully": "Articles scheduled successfully",
+      "unscheduledSuccessfully": "Article unscheduled successfully",
+      "schedulingFailed": "Failed to schedule articles. Please try again.",
+      "unschedulingFailed": "Failed to unschedule article. Please try again.",
+      "loading": "Loading your calendar...",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "addArticle": "Add article",
+      "articlePlaceholder": "Article #{{id}}",
+      "scheduleInfo": "Schedule Information",
+      "scheduledDate": "Scheduled Date",
+      "notScheduled": "Not scheduled",
+      "publishedDate": "Published Date",
+      "noArticlesTitle": "No Articles Available",
+      "noArticlesDescription": "You don't have any articles ready for scheduling. Generate new content first.",
+      "generateArticleButton": "Generate New Article",
+      "days": {
+        "sunday": "Sun",
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat"
+      }
     }
+  }
 }

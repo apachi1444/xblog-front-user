@@ -17,7 +17,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import InputAdornment from '@mui/material/InputAdornment';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -31,7 +30,7 @@ import { ARTICLE_TEMPLATES, TEMPLATE_CATEGORIES } from './template-data';
 // ----------------------------------------------------------------------
 
 // Feature flag to control whether the Templates feature is locked or available
-const IS_FEATURE_LOCKED = false;
+const IS_FEATURE_LOCKED = true;
 
 export function TemplateView() {
   const navigate = useNavigate();

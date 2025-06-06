@@ -301,6 +301,550 @@
       "sample_response": "Actualmente estoy en desarrollo. ¡Pronto podré ayudarte con la creación de contenido, optimización SEO y más!",
       "message_placeholder": "Escribe tu mensaje aquí...",
       "typing": "IA está escribiendo..."
+    },
+    "navigation": {
+      "dashboard": "Panel de Control",
+      "generate": "Generar",
+      "blog": "Blog",
+      "calendar": "Calendario",
+      "websites": "Sitios Web",
+      "profile": "Perfil",
+      "support": "Soporte",
+      "logout": "Cerrar Sesión",
+      "settings": "Configuración"
+    },
+    "dashboard": {
+      "title": "Panel de Control",
+      "subtitle": "Gestiona tu contenido y supervisa el rendimiento",
+      "quickActions": "Acciones Rápidas",
+      "generateArticle": "Generar Artículo",
+      "viewBlog": "Ver Blog",
+      "manageWebsites": "Gestionar Sitios Web",
+      "stats": {
+        "totalArticles": "Total de Artículos",
+        "publishedArticles": "Artículos Publicados",
+        "draftArticles": "Borradores",
+        "scheduledArticles": "Programados"
+      },
+      "recentActivity": "Actividad Reciente",
+      "noActivity": "No hay actividad reciente",
+      "welcomeBack": "¡Bienvenido de vuelta!",
+      "getStarted": "Empezar",
+      "createFirst": "Crear tu primer artículo"
+    },
+    "generate": {
+      "title": "Generar Nuevo Artículo",
+      "subtitle": "Crea contenido optimizado para SEO con IA",
+      "steps": {
+        "keywords": "Palabras Clave",
+        "content": "Contenido",
+        "seo": "SEO",
+        "publish": "Publicar"
+      },
+      "keywords": {
+        "primary": "Palabra Clave Principal",
+        "secondary": "Palabras Clave Secundarias",
+        "add": "Agregar palabra clave",
+        "placeholder": "Ingresa una palabra clave"
+      },
+      "content": {
+        "title": "Título del Artículo",
+        "sections": "Secciones del Artículo",
+        "generate": "Generar Contenido",
+        "regenerate": "Regenerar",
+        "edit": "Editar"
+      },
+      "seo": {
+        "title": "Optimización SEO",
+        "metaTitle": "Título Meta",
+        "metaDescription": "Meta Descripción",
+        "urlSlug": "URL Slug",
+        "score": "Puntuación SEO"
+      },
+      "publish": {
+        "title": "Publicar Artículo",
+        "selectWebsite": "Seleccionar Sitio Web",
+        "publishNow": "Publicar Ahora",
+        "saveDraft": "Guardar como Borrador",
+        "schedule": "Programar"
+      }
+    },
+    "blog": {
+      "title": "Mis Artículos",
+      "subtitle": "Gestiona todos tus artículos de blog",
+      "filters": {
+        "all": "Todos",
+        "published": "Publicados",
+        "draft": "Borradores",
+        "scheduled": "Programados"
+      },
+      "search": "Buscar artículos...",
+      "noArticles": "No se encontraron artículos",
+      "createFirst": "Crear tu primer artículo",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "publish": "Publicar",
+        "schedule": "Programar"
+      }
+    },
+    "calendar": {
+      "title": "Calendario de Contenido",
+      "subtitle": "Programa y gestiona tu calendario de publicaciones",
+      "schedule": "Programar",
+      "unschedule": "Desprogramar",
+      "unscheduling": "Desprogramando...",
+      "articleDetails": "Detalles del Artículo",
+      "scheduleArticles": "Programar Artículos para {{date}}",
+      "selectArticles": "Selecciona artículos para programar:",
+      "noArticles": "No hay artículos disponibles para programar",
+      "scheduledSuccessfully": "Artículos programados exitosamente",
+      "unscheduledSuccessfully": "Artículo desprogramado exitosamente",
+      "schedulingFailed": "Error al programar artículos. Por favor, inténtalo de nuevo.",
+      "unschedulingFailed": "Error al desprogramar artículo. Por favor, inténtalo de nuevo.",
+      "loading": "Cargando tu calendario...",
+      "previousMonth": "Mes anterior",
+      "nextMonth": "Mes siguiente",
+      "addArticle": "Agregar artículo",
+      "articlePlaceholder": "Artículo #{{id}}",
+      "scheduleInfo": "Información de Programación",
+      "scheduledDate": "Fecha Programada",
+      "notScheduled": "No programado",
+      "publishedDate": "Fecha de Publicación",
+      "noArticlesTitle": "No Hay Artículos Disponibles",
+      "noArticlesDescription": "No tienes artículos listos para programar. Genera nuevo contenido primero.",
+      "generateArticleButton": "Generar Nuevo Artículo",
+      "days": {
+        "sunday": "Dom",
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mié",
+        "thursday": "Jue",
+        "friday": "Vie",
+        "saturday": "Sáb"
+      }
+    },
+    "resources": {
+      "websites": "Sitios Web",
+      "articles": "Artículos",
+      "websitesRemaining": "{{count}} sitios web restantes",
+      "articlesRemaining": "{{count}} artículos restantes"
+    },
+    "websites": {
+      "title": "Mis Sitios Web",
+      "subtitle": "Gestiona tus sitios web conectados",
+      "addNew": "Agregar nuevo sitio web",
+      "noWebsites": "No hay sitios web conectados",
+      "connectFirst": "Conecta tu primer sitio web"
+    },
+    "store": {
+      "title": "Conectar Tu Tienda",
+      "subtitle": "Elige tu plataforma y conecta tu tienda",
+      "selectPlatform": "Seleccionar Plataforma",
+      "selectPlatformSubtitle": "Elige la plataforma en la que está construido tu sitio web para optimizar la integración",
+      "selectPlatformRequired": "Por favor selecciona una plataforma para continuar",
+      "selectPlatformFirst": "Por favor selecciona una plataforma primero",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "backToStores": "Volver a Tiendas",
+      "connect": "Conectar Tienda",
+      "connecting": "Conectando...",
+      "success": "¡Tienda conectada exitosamente!",
+      "error": "Error al conectar la tienda. Por favor, inténtalo de nuevo.",
+      "formErrors": "Por favor corrige los errores del formulario antes de enviar",
+      "integrationTitle": "Integración {{platform}}",
+      "integrationSubtitle": "Por favor proporciona los detalles de tu sitio web {{platform}}.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
+      },
+      "wordpress": {
+        "url": "URL de WordPress",
+        "urlPlaceholder": "https://tu-sitio-wordpress.com",
+        "username": "Nombre de usuario de WordPress",
+        "usernamePlaceholder": "admin",
+        "password": "Contraseña de WordPress",
+        "passwordPlaceholder": "••••••••",
+        "description": "Conecta tu sitio de WordPress"
+      },
+      "shopify": {
+        "storeName": "Nombre de la tienda Shopify",
+        "storeNamePlaceholder": "tu-tienda",
+        "apiKey": "Clave API",
+        "apiKeyPlaceholder": "Ingresa tu clave API",
+        "apiSecret": "Secreto API",
+        "apiSecretPlaceholder": "Ingresa tu secreto API",
+        "description": "Conecta tu tienda Shopify"
+      },
+      "wix": {
+        "adminUrl": "URL de Admin Wix",
+        "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+        "consumerKey": "Clave de Consumidor",
+        "consumerKeyPlaceholder": "Ingresa tu clave de consumidor",
+        "consumerSecret": "Secreto de Consumidor",
+        "consumerSecretPlaceholder": "Ingresa tu secreto de consumidor",
+        "description": "Conecta tu tienda Wix"
+      }
+    },
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Gestiona la configuración de tu cuenta y suscripción",
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nombre",
+        "lastName": "Apellido"
+      },
+      "tabs": {
+        "account": "Cuenta",
+        "subscription": "Suscripción",
+        "security": "Seguridad"
+      },
+      "subscription": {
+        "current": "Suscripción Actual",
+        "viewDetails": "Ver Detalles",
+        "hideDetails": "Ocultar Detalles",
+        "manage": "Gestionar Suscripción",
+        "upgrade": "Actualizar",
+        "plans": "Planes de Suscripción",
+        "choosePlan": "Elige el plan que mejor se adapte a tus necesidades",
+        "currentPlan": "Plan Actual",
+        "perMonth": "por mes",
+        "planNames": {
+          "free": "Gratuito",
+          "basic": "Básico",
+          "professional": "Profesional"
+        },
+        "planFeatures": {
+          "0": "Generación Básica de Artículos",
+          "1": "Análisis Limitados",
+          "2": "Soporte Estándar",
+          "3": "5 Artículos por mes",
+          "4": "1GB de Almacenamiento"
+        }
+      },
+      "billing": {
+        "history": "Historial de Facturación",
+        "loading": "Cargando facturas...",
+        "noHistory": "No hay historial de facturación disponible",
+        "date": "Fecha",
+        "invoiceNumber": "Número de Factura",
+        "plan": "Plan",
+        "amount": "Cantidad",
+        "status": "Estado",
+        "planMonthly": "Plan {{plan}} - Mensual",
+        "refreshSuccess": "Facturas actualizadas exitosamente"
+      },
+      "errors": {
+        "refreshInvoices": "Error al actualizar facturas"
+      }
+    },
+    "common": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "select": "Seleccionar",
+      "selected": "Seleccionado",
+      "waiting": "esperando entrada",
+      "close": "Cerrar",
+      "status": "Estado",
+      "description": "Descripción",
+      "created": "Creado"
+    },
+    "seo": {
+      "sections": {
+        "core_essentials": "Fundamentos SEO",
+        "boosters": "Potenciadores SEO",
+        "title_optimization": "Optimización del Título",
+        "content_clarity": "Claridad del Contenido"
+      },
+      "status": {
+        "pending": "Esta verificación está esperando que completes los campos requeridos",
+        "error": "Este elemento necesita atención para mejorar tu puntuación SEO",
+        "warning": "Este elemento podría mejorarse para un mejor SEO",
+        "success": "Este elemento está optimizado para SEO"
+      },
+      "performance_score": "Puntuación de Rendimiento SEO",
+      "points": "puntos",
+      "tooltip": {
+        "score": "{{score}} de {{total}} puntos posibles",
+        "progress": "{{progress}}% completado"
+      },
+      "rating": {
+        "needs_improvement": "Necesita Mejora",
+        "good": "Bueno",
+        "excellent": "Excelente"
+      },
+      "toast": {
+        "already_optimized": "¡Este elemento ya está optimizado!",
+        "optimization_not_available": "La optimización aún no está disponible para este elemento.",
+        "not_ready": "Este elemento aún no está listo para optimización.",
+        "optimizing": "Optimizando {{field}}...",
+        "optimized_success": "¡{{field}} optimizado exitosamente!",
+        "optimization_failed": "Error al optimizar {{field}}. Por favor, inténtalo de nuevo."
+      },
+      "criteria": {
+        "core": {
+          "keyword_in_title": {
+            "description": "Palabra clave principal usada en el título SEO",
+            "success": "La palabra clave principal se usa en el título SEO.",
+            "error": "La palabra clave principal no está presente en el título SEO."
+          },
+          "keyword_in_meta": {
+            "description": "Palabra clave principal usada en la meta descripción",
+            "success": "La palabra clave principal está presente en la meta descripción.",
+            "error": "La palabra clave principal no está presente en la meta descripción."
+          },
+          "keyword_in_url": {
+            "description": "Palabra clave principal usada en la URL",
+            "success": "La palabra clave principal se usa en la URL.",
+            "error": "La palabra clave principal no se usa en la URL."
+          },
+          "keyword_in_first_10": {
+            "description": "La palabra clave principal aparece en el primer 10% del contenido",
+            "success": "La palabra clave principal aparece en el primer 10% del contenido.",
+            "error": "La palabra clave principal no aparece en el primer 10% del contenido."
+          },
+          "keyword_in_content": {
+            "description": "Palabra clave principal encontrada en el contenido",
+            "success": "La palabra clave principal está presente en todo el contenido.",
+            "error": "La palabra clave principal no se encuentra en el contenido."
+          },
+          "content_length": {
+            "description": "Longitud general del contenido",
+            "success": "El contenido tiene 2500 palabras o más.",
+            "warning": "El contenido tiene entre 1000 y 2499 palabras.",
+            "error": "El contenido tiene menos de 1000 palabras."
+          }
+        },
+        "boosters": {
+          "keyword_in_subheadings": {
+            "description": "Palabra clave principal usada en subtítulos",
+            "success": "La palabra clave principal aparece en al menos un subtítulo.",
+            "error": "La palabra clave principal no se encuentra en los subtítulos."
+          },
+          "keyword_density": {
+            "description": "Frecuencia de aparición de la palabra clave principal",
+            "success": "La densidad de la palabra clave principal está entre 1% y 1.5%.",
+            "warning": "La densidad de la palabra clave principal es ligeramente baja o ligeramente alta (entre 0.5%–0.99% o 1.51%–2.5%).",
+            "error": "La densidad de la palabra clave principal es muy baja (menos de 0.5%) o demasiado alta (más de 2.5%)."
+          },
+          "url_slug_length": {
+            "description": "El slug de URL contiene un número razonable de palabras descriptivas",
+            "success": "El slug de URL contiene 3 a 5 palabras.",
+            "warning": "El slug de URL contiene 2 o 6 palabras.",
+            "error": "El slug de URL contiene menos de 2 palabras o más de 6 palabras."
+          },
+          "external_links": {
+            "description": "Se incluyen enlaces externos",
+            "success": "Se incluye al menos un enlace externo.",
+            "error": "No se encontraron enlaces externos."
+          },
+          "dofollow_links": {
+            "description": "Al menos un enlace externo con DoFollow encontrado en tu contenido",
+            "success": "Un enlace externo DoFollow está presente.",
+            "error": "No se encontraron enlaces externos DoFollow."
+          },
+          "internal_links": {
+            "description": "Se incluyen enlaces internos",
+            "success": "Se incluye al menos un enlace interno.",
+            "error": "No se encontraron enlaces internos."
+          }
+        },
+        "title": {
+          "keyword_at_start": {
+            "description": "Palabra clave principal al inicio del título SEO",
+            "success": "El título SEO comienza con la palabra clave principal.",
+            "error": "La palabra clave principal no está al inicio del título SEO."
+          },
+          "sentiment": {
+            "description": "El título tiene un sentimiento positivo o negativo",
+            "success": "El título SEO incluye sentimiento emocional.",
+            "error": "El título SEO carece de sentimiento emocional."
+          },
+          "power_words": {
+            "description": "El título contiene 2 palabras poderosas",
+            "success": "El título contiene 2 o más palabras poderosas.",
+            "warning": "El título contiene 1 palabra poderosa.",
+            "error": "No hay palabras poderosas en el título."
+          }
+        },
+        "clarity": {
+          "table_of_contents": {
+            "description": "Se incluye una tabla de contenidos",
+            "success": "Una tabla de contenidos está presente.",
+            "error": "No se encontró tabla de contenidos."
+          },
+          "short_paragraphs": {
+            "description": "Se usan párrafos cortos",
+            "success": "Los párrafos son concisos (≤5 líneas).",
+            "warning": "Algunos párrafos exceden 6-7 líneas.",
+            "error": "La mayoría de los párrafos son largos y difíciles de escanear."
+          },
+          "media_content": {
+            "description": "El contenido contiene imágenes y/o videos",
+            "success": "El contenido incluye al menos una imagen o video.",
+            "error": "No se incluyen imágenes o videos en el contenido."
+          }
+        }
+      }
+    },
+    "support": {
+      "title": "Contactar Soporte",
+      "subtitle": "Completa el formulario a continuación para crear un ticket y nuestro equipo de soporte te responderá lo antes posible.",
+      "button": {
+        "tooltip": "Contactar Soporte"
+      },
+      "form": {
+        "email": "Dirección de Correo Electrónico",
+        "emailPlaceholder": "Ingresa tu dirección de correo electrónico",
+        "subject": "Asunto",
+        "subjectPlaceholder": "Breve descripción de tu problema",
+        "category": "Categoría",
+        "categoryPlaceholder": "Selecciona una categoría",
+        "message": "Mensaje",
+        "messagePlaceholder": "Por favor describe tu problema en detalle...",
+        "submit": "Enviar Solicitud de Soporte",
+        "submitting": "Enviando..."
+      },
+      "categories": {
+        "technical": "Problema Técnico",
+        "billing": "Facturación y Suscripción",
+        "feature": "Solicitud de Función",
+        "bug": "Reporte de Error",
+        "account": "Gestión de Cuenta",
+        "integration": "Integración de Plataforma",
+        "other": "Otro"
+      },
+      "success": {
+        "title": "¡Solicitud Enviada Exitosamente!",
+        "message": "Hemos recibido tu pregunta y nuestro equipo de soporte te responderá pronto!",
+        "note": "Recibirás un correo de confirmación en breve."
+      }
+    },
+    "demo": {
+      "title": "Reservar una Demo",
+      "subtitle": "Programa una demo personalizada con nuestro equipo para ver cómo podemos ayudar a tu negocio a crecer",
+      "steps": {
+        "basicInfo": "Información Básica",
+        "chooseTime": "Elegir Hora",
+        "confirmation": "Confirmación"
+      },
+      "form": {
+        "fullName": "Nombre Completo",
+        "email": "Correo Electrónico",
+        "company": "Nombre de la Empresa",
+        "teamSize": "Tamaño del Equipo",
+        "teamSizePlaceholder": "Selecciona el tamaño de tu equipo",
+        "teamSizeOptions": {
+          "small": "1-10 empleados",
+          "medium": "11-50 empleados",
+          "large": "51-200 empleados",
+          "enterprise": "201+ empleados"
+        },
+        "dateTime": "Fecha y Hora Preferida",
+        "message": "Mensaje Adicional",
+        "messagePlaceholder": "Cuéntanos sobre tus necesidades y qué te gustaría aprender en la demo..."
+      },
+      "buttons": {
+        "next": "Siguiente",
+        "back": "Atrás",
+        "submit": "Programar Demo",
+        "submitting": "Programando..."
+      },
+      "confirmation": {
+        "title": "¡Demo Programada Exitosamente!",
+        "message": "Gracias por programar una demo con nosotros. Hemos enviado un correo de confirmación con todos los detalles.",
+        "nextSteps": "Qué sigue:",
+        "step1": "Recibirás una invitación de calendario para la hora programada",
+        "step2": "Nuestro equipo preparará una demo personalizada basada en tus necesidades",
+        "step3": "Te enviaremos un recordatorio 1 hora antes de la demo programada",
+        "bookAnother": "Reservar Otra Demo"
+      },
+      "emailSent": {
+        "title": "¡Demo Programada!",
+        "message": "Te hemos enviado un correo de confirmación con todos los detalles."
+      },
+      "video": {
+        "title": "¿Por Qué Reservar una Demo?",
+        "description": "Ve cómo nuestro equipo brinda soporte excepcional y respuestas rápidas para ayudarte a maximizar tus resultados.",
+        "watchButton": "Ver Video de Demo",
+        "watchFullScreen": "Ver en pantalla completa",
+        "dialogTitle": "Cómo Funciona Nuestro Equipo de Soporte",
+        "dialogDescription": "Nuestro equipo de soporte está disponible 24/7 para ayudarte con cualquier pregunta o problema que puedas tener. Nos enorgullecemos de nuestros tiempos de respuesta rápidos y soluciones personalizadas."
+      },
+      "benefits": {
+        "title": "Beneficios de Reservar una Demo",
+        "benefit1": "Obtén orientación personalizada de nuestro equipo de expertos",
+        "benefit2": "Ve ejemplos en tiempo real de cómo nuestra plataforma puede resolver tus desafíos específicos",
+        "benefit3": "Recibe un plan de implementación personalizado adaptado a las necesidades de tu negocio"
+      },
+      "validation": {
+        "fullNameRequired": "El nombre completo es requerido",
+        "emailRequired": "El correo electrónico es requerido",
+        "emailInvalid": "Formato de correo electrónico inválido",
+        "companyRequired": "El nombre de la empresa es requerido",
+        "teamSizeRequired": "El tamaño del equipo es requerido",
+        "dateTimeRequired": "La fecha y hora son requeridas"
+      },
+      "onboarding": {
+        "title": "Incorporación Guiada",
+        "description": "Nuestro equipo te guiará paso a paso para configurar tu cuenta y comenzar a usar nuestra plataforma de manera efectiva."
+      }
+    },
+    "welcome": {
+      "title": "¡Bienvenido a XBlog!",
+      "videoTitle": "Cómo usar XBlog",
+      "learnTitle": "Aprende a usar XBlog en minutos",
+      "description": "Este tutorial rápido te mostrará cómo generar contenido de alta calidad, publicar en tu sitio web y programar artículos para máximo impacto.",
+      "dontShowAgain": "No mostrar de nuevo",
+      "getStarted": "Empezar",
+      "feature1": {
+        "title": "Generar Contenido",
+        "description": "Crea artículos optimizados para SEO con IA"
+      },
+      "feature2": {
+        "title": "Publicar",
+        "description": "Publica directamente en tu sitio web"
+      },
+      "feature3": {
+        "title": "Programar",
+        "description": "Planifica tu calendario de contenido"
+      }
+    },
+    "premium": {
+      "label": "Plan Pro",
+      "title": "Desbloquea Funciones Premium",
+      "description": "Actualiza a Pro y obtén artículos ilimitados, herramientas SEO avanzadas y soporte prioritario.",
+      "upgradeButton": "Actualizar a Pro",
+      "features": {
+        "unlimitedArticles": "Generación de artículos ilimitada",
+        "seoTools": "Herramientas de optimización SEO avanzadas",
+        "prioritySupport": "Soporte al cliente prioritario"
+      }
+    },
+    "comingSoon": {
+      "title": "Próximamente",
+      "description": "Constantemente mejoramos nuestra plataforma. Esto es lo que viene:",
+      "stayTuned": "¡Mantente atento para más funciones emocionantes!",
+      "eta": {
+        "soon": "Próximamente",
+        "inProgress": "En progreso",
+        "beta": "Beta"
+      },
+      "features": {
+        "templates": {
+          "title": "Plantillas Integradas",
+          "description": "Crea artículos desde plantillas prediseñadas para diferentes tipos de contenido"
+        },
+        "bulk": {
+          "title": "Generación Masiva",
+          "description": "Genera múltiples artículos de una vez para ahorrar tiempo"
+        },
+        "analytics": {
+          "title": "Análisis Avanzados",
+          "description": "Obtén información detallada sobre el rendimiento de tu contenido"
+        }
+      }
     }
   }
 }

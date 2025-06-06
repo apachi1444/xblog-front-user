@@ -23,12 +23,12 @@ const getInitialLanguage = (): string => {
 
 i18n.use(initReactI18next).init({
   resources: {
-    en: { ...enJSON },
-    pt: { ...ptJSON },
-    fr: { ...frJSON },
-    ar: {...arJSON },
-    ru: {...ruJSON },
-    es: {...esJSON }
+    en: enJSON,
+    pt: ptJSON,
+    fr: frJSON,
+    ar: arJSON,
+    ru: ruJSON,
+    es: esJSON
   },
   lng: getInitialLanguage(),
   fallbackLng: "en",

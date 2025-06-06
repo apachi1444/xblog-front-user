@@ -190,40 +190,6 @@
         }
       }
     },
-    "calendar": {
-      "schedule": "Planifier",
-      "unschedule": "Déplanifier",
-      "unscheduling": "Déplanification...",
-      "articleDetails": "Détails de l'Article",
-      "scheduleArticles": "Planifier des Articles pour le {{date}}",
-      "selectArticles": "Sélectionnez les articles à planifier :",
-      "noArticles": "Aucun article disponible pour la planification",
-      "scheduledSuccessfully": "Articles planifiés avec succès",
-      "unscheduledSuccessfully": "Article déplanifié avec succès",
-      "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",
-      "unschedulingFailed": "Échec de la déplanification de l'article. Veuillez réessayer.",
-      "loading": "Chargement de votre calendrier...",
-      "previousMonth": "Mois précédent",
-      "nextMonth": "Mois suivant",
-      "addArticle": "Ajouter un article",
-      "articlePlaceholder": "Article #{{id}}",
-      "scheduleInfo": "Informations de Planification",
-      "scheduledDate": "Date Planifiée",
-      "notScheduled": "Non planifié",
-      "publishedDate": "Date de Publication",
-      "noArticlesTitle": "Aucun Article Disponible",
-      "noArticlesDescription": "Vous n'avez aucun article prêt pour la planification. Générez d'abord du nouveau contenu.",
-      "generateArticleButton": "Générer un Nouvel Article",
-      "days": {
-        "sunday": "Dim",
-        "monday": "Lun",
-        "tuesday": "Mar",
-        "wednesday": "Mer",
-        "thursday": "Jeu",
-        "friday": "Ven",
-        "saturday": "Sam"
-      }
-    },
     "resources": {
       "websites": "Sites Web",
       "articles": "Articles",
@@ -334,17 +300,6 @@
       "errors": {
         "refreshInvoices": "Échec de la mise à jour des factures"
       }
-    },
-    "common": {
-      "save": "Enregistrer",
-      "cancel": "Annuler",
-      "select": "Sélectionner",
-      "selected": "Sélectionné",
-      "waiting": "en attente de saisie",
-      "close": "Fermer",
-      "status": "Statut",
-      "description": "Description",
-      "created": "Créé le"
     },
     "calendar": {
       "schedule": "Planifier",
@@ -528,6 +483,76 @@
         "title": "Demande Envoyée avec Succès !",
         "message": "Nous avons reçu votre question et notre équipe de support vous répondra bientôt !",
         "note": "Vous recevrez un email de confirmation sous peu."
+      }
+    },
+    "demo": {
+      "title": "Réserver une Démo",
+      "subtitle": "Planifiez une démo personnalisée avec notre équipe pour voir comment nous pouvons aider votre entreprise à croître",
+      "steps": {
+        "basicInfo": "Informations de Base",
+        "chooseTime": "Choisir l'Heure",
+        "confirmation": "Confirmation"
+      },
+      "form": {
+        "fullName": "Nom Complet",
+        "email": "Adresse Email",
+        "company": "Nom de l'Entreprise",
+        "teamSize": "Taille de l'Équipe",
+        "teamSizePlaceholder": "Sélectionnez la taille de votre équipe",
+        "teamSizeOptions": {
+          "small": "1-10 employés",
+          "medium": "11-50 employés",
+          "large": "51-200 employés",
+          "enterprise": "201+ employés"
+        },
+        "dateTime": "Date et Heure Préférées",
+        "message": "Message Supplémentaire",
+        "messagePlaceholder": "Parlez-nous de vos besoins et de ce que vous aimeriez apprendre lors de la démo..."
+      },
+      "buttons": {
+        "next": "Suivant",
+        "back": "Retour",
+        "submit": "Planifier la Démo",
+        "submitting": "Planification..."
+      },
+      "confirmation": {
+        "title": "Démo Planifiée avec Succès !",
+        "message": "Merci d'avoir planifié une démo avec nous. Nous avons envoyé un email de confirmation avec tous les détails.",
+        "nextSteps": "Prochaines étapes :",
+        "step1": "Vous recevrez une invitation de calendrier pour l'heure planifiée",
+        "step2": "Notre équipe préparera une démo personnalisée basée sur vos besoins",
+        "step3": "Nous vous enverrons un rappel 1 heure avant la démo planifiée",
+        "bookAnother": "Réserver une Autre Démo"
+      },
+      "emailSent": {
+        "title": "Démo Planifiée !",
+        "message": "Nous vous avons envoyé un email de confirmation avec tous les détails."
+      },
+      "video": {
+        "title": "Pourquoi Réserver une Démo ?",
+        "description": "Découvrez comment notre équipe fournit un support exceptionnel et des réponses rapides pour vous aider à maximiser vos résultats.",
+        "watchButton": "Regarder la Vidéo de Démo",
+        "watchFullScreen": "Regarder en plein écran",
+        "dialogTitle": "Comment Fonctionne Notre Équipe de Support",
+        "dialogDescription": "Notre équipe de support est disponible 24h/24 et 7j/7 pour vous aider avec toutes vos questions ou problèmes. Nous sommes fiers de nos temps de réponse rapides et de nos solutions personnalisées."
+      },
+      "benefits": {
+        "title": "Avantages de Réserver une Démo",
+        "benefit1": "Obtenez des conseils personnalisés de notre équipe d'experts",
+        "benefit2": "Voyez des exemples en temps réel de comment notre plateforme peut résoudre vos défis spécifiques",
+        "benefit3": "Recevez un plan d'implémentation personnalisé adapté aux besoins de votre entreprise"
+      },
+      "validation": {
+        "fullNameRequired": "Le nom complet est requis",
+        "emailRequired": "L'adresse email est requise",
+        "emailInvalid": "Format d'email invalide",
+        "companyRequired": "Le nom de l'entreprise est requis",
+        "teamSizeRequired": "La taille de l'équipe est requise",
+        "dateTimeRequired": "La date et l'heure sont requises"
+      },
+      "onboarding": {
+        "title": "Intégration Guidée",
+        "description": "Notre équipe vous accompagnera étape par étape pour configurer votre compte et commencer à utiliser notre plateforme efficacement."
       }
     }
   }

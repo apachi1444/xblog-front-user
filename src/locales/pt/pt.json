@@ -286,6 +286,343 @@
       "unscheduledSuccessfully": "Artigo desagendado com sucesso",
       "schedulingFailed": "Falha ao agendar artigos. Por favor, tente novamente.",
       "unschedulingFailed": "Falha ao desagendar artigo. Por favor, tente novamente."
+    },
+    "navigation": {
+      "dashboard": "Painel",
+      "generate": "Gerar",
+      "blog": "Blog",
+      "calendar": "Calendário",
+      "websites": "Sites",
+      "profile": "Perfil",
+      "support": "Suporte",
+      "logout": "Sair",
+      "settings": "Configurações"
+    },
+    "dashboard": {
+      "title": "Painel",
+      "subtitle": "Gerencie seu conteúdo e monitore o desempenho",
+      "quickActions": "Ações Rápidas",
+      "generateArticle": "Gerar Artigo",
+      "viewBlog": "Ver Blog",
+      "manageWebsites": "Gerenciar Sites",
+      "stats": {
+        "totalArticles": "Total de Artigos",
+        "publishedArticles": "Artigos Publicados",
+        "draftArticles": "Rascunhos",
+        "scheduledArticles": "Agendados"
+      },
+      "recentActivity": "Atividade Recente",
+      "noActivity": "Nenhuma atividade recente",
+      "welcomeBack": "Bem-vindo de volta!",
+      "getStarted": "Começar",
+      "createFirst": "Criar seu primeiro artigo"
+    },
+    "generate": {
+      "title": "Gerar Novo Artigo",
+      "subtitle": "Crie conteúdo otimizado para SEO com IA",
+      "steps": {
+        "keywords": "Palavras-chave",
+        "content": "Conteúdo",
+        "seo": "SEO",
+        "publish": "Publicar"
+      },
+      "keywords": {
+        "primary": "Palavra-chave Principal",
+        "secondary": "Palavras-chave Secundárias",
+        "add": "Adicionar palavra-chave",
+        "placeholder": "Digite uma palavra-chave"
+      },
+      "content": {
+        "title": "Título do Artigo",
+        "sections": "Seções do Artigo",
+        "generate": "Gerar Conteúdo",
+        "regenerate": "Regenerar",
+        "edit": "Editar"
+      },
+      "seo": {
+        "title": "Otimização SEO",
+        "metaTitle": "Meta Título",
+        "metaDescription": "Meta Descrição",
+        "urlSlug": "URL Slug",
+        "score": "Pontuação SEO"
+      },
+      "publish": {
+        "title": "Publicar Artigo",
+        "selectWebsite": "Selecionar Site",
+        "publishNow": "Publicar Agora",
+        "saveDraft": "Salvar como Rascunho",
+        "schedule": "Agendar"
+      }
+    },
+    "blog": {
+      "title": "Meus Artigos",
+      "subtitle": "Gerencie todos os seus artigos de blog",
+      "filters": {
+        "all": "Todos",
+        "published": "Publicados",
+        "draft": "Rascunhos",
+        "scheduled": "Agendados"
+      },
+      "search": "Buscar artigos...",
+      "noArticles": "Nenhum artigo encontrado",
+      "createFirst": "Criar seu primeiro artigo",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Excluir",
+        "publish": "Publicar",
+        "schedule": "Agendar"
+      }
+    },
+    "resources": {
+      "websites": "Sites",
+      "articles": "Artigos",
+      "websitesRemaining": "{{count}} sites restantes",
+      "articlesRemaining": "{{count}} artigos restantes"
+    },
+    "websites": {
+      "title": "Meus Sites",
+      "subtitle": "Gerencie seus sites conectados",
+      "addNew": "Adicionar novo site",
+      "noWebsites": "Nenhum site conectado",
+      "connectFirst": "Conecte seu primeiro site"
+    },
+    "store": {
+      "title": "Conectar Sua Loja",
+      "subtitle": "Escolha sua plataforma e conecte sua loja",
+      "selectPlatform": "Selecionar Plataforma",
+      "selectPlatformSubtitle": "Escolha a plataforma na qual seu site está construído para otimizar a integração",
+      "selectPlatformRequired": "Por favor, selecione uma plataforma para continuar",
+      "selectPlatformFirst": "Por favor, selecione uma plataforma primeiro",
+      "next": "Próximo",
+      "back": "Voltar",
+      "backToStores": "Voltar às Lojas",
+      "connect": "Conectar Loja",
+      "connecting": "Conectando...",
+      "success": "Loja conectada com sucesso!",
+      "error": "Falha ao conectar a loja. Por favor, tente novamente.",
+      "formErrors": "Por favor, corrija os erros do formulário antes de enviar",
+      "integrationTitle": "Integração {{platform}}",
+      "integrationSubtitle": "Por favor, forneça os detalhes do seu site {{platform}}.",
+      "platforms": {
+        "wordpress": "WordPress",
+        "shopify": "Shopify",
+        "wix": "Wix"
+      },
+      "wordpress": {
+        "url": "URL do WordPress",
+        "urlPlaceholder": "https://seu-site-wordpress.com",
+        "username": "Nome de usuário do WordPress",
+        "usernamePlaceholder": "admin",
+        "password": "Senha do WordPress",
+        "passwordPlaceholder": "••••••••",
+        "description": "Conecte seu site WordPress"
+      },
+      "shopify": {
+        "storeName": "Nome da loja Shopify",
+        "storeNamePlaceholder": "sua-loja",
+        "apiKey": "Chave API",
+        "apiKeyPlaceholder": "Digite sua chave API",
+        "apiSecret": "Segredo API",
+        "apiSecretPlaceholder": "Digite seu segredo API",
+        "description": "Conecte sua loja Shopify"
+      },
+      "wix": {
+        "adminUrl": "URL Admin Wix",
+        "adminUrlPlaceholder": "https://manage.wix.com/dashboard/...",
+        "consumerKey": "Chave do Consumidor",
+        "consumerKeyPlaceholder": "Digite sua chave do consumidor",
+        "consumerSecret": "Segredo do Consumidor",
+        "consumerSecretPlaceholder": "Digite seu segredo do consumidor",
+        "description": "Conecte sua loja Wix"
+      }
+    },
+    "profile": {
+      "title": "Perfil",
+      "subtitle": "Gerencie as configurações da sua conta e assinatura",
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nome",
+        "lastName": "Sobrenome"
+      },
+      "tabs": {
+        "account": "Conta",
+        "subscription": "Assinatura",
+        "security": "Segurança"
+      },
+      "subscription": {
+        "current": "Assinatura Atual",
+        "viewDetails": "Ver Detalhes",
+        "hideDetails": "Ocultar Detalhes",
+        "manage": "Gerenciar Assinatura",
+        "upgrade": "Atualizar",
+        "plans": "Planos de Assinatura",
+        "choosePlan": "Escolha o plano que melhor atende às suas necessidades",
+        "currentPlan": "Plano Atual",
+        "perMonth": "por mês",
+        "planNames": {
+          "free": "Gratuito",
+          "basic": "Básico",
+          "professional": "Profissional"
+        },
+        "planFeatures": {
+          "0": "Geração Básica de Artigos",
+          "1": "Análises Limitadas",
+          "2": "Suporte Padrão",
+          "3": "5 Artigos por mês",
+          "4": "1GB de Armazenamento"
+        }
+      },
+      "billing": {
+        "history": "Histórico de Cobrança",
+        "loading": "Carregando faturas...",
+        "noHistory": "Nenhum histórico de cobrança disponível",
+        "date": "Data",
+        "invoiceNumber": "Número da Fatura",
+        "plan": "Plano",
+        "amount": "Valor",
+        "status": "Status",
+        "planMonthly": "Plano {{plan}} - Mensal",
+        "refreshSuccess": "Faturas atualizadas com sucesso"
+      },
+      "errors": {
+        "refreshInvoices": "Falha ao atualizar faturas"
+      }
+    },
+    "common": {
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "select": "Selecionar",
+      "selected": "Selecionado",
+      "waiting": "aguardando entrada",
+      "close": "Fechar",
+      "status": "Status",
+      "description": "Descrição",
+      "created": "Criado"
+    },
+    "demo": {
+      "title": "Agendar uma Demonstração",
+      "subtitle": "Agende uma demonstração personalizada com nossa equipe para ver como podemos ajudar seu negócio a crescer",
+      "steps": {
+        "basicInfo": "Informações Básicas",
+        "chooseTime": "Escolher Horário",
+        "confirmation": "Confirmação"
+      },
+      "form": {
+        "fullName": "Nome Completo",
+        "email": "Endereço de Email",
+        "company": "Nome da Empresa",
+        "teamSize": "Tamanho da Equipe",
+        "teamSizePlaceholder": "Selecione o tamanho da sua equipe",
+        "teamSizeOptions": {
+          "small": "1-10 funcionários",
+          "medium": "11-50 funcionários",
+          "large": "51-200 funcionários",
+          "enterprise": "201+ funcionários"
+        },
+        "dateTime": "Data e Hora Preferidas",
+        "message": "Mensagem Adicional",
+        "messagePlaceholder": "Conte-nos sobre suas necessidades e o que gostaria de aprender na demonstração..."
+      },
+      "buttons": {
+        "next": "Próximo",
+        "back": "Voltar",
+        "submit": "Agendar Demonstração",
+        "submitting": "Agendando..."
+      },
+      "confirmation": {
+        "title": "Demonstração Agendada com Sucesso!",
+        "message": "Obrigado por agendar uma demonstração conosco. Enviamos um email de confirmação com todos os detalhes.",
+        "nextSteps": "Próximos passos:",
+        "step1": "Você receberá um convite de calendário para o horário agendado",
+        "step2": "Nossa equipe preparará uma demonstração personalizada baseada em suas necessidades",
+        "step3": "Enviaremos um lembrete 1 hora antes da demonstração agendada",
+        "bookAnother": "Agendar Outra Demonstração"
+      },
+      "emailSent": {
+        "title": "Demonstração Agendada!",
+        "message": "Enviamos um email de confirmação com todos os detalhes."
+      },
+      "video": {
+        "title": "Por Que Agendar uma Demonstração?",
+        "description": "Veja como nossa equipe oferece suporte excepcional e respostas rápidas para ajudá-lo a maximizar seus resultados.",
+        "watchButton": "Assistir Vídeo da Demonstração",
+        "watchFullScreen": "Assistir em tela cheia",
+        "dialogTitle": "Como Nossa Equipe de Suporte Funciona",
+        "dialogDescription": "Nossa equipe de suporte está disponível 24/7 para ajudá-lo com qualquer dúvida ou problema que possa ter. Nos orgulhamos de nossos tempos de resposta rápidos e soluções personalizadas."
+      },
+      "benefits": {
+        "title": "Benefícios de Agendar uma Demonstração",
+        "benefit1": "Obtenha orientação personalizada de nossa equipe de especialistas",
+        "benefit2": "Veja exemplos em tempo real de como nossa plataforma pode resolver seus desafios específicos",
+        "benefit3": "Receba um plano de implementação personalizado adaptado às necessidades do seu negócio"
+      },
+      "validation": {
+        "fullNameRequired": "Nome completo é obrigatório",
+        "emailRequired": "Endereço de email é obrigatório",
+        "emailInvalid": "Formato de email inválido",
+        "companyRequired": "Nome da empresa é obrigatório",
+        "teamSizeRequired": "Tamanho da equipe é obrigatório",
+        "dateTimeRequired": "Data e hora são obrigatórias"
+      },
+      "onboarding": {
+        "title": "Integração Guiada",
+        "description": "Nossa equipe irá guiá-lo passo a passo para configurar sua conta e começar a usar nossa plataforma de forma eficaz."
+      }
+    },
+    "welcome": {
+      "title": "Bem-vindo ao XBlog!",
+      "videoTitle": "Como usar o XBlog",
+      "learnTitle": "Aprenda a usar o XBlog em minutos",
+      "description": "Este tutorial rápido mostrará como gerar conteúdo de alta qualidade, publicar em seu site e agendar artigos para máximo impacto.",
+      "dontShowAgain": "Não mostrar novamente",
+      "getStarted": "Começar",
+      "feature1": {
+        "title": "Gerar Conteúdo",
+        "description": "Crie artigos otimizados para SEO com IA"
+      },
+      "feature2": {
+        "title": "Publicar",
+        "description": "Publique diretamente em seu site"
+      },
+      "feature3": {
+        "title": "Agendar",
+        "description": "Planeje seu calendário de conteúdo"
+      }
+    },
+    "premium": {
+      "label": "Plano Pro",
+      "title": "Desbloqueie Recursos Premium",
+      "description": "Atualize para Pro e obtenha artigos ilimitados, ferramentas SEO avançadas e suporte prioritário.",
+      "upgradeButton": "Atualizar para Pro",
+      "features": {
+        "unlimitedArticles": "Geração de artigos ilimitada",
+        "seoTools": "Ferramentas de otimização SEO avançadas",
+        "prioritySupport": "Suporte ao cliente prioritário"
+      }
+    },
+    "comingSoon": {
+      "title": "Em Breve",
+      "description": "Estamos constantemente melhorando nossa plataforma. Aqui está o que vem por aí:",
+      "stayTuned": "Fique atento para mais recursos emocionantes!",
+      "eta": {
+        "soon": "Em breve",
+        "inProgress": "Em andamento",
+        "beta": "Beta"
+      },
+      "features": {
+        "templates": {
+          "title": "Modelos Integrados",
+          "description": "Crie artigos a partir de modelos pré-projetados para diferentes tipos de conteúdo"
+        },
+        "bulk": {
+          "title": "Geração em Massa",
+          "description": "Gere múltiplos artigos de uma vez para economizar tempo"
+        },
+        "analytics": {
+          "title": "Análises Avançadas",
+          "description": "Obtenha insights detalhados sobre o desempenho do seu conteúdo"
+        }
+      }
     }
   }
 }

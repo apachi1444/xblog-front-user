@@ -1,25 +1,26 @@
+import type { AuthUser } from 'src/types/user';
+
 import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { User, Edit, Upload } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Upload, User, Edit } from 'lucide-react';
 
 import {
   Box,
   Grid,
+  alpha,
+  Stack,
   Button,
   Avatar,
+  useTheme,
   TextField,
   Typography,
-  useTheme,
-  alpha,
   IconButton,
-  Stack,
 } from '@mui/material';
 
-import { profileFormSchema, type ProfileFormData } from 'src/validation/validation-forms';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
-import type { AuthUser } from 'src/types/user';
+import { profileFormSchema, type ProfileFormData } from 'src/validation/validation-forms';
 
 import { Iconify } from 'src/components/iconify';
 

@@ -3,8 +3,8 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TextFieldElement } from "react-hook-form-mui"
 import { useForm, FormProvider } from "react-hook-form"
+import { SelectElement, TextFieldElement } from "react-hook-form-mui"
 import { Mail, Users, Calendar, Building, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
 import {
@@ -29,23 +29,20 @@ import {
 
 import { DashboardContent } from "src/layouts/dashboard"
 
-import { FormDropdown } from "src/components/generate-article/FormDropdown"
 import { EmailSentAnimation } from "src/components/animations/EmailSentAnimation"
 
 // Demo video URL
 const DEMO_VIDEO = "https://www.youtube.com/embed/example-demo-video"
 
-// Form validation schema
-const bookDemoSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
-  email: z.string().min(1, "Email is required").email("Invalid email format"),
-  company: z.string().min(1, "Company name is required"),
-  teamSize: z.string().min(1, "Team size is required"),
-  dateTime: z.string().min(1, "Date and time is required"),
+// Form validation schema - we'll create it inside the component to access translations
+const createBookDemoSchema = (t: any) => z.object({
+  fullName: z.string().min(1, t("demo.validation.fullNameRequired", "Full name is required")),
+  email: z.string().min(1, t("demo.validation.emailRequired", "Email is required")).email(t("demo.validation.emailInvalid", "Invalid email format")),
+  company: z.string().min(1, t("demo.validation.companyRequired", "Company name is required")),
+  teamSize: z.string().min(1, t("demo.validation.teamSizeRequired", "Team size is required")),
+  dateTime: z.string().min(1, t("demo.validation.dateTimeRequired", "Date and time is required")),
   message: z.string().optional(),
 })
-
-type BookDemoFormData = z.infer<typeof bookDemoSchema>
 
 export function BookDemoView() {
   const theme = useTheme()
@@ -55,6 +52,10 @@ export function BookDemoView() {
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
   const [showEmailAnimation, setShowEmailAnimation] = useState(false)
   const [demoScheduled, setDemoScheduled] = useState(false)
+
+  // Create schema with translations
+  const bookDemoSchema = createBookDemoSchema(t)
+  type BookDemoFormData = z.infer<typeof bookDemoSchema>
 
   const methods = useForm<BookDemoFormData>({
     resolver: zodResolver(bookDemoSchema),
@@ -72,7 +73,6 @@ export function BookDemoView() {
   const {
     handleSubmit,
     trigger,
-    register,
     formState: { errors },
     watch,
   } = methods
@@ -126,6 +126,9 @@ export function BookDemoView() {
     setIsSubmitting(true)
 
     try {
+      // Log form data for debugging
+      console.log("Demo booking form submitted:", data)
+
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
@@ -152,7 +155,7 @@ export function BookDemoView() {
         return (
           <Stack spacing={3}>
             <TextFieldElement
-              {...register("fullName")}
+              name="fullName"
               label={t("demo.form.fullName")}
               fullWidth
               required
@@ -161,7 +164,7 @@ export function BookDemoView() {
               }}
             />
             <TextFieldElement
-              {...register("email")}
+              name="email"
               label={t("demo.form.email")}
               type="email"
               fullWidth
@@ -171,7 +174,7 @@ export function BookDemoView() {
               }}
             />
             <TextFieldElement
-              {...register("company")}
+              name="company"
               label={t("demo.form.company")}
               fullWidth
               required
@@ -179,16 +182,16 @@ export function BookDemoView() {
                 startAdornment: <Building size={18} style={{ marginRight: 8, opacity: 0.7 }} />,
               }}
             />
-            <FormDropdown
-              {...register("teamSize")}
+            <SelectElement
+              name="teamSize"
               label={t("demo.form.teamSize")}
               options={[
-                { value: "1-10", label: t("demo.form.teamSizeOptions.small") },
-                { value: "11-50", label: t("demo.form.teamSizeOptions.medium") },
-                { value: "51-200", label: t("demo.form.teamSizeOptions.large") },
-                { value: "201+", label: t("demo.form.teamSizeOptions.enterprise") },
+                { id: "1-10", label: t("demo.form.teamSizeOptions.small") },
+                { id: "11-50", label: t("demo.form.teamSizeOptions.medium") },
+                { id: "51-200", label: t("demo.form.teamSizeOptions.large") },
+                { id: "201+", label: t("demo.form.teamSizeOptions.enterprise") },
               ]}
-              placeholder={t("demo.form.teamSizePlaceholder")}
+              fullWidth
               required
             />
           </Stack>
