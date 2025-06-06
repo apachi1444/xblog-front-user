@@ -97,12 +97,6 @@ export function Step1ContentSetup({
     name: "step1.urlSlug",
   })
 
-  useEffect(() => {
-    evaluateCriteria("primaryKeyword", primaryKeyword);
-  }, [primaryKeyword, evaluateCriteria]);
-
-  const metaInformation = !!metaTitle && !!metaDescription && !!urlSlug
-
   // Primary keyword should always be enabled since we have default values for language and targetCountry
   const isPrimaryKeywordDisabled = false
   const isSecondaryKeywordsDisabled = !primaryKeyword
@@ -114,6 +108,24 @@ export function Step1ContentSetup({
   const [localIsGeneratingTitle, setLocalIsGeneratingTitle] = useState(false);
   const [localIsGeneratingSecondaryKeywords, setLocalIsGeneratingSecondaryKeywords] = useState(false);
   const [localIsOptimizingContentDescription, setLocalIsOptimizingContentDescription] = useState(false);
+
+  // Track which fields have been generated at least once
+  const [hasGeneratedTitle, setHasGeneratedTitle] = useState(false);
+  const [hasGeneratedMeta, setHasGeneratedMeta] = useState(false);
+
+  useEffect(() => {
+    evaluateCriteria("primaryKeyword", primaryKeyword);
+  }, [primaryKeyword, evaluateCriteria]);
+
+  // Check if form already has generated content (e.g., from draft)
+  useEffect(() => {
+    if (title && !hasGeneratedTitle) {
+      setHasGeneratedTitle(true);
+    }
+    if ((metaTitle || metaDescription || urlSlug) && !hasGeneratedMeta) {
+      setHasGeneratedMeta(true);
+    }
+  }, [title, metaTitle, metaDescription, urlSlug, hasGeneratedTitle, hasGeneratedMeta]);
 
   // Use external values if provided, otherwise use local state
   const isGeneratingTitle = externalIsGeneratingTitle !== undefined ? externalIsGeneratingTitle : localIsGeneratingTitle;
@@ -143,9 +155,10 @@ export function Step1ContentSetup({
     try {
       const generatedTitle = await onGenerateTitle();
       setValue("step1.title", generatedTitle);
+      setHasGeneratedTitle(true); // Mark that title has been generated
     } catch (error) {
       toast.error("Error generating title:");
-    } 
+    }
   };
 
   // Update the secondary keywords generation handler to use the state prop
@@ -194,6 +207,7 @@ export function Step1ContentSetup({
       setValue("step1.metaTitle", generatedMeta.metaTitle);
       setValue("step1.metaDescription", generatedMeta.metaDescription);
       setValue("step1.urlSlug", generatedMeta.urlSlug);
+      setHasGeneratedMeta(true); // Mark that meta has been generated
     } catch (error) {
       console.error("Error generating meta information:", error);
     }
@@ -451,7 +465,7 @@ export function Step1ContentSetup({
       </Grid>
 
       <Grid item xs={12} sx={{ mt: -2 }}>
-        {!title ? (
+        {!hasGeneratedTitle ? (
           <Box
             sx={{
               width: "100%",
@@ -541,7 +555,7 @@ export function Step1ContentSetup({
         )}
 
         {/* Meta information generation section */}
-        {!metaInformation ? (
+        {!hasGeneratedMeta ? (
           <GenerationPlaceholder
             title="Generate SEO meta information for your content"
             buttonLabel="Generate Meta Info"
