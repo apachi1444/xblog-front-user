@@ -11,7 +11,6 @@ import {
   Box,
   Tab,
   Chip,
-  Grid,
   Link,
   List,
   Tabs,
@@ -45,19 +44,11 @@ import {
 } from '@mui/material';
 
 // API hooks
-import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import {
-  usePublishWixMutation,
-  usePublishShopifyMutation,
-  usePublishWordPressMutation
-} from 'src/services/apis/integrations/publishApi';
+
+
 
 // Components
 import { Iconify } from 'src/components/iconify';
-import { FormInput } from 'src/components/generate-article/FormInput';
-import { FormDropdown } from 'src/components/generate-article/FormDropdown';
-
-import { FormContainer } from '../../../../components/generate-article/FormContainer';
 
 import type {
   ArticleSection,
@@ -940,12 +931,6 @@ const StoreSelectionModal = ({ open, onClose, onSelect, stores }: StoreSelection
 };
 
 export function Step4Publish() {
-  // API hooks
-  const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
-  const [publishWordPress] = usePublishWordPressMutation();
-  const [publishWix] = usePublishWixMutation();
-  const [publishShopify] = usePublishShopifyMutation();
-
   // Get form data from context
   const { getValues } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
@@ -964,734 +949,278 @@ export function Step4Publish() {
     createdAt: new Date().toISOString(),
   }), [formData.step1]);
 
-  const {sections} = formData.step3
-
-  // State for modals
-  const [copyModalOpen, setCopyModalOpen] = useState(false);
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [storeSelectionOpen, setStoreSelectionOpen] = useState(false);
-  const [fullArticleModalOpen, setFullArticleModalOpen] = useState(false);
-  const [publishingSchedule, setPublishingSchedule] = useState('now');
-  const [selectedStore, setSelectedStore] = useState<number | null>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
-
-  // Get stores from API using useMemo to avoid re-renders
-  const stores = useMemo(() => storesData?.stores || [], [storesData]);
-
-  useEffect(() => {
-    if (stores.length > 0 && !selectedStore) {
-      setSelectedStore(stores[0].id);
-    }
-  }, [stores, selectedStore]);
-
-  // Handle modal open/close
-  const handleOpenCopyModal = () => setCopyModalOpen(true);
-  const handleCloseCopyModal = () => setCopyModalOpen(false);
-  const handleOpenExportModal = () => setExportModalOpen(true);
-  const handleCloseExportModal = () => setExportModalOpen(false);
-  const handleOpenStoreSelection = () => setStoreSelectionOpen(true);
-  const handleCloseStoreSelection = () => setStoreSelectionOpen(false);
-  const handleOpenFullArticleModal = () => setFullArticleModalOpen(true);
-  const handleCloseFullArticleModal = () => setFullArticleModalOpen(false);
-
-  // Handle store selection
-  const handleStoreSelect = (storeId: number) => {
-    setSelectedStore(storeId);
-    setStoreSelectionOpen(false);
-  };
-
-  // Handle publish action
-  const handlePublish = async () => {
-    if (!selectedStore) {
-      toast.error('Please select a store before publishing');
-      return;
-    }
-
-    setIsPublishing(true);
-
-    try {
-      // Get selected store
-      const store = stores.find(s => s.id === selectedStore);
-
-      if (!store) {
-        throw new Error('Store not found');
-      }
-
-      // Determine which publish API to use based on store platform
-      let publishResult;
-
-      const publishData = {
-        store_id: String(selectedStore),
-        article_id: 'current-article-id', // This would come from the article being created
-        scheduled_date: publishingSchedule === 'schedule' ? new Date().toISOString() : undefined,
-      };
-
-      switch (store.platform?.toLowerCase()) {
-        case 'wordpress':
-          publishResult = await publishWordPress(publishData).unwrap();
-          break;
-        case 'wix':
-          publishResult = await publishWix(publishData).unwrap();
-          break;
-        case 'shopify':
-          publishResult = await publishShopify(publishData).unwrap();
-          break;
-        default:
-          // Mock success for testing
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          publishResult = { success: true };
-      }
-
-      if (publishResult.success) {
-        toast.success('Content published successfully!');
-      } else {
-        throw new Error(publishResult.message || 'Unknown error');
-      }
-    } catch (error) {
-      toast.error('Failed to publish content. Please try again.');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
+  const { sections } = formData.step3;
 
   return (
-    <Box sx={{ position: 'relative', pb: 8 }}>
-      <Grid container spacing={2}>
-        {/* Article Preview */}
-        <Grid item xs={12}>
-          <FormContainer
-            isCollapsible
-            title="Article Preview"
-          >
-            <Box sx={{
-              p: { xs: 2, md: 3 },
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              mb: 2,
-              boxShadow: '0 0 10px rgba(0,0,0,0.05)'
-            }}>
-              {/* Article Title */}
-              <Typography variant="h4" gutterBottom sx={{
-                fontWeight: 700,
-                color: 'text.primary',
-                fontSize: { xs: '1.5rem', md: '2rem' }
-              }}>
-                {articleInfo.title || 'Your Article Title'}
-              </Typography>
+    <Box sx={{ pb: 2 }}>
+      {/* Article Preview - Clean Layout */}
+      <Box sx={{
+        p: { xs: 2, md: 3 },
+        bgcolor: 'background.paper',
+        borderRadius: 1,
+        boxShadow: '0 0 10px rgba(0,0,0,0.05)'
+      }}>
+        {/* Article Title */}
+        <Typography variant="h4" gutterBottom sx={{
+          fontWeight: 700,
+          color: 'text.primary',
+          fontSize: { xs: '1.5rem', md: '2rem' }
+        }}>
+          {articleInfo.title || 'Your Article Title'}
+        </Typography>
 
-              {/* Article Meta */}
-              <Box sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                mb: 3,
-                color: 'text.secondary'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
-                  <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
-                  <Typography variant="body2">
-                    {new Date(articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
-                  <Iconify icon="mdi:account" width={16} height={16} sx={{ mr: 1 }} />
-                  <Typography variant="body2">
-                    AI Generated
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
-                  <Typography variant="body2">
-                    {articleInfo.language.toUpperCase()} | {articleInfo.targetCountry.toUpperCase()}
-                  </Typography>
-                </Box>
-              </Box>
+        {/* Article Meta */}
+        <Box sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          mb: 3,
+          color: 'text.secondary'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 3, mb: { xs: 1, sm: 0 } }}>
+            <Iconify icon="mdi:calendar" width={16} height={16} sx={{ mr: 1 }} />
+            <Typography variant="body2">
+              {new Date(articleInfo.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </Typography>
+          </Box>
 
-              <Paper
-                sx={{
-                  height: { xs: 200, sm: 250, md: 300 },
-                  width: '100%',
-                  bgcolor: 'background.neutral',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 3,
-                  borderRadius: 2,
-                  backgroundImage: 'url(https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.01)',
-                  }
-                }}
-              />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Iconify icon="mdi:translate" width={16} height={16} sx={{ mr: 1 }} />
+            <Typography variant="body2">
+              {articleInfo.language.toUpperCase()} | {articleInfo.targetCountry.toUpperCase()}
+            </Typography>
+          </Box>
+        </Box>
 
-              {/* Article Content - Display generated sections */}
-              {sections && sections.length > 0 ? (
-                <>
-                  {/* Display first section as introduction */}
-                  <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                      {sections[0]?.title || 'Introduction'}
-                    </Typography>
-
-                    {/* Content Type Badge */}
-                    {(sections[0]?.type === 'faq' || sections[0]?.contentType) && (
-                      <Chip
-                        label={
-                          sections[0]?.type === 'faq'
-                            ? 'FAQ Section'
-                            : sections[0]?.contentType === 'bullet-list'
-                              ? 'List Section'
-                              : sections[0]?.contentType === 'table'
-                                ? 'Table Section'
-                                : sections[0]?.contentType === 'image-gallery'
-                                  ? 'Image Gallery'
-                                  : sections[0]?.contentType || 'Paragraph'
-                        }
-                        size="small"
-                        sx={{
-                          mb: 1.5,
-                          bgcolor: 'background.neutral',
-                          color: 'text.secondary',
-                          fontWeight: 500,
-                          fontSize: '0.75rem'
-                        }}
-                      />
-                    )}
-
-                    {/* Display content based on type */}
-                    {sections[0]?.type === 'faq' ? (
-                      <Box sx={{ mb: 2 }}>
-                        {sections[0]?.faqItems && sections[0]?.faqItems.length > 0 ? (
-                          <Accordion sx={{ mb: 1 }}>
-                            <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
-                              <Typography variant="subtitle2">{sections[0].faqItems[0].question}</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <Typography variant="body2">{sections[0].faqItems[0].answer}</Typography>
-                            </AccordionDetails>
-                          </Accordion>
-                        ) : (
-                          <Typography variant="body1" paragraph>
-                            {sections[0]?.content || 'No content available for this section.'}
-                          </Typography>
-                        )}
-                      </Box>
-                    ) : sections[0]?.contentType === 'bullet-list' || (sections[0]?.bulletPoints && sections[0]?.bulletPoints.length > 0) ? (
-                      <Box sx={{ mb: 2 }}>
-                        <List disablePadding>
-                          {sections[0]?.bulletPoints && sections[0]?.bulletPoints.length > 0 ? (
-                            sections[0].bulletPoints.slice(0, 2).map((point, i) => (
-                              <ListItem key={i} sx={{ py: 0.5 }}>
-                                <ListItemIcon sx={{ minWidth: 36 }}>
-                                  <Iconify icon="mdi:circle-small" />
-                                </ListItemIcon>
-                                <ListItemText primary={point} />
-                              </ListItem>
-                            ))
-                          ) : (
-                            <Typography variant="body1" paragraph>
-                              {sections[0]?.content || 'No content available for this section.'}
-                            </Typography>
-                          )}
-                        </List>
-                      </Box>
-                    ) : sections[0]?.contentType === 'table' ? (
-                      <Box sx={{ mb: 2 }}>
-                        {sections[0]?.tableData ? (
-                          <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
-                            <Table size="small">
-                              <TableHead>
-                                <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                                  {sections[0].tableData.headers.map((header, i) => (
-                                    <TableCell key={i} sx={{ fontWeight: 'bold' }}>
-                                      {header}
-                                    </TableCell>
-                                  ))}
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {sections[0].tableData.rows.slice(0, 2).map((row, rowIndex) => (
-                                  <TableRow key={rowIndex}>
-                                    {row.map((cell, cellIndex) => (
-                                      <TableCell key={cellIndex}>{cell}</TableCell>
-                                    ))}
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        ) : (
-                          <Typography variant="body1" paragraph>
-                            {sections[0]?.content || 'No content available for this section.'}
-                          </Typography>
-                        )}
-                      </Box>
-                    ) : (
-                      <Typography variant="body1" paragraph>
-                        {sections[0]?.content || 'No content available for this section.'}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  {/* Display second section if available */}
-                  {sections.length > 1 && (
-                    <Box sx={{ mb: 4 }}>
-                      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                        {sections[1]?.title || 'Section 2'}
-                      </Typography>
-
-                      {/* Content Type Badge */}
-                      {(sections[1]?.type === 'faq' || sections[1]?.contentType) && (
-                        <Chip
-                          label={
-                            sections[1]?.type === 'faq'
-                              ? 'FAQ Section'
-                              : sections[1]?.contentType === 'bullet-list'
-                                ? 'List Section'
-                                : sections[1]?.contentType === 'table'
-                                  ? 'Table Section'
-                                  : sections[1]?.contentType === 'image-gallery'
-                                    ? 'Image Gallery'
-                                    : sections[1]?.contentType || 'Paragraph'
-                          }
-                          size="small"
-                          sx={{
-                            mb: 1.5,
-                            bgcolor: 'background.neutral',
-                            color: 'text.secondary',
-                            fontWeight: 500,
-                            fontSize: '0.75rem'
-                          }}
-                        />
-                      )}
-
-                      {/* Display content based on type */}
-                      {sections[1]?.type === 'faq' ? (
-                        <Box sx={{ mb: 2 }}>
-                          {sections[1]?.faqItems && sections[1]?.faqItems.length > 0 ? (
-                            <Accordion sx={{ mb: 1 }}>
-                              <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
-                                <Typography variant="subtitle2">{sections[1].faqItems[0].question}</Typography>
-                              </AccordionSummary>
-                              <AccordionDetails>
-                                <Typography variant="body2">{sections[1].faqItems[0].answer}</Typography>
-                              </AccordionDetails>
-                            </Accordion>
-                          ) : (
-                            <Typography variant="body1" paragraph>
-                              {sections[1]?.content || 'No content available for this section.'}
-                            </Typography>
-                          )}
-                        </Box>
-                      ) : sections[1]?.contentType === 'bullet-list' || (sections[1]?.bulletPoints && sections[1]?.bulletPoints.length > 0) ? (
-                        <Box sx={{ mb: 2 }}>
-                          <List disablePadding>
-                            {sections[1]?.bulletPoints && sections[1]?.bulletPoints.length > 0 ? (
-                              sections[1].bulletPoints.slice(0, 2).map((point, i) => (
-                                <ListItem key={i} sx={{ py: 0.5 }}>
-                                  <ListItemIcon sx={{ minWidth: 36 }}>
-                                    <Iconify icon="mdi:circle-small" />
-                                  </ListItemIcon>
-                                  <ListItemText primary={point} />
-                                </ListItem>
-                              ))
-                            ) : (
-                              <Typography variant="body1" paragraph>
-                                {sections[1]?.content || 'No content available for this section.'}
-                              </Typography>
-                            )}
-                          </List>
-                        </Box>
-                      ) : sections[1]?.contentType === 'table' ? (
-                        <Box sx={{ mb: 2 }}>
-                          {sections[1]?.tableData ? (
-                            <TableContainer component={Paper} sx={{ mb: 2, maxHeight: 150, overflow: 'auto' }}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                                    {sections[1].tableData.headers.map((header, i) => (
-                                      <TableCell key={i} sx={{ fontWeight: 'bold' }}>
-                                        {header}
-                                      </TableCell>
-                                    ))}
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {sections[1].tableData.rows.slice(0, 2).map((row, rowIndex) => (
-                                    <TableRow key={rowIndex}>
-                                      {row.map((cell, cellIndex) => (
-                                        <TableCell key={cellIndex}>{cell}</TableCell>
-                                      ))}
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          ) : (
-                            <Typography variant="body1" paragraph>
-                              {sections[1]?.content || 'No content available for this section.'}
-                            </Typography>
-                          )}
-                        </Box>
-                      ) : (
-                        <Typography variant="body1" paragraph>
-                          {sections[1]?.content || 'No content available for this section.'}
-                        </Typography>
-                      )}
-                    </Box>
-                  )}
-
-                  {/* Show a message for remaining sections */}
-                  {sections.length > 2 && (
-                    <Box sx={{
-                      textAlign: 'center',
-                      color: 'text.secondary',
-                      my: 3,
-                      p: 2,
-                      bgcolor: 'background.neutral',
-                      borderRadius: 1
-                    }}>
-                      <Typography variant="body2">
-                        +{sections.length - 2} more sections in the full article
-                      </Typography>
-                      <Box sx={{ mt: 1 }}>
-                        {sections.slice(2).map((section, index) => (
-                          <Chip
-                            key={index}
-                            label={section.title}
-                            size="small"
-                            sx={{ m: 0.5, bgcolor: 'background.paper' }}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <Box sx={{
-                  textAlign: 'center',
-                  color: 'text.secondary',
-                  my: 3,
-                  p: 2,
-                  bgcolor: 'background.neutral',
-                  borderRadius: 1
-                }}>
-                  <Typography variant="body2">
-                    No sections have been generated yet. Please go back to step 3 and generate content.
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              gap: 2,
-              mb: 2
-            }}>
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mdi:content-copy" />}
-                onClick={() => {
-                  // Check if we have sections to copy
-                  if (sections && sections.length > 0) {
-                    // Import the markdown converter
-                    import('src/utils/markdownConverter').then(({ articleToMarkdown }) => {
-                      // Convert article to markdown
-                      const markdownContent = articleToMarkdown(
-                        {
-                          title: articleInfo.title,
-                          metaTitle: articleInfo.metaTitle,
-                          metaDescription: articleInfo.metaDescription,
-                          primaryKeyword: articleInfo.primaryKeyword,
-                          secondaryKeywords: articleInfo.secondaryKeywords,
-                          language: articleInfo.language,
-                          targetCountry: articleInfo.targetCountry,
-                          createdAt: articleInfo.createdAt
-                        },
-                        sections
-                      );
-
-                      // Copy markdown content to clipboard
-                      navigator.clipboard.writeText(markdownContent);
-                      toast.success("Article content copied to clipboard in Markdown format");
-                    }).catch(error => {
-                      console.error("Error converting to markdown:", error);
-                      // Fallback to simple text format if markdown conversion fails
-                      const content = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
-                      navigator.clipboard.writeText(content);
-                      toast.success("Article content copied to clipboard");
-                    });
-                  } else {
-                    toast.error("No content available to copy");
-                  }
-                }}
-                sx={{
-                  borderRadius: '24px',
-                  px: 3,
-                  mb: { xs: 1, sm: 0 }
-                }}
-              >
-                Copy as Markdown
-              </Button>
-
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mdi:format-list-bulleted" />}
-                onClick={handleOpenCopyModal}
-                sx={{
-                  borderRadius: '24px',
-                  px: 3,
-                  mb: { xs: 1, sm: 0 }
-                }}
-              >
-                Copy Options
-              </Button>
-
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mdi:export" />}
-                onClick={handleOpenExportModal}
-                sx={{
-                  borderRadius: '24px',
-                  px: 3,
-                  mb: { xs: 1, sm: 0 }
-                }}
-              >
-                Export
-              </Button>
-
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mdi:file-document-outline" />}
-                onClick={handleOpenFullArticleModal}
-                sx={{
-                  borderRadius: '24px',
-                  px: 3,
-                  mb: { xs: 1, sm: 0 }
-                }}
-              >
-                View Full Article
-              </Button>
-
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Iconify icon="mdi:publish" />}
-                onClick={handleOpenStoreSelection}
-                sx={{
-                  borderRadius: '24px',
-                  px: 3,
-                  mb: { xs: 1, sm: 0 },
-                  bgcolor: 'primary.main',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                  }
-                }}
-              >
-                Publish
-              </Button>
-            </Box>
-          </FormContainer>
-        </Grid>
-
-        {/* Article Information and Distribution Options in a responsive grid */}
-        <Grid item xs={12} md={6}>
-          <FormContainer title="Article Information">
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <FormInput
-                  label="Article Title"
-                  disabled
-                  fullWidth
-                  value={articleInfo.title || 'No title available'}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormInput
-                    label="Meta Title"
-                    value={articleInfo.metaTitle || 'No meta title available'}
-                    disabled
-                    fullWidth
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormInput
-                  label="Meta Description"
-                  value={articleInfo.metaDescription || 'No meta description available'}
-                  disabled
-                  fullWidth
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormInput
-                  label="URL Slug"
-                  value={articleInfo.urlSlug || 'No URL slug available'}
-                  disabled
-                  fullWidth
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Primary Keyword
-                </Typography>
+        {/* Keywords */}
+        {(articleInfo.primaryKeyword || articleInfo.secondaryKeywords?.length > 0) && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Keywords:
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {articleInfo.primaryKeyword && (
                 <Chip
-                  label={articleInfo.primaryKeyword || 'No primary keyword'}
+                  label={articleInfo.primaryKeyword}
                   sx={{
                     bgcolor: 'success.lighter',
                     color: 'success.dark',
-                    borderRadius: '16px',
-                    mb: 1,
                     fontWeight: 'bold'
                   }}
                 />
-              </Grid>
+              )}
+              {articleInfo.secondaryKeywords?.map((keyword, index) => (
+                <Chip
+                  key={index}
+                  label={keyword}
+                  sx={{
+                    bgcolor: 'primary.lighter',
+                    color: 'primary.main'
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
 
-              <Grid item xs={12}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Secondary Keywords
+        <Divider sx={{ my: 3 }} />
+
+        {/* Featured Image */}
+        <Paper
+          sx={{
+            height: { xs: 200, sm: 250, md: 300 },
+            width: '100%',
+            bgcolor: 'background.neutral',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+            borderRadius: 2,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.01)',
+            }
+          }}
+        />
+
+        {/* All Sections */}
+        {sections && sections.length > 0 ? (
+          sections.map((section, index) => (
+            <Box key={index} sx={{ mb: 6 }}>
+              {/* Section Title */}
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                {section.title || `Section ${index + 1}`}
+              </Typography>
+
+              {/* Content Type Badge */}
+              {(section.type === 'faq' || section.contentType) && (
+                <Chip
+                  label={
+                    section.type === 'faq'
+                      ? 'FAQ Section'
+                      : section.contentType === 'bullet-list'
+                        ? 'List Section'
+                        : section.contentType === 'table'
+                          ? 'Table Section'
+                          : section.contentType === 'image-gallery'
+                            ? 'Image Gallery'
+                            : section.contentType || 'Paragraph'
+                  }
+                  size="small"
+                  sx={{
+                    mb: 1.5,
+                    bgcolor: 'background.neutral',
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    fontSize: '0.75rem'
+                  }}
+                />
+              )}
+
+              {/* Main Content */}
+              {section.content && (
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                  {section.content}
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {articleInfo.secondaryKeywords && articleInfo.secondaryKeywords.length > 0 ? (
-                    articleInfo.secondaryKeywords.map((keyword, index) => (
-                      <Chip
-                        key={index}
-                        label={keyword}
-                        sx={{
-                          bgcolor: 'primary.lighter',
-                          color: 'primary.main',
-                          borderRadius: '16px',
-                          mb: 0.5
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      No secondary keywords available
-                    </Typography>
+              )}
+
+              {/* Bullet Points */}
+              {section.bulletPoints && section.bulletPoints.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <List disablePadding>
+                    {section.bulletPoints.map((point, i) => (
+                      <ListItem key={i} sx={{ py: 0.5 }}>
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                          <Iconify icon="mdi:circle-small" />
+                        </ListItemIcon>
+                        <ListItemText primary={point} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              )}
+
+              {/* Table Data */}
+              {section.tableData && section.tableData.headers && section.tableData.rows && (
+                <TableContainer component={Paper} sx={{ mb: 2, overflow: 'auto' }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: 'background.neutral' }}>
+                        {section.tableData.headers.map((header, i) => (
+                          <TableCell key={i} sx={{ fontWeight: 'bold' }}>
+                            {header}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {section.tableData.rows.map((row: string[], rowIndex: number) => (
+                        <TableRow key={rowIndex}>
+                          {row.map((cell: string, cellIndex: number) => (
+                            <TableCell key={cellIndex}>{cell}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* FAQ Items */}
+              {section.faqItems && section.faqItems.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  {section.faqItems.map((faq, i) => (
+                    <Accordion key={i} sx={{ mb: 1 }}>
+                      <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
+                        <Typography variant="subtitle1">{faq.question}</Typography>
+                      </AccordionSummary>
+                      <Divider />
+                      <AccordionDetails>
+                        <Typography variant="body2">{faq.answer}</Typography>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
+                </Box>
+              )}
+
+              {/* Internal and External Links */}
+              {((section.internalLinks && section.internalLinks.length > 0) ||
+                (section.externalLinks && section.externalLinks.length > 0)) && (
+                <Box sx={{ mb: 2, mt: 2 }}>
+                  {/* Internal Links */}
+                  {section.internalLinks && section.internalLinks.length > 0 && (
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Related Content:
+                      </Typography>
+                      <List disablePadding>
+                        {section.internalLinks.map((link, i) => (
+                          <ListItem key={i} sx={{ py: 0.5 }}>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              <Iconify icon="mdi:link-variant" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Link href={link.url} color="primary" underline="hover">
+                                  {link.text}
+                                </Link>
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  )}
+
+                  {/* External Links */}
+                  {section.externalLinks && section.externalLinks.length > 0 && (
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Sources:
+                      </Typography>
+                      <List disablePadding>
+                        {section.externalLinks.map((link, i) => (
+                          <ListItem key={i} sx={{ py: 0.5 }}>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              <Iconify icon="mdi:open-in-new" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener">
+                                  {link.text}
+                                </Link>
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
                   )}
                 </Box>
-              </Grid>
+              )}
 
-              <Grid item xs={12}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Content Description
-                </Typography>
-                <Typography variant="body2" sx={{ p: 1, bgcolor: 'background.neutral', borderRadius: 1 }}>
-                  {articleInfo.contentDescription || 'No content description available'}
-                </Typography>
-              </Grid>
-            </Grid>
-          </FormContainer>
-        </Grid>
+              {index < sections.length - 1 && <Divider sx={{ my: 3 }} />}
+            </Box>
+          ))
+        ) : (
+          <Box sx={{
+            textAlign: 'center',
+            color: 'text.secondary',
+            my: 3,
+            p: 2,
+            bgcolor: 'background.neutral',
+            borderRadius: 1
+          }}>
+            <Typography variant="body2">
+              No sections have been generated yet.
+            </Typography>
+          </Box>
+        )}
+      </Box>
 
-        {/* Distribution Options */}
-        <Grid item xs={12} md={6}>
-          <FormContainer title="Distribution Options">
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {isLoadingStores ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : stores.length > 0 ? (
-                  <FormDropdown
-                    label="Select Store"
-                    value={selectedStore || ''}
-                    onChange={(e) => setSelectedStore(e.target.value as number)}
-                    options={stores?.map(store => ({
-                      value: store.id.toString(),
-                      label: store.name,
-                    }))}
-                  />
-                ) : (
-                  <Typography color="text.secondary" sx={{ p: 1 }}>
-                    No stores available. Please connect a store first.
-                  </Typography>
-                )}
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormDropdown
-                  label="Publishing Schedule"
-                  value={publishingSchedule}
-                  onChange={(e) => setPublishingSchedule(e.target.value as string)}
-                  options={[
-                    { value: 'now', label: 'Publish Now' },
-                    { value: 'schedule', label: 'Schedule for Later' },
-                    { value: 'draft', label: 'Save as Draft' }
-                  ]}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="success"
-                  startIcon={<Iconify icon="mdi:rocket-launch" />}
-                  onClick={handlePublish}
-                  disabled={!selectedStore || isPublishing}
-                  sx={{
-                    borderRadius: '24px',
-                    py: 1.5,
-                    bgcolor: 'success.main',
-                    '&:hover': {
-                      bgcolor: 'success.dark',
-                    }
-                  }}
-                >
-                  {isPublishing ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
-                      Publishing...
-                    </Box>
-                  ) : (
-                    publishingSchedule === 'now' ? 'Publish Now' :
-                    publishingSchedule === 'schedule' ? 'Schedule for Later' :
-                    'Save as Draft'
-                  )}
-                </Button>
-              </Grid>
-            </Grid>
-          </FormContainer>
-        </Grid>
-      </Grid>
-
-      {/* Modals */}
-      <CopyModal
-        open={copyModalOpen}
-        onClose={handleCloseCopyModal}
-        articleInfo={articleInfo}
-        sections={sections}
-      />
-      <ExportModal
-        open={exportModalOpen}
-        onClose={handleCloseExportModal}
-        articleInfo={articleInfo}
-        sections={sections}
-      />
-      <StoreSelectionModal
-        open={storeSelectionOpen}
-        onClose={handleCloseStoreSelection}
-        onSelect={handleStoreSelect}
-        stores={stores}
-      />
-      <FullArticleModal
-        open={fullArticleModalOpen}
-        onClose={handleCloseFullArticleModal}
-        articleInfo={articleInfo}
-        sections={sections}
-      />
     </Box>
   );
 }

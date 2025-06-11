@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
-import { Box, Button, useTheme } from '@mui/material';
+import { Box, Button, useTheme, Stack } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+
+// Import modals for final step actions
+import { CopyModal } from '../generate-steps/modals/CopyModal';
+import { ExportModal } from '../generate-steps/modals/ExportModal';
+import { PublishModal } from '../generate-steps/modals/PublishModal';
 
 interface StepNavigationProps {
   activeStep: number;
@@ -15,7 +21,11 @@ interface StepNavigationProps {
 export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep }: StepNavigationProps) => {
   const theme = useTheme();
   const methods = useFormContext();
-  
+
+  // State for modals (only for final step)
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
 
   // Helper function to get the field names for a specific step
   const getFieldsForStep = (step: number): string[] => {
@@ -57,7 +67,6 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
     // Trigger validation for the current step's fields
     const isStepValid = await methods.trigger(currentStepFields as any);
 
-
     if (isStepValid) {
       const values = methods.getValues();
 
@@ -88,7 +97,7 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
       }
 
       if (shouldProceed) {
-        onNextStep()
+        onNextStep();
       }
     } else {
       toast.error("Please fill out all required fields before proceeding.");
@@ -97,63 +106,113 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
 
   // Handle back button click
   const handleBack = () => {
-    onPrevStep()
+    onPrevStep();
   };
 
-  return (
-    <Box
-      sx={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        py: 3, // Increased vertical padding
-        px: 4, // Increased horizontal padding
-        bgcolor: 'background.paper',
-        borderTop: `1px solid ${theme.palette.divider}`,
-        boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)', // Add subtle shadow for better separation
-        zIndex: 1000,
-        display: 'flex',
-        justifyContent: 'space-between',
-        width: 'calc(100% - 240px)',
-        ml: '240px',
-      }}
-    >
-      <Box>
-        {activeStep > 0 ? (
-          <Button
-            variant="outlined"
-            startIcon={<Iconify icon="eva:arrow-back-fill" />}
-            sx={{
-              borderRadius: '24px',
-              minWidth: '120px',
-            }}
-            onClick={handleBack}
-          >
-            Previous
-          </Button>
-        ) : null}
-      </Box>
+  // Get form data for final step actions
+  const getArticleData = () => {
+    const values = methods.getValues();
+    return {
+      articleInfo: {
+        title: values.step1?.title || '',
+        urlSlug: values.step1?.urlSlug || '',
+        metaTitle: values.step1?.metaTitle || '',
+        metaDescription: values.step1?.metaDescription || '',
+        primaryKeyword: values.step1?.primaryKeyword || '',
+        secondaryKeywords: values.step1?.secondaryKeywords || [],
+        language: values.step1?.language || 'en-us',
+        targetCountry: values.step1?.targetCountry || 'us',
+        contentDescription: values.step1?.contentDescription || '',
+        createdAt: new Date().toISOString(),
+      },
+      sections: values.step3?.sections || []
+    };
+  };
 
-      <Box>
+  // Handle final step actions
+  const handleCopyAction = () => setCopyModalOpen(true);
+  const handleExportAction = () => setExportModalOpen(true);
+  const handlePublishAction = () => setPublishModalOpen(true);
+
+  return (
+    <>
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          py: 3,
+          px: 4,
+          bgcolor: 'background.paper',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: 'calc(100% - 240px)',
+          ml: '240px',
+        }}
+      >
+        <Box>
+          {activeStep > 0 ? (
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="eva:arrow-back-fill" />}
+              sx={{
+                borderRadius: '24px',
+                minWidth: '120px',
+              }}
+              onClick={handleBack}
+            >
+              Previous
+            </Button>
+          ) : null}
+        </Box>
+
         {activeStep === totalSteps - 1 ? (
-          <Button
-            variant="contained"
-            endIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-            sx={{
-              borderRadius: '24px',
-              bgcolor: 'success.main',
-              minWidth: '180px',
-              px: 3,
-              '&:hover': {
-                bgcolor: 'success.dark',
-              }
-            }}
-            onClick={handleNext}
-          >
-            Finish & Publish
-          </Button>
+          // Final step - show action buttons
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="eva:copy-fill" />}
+              onClick={handleCopyAction}
+              sx={{
+                borderRadius: '24px',
+                px: 3,
+              }}
+            >
+              Copy
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="eva:download-fill" />}
+              onClick={handleExportAction}
+              sx={{
+                borderRadius: '24px',
+                px: 3,
+              }}
+            >
+              Export
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+              onClick={handlePublishAction}
+              sx={{
+                borderRadius: '24px',
+                bgcolor: 'success.main',
+                px: 3,
+                '&:hover': {
+                  bgcolor: 'success.dark',
+                }
+              }}
+            >
+              Publish
+            </Button>
+          </Stack>
         ) : (
+          // Other steps - show next button
           <Button
             variant="contained"
             endIcon={<Iconify icon="eva:arrow-forward-fill" />}
@@ -167,6 +226,30 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
           </Button>
         )}
       </Box>
-    </Box>
+
+      {/* Modals for final step actions */}
+      {activeStep === totalSteps - 1 && (
+        <>
+          <CopyModal
+            open={copyModalOpen}
+            onClose={() => setCopyModalOpen(false)}
+            articleInfo={getArticleData().articleInfo}
+            sections={getArticleData().sections}
+          />
+          <ExportModal
+            open={exportModalOpen}
+            onClose={() => setExportModalOpen(false)}
+            articleInfo={getArticleData().articleInfo}
+            sections={getArticleData().sections}
+          />
+          <PublishModal
+            open={publishModalOpen}
+            onClose={() => setPublishModalOpen(false)}
+            articleInfo={getArticleData().articleInfo}
+            sections={getArticleData().sections}
+          />
+        </>
+      )}
+    </>
   );
 };
