@@ -1,9 +1,10 @@
+/* eslint-disable consistent-return */
 // Custom hooks
 import type { GenerateArticleFormData } from "src/sections/generate/schemas";
 
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from "react-hook-form";
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -18,7 +19,7 @@ import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEv
 import { ItemSectionNew } from "./ItemSectionNew";
 import { OptimizationModal } from "./OptimizationModal";
 import { CriterionDetailsModal } from "./CriterionDetailsModal";
-import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP } from "../../utils/seo-criteria-definitions";
+import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from "../../utils/seo-criteria-definitions";
 
 // Types
 
@@ -36,9 +37,10 @@ const getColors = (theme: any) => ({
 
 interface RealTimeScoringTabNewProps {
   totalMaxScore?: number;
+  onCriteriaHighlighted?: (hasHighlighted: boolean) => void;
 }
 
-export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTabNewProps) {
+export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlighted }: RealTimeScoringTabNewProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const COLORS = getColors(theme);
@@ -47,6 +49,10 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
   const [selectedCriterionId, setSelectedCriterionId] = useState<number | null>(null);
   const [isOptimizationModalOpen, setIsOptimizationModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // State for highlighting criteria when inputs change
+  const [highlightedCriteria, setHighlightedCriteria] = useState<Set<number>>(new Set());
+  const previousFormValues = useRef<any>(null);
 
   // Use criteria evaluation hook
   const {
@@ -61,9 +67,60 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
   const form = useFormContext<GenerateArticleFormData>();
   const formValues = form.watch();
 
+  // Function to detect which criteria should be highlighted based on input changes
+  const detectChangedCriteria = useCallback((currentValues: any, previousValues: any) => {
+    if (!previousValues) return new Set<number>();
+
+    const changedCriteria = new Set<number>();
+    const currentStep1 = currentValues?.step1 || {};
+    const previousStep1 = previousValues?.step1 || {};
+
+    // Check each input field for changes
+    const inputFields = ['primaryKeyword', 'title', 'metaDescription', 'urlSlug', 'contentDescription'];
+
+    inputFields.forEach(field => {
+      const currentValue = currentStep1[field] || '';
+      const previousValue = previousStep1[field] || '';
+
+      // If the field has changed, add all affected criteria to highlight set
+      if (currentValue !== previousValue) {
+        const affectedCriteria = INPUT_TO_CRITERIA_MAP[field] || [];
+        affectedCriteria.forEach(criteriaId => {
+          changedCriteria.add(criteriaId);
+        });
+      }
+    });
+
+    return changedCriteria;
+  }, []);
+
+  // Effect to detect form changes and highlight affected criteria
+  useEffect(() => {
+    if (previousFormValues.current) {
+      const changedCriteria = detectChangedCriteria(formValues, previousFormValues.current);
+
+      if (changedCriteria.size > 0) {
+        setHighlightedCriteria(changedCriteria);
+
+        // Notify parent that criteria are highlighted
+        onCriteriaHighlighted?.(true);
+
+        // Clear highlights after 3 seconds
+        const timer = setTimeout(() => {
+          setHighlightedCriteria(new Set());
+          onCriteriaHighlighted?.(false);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+      }
+    }
+
+    // Update previous values
+    previousFormValues.current = formValues;
+  }, [formValues, detectChangedCriteria, onCriteriaHighlighted]);
+
   // Initialize criteria evaluation when the component mounts or form data changes
   useEffect(() => {
-    console.log("RealTimeScoringTabNew: Initializing criteria evaluation");
     evaluateAllCriteria();
   }, [
     evaluateAllCriteria,
@@ -316,7 +373,7 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100 }: RealTimeScoringTa
                   tooltip={needsTranslation ? t(message) : message}
                   onImprove={() => handleOpenModal(criterion.id)}
                   onAdvancedOptimize={handleOpenModal}
-                  isHighlighted={false}
+                  isHighlighted={highlightedCriteria.has(criterion.id)}
                 />
               );
             })}

@@ -78,6 +78,7 @@ export function SEODashboard({
   }, [evaluateAllCriteria]);
 
   const [tabValue, setTabValue] = useState(defaultTab);
+  const [shouldAutoSwitchToScoring, setShouldAutoSwitchToScoring] = useState(false);
 
   // Use the isCollapsed prop if provided, otherwise use internal state
   const [internalShowContent, setInternalShowContent] = useState(true);
@@ -104,6 +105,24 @@ export function SEODashboard({
     }
   }, [isCollapsed, internalShowContent, onCollapseChange]);
 
+  // Handle criteria highlighting callback
+  const handleCriteriaHighlighted = useCallback((hasHighlighted: boolean) => {
+    if (hasHighlighted) {
+      // Auto-switch to Real-time Scoring tab when criteria are highlighted
+      setTabValue(1);
+      setShouldAutoSwitchToScoring(true);
+
+      // Also expand the dashboard if it's collapsed
+      if (isCollapsed && onCollapseChange) {
+        onCollapseChange(false);
+      } else if (!showContent) {
+        setInternalShowContent(true);
+      }
+    } else {
+      setShouldAutoSwitchToScoring(false);
+    }
+  }, [isCollapsed, onCollapseChange, showContent]);
+
   const isGenerateDisabled = !formValues.primaryKeyword || !formValues.secondaryKeywords.length || !formValues.contentDescription || !formValues.language || !formValues.targetCountry;
 
   // Memoize tab content to prevent unnecessary re-renders
@@ -125,14 +144,17 @@ export function SEODashboard({
       case 1:
         return (
           <FormProvider {...form}>
-            <RealTimeScoringTabNew/>
+            <RealTimeScoringTabNew
+              totalMaxScore={totalScore}
+              onCriteriaHighlighted={handleCriteriaHighlighted}
+            />
           </FormProvider>
         );
 
       default:
         return null;
     }
-  }, [tabValue, formValues, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form]);
+  }, [tabValue, formValues.title, formValues.metaTitle, formValues.metaDescription, formValues.urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, totalScore, handleCriteriaHighlighted]);
 
   return (
     <Box sx={{
@@ -229,7 +251,25 @@ export function SEODashboard({
               }}
             >
               <Tab label="Preview SEO" />
-              <Tab label={`Real-time Scoring (${formattedScore})`} />
+              <Tab
+                label={`Real-time Scoring (${formattedScore})`}
+                sx={shouldAutoSwitchToScoring ? {
+                  animation: 'tabHighlight 1.5s ease-in-out',
+                  '@keyframes tabHighlight': {
+                    '0%': {
+                      backgroundColor: 'transparent',
+                    },
+                    '50%': {
+                      backgroundColor: theme.palette.mode === 'dark'
+                        ? `${theme.palette.primary.main}20`
+                        : `${theme.palette.primary.main}10`,
+                    },
+                    '100%': {
+                      backgroundColor: 'transparent',
+                    }
+                  }
+                } : {}}
+              />
             </Tabs>
           )}
         </Box>

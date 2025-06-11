@@ -112,7 +112,7 @@ export function ItemSectionNew({
       setHighlight(true);
       const timer = setTimeout(() => {
         setHighlight(false);
-      }, 5000);
+      }, 3000); // Reduced from 5000 to 3000 for better UX
       return () => clearTimeout(timer);
     }
   }, [isHighlighted]);
@@ -177,19 +177,35 @@ export function ItemSectionNew({
         justifyContent: 'space-between',
         transition: 'all 0.2s ease-in-out',
         opacity: isPending ? 0.7 : 1,
-        animation: highlight ? 'pulse 2s' : 'none',
-        '@keyframes pulse': {
+        animation: highlight ? 'highlightPulse 1.5s ease-in-out' : 'none',
+        '@keyframes highlightPulse': {
           '0%': {
-            boxShadow: `0 0 0 0 ${theme.palette.primary.main}70`
+            boxShadow: `0 0 0 0 ${theme.palette.primary.main}80`,
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.05)'
+              : 'rgba(0, 0, 0, 0.02)',
+            borderColor: theme.palette.mode === 'dark'
+              ? theme.palette.grey[800]
+              : theme.palette.grey[200],
           },
-          '70%': {
-            boxShadow: `0 0 0 10px ${theme.palette.primary.main}00`
+          '50%': {
+            boxShadow: `0 0 0 8px ${theme.palette.primary.main}20, 0 0 20px ${theme.palette.primary.main}40`,
+            backgroundColor: theme.palette.mode === 'dark'
+              ? `${theme.palette.primary.main}15`
+              : `${theme.palette.primary.main}08`,
+            borderColor: theme.palette.primary.main,
           },
           '100%': {
-            boxShadow: `0 0 0 0 ${theme.palette.primary.main}00`
+            boxShadow: `0 0 0 0 ${theme.palette.primary.main}00`,
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.05)'
+              : 'rgba(0, 0, 0, 0.02)',
+            borderColor: theme.palette.mode === 'dark'
+              ? theme.palette.grey[800]
+              : theme.palette.grey[200],
           }
         },
-        transform: highlight ? 'scale(1.02)' : 'scale(1)',
+        transform: highlight ? 'scale(1.01)' : 'scale(1)',
         borderLeft: status === 'success' ? `3px solid ${COLORS.success}` :
                    status === 'warning' ? `3px solid ${COLORS.warning}` :
                    status === 'error' ? `3px solid ${COLORS.error}` :
