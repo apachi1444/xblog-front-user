@@ -42,6 +42,7 @@ export const userApi = api.injectEndpoints({
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         };
       },
+      providesTags: ['User'],
     }),
 
     // Update user information

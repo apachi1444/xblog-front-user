@@ -169,6 +169,7 @@ const setupMocks = () => {
       email: 'john.doe@example.com',
       avatar: '/assets/images/avatar/avatar-1.webp',
       role: 'user',
+      telephone: '+1 (555) 123-4567',
       created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
       updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       is_completed_onboarding: true,
@@ -183,6 +184,34 @@ const setupMocks = () => {
         total: 50
       }
     });
+
+    // Mock user update endpoint
+    mock.onPatch('/users/me').reply((config) => {
+      const updateData = JSON.parse(config.data);
+      return [200, {
+        id: '1',
+        name: updateData.name || 'John Doe',
+        email: 'john.doe@example.com',
+        avatar: updateData.avatar || '/assets/images/avatar/avatar-1.webp',
+        role: 'user',
+        telephone: updateData.telephone || '+1 (555) 123-4567',
+        created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+        is_completed_onboarding: true,
+        subscription: {
+          name: 'Professional',
+          price: 29.99,
+          billing_cycle: 'monthly',
+          status: 'active'
+        },
+        regenerations: {
+          available: 15,
+          total: 50
+        }
+      }];
+    });
+
+
 
     // Mock new user invoices endpoint
     mock.onGet(/\/api\/v1\/user\/invoices\/(.+)/).reply(200, {

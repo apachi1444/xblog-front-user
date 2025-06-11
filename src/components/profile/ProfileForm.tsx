@@ -69,8 +69,13 @@ export function ProfileForm({ userData }: ProfileFormProps) {
   };
 
   const handleImageUpload = () => {
-    // TODO: Implement image upload functionality
-    console.log('Image upload functionality to be implemented');
+    // Upload functionality is disabled
+    console.log('Profile picture upload is currently disabled');
+  };
+
+  const handleAvatarUpload = async () => {
+    // Upload functionality is disabled
+    console.log('Profile picture upload is currently disabled');
   };
 
   return (
@@ -99,32 +104,44 @@ export function ProfileForm({ userData }: ProfileFormProps) {
             </Avatar>
             <IconButton
               onClick={handleImageUpload}
+              disabled
               sx={{
                 position: 'absolute',
                 bottom: 0,
                 right: 0,
-                bgcolor: theme.palette.primary.main,
-                color: 'white',
+                bgcolor: theme.palette.action.disabled,
+                color: theme.palette.action.disabled,
                 width: 36,
                 height: 36,
+                cursor: 'not-allowed',
                 '&:hover': {
-                  bgcolor: theme.palette.primary.dark,
+                  bgcolor: theme.palette.action.disabled,
                 },
               }}
             >
               <Upload size={18} />
             </IconButton>
           </Box>
+
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('profile.picture.description', 'Upload/Change Your Profile Image')}
+            {t('profile.picture.description', 'Profile picture upload is currently disabled')}
           </Typography>
+
           <Button
             variant="outlined"
             onClick={handleImageUpload}
+            disabled
             startIcon={<Upload size={16} />}
-            sx={{ borderRadius: 2 }}
+            sx={{
+              borderRadius: 2,
+              cursor: 'not-allowed',
+              '&.Mui-disabled': {
+                color: theme.palette.action.disabled,
+                borderColor: theme.palette.action.disabled,
+              }
+            }}
           >
-            {t('profile.picture.upload', 'Upload Avatar')}
+            {t('profile.picture.upload', 'Upload Disabled')}
           </Button>
         </Box>
       </Box>

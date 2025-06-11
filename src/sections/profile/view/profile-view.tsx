@@ -209,7 +209,13 @@ export function ProfileView() {
                       {t('profile.stats.memberSince', 'Member Since')}
                     </Typography>
                     <Typography variant="body2" fontWeight={600}>
-                      {userData?.created_at ? new Date(userData.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'}
+                      {userData?.created_at
+                        ? new Date(userData.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            year: 'numeric'
+                          })
+                        : t('profile.stats.notAvailable', 'N/A')
+                      }
                     </Typography>
                   </Box>
                 </Stack>
