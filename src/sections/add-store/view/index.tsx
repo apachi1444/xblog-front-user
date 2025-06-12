@@ -2,13 +2,10 @@ import { z } from 'zod';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useConnectWixMutation } from 'src/services/apis/integrations/wixApi';
-import { useConnectShopifyMutation } from 'src/services/apis/integrations/shopifyApi';
 import { useConnectWordPressMutation } from 'src/services/apis/integrations/wordpressApi';
 
 import { FormStepper } from 'src/components/stepper/FormStepper';
@@ -20,30 +17,107 @@ import { SuccessAnimation } from './SuccessAnimation';
 // Test mode for bypassing API errors
 const TEST_MODE = true;
 
-export const platforms = [
-  {
-    id: 'wordpress',
-    name: 'WordPress',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/WordPress_blue_logo.svg/512px-WordPress_blue_logo.svg.png',
-    description: 'Connect your WordPress site',
-  },
-  {
-    id: 'shopify',
-    name: 'Shopify',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/512px-Shopify_logo_2018.svg.png',
-    description: 'Connect your Shopify store',
-  },
-  {
-    id: 'wix',
-    name: 'Wix',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Wix.com_website_logo.svg/512px-Wix.com_website_logo.svg.png',
-    description: 'Connect your Wix store',
-  },
-];
+export const platformCategories = {
+  websites: [
+    {
+      id: 'wordpress',
+      name: 'WordPress',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/WordPress_blue_logo.svg/512px-WordPress_blue_logo.svg.png',
+      description: 'Connect your WordPress site',
+      category: 'websites',
+      enabled: true
+    },
+    {
+      id: 'shopify',
+      name: 'Shopify',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/512px-Shopify_logo_2018.svg.png',
+      description: 'Coming soon - Connect your Shopify store',
+      category: 'websites',
+      enabled: false
+    },
+    {
+      id: 'wix',
+      name: 'Wix',
+      icon: '/assets/images/wix.png',
+      description: 'Coming soon - Connect your Wix store',
+      category: 'websites',
+      enabled: false
+    },
+    {
+      id: 'ebay',
+      name: 'eBay',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/EBay_logo.svg/512px-EBay_logo.svg.png',
+      description: 'Coming soon - Connect your eBay store',
+      category: 'websites',
+      enabled: false
+    },
+    {
+      id: 'custom',
+      name: 'Custom Website',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/HTML5_logo_and_wordmark.svg/512px-HTML5_logo_and_wordmark.svg.png',
+      description: 'Coming soon - Connect your custom website',
+      category: 'websites',
+      enabled: false
+    }
+  ],
+  socialMedia: [
+    {
+      id: 'linkedin',
+      name: 'LinkedIn',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/512px-LinkedIn_logo_initials.png',
+      description: 'Coming soon - Share content on LinkedIn',
+      category: 'socialMedia',
+      enabled: false
+    },
+    {
+      id: 'reddit',
+      name: 'Reddit',
+      icon: 'https://cdn.worldvectorlogo.com/logos/reddit-4.svg',
+      description: 'Coming soon - Post to Reddit communities',
+      category: 'socialMedia',
+      enabled: false
+    },
+    {
+      id: 'quora',
+      name: 'Quora',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Quora_logo_2015.svg/512px-Quora_logo_2015.svg.png',
+      description: 'Coming soon - Answer questions on Quora',
+      category: 'socialMedia',
+      enabled: false
+    },
+    {
+      id: 'x',
+      name: 'X (Twitter)',
+      icon: '/assets/images/x.png',
+      description: 'Coming soon - Post to X (formerly Twitter)',
+      category: 'socialMedia',
+      enabled: false
+    },
+    {
+      id: 'instagram',
+      name: 'Instagram',
+      icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/512px-Instagram_icon.png',
+      description: 'Coming soon - Share on Instagram',
+      category: 'socialMedia',
+      enabled: false
+    }
+  ]
+};
+
+// Flatten all platforms for backward compatibility
+export const platforms = [...platformCategories.websites, ...platformCategories.socialMedia];
 
 // Create a schema for form validation
 const storeFormSchema = z.object({
-  platform: z.string().min(1, "Please select a platform"),
+  platform: z.string().min(1, "Please select a platform").refine(
+    (val) => {
+      const platform = platforms.find(p => p.id === val);
+      return platform?.enabled === true;
+    },
+    {
+      message: "Selected platform is not available yet. Only WordPress is currently supported.",
+    }
+  ),
   acceptTerms: z.boolean().refine(val => val === true, {
     message: "You must accept the terms and conditions",
   }),
@@ -70,16 +144,13 @@ export type StoreFormData = z.infer<typeof storeFormSchema>;
 
 export default function AddStoreFlow() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const [integrationSuccess, setIntegrationSuccess] = useState(false);
   
   // API mutation hooks
   const [connectWordPress , {isLoading : isWordPressLoading}] = useConnectWordPressMutation();
-  const [connectShopify ,  {isLoading : isShopifyLoading}] = useConnectShopifyMutation();
-  const [connectWix, {isLoading : isWixLoading}] = useConnectWixMutation();
 
-  const isLoading = isWordPressLoading || isShopifyLoading || isWixLoading;
+  const isLoading = isWordPressLoading
 
   const methods = useForm<StoreFormData>({
     resolver: zodResolver(storeFormSchema),
@@ -94,8 +165,8 @@ export default function AddStoreFlow() {
   const selectedPlatform = watch('platform');
 
   const steps = [
-    t('store.selectPlatform'),
-    t('store.title')
+    'Select Platform',
+    'Store Details'
   ];
 
   const handleNext = async () => {
@@ -159,12 +230,12 @@ export default function AddStoreFlow() {
       store_password: data.store_password || '',
     }).unwrap()
       .then(() => {
-        toast.success(t('store.success'));
+        toast.success('Store connected successfully!');
       })
       .catch(() => {
         if (TEST_MODE) {
           setIntegrationSuccess(true);
-          toast.success(t('store.success'));
+          toast.success('Store connected successfully!');
         }
       })
   };
@@ -175,7 +246,13 @@ export default function AddStoreFlow() {
 
   // Handle platform selection
   const handlePlatformSelect = (platform: string) => {
-    setValue('platform', platform);
+    // Find the platform and check if it's enabled
+    const selectedPlatformData = platforms.find(p => p.id === platform);
+    if (selectedPlatformData?.enabled) {
+      setValue('platform', platform);
+    } else {
+      toast.error('This platform is not available yet. Only WordPress is currently supported.');
+    }
   };
 
   const renderStepContent = () => {

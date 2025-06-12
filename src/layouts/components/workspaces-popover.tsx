@@ -192,6 +192,26 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         open={!!openPopover}
         anchorEl={openPopover}
         onClose={handleClosePopover}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        disableRestoreFocus // Prevents focus issues that can cause reopening
+        disableScrollLock // Prevents scroll issues
+        disablePortal={false} // Use portal for better positioning
+        keepMounted={false} // Don't keep in DOM when closed
+        slotProps={{
+          paper: {
+            sx: {
+              maxHeight: '85vh',
+              mt: 1.5,
+              overflow: 'hidden',
+              boxShadow: theme.customShadows.z16,
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
+              bgcolor: theme.palette.background.paper,
+              zIndex: 1300, // Higher z-index to ensure it appears above other elements
+            },
+          },
+        }}
       >
         <MenuList
           disablePadding

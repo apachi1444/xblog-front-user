@@ -366,21 +366,36 @@ export default function AddStoreModal({ open, onClose, onSuccess }: AddStoreModa
       onClose={onClose}
       closeAfterTransition
       aria-labelledby="add-store-modal-title"
+      disableRestoreFocus
+      disableScrollLock
+      disablePortal={false}
+      keepMounted={false}
+      slotProps={{
+        backdrop: {
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(2px)',
+          },
+        },
+      }}
     >
       <Fade in={open}>
         <Box
           sx={{
-            position: 'absolute',
+            position: 'fixed',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: { xs: '90%', sm: 600 },
+            maxWidth: '95vw',
             maxHeight: '90vh',
             bgcolor: 'background.paper',
             borderRadius: 2,
             boxShadow: 24,
             p: 4,
             overflow: 'auto',
+            zIndex: 1300,
+            outline: 'none',
           }}
         >
           <Typography id="add-store-modal-title" variant="h5" component="h2" sx={{ mb: 3 }}>
