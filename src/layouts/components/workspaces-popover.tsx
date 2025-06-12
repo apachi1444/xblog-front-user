@@ -1,18 +1,19 @@
 import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
+import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 
-import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonBase from '@mui/material/ButtonBase';
+import { Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
-import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import Popover from '@mui/material/Popover';
+import MenuList from '@mui/material/MenuList';
+import ButtonBase from '@mui/material/ButtonBase';
 import { alpha, useTheme } from '@mui/material/styles';
+import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { setCurrentStore } from 'src/services/slices/stores/storeSlice';
@@ -46,6 +47,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   const dispatch = useDispatch();
   const currentStore = useSelector(selectCurrentStore);
   const theme = useTheme();
+  const location = useLocation();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
@@ -72,7 +74,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     [dispatch]
   );
 
-  // Use the same navigation logic as account-popover
+  // Optimized navigation logic with route checking
   const handleAddNewWebsite = useCallback(() => {
     // Close popover immediately
     setAnchorEl(null);
@@ -80,12 +82,18 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     // Force immediate closing of the popover (same as account-popover)
     document.body.click();
 
+    // Check if we're already on the target page to avoid unnecessary navigation
+    if (location.pathname === '/stores/add') {
+      // Already on the target page, no need to navigate
+      return;
+    }
+
     // Navigate after a very short delay to ensure popover is closed (same as account-popover)
     setTimeout(() => {
       // Use direct navigation for more reliable routing (same as account-popover)
       window.location.href = '/stores/add';
     }, 10);
-  }, []);
+  }, [location.pathname]);
 
   // Helper function to get platform image
   const getPlatformImage = (platform: string): string => {

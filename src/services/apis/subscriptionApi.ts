@@ -54,19 +54,9 @@ export const subscriptionApi = api.injectEndpoints({
     // Get user invoices - Updated to new endpoint
     getUserInvoices: builder.query<InvoicesResponse, void>({
         query: () => {
-          let userId = null;
-          try {
-            const authData = localStorage.getItem('xblog_auth_session_v2');
-            if (authData) {
-              const parsedData = JSON.parse(authData);
-              userId = parsedData.user?.id;
-            }
-          } catch (error) {
-            console.error('Error retrieving user ID from localStorage:', error);
-          }
-
+        const url = '/user/invoices';
         return {
-          url: `/api/v1/user/invoices/${userId}`,
+          url,
           method: 'GET',
         };
       },
