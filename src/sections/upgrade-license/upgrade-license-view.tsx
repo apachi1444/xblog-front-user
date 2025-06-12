@@ -37,6 +37,7 @@ export function UpgradeLicenseView() {
 
   // Fetch subscription plans
   const {
+    data: plansData,
     isLoading: isLoadingPlans,
     refetch: refetchPlans
   } = useGetSubscriptionPlansQuery();
@@ -220,10 +221,20 @@ export function UpgradeLicenseView() {
   // Handle opening plan in new tab
   const handleChoosePlan = useCallback((planId: string) => {
     console.log(`Opening plan ${planId} in new tab`);
-    // Open the Hostinger VPS pricing page in a new tab
-    const planUrl = `https://www.hostinger.com/fr/vps#pricing`;
-    window.open(planUrl, '_blank');
-  }, []);
+
+    // Find the specific plan from the API data
+    const selectedPlan = plansData?.find(plan => plan.id === planId);
+
+    if (selectedPlan && selectedPlan.url) {
+      // Open the specific plan URL in a new tab
+      window.open(selectedPlan.url, '_blank');
+      console.log(`Opened plan URL: ${selectedPlan.url}`);
+    } else {
+      // Fallback: show error message
+      toast.error('Plan URL not available. Please try again later.');
+      console.error(`Plan not found or URL missing for planId: ${planId}`);
+    }
+  }, [plansData]);
 
   // Set up visibility change listener to detect when user returns to the app
   useEffect(() => {
