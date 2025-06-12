@@ -1,19 +1,18 @@
 import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
 
+import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { Typography } from '@mui/material';
-import Divider from '@mui/material/Divider';
-import Popover from '@mui/material/Popover';
-import MenuList from '@mui/material/MenuList';
 import ButtonBase from '@mui/material/ButtonBase';
-import { alpha, useTheme } from '@mui/material/styles';
+import Divider from '@mui/material/Divider';
+import MenuList from '@mui/material/MenuList';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+import Popover from '@mui/material/Popover';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { setCurrentStore } from 'src/services/slices/stores/storeSlice';
@@ -45,32 +44,48 @@ export type WorkspacesPopoverProps = ButtonBaseProps & {
 export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopoverProps) {
   const { data: stores, isLoading } = useGetStoresQuery();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const currentStore = useSelector(selectCurrentStore);
   const theme = useTheme();
 
-  const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const open = Boolean(anchorEl);
 
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpenPopover(event.currentTarget);
+  // Force close popover on component unmount or route change
+  useEffect(() => () => {
+      setAnchorEl(null);
+    }, []);
+
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   }, []);
 
-  const handleClosePopover = useCallback(() => {
-    setOpenPopover(null);
+  const handleClose = useCallback(() => {
+    setAnchorEl(null);
   }, []);
 
   const handleChangeWorkspace = useCallback(
     (newStore: Store) => {
+      // Close popover FIRST
+      setAnchorEl(null);
       dispatch(setCurrentStore(newStore));
-      handleClosePopover();
     },
-    [dispatch, handleClosePopover]
+    [dispatch]
   );
 
+  // Use the same navigation logic as account-popover
   const handleAddNewWebsite = useCallback(() => {
-    navigate('/stores/add');
-    handleClosePopover();
-  }, [navigate, handleClosePopover]);
+    // Close popover immediately
+    setAnchorEl(null);
+
+    // Force immediate closing of the popover (same as account-popover)
+    document.body.click();
+
+    // Navigate after a very short delay to ensure popover is closed (same as account-popover)
+    setTimeout(() => {
+      // Use direct navigation for more reliable routing (same as account-popover)
+      window.location.href = '/stores/add';
+    }, 10);
+  }, []);
 
   // Helper function to get platform image
   const getPlatformImage = (platform: string): string => {
@@ -98,17 +113,15 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   };
 
   if (isLoading || !currentStore) {
-    return null; // Or a loading state
+    return null;
   }
-
-  console.log(currentStore);
-  
 
   return (
     <>
       <ButtonBase
         disableRipple
-        onClick={handleOpenPopover}
+        onClick={handleClick}
+        aria-describedby={open ? 'workspaces-popover' : undefined}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -184,23 +197,34 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         <Iconify
           icon="eva:chevron-down-fill"
           width={18}
-          sx={{ color: 'text.secondary' }}
+          sx={{ 
+            color: 'text.secondary',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease-in-out',
+          }}
         />
       </ButtonBase>
 
       <Popover
-        open={!!openPopover}
-        anchorEl={openPopover}
-        onClose={handleClosePopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        disableRestoreFocus // Prevents focus issues that can cause reopening
-        disableScrollLock // Prevents scroll issues
-        disablePortal={false} // Use portal for better positioning
-        keepMounted={false} // Don't keep in DOM when closed
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        disableRestoreFocus
+        disableScrollLock
+        disablePortal={false}
+        keepMounted={false}
         slotProps={{
           paper: {
             sx: {
+              width: 260,
               maxHeight: '85vh',
               mt: 1.5,
               overflow: 'hidden',
@@ -208,7 +232,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               borderRadius: 2,
               border: `1px solid ${alpha(theme.palette.grey[500], 0.08)}`,
               bgcolor: theme.palette.background.paper,
-              zIndex: 1300, // Higher z-index to ensure it appears above other elements
+              zIndex: 1300,
             },
           },
         }}
@@ -217,17 +241,18 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           disablePadding
           sx={{
             p: 0.5,
-            gap: 0.5,
-            width: 260,
-            display: 'flex',
-            flexDirection: 'column',
             [`& .${menuItemClasses.root}`]: {
-              p: 1.5,
+              px: 1.5,
+              py: 1,
               gap: 1.5,
-              borderRadius: 0.75,
+              borderRadius: 1,
+              minHeight: 44,
               [`&.${menuItemClasses.selected}`]: {
                 bgcolor: 'action.selected',
                 fontWeight: 'fontWeightSemiBold',
+              },
+              '&:hover': {
+                bgcolor: 'action.hover',
               },
             },
           }}
@@ -240,22 +265,23 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
             >
               {renderAvatar(store.name, store.logo, store.platform)}
               <Box component="span" sx={{ flexGrow: 1 }}>
-                {store.name}
+                <Typography variant="body2" noWrap>
+                  {store.name}
+                </Typography>
               </Box>
             </MenuItem>
           ))}
 
-          {/* Divider */}
-          <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 0.5 }} />
 
-          {/* Add New Website Button */}
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 0.5 }}>
             <Button
               fullWidth
               variant="outlined"
               startIcon={<Iconify icon="mingcute:add-line" />}
               onClick={handleAddNewWebsite}
               sx={{
+                py: 1,
                 borderStyle: 'dashed',
                 borderColor: 'primary.main',
                 color: 'primary.main',

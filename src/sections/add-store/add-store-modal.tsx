@@ -370,6 +370,8 @@ export default function AddStoreModal({ open, onClose, onSuccess }: AddStoreModa
       disableScrollLock
       disablePortal={false}
       keepMounted={false}
+      disableAutoFocus
+      disableEnforceFocus
       slotProps={{
         backdrop: {
           sx: {
