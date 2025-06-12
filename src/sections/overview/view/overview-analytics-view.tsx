@@ -685,11 +685,11 @@ export function OverviewAnalyticsView() {
             list={
               invoicesData?.invoices && invoicesData.invoices.length > 0
                 ? invoicesData.invoices.map((invoice, index) => ({
-                    id: invoice.id || String(index + 1),
-                    title: invoice.plan || 'Subscription Payment',
+                    id: invoice.payment_id?.toString() || String(index + 1),
+                    title: `Plan ID: ${invoice.plan_id}` || 'Subscription Payment',
                     type: `order${index + 1}`,
                     status: invoice.status === 'paid' ? 'completed' : 'pending',
-                    time: invoice.createdAt ? new Date(invoice.createdAt).getTime() : new Date().getTime(),
+                    time: invoice.created_at ? new Date(invoice.created_at).getTime() : new Date().getTime(),
                   }))
                 : []
             }

@@ -1,6 +1,5 @@
 import jsPDF  from 'jspdf';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from 'react';
@@ -23,6 +22,7 @@ import {
 
 import { DashboardContent } from "src/layouts/dashboard";
 import {
+  type Invoice,
   useGetUserInvoicesQuery,
   useLazyGetUserInvoicesQuery,
   useGetSubscriptionPlansQuery
@@ -52,6 +52,16 @@ export function UpgradeLicenseView() {
     triggerRefreshInvoices,
     { isLoading: isRefreshingInvoices }
   ] = useLazyGetUserInvoicesQuery();
+
+  // Helper function to transform API invoice data for UI compatibility
+  const transformInvoiceData = (invoice: Invoice) => ({
+    ...invoice,
+    id: invoice.payment_id?.toString() || '',
+    invoiceNumber: `INV-${invoice.payment_id?.toString().padStart(6, '0')}`,
+    createdAt: invoice.created_at,
+    plan: `Plan ID: ${invoice.plan_id}`,
+    amount: parseFloat(invoice.amount || '0'),
+  });
 
   // Handle refreshing all data
   const refreshAllData = useCallback(async (isAfterReturn = false) => {
@@ -92,174 +102,16 @@ export function UpgradeLicenseView() {
     }
   };
 
+
+
   // Handle PDF download for specific invoice
-  const handleDownloadInvoicePdf = async (invoice: any) => {
+  const handleDownloadInvoicePdf = async (invoice: Invoice) => {
+    // Transform the invoice data to ensure we have the right fields
+    const transformedInvoice = transformInvoiceData(invoice);
     try {
       toast.success('Generating PDF...');
 
-      // Create a temporary container for the invoice
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.width = '210mm';
-      tempContainer.style.height = '297mm';
-      tempContainer.style.backgroundColor = 'white';
-      tempContainer.style.fontFamily = 'Arial, sans-serif';
-      tempContainer.style.fontSize = '14px';
-      tempContainer.style.lineHeight = '1.4';
-      tempContainer.style.color = '#000';
-      tempContainer.style.padding = '20mm';
-      tempContainer.style.boxSizing = 'border-box';
-
-      // Create the invoice HTML content
-      tempContainer.innerHTML = `
-        <div style="width: 100%; height: 100%; background: white; font-family: Arial, sans-serif;">
-          <!-- Header Section -->
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
-            <!-- Company Info -->
-            <div>
-              <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #000;">
-                Your Company Inc.
-              </div>
-              <div style="font-size: 14px; margin-bottom: 4px; color: #000;">
-                1234 Company St.
-              </div>
-              <div style="font-size: 14px; color: #000;">
-                Company Town, ST 12345
-              </div>
-            </div>
-
-            <!-- Upload Logo Box -->
-            <div style="border: 2px solid #ddd; border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 200px; background-color: #fafafa;">
-              <div style="margin-bottom: 8px;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M14 2V8H20" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M16 13L12 17L8 13" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M12 17V9" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div style="font-size: 14px; color: #666; font-weight: 500;">
-                Upload Logo
-              </div>
-            </div>
-          </div>
-
-          <!-- INVOICE Title -->
-          <div style="text-align: right; margin-bottom: 40px;">
-            <div style="font-size: 48px; font-weight: bold; letter-spacing: 0.2em; color: #000; line-height: 1;">
-              INVOICE
-            </div>
-          </div>
-
-          <!-- Bill To and Invoice Details -->
-          <div style="display: flex; justify-content: space-between; margin-bottom: 40px;">
-            <!-- Bill To -->
-            <div style="flex: 1;">
-              <div style="font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #000;">
-                Bill To
-              </div>
-              <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #000;">
-                Customer Name
-              </div>
-              <div style="font-size: 14px; margin-bottom: 4px; color: #000;">
-                1234 Customer St.
-              </div>
-              <div style="font-size: 14px; color: #000;">
-                Customer Town, ST 12345
-              </div>
-            </div>
-
-            <!-- Invoice Details -->
-            <div style="text-align: right; min-width: 200px;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Invoice #</span>
-                <span style="font-size: 14px; color: #000;">${invoice.invoiceNumber || '0000007'}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Invoice date</span>
-                <span style="font-size: 14px; color: #000;">${new Date(invoice.createdAt || Date.now()).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="font-size: 14px; font-weight: bold; color: #000; margin-right: 32px;">Due date</span>
-                <span style="font-size: 14px; color: #000;">${new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Services Table -->
-          <div style="margin-bottom: 40px;">
-            <!-- Table Header -->
-            <div style="display: flex; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 16px;">
-              <div style="font-size: 14px; font-weight: bold; color: #000; width: 60px;">QTY</div>
-              <div style="font-size: 14px; font-weight: bold; color: #000; flex: 1; margin-left: 16px;">Description</div>
-              <div style="font-size: 14px; font-weight: bold; color: #000; width: 100px; text-align: right;">Unit Price</div>
-              <div style="font-size: 14px; font-weight: bold; color: #000; width: 100px; text-align: right; margin-left: 16px;">Amount</div>
-            </div>
-
-            <!-- Table Rows -->
-            <div style="display: flex; padding: 8px 0; align-items: center;">
-              <div style="font-size: 14px; color: #000; width: 60px;">1.00</div>
-              <div style="font-size: 14px; color: #000; flex: 1; margin-left: 16px;">${invoice.plan || 'Professional Plan Subscription'}</div>
-              <div style="font-size: 14px; color: #000; width: 100px; text-align: right;">${(invoice.amount || 40).toFixed(2)}</div>
-              <div style="font-size: 14px; color: #000; width: 100px; text-align: right; margin-left: 16px;">$${(invoice.amount || 40).toFixed(2)}</div>
-            </div>
-          </div>
-
-          <!-- Totals Section -->
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 60px;">
-            <div style="min-width: 250px;">
-              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 14px; color: #000;">Subtotal</span>
-                <span style="font-size: 14px; color: #000;">$${(invoice.amount || 40).toFixed(2)}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-                <span style="font-size: 14px; color: #000;">Sales Tax (5%)</span>
-                <span style="font-size: 14px; color: #000;">$${((invoice.amount || 40) * 0.05).toFixed(2)}</span>
-              </div>
-              <div style="border-top: 2px solid #000; padding-top: 8px; display: flex; justify-content: space-between;">
-                <span style="font-size: 16px; font-weight: bold; color: #000;">Total (USD)</span>
-                <span style="font-size: 16px; font-weight: bold; color: #000;">$${((invoice.amount || 40) * 1.05).toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Terms and Conditions -->
-          <div>
-            <div style="font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #000;">
-              Terms and Conditions
-            </div>
-            <div style="font-size: 14px; margin-bottom: 8px; color: #000;">
-              Payment is due in 14 days
-            </div>
-            <div style="font-size: 14px; color: #000;">
-              Please make checks payable to: Your Company Inc.
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Add to document
-      document.body.appendChild(tempContainer);
-
-      // Wait for fonts and rendering
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Generate canvas
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794, // A4 width in pixels
-        height: 1123, // A4 height in pixels
-      });
-
-      // Remove temporary container
-      document.body.removeChild(tempContainer);
-
-      // Create PDF
+      // Create PDF directly with jsPDF without html2canvas
       // eslint-disable-next-line new-cap
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -267,14 +119,98 @@ export function UpgradeLicenseView() {
         format: 'a4',
       });
 
-      // Add image to PDF
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+      // Set font
+      pdf.setFont('helvetica');
 
-      // Download
-      pdf.save(`invoice-${invoice.invoiceNumber || '0000007'}.pdf`);
+      // Add XBlog header
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('XBlog', 20, 30);
 
-      toast.success('Invoice PDF downloaded successfully!');
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Content Creation Platform', 20, 38);
+      pdf.text('71-75 Shelton St, London WC2H 9JQ', 20, 46);
+      pdf.text('Royaume-Uni', 20, 54);
+      pdf.text('Téléphone: +44 7383 596325', 20, 62);
+
+      // Add INVOICE title
+      pdf.setFontSize(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('INVOICE', 150, 30);
+
+      // Add invoice details
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+
+      const invoiceDetails = [
+        `Invoice #: ${transformedInvoice.invoiceNumber}`,
+        `Date: ${new Date(transformedInvoice.created_at).toLocaleDateString('en-US')}`,
+        `Status: ${transformedInvoice.status}`,
+        `Currency: ${transformedInvoice.currency.toUpperCase()}`
+      ];
+
+      invoiceDetails.forEach((detail, index) => {
+        pdf.text(detail, 150, 45 + (index * 8));
+      });
+
+      // Add Bill To section
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Bill To:', 20, 90);
+
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(transformedInvoice.email || 'Customer', 20, 100);
+      pdf.text(`Customer ID: ${transformedInvoice.customer_id}`, 20, 108);
+      pdf.text(`Payment ID: ${transformedInvoice.payment_id}`, 20, 116);
+
+      // Add table header
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      const tableY = 140;
+      pdf.text('QTY', 20, tableY);
+      pdf.text('Description', 40, tableY);
+      pdf.text('Unit Price', 130, tableY);
+      pdf.text('Amount', 170, tableY);
+
+      // Add line under header
+      pdf.line(20, tableY + 2, 190, tableY + 2);
+
+      // Add table row
+      pdf.setFont('helvetica', 'normal');
+      const rowY = tableY + 10;
+      pdf.text('1.00', 20, rowY);
+      pdf.text(transformedInvoice.plan, 40, rowY);
+      pdf.text(`$${transformedInvoice.amount.toFixed(2)}`, 130, rowY);
+      pdf.text(`$${transformedInvoice.amount.toFixed(2)}`, 170, rowY);
+
+      // Add totals
+      const totalY = rowY + 20;
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Subtotal:', 130, totalY);
+      pdf.text(`$${transformedInvoice.amount.toFixed(2)}`, 170, totalY);
+
+      pdf.text('Tax:', 130, totalY + 8);
+      pdf.text('$0.00', 170, totalY + 8);
+
+      pdf.line(130, totalY + 12, 190, totalY + 12);
+      pdf.text('Total:', 130, totalY + 20);
+      pdf.text(`$${transformedInvoice.amount.toFixed(2)}`, 170, totalY + 20);
+
+      // Add terms
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Terms and Conditions:', 20, totalY + 40);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Payment processed successfully via secure payment gateway', 20, totalY + 50);
+      pdf.text('For support, contact us at: +44 7383 596325', 20, totalY + 58);
+      pdf.text('Thank you for choosing XBlog for your content creation needs.', 20, totalY + 66);
+
+      // Download the PDF
+      pdf.save(`invoice-${transformedInvoice.invoiceNumber}.pdf`);
+
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Failed to generate PDF. Please try again.');
@@ -284,8 +220,8 @@ export function UpgradeLicenseView() {
   // Handle opening plan in new tab
   const handleChoosePlan = useCallback((planId: string) => {
     console.log(`Opening plan ${planId} in new tab`);
-    // Open the plan URL in a new tab
-    const planUrl = `https://example.com/checkout?plan=${planId}`;
+    // Open the Hostinger VPS pricing page in a new tab
+    const planUrl = `https://www.hostinger.com/fr/vps#pricing`;
     window.open(planUrl, '_blank');
   }, []);
 
@@ -414,39 +350,48 @@ export function UpgradeLicenseView() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {invoicesData.invoices.map((invoice, index) => (
-                    <TableRow key={invoice.id} hover>
-                      <TableCell>{String(index + 1).padStart(2, '0')}</TableCell>
-                      <TableCell>{invoice.invoiceNumber}</TableCell>
-                      <TableCell>{new Date(invoice.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell>{invoice.plan}</TableCell>
-                      <TableCell align="right">${invoice.amount}</TableCell>
-                      <TableCell align="right">
-                        <Chip
-                          label={invoice.status}
-                          color={invoice.status === "paid" ? "success" : "warning"}
-                          size="small"
-                          sx={{
-                            textTransform: 'capitalize',
-                            fontWeight: 'medium'
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice')}>
-                          <Button
+                  {invoicesData.invoices.map((invoice, index) => {
+                    const transformedInvoice = transformInvoiceData(invoice);
+                    return (
+                      <TableRow key={transformedInvoice.id} hover>
+                        <TableCell>{String(index + 1).padStart(2, '0')}</TableCell>
+                        <TableCell>{transformedInvoice.invoiceNumber}</TableCell>
+                        <TableCell>
+                          {new Date(transformedInvoice.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          })}
+                        </TableCell>
+                        <TableCell>{transformedInvoice.plan}</TableCell>
+                        <TableCell align="right">${transformedInvoice.amount.toFixed(2)}</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={transformedInvoice.status}
+                            color={transformedInvoice.status === "paid" ? "success" : "warning"}
                             size="small"
-                            variant="contained"
-                            color="primary"
-                            sx={{ padding: '6px 12px', minWidth: 'auto' }}
-                            onClick={() => handleDownloadInvoicePdf(invoice)}
-                          >
-                            <Download size={18} />
-                          </Button>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            sx={{
+                              textTransform: 'capitalize',
+                              fontWeight: 'medium'
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title={t('upgrade.downloadInvoice', 'Download PDF Invoice')}>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              sx={{ padding: '6px 12px', minWidth: 'auto' }}
+                              onClick={() => handleDownloadInvoicePdf(invoice)}
+                            >
+                              <Download size={18} />
+                            </Button>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             ) : (

@@ -3,22 +3,28 @@ import { api, CACHE_DURATION } from '.';
 // Define the base URL for subscription endpoints
 const SUBSCRIPTION_BASE_URL = 'subscriptions';
 
-// Interface for invoice data
+// Interface for invoice data - Updated to match API response
 export interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  amount: number;
+  payment_id: number;
+  plan_id: string;
+  customer_id: string;
+  email: string;
+  amount: string;
   currency: string;
   status: string;
-  createdAt: string;
-  plan: string;
+  created_at: string;
+  // Computed fields for UI compatibility
+  id?: string;
+  invoiceNumber?: string;
+  createdAt?: string;
+  plan?: string;
   downloadUrl?: string;
 }
 
 // Interface for invoice response
-interface InvoicesResponse {
+export interface InvoicesResponse {
   invoices: Invoice[];
-  count: number;
+  count?: number;
 }
 
 // Interface for subscription details
