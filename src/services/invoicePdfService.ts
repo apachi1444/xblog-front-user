@@ -1,5 +1,7 @@
+/* eslint-disable new-cap */
 import jsPDF from 'jspdf';
 import toast from 'react-hot-toast';
+
 import type { Invoice } from './apis/subscriptionApi';
 
 // Interface for transformed invoice data
