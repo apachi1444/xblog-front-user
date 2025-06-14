@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import { filterNonFreePlans } from 'src/services/invoicePdfService';
 import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 import { PricingPlans } from './PricingPlans';
@@ -24,6 +25,7 @@ export interface ResponsivePricingPlansProps {
   selectedPlan?: string | null;
   gridColumns?: { xs?: number; sm?: number; md?: number; lg?: number };
   dynamicLayout?: boolean; // New prop to control dynamic layout
+  hideFreePlans?: boolean; // New prop to hide free plans
   sx?: any;
 }
 
@@ -34,6 +36,7 @@ export function ResponsivePricingPlans({
   selectedPlan,
   gridColumns,
   dynamicLayout = true, // Default to true for dynamic layout
+  hideFreePlans = false, // Default to false to show all plans
   sx = {},
 }: ResponsivePricingPlansProps) {
   const theme = useTheme();
@@ -47,17 +50,24 @@ export function ResponsivePricingPlans({
 
   const { data:  plans} = useGetSubscriptionPlansQuery()
 
-  // Filter plans based on the billing cycle
+  // Filter plans based on the billing cycle and free plan visibility
   const filteredPlans = useMemo(() => {
     if (!plans) return [];
 
-    return plans.filter(plan => {
+    let filtered = plans.filter(plan => {
       const planName = plan.name.toLowerCase();
       return billingCycle === 'monthly'
         ? planName.includes('monthly') || (!planName.includes('yearly') && !planName.includes('monthly'))
         : planName.includes('yearly');
     });
-  }, [plans, billingCycle]);
+
+    // Filter out free plans if hideFreePlans is true
+    if (hideFreePlans) {
+      filtered = filterNonFreePlans(filtered);
+    }
+
+    return filtered;
+  }, [plans, billingCycle, hideFreePlans]);
 
   return (
     <Box sx={{ width: '100%', ...sx }}>

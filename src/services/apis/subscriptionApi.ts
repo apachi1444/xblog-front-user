@@ -7,6 +7,7 @@ const SUBSCRIPTION_BASE_URL = 'subscriptions';
 export interface Invoice {
   payment_id: number;
   plan_id: string;
+  plan_name : string;
   customer_id: string;
   email: string;
   amount: string;

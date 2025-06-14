@@ -3,6 +3,8 @@ import type { CardProps } from '@mui/material/Card';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,6 +13,8 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 import TableContainer from '@mui/material/TableContainer';
+
+import { Iconify } from 'src/components/iconify';
 
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
@@ -21,6 +25,7 @@ type Props = CardProps & {
   title?: string;
   subheader?: string;
   emptyText?: string;
+  onDownloadInvoice?: (item: any) => void; // Add download handler
   list: {
     id: string;
     type: string;
@@ -30,10 +35,11 @@ type Props = CardProps & {
     status?: 'active' | 'completed' | 'pending' | 'cancelled';
     description?: string;
     features?: string[];
+    invoice?: any; // Add invoice data for download
   }[];
 };
 
-export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No data available', ...other }: Props) {
+export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No data available', onDownloadInvoice, ...other }: Props) {
   const theme = useTheme();
 
   // Determine color based on type
@@ -133,12 +139,21 @@ export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No da
               }}>
                 Status
               </TableCell>
+              {onDownloadInvoice && (
+                <TableCell align="center" sx={{
+                  color: isDarkMode ? theme.palette.grey[300] : 'inherit',
+                  fontWeight: 600,
+                  borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.24) : 'inherit'
+                }}>
+                  Download
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {list.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} align="center" sx={{ py: 5 }}>
+                <TableCell colSpan={onDownloadInvoice ? 4 : 3} align="center" sx={{ py: 5 }}>
                   <Typography variant="body1" color="text.secondary">
                     {emptyText}
                   </Typography>
@@ -229,6 +244,29 @@ export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No da
                     />
                   )}
                 </TableCell>
+                {onDownloadInvoice && (
+                  <TableCell align="center" sx={{
+                    borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.16) : 'inherit'
+                  }}>
+                    {item.invoice && (
+                      <Tooltip title="Download Invoice PDF">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                          onClick={() => onDownloadInvoice(item.invoice)}
+                          sx={{
+                            minWidth: 'auto',
+                            padding: '6px 8px',
+                            borderRadius: 1
+                          }}
+                        >
+                          <Iconify icon="mdi:download" width={16} height={16} />
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))
             )}

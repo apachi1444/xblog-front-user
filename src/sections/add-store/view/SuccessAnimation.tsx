@@ -2,18 +2,19 @@ import type { FC } from "react";
 
 import { t } from "i18next";
 import PropTypes from "prop-types";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Box, Paper, Typography } from "@mui/material";
 
 interface SuccessAnimationProps {
   integrationSuccess: boolean;
+  integrationError: boolean;
 }
 
-export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess }) => (
+export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess, integrationError }) => (
   <AnimatePresence>
-    {integrationSuccess && (
+    {(integrationSuccess || integrationError) && (
       <Box
         sx={{
           position: 'fixed',
@@ -48,38 +49,54 @@ export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess
               animate={{ scale: [0, 1.2, 1] }}
               transition={{ duration: 0.6, times: [0, 0.6, 1] }}
             >
-              <CheckCircle
-                size={80}
-                color="green"
-                strokeWidth={1}
-              />
+              {integrationSuccess ? (
+                <CheckCircle
+                  size={80}
+                  color="green"
+                  strokeWidth={1}
+                />
+              ) : (
+                <XCircle
+                  size={80}
+                  color="red"
+                  strokeWidth={1}
+                />
+              )}
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
               <Typography variant="h5" sx={{ mt: 2, fontWeight: 'bold' }}>
-                {t('store.integrationSuccess', 'Integration Successful!')}
+                {integrationSuccess
+                  ? t('store.integrationSuccess', 'Integration Successful!')
+                  : t('store.integrationError', 'Integration Failed!')
+                }
               </Typography>
-              
+
               <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                {t('store.redirecting', 'Redirecting to your stores...')}
+                {integrationSuccess
+                  ? t('store.redirecting', 'Redirecting to your stores...')
+                  : t('store.errorMessage', 'Please check your credentials and try again.')
+                }
               </Typography>
             </motion.div>
-            
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '100%' }}
-              transition={{ delay: 0.5, duration: 2.5 }}
-              style={{
-                height: 4,
-                backgroundColor: 'green',
-                borderRadius: 2,
-                marginTop: 24,
-              }}
-            />
+
+            {integrationSuccess && (
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: '100%' }}
+                transition={{ delay: 0.5, duration: 2.5 }}
+                style={{
+                  height: 4,
+                  backgroundColor: 'green',
+                  borderRadius: 2,
+                  marginTop: 24,
+                }}
+              />
+            )}
           </Paper>
         </motion.div>
       </Box>
@@ -90,6 +107,7 @@ export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess
 // PropTypes definition for runtime type checking
 SuccessAnimation.propTypes = {
   integrationSuccess: PropTypes.bool.isRequired,
+  integrationError: PropTypes.bool.isRequired,
 };
 
 // Default export

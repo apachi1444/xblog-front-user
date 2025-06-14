@@ -23,7 +23,9 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import {
   useGetSubscriptionDetailsQuery,
+  useGetSubscriptionPlansQuery,
 } from 'src/services/apis/subscriptionApi';
+import { isFreeplan } from 'src/services/invoicePdfService';
 
 import { Iconify } from 'src/components/iconify';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
@@ -39,7 +41,14 @@ export function ProfileView() {
   // Fetch subscription details
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
 
+  // Fetch subscription plans to check if current plan is free
+  const { data: plansData } = useGetSubscriptionPlansQuery();
+
   console.log(subscriptionData);
+
+  // Check if current plan is a free plan
+  const currentPlan = plansData?.find(plan => plan.name === subscriptionData?.subscription_name);
+  const isCurrentPlanFree = currentPlan ? isFreeplan(currentPlan) : true; // Default to true if no plan found
   
 
   // Handle upgrade license navigation
@@ -256,7 +265,8 @@ export function ProfileView() {
                   >
                     {t('profile.subscription.upgrade', 'Upgrade License')}
                   </Button>
-                  {subscriptionData?.subscription_url && (
+                  {/* Only show manage subscription if user has a paid plan */}
+                  {!isCurrentPlanFree && subscriptionData?.subscription_url && (
                     <Button
                       variant="outlined"
                       fullWidth

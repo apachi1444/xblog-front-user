@@ -14,8 +14,8 @@ import SelectPlatform from './SelectPlatform';
 import WebsiteDetails from './WebsiteDetails';
 import { SuccessAnimation } from './SuccessAnimation';
 
-// Test mode for bypassing API errors
-const TEST_MODE = true;
+// Test mode for bypassing API errors (disabled in production)
+const TEST_MODE = false;
 
 export const platformCategories = {
   websites: [
@@ -125,7 +125,7 @@ const storeFormSchema = z.object({
   // WordPress specific fields with validation
   store_url: z.string().min(1, "WordPress URL is required")
     .url("Please enter a valid URL"),
-  store_username: z.string().min(1, "WordPress username is required").email(),
+  store_username: z.string().min(1, "WordPress username is required"),
   store_password: z.string().min(1, "WordPress password is required"),
   
   // Shopify specific fields
@@ -146,6 +146,7 @@ export default function AddStoreFlow() {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [integrationSuccess, setIntegrationSuccess] = useState(false);
+  const [integrationError, setIntegrationError] = useState(false);
   
   // API mutation hooks
   const [connectWordPress , {isLoading : isWordPressLoading}] = useConnectWordPressMutation();
@@ -208,36 +209,49 @@ export default function AddStoreFlow() {
         setIntegrationSuccess(true);
         navigate('/stores');
       }, 3000);
-    } catch (errore) {
-      if (TEST_MODE) {
-        setTimeout(() => {
-          navigate('/stores');
-        }, 3000);
-      } else {
-        setTimeout(() => {
-          setIntegrationSuccess(true);
-          navigate('/stores');
-        }, 3000);
-      }
+    } catch (error) {
+      console.error('Integration failed:', error);
+
+      // Show error animation instead of success
+      setIntegrationError(true);
+
+      // Hide error animation after 3 seconds
+      setTimeout(() => {
+        setIntegrationError(false);
+      }, 3000);
+
+      // Don't navigate to success page on error
+      // The user should fix the issue and try again
     }
   };
 
   // Platform-specific connection handlers
-  const handleWordPressConnection = async (data: StoreFormData) => {    
-    await connectWordPress({
-      store_url: data.store_url || '',
-      store_username: data.store_username || '',
-      store_password: data.store_password || '',
-    }).unwrap()
-      .then(() => {
-        toast.success('Store connected successfully!');
-      })
-      .catch(() => {
-        if (TEST_MODE) {
-          setIntegrationSuccess(true);
-          toast.success('Store connected successfully!');
-        }
-      })
+  const handleWordPressConnection = async (data: StoreFormData) => {
+    try {
+      await connectWordPress({
+        store_url: data.store_url || '',
+        store_username: data.store_username || '',
+        store_password: data.store_password || '',
+      }).unwrap();
+
+      // Only show success if API call actually succeeded
+      toast.success('Store connected successfully!');
+    } catch (error) {
+      // Log the actual error for debugging
+      console.error('WordPress connection failed:', error);
+
+      // Only use TEST_MODE for development, not for API errors
+      if (TEST_MODE && process.env.NODE_ENV === 'development') {
+        console.warn('TEST_MODE: Simulating success despite API error');
+        setIntegrationSuccess(true);
+        toast.success('Store connected successfully! (Test Mode)');
+      } else {
+        // Properly handle the API error
+        const errorMessage = error?.data?.message || error?.message || 'Failed to connect to WordPress. Please check your credentials and try again.';
+        toast.error(errorMessage);
+        throw error; // Re-throw to trigger the error animation in handleSubmit
+      }
+    }
   };
 
   const handleShopifyConnection = async (data: StoreFormData) => {};
@@ -291,7 +305,7 @@ export default function AddStoreFlow() {
         {renderStepContent()}
       </FormProvider>
       
-      <SuccessAnimation integrationSuccess={integrationSuccess} />
+      <SuccessAnimation integrationSuccess={integrationSuccess} integrationError={integrationError} />
     </DashboardContent>
   );
 }

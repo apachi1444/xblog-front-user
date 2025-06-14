@@ -18,7 +18,8 @@ import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
 import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { useGetUserInvoicesQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { useGetUserInvoicesQuery, useGetSubscriptionDetailsQuery, useGetSubscriptionPlansQuery, type Invoice } from 'src/services/apis/subscriptionApi';
+import { generateInvoicePdf } from 'src/services/invoicePdfService';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -454,7 +455,19 @@ export function OverviewAnalyticsView() {
   // Fetch invoices data for purchase history
   const { data: invoicesData } = useGetUserInvoicesQuery();
 
+  // Fetch subscription plans for plan names
+  const { data: plansData } = useGetSubscriptionPlansQuery();
+
   const articles_limit = subscriptionDetails?.articles_limit || 0;
+
+  // Handle PDF download for invoices
+  const handleDownloadInvoice = async (invoice: Invoice) => {
+    try {
+      await generateInvoicePdf(invoice, plansData);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
 
   // Get scheduled articles count
   const { scheduledArticles } = useScheduledArticles('scheduled');
@@ -682,15 +695,23 @@ export function OverviewAnalyticsView() {
             title={t('analytics.purchaseHistory', 'Purchase History')}
             subheader={t('analytics.purchaseHistorySubheader', 'Recent subscription activity')}
             emptyText={t('analytics.noPurchaseHistory', 'No billing history available yet. Your purchase records will appear here.')}
+            onDownloadInvoice={handleDownloadInvoice}
             list={
               invoicesData?.invoices && invoicesData.invoices.length > 0
-                ? invoicesData.invoices.map((invoice, index) => ({
-                    id: invoice.payment_id?.toString() || String(index + 1),
-                    title: `Plan ID: ${invoice.plan_id}` || 'Subscription Payment',
-                    type: `order${index + 1}`,
-                    status: invoice.status === 'paid' ? 'completed' : 'pending',
-                    time: invoice.created_at ? new Date(invoice.created_at).getTime() : new Date().getTime(),
-                  }))
+                ? invoicesData.invoices.map((invoice, index) => {
+                    // Find the plan name from the plans data
+                    const planDetails = plansData?.find(plan => plan.id === invoice.plan_id);
+                    const planName = planDetails?.name || `Plan ID: ${invoice.plan_id}`;
+
+                    return {
+                      id: invoice.payment_id?.toString() || String(index + 1),
+                      title: planName || 'Subscription Payment',
+                      type: `order${index + 1}`,
+                      status: invoice.status === 'paid' ? 'completed' : 'pending',
+                      time: invoice.created_at ? new Date(invoice.created_at).getTime() : new Date().getTime(),
+                      invoice, // Add invoice data for download
+                    };
+                  })
                 : []
             }
           />
