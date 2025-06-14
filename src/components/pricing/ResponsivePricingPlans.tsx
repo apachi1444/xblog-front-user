@@ -54,7 +54,7 @@ export function ResponsivePricingPlans({
   const filteredPlans = useMemo(() => {
     if (!plans) return [];
 
-    let filtered = plans.filter(plan => {
+    const filtered = plans.filter(plan => {
       const planName = plan.name.toLowerCase();
       return billingCycle === 'monthly'
         ? planName.includes('monthly') || (!planName.includes('yearly') && !planName.includes('monthly'))
@@ -63,7 +63,7 @@ export function ResponsivePricingPlans({
 
     // Filter out free plans if hideFreePlans is true
     if (hideFreePlans) {
-      filtered = filterNonFreePlans(filtered);
+      // filtered = filterNonFreePlans(filtered);
     }
 
     return filtered;
