@@ -20,12 +20,12 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { isFreeplan } from 'src/services/invoicePdfService';
 import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import {
   useGetSubscriptionDetailsQuery,
-  useGetSubscriptionPlansQuery,
+  useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
-import { isFreeplan } from 'src/services/invoicePdfService';
 
 import { Iconify } from 'src/components/iconify';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
@@ -41,14 +41,48 @@ export function ProfileView() {
   // Fetch subscription details
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
 
-  // Fetch subscription plans to check if current plan is free
-  const { data: plansData } = useGetSubscriptionPlansQuery();
+  // Fetch plans using RTK Query (will use cache if available)
+  const { data: availablePlans = [], isLoading: isLoadingPlans } = useGetSubscriptionPlansQuery();
 
-  console.log(subscriptionData);
+  console.log('🔍 Debug Profile Data:');
+  console.log('Subscription Data:', subscriptionData);
+  console.log('Available Plans:', availablePlans);
+  console.log('Plans Loading:', isLoadingPlans);
+  console.log('Plan ID from subscription:', subscriptionData?.plan_id);
+  console.log('Available Plan IDs:', availablePlans.map(p => ({ id: p.id, name: p.name })));
 
-  // Check if current plan is a free plan
-  const currentPlan = plansData?.find(plan => plan.name === subscriptionData?.subscription_name);
-  const isCurrentPlanFree = currentPlan ? isFreeplan(currentPlan) : true; // Default to true if no plan found
+  // Try to match plan by ID first, then by name as fallback
+  let currentPlan = null;
+
+  if (subscriptionData?.plan_id && availablePlans.length > 0) {
+    // First try: Match by plan_id
+    currentPlan = availablePlans.find(plan => {
+      console.log(`Comparing plan.id "${plan.id}" (${typeof plan.id}) with subscription.plan_id "${subscriptionData.plan_id}" (${typeof subscriptionData.plan_id})`);
+      // Handle both string and number comparisons
+      return plan.id === subscriptionData.plan_id || plan.id === String(subscriptionData.plan_id);
+    });
+
+    // Second try: If no match by ID, try matching by name
+    if (!currentPlan && subscriptionData.subscription_name) {
+      currentPlan = availablePlans.find(plan =>
+        plan.name.toLowerCase() === subscriptionData.subscription_name.toLowerCase()
+      );
+    
+    }
+  }
+
+
+  const isCurrentPlanFree = currentPlan ? isFreeplan(currentPlan) : false;
+
+
+  // Additional debugging
+  if (subscriptionData?.plan_id && !currentPlan) {
+    console.error('❌ Plan matching failed!');
+    console.error('Looking for plan_id:', subscriptionData.plan_id);
+    console.error('Available plans:', availablePlans);
+    console.error('Type of plan_id:', typeof subscriptionData.plan_id);
+    console.error('Type of plan.id:', availablePlans.length > 0 ? typeof availablePlans[0].id : 'no plans');
+  }
   
 
   // Handle upgrade license navigation
@@ -207,7 +241,7 @@ export function ProfileView() {
                       {t('profile.stats.currentPlan', 'Current Plan')}
                     </Typography>
                     <Chip
-                      label={subscriptionData?.subscription_name || 'Free'}
+                      label={currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
                       size="small"
                       color="success"
                       sx={{ fontWeight: 600 }}

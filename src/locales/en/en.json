@@ -500,6 +500,22 @@
         "startCreating": "Start Creating Amazing Content"
       }
     },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Manage your account settings and preferences",
+      "stats": {
+        "title": "Account Stats",
+        "articlesCreated": "Articles Created",
+        "currentPlan": "Current Plan",
+        "memberSince": "Member Since",
+        "notAvailable": "N/A"
+      },
+      "subscription": {
+        "title": "Subscription",
+        "upgrade": "Upgrade License",
+        "manage": "Manage Subscription"
+      }
+    },
     "ai_chat": {
       "title": "AI Assistance Chat",
       "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",

@@ -464,6 +464,22 @@
         "startCreating": "Commencer à Créer du Contenu Incroyable"
       }
     },
+    "profile": {
+      "title": "Mon Profil",
+      "subtitle": "Gérez les paramètres et préférences de votre compte",
+      "stats": {
+        "title": "Statistiques du Compte",
+        "articlesCreated": "Articles Créés",
+        "currentPlan": "Plan Actuel",
+        "memberSince": "Membre Depuis",
+        "notAvailable": "N/D"
+      },
+      "subscription": {
+        "title": "Abonnement",
+        "upgrade": "Mettre à Niveau la Licence",
+        "manage": "Gérer l'Abonnement"
+      }
+    },
     "support": {
       "title": "Contacter le Support",
       "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",

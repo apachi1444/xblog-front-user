@@ -1,9 +1,9 @@
-import type { RootState } from 'src/services/store';
 import type { SubscriptionPlan } from 'src/services/apis/subscriptionApi';
 
-import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 interface SubscriptionSuccessData {
   subscriptionId: string;
@@ -25,8 +25,8 @@ export function useSubscriptionSuccess() {
   const [successData, setSuccessData] = useState<SubscriptionSuccessData | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
-  // Get plans from Redux store
-  const availablePlans = useSelector((state: RootState) => state.subscription.availablePlans);
+  // Get plans using RTK Query (will use cache if available)
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);

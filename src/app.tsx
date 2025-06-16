@@ -12,7 +12,6 @@ import { useTheme } from '@mui/material/styles';
 import { Router } from 'src/routes/sections';
 
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
-import { useInitializePlans } from 'src/hooks/useInitializePlans';
 import { useSubscriptionSuccess } from 'src/hooks/useSubscriptionSuccess';
 
 import { CustomThemeProvider } from 'src/theme/theme-provider';
@@ -36,9 +35,6 @@ console.log(GOOGLE_CLIENT_ID);
 export default function App() {
   useAxiosAuth();
   const dispatch = useDispatch();
-
-  // Initialize plans cache at app startup
-  useInitializePlans();
 
   // Handle subscription success detection
   const { successData, showSuccessAnimation, hideSuccessAnimation } = useSubscriptionSuccess();

@@ -41,6 +41,7 @@ export interface SubscriptionDetails {
   regeneration_limit: number;
   subscription_url: string;
   subscription_name: string;
+  plan_id: string; // ID to match with plans from getSubscriptionPlans
 }
 
 // Interface for subscription plan

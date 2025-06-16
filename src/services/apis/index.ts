@@ -27,7 +27,8 @@ const mockSubscriptionDetails = {
   regeneration_number: 15,
   regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
-  subscription_name: 'Professional'
+  subscription_name: 'Professional',
+  plan_id: '3' // Matches the Professional plan ID in the plans list
 };
 
 // Mock data for calendar
@@ -114,11 +115,16 @@ const setupMocks = () => {
     });
 
     // Subscription endpoints
-    mock.onGet('/subscriptions').reply(200, mockSubscriptionDetails);
+    mock.onGet('/subscriptions').reply((config) => {
+      console.log('🔥 Mock subscription endpoint called:', config.url);
+      console.log('🔥 Returning subscription data:', mockSubscriptionDetails);
+      return [200, mockSubscriptionDetails];
+    });
 
     // Mock subscription plans endpoint
-    mock.onGet('/subscriptions/plans').reply(200, {
-      plans: [
+    mock.onGet('/all/plans').reply((config) => {
+      console.log('🔥 Mock plans endpoint called:', config.url);
+      return [200, [
         {
           id: '1',
           name: 'Free',
@@ -159,7 +165,7 @@ const setupMocks = () => {
           current: true,
           highlight: true
         }
-      ]
+      ]];
     });
 
     // Mock user endpoint
