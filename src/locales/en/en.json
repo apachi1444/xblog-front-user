@@ -23,7 +23,10 @@
     },
     "upgrade": {
       "unlockFeatures": "Want to unlock more features?",
-      "upgradeToPro": "Upgrade to Pro 🚀"
+      "upgradeToPro": "Upgrade to Pro 🚀",
+      "invoicesRefreshed": "Invoices refreshed successfully",
+      "invoicesRefreshError": "Failed to refresh invoices",
+      "downloadInvoice": "Download PDF Invoice"
     },
     "resources": {
       "websites": "Websites",
@@ -484,6 +487,18 @@
     "comparePlans": "Compare Plans",
     "faq": "Frequently Asked Questions",
     "faqSubtitle": "Have questions? We're here to help."
+    },
+    "subscription": {
+      "success": {
+        "title": "Subscription Activated!",
+        "planMessage": "You have successfully activated the {{planName}} plan!",
+        "genericMessage": "Your subscription has been successfully activated!",
+        "description": "You can now enjoy all the features of your new plan. Start creating amazing content!",
+        "planDescription": "Your {{planName}} plan is now active! Unlock the full potential of AI-powered content creation.",
+        "subscriptionId": "Subscription ID: {{id}}",
+        "getStarted": "Get Started",
+        "startCreating": "Start Creating Amazing Content"
+      }
     },
     "ai_chat": {
       "title": "AI Assistance Chat",

@@ -1,14 +1,13 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Plan } from 'src/services/apis/plansApi';
-import type { SubscriptionDetails } from 'src/services/apis/subscriptionApi';
+import type { SubscriptionPlan, SubscriptionDetails } from 'src/services/apis/subscriptionApi';
 
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { RootState } from '../../store';
 
 interface SubscriptionState {
-  availablePlans: Plan[];
-  currentPlan: Plan | null;
+  availablePlans: SubscriptionPlan[];
+  currentPlan: SubscriptionPlan | null;
   subscriptionDetails: SubscriptionDetails | null;
 }
 
@@ -22,13 +21,13 @@ const subscriptionSlice = createSlice({
   name: 'subscription',
   initialState,
   reducers: {
-    setAvailablePlans: (state, action: PayloadAction<Plan[]>) => {
+    setAvailablePlans: (state, action: PayloadAction<SubscriptionPlan[]>) => {
       state.availablePlans = action.payload;
     },
     setSubscriptionDetails: (state, action: PayloadAction<SubscriptionDetails>) => {
       state.subscriptionDetails = action.payload;
     },
-    setCurrentPlan: (state, action: PayloadAction<Plan | null>) => {
+    setCurrentPlan: (state, action: PayloadAction<SubscriptionPlan | null>) => {
       state.currentPlan = action.payload;
     },
     clearSubscription: (state) => {

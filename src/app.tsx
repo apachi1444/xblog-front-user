@@ -12,6 +12,8 @@ import { useTheme } from '@mui/material/styles';
 import { Router } from 'src/routes/sections';
 
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
+import { useInitializePlans } from 'src/hooks/useInitializePlans';
+import { useSubscriptionSuccess } from 'src/hooks/useSubscriptionSuccess';
 
 import { CustomThemeProvider } from 'src/theme/theme-provider';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
@@ -24,6 +26,7 @@ import { SupportChat } from './components/support-chat';
 import { ErrorFallback } from './components/error-boundary';
 import { SupportChatProvider } from './contexts/SupportChatContext';
 import { AuthPersistence } from './components/auth/auth-persistence';
+import { SubscriptionSuccessAnimation } from './components/subscription';
 
 // Get Google OAuth client ID from environment variables
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -33,6 +36,12 @@ console.log(GOOGLE_CLIENT_ID);
 export default function App() {
   useAxiosAuth();
   const dispatch = useDispatch();
+
+  // Initialize plans cache at app startup
+  useInitializePlans();
+
+  // Handle subscription success detection
+  const { successData, showSuccessAnimation, hideSuccessAnimation } = useSubscriptionSuccess();
 
   useEffect(() => {
     dispatch(resetBannerDismissals());
@@ -56,6 +65,13 @@ export default function App() {
                   <WelcomePopupContextProvider>
                     <Router />
                     <SupportChat />
+                    {/* Subscription Success Animation */}
+                    <SubscriptionSuccessAnimation
+                      open={showSuccessAnimation}
+                      onClose={hideSuccessAnimation}
+                      plan={successData?.plan}
+                      subscriptionId={successData?.subscriptionId || ''}
+                    />
                   </WelcomePopupContextProvider>
                 </SupportChatProvider>
               </ToastProvider>

@@ -452,6 +452,18 @@
         }
       }
     },
+    "subscription": {
+      "success": {
+        "title": "Abonnement Activé !",
+        "planMessage": "Vous avez activé avec succès le plan {{planName}} !",
+        "genericMessage": "Votre abonnement a été activé avec succès !",
+        "description": "Vous pouvez maintenant profiter de toutes les fonctionnalités de votre nouveau plan. Commencez à créer du contenu incroyable !",
+        "planDescription": "Votre plan {{planName}} est maintenant actif ! Débloquez tout le potentiel de la création de contenu alimentée par l'IA.",
+        "subscriptionId": "ID d'abonnement : {{id}}",
+        "getStarted": "Commencer",
+        "startCreating": "Commencer à Créer du Contenu Incroyable"
+      }
+    },
     "support": {
       "title": "Contacter le Support",
       "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",

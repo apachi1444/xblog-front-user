@@ -9,7 +9,6 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { filterNonFreePlans } from 'src/services/invoicePdfService';
 import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 import { PricingPlans } from './PricingPlans';
@@ -63,7 +62,7 @@ export function ResponsivePricingPlans({
 
     // Filter out free plans if hideFreePlans is true
     if (hideFreePlans) {
-      // filtered = filterNonFreePlans(filtered);
+      return filtered.filter(plan => !plan.name.toLowerCase().includes('free'));
     }
 
     return filtered;

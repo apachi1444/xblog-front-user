@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw } from "lucide-react";
-import { useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -33,7 +33,7 @@ import { ResponsivePricingPlans } from 'src/components/pricing';
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
-  const [isRefreshingAfterReturn, setIsRefreshingAfterReturn] = useState(false);
+
 
   // Fetch subscription plans
   const {
@@ -58,29 +58,17 @@ export function UpgradeLicenseView() {
   const transformInvoiceData = (invoice: Invoice) => transformInvoiceForPdf(invoice, plansData);
 
   // Handle refreshing all data
-  const refreshAllData = useCallback(async (isAfterReturn = false) => {
+  const refreshAllData = useCallback(async () => {
     try {
-      if (isAfterReturn) {
-        setIsRefreshingAfterReturn(true);
-      }
-
       await Promise.all([
         refetchPlans(),
         refetchInvoices()
       ]);
 
-      if (isAfterReturn) {
-        toast.success('Data updated after returning to the app');
-      } else {
-        toast.success('Data refreshed successfully');
-      }
+      toast.success('Data refreshed successfully');
     } catch (error) {
       console.error('Error refreshing data:', error);
       toast.error('Failed to refresh data');
-    } finally {
-      if (isAfterReturn) {
-        setIsRefreshingAfterReturn(false);
-      }
     }
   }, [refetchPlans, refetchInvoices]);
 
@@ -125,54 +113,12 @@ export function UpgradeLicenseView() {
     }
   }, [plansData]);
 
-  // Set up visibility change listener to detect when user returns to the app
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('User returned to the app, refreshing data...');
-        refreshAllData(true); // Pass true to indicate this is after returning to the app
-      }
-    };
 
-    // Add event listener
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Clean up
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [refreshAllData]);
 
 
   return (
     <DashboardContent>
-      {/* Loading overlay when refreshing after return */}
-      {isRefreshingAfterReturn && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            bgcolor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-          }}
-        >
-          <CircularProgress color="primary" size={60} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Updating data...
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            Please wait while we refresh your subscription information
-          </Typography>
-        </Box>
-      )}
+
 
       <Container maxWidth={false}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={5}>
@@ -183,8 +129,8 @@ export function UpgradeLicenseView() {
             <Button
               variant="outlined"
               size="small"
-              onClick={() => refreshAllData(false)} // Pass false to indicate this is a manual refresh
-              disabled={isLoadingPlans || isLoadingInvoices || isRefreshingInvoices || isRefreshingAfterReturn}
+              onClick={refreshAllData}
+              disabled={isLoadingPlans || isLoadingInvoices || isRefreshingInvoices}
               startIcon={
                 isLoadingPlans || isLoadingInvoices || isRefreshingInvoices ?
                 <CircularProgress size={16} /> :
