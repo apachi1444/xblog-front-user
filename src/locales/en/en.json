@@ -516,6 +516,16 @@
         "manage": "Manage Subscription"
       }
     },
+    "account": {
+      "freePlan": "Free",
+      "profile": "Profile",
+      "settings": "Settings",
+      "myWebsites": "My websites",
+      "signOut": "Sign Out",
+      "preferences": "Preferences",
+      "theme": "Theme",
+      "upgradePlan": "Upgrade Plan"
+    },
     "ai_chat": {
       "title": "AI Assistance Chat",
       "welcome_message": "Hello! I'm your AI assistant. How can I help you today?",

@@ -480,6 +480,16 @@
         "manage": "Gérer l'Abonnement"
       }
     },
+    "account": {
+      "freePlan": "Gratuit",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "myWebsites": "Mes sites web",
+      "signOut": "Se déconnecter",
+      "preferences": "Préférences",
+      "theme": "Thème",
+      "upgradePlan": "Mettre à Niveau le Plan"
+    },
     "support": {
       "title": "Contacter le Support",
       "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",

@@ -2,6 +2,7 @@ import type { IconButtonProps } from '@mui/material/IconButton';
 
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
@@ -36,6 +37,7 @@ export type AccountPopoverProps = IconButtonProps & {
 };
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const theme = useTheme();
   const { isDarkMode, toggleTheme } = useThemeMode();
@@ -190,7 +192,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               fontWeight: 'medium'
             }}
           >
-            {subscriptionDetails?.subscription_name || 'Free'}
+            {subscriptionDetails?.subscription_name || t('account.freePlan', 'Free')}
           </Typography>
         </Box>
 
@@ -214,7 +216,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   color: 'text.secondary'
                 }}
               />
-              <Typography variant="body2">Profile</Typography>
+              <Typography variant="body2">{t('account.profile', 'Profile')}</Typography>
             </Box>
           </MenuItem>
 
@@ -236,7 +238,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   color: 'text.secondary'
                 }}
               />
-              <Typography variant="body2">Settings</Typography>
+              <Typography variant="body2">{t('account.settings', 'Settings')}</Typography>
             </Box>
           </MenuItem>
 
@@ -258,7 +260,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   color: 'text.secondary'
                 }}
               />
-              <Typography variant="body2">My websites</Typography>
+              <Typography variant="body2">{t('account.myWebsites', 'My websites')}</Typography>
             </Box>
           </MenuItem>
 
@@ -280,7 +282,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   color: 'text.secondary'
                 }}
               />
-              <Typography variant="body2">Sign Out</Typography>
+              <Typography variant="body2">{t('account.signOut', 'Sign Out')}</Typography>
             </Box>
           </MenuItem>
         </MenuList>
@@ -299,7 +301,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               mb: 1
             }}
           >
-            Preferences
+            {t('account.preferences', 'Preferences')}
           </Typography>
         </Box>
 
@@ -313,7 +315,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             justifyContent: 'space-between'
           }}
         >
-          <Typography variant="body2">Theme</Typography>
+          <Typography variant="body2">{t('account.theme', 'Theme')}</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton
               size="small"
@@ -357,7 +359,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             fullWidth
             variant="contained"
             color="primary"
-            onClick={() => handleClickItem('/pricing')}
+            onClick={() => handleClickItem('/upgrade-license')}
             sx={{
               py: 1,
               borderRadius: 1,
@@ -365,7 +367,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               textTransform: 'none'
             }}
           >
-            Upgrade Plan
+            {t('account.upgradePlan', 'Upgrade Plan')}
           </Button>
         </Box>
       </Popover>
