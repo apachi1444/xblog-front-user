@@ -2,6 +2,7 @@
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -15,7 +16,7 @@ import Pagination from '@mui/material/Pagination';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 import { Iconify } from 'src/components/iconify';
@@ -39,6 +40,8 @@ export function BlogView() {
     data: articlesData,
     isLoading: isLoadingArticles,
   } = useGetArticlesQuery({ store_id: storeId });
+
+  const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
 
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
 
@@ -90,8 +93,26 @@ export function BlogView() {
     setPage(value);
   };
 
-  const handleNewArticle = () => {
-    navigate('/generate');
+  const handleNewArticle = async () => {
+    try {
+      // Create empty article first
+      const newArticle = await createArticle({
+        title: 'Untitled Article',
+        content: '',
+        meta_description: '',
+        keywords: [],
+        status: 'draft',
+        website_id: undefined,
+      }).unwrap();
+
+      // Navigate to generate view with the new article ID
+      navigate(`/generate?articleId=${newArticle.id}`);
+
+      toast.success('New article created! Start editing...');
+    } catch (error) {
+      console.error('Failed to create article:', error);
+      toast.error('Failed to create article. Please try again.');
+    }
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,12 +143,13 @@ export function BlogView() {
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={handleNewArticle}
+          disabled={isCreatingArticle}
           sx={{
             bgcolor: 'primary.main',
             color: 'text.light',
           }}
         >
-          New article
+          {isCreatingArticle ? 'Creating...' : 'New article'}
         </Button>
       </Box>
 

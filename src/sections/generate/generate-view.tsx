@@ -59,8 +59,7 @@ export function GeneratingView() {
   // Article draft management
   const articleDraft = useArticleDraft({
     onSave: (article) => {
-      console.log('✅ Article created:', article);
-      navigate(`/generate?articleId=${article.id}`, { replace: true });
+      navigate('/generate');
     },
     onError: (error) => {
       console.error('❌ Article error:', error);

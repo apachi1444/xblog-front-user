@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -13,7 +14,7 @@ import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 import { Iconify } from 'src/components/iconify';
@@ -28,6 +29,8 @@ export function CreateView() {
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
   const { data: articlesData, isLoading } = useGetArticlesQuery({ store_id: storeId });
+
+  const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
 
   // Filter draft articles
   const draftArticles = useMemo(() => {
@@ -64,7 +67,7 @@ export function CreateView() {
     },
   ];
 
-  const handleOptionSelect = (optionId: string, isLocked: boolean = false) => {
+  const handleOptionSelect = async (optionId: string, isLocked: boolean = false) => {
     // Don't do anything if the option is locked
     if (isLocked) return;
 
@@ -72,8 +75,25 @@ export function CreateView() {
 
     // Navigate to the appropriate page based on selection
     if (optionId === 'generate') {
-      // Navigate to generate view - article will be created automatically
-      navigate('/generate');
+      try {
+        // Create empty article first
+        const newArticle = await createArticle({
+          title: 'Untitled Article',
+          content: '',
+          meta_description: '',
+          keywords: [],
+          status: 'draft',
+          website_id: undefined,
+        }).unwrap();
+
+        // Navigate to generate view with the new article ID
+        navigate(`/generate?articleId=${newArticle.id}`);
+
+        toast.success('New article created! Start editing...');
+      } catch (error) {
+        console.error('Failed to create article:', error);
+        toast.error('Failed to create article. Please try again.');
+      }
     }
     // Add other navigation options as needed
   };
@@ -121,7 +141,7 @@ export function CreateView() {
               )}
               <CardActionArea
                 onClick={() => handleOptionSelect(option.id, option.locked)}
-                disabled={option.locked}
+                disabled={option.locked || (option.id === 'generate' && isCreatingArticle)}
                 sx={{
                   height: '100%',
                   p: 2,

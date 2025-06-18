@@ -103,6 +103,8 @@ const setupMocks = () => {
         keywords: requestData.keywords || [],
         status: requestData.status || 'draft',
         website_id: requestData.website_id || null,
+        featured_media: '', // New articles start without featured media
+        platform: 'shopify', // Default platform
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

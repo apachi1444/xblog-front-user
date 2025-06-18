@@ -280,11 +280,11 @@ export function PostItem({
     </Stack>
   );
 
-  const renderCover = (
+  const renderCover = post.featured_media ? (
     <Box
       component="img"
       alt={post.title}
-      src={post.featured_media || '/assets/images/covers/cover_placeholder.jpg'}
+      src={post.featured_media}
       sx={{
         top: 0,
         width: 1,
@@ -293,6 +293,42 @@ export function PostItem({
         position: 'absolute',
       }}
     />
+  ) : (
+    <Box
+      sx={{
+        top: 0,
+        width: 1,
+        height: 1,
+        position: 'absolute',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: alpha(theme.palette.grey[500], 0.12),
+        border: `2px dashed ${alpha(theme.palette.grey[500], 0.32)}`,
+      }}
+    >
+      <Stack alignItems="center" spacing={1}>
+        <Iconify
+          icon="mdi:image-off-outline"
+          width={48}
+          height={48}
+          sx={{
+            color: theme.palette.grey[500],
+            opacity: 0.6
+          }}
+        />
+        <Typography
+          variant="body2"
+          sx={{
+            color: theme.palette.grey[600],
+            fontWeight: 500,
+            textAlign: 'center'
+          }}
+        >
+          {t('blog.imageNotSet', 'Image not set')}
+        </Typography>
+      </Stack>
+    </Box>
   );
 
   const renderDate = (
