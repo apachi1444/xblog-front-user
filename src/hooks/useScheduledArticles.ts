@@ -6,7 +6,7 @@ import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 export interface ScheduledArticle {
-  id: string;
+  id: number;
   title: string;
   scheduledAt: string;
   status: string;
@@ -42,30 +42,30 @@ export function useScheduledArticles(status: string = 'scheduled'): UseScheduled
   const scheduledArticles = useMemo(() => {
     if (!articlesData?.articles) return [];
     
-    // Filter articles by status and ensure they have a scheduledAt date
+    // Filter articles by status - use created_at as scheduled date since scheduledAt doesn't exist in API
     const filtered = articlesData.articles.filter(
-      article => article.status === status && article.scheduledAt
+      article => article.status === status
     );
-    
+
     // Add time remaining information and sort by scheduled date (ascending)
     return filtered
       .map(article => {
         const now = new Date();
-        const scheduledDate = new Date(article.scheduledAt || '');
-        
+        const scheduledDate = new Date(article.created_at);
+
         // Only calculate time remaining for future dates
-        const timeRemaining = isAfter(scheduledDate, now) 
+        const timeRemaining = isAfter(scheduledDate, now)
           ? {
               days: differenceInDays(scheduledDate, now),
               hours: differenceInHours(scheduledDate, now) % 24,
               minutes: differenceInMinutes(scheduledDate, now) % 60,
             }
           : undefined;
-        
+
         return {
           id: article.id,
           title: article.title,
-          scheduledAt: article.scheduledAt || '',
+          scheduledAt: article.created_at,
           status: article.status,
           timeRemaining
         };

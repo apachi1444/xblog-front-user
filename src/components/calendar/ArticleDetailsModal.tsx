@@ -6,15 +6,15 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Chip,
+  Fade,
   Modal,
   Stack,
+  alpha,
   Button,
   Divider,
+  useTheme,
   Typography,
   IconButton,
-  useTheme,
-  alpha,
-  Fade,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -132,14 +132,14 @@ export function ArticleDetailsModal({
                 </Typography>
               </Box>
 
-              {/* Description */}
-              {article.description && (
+              {/* Content */}
+              {article.content && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                    {t('common.description', 'Description')}
+                    {t('common.content', 'Content')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {article.description}
+                    {article.content}
                   </Typography>
                 </Box>
               )}
@@ -170,82 +170,32 @@ export function ArticleDetailsModal({
                         {t('common.created', 'Created')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {format(new Date(article.createdAt), 'MMMM d, yyyy • h:mm a')}
+                        {format(new Date(article.created_at), 'MMMM d, yyyy • h:mm a')}
                       </Typography>
                     </Box>
                   </Stack>
 
-                  {/* Scheduled Date */}
-                  {article.scheduledAt && (
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Box
-                        sx={{
-                          p: 1,
-                          borderRadius: 1,
-                          bgcolor: alpha(theme.palette.warning.main, 0.1),
-                          color: theme.palette.warning.main,
-                        }}
-                      >
-                        <Iconify icon="eva:clock-outline" width={16} height={16} />
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {t('common.scheduled', 'Scheduled')}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {format(new Date(article.scheduledAt), 'MMMM d, yyyy • h:mm a')}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  )}
-
-                  {/* Published Date */}
-                  {article.publishedAt && (
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Box
-                        sx={{
-                          p: 1,
-                          borderRadius: 1,
-                          bgcolor: alpha(theme.palette.success.main, 0.1),
-                          color: theme.palette.success.main,
-                        }}
-                      >
-                        <Iconify icon="eva:checkmark-circle-outline" width={16} height={16} />
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {t('common.published', 'Published')}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {format(new Date(article.publishedAt), 'MMMM d, yyyy • h:mm a')}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  )}
-
-                  {/* Author */}
-                  {article.author && (
-                    <Stack direction="row" alignItems="center" spacing={2}>
-                      <Box
-                        sx={{
-                          p: 1,
-                          borderRadius: 1,
-                          bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          color: theme.palette.primary.main,
-                        }}
-                      >
-                        <Iconify icon="eva:person-outline" width={16} height={16} />
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {t('common.author', 'Author')}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {article.author.name}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  )}
+                  {/* Platform */}
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Box
+                      sx={{
+                        p: 1,
+                        borderRadius: 1,
+                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        color: theme.palette.primary.main,
+                      }}
+                    >
+                      <Iconify icon="eva:globe-outline" width={16} height={16} />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {t('common.platform', 'Platform')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {article.platform}
+                      </Typography>
+                    </Box>
+                  </Stack>
                 </Stack>
               </Stack>
             </Stack>

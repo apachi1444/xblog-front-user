@@ -26,8 +26,8 @@ interface SchedulingModalProps {
   onClose: () => void;
   selectedDay: Date | null;
   availableArticles: Article[];
-  selectedArticles: string[];
-  onArticleToggle: (articleId: string) => void;
+  selectedArticles: number[];
+  onArticleToggle: (articleId: number) => void;
   onScheduleSubmit: () => void;
   isLoading?: boolean;
 }

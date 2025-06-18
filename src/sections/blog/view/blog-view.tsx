@@ -58,7 +58,7 @@ export function BlogView() {
     if (searchQuery) {
       sorted = sorted.filter(post =>
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -70,10 +70,10 @@ export function BlogView() {
     // Apply sorting
     switch (sortBy) {
       case 'latest':
-        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       case 'oldest':
-        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
       default:
         break;

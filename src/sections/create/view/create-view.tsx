@@ -268,7 +268,7 @@ export function CreateView() {
                   <Box>
                     <Typography variant="subtitle1">{article.title}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Created on {new Date(article.createdAt).toLocaleDateString()}
+                      Created on {new Date(article.created_at).toLocaleDateString()}
                     </Typography>
                   </Box>
                   <Iconify

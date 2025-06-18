@@ -41,10 +41,6 @@ const articlesSlice = createSlice({
       state.articles.push(action.payload);
       state.count += 1;   
     },
-
-    deleteArticle: (state, action: PayloadAction<string>) => {
-      state.articles = state.articles.filter(article => article.id !== action.payload);
-    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
@@ -58,7 +54,6 @@ export const {
   setArticles,
   setArticlesResponse,
   addArticle,
-  deleteArticle,
   setLoading,
   setError
 } = articlesSlice.actions;

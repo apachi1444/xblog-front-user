@@ -6,17 +6,17 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   List,
-  Modal,
   Chip,
+  Fade,
+  Modal,
   Stack,
+  alpha,
   ListItem,
+  useTheme,
   Typography,
   IconButton,
   ListItemText,
   ListItemButton,
-  useTheme,
-  alpha,
-  Fade,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -164,16 +164,13 @@ export function ArticleListModal({
                             sx={{ color: 'text.secondary' }} 
                           />
                           <Typography variant="caption" color="text.secondary">
-                            {article.scheduledAt 
-                              ? format(new Date(article.scheduledAt), 'h:mm a')
-                              : t('calendar.noTime', 'No specific time')
-                            }
+                            {format(new Date(article.created_at), 'h:mm a')}
                           </Typography>
-                          {article.description && (
+                          {article.content && (
                             <>
                               <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'text.disabled' }} />
-                              <Typography 
-                                variant="caption" 
+                              <Typography
+                                variant="caption"
                                 color="text.secondary"
                                 sx={{
                                   overflow: 'hidden',
@@ -182,7 +179,7 @@ export function ArticleListModal({
                                   maxWidth: 200,
                                 }}
                               >
-                                {article.description}
+                                {article.content}
                               </Typography>
                             </>
                           )}

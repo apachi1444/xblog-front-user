@@ -373,9 +373,7 @@ const setupMocks = () => {
         // Update the article status and scheduledAt date
         _posts[articleIndex] = {
           ..._posts[articleIndex],
-          status: 'scheduled',
-          scheduledAt: scheduled_date,
-          updatedAt: new Date().toISOString()
+          status: 'scheduled'
         };
 
         console.log(`Article ${article_id} scheduled for ${scheduled_date}`);
@@ -403,9 +401,7 @@ const setupMocks = () => {
         // Update the article status and remove scheduledAt date
         _posts[articleIndex] = {
           ..._posts[articleIndex],
-          status: 'draft', // Change status back to draft
-          scheduledAt: undefined, // Remove scheduled date
-          updatedAt: new Date().toISOString()
+          status: 'draft' // Change status back to draft
         };
 
         console.log(`Article ${article_id} unscheduled successfully`);
@@ -530,7 +526,7 @@ const setupMocks = () => {
     mock.onPost('/generate-title').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { primary_keyword, content_description } = requestData;
+        const { primary_keyword } = requestData;
 
         // Generate a title based on the primary keyword and content description
         const titleTemplates = [

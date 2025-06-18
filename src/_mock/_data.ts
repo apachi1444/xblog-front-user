@@ -47,43 +47,28 @@ export const _users = [...Array(24)].map((_, index) => ({
 
 // ----------------------------------------------------------------------
 
-export const _posts: Article[] = [...Array(23)].map((_, index) => ({
-  id: _id(index),
-  title: _postTitles(index),
-  description: _description(index),
-  slug: _postTitles(index).toLowerCase().replace(/\s+/g, '-'),
-  coverImage: `/assets/images/cover/cover-${index + 1}.webp`,
-  // Make the first article scheduled with a near future date to test the banner
-  status: index === 0 ? 'scheduled' : ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
-  createdAt: _times(index),
-  updatedAt: _times(index),
-  publishedAt: _times(index),
-  // Set the first article to be scheduled for tomorrow
-  scheduledAt: index === 0
-    ? new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
-    : _times(index),
-  author: {
-    id: _id(index),
-    name: _fullName(index),
-    avatar: `/assets/images/avatar/avatar-${index + 1}.webp`,
+export const _posts: Article[] = [
+  // Real API response structure
+  {
+    id: 6,
+    title: 'Getting Started with Digital Marketing',
+    featured_media: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+    created_at: '2025-06-18T00:53:09',
+    status: 'draft',
+    platform: 'shopify',
+    content: 'A comprehensive guide to getting started with digital marketing strategies for modern businesses.',
   },
-  storeId: index % 4 === 0 ? undefined : _id(Math.floor(index / 3)), // Changed null to undefined
-  keywords: {
-    primary: ['WordPress', 'SEO', 'Marketing', 'Design', 'Development'][index % 5],
-    secondary: [
-      'Plugin',
-      'Theme',
-      'Performance',
-      'Security',
-      'Analytics'
-    ].slice(0, (index % 5) + 1)
-  },
-  meta: {
-    title: `SEO Title for ${_postTitles(index)}`,
-    description: _description(index).substring(0, 160),
-    url: `https://example.com/blog/${_postTitles(index).toLowerCase().replace(/\s+/g, '-')}`,
-  }
-}));
+  // Additional mock articles with real API structure
+  ...Array.from({ length: 22 }, (_, index) => ({
+    id: index + 1,
+    title: _postTitles(index),
+    featured_media: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+    created_at: _times(index),
+    status: index === 0 ? 'scheduled' : ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
+    platform: ['shopify', 'wordpress', 'wix', 'squarespace'][index % 4],
+    content: _description(index),
+  }))
+];
 
 // ----------------------------------------------------------------------
 

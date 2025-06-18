@@ -1,3 +1,6 @@
+// API types and hooks
+import type { CreateArticleResponse } from 'src/services/apis/articlesApi';
+
 import { useSelector } from 'react-redux';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -7,9 +10,6 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
-
-// API types and hooks
-import type { CreateArticleResponse } from 'src/services/apis/articlesApi';
 
 // Custom hooks
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
@@ -103,10 +103,10 @@ export function GeneratingView() {
         step1: {
           ...defaults.step1,
           title: selectedArticle.title || '',
-          contentDescription: selectedArticle.description || selectedArticle.content?.contextDescription || '',
-          metaDescription: selectedArticle.meta?.description || '',
-          primaryKeyword: selectedArticle.keywords?.primary || '',
-          secondaryKeywords: selectedArticle.keywords?.secondary || [],
+          contentDescription: selectedArticle.content || '',
+          metaDescription: '',
+          primaryKeyword: '',
+          secondaryKeywords: [],
         },
         step2: { ...defaults.step2 },
         step3: { ...defaults.step3 },
@@ -130,15 +130,15 @@ export function GeneratingView() {
 
       // Set the current article for the draft system
       const articleResponse: CreateArticleResponse = {
-        id: selectedArticle.id,
+        id: selectedArticle.id.toString(),
         title: selectedArticle.title || '',
-        content: selectedArticle.content?.contextDescription || '',
-        meta_description: selectedArticle.meta?.description || selectedArticle.description || '',
-        keywords: selectedArticle.keywords?.primary ? [selectedArticle.keywords.primary, ...(selectedArticle.keywords.secondary || [])] : [],
+        content: selectedArticle.content || '',
+        meta_description: '',
+        keywords: [],
         status: (selectedArticle.status as 'draft' | 'published') || 'draft',
-        website_id: selectedArticle.storeId || null,
-        created_at: selectedArticle.createdAt,
-        updated_at: selectedArticle.updatedAt,
+        website_id: null,
+        created_at: selectedArticle.created_at,
+        updated_at: selectedArticle.created_at,
       };
 
       articleDraft.setCurrentArticle(articleResponse);

@@ -1,7 +1,6 @@
 import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
-import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
@@ -9,7 +8,6 @@ import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -64,18 +62,15 @@ const PLATFORM_ICONS = {
 };
 
 const getPlatformIcons = (post: Article) => {
-  const postIdSum = post.id.length
-
   if (post.status !== 'published') return [];
 
-  // Simulate different platform combinations
-  const platforms = [];
-  if (postIdSum % 2 === 0) platforms.push('wordpress');
-  if (postIdSum % 3 === 0) platforms.push('medium');
-  if (postIdSum % 5 === 0) platforms.push('ghost');
-  if (postIdSum % 7 === 0) platforms.push('webflow');
+  // Use the platform from the API response
+  if (post.platform && post.platform !== 'string') {
+    return [post.platform];
+  }
 
-  return platforms.length ? platforms : ['default'];
+  // Fallback to default if no platform specified
+  return ['default'];
 };
 
 export function PostItem({
@@ -217,33 +212,8 @@ export function PostItem({
     </Box>
   );
 
-  // Render scheduled info
-  const renderScheduledInfo = post.status === 'scheduled' && post.scheduledAt && (
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: 16,
-        right: 16,
-        zIndex: 10,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5,
-        backgroundColor: alpha(theme.palette.info.main, 0.9),
-        color: '#fff',
-        borderRadius: 1,
-        px: 1,
-        py: 0.5,
-        fontSize: '0.75rem',
-        fontWeight: 'medium',
-        boxShadow: `0 2px 4px ${alpha(theme.palette.info.main, 0.4)}`,
-      }}
-    >
-      <Iconify icon="mdi:calendar-clock" width={14} height={14} />
-      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-        {format(new Date(post.scheduledAt), 'MMM d, yyyy')}
-      </Typography>
-    </Box>
-  );
+  // Render scheduled info (disabled for now since scheduledAt is not in API)
+  const renderScheduledInfo = null;
 
   // Render draft creative element
   const renderDraftCreative = post.status === 'draft' && (
@@ -295,28 +265,24 @@ export function PostItem({
         }),
       }}
     >
-      {/* Keywords */}
-      {post.keywords?.primary && (
-        <Tooltip title={t('blog.primaryKeyword', 'Primary Keyword')}>
-          <Chip
-            size="small"
-            label={post.keywords.primary}
-            sx={{
-              height: 20,
-              fontSize: '0.65rem',
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              color: theme.palette.primary.main,
-              '& .MuiChip-label': { px: 1 }
-            }}
-          />
-        </Tooltip>
-      )}
+      {/* Platform */}
+      <Chip
+        size="small"
+        label={post.platform}
+        sx={{
+          height: 20,
+          fontSize: '0.65rem',
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+          color: theme.palette.primary.main,
+          '& .MuiChip-label': { px: 1 }
+        }}
+      />
 
-      {/* Last updated */}
+      {/* Created date */}
       <Box display="flex" alignItems="center">
         <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ mr: 0.5 }} />
         <Typography variant="caption">
-          {t('blog.updated', 'Updated {{date}}', { date: fDate(post.updatedAt || post.createdAt) })}
+          {t('blog.created', 'Created {{date}}', { date: fDate(post.created_at) })}
         </Typography>
       </Box>
     </Stack>
@@ -326,7 +292,7 @@ export function PostItem({
     <Box
       component="img"
       alt={post.title}
-      src={post.coverImage || '/assets/images/covers/cover_placeholder.jpg'}
+      src={post.featured_media || '/assets/images/covers/cover_placeholder.jpg'}
       sx={{
         top: 0,
         width: 1,
@@ -350,12 +316,7 @@ export function PostItem({
         }),
       }}
     >
-      {post.status === 'published'
-        ? t('blog.publishedOn', 'Published on {{date}}', { date: fDate(post.publishedAt || post.createdAt) })
-        : post.status === 'scheduled'
-          ? t('blog.scheduledFor', 'Scheduled for {{date}}', { date: fDate(post.scheduledAt || '') })
-          : t('blog.createdOn', 'Created on {{date}}', { date: fDate(post.createdAt) })
-      }
+      {fDate(post.created_at)}
     </Typography>
   );
 
@@ -375,7 +336,7 @@ export function PostItem({
     />
   );
 
-  // Render a short excerpt of the description
+  // Render a short excerpt of the content
   const renderExcerpt = (
     <Typography
       variant="body2"
@@ -393,7 +354,7 @@ export function PostItem({
         }),
       }}
     >
-      {post.description}
+      {post.content}
     </Typography>
   );
 

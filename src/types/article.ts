@@ -24,27 +24,15 @@ export interface KeywordData {
     sections: SectionContent[];
   }
   
-  // New  interface for overview information
+  // Real API structure for articles
   export interface Article {
-    id: string;
+    id: number;
     title: string;
-    description: string;
-    slug: string;
-    coverImage?: string;
-    author?: {
-      id: string;
-      name: string;
-      avatar?: string;
-    };
-    storeId?: string;
+    featured_media: string;
+    created_at: string;
     status: 'draft' | 'published' | 'scheduled';
-    createdAt: string;
-    updatedAt: string;
-    publishedAt?: string;
-    scheduledAt?: string;
-    keywords?: KeywordData;
-    meta?: MetaData;
-    content?: ArticleContent;
+    platform: string;
+    content: string;
   }
   
   export interface ArticleContent {

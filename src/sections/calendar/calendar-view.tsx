@@ -33,7 +33,7 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
+  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
 
   const [selectedArticleDetails, setSelectedArticleDetails] = useState<any>(null);
   const [isArticleDetailsModalOpen, setIsArticleDetailsModalOpen] = useState(false);
@@ -111,7 +111,7 @@ export default function CalendarPage() {
   };
 
   // Toggle article selection
-  const handleArticleToggle = (articleId: string) => {
+  const handleArticleToggle = (articleId: number) => {
     setSelectedArticles(prev =>
       prev.includes(articleId)
         ? prev.filter(id => id !== articleId)
@@ -132,7 +132,7 @@ export default function CalendarPage() {
       await Promise.all(selectedArticles.map(articleId =>
         scheduleArticle({
           store_id: storeId,
-          article_id: articleId,
+          article_id: articleId.toString(),
           scheduled_date: scheduledDate
         })
       ));
@@ -155,7 +155,8 @@ export default function CalendarPage() {
     return articles.filter(article => {
       if (article.status !== 'scheduled') return false;
 
-      const scheduledDate = article.scheduledAt || article.publishedAt;
+      // For now, just use created_at as the scheduled date since scheduledAt doesn't exist in API
+      const scheduledDate = article.created_at;
       if (!scheduledDate) return false;
 
       const articleDate = format(new Date(scheduledDate), 'yyyy-MM-dd');
