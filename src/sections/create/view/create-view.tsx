@@ -72,7 +72,7 @@ export function CreateView() {
 
     // Navigate to the appropriate page based on selection
     if (optionId === 'generate') {
-      // Navigate to the new route structure with 'new' as the articleId
+      // Navigate to generate view - article will be created automatically
       navigate('/generate');
     }
     // Add other navigation options as needed

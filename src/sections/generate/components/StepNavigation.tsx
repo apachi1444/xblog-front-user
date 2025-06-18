@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
-import { Box, Button, useTheme, Stack } from '@mui/material';
+import { Box, Button, useTheme, Stack, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -16,11 +16,30 @@ interface StepNavigationProps {
   totalSteps: number;
   onNextStep: () => void;
   onPrevStep: () => void;
+  // Save functionality props
+  hasUnsavedChanges?: boolean;
+  isSaving?: boolean;
+  onSaveDraft?: (formData: any) => void;
 }
 
-export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep }: StepNavigationProps) => {
+export const StepNavigation = ({
+  activeStep,
+  totalSteps,
+  onNextStep,
+  onPrevStep,
+  hasUnsavedChanges = false,
+  isSaving = false,
+  onSaveDraft
+}: StepNavigationProps) => {
   const theme = useTheme();
   const methods = useFormContext();
+
+  const handleSaveDraft = () => {
+    if (onSaveDraft) {
+      const formData = methods.getValues();
+      onSaveDraft(formData);
+    }
+  };
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -150,10 +169,12 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
           zIndex: 1000,
           display: 'flex',
           justifyContent: 'space-between',
+          alignItems: 'center',
           width: 'calc(100% - 240px)',
           ml: '240px',
         }}
       >
+        {/* Left side - Previous button */}
         <Box>
           {activeStep > 0 ? (
             <Button
@@ -170,61 +191,96 @@ export const StepNavigation = ({ activeStep, totalSteps, onNextStep, onPrevStep 
           ) : null}
         </Box>
 
-        {activeStep === totalSteps - 1 ? (
-          // Final step - show action buttons
-          <Stack direction="row" spacing={2}>
+        {/* Center - Save Draft button */}
+        <Box>
+          {hasUnsavedChanges && onSaveDraft && (
             <Button
               variant="outlined"
-              startIcon={<Iconify icon="eva:copy-fill" />}
-              onClick={handleCopyAction}
+              color="warning"
+              onClick={handleSaveDraft}
+              disabled={isSaving}
+              startIcon={
+                isSaving ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  <Iconify icon="eva:save-fill" />
+                )
+              }
               sx={{
                 borderRadius: '24px',
-                px: 3,
-              }}
-            >
-              Copy
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="eva:download-fill" />}
-              onClick={handleExportAction}
-              sx={{
-                borderRadius: '24px',
-                px: 3,
-              }}
-            >
-              Export
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-              onClick={handlePublishAction}
-              sx={{
-                borderRadius: '24px',
-                bgcolor: 'success.main',
-                px: 3,
+                minWidth: '140px',
+                textTransform: 'none',
+                borderColor: 'warning.main',
+                color: 'warning.main',
                 '&:hover': {
-                  bgcolor: 'success.dark',
+                  borderColor: 'warning.dark',
+                  bgcolor: 'warning.lighter',
                 }
               }}
             >
-              Publish
+              {isSaving ? 'Saving...' : 'Save Draft'}
             </Button>
-          </Stack>
-        ) : (
-          // Other steps - show next button
-          <Button
-            variant="contained"
-            endIcon={<Iconify icon="eva:arrow-forward-fill" />}
-            sx={{
-              borderRadius: '24px',
-              minWidth: '120px',
-            }}
-            onClick={handleNext}
-          >
-            Next
-          </Button>
-        )}
+          )}
+        </Box>
+
+        {/* Right side - Next/Action buttons */}
+        <Box>
+          {activeStep === totalSteps - 1 ? (
+            // Final step - show action buttons
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:copy-fill" />}
+                onClick={handleCopyAction}
+                sx={{
+                  borderRadius: '24px',
+                  px: 3,
+                }}
+              >
+                Copy
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:download-fill" />}
+                onClick={handleExportAction}
+                sx={{
+                  borderRadius: '24px',
+                  px: 3,
+                }}
+              >
+                Export
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+                onClick={handlePublishAction}
+                sx={{
+                  borderRadius: '24px',
+                  bgcolor: 'success.main',
+                  px: 3,
+                  '&:hover': {
+                    bgcolor: 'success.dark',
+                  }
+                }}
+              >
+                Publish
+              </Button>
+            </Stack>
+          ) : (
+            // Other steps - show next button
+            <Button
+              variant="contained"
+              endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+              sx={{
+                borderRadius: '24px',
+                minWidth: '120px',
+              }}
+              onClick={handleNext}
+            >
+              Next
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {/* Modals for final step actions */}

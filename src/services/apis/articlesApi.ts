@@ -18,6 +18,51 @@ interface ArticlesResponse {
   articles: Article[];
 }
 
+// Article creation request
+export interface CreateArticleRequest {
+  title: string;
+  content?: string;
+  meta_description?: string;
+  keywords?: string[];
+  status?: 'draft' | 'published';
+  website_id?: string;
+}
+
+// Article update request
+export interface UpdateArticleRequest {
+  title?: string;
+  content?: string;
+  meta_description?: string;
+  keywords?: string[];
+  status?: 'draft' | 'published';
+  website_id?: string;
+}
+
+// Article creation response
+export interface CreateArticleResponse {
+  id: string;
+  title: string;
+  content: string;
+  meta_description: string;
+  keywords: string[];
+  status: 'draft' | 'published';
+  website_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Article update response
+export interface UpdateArticleResponse {
+  id: string;
+  title: string;
+  content: string;
+  meta_description: string;
+  keywords: string[];
+  status: 'draft' | 'published';
+  website_id: string | null;
+  updated_at: string;
+}
+
 export const articlesApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all articles with optional filtering by store_id
@@ -32,11 +77,22 @@ export const articlesApi = api.injectEndpoints({
       providesTags : ['Articles'],
     }),
 
-    createArticle: builder.mutation<Article, Partial<Article>>({
+    // Create a new article (draft by default)
+    createArticle: builder.mutation<CreateArticleResponse, CreateArticleRequest>({
       query: (article) => ({
         url: ARTICLES_BASE_URL,
         method: 'POST',
         body: article,
+      }),
+      invalidatesTags: ['Articles'],
+    }),
+
+    // Update an existing article
+    updateArticle: builder.mutation<UpdateArticleResponse, { id: string; data: UpdateArticleRequest }>({
+      query: ({ id, data }) => ({
+        url: `${ARTICLES_BASE_URL}/update/${id}`,
+        method: 'PATCH',
+        body: data,
       }),
       invalidatesTags: ['Articles'],
     }),
@@ -64,6 +120,7 @@ export const articlesApi = api.injectEndpoints({
 export const {
   useGetArticlesQuery,
   useCreateArticleMutation,
+  useUpdateArticleMutation,
   useDeleteArticleMutation,
   useUnscheduleArticleMutation,
 } = articlesApi;

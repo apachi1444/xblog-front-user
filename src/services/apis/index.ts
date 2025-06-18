@@ -92,15 +92,45 @@ const setupMocks = () => {
 
     // Mock create article
     mock.onPost(ARTICLES_BASE_URL).reply((config) => {
-      const newArticle = JSON.parse(config.data);
-      const articleWithId = {
-        ...newArticle,
-        id: `article-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      const requestData = JSON.parse(config.data);
+      console.log('🔥 Mock create article endpoint called with:', requestData);
+
+      const newArticle = {
+        id: `article_${Date.now()}`,
+        title: requestData.title || 'Untitled Article',
+        content: requestData.content || '',
+        meta_description: requestData.meta_description || '',
+        keywords: requestData.keywords || [],
+        status: requestData.status || 'draft',
+        website_id: requestData.website_id || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      return [201, articleWithId];
+      console.log('🔥 Returning created article:', newArticle);
+      return [201, newArticle];
+    });
+
+    // Mock update article
+    mock.onPatch(new RegExp(`${ARTICLES_BASE_URL}/update/.*`)).reply((config) => {
+      const requestData = JSON.parse(config.data);
+      const articleId = config.url?.split('/').pop();
+      console.log('🔥 Mock update article endpoint called for ID:', articleId);
+      console.log('🔥 Update data:', requestData);
+
+      const updatedArticle = {
+        id: articleId,
+        title: requestData.title || 'Updated Article',
+        content: requestData.content || 'Updated content',
+        meta_description: requestData.meta_description || 'Updated meta description',
+        keywords: requestData.keywords || ['updated'],
+        status: requestData.status || 'draft',
+        website_id: requestData.website_id || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('🔥 Returning updated article:', updatedArticle);
+      return [200, updatedArticle];
     });
 
     // Mock delete article

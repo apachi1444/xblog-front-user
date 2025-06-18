@@ -8,8 +8,11 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
+// API types and hooks
+import type { CreateArticleResponse } from 'src/services/apis/articlesApi';
+
 // Custom hooks
-import { useDraftManager } from 'src/hooks/useDraftManager';
+import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
 // Layout components
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -18,8 +21,6 @@ import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 // Custom components
-import { DraftStatus } from 'src/components/draft-status/DraftStatus';
-
 import { DraftGuard } from './components/DraftGuard';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
@@ -55,10 +56,15 @@ export function GeneratingView() {
   // Loading state - only show loading if we're expecting to find an article
   const isArticleLoading = articleId ? isArticlesLoading : false;
 
-  // Draft management
-  const draftManager = useDraftManager({
-    autoSaveDelay: 2000,
-    enableLocalFallback: true,
+  // Article draft management
+  const articleDraft = useArticleDraft({
+    onSave: (article) => {
+      console.log('✅ Article created:', article);
+      navigate(`/generate?articleId=${article.id}`, { replace: true });
+    },
+    onError: (error) => {
+      console.error('❌ Article error:', error);
+    }
   });
 
   // Get default values, potentially from draft
@@ -97,9 +103,10 @@ export function GeneratingView() {
         step1: {
           ...defaults.step1,
           title: selectedArticle.title || '',
-          contentDescription: selectedArticle.description || '',
-          // Note: We'll need to store form data in article metadata or separate field
-          // For now, just populate basic fields
+          contentDescription: selectedArticle.description || selectedArticle.content?.contextDescription || '',
+          metaDescription: selectedArticle.meta?.description || '',
+          primaryKeyword: selectedArticle.keywords?.primary || '',
+          secondaryKeywords: selectedArticle.keywords?.secondary || [],
         },
         step2: { ...defaults.step2 },
         step3: { ...defaults.step3 },
@@ -114,42 +121,44 @@ export function GeneratingView() {
     defaultValues: getDefaultValues(),
   });
 
-  // Update form when article data loads
+  // Load existing article when editing
   useEffect(() => {
     if (selectedArticle) {
-      // Reset form with article data
+      // Editing existing article - load form with data
       const formData = getDefaultValues();
       methods.reset(formData);
 
-      // Update draft manager state to reflect we're editing an existing article
-      if (articleId && draftManager) {
-        draftManager.currentDraftId = articleId;
-        draftManager.isFirstInput = false;
-      }
+      // Set the current article for the draft system
+      const articleResponse: CreateArticleResponse = {
+        id: selectedArticle.id,
+        title: selectedArticle.title || '',
+        content: selectedArticle.content?.contextDescription || '',
+        meta_description: selectedArticle.meta?.description || selectedArticle.description || '',
+        keywords: selectedArticle.keywords?.primary ? [selectedArticle.keywords.primary, ...(selectedArticle.keywords.secondary || [])] : [],
+        status: (selectedArticle.status as 'draft' | 'published') || 'draft',
+        website_id: selectedArticle.storeId || null,
+        created_at: selectedArticle.createdAt,
+        updated_at: selectedArticle.updatedAt,
+      };
+
+      articleDraft.setCurrentArticle(articleResponse);
+      articleDraft.setHasUnsavedChanges(false);
     }
-  }, [selectedArticle, getDefaultValues, methods, articleId, draftManager]);
+  }, [selectedArticle, getDefaultValues, methods, articleDraft]);
 
-  // Force save before navigation
+  // Watch for form changes to show save button
   useEffect(() => {
-    const handleBeforeUnload = async () => {
-      if (draftManager.hasUnsavedChanges) {
-        await draftManager.forceSave();
+    const subscription = methods.watch(() => {
+      // Show save button when form changes
+      if (articleDraft.currentArticle) {
+        articleDraft.setHasUnsavedChanges(true);
       }
-    };
+    });
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [draftManager]);
+    return () => subscription.unsubscribe();
+  }, [methods, articleDraft]);
 
-  const onSubmit = useCallback(async (data: GenerateArticleFormData) => {
-    console.log("Form submitted:", data);
-    // Force save before submission
-    await draftManager.forceSave();
-    // Clear draft after successful submission
-    draftManager.clearDraft();
-    navigate('/blog');
-    return Promise.resolve();
-  }, [navigate, draftManager]);
+
 
   const steps = [
     { id: 1, label: "Content Setup" },
@@ -195,29 +204,41 @@ export function GeneratingView() {
         {/* Header with draft info */}
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            {articleId && selectedArticle && (
+            {articleDraft.currentArticle && (
               <Box>
                 <Typography variant="h5" gutterBottom>
-                  Editing Draft: {selectedArticle.title || 'Untitled Draft'}
+                  Editing Draft: {articleDraft.currentArticle.title || 'Untitled Draft'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Created on {new Date(selectedArticle.createdAt).toLocaleDateString()}
+                  Created on {new Date(articleDraft.currentArticle.created_at || Date.now()).toLocaleDateString()}
                 </Typography>
               </Box>
             )}
-            {!articleId && (
+            {!articleDraft.currentArticle && (
               <Typography variant="h5">
                 Create New Article
               </Typography>
             )}
           </Box>
 
-          {/* Draft Status Indicator */}
-          <DraftStatus
-            status={draftManager.status}
-            lastSaved={draftManager.lastSaved}
-            compact
-          />
+          {/* Status Indicator Only */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {!articleDraft.hasUnsavedChanges && articleDraft.currentArticle && (
+              <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                ✓ All changes saved
+              </Typography>
+            )}
+            {articleDraft.hasUnsavedChanges && articleDraft.currentArticle && (
+              <Typography variant="body2" color="warning.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                ● Unsaved changes
+              </Typography>
+            )}
+            {articleDraft.isCreating && (
+              <Typography variant="body2" color="info.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                ● Creating article...
+              </Typography>
+            )}
+          </Box>
         </Box>
 
         {/* Use the GenerateViewForm component */}
@@ -233,6 +254,9 @@ export function GeneratingView() {
             totalSteps={steps.length}
             onNextStep={handleNextStep}
             onPrevStep={handlePrevStep}
+            hasUnsavedChanges={articleDraft.hasUnsavedChanges}
+            isSaving={articleDraft.isSaving}
+            onSaveDraft={articleDraft.saveDraft}
           />
         </FormProvider>
       </DraftGuard>
