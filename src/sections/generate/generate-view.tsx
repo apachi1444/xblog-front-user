@@ -148,9 +148,10 @@ export function GeneratingView() {
 
   // Watch for form changes to show save button
   useEffect(() => {
-    const subscription = methods.watch(() => {
-      // Show save button when form changes
-      if (articleDraft.currentArticle) {
+    const subscription = methods.watch((data) => {
+      // Show save button when form has content (for both new and existing articles)
+      const hasContent = data.step1?.title || data.step1?.contentDescription || data.step1?.primaryKeyword;
+      if (hasContent) {
         articleDraft.setHasUnsavedChanges(true);
       }
     });

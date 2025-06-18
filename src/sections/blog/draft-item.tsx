@@ -77,9 +77,46 @@ export function DraftItem({ draft, latestPost, latestPostLarge }: DraftItemProps
   );
 
   const renderDate = (
-    <Typography variant="caption" color="text.disabled">
-      {t('blog.updated', 'Updated {{date}}', { date: fDate(draft.updatedAt) })}
-    </Typography>
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        px: 2,
+        py: 1,
+        borderRadius: 2,
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+        ...((latestPostLarge || latestPost) && {
+          backgroundColor: alpha(theme.palette.common.white, 0.12),
+          border: `1px solid ${alpha(theme.palette.common.white, 0.16)}`,
+        }),
+      }}
+    >
+      <Iconify
+        icon="mdi:calendar-outline"
+        width={16}
+        height={16}
+        sx={{
+          mr: 1,
+          color: theme.palette.primary.main,
+          ...((latestPostLarge || latestPost) && {
+            color: 'common.white',
+          }),
+        }}
+      />
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          color: theme.palette.primary.main,
+          ...((latestPostLarge || latestPost) && {
+            color: 'common.white',
+          }),
+        }}
+      >
+        {fDate(draft.updatedAt)}
+      </Typography>
+    </Box>
   );
 
   const renderShape = (

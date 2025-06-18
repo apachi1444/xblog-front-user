@@ -277,14 +277,6 @@ export function PostItem({
           '& .MuiChip-label': { px: 1 }
         }}
       />
-
-      {/* Created date */}
-      <Box display="flex" alignItems="center">
-        <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ mr: 0.5 }} />
-        <Typography variant="caption">
-          {t('blog.created', 'Created {{date}}', { date: fDate(post.created_at) })}
-        </Typography>
-      </Box>
     </Stack>
   );
 
@@ -304,20 +296,47 @@ export function PostItem({
   );
 
   const renderDate = (
-    <Typography
-      variant="caption"
-      component="div"
+    <Box
       sx={{
-        mb: 1,
-        color: 'text.disabled',
+        mb: 2,
+        display: 'inline-flex',
+        alignItems: 'center',
+        px: 2,
+        py: 1,
+        borderRadius: 2,
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
         ...((latestPostLarge || latestPost) && {
-          opacity: 0.48,
-          color: 'common.white',
+          backgroundColor: alpha(theme.palette.common.white, 0.12),
+          border: `1px solid ${alpha(theme.palette.common.white, 0.16)}`,
         }),
       }}
     >
-      {fDate(post.created_at)}
-    </Typography>
+      <Iconify
+        icon="mdi:calendar-outline"
+        width={16}
+        height={16}
+        sx={{
+          mr: 1,
+          color: theme.palette.primary.main,
+          ...((latestPostLarge || latestPost) && {
+            color: 'common.white',
+          }),
+        }}
+      />
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          color: theme.palette.primary.main,
+          ...((latestPostLarge || latestPost) && {
+            color: 'common.white',
+          }),
+        }}
+      >
+        {fDate(post.created_at)}
+      </Typography>
+    </Box>
   );
 
   const renderShape = (

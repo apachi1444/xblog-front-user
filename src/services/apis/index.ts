@@ -82,7 +82,7 @@ const setupMocks = () => {
 
     mock.onGet(new RegExp(`${ARTICLES_BASE_URL}/\\d+$`)).reply((config) => {
       const articleId = config.url?.split('/').pop();
-      const article = _posts.find(post => post.id === articleId);
+      const article = _posts.find(post => post.id.toString() === articleId);
 
       if (article) {
         return [200, article];
@@ -136,7 +136,7 @@ const setupMocks = () => {
     // Mock delete article
     mock.onDelete(new RegExp(`${ARTICLES_BASE_URL}/.*`)).reply((config) => {
       const articleId = config.url?.split('/').pop();
-      const articleExists = _posts.some(post => post.id === articleId);
+      const articleExists = _posts.some(post => post.id.toString() === articleId);
 
       if (articleExists) {
         return [200, { message: `Article ${articleId} deleted successfully` }];
@@ -367,7 +367,7 @@ const setupMocks = () => {
       const { article_id, scheduled_date } = scheduleData;
 
       // Find the article in the mock data
-      const articleIndex = _posts.findIndex(post => post.id === article_id);
+      const articleIndex = _posts.findIndex(post => post.id.toString() === article_id.toString());
 
       if (articleIndex !== -1) {
         // Update the article status and scheduledAt date
@@ -395,7 +395,7 @@ const setupMocks = () => {
       const { article_id } = unscheduleData;
 
       // Find the article in the mock data
-      const articleIndex = _posts.findIndex(post => post.id === article_id);
+      const articleIndex = _posts.findIndex(post => post.id.toString() === article_id.toString());
 
       if (articleIndex !== -1) {
         // Update the article status and remove scheduledAt date

@@ -211,11 +211,12 @@ export function BlogView() {
 
           <Grid container spacing={3}>
             {paginatedPosts.map((post, index) => {
-              const latestPostLarge = index === 0 && page === 1;
-              const latestPost = (index === 1 || index === 2) && page === 1;
+              // Make all cards look like the first one (large featured style)
+              const latestPostLarge = true;
+              const latestPost = true;
 
               return (
-                <Grid key={post.id} xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
+                <Grid key={post.id} xs={12} sm={12} md={6}>
                   {post.isDraft ? (
                     <DraftItem
                       draft={post}
