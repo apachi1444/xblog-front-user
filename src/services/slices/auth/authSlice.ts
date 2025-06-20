@@ -91,6 +91,14 @@ const authSlice = createSlice({
       // Remove both old and new keys for complete cleanup
       localStorage.removeItem('xblog_auth_session_v2');
 
+      // Also clear session storage tokens
+      try {
+        sessionStorage.removeItem('xblog_secure_session_token_v2_8a7b6c5d4e3f2g1h');
+        sessionStorage.removeItem('access_token'); // Legacy token key
+      } catch (error) {
+        console.error('Error clearing session storage:', error);
+      }
+
       // Clear state
       state.user = null;
       state.accessToken = null;

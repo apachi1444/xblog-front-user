@@ -89,11 +89,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
     // Navigate after a very short delay to ensure popover is closed
     setTimeout(() => {
-      // Dispatch logout action
+      // Dispatch logout action (this will handle all storage cleanup)
       dispatch(logout());
-
-      // Clear storage
-      localStorage.removeItem('xblog_auth_session_v2');
 
       // Use direct navigation for more reliable routing
       window.location.href = '/sign-in';

@@ -14,10 +14,12 @@ import { Router } from 'src/routes/sections';
 import { useAxiosAuth } from 'src/hooks/useAxiosAuth';
 import { useSubscriptionSuccess } from 'src/hooks/useSubscriptionSuccess';
 
+import { logout } from 'src/services/slices/auth/authSlice';
 import { CustomThemeProvider } from 'src/theme/theme-provider';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
 import { WelcomePopupContextProvider } from 'src/contexts/WelcomePopupContext';
 import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
+import { useSessionExpired, SessionExpiredProvider } from 'src/contexts/SessionExpiredContext';
 
 import i18n from './locales/i18n';
 import { ToastProvider } from './contexts/ToastContext';
@@ -26,6 +28,7 @@ import { ErrorFallback } from './components/error-boundary';
 import { SupportChatProvider } from './contexts/SupportChatContext';
 import { AuthPersistence } from './components/auth/auth-persistence';
 import { SubscriptionSuccessAnimation } from './components/subscription';
+import { SessionExpiredModal } from './components/auth/session-expired-modal';
 
 // Get Google OAuth client ID from environment variables
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -33,7 +36,6 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 console.log(GOOGLE_CLIENT_ID);
 
 export default function App() {
-  useAxiosAuth();
   const dispatch = useDispatch();
 
   // Handle subscription success detection
@@ -42,6 +44,26 @@ export default function App() {
   useEffect(() => {
     dispatch(resetBannerDismissals());
   }, [dispatch]);
+
+  // Handle session expiration
+  const handleSessionExpired = () => {
+    // Clear all authentication data
+    try {
+      localStorage.removeItem('xblog_auth_session_v2');
+      sessionStorage.removeItem('xblog_secure_session_token_v2_8a7b6c5d4e3f2g1h');
+      sessionStorage.removeItem('access_token'); // Legacy token key
+    } catch (storageError) {
+      console.error('Error clearing storage:', storageError);
+    }
+
+    // Dispatch logout action
+    dispatch(logout());
+
+    // Redirect to login page
+    setTimeout(() => {
+      window.location.href = '/sign-in';
+    }, 100);
+  };
 
   return (
     <ErrorBoundary
@@ -54,28 +76,57 @@ export default function App() {
         <I18nextProvider i18n={i18n}>
           <LanguageContextProvider>
             <CustomThemeProvider>
-              <ToasterWithTheme />
-              <AuthPersistence />
-              <ToastProvider>
-                <SupportChatProvider>
-                  <WelcomePopupContextProvider>
-                    <Router />
-                    <SupportChat />
-                    {/* Subscription Success Animation */}
-                    <SubscriptionSuccessAnimation
-                      open={showSuccessAnimation}
-                      onClose={hideSuccessAnimation}
-                      plan={successData?.plan}
-                      subscriptionId={successData?.subscriptionId || ''}
-                    />
-                  </WelcomePopupContextProvider>
-                </SupportChatProvider>
-              </ToastProvider>
+              <SessionExpiredProvider onSessionExpired={handleSessionExpired}>
+                <SessionExpiredContent
+                  successData={successData}
+                  showSuccessAnimation={showSuccessAnimation}
+                  hideSuccessAnimation={hideSuccessAnimation}
+                />
+              </SessionExpiredProvider>
             </CustomThemeProvider>
           </LanguageContextProvider>
         </I18nextProvider>
       </GoogleOAuthProvider>
     </ErrorBoundary>
+  );
+}
+
+// Separate component to access SessionExpired context
+function SessionExpiredContent({
+  successData,
+  showSuccessAnimation,
+  hideSuccessAnimation
+}: {
+  successData: any;
+  showSuccessAnimation: boolean;
+  hideSuccessAnimation: () => void;
+}) {
+  useAxiosAuth(); // This hook now uses the SessionExpired context
+
+  const { isModalOpen, countdown } = useSessionExpired();
+
+  return (
+    <>
+      <ToasterWithTheme />
+      <AuthPersistence />
+      <ToastProvider>
+        <SupportChatProvider>
+          <WelcomePopupContextProvider>
+            <Router />
+            <SupportChat />
+            {/* Session Expired Modal */}
+            <SessionExpiredModal open={isModalOpen} countdown={countdown} />
+            {/* Subscription Success Animation */}
+            <SubscriptionSuccessAnimation
+              open={showSuccessAnimation}
+              onClose={hideSuccessAnimation}
+              plan={successData?.plan}
+              subscriptionId={successData?.subscriptionId || ''}
+            />
+          </WelcomePopupContextProvider>
+        </SupportChatProvider>
+      </ToastProvider>
+    </>
   );
 }
 

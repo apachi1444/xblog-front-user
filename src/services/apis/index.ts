@@ -1190,6 +1190,9 @@ const axiosBaseQuery =
       return { data: result.data };
     } catch (axiosError) {
       const err = axiosError as AxiosError;
+
+      // The 401 handling is already done in the Axios response interceptor
+      // So we just need to return the error here
       return {
         error: {
           status: err.response?.status,
