@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, { useRef, useState, useContext, useCallback, createContext } from 'react';
 
 interface SessionExpiredContextType {
   showSessionExpiredModal: () => void;
@@ -49,17 +49,16 @@ export function SessionExpiredProvider({ children, onSessionExpired }: SessionEx
   }, [isModalOpen, onSessionExpired]);
 
   // Cleanup timeouts on unmount
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(() => () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-    };
-  }, []);
+    }, []);
 
+  // eslint-disable-next-line react/jsx-no-constructed-context-values
   const value = {
     showSessionExpiredModal,
     isModalOpen,
