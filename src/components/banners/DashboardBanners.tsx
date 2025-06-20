@@ -123,7 +123,7 @@ export function ScheduledArticleBanner({ onClose }: BannerProps) {
 
   // Navigate to generate page
   const handleNavigateToGenerate = () => {
-    navigate('/generate');
+    navigate('/create');
   };
 
   // Navigate to calendar page
