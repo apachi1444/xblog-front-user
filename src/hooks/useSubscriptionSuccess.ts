@@ -1,6 +1,6 @@
 import type { SubscriptionPlan } from 'src/services/apis/subscriptionApi';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
@@ -25,22 +25,36 @@ export function useSubscriptionSuccess() {
   const [successData, setSuccessData] = useState<SubscriptionSuccessData | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
-  // Get plans using RTK Query (will use cache if available)
-  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
+  // Memoize URL parameters parsing to avoid recreating on every render
+  const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+
+  // Memoize subscription parameters check
+  const subscriptionParams = useMemo(() => ({
+    subscriptionId: urlParams.get('subscriptionId'),
+    subscriptionCustomer: urlParams.get('subscriptionCustomer'),
+    redirectStatus: urlParams.get('redirect_status')
+  }), [urlParams]);
+
+  // Check if we have valid subscription success parameters
+  const hasSubscriptionParams = useMemo(() =>
+    subscriptionParams.subscriptionId &&
+    subscriptionParams.subscriptionCustomer &&
+    subscriptionParams.redirectStatus === 'succeeded',
+    [subscriptionParams]
+  );
+
+  // Only fetch plans if we have subscription success parameters
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery(undefined, {
+    skip: !hasSubscriptionParams
+  });
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    
-    const subscriptionId = urlParams.get('subscriptionId');
-    const subscriptionCustomer = urlParams.get('subscriptionCustomer');
-    const redirectStatus = urlParams.get('redirect_status');
-
     // Check if this is a subscription success URL
-    if (subscriptionId && subscriptionCustomer && redirectStatus === 'succeeded') {
+    if (hasSubscriptionParams && subscriptionParams.subscriptionId && subscriptionParams.subscriptionCustomer && subscriptionParams.redirectStatus) {
       console.log('🎉 Subscription success detected:', {
-        subscriptionId,
-        subscriptionCustomer,
-        redirectStatus
+        subscriptionId: subscriptionParams.subscriptionId,
+        subscriptionCustomer: subscriptionParams.subscriptionCustomer,
+        redirectStatus: subscriptionParams.redirectStatus
       });
 
       // Since subscription ID is the same as plan ID, we can directly match it
@@ -48,7 +62,7 @@ export function useSubscriptionSuccess() {
 
       if (availablePlans.length > 0) {
         // Direct match: subscriptionId === planId
-        matchedPlan = availablePlans.find(plan => plan.id === subscriptionId);
+        matchedPlan = availablePlans.find(plan => plan.id === subscriptionParams.subscriptionId);
 
         if (matchedPlan) {
           console.log('✅ Plan matched successfully:', {
@@ -57,7 +71,7 @@ export function useSubscriptionSuccess() {
             planPrice: matchedPlan.price
           });
         } else {
-          console.warn('⚠️ No plan found for subscription ID:', subscriptionId);
+          console.warn('⚠️ No plan found for subscription ID:', subscriptionParams.subscriptionId);
           console.log('Available plans:', availablePlans.map(p => ({ id: p.id, name: p.name })));
         }
       } else {
@@ -65,9 +79,9 @@ export function useSubscriptionSuccess() {
       }
 
       const detectedSuccessData: SubscriptionSuccessData = {
-        subscriptionId,
-        subscriptionCustomer,
-        redirectStatus,
+        subscriptionId: subscriptionParams.subscriptionId,
+        subscriptionCustomer: subscriptionParams.subscriptionCustomer,
+        redirectStatus: subscriptionParams.redirectStatus,
         plan: matchedPlan
       };
 
@@ -79,7 +93,7 @@ export function useSubscriptionSuccess() {
       const cleanUrl = `${location.pathname}`;
       navigate(cleanUrl, { replace: true });
     }
-  }, [location.search, availablePlans, navigate, location.pathname]);
+  }, [hasSubscriptionParams, subscriptionParams, availablePlans, navigate, location.pathname]);
 
   const hideSuccessAnimation = () => {
     setShowSuccessAnimation(false);

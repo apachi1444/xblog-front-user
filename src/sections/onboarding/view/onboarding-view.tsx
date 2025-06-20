@@ -53,8 +53,7 @@ export function OnBoardingView() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Initialize the queries and mutations
-  useGetSubscriptionPlansQuery(); // This is used by ResponsivePricingPlans component
+  // Initialize the mutations
   const [updateUser] = useUpdateUserMutation();
   const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
 

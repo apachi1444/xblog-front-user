@@ -455,8 +455,11 @@ export function OverviewAnalyticsView() {
   // Fetch invoices data for purchase history
   const { data: invoicesData } = useGetUserInvoicesQuery();
 
-  // Fetch subscription plans for plan names
-  const { data: plansData } = useGetSubscriptionPlansQuery();
+  // Only fetch subscription plans if we have invoices to display
+  const hasInvoices = invoicesData?.invoices && invoicesData.invoices.length > 0;
+  const { data: plansData } = useGetSubscriptionPlansQuery(undefined, {
+    skip: !hasInvoices
+  });
 
   const articles_limit = subscriptionDetails?.articles_limit || 0;
 

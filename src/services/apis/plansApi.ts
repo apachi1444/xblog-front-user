@@ -25,6 +25,9 @@ export const plansApi = api.injectEndpoints({
         url: `${PLANS_BASE_URL}`,
         method: 'GET',
       }),
+      providesTags: ['Plans'],
+      // Cache the plans for 1 hour to prevent unnecessary refetches
+      keepUnusedDataFor: 3600, // 1 hour in seconds
     }),
   }),
 });
