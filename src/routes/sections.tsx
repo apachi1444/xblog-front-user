@@ -38,6 +38,7 @@ export const AddStorePage = lazy(() => import('src/pages/add-store'));
 export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
 export const ErrorTestPage = lazy(() => import('src/pages/error-test'));
 export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-preview-demo'));
+export const TestDraftEditingPage = lazy(() => import('src/pages/test-draft-editing'));
 
 // ----------------------------------------------------------------------
 
@@ -221,6 +222,14 @@ export function Router() {
               element: (
                 <ErrorBoundary FallbackComponent={ErrorFallback}>
                   <ArticlePreviewDemoPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'test-draft-editing',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <TestDraftEditingPage />
                 </ErrorBoundary>
               )
             },

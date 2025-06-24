@@ -64,7 +64,7 @@ export function useScheduledArticles(status: string = 'scheduled'): UseScheduled
 
         return {
           id: article.id,
-          title: article.title,
+          title: article.article_title || article.title || 'Untitled Article',
           scheduledAt: article.created_at,
           status: article.status,
           timeRemaining

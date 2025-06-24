@@ -48,19 +48,81 @@ export const _users = [...Array(24)].map((_, index) => ({
 // ----------------------------------------------------------------------
 
 export const _posts: Article[] = [
-  // Real API response structure
+  // Real API response structure - Comprehensive draft for testing
   {
     id: 6,
-    title: 'Getting Started with Digital Marketing',
+    // New API fields - Step 1 data
+    target_country: 'us',
+    language: 'english',
+    primary_keyword: 'digital marketing strategies',
+    secondary_keywords: '["social media marketing", "content marketing", "email marketing", "SEO optimization"]',
+    content_description: 'A comprehensive guide covering the essential digital marketing strategies that modern businesses need to succeed in today\'s competitive online landscape.',
+    article_title: 'The Complete Guide to Digital Marketing Strategies for Modern Businesses',
+    meta_title: 'Digital Marketing Strategies Guide 2024 | Boost Your Business Online',
+    meta_description: 'Discover proven digital marketing strategies to grow your business. Learn social media, content marketing, SEO, and email marketing techniques that drive results.',
+    url_slug: 'complete-guide-digital-marketing-strategies-modern-businesses',
+
+    // Step 2 data
+    article_type: 'how-to',
+    article_size: 'large',
+    tone_of_voice: 'professional',
+    point_of_view: 'second-person',
+    plagiat_removal: true,
+    include_images: true,
+    include_videos: false,
+    internal_links: '[{"url": "https://example.com/seo-guide", "link_text": "SEO Best Practices"}, {"url": "https://example.com/content-strategy", "link_text": "Content Strategy Tips"}]',
+    external_links: '[{"url": "https://blog.hubspot.com/marketing", "link_text": "HubSpot Marketing Blog"}, {"url": "https://moz.com/beginners-guide-to-seo", "link_text": "Moz SEO Guide"}]',
+
+    // Legacy and additional fields
+    content: 'A comprehensive guide to getting started with digital marketing strategies for modern businesses.',
     featured_media: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
-    created_at: '2025-06-18T00:53:09',
     status: 'draft',
     platform: 'shopify',
-    content: 'A comprehensive guide to getting started with digital marketing strategies for modern businesses.',
+    scheduled_publish_date: '2025-06-25T10:00:00',
+    created_at: '2025-06-18T00:53:09',
+
+    // Legacy compatibility
+    title: 'The Complete Guide to Digital Marketing Strategies for Modern Businesses',
   },
+  // Second comprehensive draft for testing
+  {
+    id: 7,
+    // Step 1 data - Different settings
+    target_country: 'global',
+    language: 'english',
+    primary_keyword: 'e-commerce SEO',
+    secondary_keywords: '["product optimization", "online store SEO", "conversion rate optimization"]',
+    content_description: 'Learn how to optimize your e-commerce website for search engines and increase organic traffic to boost sales.',
+    article_title: 'E-commerce SEO: Boost Your Online Store\'s Visibility',
+    meta_title: 'E-commerce SEO Guide: Increase Online Store Traffic & Sales',
+    meta_description: 'Master e-commerce SEO with our comprehensive guide. Learn product optimization, technical SEO, and conversion strategies.',
+    url_slug: 'ecommerce-seo-boost-online-store-visibility',
+
+    // Step 2 data - Different settings
+    article_type: 'listicle',
+    article_size: 'medium',
+    tone_of_voice: 'friendly',
+    point_of_view: 'first-person',
+    plagiat_removal: false,
+    include_images: true,
+    include_videos: true,
+    internal_links: '[{"url": "https://example.com/product-pages", "link_text": "Product Page Optimization"}]',
+    external_links: '[{"url": "https://developers.google.com/search", "link_text": "Google Search Console"}]',
+
+    // Legacy and additional fields
+    content: 'Learn how to optimize your e-commerce website for search engines.',
+    featured_media: '',
+    status: 'draft',
+    platform: 'wordpress',
+    created_at: '2025-06-17T14:30:00',
+
+    // Legacy compatibility
+    title: 'E-commerce SEO: Boost Your Online Store\'s Visibility',
+  },
+
   // Additional mock articles with real API structure
-  ...Array.from({ length: 22 }, (_, index) => ({
-    id: index + 1,
+  ...Array.from({ length: 21 }, (_, index) => ({
+    id: index + 8, // Start from 8 since we have 6 and 7 above
     title: _postTitles(index),
     // Some articles have no featured_media to test "Image not set" functionality
     featured_media: index % 5 === 0 ? '' : 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',

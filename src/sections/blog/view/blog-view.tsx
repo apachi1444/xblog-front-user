@@ -60,7 +60,7 @@ export function BlogView() {
     // Apply search filter
     if (searchQuery) {
       sorted = sorted.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }

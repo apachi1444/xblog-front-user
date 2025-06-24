@@ -34,7 +34,7 @@ export function GeneratingView() {
   const [searchParams] = useSearchParams();
 
   // Check if we're editing an existing draft article
-  const articleId = searchParams.get('articleId');
+  const articleId = searchParams.get('articleId') || searchParams.get('draft');
 
   // Get current store
   const currentStore = useSelector(selectCurrentStore);
@@ -65,6 +65,50 @@ export function GeneratingView() {
       console.error('❌ Article error:', error);
     }
   });
+
+  // Helper function to parse links from string format with stable IDs
+  const parseLinksFromString = useCallback((linksString: string, article_id?: number) => {
+    if (!linksString || linksString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON first
+      const parsed = JSON.parse(linksString);
+      if (Array.isArray(parsed)) {
+        return parsed.map((link, index) => ({
+          id: `article-${article_id || 'new'}-link-${index}-${link.url?.slice(-10) || 'default'}`,
+          url: link.url || link.link_url || '',
+          anchorText: link.anchorText || link.anchor_text || link.text || link.label || link.link_text || ''
+        })).filter(link => link.url && link.anchorText);
+      }
+    } catch {
+      // If JSON parsing fails, treat as comma-separated URLs
+      return linksString.split(',').map((url, index) => ({
+        id: `article-${article_id || 'new'}-simple-${index}-${url.slice(-10)}`,
+        url: url.trim(),
+        anchorText: url.trim()
+      })).filter(link => link.url);
+    }
+
+    return [];
+  }, []);
+
+  // Helper function to parse secondary keywords
+  const parseSecondaryKeywords = useCallback((keywordsString: string) => {
+    if (!keywordsString || keywordsString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON array first
+      const parsed = JSON.parse(keywordsString);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(Boolean);
+      }
+    } catch {
+      // If JSON parsing fails, treat as comma-separated string
+      return keywordsString.split(',').map(k => k.trim()).filter(Boolean);
+    }
+
+    return [];
+  }, []);
 
   // Get default values, potentially from draft
   const getDefaultValues = useCallback((): GenerateArticleFormData => {
@@ -98,41 +142,67 @@ export function GeneratingView() {
 
     // If we have selected article (draft), convert it to form format
     if (selectedArticle) {
+      console.log('🔄 Converting article data to form format:', selectedArticle);
+
+      // Parse links once and memoize them
+      const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
+      const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
+
+      console.log('📎 Parsed internal links:', internalLinks);
+      console.log('📎 Parsed external links:', externalLinks);
+
       return {
         step1: {
-          ...defaults.step1,
-          title: selectedArticle.title || '',
-          contentDescription: selectedArticle.content || '',
-          metaDescription: '',
-          primaryKeyword: '',
-          secondaryKeywords: [],
+          contentDescription: selectedArticle.content_description || selectedArticle.content || '',
+          primaryKeyword: selectedArticle.primary_keyword || '',
+          secondaryKeywords: parseSecondaryKeywords(selectedArticle.secondary_keywords || ''),
+          language: selectedArticle.language || 'en-us',
+          targetCountry: selectedArticle.target_country || 'us',
+          title: selectedArticle.article_title || selectedArticle.title || '',
+          metaTitle: selectedArticle.meta_title || '',
+          metaDescription: selectedArticle.meta_description || '',
+          urlSlug: selectedArticle.url_slug || '',
         },
-        step2: { ...defaults.step2 },
-        step3: { ...defaults.step3 },
+        step2: {
+          articleType: selectedArticle.article_type || 'how-to',
+          articleSize: selectedArticle.article_size || 'small',
+          toneOfVoice: selectedArticle.tone_of_voice || 'friendly',
+          pointOfView: selectedArticle.point_of_view || 'first-person',
+          aiContentCleaning: selectedArticle.plagiat_removal ? 'plagiarism-removal' : 'no-removal',
+          includeImages: selectedArticle.include_images ?? true,
+          includeVideos: selectedArticle.include_videos ?? false,
+          internalLinks,
+          externalLinks,
+        },
+        step3: {
+          sections: [], // Will be populated if content exists
+        },
       };
     }
 
     return defaults;
-  }, [selectedArticle]);
+  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords]);
+
+  // Memoize default values to prevent infinite re-renders
+  const defaultValues = useMemo(() => getDefaultValues(), [getDefaultValues]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,
-    defaultValues: getDefaultValues(),
+    defaultValues,
   });
 
   // Load existing article when editing
   useEffect(() => {
     if (selectedArticle) {
       // Editing existing article - load form with data
-      const formData = getDefaultValues();
-      methods.reset(formData);
+      methods.reset(defaultValues);
 
       // Set the current article for the draft system
       const articleResponse: CreateArticleResponse = {
         id: selectedArticle.id.toString(),
-        title: selectedArticle.title || '',
+        title: selectedArticle.article_title || selectedArticle.title || '',
         content: selectedArticle.content || '',
-        meta_description: '',
+        meta_description: selectedArticle.meta_description || '',
         keywords: [],
         status: (selectedArticle.status as 'draft' | 'published') || 'draft',
         website_id: null,
@@ -143,7 +213,7 @@ export function GeneratingView() {
       articleDraft.setCurrentArticle(articleResponse);
       articleDraft.setHasUnsavedChanges(false);
     }
-  }, [selectedArticle, getDefaultValues, methods, articleDraft]);
+  }, [selectedArticle, defaultValues, methods, articleDraft]);
 
   // Watch for form changes to show save button
   useEffect(() => {

@@ -24,15 +24,36 @@ export interface KeywordData {
     sections: SectionContent[];
   }
   
-  // Real API structure for articles
+  // Real API structure for articles - Updated to match new API response
   export interface Article {
     id: number;
-    title: string;
-    featured_media: string;
-    created_at: string;
+    target_country?: string;
+    language?: string;
+    primary_keyword?: string;
+    secondary_keywords?: string;
+    content_description?: string;
+    article_title?: string;
+    meta_title?: string;
+    meta_description?: string;
+    url_slug?: string;
+    article_type?: string;
+    article_size?: string;
+    tone_of_voice?: string;
+    point_of_view?: string;
+    plagiat_removal?: boolean;
+    include_images?: boolean;
+    include_videos?: boolean;
+    internal_links?: string;
+    external_links?: string;
+    content?: string;
+    featured_media?: string;
     status: 'draft' | 'published' | 'scheduled';
-    platform: string;
-    content: string;
+    platform?: string;
+    scheduled_publish_date?: string;
+    created_at: string;
+
+    // Legacy fields for backward compatibility
+    title?: string; // Maps to article_title
   }
   
   export interface ArticleContent {
