@@ -493,29 +493,61 @@ const setupMocks = () => {
     // Mock generate-keywords endpoint
     mock.onPost('/generate-keywords').reply((config) => {
       try {
-        const requestData = JSON.parse(config.data);
-        const { primary_keyword } = requestData;
+        // Simulate server overload (20% chance of 500 error for testing retry functionality)
+        if (Math.random() < 0.2) {
+          console.log('🔥 Simulating server overload (500 error) for keywords generation');
+          return [500, {
+            success: false,
+            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
+          }];
+        }
 
-        // Generate mock secondary keywords based on the primary keyword
-        const mockKeywords = [
-          `what is ${primary_keyword}`,
-          `${primary_keyword} meaning`,
-          `how does ${primary_keyword} work`,
-          `${primary_keyword} basics for beginners`,
-          `${primary_keyword} strategies for 2024`,
-          `${primary_keyword} tutorial for small business`,
-          `${primary_keyword} optimization techniques`,
-          `what is on page ${primary_keyword}`,
-          `learn ${primary_keyword} online`,
-          `best ${primary_keyword} tools for beginners`
-        ].join(', ');
+        const requestData = JSON.parse(config.data);
+        const { primary_keyword, language = 'english' } = requestData;
+
+        console.log('🔑 Mock keywords generation called with:', { primary_keyword, language });
+
+        // Generate mock secondary keywords based on the primary keyword and language
+        let mockKeywords;
+
+        if (language.toLowerCase() === 'french' || language.toLowerCase() === 'français') {
+          // French keywords
+          mockKeywords = [
+            `qu'est-ce que ${primary_keyword}`,
+            `${primary_keyword} définition`,
+            `comment fonctionne ${primary_keyword}`,
+            `${primary_keyword} pour débutants`,
+            `stratégies ${primary_keyword} 2024`,
+            `tutoriel ${primary_keyword}`,
+            `techniques d'optimisation ${primary_keyword}`,
+            `apprendre ${primary_keyword} en ligne`,
+            `meilleurs outils ${primary_keyword}`,
+            `guide complet ${primary_keyword}`
+          ].join(', ');
+        } else {
+          // English keywords (default)
+          mockKeywords = [
+            `what is ${primary_keyword}`,
+            `${primary_keyword} meaning`,
+            `how does ${primary_keyword} work`,
+            `${primary_keyword} basics for beginners`,
+            `${primary_keyword} strategies for 2024`,
+            `${primary_keyword} tutorial for small business`,
+            `${primary_keyword} optimization techniques`,
+            `what is on page ${primary_keyword}`,
+            `learn ${primary_keyword} online`,
+            `best ${primary_keyword} tools for beginners`
+          ].join(', ');
+        }
+
+        console.log('🔑 Generated mock keywords:', mockKeywords);
 
         return [
           200,
           {
             keywords: mockKeywords,
             success: true,
-            message: null
+            message: `Successfully generated secondary keywords in ${language}`
           }
         ];
       } catch (error) {
@@ -527,6 +559,15 @@ const setupMocks = () => {
     // Mock generate-title endpoint
     mock.onPost('/generate-title').reply((config) => {
       try {
+        // Simulate server overload (15% chance of 500 error for testing retry functionality)
+        if (Math.random() < 0.15) {
+          console.log('🔥 Simulating server overload (500 error) for title generation');
+          return [500, {
+            success: false,
+            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
+          }];
+        }
+
         const requestData = JSON.parse(config.data);
         const { primary_keyword } = requestData;
 

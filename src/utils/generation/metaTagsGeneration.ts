@@ -1,20 +1,29 @@
 import type { GenerateMetaRequest, GenerateMetaResponse } from 'src/services/apis/generateContentApi';
 
+import { useApiGenerationWithRetry } from 'src/hooks/useApiGenerationWithRetry';
+
 import { useGenerateMetaMutation } from 'src/services/apis/generateContentApi';
 
 /**
- * Custom hook for generating meta tags for SEO optimization
+ * Custom hook for generating meta tags for SEO optimization with retry functionality
  * @returns Functions and state for meta tags generation
  */
 export const useMetaTagsGeneration = () => {
   // Use the RTK Query mutation hook
   const [generateMeta, { isLoading, isError, error }] = useGenerateMetaMutation();
 
+  // Use retry mechanism for API calls
+  const retryHandler = useApiGenerationWithRetry({
+    maxRetries: 3,
+    retryDelay: 2000, // 2 seconds delay between retries
+  });
+
   /**
-   * Generate meta tags based on title and primary keyword
+   * Generate meta tags based on title and primary keyword with retry functionality
+   * @param primary_keyword - The main keyword for the article
+   * @param secondary_keywords - Array of secondary keywords
+   * @param content_description - Description of the article content
    * @param title - The article title
-   * @param primaryKeyword - The main keyword for the article
-   * @param language - Optional language parameter
    * @returns The generated meta information or null if there was an error
    */
   const generateMetaTags = async (
@@ -23,7 +32,8 @@ export const useMetaTagsGeneration = () => {
     content_description : string,
     title: string,
   ): Promise<GenerateMetaResponse | null> => {
-    try {
+    // Create the API call function
+    const apiCall = async () => {
       // Prepare the request payload
       const payload : GenerateMetaRequest = {
         content_description,
@@ -32,12 +42,14 @@ export const useMetaTagsGeneration = () => {
         title
       };
 
+      console.log('🏷️ Generating meta tags with payload:', payload);
+
       const response = await generateMeta(payload).unwrap();
 
       // Check if the request was successful
       if (!response.success) {
         console.error('Meta tags generation failed:', response.message);
-        return null;
+        throw new Error(response.message || 'Meta tags generation failed');
       }
 
       // Map the API response fields to our expected format
@@ -46,24 +58,38 @@ export const useMetaTagsGeneration = () => {
       const mappedResponse: GenerateMetaResponse = {
         success: response.success,
         message: response.message || '',
-        metaTitle: (response as any).meta_title || '',
-        metaDescription: (response as any).meta_description || '',
-        urlSlug: (response as any).url_slug || '',
+        metaTitle: (response as any).meta_title || response.metaTitle || '',
+        metaDescription: (response as any).meta_description || response.metaDescription || '',
+        urlSlug: (response as any).url_slug || response.urlSlug || '',
         score: response.score
       };
 
-      // Return the mapped response
+      console.log('✅ Successfully generated meta tags:', mappedResponse);
       return mappedResponse;
+    };
+
+    try {
+      // Execute with retry mechanism
+      return await retryHandler.executeWithRetry(
+        apiCall,
+        'Meta Tags Generation',
+        `Failed to generate meta tags for "${title}". Server might be overloaded.`
+      );
     } catch (err) {
-      console.error('Error generating meta tags:', err);
+      console.error('❌ Final error generating meta tags:', err);
       return null;
     }
   };
 
   return {
     generateMetaTags,
-    isGenerating: isLoading,
+    isGenerating: isLoading || retryHandler.isLoading,
+    isRetrying: retryHandler.isRetrying,
     isError,
-    error
+    error: error || retryHandler.error,
+    retryCount: retryHandler.retryCount,
+    canRetry: retryHandler.canRetry,
+    retry: retryHandler.retry,
+    reset: retryHandler.reset,
   };
 };

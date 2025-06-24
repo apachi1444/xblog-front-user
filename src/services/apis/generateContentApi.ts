@@ -34,6 +34,7 @@ export interface GenerateMetaResponse extends BaseGenerationResponse {
  */
 export interface GenerateKeywordsRequest {
   primary_keyword: string;
+  language?: string;
 }
 
 /**

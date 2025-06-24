@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { Button } from '@mui/material';
 
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
+import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
@@ -35,6 +36,9 @@ export function GenerateViewForm({
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
 
+  // Keywords generation hook
+  const { generateSecondaryKeywords } = useKeywordGeneration();
+
   const [generationState, setGenerationState] = useState({
     isGeneratingTitle: false,
     isGeneratingKeywords: false,
@@ -61,9 +65,54 @@ export function GenerateViewForm({
 
   const handleGenerateSecondaryKeywords = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingKeywords: true }));
-    await simulateDelay(1000);
-    console.log('Fake keywords generated');
-    setGenerationState((s) => ({ ...s, isGeneratingKeywords: false }));
+
+    try {
+      const formData = methods.getValues();
+      const primaryKeyword = formData.step1?.primaryKeyword;
+      const language = formData.step1?.language || 'english';
+
+      if (!primaryKeyword) {
+        console.error('No primary keyword provided for secondary keywords generation');
+        return;
+      }
+
+      console.log('🔑 Generating secondary keywords for:', { primaryKeyword, language });
+
+      // Call the real API with language parameter
+      const generatedKeywords = await generateSecondaryKeywords(primaryKeyword, language);
+
+      if (generatedKeywords && generatedKeywords.length > 0) {
+        // Update the form with generated keywords
+        methods.setValue('step1.secondaryKeywords', generatedKeywords, { shouldValidate: true });
+        console.log('✅ Generated secondary keywords:', generatedKeywords);
+      } else {
+        console.warn('⚠️ No keywords generated, using fallback');
+        // Fallback keywords if API fails
+        const fallbackKeywords = [
+          `${primaryKeyword} guide`,
+          `${primaryKeyword} tips`,
+          `${primaryKeyword} tutorial`,
+          `${primaryKeyword} basics`,
+          `${primaryKeyword} strategies`
+        ];
+        methods.setValue('step1.secondaryKeywords', fallbackKeywords, { shouldValidate: true });
+      }
+    } catch (error) {
+      console.error('❌ Error generating secondary keywords:', error);
+      // Fallback on error
+      const formData = methods.getValues();
+      const primaryKeyword = formData.step1?.primaryKeyword;
+      if (primaryKeyword) {
+        const fallbackKeywords = [
+          `${primaryKeyword} guide`,
+          `${primaryKeyword} tips`,
+          `${primaryKeyword} tutorial`
+        ];
+        methods.setValue('step1.secondaryKeywords', fallbackKeywords, { shouldValidate: true });
+      }
+    } finally {
+      setGenerationState((s) => ({ ...s, isGeneratingKeywords: false }));
+    }
   };
 
   const handleOptimizeContentDescription = async () => {
