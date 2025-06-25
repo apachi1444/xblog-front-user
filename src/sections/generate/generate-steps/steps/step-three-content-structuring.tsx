@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
-import { useState, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useState, useEffect, useCallback } from 'react';
 
 import {
   Box,
@@ -10,9 +10,11 @@ import {
   Select,
   Divider,
   MenuItem,
+  Collapse,
   TextField,
   CardHeader,
   Typography,
+  IconButton,
   CardContent,
   FormControl
 } from '@mui/material';
@@ -24,16 +26,52 @@ import { FormContainer } from '../../../../components/generate-article/FormConta
 
 import type { ArticleSection, GenerateArticleFormData } from '../../schemas';
 
+// Type alias for content types
+type ContentType = 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery';
+
 export function Step3ContentStructuring() {
-  const { getValues, setValue } = useFormContext<GenerateArticleFormData>();
-  const generatedSections = getValues('step3.sections') || [];
-  const sections = generatedSections;
+  const { setValue, getValues } = useFormContext<GenerateArticleFormData>();
 
   // State for tracking which section is being edited
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editTitle, setEditTitle] = useState("");
-  const [editContentType, setEditContentType] = useState<string>("paragraph");
+  const [editContentType, setEditContentType] = useState<ContentType>("paragraph");
+
+  // State for tracking expanded sections
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+
+  // Force re-render state
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [sectionsCache, setSectionsCache] = useState<ArticleSection[]>([]);
+
+  // Get sections and update cache when refreshKey changes
+  useEffect(() => {
+    const currentSections = getValues('step3.sections') || [];
+    setSectionsCache(currentSections);
+  }, [refreshKey, getValues]);
+
+  const sections = sectionsCache;
+
+  // Function to toggle section expansion
+  const toggleSectionExpansion = useCallback((sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Function to strip HTML tags and get plain text
+  const stripHtmlTags = useCallback((html: string) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  }, []);
 
   // Function to start editing a section
   const handleEditSection = useCallback((section: ArticleSection) => {
@@ -47,7 +85,10 @@ export function Step3ContentStructuring() {
   const handleSaveSection = useCallback(() => {
     if (!editingSectionId) return;
 
-    const updatedSections = sections.map(section =>
+    // Get the current sections from the form to ensure we have the latest state
+    const currentSections = sections;
+
+    const updatedSections = currentSections.map(section =>
       section.id === editingSectionId
         ? {
             ...section,
@@ -58,14 +99,18 @@ export function Step3ContentStructuring() {
         : section
     );
 
-    setValue('step3.sections', updatedSections as any, {
+    setValue('step3.sections', updatedSections, {
       shouldValidate: true,
       shouldDirty: true,
+      shouldTouch: true,
     });
+
+    // Force a re-render to ensure the UI updates
+    setRefreshKey(prev => prev + 1);
 
     toast.success("Section updated successfully!");
     setEditingSectionId(null);
-  }, [editingSectionId, editContent, editTitle, editContentType, sections, setValue]);
+  }, [editingSectionId, sections, setValue, editContent, editTitle, editContentType]);
 
 
 
@@ -155,7 +200,7 @@ export function Step3ContentStructuring() {
                 <FormControl fullWidth>
                   <Select
                     value={editContentType}
-                    onChange={(e) => setEditContentType(e.target.value)}
+                    onChange={(e) => setEditContentType(e.target.value as ContentType)}
                     displayEmpty
                   >
                     <MenuItem value="paragraph">Paragraph</MenuItem>
@@ -200,45 +245,77 @@ export function Step3ContentStructuring() {
               </Box>
 
               {/* Section list */}
-              <Box sx={{ mb: 3 }}>
-                {sections.map((section) => (
-                  <Card key={section.id} sx={{ mb: 2, borderRadius: 1, overflow: 'hidden' }}>
-                    <CardHeader
-                      title={section.title}
-                      action={
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleEditSection(section)}
-                            startIcon={<Iconify icon="eva:edit-2-fill" />}
-                            sx={{ borderRadius: '20px' }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="error"
-                            onClick={() => handleDeleteSection(section.id)}
-                            startIcon={<Iconify icon="eva:trash-2-fill" />}
-                            sx={{ borderRadius: '20px' }}
-                          >
-                            Delete
-                          </Button>
-                        </Box>
-                      }
-                    />
-                    <Divider />
-                    <CardContent>
-                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                        {section.content?.length > 200
-                          ? `${section.content.substring(0, 200)}...`
-                          : section.content}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
+              <Box sx={{ mb: 3 }} key={refreshKey}>
+                {sections.map((section) => {
+                  const isExpanded = expandedSections.has(section.id);
+                  const plainTextContent = stripHtmlTags(section.content || '');
+                  const previewContent = plainTextContent.length > 200
+                    ? `${plainTextContent.substring(0, 200)}...`
+                    : plainTextContent;
+
+                  return (
+                    <Card key={section.id} sx={{ mb: 2, borderRadius: 1, overflow: 'hidden' }}>
+                      <CardHeader
+                        title={section.title}
+                        action={
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => toggleSectionExpansion(section.id)}
+                              sx={{
+                                transition: 'transform 0.2s',
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                              }}
+                            >
+                              <Iconify icon="eva:chevron-down-fill" />
+                            </IconButton>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleEditSection(section)}
+                              startIcon={<Iconify icon="eva:edit-2-fill" />}
+                              sx={{ borderRadius: '20px' }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="error"
+                              onClick={() => handleDeleteSection(section.id)}
+                              startIcon={<Iconify icon="eva:trash-2-fill" />}
+                              sx={{ borderRadius: '20px' }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        }
+                      />
+                      <Divider />
+                      <CardContent sx={{ pt: 2 }}>
+                        {!isExpanded ? (
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.secondary' }}>
+                            {previewContent}
+                          </Typography>
+                        ) : null}
+                        <Collapse in={isExpanded}>
+                          <Box
+                            sx={{
+                              '& p': { mb: 1 },
+                              '& ul, & ol': { pl: 2, mb: 1 },
+                              '& li': { mb: 0.5 },
+                              '& h1, & h2, & h3, & h4, & h5, & h6': { mb: 1, mt: 1 },
+                              '& blockquote': { pl: 2, borderLeft: '3px solid', borderColor: 'divider', mb: 1 },
+                              '& table': { width: '100%', borderCollapse: 'collapse', mb: 1 },
+                              '& td, & th': { border: '1px solid', borderColor: 'divider', p: 1 }
+                            }}
+                            dangerouslySetInnerHTML={{ __html: section.content || '' }}
+                          />
+                        </Collapse>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </Box>
 
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>

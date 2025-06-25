@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Box,
+  alpha,
   Button,
+  useTheme,
   Typography,
   IconButton,
-  useTheme,
-  alpha,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -137,12 +137,12 @@ export const showRetryToast = (
     duration?: number;
     position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
   }
-) => {
+) => 
   // This will be implemented with the toast system
   // For now, return the component props
-  return {
+   ({
     message,
     onRetry,
     ...options,
-  };
-};
+  })
+;
