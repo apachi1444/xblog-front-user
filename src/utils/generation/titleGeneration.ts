@@ -21,20 +21,23 @@ export const useTitleGeneration = () => {
    * @param primaryKeyword - The main keyword for the article
    * @param secondaryKeywords - Array of secondary keywords
    * @param contentDescription - Description of the article content
+   * @param language - Target language for title generation (defaults to 'english')
    * @returns The generated title or null if there was an error
    */
   const generateArticleTitle = async (
     primaryKeyword: string,
     secondaryKeywords: string[] = [],
-    contentDescription: string = ''
+    contentDescription: string = '',
+    language: string = 'english'
   ): Promise<string | null> => {
     // Create the API call function
     const apiCall = async () => {
-      // Prepare the request payload
+      // Prepare the request payload with language parameter
       const payload = {
         primary_keyword: primaryKeyword,
         secondary_keywords: secondaryKeywords,
-        content_description: contentDescription
+        content_description: contentDescription,
+        language: language || 'english' // Default to English if no language provided
       };
 
       console.log('📝 Generating title with payload:', payload);

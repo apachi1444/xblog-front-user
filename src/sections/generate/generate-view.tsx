@@ -112,13 +112,14 @@ export function GeneratingView() {
 
   // Get default values, potentially from draft
   const getDefaultValues = useCallback((): GenerateArticleFormData => {
+    // Default values for new articles (not editing existing drafts)
     const defaults: GenerateArticleFormData = {
       step1: {
         contentDescription: '',
         primaryKeyword: '',
         secondaryKeywords: [],
-        language: 'en-us',
-        targetCountry: 'us',
+        language: 'en', // Default to English for new articles
+        targetCountry: 'us', // Default to United States for new articles
         title: '',
         metaTitle: '',
         metaDescription: '',
@@ -140,9 +141,9 @@ export function GeneratingView() {
       },
     };
 
-    // If we have selected article (draft), convert it to form format
+    // If we have selected article (draft), preserve original values instead of using defaults
     if (selectedArticle) {
-      console.log('🔄 Converting article data to form format:', selectedArticle);
+      console.log('🔄 Converting existing draft article data to form format:', selectedArticle);
 
       // Parse links once and memoize them
       const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
@@ -156,7 +157,8 @@ export function GeneratingView() {
           contentDescription: selectedArticle.content_description || selectedArticle.content || '',
           primaryKeyword: selectedArticle.primary_keyword || '',
           secondaryKeywords: parseSecondaryKeywords(selectedArticle.secondary_keywords || ''),
-          language: selectedArticle.language || 'en-us',
+          // Preserve original language and country from draft, fallback to defaults only if not set
+          language: selectedArticle.language || 'en',
           targetCountry: selectedArticle.target_country || 'us',
           title: selectedArticle.article_title || selectedArticle.title || '',
           metaTitle: selectedArticle.meta_title || '',
@@ -180,6 +182,8 @@ export function GeneratingView() {
       };
     }
 
+    // Return defaults for new article creation (no existing draft)
+    console.log('📝 Using default values for new article creation:', defaults);
     return defaults;
   }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords]);
 

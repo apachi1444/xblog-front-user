@@ -47,18 +47,9 @@ export function TargetLanguageSelector() {
   const selectedCountryInfo = COUNTRIES.find(c => c.code === selectedCountry);
   const selectedLanguageInfo = LANGUAGES.find(l => l.code === selectedLanguage);
 
-  // Set default values if none are selected (to ensure form values are properly updated)
-  useEffect(() => {
-    // If no country is selected, set a default (Global)
-    if (!selectedCountry) {
-      setValue('targetCountry', 'global', { shouldValidate: true });
-    }
-
-    // If no language is selected, set a default (English US)
-    if (!selectedLanguage) {
-      setValue('language', 'en-us', { shouldValidate: true });
-    }
-  }, [selectedCountry, selectedLanguage, setValue]);
+  // Note: Default values are now handled by the form's getDefaultValues function
+  // This ensures proper defaults for new articles while preserving draft data
+  // No need to override form defaults here
 
   return (
     <Grid container spacing={2}>

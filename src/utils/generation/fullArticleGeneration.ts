@@ -1,16 +1,23 @@
 import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
+import { useApiGenerationWithRetry } from 'src/hooks/useApiGenerationWithRetry';
 import type { GenerateSectionsRequest, GenerateSectionsResponse, GeneratedSection } from 'src/services/apis/generateContentApi';
 
 /**
- * Custom hook for generating a complete article with all sections
+ * Custom hook for generating a complete article with all sections with retry functionality
  * @returns Functions and state for full article generation
  */
 export const useFullArticleGeneration = () => {
   // Use the RTK Query mutation hook
   const [generateFullArticle, { isLoading, isError, error }] = useGenerateFullArticleMutation();
 
+  // Use retry mechanism for API calls
+  const retryHandler = useApiGenerationWithRetry({
+    maxRetries: 3,
+    retryDelay: 3000, // 3 seconds delay for content generation (longer process)
+  });
+
   /**
-   * Generate a complete article with all sections
+   * Generate a complete article with all sections with retry functionality
    * @param title - The article title
    * @param keyword - The main keyword for the article
    * @param secondaryKeywords - Array of secondary keywords
@@ -31,7 +38,8 @@ export const useFullArticleGeneration = () => {
     toneOfVoice: string = 'friendly',
     targetCountry: string = 'us'
   ): Promise<GeneratedSection[] | null> => {
-    try {
+    // Create the API call function
+    const apiCall = async () => {
       // Prepare the request payload
       const payload: GenerateSectionsRequest = {
         title,
@@ -44,28 +52,44 @@ export const useFullArticleGeneration = () => {
         targetCountry
       };
 
+      console.log('📝 Generating full article with payload:', payload);
+
       // Call the API
       const response = await generateFullArticle(payload).unwrap();
 
       // Check if the request was successful
       if (!response.success) {
         console.error('Full article generation failed:', response.message);
-        return null;
+        throw new Error(response.message || 'Full article generation failed');
       }
 
-      // Return the complete article sections
+      console.log('✅ Successfully generated article sections:', response.sections);
       return response.sections;
+    };
+
+    try {
+      // Execute with retry mechanism
+      return await retryHandler.executeWithRetry(
+        apiCall,
+        'Full Article Generation',
+        `Failed to generate article content for "${title}". Server might be overloaded.`
+      );
     } catch (err) {
-      console.error('Error generating full article:', err);
+      console.error('❌ Final error generating full article:', err);
       return null;
     }
   };
 
   return {
     generateCompleteArticle,
-    isGenerating: isLoading,
+    isGenerating: isLoading || retryHandler.isLoading,
+    isRetrying: retryHandler.isRetrying,
     isError,
-    error
+    error: error || retryHandler.error,
+    retryCount: retryHandler.retryCount,
+    canRetry: retryHandler.canRetry,
+    retry: retryHandler.retry,
+    reset: retryHandler.reset,
   };
 };
 

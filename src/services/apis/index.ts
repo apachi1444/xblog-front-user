@@ -569,18 +569,32 @@ const setupMocks = () => {
         }
 
         const requestData = JSON.parse(config.data);
-        const { primary_keyword } = requestData;
+        const { primary_keyword, language = 'english' } = requestData;
 
-        // Generate a title based on the primary keyword and content description
-        const titleTemplates = [
-          `What is ${primary_keyword}? A Beginner's Guide to Ranking #1`,
-          `The Ultimate ${primary_keyword} Guide for 2024`,
-          `How to Master ${primary_keyword} in 5 Simple Steps`,
-          `${primary_keyword}: Everything You Need to Know`,
-          `Why ${primary_keyword} Matters for Your Business Success`
-        ];
+        console.log('📝 Mock title generation called with:', { primary_keyword, language });
+
+        // Generate a title based on the primary keyword, content description, and language
+        let titleTemplates;
+        if (language.toLowerCase() === 'french' || language.toLowerCase() === 'français') {
+          titleTemplates = [
+            `Qu'est-ce que ${primary_keyword}? Guide Complet pour Débutants`,
+            `Le Guide Ultime de ${primary_keyword} pour 2024`,
+            `Comment Maîtriser ${primary_keyword} en 5 Étapes Simples`,
+            `${primary_keyword}: Tout ce que Vous Devez Savoir`,
+            `Pourquoi ${primary_keyword} est Important pour Votre Succès`
+          ];
+        } else {
+          titleTemplates = [
+            `What is ${primary_keyword}? A Beginner's Guide to Ranking #1`,
+            `The Ultimate ${primary_keyword} Guide for 2024`,
+            `How to Master ${primary_keyword} in 5 Simple Steps`,
+            `${primary_keyword}: Everything You Need to Know`,
+            `Why ${primary_keyword} Matters for Your Business Success`
+          ];
+        }
 
         const title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
+        console.log('📝 Generated mock title:', title);
 
         return [
           200,
@@ -631,12 +645,21 @@ const setupMocks = () => {
     mock.onPost('/generate-meta-tags').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { primary_keyword, title } = requestData;
+        const { primary_keyword, title, language = 'english' } = requestData;
 
-        // Generate meta information based on the primary keyword and title
-        const meta_title = `${title} | Learn ${primary_keyword} Today`;
-        const meta_description = `What is ${primary_keyword} and how does it work? Learn ${primary_keyword} meaning in this beginner's guide and start ranking your website higher today!`;
+        // Generate meta information based on the primary keyword, title, and language
+        let meta_title; let meta_description;
+        if (language.toLowerCase() === 'french' || language.toLowerCase() === 'français') {
+          meta_title = `${title} | Apprenez ${primary_keyword} Aujourd'hui`;
+          meta_description = `Qu'est-ce que ${primary_keyword} et comment ça marche? Apprenez la signification de ${primary_keyword} dans ce guide pour débutants et commencez à mieux classer votre site web dès aujourd'hui!`;
+        } else {
+          meta_title = `${title} | Learn ${primary_keyword} Today`;
+          meta_description = `What is ${primary_keyword} and how does it work? Learn ${primary_keyword} meaning in this beginner's guide and start ranking your website higher today!`;
+        }
+
         const url_slug = primary_keyword.toLowerCase().replace(/\s+/g, '-');
+
+        console.log('🏷️ Generated mock meta tags:', { meta_title, meta_description, url_slug });
 
         return [
           200,
@@ -645,7 +668,7 @@ const setupMocks = () => {
             metaDescription: meta_description,
             urlSlug: url_slug,
             success: true,
-            message: null
+            message: `Successfully generated meta tags in ${language}`
           }
         ];
       } catch (error) {
@@ -657,6 +680,15 @@ const setupMocks = () => {
     // Mock generate-internal-links endpoint
     mock.onPost('/generate-internal-links').reply((config) => {
       try {
+        // Simulate server overload (20% chance of 500 error for testing retry functionality)
+        if (Math.random() < 0.20) {
+          console.log('🔥 Simulating server overload (500 error) for internal links generation');
+          return [500, {
+            success: false,
+            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
+          }];
+        }
+
         const requestData = JSON.parse(config.data);
         const { website_url } = requestData;
 
@@ -694,9 +726,17 @@ const setupMocks = () => {
     });
 
     // Mock generate-external-links endpoint
-
     mock.onPost('/generate-external-links').reply((config) => {
       try {
+        // Simulate server overload (20% chance of 500 error for testing retry functionality)
+        if (Math.random() < 0.20) {
+          console.log('🔥 Simulating server overload (500 error) for external links generation');
+          return [500, {
+            success: false,
+            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
+          }];
+        }
+
         const requestData = JSON.parse(config.data);
         const { primary_keyword, secondary_keywords, content_description, title } = requestData;
 
@@ -880,6 +920,15 @@ const setupMocks = () => {
     // Mock generate-article endpoint
     mock.onPost('/generate-article').reply((config) => {
       try {
+        // Simulate server overload (25% chance of 500 error for testing retry functionality)
+        if (Math.random() < 0.25) {
+          console.log('🔥 Simulating server overload (500 error) for full article generation');
+          return [500, {
+            success: false,
+            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
+          }];
+        }
+
         const requestData = JSON.parse(config.data);
         const { title, keyword, articleSize = 'medium' } = requestData;
 

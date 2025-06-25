@@ -1,17 +1,24 @@
 import type { GeneratedSection, GenerateSectionsRequest, GenerateSectionsResponse } from 'src/services/apis/generateContentApi';
 
 import { useGenerateSectionsMutation } from 'src/services/apis/generateContentApi';
+import { useApiGenerationWithRetry } from 'src/hooks/useApiGenerationWithRetry';
 
 /**
- * Custom hook for generating article sections/table of contents
+ * Custom hook for generating article sections/table of contents with retry functionality
  * @returns Functions and state for sections generation
  */
 export const useSectionsGeneration = () => {
   // Use the RTK Query mutation hook
   const [generateSections, { isLoading, isError, error }] = useGenerateSectionsMutation();
 
+  // Use retry mechanism for API calls
+  const retryHandler = useApiGenerationWithRetry({
+    maxRetries: 3,
+    retryDelay: 2500, // 2.5 seconds delay for sections generation
+  });
+
   /**
-   * Generate article sections based on title, keyword, and other parameters
+   * Generate article sections based on title, keyword, and other parameters with retry functionality
    * @param title - The article title
    * @param keyword - The main keyword for the article
    * @param secondaryKeywords - Array of secondary keywords
@@ -32,7 +39,8 @@ export const useSectionsGeneration = () => {
     toneOfVoice: string = 'friendly',
     targetCountry: string = 'us'
   ): Promise<GeneratedSection[] | null> => {
-    try {
+    // Create the API call function
+    const apiCall = async () => {
       // Prepare the request payload
       const payload: GenerateSectionsRequest = {
         title,
@@ -45,28 +53,44 @@ export const useSectionsGeneration = () => {
         targetCountry
       };
 
+      console.log('📋 Generating article sections with payload:', payload);
+
       // Call the API
       const response = await generateSections(payload).unwrap();
 
       // Check if the request was successful
       if (!response.success) {
         console.error('Sections generation failed:', response.message);
-        return null;
+        throw new Error(response.message || 'Sections generation failed');
       }
 
-      // Return the sections
+      console.log('✅ Successfully generated sections:', response.sections);
       return response.sections;
+    };
+
+    try {
+      // Execute with retry mechanism
+      return await retryHandler.executeWithRetry(
+        apiCall,
+        'Article Sections Generation',
+        `Failed to generate sections for "${title}". Server might be overloaded.`
+      );
     } catch (err) {
-      console.error('Error generating sections:', err);
+      console.error('❌ Final error generating sections:', err);
       return null;
     }
   };
 
   return {
     generateArticleSections,
-    isGenerating: isLoading,
+    isGenerating: isLoading || retryHandler.isLoading,
+    isRetrying: retryHandler.isRetrying,
     isError,
-    error
+    error: error || retryHandler.error,
+    retryCount: retryHandler.retryCount,
+    canRetry: retryHandler.canRetry,
+    retry: retryHandler.retry,
+    reset: retryHandler.reset,
   };
 };
 

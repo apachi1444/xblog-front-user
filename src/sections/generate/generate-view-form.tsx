@@ -5,7 +5,10 @@ import { useFormContext } from 'react-hook-form';
 import { Button } from '@mui/material';
 
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
+
+import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
+import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
@@ -36,8 +39,10 @@ export function GenerateViewForm({
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
 
-  // Keywords generation hook
+  // Generation hooks
   const { generateSecondaryKeywords } = useKeywordGeneration();
+  const { generateArticleTitle } = useTitleGeneration();
+  const { generateMetaTags } = useMetaTagsGeneration();
 
   const [generationState, setGenerationState] = useState({
     isGeneratingTitle: false,
@@ -57,10 +62,42 @@ export function GenerateViewForm({
 
   const handleGenerateTitle = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingTitle: true }));
-    await simulateDelay(1000);
-    console.log('Fake title generated');
-    setGenerationState((s) => ({ ...s, isGeneratingTitle: false }));
-    return "title"
+
+    try {
+      const formData = methods.getValues();
+      const { primaryKeyword, secondaryKeywords, contentDescription, language } = formData.step1;
+
+      if (!primaryKeyword) {
+        console.error('No primary keyword provided for title generation');
+        return '';
+      }
+
+      console.log('📝 Generating title with language:', { primaryKeyword, language, secondaryKeywords, contentDescription });
+
+      // Call the real API with language support
+      const generatedTitle = await generateArticleTitle(
+        primaryKeyword,
+        secondaryKeywords || [],
+        contentDescription || '',
+        language || 'english'
+      );
+
+      if (generatedTitle) {
+        console.log('✅ Generated title:', generatedTitle);
+        return generatedTitle;
+      } 
+        console.warn('⚠️ No title generated, using fallback');
+        return `Complete Guide to ${primaryKeyword}`;
+      
+    } catch (error) {
+      console.error('❌ Error generating title:', error);
+      // Fallback title
+      const formData = methods.getValues();
+      const primaryKeyword = formData.step1?.primaryKeyword;
+      return primaryKeyword ? `Complete Guide to ${primaryKeyword}` : 'Untitled Article';
+    } finally {
+      setGenerationState((s) => ({ ...s, isGeneratingTitle: false }));
+    }
   };
 
   const handleGenerateSecondaryKeywords = async () => {
@@ -124,12 +161,58 @@ export function GenerateViewForm({
 
   const handleGenerateMeta = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingMeta: true }));
-    await simulateDelay(1000);
-    setGenerationState((s) => ({ ...s, isGeneratingMeta: false }));
-    return {
-      metaTitle: "meta title",
-      metaDescription: "meta description",
-      urlSlug: "url slug"
+
+    try {
+      const formData = methods.getValues();
+      const { primaryKeyword, secondaryKeywords, contentDescription, title, language } = formData.step1;
+
+      if (!primaryKeyword || !title) {
+        console.error('Missing required fields for meta generation:', { primaryKeyword, title });
+        return {
+          metaTitle: '',
+          metaDescription: '',
+          urlSlug: ''
+        };
+      }
+
+      console.log('🏷️ Generating meta tags with language:', { primaryKeyword, language, title, contentDescription });
+
+      // Call the real API with language support
+      const generatedMeta = await generateMetaTags(
+        primaryKeyword,
+        secondaryKeywords || [],
+        contentDescription || '',
+        title,
+        language || 'english'
+      );
+
+      if (generatedMeta) {
+        console.log('✅ Generated meta tags:', generatedMeta);
+        return {
+          metaTitle: generatedMeta.metaTitle,
+          metaDescription: generatedMeta.metaDescription,
+          urlSlug: generatedMeta.urlSlug
+        };
+      } 
+        console.warn('⚠️ No meta tags generated, using fallback');
+        return {
+          metaTitle: `${title} | Complete Guide`,
+          metaDescription: `Learn everything about ${primaryKeyword}. ${contentDescription || 'Comprehensive guide with expert tips and strategies.'}`,
+          urlSlug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        };
+      
+    } catch (error) {
+      console.error('❌ Error generating meta tags:', error);
+      // Fallback meta tags
+      const formData = methods.getValues();
+      const { primaryKeyword, title } = formData.step1;
+      return {
+        metaTitle: title ? `${title} | Guide` : `${primaryKeyword} Guide`,
+        metaDescription: `Complete guide about ${primaryKeyword}. Learn tips, strategies, and best practices.`,
+        urlSlug: (title || primaryKeyword || 'article').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      };
+    } finally {
+      setGenerationState((s) => ({ ...s, isGeneratingMeta: false }));
     }
   };
 

@@ -65,6 +65,7 @@ export interface GenerateTitleRequest {
   primary_keyword: string;
   secondary_keywords: string[];
   content_description: string;
+  language?: string;
 }
 
 /**

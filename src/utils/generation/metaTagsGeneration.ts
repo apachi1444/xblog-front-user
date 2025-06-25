@@ -24,6 +24,7 @@ export const useMetaTagsGeneration = () => {
    * @param secondary_keywords - Array of secondary keywords
    * @param content_description - Description of the article content
    * @param title - The article title
+   * @param language - Target language for meta generation (defaults to 'english')
    * @returns The generated meta information or null if there was an error
    */
   const generateMetaTags = async (
@@ -31,15 +32,17 @@ export const useMetaTagsGeneration = () => {
     secondary_keywords : string[],
     content_description : string,
     title: string,
+    language: string = 'english'
   ): Promise<GenerateMetaResponse | null> => {
     // Create the API call function
     const apiCall = async () => {
-      // Prepare the request payload
+      // Prepare the request payload with language parameter
       const payload : GenerateMetaRequest = {
         content_description,
         primary_keyword,
         secondary_keywords,
-        title
+        title,
+        language: language || 'english' // Default to English if no language provided
       };
 
       console.log('🏷️ Generating meta tags with payload:', payload);
