@@ -213,25 +213,24 @@ export function GeneratingView() {
   });
 
   useEffect(() => {
-    if (selectedArticle) {
+  if (selectedArticle) {    
+    // Set the current article for the draft system (ONLY ONCE)
+    const articleResponse: CreateArticleResponse = {
+      id: selectedArticle.id.toString(),
+      title: selectedArticle.article_title || selectedArticle.title || '',
+      content: selectedArticle.content || '',
+      meta_description: selectedArticle.meta_description || '',
+      keywords: [],
+      status: (selectedArticle.status as 'draft' | 'published') || 'draft',
+      website_id: null,
+      created_at: selectedArticle.created_at,
+      updated_at: selectedArticle.created_at,
+    };
 
-      // Set the current article for the draft system
-      const articleResponse: CreateArticleResponse = {
-        id: selectedArticle.id.toString(),
-        title: selectedArticle.article_title || selectedArticle.title || '',
-        content: selectedArticle.content || '',
-        meta_description: selectedArticle.meta_description || '',
-        keywords: [],
-        status: (selectedArticle.status as 'draft' | 'published') || 'draft',
-        website_id: null,
-        created_at: selectedArticle.created_at,
-        updated_at: selectedArticle.created_at,
-      };
+    articleDraft.setCurrentArticle(articleResponse);
 
-      articleDraft.setCurrentArticle(articleResponse);
-      articleDraft.setHasUnsavedChanges(false);
-    }
-  }, [selectedArticle, articleDraft]);
+  }
+}, [articleDraft, selectedArticle]); // Remove articleDraft from dependencies to prevent re-runs
 
   // Watch for form changes to show save button
   useEffect(() => {
