@@ -68,7 +68,6 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     articleSizeOptions,
     toneOptions,
     povOptions,
-    aiCleaningOptions,
   } = options;
 
 
@@ -170,20 +169,33 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
               </Grid>
 
               <Grid item xs={12} sm={6} md={3}>
-                <FormDropdown
-                  label={t('article.settings.aiContentCleaning', "AI Content Cleaning")}
-                  tooltipText={t('article.tooltips.aiContentCleaning', "Controls how AI-generated text is processed to sound more natural")}
-                  options={aiCleaningOptions}
-                  {...register("step2.aiContentCleaning", {
-                    onChange: (e) => {
-                      setValue("step2.aiContentCleaning", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select cleaning level")}
-                  error={!!errors.step2?.aiContentCleaning}
-                  helperText={errors.step2?.aiContentCleaning?.message}
-                  value={watch("step2.aiContentCleaning")}
-                />
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    {t('article.settings.plagiaRemoval', "Plagia Removal")}
+                  </Typography>
+                  <Controller
+                    name="step2.plagiaRemoval"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={field.value || false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label={field.value ? t('common.enabled', "Enabled") : t('common.disabled', "Disabled")}
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            fontSize: '0.875rem',
+                            color: field.value ? 'primary.main' : 'text.secondary'
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
               </Grid>
             </Grid>
           </Box>
@@ -264,66 +276,7 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
               </Grid>
             </Grid>
           </Box>
-          {
-            /*
-          <Divider sx={{ my: 1, width: '100%' }} />
-
-          
-            
-            <Box sx={{ width: '100%', mb: 4 }}>
-            <Typography
-            variant="subtitle1"
-            sx={{
-              mb: 2,
-              fontWeight: 600,
-              color: 'text.primary',
-              display: 'flex',
-              
-                alignItems: 'center',
-                gap: 1,
-                width: '100%'
-              }}
-            >
-              <Iconify icon="mdi:link-variant" width={20} height={20} />
-              {t('article.settings.linkingSettings', "Linking Settings")}
-            </Typography>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <FormDropdown
-                  label={t('article.settings.internalLinking', "Internal Linking")}
-                  tooltipText={t('article.tooltips.internalLinking', "Select which of your websites to link to within the article")}
-                  options={linkingOptions}
-                  {...register("step2.internalLinking", {
-                    onChange: (e) => {
-                      setValue("step2.internalLinking", e.target.value, { shouldValidate: true });
-                    }
-                  })}
-                  placeholder={t('article.placeholders.select', "Select internal linking")}
-                  error={!!errors.step2?.internalLinking}
-                  helperText={errors.step2?.internalLinking?.message}
-                  value={watch("step2.internalLinking")}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormAutocompleteDropdown
-                  label={t('article.settings.externalLinking', "External Linking")}
-                  tooltipText={t('article.tooltips.externalLinking', "Choose which external sources to reference in your article or type your own")}
-                  options={externalLinkingOptions}
-                  placeholder={t('article.placeholders.selectOrType', "Select or type external linking")}
-                  error={!!errors.step2?.externalLinking}
-                  helperText={errors.step2?.externalLinking?.message}
-                  value={watch("step2.externalLinking") || ""}
-                  onChange={(newValue) => {
-                    setValue("step2.externalLinking", newValue, { shouldValidate: true });
-                  }}
-                  freeSolo
-                />
-              </Grid>
-            </Grid>
-            </Box>
-          */}
+        
 
           <Divider sx={{ my: 1, width: '100%' }} />
 

@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import Flag from 'react-world-flags';
-import { useState, useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { alpha } from '@mui/material/styles';
@@ -22,11 +22,11 @@ import { COUNTRIES, LANGUAGES } from 'src/utils/constants';
 import { Iconify } from 'src/components/iconify';
 
 export function TargetLanguageSelector() {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch } = useFormContext();
 
-  // Watch for country and language changes
-  const selectedCountry = watch('targetCountry') || '';
-  const selectedLanguage = watch('language') || '';
+  // Watch for country and language changes (nested under step1)
+  const selectedCountry = watch('step1.targetCountry') || '';
+  const selectedLanguage = watch('step1.language') || '';
 
   // State for popovers
   const [countryAnchorEl, setCountryAnchorEl] = useState<HTMLElement | null>(null);
@@ -47,6 +47,8 @@ export function TargetLanguageSelector() {
   const selectedCountryInfo = COUNTRIES.find(c => c.code === selectedCountry);
   const selectedLanguageInfo = LANGUAGES.find(l => l.code === selectedLanguage);
 
+
+
   // Note: Default values are now handled by the form's getDefaultValues function
   // This ensures proper defaults for new articles while preserving draft data
   // No need to override form defaults here
@@ -56,7 +58,7 @@ export function TargetLanguageSelector() {
       {/* Country Selector */}
       <Grid item xs={12} md={6}>
         <Controller
-          name="targetCountry"
+          name="step1.targetCountry"
           control={control}
           render={({ field, fieldState: { error } }) => (
             <>
@@ -219,7 +221,7 @@ export function TargetLanguageSelector() {
       {/* Language Selector - Independent from country */}
       <Grid item xs={12} md={6}>
         <Controller
-          name="language"
+          name="step1.language"
           control={control}
           render={({ field, fieldState: { error } }) => (
             <>

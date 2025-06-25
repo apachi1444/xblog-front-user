@@ -34,12 +34,7 @@ export const useArticleSettingsForm = () => {
     { value: "third-person", label: t('article.pov.thirdPerson', "Third Person (He, She, They)") }
   ];
 
-  const aiCleaningOptions = [
-    { value: "no-removal", label: t('article.aiCleaning.none', "No AI Words Removal") },
-    { value: "light", label: t('article.aiCleaning.light', "Light Cleaning") },
-    { value: "moderate", label: t('article.aiCleaning.moderate', "Moderate Cleaning") },
-    { value: "thorough", label: t('article.aiCleaning.thorough', "Thorough Cleaning") }
-  ];
+  // Removed aiCleaningOptions - now using boolean plagiaRemoval instead
 
   const imageQualityOptions = [
     { value: "high", label: t('article.imageQuality.high', "High Quality (costs 20 tokens)") },
@@ -96,7 +91,7 @@ export const useArticleSettingsForm = () => {
       articleSizeOptions,
       toneOptions,
       povOptions,
-      aiCleaningOptions,
+
       imageQualityOptions,
       imagePlacementOptions,
       imageStyleOptions,

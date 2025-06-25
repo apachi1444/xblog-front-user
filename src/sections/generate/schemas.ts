@@ -26,7 +26,7 @@ export const step2Schema = z.object({
   articleSize: z.string().min(1, 'Article size is required'),
   toneOfVoice: z.string().min(1, 'Tone of voice is required'),
   pointOfView: z.string().min(1, 'Point of view is required'),
-  aiContentCleaning: z.string().min(1, 'AI content cleaning is required'),
+  plagiaRemoval: z.boolean().default(false),
   // Simplified media settings
   includeImages: z.boolean().default(true),
   includeVideos: z.boolean().default(false),

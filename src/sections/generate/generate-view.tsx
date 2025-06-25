@@ -110,10 +110,10 @@ export function GeneratingView() {
     return [];
   }, []);
 
-  // Get default values, potentially from draft
-  const getDefaultValues = useCallback((): GenerateArticleFormData => {
-    // Default values for new articles (not editing existing drafts)
-    const defaults: GenerateArticleFormData = {
+  // Calculate initial form values - either from draft or defaults
+  const defaultValues = useMemo((): GenerateArticleFormData => {
+    // Base default values for new articles
+    const baseDefaults: GenerateArticleFormData = {
       step1: {
         contentDescription: '',
         primaryKeyword: '',
@@ -130,7 +130,7 @@ export function GeneratingView() {
         articleSize: 'small',
         toneOfVoice: 'friendly',
         pointOfView: 'first-person',
-        aiContentCleaning: 'no-removal',
+        plagiaRemoval: false,
         includeImages: true,
         includeVideos: false,
         internalLinks: [],
@@ -141,11 +141,11 @@ export function GeneratingView() {
       },
     };
 
-    // If we have selected article (draft), preserve original values instead of using defaults
+    // If we have a draft article, use its values as initial form state
     if (selectedArticle) {
-      console.log('🔄 Converting existing draft article data to form format:', selectedArticle);
+      console.log('🔄 Using draft article values as initial form state:', selectedArticle);
 
-      // Parse links once and memoize them
+      // Parse links once
       const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
       const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
 
@@ -157,7 +157,6 @@ export function GeneratingView() {
           contentDescription: selectedArticle.content_description || selectedArticle.content || '',
           primaryKeyword: selectedArticle.primary_keyword || '',
           secondaryKeywords: parseSecondaryKeywords(selectedArticle.secondary_keywords || ''),
-          // Preserve original language and country from draft, fallback to defaults only if not set
           language: selectedArticle.language || 'en',
           targetCountry: selectedArticle.target_country || 'us',
           title: selectedArticle.article_title || selectedArticle.title || '',
@@ -170,7 +169,7 @@ export function GeneratingView() {
           articleSize: selectedArticle.article_size || 'small',
           toneOfVoice: selectedArticle.tone_of_voice || 'friendly',
           pointOfView: selectedArticle.point_of_view || 'first-person',
-          aiContentCleaning: selectedArticle.plagiat_removal ? 'plagiarism-removal' : 'no-removal',
+          plagiaRemoval: selectedArticle.plagiat_removal || false,
           includeImages: selectedArticle.include_images ?? true,
           includeVideos: selectedArticle.include_videos ?? false,
           internalLinks,
@@ -182,24 +181,20 @@ export function GeneratingView() {
       };
     }
 
-    // Return defaults for new article creation (no existing draft)
-    console.log('📝 Using default values for new article creation:', defaults);
-    return defaults;
+    // Return base defaults for new article creation
+    console.log('📝 Using default values for new article creation');
+    return baseDefaults;
   }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords]);
-
-  // Memoize default values to prevent infinite re-renders
-  const defaultValues = useMemo(() => getDefaultValues(), [getDefaultValues]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,
     defaultValues,
   });
 
-  // Load existing article when editing
+  // Set current article for draft system when selectedArticle changes
   useEffect(() => {
     if (selectedArticle) {
-      // Editing existing article - load form with data
-      methods.reset(defaultValues);
+      console.log('📝 Setting current article for draft system:', selectedArticle);
 
       // Set the current article for the draft system
       const articleResponse: CreateArticleResponse = {
@@ -217,7 +212,7 @@ export function GeneratingView() {
       articleDraft.setCurrentArticle(articleResponse);
       articleDraft.setHasUnsavedChanges(false);
     }
-  }, [selectedArticle, defaultValues, methods, articleDraft]);
+  }, [selectedArticle, articleDraft]);
 
   // Watch for form changes to show save button
   useEffect(() => {
