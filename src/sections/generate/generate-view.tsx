@@ -113,6 +113,24 @@ export function GeneratingView() {
     return [];
   }, []);
 
+  // Helper function to parse sections from JSON string
+  const parseSectionsFromString = useCallback((sectionsString: string) => {
+    if (!sectionsString || sectionsString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON array
+      const parsed = JSON.parse(sectionsString);
+      if (Array.isArray(parsed)) {
+        console.log('📋 Parsed sections from draft:', parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error('❌ Error parsing sections JSON:', error);
+    }
+
+    return [];
+  }, []);
+
   // Calculate initial form values - either from draft or defaults
   const defaultValues = useMemo((): GenerateArticleFormData => {
     // Base default values for new articles
@@ -148,12 +166,14 @@ export function GeneratingView() {
     if (selectedArticle) {
       console.log('🔄 Using draft article values as initial form state:', selectedArticle);
 
-      // Parse links once
+      // Parse links and sections once
       const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
       const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
+      const sections = parseSectionsFromString(selectedArticle.sections || '');
 
       console.log('📎 Parsed internal links:', internalLinks);
       console.log('📎 Parsed external links:', externalLinks);
+      console.log('📋 Parsed sections:', sections);
 
       return {
         step1: {
@@ -179,25 +199,21 @@ export function GeneratingView() {
           externalLinks,
         },
         step3: {
-          sections: [], // Will be populated if content exists
+          sections,
         },
       };
     }
-
-    // Return base defaults for new article creation
-    console.log('📝 Using default values for new article creation');
+    
     return baseDefaults;
-  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords]);
+  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,
     defaultValues,
   });
 
-  // Set current article for draft system when selectedArticle changes
   useEffect(() => {
     if (selectedArticle) {
-      console.log('📝 Setting current article for draft system:', selectedArticle);
 
       // Set the current article for the draft system
       const articleResponse: CreateArticleResponse = {
@@ -229,8 +245,6 @@ export function GeneratingView() {
 
     return () => subscription.unsubscribe();
   }, [methods, articleDraft]);
-
-
 
   // Dynamic steps with translations
   const steps = STEPS_KEYS.map(step => {

@@ -75,6 +75,43 @@ export const _posts: Article[] = [
 
     // Legacy and additional fields
     content: 'A comprehensive guide to getting started with digital marketing strategies for modern businesses.',
+    sections: JSON.stringify([
+      {
+        id: 'section-1',
+        title: 'Introduction to Digital Marketing',
+        content: 'Digital marketing has revolutionized how businesses connect with their customers. In today\'s digital age, having a strong online presence is crucial for success.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-2',
+        title: 'Social Media Marketing Strategies',
+        content: 'Social media platforms offer unprecedented opportunities to engage with your target audience. Learn how to create compelling content that drives engagement and conversions.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-3',
+        title: 'Content Marketing Best Practices',
+        content: 'Content is king in digital marketing. Discover how to create valuable, relevant content that attracts and retains customers while driving profitable customer action.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-4',
+        title: 'Email Marketing Automation',
+        content: 'Email marketing remains one of the most effective digital marketing channels. Learn how to build automated email campaigns that nurture leads and drive sales.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-5',
+        title: 'SEO Optimization Techniques',
+        content: 'Search engine optimization is essential for organic visibility. Master the fundamentals of on-page and off-page SEO to improve your search rankings.',
+        status: 'completed',
+        subsections: []
+      }
+    ]),
     featured_media: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
     status: 'draft',
     platform: 'shopify',
@@ -111,6 +148,29 @@ export const _posts: Article[] = [
 
     // Legacy and additional fields
     content: 'Learn how to optimize your e-commerce website for search engines.',
+    sections: JSON.stringify([
+      {
+        id: 'section-1',
+        title: 'Understanding E-commerce SEO Fundamentals',
+        content: 'E-commerce SEO differs from traditional SEO in several key ways. Learn the unique challenges and opportunities of optimizing online stores.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-2',
+        title: 'Product Page Optimization Strategies',
+        content: 'Product pages are the heart of your e-commerce site. Discover how to optimize product titles, descriptions, and images for maximum search visibility.',
+        status: 'completed',
+        subsections: []
+      },
+      {
+        id: 'section-3',
+        title: 'Technical SEO for E-commerce Sites',
+        content: 'Technical SEO is crucial for large e-commerce sites. Learn about site speed, mobile optimization, and structured data implementation.',
+        status: 'completed',
+        subsections: []
+      }
+    ]),
     featured_media: '',
     status: 'draft',
     platform: 'wordpress',
