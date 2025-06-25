@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
-import { Box, Button, useTheme, Stack, CircularProgress } from '@mui/material';
+import { Box, Stack, Button, useTheme, CircularProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -63,7 +63,7 @@ export const StepNavigation = ({
           'step2.articleSize',
           'step2.toneOfVoice',
           'step2.pointOfView',
-          'step2.aiContentCleaning',
+          'step2.plagiaRemoval',
           'step2.internalLinking',
           'step2.externalLinking',
           'step2.includeImages',

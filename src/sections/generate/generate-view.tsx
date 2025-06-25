@@ -2,6 +2,7 @@
 import type { CreateArticleResponse } from 'src/services/apis/articlesApi';
 
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -20,11 +21,12 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
+import { STEPS_KEYS } from './constants';
 // Custom components
 import { DraftGuard } from './components/DraftGuard';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
-// Types
+// Types and constants
 import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 
 
@@ -32,6 +34,7 @@ export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
 
   // Check if we're editing an existing draft article
   const articleId = searchParams.get('articleId') || searchParams.get('draft');
@@ -229,12 +232,21 @@ export function GeneratingView() {
 
 
 
-  const steps = [
-    { id: 1, label: "Content Setup" },
-    { id: 2, label: "Article Settings" },
-    { id: 3, label: "Content Structuring" },
-    { id: 4, label: "Publish" }
-  ];
+  // Dynamic steps with translations
+  const steps = STEPS_KEYS.map(step => {
+    // Define fallback values for each step
+    const fallbacks: Record<string, string> = {
+      'generate.steps.contentSetup': 'Content Setup',
+      'generate.steps.articleSettings': 'Article Settings',
+      'generate.steps.contentStructuring': 'Content Structuring',
+      'generate.steps.publish': 'Publish'
+    };
+
+    return {
+      id: step.id,
+      label: t(step.labelKey, fallbacks[step.labelKey] || 'Step')
+    };
+  });
 
   const handleNextStep = () => {
     setActiveStep((prev) => Math.min(prev + 1, 4));

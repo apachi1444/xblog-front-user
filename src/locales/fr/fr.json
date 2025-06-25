@@ -1,6 +1,12 @@
 {
   "translation": {
     "generate": {
+      "steps": {
+        "contentSetup": "Configuration du Contenu",
+        "articleSettings": "Paramètres de l'Article",
+        "contentStructuring": "Structuration du Contenu",
+        "publish": "Publier"
+      },
       "step1": {
         "titles": {
           "languageRegion": "Langue et Région",
