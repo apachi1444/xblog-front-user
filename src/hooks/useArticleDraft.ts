@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import { useState, useCallback } from 'react';
 
 import {
   useCreateArticleMutation,
@@ -37,7 +37,6 @@ export function useArticleDraft(options: UseArticleDraftOptions = {}): UseArticl
   const saveDraft = useCallback(async (formData: any) => {
     try {
       if (!currentArticle) {
-        console.log('🚀 Creating article with form data:', formData);
 
         const createData: CreateArticleRequest = {
           title: formData.step1?.title || 'Untitled Article',
@@ -60,7 +59,6 @@ export function useArticleDraft(options: UseArticleDraftOptions = {}): UseArticl
 
         toast.success('Article draft created successfully!');
       } else {
-        console.log('💾 Updating article with form data:', formData);
 
         const updateData: UpdateArticleRequest = {
           title: formData.step1?.title || 'Untitled Article',
@@ -85,7 +83,6 @@ export function useArticleDraft(options: UseArticleDraftOptions = {}): UseArticl
         toast.success('Article saved successfully!');
       }
     } catch (error) {
-      console.error('❌ Failed to save article:', error);
       onError?.(error);
       toast.error('Failed to save article');
       throw error;

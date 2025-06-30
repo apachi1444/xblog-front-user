@@ -1192,6 +1192,38 @@ const setupMocks = () => {
       return [200, { success: true, article_id: `article_${Date.now()}` }];
     });
 
+    // Mock WordPress publish endpoint
+    mock.onPost('/publish/wordpress').reply((config) => {
+      const requestData = JSON.parse(config.data);
+
+      // Simulate different scenarios for testing
+      const shouldSucceed = Math.random() > 0.2; // 80% success rate
+
+      if (shouldSucceed) {
+        return [200, {
+          success: true,
+          message: `Article published successfully to WordPress!`,
+          published_url: `https://example-wordpress-site.com/blog/article-${requestData.article_id}`,
+          platform: 'WordPress'
+        }];
+      }
+
+      // Simulate random errors
+      const errors = [
+        'WordPress authentication failed. Please check your credentials.',
+        'WordPress site is temporarily unavailable.',
+        'Invalid WordPress REST API endpoint.',
+        'Insufficient permissions to publish articles.'
+      ];
+      const randomError = errors[Math.floor(Math.random() * errors.length)];
+
+      return [400, {
+        success: false,
+        message: randomError,
+        platform: 'WordPress'
+      }];
+    });
+
     // Catch-all for unhandled requests
     mock.onAny().reply((config) => {
       console.log('Unhandled request:', config.url);

@@ -139,9 +139,27 @@ export function Step1ContentSetup({
 
   const handleAddKeyword = (keyword: string) => {
     if (!keyword.trim()) return;
-    setValue("step1.secondaryKeywords", [...secondaryKeywords, keyword]);
+
+    // Check if keyword already exists (case-insensitive)
+    const keywordExists = secondaryKeywords.some(
+      existingKeyword => existingKeyword.toLowerCase() === keyword.trim().toLowerCase()
+    );
+
+    if (keywordExists) {
+      toast.error(`Keyword "${keyword}" already exists`);
+      return;
+    }
+
+    setValue("step1.secondaryKeywords", [...secondaryKeywords, keyword.trim()]);
     setKeywordInput("");
     toast.success(`Keyword "${keyword}" added`);
+  };
+
+  const handleKeywordInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent form submission
+      handleAddKeyword(keywordInput);
+    }
   };
 
   const isGenerateDisabled = !primaryKeyword;
@@ -208,6 +226,14 @@ export function Step1ContentSetup({
       setValue("step1.metaDescription", generatedMeta.metaDescription);
       setValue("step1.urlSlug", generatedMeta.urlSlug);
       setHasGeneratedMeta(true); // Mark that meta has been generated
+
+      // Trigger criteria evaluation for the updated fields
+      setTimeout(() => {
+        evaluateCriteria("metaTitle", generatedMeta.metaTitle);
+        evaluateCriteria("metaDescription", generatedMeta.metaDescription);
+        evaluateCriteria("urlSlug", generatedMeta.urlSlug);
+      }, 100);
+
     } catch (error) {
       console.error("Error generating meta information:", error);
     }
@@ -249,10 +275,11 @@ export function Step1ContentSetup({
                 value={keywordInput}
                 disabled={isSecondaryKeywordsDisabled}
                 label="Secondary Keywords"
-                placeholder="Add secondary keywords manually or generate with AI"
-                tooltipText="Add relevant secondary keywords to improve SEO ranking"
+                placeholder="Add secondary keywords manually or generate with AI (Press Enter to add)"
+                tooltipText="Add relevant secondary keywords to improve SEO ranking. Press Enter to add the keyword."
                 fullWidth
                 onChange={(e) => { setKeywordInput(e.target.value)} }
+                onKeyDown={handleKeywordInputKeyDown}
                 error={errors.step1?.secondaryKeywords && secondaryKeywords.length === 0}
                 helperText={
                   errors.step1?.secondaryKeywords && secondaryKeywords.length === 0

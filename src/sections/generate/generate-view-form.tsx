@@ -154,9 +154,42 @@ export function GenerateViewForm({
 
   const handleOptimizeContentDescription = async () => {
     setGenerationState((s) => ({ ...s, isOptimizingDescription: true }));
-    await simulateDelay(1000);
-    console.log('Fake description optimized');
-    setGenerationState((s) => ({ ...s, isOptimizingDescription: false }));
+
+    try {
+      const formData = methods.getValues();
+      const { primaryKeyword, contentDescription, language } = formData.step1;
+
+      if (!primaryKeyword || !contentDescription) {
+        console.error('Missing required fields for content optimization:', { primaryKeyword, contentDescription });
+        return;
+      }
+
+      console.log('🔧 Optimizing content description with:', { primaryKeyword, language, contentDescription });
+
+      // Simulate API call for content optimization
+      await simulateDelay(2000);
+
+      // Generate optimized content (you can replace this with actual API call)
+      const optimizedContent = `${contentDescription.trim()} This comprehensive guide covers everything you need to know about ${primaryKeyword}, including best practices, expert tips, and actionable strategies. Whether you're a beginner or looking to improve your skills, this detailed resource will help you achieve your goals with proven methods and real-world examples.`;
+
+      // Update the form field with optimized content
+      methods.setValue('step1.contentDescription', optimizedContent, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
+      // Trigger criteria evaluation for the updated content description
+      setTimeout(() => {
+        evaluateCriteria('contentDescription', optimizedContent);
+      }, 100);
+
+      console.log('✅ Content description optimized successfully');
+
+    } catch (error) {
+      console.error('❌ Error optimizing content description:', error);
+    } finally {
+      setGenerationState((s) => ({ ...s, isOptimizingDescription: false }));
+    }
   };
 
   const handleGenerateMeta = async () => {

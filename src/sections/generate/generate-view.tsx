@@ -212,8 +212,31 @@ export function GeneratingView() {
     defaultValues,
   });
 
+  // Helper function to deeply compare objects (memoized for performance)
+  const hasChanges = useCallback((current: any, initial: any): boolean => {
+    if (current === initial) return false;
+
+    if (typeof current !== typeof initial) return true;
+
+    if (Array.isArray(current) && Array.isArray(initial)) {
+      if (current.length !== initial.length) return true;
+      return current.some((item, index) => hasChanges(item, initial[index]));
+    }
+
+    if (typeof current === 'object' && current !== null && initial !== null) {
+      const currentKeys = Object.keys(current);
+      const initialKeys = Object.keys(initial);
+
+      if (currentKeys.length !== initialKeys.length) return true;
+
+      return currentKeys.some(key => hasChanges(current[key], initial[key]));
+    }
+
+    return current !== initial;
+  }, []);
+
   useEffect(() => {
-  if (selectedArticle) {    
+  if (selectedArticle) {
     // Set the current article for the draft system (ONLY ONCE)
     const articleResponse: CreateArticleResponse = {
       id: selectedArticle.id.toString(),
@@ -228,22 +251,30 @@ export function GeneratingView() {
     };
 
     articleDraft.setCurrentArticle(articleResponse);
-
+    // Reset unsaved changes when loading a draft
+    articleDraft.setHasUnsavedChanges(false);
   }
-}, [articleDraft, selectedArticle]); // Remove articleDraft from dependencies to prevent re-runs
+}, [articleDraft, selectedArticle]);
 
   // Watch for form changes to show save button
   useEffect(() => {
-    const subscription = methods.watch((data) => {
-      // Show save button when form has content (for both new and existing articles)
-      const hasContent = data.step1?.title || data.step1?.contentDescription || data.step1?.primaryKeyword;
-      if (hasContent) {
-        articleDraft.setHasUnsavedChanges(true);
+    const subscription = methods.watch((data, { name, type }) => {
+      // Only trigger on actual user input changes, not on navigation or programmatic changes
+      if (type === 'change' && name) {
+        // Check if any form data has changed from initial values
+        const formHasChanges = hasChanges(data, defaultValues);
+
+        // Only set unsaved changes if there are actual changes
+        if (formHasChanges) {
+          articleDraft.setHasUnsavedChanges(true);
+        } else {
+          articleDraft.setHasUnsavedChanges(false);
+        }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [methods, articleDraft]);
+  }, [methods, articleDraft, defaultValues, hasChanges]);
 
   // Dynamic steps with translations
   const steps = STEPS_KEYS.map(step => {

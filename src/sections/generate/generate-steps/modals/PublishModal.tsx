@@ -4,6 +4,8 @@ import type { Store } from 'src/types/store';
 import toast from 'react-hot-toast';
 import { useMemo, useState, useEffect } from 'react';
 
+import { useRouter } from 'src/routes/hooks';
+
 import {
   Box,
   Modal,
@@ -24,11 +26,7 @@ import {
 
 // API hooks
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import {
-  usePublishWixMutation,
-  usePublishShopifyMutation,
-  usePublishWordPressMutation
-} from 'src/services/apis/integrations/publishApi';
+import { usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -56,11 +54,12 @@ interface PublishResult {
 }
 
 export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishModalProps) => {
+  // Hooks
+  const router = useRouter();
+
   // API hooks
   const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
   const [publishWordPress] = usePublishWordPressMutation();
-  const [publishWix] = usePublishWixMutation();
-  const [publishShopify] = usePublishShopifyMutation();
 
   // State
   const [selectedStore, setSelectedStore] = useState<number | null>(null);
@@ -68,15 +67,10 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishingStep, setPublishingStep] = useState<'selection' | 'publishing' | 'success'>('selection');
   const [successMessage, setSuccessMessage] = useState('');
+  const [redirectCountdown, setRedirectCountdown] = useState(3);
 
   // Get stores from API with useMemo to prevent unnecessary re-renders
   const stores = useMemo(() => storesData?.stores || [], [storesData?.stores]);
-
-  useEffect(() => {
-    if (stores.length > 0 && !selectedStore) {
-      setSelectedStore(stores[0].id);
-    }
-  }, [stores, selectedStore]);
 
   // Reset modal state when opened
   useEffect(() => {
@@ -84,6 +78,8 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
       setPublishingStep('selection');
       setIsPublishing(false);
       setSuccessMessage('');
+      setSelectedStore(null); // Reset store selection to force user to choose
+      setRedirectCountdown(3);
     }
   }, [open]);
 
@@ -114,63 +110,57 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
         scheduled_date: publishingSchedule === 'schedule' ? new Date().toISOString() : undefined,
       };
 
-      switch (store.platform?.toLowerCase()) {
-        case 'wordpress':
-          publishResult = await publishWordPress(publishData).unwrap() as PublishResult;
-          break;
-        case 'wix':
-          publishResult = await publishWix(publishData).unwrap() as PublishResult;
-          break;
-        case 'shopify':
-          publishResult = await publishShopify(publishData).unwrap() as PublishResult;
-          break;
-        default:
-          // Mock API call for testing - simulate different publishing modes
-          await new Promise(resolve => setTimeout(resolve, 3000));
+      const platform = store.platform?.toLowerCase();
 
-          // Simulate different responses based on publishing schedule
-          if (publishingSchedule === 'now') {
-            publishResult = {
-              success: true,
-              message: `Article "${articleInfo.title}" has been published successfully to ${store.name}!`
-            };
-          } else if (publishingSchedule === 'schedule') {
-            publishResult = {
-              success: true,
-              message: `Article "${articleInfo.title}" has been scheduled for later publication on ${store.name}!`
-            };
-          } else if (publishingSchedule === 'draft') {
-            publishResult = {
-              success: true,
-              message: `Article "${articleInfo.title}" has been saved as draft on ${store.name}!`
-            };
-          } else {
-            publishResult = {
-              success: true,
-              message: `Article "${articleInfo.title}" has been processed successfully!`
-            };
-          }
-
-          // Simulate occasional failures for testing (10% chance)
-          if (Math.random() < 0.1) {
-            publishResult = {
-              success: false,
-              message: 'Mock error: Connection timeout. Please try again.'
-            };
-          }
+      if (platform === 'wordpress') {
+        // Use WordPress API
+        publishResult = await publishWordPress(publishData).unwrap() as PublishResult;
+      } else {
+        // For non-WordPress platforms, show not supported message
+        throw new Error(`Publishing to ${store.platform || 'this platform'} is not supported yet. Only WordPress is currently available.`);
       }
 
       if (publishResult.success) {
         setSuccessMessage(publishResult.message || 'Content published successfully!');
         setPublishingStep('success');
         toast.success(publishResult.message || 'Content published successfully!');
+
+        // Start countdown for auto-redirect
+        setRedirectCountdown(3);
+        const countdownInterval = setInterval(() => {
+          setRedirectCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdownInterval);
+              router.push('/blog');
+              onClose();
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       } else {
         throw new Error(publishResult.message || 'Unknown error');
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to publish content. Please try again.';
-      toast.error(errorMessage);
+    } catch (error: any) {
+      console.error('Publishing error:', error);
+      setIsPublishing(false);
       setPublishingStep('selection');
+
+      // Handle different types of errors
+      if (error?.status === 401) {
+        toast.error('Authentication failed. Please reconnect your store.');
+      } else if (error?.status === 403) {
+        toast.error('Permission denied. Check your store permissions.');
+      } else if (error?.status === 429) {
+        toast.error('Rate limit exceeded. Please try again later.');
+      } else if (error?.status === 500) {
+        toast.error('Server error occurred. Please try again later.');
+      } else if (error?.data?.message) {
+        toast.error(error.data.message);
+      } else {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to publish content. Please try again.';
+        toast.error(errorMessage);
+      }
     } finally {
       setIsPublishing(false);
     }
@@ -230,51 +220,95 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                   value={selectedStore?.toString() || ''}
                   onChange={(e) => setSelectedStore(Number(e.target.value))}
                 >
-                  {stores.map((store: Store) => (
-                    <FormControlLabel
-                      key={store.id}
-                      value={store.id.toString()}
-                      control={<Radio />}
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {store.logo ? (
-                            <img
-                              src={store.logo}
-                              alt={store.name}
-                              style={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: '50%',
-                                objectFit: 'cover'
-                              }}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <Box
-                              sx={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: '50%',
-                                bgcolor: 'primary.main',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '12px',
-                                fontWeight: 'bold'
-                              }}
-                            >
-                              {store.name.charAt(0).toUpperCase()}
+                  {stores.map((store: Store) => {
+                    const isWordPress = store.platform?.toLowerCase() === 'wordpress';
+
+                    return (
+                      <FormControlLabel
+                        key={store.id}
+                        value={store.id.toString()}
+                        control={<Radio />}
+                        disabled={!isWordPress}
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {store.logo ? (
+                              <img
+                                src={store.logo}
+                                alt={store.name}
+                                style={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: '50%',
+                                  objectFit: 'cover',
+                                  opacity: isWordPress ? 1 : 0.5
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                sx={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: '50%',
+                                  bgcolor: 'primary.main',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: 'white',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold',
+                                  opacity: isWordPress ? 1 : 0.5
+                                }}
+                              >
+                                {store.name.charAt(0).toUpperCase()}
+                              </Box>
+                            )}
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                              <Typography
+                                variant="body1"
+                                sx={{
+                                  fontWeight: 500,
+                                  opacity: isWordPress ? 1 : 0.5
+                                }}
+                              >
+                                {store.name}
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: 'text.secondary',
+                                    textTransform: 'uppercase',
+                                    opacity: isWordPress ? 1 : 0.5
+                                  }}
+                                >
+                                  {store.platform || 'Unknown Platform'}
+                                </Typography>
+                                {!isWordPress && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: 'warning.main',
+                                      fontWeight: 'bold',
+                                      fontSize: '10px'
+                                    }}
+                                  >
+                                    (Not Supported)
+                                  </Typography>
+                                )}
+                              </Box>
                             </Box>
-                          )}
-                          <Typography>{store.name}</Typography>
-                        </Box>
-                      }
-                      sx={{ my: 0.5 }}
-                    />
-                  ))}
+                          </Box>
+                        }
+                        sx={{
+                          my: 0.5,
+                          opacity: isWordPress ? 1 : 0.6
+                        }}
+                      />
+                    );
+                  })}
                 </RadioGroup>
               ) : (
                 <Alert severity="warning">
@@ -282,6 +316,14 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                 </Alert>
               )}
             </Box>
+
+            {/* Warning for non-WordPress stores */}
+            {selectedStore && stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress' && (
+              <Alert severity="warning" sx={{ mb: 3 }}>
+                Publishing to {stores.find(s => s.id === selectedStore)?.platform || 'this platform'} is not supported yet.
+                Only WordPress stores are currently available for publishing.
+              </Alert>
+            )}
 
             {/* Publishing Schedule */}
             <Box sx={{ mb: 3 }}>
@@ -307,7 +349,11 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
               <Button
                 variant="contained"
                 onClick={handlePublish}
-                disabled={!selectedStore || stores.length === 0}
+                disabled={
+                  !selectedStore ||
+                  stores.length === 0 ||
+                  stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress'
+                }
                 startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
                 sx={{
                   bgcolor: 'success.main',
@@ -325,15 +371,50 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
         )}
 
         {publishingStep === 'publishing' && (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <CircularProgress size={48} />
-              <Typography variant="h6" gutterBottom>
-                Publishing your article...
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Please wait while we publish your content
-              </Typography>
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              {/* Enhanced loading animation */}
+              <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <CircularProgress
+                  size={80}
+                  thickness={4}
+                  sx={{
+                    color: 'primary.main',
+                    animationDuration: '1.5s'
+                  }}
+                />
+                <Box
+                  sx={{
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    position: 'absolute',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography variant="caption" component="div" color="primary.main" sx={{ fontWeight: 'bold' }}>
+                    📝
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ maxWidth: 400 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                  Publishing your article...
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                  {(() => {
+                    const store = stores.find(s => s.id === selectedStore);
+                    return `Publishing to ${store?.name || 'selected store'} via ${store?.platform || 'Unknown Platform'}`;
+                  })()}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  Please wait while we publish your content to WordPress...
+                </Typography>
+              </Box>
             </Box>
           </Box>
         )}
@@ -367,13 +448,30 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
               </Typography>
             )}
 
-            <Button
-              variant="contained"
-              onClick={handleClose}
-              sx={{ borderRadius: '24px', mt: 1 }}
-            >
-              Done
-            </Button>
+            {/* Countdown and redirect info */}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Redirecting to blog page in {redirectCountdown} seconds...
+            </Typography>
+
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button
+                variant="outlined"
+                onClick={handleClose}
+                sx={{ borderRadius: '24px' }}
+              >
+                Stay Here
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  router.push('/blog');
+                  onClose();
+                }}
+                sx={{ borderRadius: '24px' }}
+              >
+                Go to Blog Now
+              </Button>
+            </Box>
           </Box>
         )}
       </Box>

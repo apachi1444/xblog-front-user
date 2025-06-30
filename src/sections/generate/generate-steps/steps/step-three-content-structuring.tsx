@@ -1,22 +1,19 @@
 import toast from 'react-hot-toast';
-import { useFormContext } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useWatch, useFormContext } from 'react-hook-form';
 
 import {
   Box,
   Card,
   Grid,
   Button,
-  Select,
   Divider,
-  MenuItem,
   Collapse,
   TextField,
   CardHeader,
   Typography,
   IconButton,
-  CardContent,
-  FormControl
+  CardContent
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -30,28 +27,27 @@ import type { ArticleSection, GenerateArticleFormData } from '../../schemas';
 type ContentType = 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery';
 
 export function Step3ContentStructuring() {
-  const { setValue, getValues } = useFormContext<GenerateArticleFormData>();
+  const { setValue, getValues, control } = useFormContext<GenerateArticleFormData>();
+
+  // Watch for changes in the sections array
+  const watchedSections = useWatch({
+    control,
+    name: 'step3.sections',
+    defaultValue: []
+  });
 
   // State for tracking which section is being edited
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editContentType, setEditContentType] = useState<ContentType>("paragraph");
+  const [showAutoSaved, setShowAutoSaved] = useState(false);
 
   // State for tracking expanded sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
-  // Force re-render state
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [sectionsCache, setSectionsCache] = useState<ArticleSection[]>([]);
-
-  // Get sections and update cache when refreshKey changes
-  useEffect(() => {
-    const currentSections = getValues('step3.sections') || [];
-    setSectionsCache(currentSections);
-  }, [refreshKey, getValues]);
-
-  const sections = sectionsCache;
+  // Use watched sections directly - this ensures real-time updates
+  const sections = useMemo(() => watchedSections || [], [watchedSections]);
 
   // Function to toggle section expansion
   const toggleSectionExpansion = useCallback((sectionId: string) => {
@@ -81,20 +77,17 @@ export function Step3ContentStructuring() {
     setEditContentType(section.contentType || "paragraph");
   }, []);
 
-  // Function to save the edited section
-  const handleSaveSection = useCallback(() => {
+  // Function to auto-save the edited section content
+  const autoSaveSection = useCallback(() => {
     if (!editingSectionId) return;
 
-    // Get the current sections from the form to ensure we have the latest state
-    const currentSections = sections;
-
-    const updatedSections = currentSections.map(section =>
+    const updatedSections = sections.map(section =>
       section.id === editingSectionId
         ? {
             ...section,
             content: editContent,
             title: editTitle,
-            contentType: editContentType
+            contentType: section.contentType // Keep existing contentType
           }
         : section
     );
@@ -105,12 +98,47 @@ export function Step3ContentStructuring() {
       shouldTouch: true,
     });
 
-    // Force a re-render to ensure the UI updates
-    setRefreshKey(prev => prev + 1);
+    // Show auto-saved indicator
+    setShowAutoSaved(true);
+    setTimeout(() => setShowAutoSaved(false), 2000);
+  }, [editingSectionId, sections, setValue, editContent, editTitle]);
+
+  // Function to save the edited section and close editor
+  const handleSaveSection = useCallback(() => {
+    if (!editingSectionId) return;
+
+    const updatedSections = sections.map(section =>
+      section.id === editingSectionId
+        ? {
+            ...section,
+            content: editContent,
+            title: editTitle,
+            contentType: section.contentType // Keep existing contentType
+          }
+        : section
+    );
+
+    setValue('step3.sections', updatedSections, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
 
     toast.success("Section updated successfully!");
     setEditingSectionId(null);
-  }, [editingSectionId, sections, setValue, editContent, editTitle, editContentType]);
+  }, [editingSectionId, sections, setValue, editContent, editTitle]);
+
+  // Auto-save when content changes
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (editingSectionId && (editContent || editTitle)) {
+      const timeoutId = setTimeout(() => {
+        autoSaveSection();
+      }, 1000); // Auto-save after 1 second of no changes
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [editContent, editTitle, editingSectionId, autoSaveSection]);
 
 
 
@@ -161,7 +189,7 @@ export function Step3ContentStructuring() {
           <FormContainer title="Edit Section">
             <Box sx={{ width: '100%', p: 2 }}>
               {/* Back and Save buttons */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Button
                   variant="outlined"
                   onClick={() => setEditingSectionId(null)}
@@ -169,13 +197,24 @@ export function Step3ContentStructuring() {
                 >
                   Back to Sections
                 </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleSaveSection}
-                  startIcon={<Iconify icon="eva:save-fill" />}
-                >
-                  Save Changes
-                </Button>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {showAutoSaved && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Iconify icon="eva:checkmark-circle-fill" sx={{ color: 'success.main' }} />
+                      <Typography variant="caption" sx={{ color: 'success.main' }}>
+                        Auto-saved
+                      </Typography>
+                    </Box>
+                  )}
+                  <Button
+                    variant="contained"
+                    onClick={handleSaveSection}
+                    startIcon={<Iconify icon="eva:checkmark-fill" />}
+                  >
+                    Done Editing
+                  </Button>
+                </Box>
               </Box>
 
               {/* Section title */}
@@ -192,25 +231,7 @@ export function Step3ContentStructuring() {
                 />
               </Box>
 
-              {/* Content type selector */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Content Type
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={editContentType}
-                    onChange={(e) => setEditContentType(e.target.value as ContentType)}
-                    displayEmpty
-                  >
-                    <MenuItem value="paragraph">Paragraph</MenuItem>
-                    <MenuItem value="bullet-list">Bullet List</MenuItem>
-                    <MenuItem value="table">Table</MenuItem>
-                    <MenuItem value="faq">FAQ</MenuItem>
-                    <MenuItem value="image-gallery">Image Gallery</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+
 
               {/* Section content */}
               <Box sx={{ mb: 3 }}>
@@ -245,7 +266,7 @@ export function Step3ContentStructuring() {
               </Box>
 
               {/* Section list */}
-              <Box sx={{ mb: 3 }} key={refreshKey}>
+              <Box sx={{ mb: 3 }}>
                 {sections.map((section) => {
                   const isExpanded = expandedSections.has(section.id);
                   const plainTextContent = stripHtmlTags(section.content || '');
