@@ -456,7 +456,6 @@ export function TemplateView() {
               </Button>
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<Iconify icon="mdi:shopping-cart" />}
                 onClick={() => {
                   handleUpgrade('premium');

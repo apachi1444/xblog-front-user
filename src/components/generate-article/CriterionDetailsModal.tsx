@@ -279,12 +279,13 @@ export function CriterionDetailsModal({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 2,
           overflow: 'hidden',
+          maxHeight: '85vh',
           background: theme.palette.mode === 'dark'
             ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`
             : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.info.main, 0.02)} 100%)`,
@@ -296,111 +297,62 @@ export function CriterionDetailsModal({
         sx={{
           background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
           color: 'white',
-          p: 3,
+          p: 2,
           position: 'relative',
           overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            background: alpha('#fff', 0.1),
-          }
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" alignItems="center" spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box
               sx={{
-                p: 1.5,
-                borderRadius: 2,
+                p: 1,
+                borderRadius: 1.5,
                 background: alpha('#fff', 0.2),
-                backdropFilter: 'blur(10px)',
               }}
             >
-              <Iconify icon="eva:info-fill" width={24} height={24} />
+              <Iconify icon="eva:info-fill" width={20} height={20} />
             </Box>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                SEO Criterion Details
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                {t(criterion.description)}
-              </Typography>
-            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {t(criterion.description)}
+            </Typography>
           </Stack>
           <IconButton
             onClick={onClose}
+            size="small"
             sx={{
               color: 'white',
               bgcolor: alpha('#fff', 0.1),
               '&:hover': { bgcolor: alpha('#fff', 0.2) }
             }}
           >
-            <Iconify icon="eva:close-fill" width={20} height={20} />
+            <Iconify icon="eva:close-fill" width={18} height={18} />
           </IconButton>
         </Stack>
       </Box>
 
-      <DialogContent sx={{ p: 4 }}>
-        <Stack spacing={4}>
-          {/* Header Info */}
+      <DialogContent sx={{ p: 2.5, maxHeight: '70vh', overflow: 'auto' }}>
+        <Stack spacing={2.5}>
           <Card
             sx={{
-              p: 3,
-              borderRadius: 3,
-              background: theme.palette.mode === 'dark'
-                ? alpha(theme.palette.info.main, 0.05)
-                : alpha(theme.palette.info.main, 0.02),
-              border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-            }}
-          >
-            <Stack direction="row" alignItems="center" spacing={3}>
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  background: alpha(theme.palette.info.main, 0.1),
-                }}
-              >
-                <Iconify icon="eva:file-text-fill" width={32} height={32} color={theme.palette.info.main} />
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                  Content-Based Criterion
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  This SEO criterion is evaluated based on your content structure and cannot be automatically optimized.
-                </Typography>
-              </Box>
-            </Stack>
-          </Card>
-
-          {/* Current Score Overview */}
-          <Card
-            sx={{
-              p: 3,
-              borderRadius: 3,
+              p: 2.5,
+              borderRadius: 2,
               background: theme.palette.mode === 'dark'
                 ? alpha(theme.palette.background.paper, 0.8)
                 : alpha(theme.palette.grey[50], 0.8),
               border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
             }}
           >
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Iconify icon="eva:trending-up-fill" width={20} height={20} />
+            <Typography variant="subtitle1" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Iconify icon="eva:trending-up-fill" width={18} height={18} />
               Current Score Analysis
             </Typography>
 
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               {/* Score Progress */}
               <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     Score: {state.currentScore} / {criterion.weight}
                   </Typography>
                   <Chip
@@ -412,6 +364,7 @@ export function CriterionDetailsModal({
                                theme.palette.error.main,
                       color: 'white',
                       fontWeight: 'bold',
+                      fontSize: '0.7rem',
                     }}
                   />
                 </Stack>
@@ -420,14 +373,14 @@ export function CriterionDetailsModal({
                   variant="determinate"
                   value={(state.currentScore / criterion.weight) * 100}
                   sx={{
-                    height: 8,
-                    borderRadius: 4,
+                    height: 6,
+                    borderRadius: 3,
                     bgcolor: alpha(theme.palette.grey[500], 0.2),
                     '& .MuiLinearProgress-bar': {
                       bgcolor: state.currentStatus === 'success' ? theme.palette.success.main :
                                state.currentStatus === 'warning' ? theme.palette.warning.main :
                                theme.palette.error.main,
-                      borderRadius: 4,
+                      borderRadius: 3,
                     }
                   }}
                 />
@@ -436,8 +389,8 @@ export function CriterionDetailsModal({
               {/* Status Message */}
               <Box
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
+                  p: 1.5,
+                  borderRadius: 1.5,
                   bgcolor: state.currentStatus === 'success' ? alpha(theme.palette.success.main, 0.1) :
                            state.currentStatus === 'warning' ? alpha(theme.palette.warning.main, 0.1) :
                            alpha(theme.palette.error.main, 0.1),
@@ -460,71 +413,71 @@ export function CriterionDetailsModal({
           {/* Detailed Evaluation Logic */}
           <Card
             sx={{
-              p: 3,
-              borderRadius: 3,
+              p: 2.5,
+              borderRadius: 2,
               background: theme.palette.mode === 'dark'
                 ? alpha(theme.palette.background.paper, 0.8)
                 : alpha(theme.palette.grey[50], 0.8),
               border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
             }}
           >
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Iconify icon="eva:settings-2-fill" width={20} height={20} />
+            <Typography variant="subtitle1" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Iconify icon="eva:settings-2-fill" width={18} height={18} />
               Evaluation Logic
             </Typography>
 
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               {/* Actual Value */}
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
                   Current Value
                 </Typography>
                 <Box
                   sx={{
-                    p: 2,
-                    borderRadius: 2,
+                    p: 1.5,
+                    borderRadius: 1.5,
                     bgcolor: alpha(theme.palette.primary.main, 0.05),
                     border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                   }}
                 >
-                  <Typography variant="body1" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>
                     {state.evaluationDetails.actualValue || 'N/A'}
                   </Typography>
                 </Box>
               </Box>
 
-              <Divider />
+              <Divider sx={{ my: 1 }} />
 
               {/* Threshold */}
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
                   Required Threshold
                 </Typography>
                 <Box
                   sx={{
-                    p: 2,
-                    borderRadius: 2,
+                    p: 1.5,
+                    borderRadius: 1.5,
                     bgcolor: alpha(theme.palette.info.main, 0.05),
                     border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
                   }}
                 >
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {state.evaluationDetails.threshold || 'Criterion-specific'}
                   </Typography>
                 </Box>
               </Box>
 
-              <Divider />
+              <Divider sx={{ my: 1 }} />
 
               {/* Explanation */}
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
                   How It s Calculated
                 </Typography>
                 <Box
                   sx={{
-                    p: 2,
-                    borderRadius: 2,
+                    p: 1.5,
+                    borderRadius: 1.5,
                     bgcolor: alpha(theme.palette.grey[500], 0.05),
                     border: `1px solid ${alpha(theme.palette.grey[500], 0.2)}`,
                   }}
@@ -538,60 +491,28 @@ export function CriterionDetailsModal({
               {/* Scoring Breakdown for Ternary Criteria */}
               {criterion.statusType === 'ternary' && (
                 <>
-                  <Divider />
+                  <Divider sx={{ my: 1 }} />
                   <Box>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
                       Scoring Breakdown
                     </Typography>
-                    <Stack spacing={1}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Chip size="small" label="SUCCESS" sx={{ bgcolor: theme.palette.success.main, color: 'white', minWidth: 80 }} />
-                        <Typography variant="body2">{criterion.weight} points - Meets optimal criteria</Typography>
+                    <Stack spacing={0.5}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Chip size="small" label="SUCCESS" sx={{ bgcolor: theme.palette.success.main, color: 'white', minWidth: 70, fontSize: '0.7rem' }} />
+                        <Typography variant="caption">{criterion.weight} points - Meets optimal criteria</Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Chip size="small" label="WARNING" sx={{ bgcolor: theme.palette.warning.main, color: 'white', minWidth: 80 }} />
-                        <Typography variant="body2">{criterion.warningScore || Math.floor(criterion.weight * 0.75)} points - Partially meets criteria</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Chip size="small" label="WARNING" sx={{ bgcolor: theme.palette.warning.main, color: 'white', minWidth: 70, fontSize: '0.7rem' }} />
+                        <Typography variant="caption">{criterion.warningScore || Math.floor(criterion.weight * 0.75)} points - Partially meets criteria</Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Chip size="small" label="ERROR" sx={{ bgcolor: theme.palette.error.main, color: 'white', minWidth: 80 }} />
-                        <Typography variant="body2">0 points - Does not meet criteria</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Chip size="small" label="ERROR" sx={{ bgcolor: theme.palette.error.main, color: 'white', minWidth: 70, fontSize: '0.7rem' }} />
+                        <Typography variant="caption">0 points - Does not meet criteria</Typography>
                       </Box>
                     </Stack>
                   </Box>
                 </>
               )}
-            </Stack>
-          </Card>
-
-          {/* Improvement Tips */}
-          <Card
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-              border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-            }}
-          >
-            <Stack direction="row" alignItems="flex-start" spacing={2}>
-              <Box
-                sx={{
-                  p: 1,
-                  borderRadius: 1,
-                  bgcolor: alpha(theme.palette.success.main, 0.1),
-                  mt: 0.5,
-                }}
-              >
-                <Iconify icon="eva:bulb-fill" width={20} height={20} color={theme.palette.success.main} />
-              </Box>
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                  💡 How to Improve This Score
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  This criterion will be automatically re-evaluated when you update your content in the form.
-                  Focus on adjusting your content structure, keywords, and formatting to meet the required thresholds.
-                </Typography>
-              </Box>
             </Stack>
           </Card>
         </Stack>
@@ -600,7 +521,7 @@ export function CriterionDetailsModal({
       {/* Footer */}
       <Box
         sx={{
-          p: 3,
+          p: 2,
           bgcolor: theme.palette.mode === 'dark'
             ? alpha(theme.palette.background.paper, 0.8)
             : alpha(theme.palette.grey[50], 0.8),
@@ -611,7 +532,8 @@ export function CriterionDetailsModal({
           <Button
             onClick={onClose}
             variant="contained"
-            sx={{ borderRadius: 2, px: 3 }}
+            size="small"
+            sx={{ borderRadius: 2, px: 2.5 }}
           >
             Close
           </Button>

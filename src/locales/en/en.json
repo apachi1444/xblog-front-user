@@ -15,6 +15,15 @@
           "generatedTitle": "Generated Title",
           "seoMeta": "SEO Meta Information"
         }
+      },
+      "startCreating": "Supercharge Your Content Creation",
+      "description": "Our AI-powered platform helps you create high-quality, engaging content in minutes. Perfect for blogs, websites, and social media.",
+      "createNow": "Start Creating Now",
+      "benefits": {
+        "seo": "SEO Optimized",
+        "seoDesc": "Content that ranks well in search engines",
+        "fast": "Save Time",
+        "fastDesc": "Create articles in minutes, not hours"
       }
     },
     "navigation": {
@@ -184,6 +193,32 @@
       "scheduleArticlePrompt": "Schedule your next article to maintain consistent content publishing",
       "viewCalendar": "View Calendar",
       "createArticle": "Create Article"
+    },
+    "analytics": {
+      "welcome": "Hi, Welcome back xBlogger",
+      "welcomeSubtext": "Ready to create amazing content? Start generating high-quality, SEO-optimized articles in minutes!",
+      "articlesGenerated": "Articles Generated",
+      "totalWebsites": "Total Websites",
+      "purchaseOrders": "Purchase orders",
+      "messages": "Messages",
+      "currentVisits": "Current visits",
+      "websiteVisits": "Website visits",
+      "websiteVisitsSubheader": "(+43%) than last year",
+      "conversionRates": "Conversion rates",
+      "conversionRatesSubheader": "(+43%) than last year",
+      "orderTimeline": "Order timeline",
+      "trafficBySite": "Traffic by site",
+      "tasks": "Tasks",
+      "teamA": "Team A",
+      "teamB": "Team B",
+      "scheduledArticles": "Scheduled Articles",
+      "regenerationsAvailable": "Regenerations Available",
+      "websiteIntegrations": "Website Integrations",
+      "websiteIntegrationsSubheader": "Distribution by platform",
+      "noWebsiteIntegrations": "No website integrations yet. Connect your first website to see platform distribution.",
+      "purchaseHistory": "Purchase History",
+      "purchaseHistorySubheader": "Recent subscription activity",
+      "noPurchaseHistory": "No billing history available yet. Your purchase records will appear here."
     },
     "regenerate": {
       "label": "Regenerations",

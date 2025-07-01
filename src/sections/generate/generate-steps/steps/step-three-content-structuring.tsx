@@ -33,7 +33,6 @@ export function Step3ContentStructuring() {
   const watchedSections = useWatch({
     control,
     name: 'step3.sections',
-    defaultValue: []
   });
 
   // State for tracking which section is being edited
@@ -127,20 +126,6 @@ export function Step3ContentStructuring() {
     toast.success("Section updated successfully!");
     setEditingSectionId(null);
   }, [editingSectionId, sections, setValue, editContent, editTitle]);
-
-  // Auto-save when content changes
-  // eslint-disable-next-line consistent-return
-  useEffect(() => {
-    if (editingSectionId && (editContent || editTitle)) {
-      const timeoutId = setTimeout(() => {
-        autoSaveSection();
-      }, 1000); // Auto-save after 1 second of no changes
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [editContent, editTitle, editingSectionId, autoSaveSection]);
-
-
 
   // Function to add a new section
   const handleAddSection = useCallback(() => {

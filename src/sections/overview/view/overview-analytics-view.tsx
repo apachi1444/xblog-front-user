@@ -18,8 +18,8 @@ import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
 import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { useGetUserInvoicesQuery, useGetSubscriptionDetailsQuery, useGetSubscriptionPlansQuery, type Invoice } from 'src/services/apis/subscriptionApi';
 import { generateInvoicePdf } from 'src/services/invoicePdfService';
+import { type Invoice, useGetUserInvoicesQuery, useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -419,18 +419,20 @@ function PremiumFeaturesCard() {
           endIcon={<Iconify icon="mdi:arrow-right" />}
           fullWidth
           sx={{
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            fontWeight: 600,
+            fontWeight: 500,
             textTransform: 'none',
             py: 1.5,
             borderRadius: 2,
+            background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)}, ${varAlpha(theme.palette.primary.darkChannel, 0.7)})`,
+            color: theme.palette.primary.contrastText,
+            opacity: 0.85,
             '&:hover': {
-              bgcolor: theme.palette.primary.dark,
+              background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)}, ${varAlpha(theme.palette.primary.mainChannel, 0.8)})`,
+              opacity: 0.95,
             },
             boxShadow: isDarkMode
-              ? `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`
-              : `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
+              ? `0 3px 8px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`
+              : `0 3px 8px ${varAlpha(theme.palette.primary.mainChannel, 0.15)}`,
           }}
         >
           {t('premium.upgradeButton', 'Upgrade to Pro')}
@@ -445,6 +447,8 @@ export function OverviewAnalyticsView() {
 
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
+
+  const navigate = useNavigate();
 
   // Fetch subscription details from API
   const { data: subscriptionDetails, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
@@ -520,34 +524,129 @@ export function OverviewAnalyticsView() {
         borderRadius: 0,
       }}
     >
-      <Typography
-        variant="h4"
+      {/* Enhanced Welcome Section with Prominent CTA */}
+      <Box
         sx={{
           mb: { xs: 3, md: 5 },
-          color: isDarkMode ? 'common.white' : 'inherit',
-          textShadow: isDarkMode ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          '& .emoji': {
-            display: 'inline-block',
-            ml: 1,
-            animation: 'wave 1.8s infinite',
-            transformOrigin: '70% 70%',
-            '@keyframes wave': {
-              '0%': { transform: 'rotate(0deg)' },
-              '10%': { transform: 'rotate(14deg)' },
-              '20%': { transform: 'rotate(-8deg)' },
-              '30%': { transform: 'rotate(14deg)' },
-              '40%': { transform: 'rotate(-4deg)' },
-              '50%': { transform: 'rotate(10deg)' },
-              '60%': { transform: 'rotate(0deg)' },
-              '100%': { transform: 'rotate(0deg)' },
-            }
+          p: { xs: 3, md: 4 },
+          borderRadius: 3,
+          background: isDarkMode
+            ? `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darkChannel, 0.1)}, ${varAlpha(theme.palette.secondary.darkChannel, 0.1)})`
+            : `linear-gradient(135deg, ${varAlpha(theme.palette.primary.lightChannel, 0.1)}, ${varAlpha(theme.palette.secondary.lightChannel, 0.1)})`,
+          border: `1px solid ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: isDarkMode
+              ? `radial-gradient(circle at 20% 80%, ${varAlpha(theme.palette.primary.mainChannel, 0.1)} 0%, transparent 50%)`
+              : `radial-gradient(circle at 20% 80%, ${varAlpha(theme.palette.primary.mainChannel, 0.05)} 0%, transparent 50%)`,
+            pointerEvents: 'none',
           }
         }}
       >
-        {t('analytics.welcome', 'Hi, Welcome back xBlogger')}<span className="emoji">👋</span>
-      </Typography>
+        <Grid container spacing={3} alignItems="center">
+          {/* Left side - Welcome text */}
+          <Grid xs={12} md={8}>
+            <Typography
+              variant="h4"
+              sx={{
+                mb: 2,
+                color: isDarkMode ? 'common.white' : 'inherit',
+                textShadow: isDarkMode ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                fontWeight: 700,
+                '& .emoji': {
+                  display: 'inline-block',
+                  ml: 1,
+                  animation: 'wave 1.8s infinite',
+                  transformOrigin: '70% 70%',
+                  '@keyframes wave': {
+                    '0%': { transform: 'rotate(0deg)' },
+                    '10%': { transform: 'rotate(14deg)' },
+                    '20%': { transform: 'rotate(-8deg)' },
+                    '30%': { transform: 'rotate(14deg)' },
+                    '40%': { transform: 'rotate(-4deg)' },
+                    '50%': { transform: 'rotate(10deg)' },
+                    '60%': { transform: 'rotate(0deg)' },
+                    '100%': { transform: 'rotate(0deg)' },
+                  }
+                }
+              }}
+            >
+              {t('analytics.welcome', 'Hi, Welcome back xBlogger')}<span className="emoji">👋</span>
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{
+                mb: 0,
+                lineHeight: 1.6,
+                fontSize: '1.1rem'
+              }}
+            >
+              {t('analytics.welcomeSubtext', 'Ready to create amazing content? Start generating high-quality, SEO-optimized articles in minutes!')}
+            </Typography>
+          </Grid>
+
+          {/* Right side - Prominent CTA */}
+          <Grid xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
+            <Button
+              variant="contained"
+              size="large"
+              color="primary"
+              startIcon={<Iconify icon="mdi:rocket-launch" width={24} />}
+              onClick={() => {
+                navigate('/generate');
+              }}
+              sx={{
+                px: 4,
+                py: 2,
+                borderRadius: 3,
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                minWidth: 200,
+                boxShadow: isDarkMode
+                  ? `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`
+                  : `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`,
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                '&:hover': {
+                  boxShadow: isDarkMode
+                    ? `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.5)}`
+                    : `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`,
+                  transform: 'translateY(-3px) scale(1.02)',
+                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                },
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.common.whiteChannel, 0.2)}, transparent)`,
+                  transition: 'left 0.6s',
+                },
+                '&:hover::before': {
+                  left: '100%',
+                }
+              }}
+            >
+              {t('generate.createNow', 'Start Creating Now')}
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
 
       <Grid container spacing={4}>
         {isLoadingSubscription ? (

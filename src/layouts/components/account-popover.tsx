@@ -24,6 +24,7 @@ import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 
 import { Iconify } from 'src/components/iconify';
+import { varAlpha } from 'src/theme/styles/utils';
 
 // ----------------------------------------------------------------------
 
@@ -355,13 +356,19 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           <Button
             fullWidth
             variant="contained"
-            color="primary"
             onClick={() => handleClickItem('/upgrade-license')}
             sx={{
               py: 1,
               borderRadius: 1,
               fontWeight: 'medium',
-              textTransform: 'none'
+              textTransform: 'none',
+              background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)}, ${varAlpha(theme.palette.primary.darkChannel, 0.7)})`,
+              color: theme.palette.primary.contrastText,
+              opacity: 0.85,
+              '&:hover': {
+                background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)}, ${varAlpha(theme.palette.primary.mainChannel, 0.8)})`,
+                opacity: 0.95,
+              }
             }}
           >
             {t('account.upgradePlan', 'Upgrade Plan')}

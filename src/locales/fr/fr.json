@@ -15,6 +15,15 @@
           "generatedTitle": "Titre Généré",
           "seoMeta": "Informations Méta SEO"
         }
+      },
+      "startCreating": "Boostez Votre Création de Contenu",
+      "description": "Notre plateforme alimentée par l'IA vous aide à créer du contenu de haute qualité et engageant en quelques minutes. Parfait pour les blogs, sites web et réseaux sociaux.",
+      "createNow": "Commencer à Créer Maintenant",
+      "benefits": {
+        "seo": "Optimisé SEO",
+        "seoDesc": "Contenu qui se classe bien dans les moteurs de recherche",
+        "fast": "Gagner du Temps",
+        "fastDesc": "Créer des articles en minutes, pas en heures"
       }
     },
     "navigation": {
@@ -89,7 +98,8 @@
       "logout": "Déconnexion"
     },
     "analytics": {
-      "welcome": "Bonjour, Bon retour xBlogger👋",
+      "welcome": "Bonjour, Bon retour xBlogger",
+      "welcomeSubtext": "Prêt à créer du contenu incroyable ? Commencez à générer des articles de haute qualité et optimisés pour le SEO en quelques minutes !",
       "articlesGenerated": "Articles Générés",
       "totalWebsites": "Total des Sites Web",
       "purchaseOrders": "Commandes d'achat",
@@ -103,7 +113,15 @@
       "trafficBySite": "Trafic par site",
       "tasks": "Tâches",
       "teamA": "Équipe A",
-      "teamB": "Équipe B"
+      "teamB": "Équipe B",
+      "scheduledArticles": "Articles Programmés",
+      "regenerationsAvailable": "Régénérations Disponibles",
+      "websiteIntegrations": "Intégrations de Sites Web",
+      "websiteIntegrationsSubheader": "Distribution par plateforme",
+      "noWebsiteIntegrations": "Aucune intégration de site web pour le moment. Connectez votre premier site web pour voir la distribution par plateforme.",
+      "purchaseHistory": "Historique des Achats",
+      "purchaseHistorySubheader": "Activité d'abonnement récente",
+      "noPurchaseHistory": "Aucun historique de facturation disponible pour le moment. Vos enregistrements d'achat apparaîtront ici."
     },
     "months": {
       "jan": "Jan",

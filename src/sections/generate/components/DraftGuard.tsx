@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useArticleLimits } from 'src/hooks/useArticleLimits';
 
 import { Iconify } from 'src/components/iconify';
+import { varAlpha } from 'src/theme/styles/utils';
 
 // ----------------------------------------------------------------------
 
@@ -97,6 +98,15 @@ export function DraftGuard({ children, onLimitExceeded }: DraftGuardProps) {
               variant="contained"
               onClick={() => navigate('/upgrade-license')}
               startIcon={<Iconify icon="mdi:rocket-launch" />}
+              sx={(theme) => ({
+                background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)}, ${varAlpha(theme.palette.primary.darkChannel, 0.7)})`,
+                color: theme.palette.primary.contrastText,
+                opacity: 0.85,
+                '&:hover': {
+                  background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)}, ${varAlpha(theme.palette.primary.mainChannel, 0.8)})`,
+                  opacity: 0.95,
+                }
+              })}
             >
               {t('draft.guard.upgradePlan', 'Upgrade Plan')}
             </Button>
