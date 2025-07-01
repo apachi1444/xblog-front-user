@@ -27,8 +27,8 @@ const mockSubscriptionDetails = {
   regeneration_number: 15,
   regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
-  subscription_name: 'Professional',
-  plan_id: '3' // Matches the Professional plan ID in the plans list
+  subscription_name: 'Free',
+  plan_id: '1' // Matches the Free plan ID in the plans list
 };
 
 // Mock data for calendar

@@ -25,7 +25,8 @@ import {
 
 import { EVALUATION_FUNCTIONS, IMPROVEMENT_FUNCTIONS } from 'src/utils/seo-criteria-evaluators';
 
-import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { isFreeplan } from 'src/services/invoicePdfService';
+import { useGetSubscriptionDetailsQuery, useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -44,10 +45,14 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
   const theme = useTheme();
   const form = useFormContext<GenerateArticleFormData>();
 
-  // Get subscription details
+  // Get subscription details and plans to check if user is on free plan
   const { data: subscriptionDetails } = useGetSubscriptionDetailsQuery();
-  const isPremiumUser = subscriptionDetails?.subscription_name &&
-    !subscriptionDetails.subscription_name.toLowerCase().includes('free');
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
+
+  // Find current plan and check if it's free
+  const currentPlan = availablePlans.find(plan => plan.id === subscriptionDetails?.plan_id);
+  const isUserOnFreePlan = currentPlan ? isFreeplan(currentPlan) : true; // Default to free if no plan found
+  const isPremiumUser = !isUserOnFreePlan;
 
   // Simplified state - no need to track field info since it's passed as props
   const [state, setState] = useState({
@@ -332,7 +337,56 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
       </Box>
 
       <DialogContent sx={{ p: 4 }}>
-        {/* Score Analysis */}
+        {/* Free Plan Restriction */}
+        {isUserOnFreePlan ? (
+          <Stack spacing={3} alignItems="center" sx={{ py: 6 }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                bgcolor: alpha(theme.palette.warning.main, 0.1),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Iconify icon="eva:lock-outline" width={40} height={40} color={theme.palette.warning.main} />
+            </Box>
+
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <Typography variant="h5" color="text.primary">
+                {t('optimization.premium_required_title', 'Premium Feature Required')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
+                {t('optimization.premium_required_description', 'AI-powered SEO optimization is available with premium plans. Upgrade your plan to unlock advanced optimization features and improve your content performance.')}
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  // Navigate to upgrade page - you can customize this URL
+                  window.open('/upgrade-license', '_blank');
+                }}
+                sx={{ borderRadius: 2 }}
+              >
+                {t('optimization.upgrade_plan', 'Upgrade Plan')}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={onClose}
+                sx={{ borderRadius: 2 }}
+              >
+                {t('common.close', 'Close')}
+              </Button>
+            </Stack>
+          </Stack>
+        ) : (
+          <>
+            {/* Score Analysis */}
         <Card
           sx={{
             p: 3,
@@ -677,18 +731,21 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
           </Fade>
         )}
       </Stack>
+        </>
+        )}
       </DialogContent>
 
-      {/* Footer */}
-      <Box
-        sx={{
-          p: 3,
-          bgcolor: theme.palette.mode === 'dark'
-            ? alpha(theme.palette.background.paper, 0.8)
-            : alpha(theme.palette.grey[50], 0.8),
-          borderTop: `1px solid ${theme.palette.divider}`,
-        }}
-      >
+      {/* Footer - Only show for premium users */}
+      {!isUserOnFreePlan && (
+        <Box
+          sx={{
+            p: 3,
+            bgcolor: theme.palette.mode === 'dark'
+              ? alpha(theme.palette.background.paper, 0.8)
+              : alpha(theme.palette.grey[50], 0.8),
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button
             onClick={onClose}
@@ -723,7 +780,8 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
             </Button>
           )}
         </Stack>
-      </Box>
+        </Box>
+      )}
     </Dialog>
   );
 }
