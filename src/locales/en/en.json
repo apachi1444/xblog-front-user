@@ -36,6 +36,15 @@
       "book_demo": "Book Demo",
       "ai_assistance_chat": "AI Assistance chat"
     },
+    "blog": {
+      "published": "Published",
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "unknown": "Unknown",
+      "inProgress": "IN PROGRESS",
+      "imageNotSet": "Image not set",
+      "editDraft": "Edit Draft"
+    },
     "upgrade": {
       "unlockFeatures": "Want to unlock more features?",
       "upgradeToPro": "Upgrade to Pro 🚀",

@@ -1,7 +1,9 @@
 import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -9,6 +11,7 @@ import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -86,6 +89,8 @@ export function PostItem({
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
   // Get platform icons for this post
   const platforms = getPlatformIcons(post);
@@ -121,6 +126,11 @@ export function PostItem({
   };
 
   const statusConfig = getStatusConfig();
+
+  // Handle edit button click for draft articles
+  const handleEditDraft = () => {
+    navigate(`/generate?articleId=${post.id}`);
+  };
 
 
   const renderTitle = (
@@ -169,6 +179,66 @@ export function PostItem({
         })
       }}
     />
+  );
+
+  // Render edit overlay for draft articles (appears on hover)
+  const renderEditOverlay = post.status === 'draft' && (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: alpha(theme.palette.common.black, 0.6),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: isHovered ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+        zIndex: 12,
+        cursor: 'pointer',
+      }}
+      onClick={handleEditDraft}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 1,
+          transform: isHovered ? 'scale(1)' : 'scale(0.9)',
+          transition: 'transform 0.3s ease-in-out',
+        }}
+      >
+        <IconButton
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            color: 'white',
+            width: 56,
+            height: 56,
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark,
+              transform: 'scale(1.1)',
+            },
+            boxShadow: theme.shadows[8],
+          }}
+        >
+          <Iconify icon="mdi:pencil" width={24} height={24} />
+        </IconButton>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: 'white',
+            fontWeight: 600,
+            textAlign: 'center',
+            textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+          }}
+        >
+          {t('blog.editDraft', 'Edit Draft')}
+        </Typography>
+      </Box>
+    </Box>
   );
 
   // Render platform icons for published posts
@@ -415,13 +485,25 @@ export function PostItem({
 
   return (
     <Card
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
         position: 'relative',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[10],
-        },
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+        ...(post.status === 'draft' && {
+          border: `2px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: theme.shadows[8],
+            borderColor: alpha(theme.palette.warning.main, 0.6),
+          },
+        }),
+        ...(post.status !== 'draft' && {
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: theme.shadows[10],
+          },
+        }),
         ...sx
       }}
       {...other}
@@ -455,6 +537,7 @@ export function PostItem({
         {platforms.length > 0 && renderPlatforms}
         {renderScheduledInfo}
         {renderDraftCreative}
+        {renderEditOverlay}
       </Box>
 
       <Box
