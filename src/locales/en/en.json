@@ -16,6 +16,11 @@
           "seoMeta": "SEO Meta Information"
         }
       },
+      "unsavedChanges": "You have unsaved changes",
+      "saveChangesPrompt": "Save your progress to avoid losing your work",
+      "discardChanges": "Discard",
+      "saving": "Saving...",
+      "saveDraft": "Save Draft",
       "startCreating": "Supercharge Your Content Creation",
       "description": "Our AI-powered platform helps you create high-quality, engaging content in minutes. Perfect for blogs, websites, and social media.",
       "createNow": "Start Creating Now",

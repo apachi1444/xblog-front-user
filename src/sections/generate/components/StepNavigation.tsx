@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 
-import { Box, Stack, Button, useTheme, CircularProgress } from '@mui/material';
+import { Box, Stack, Button, useTheme } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -16,30 +16,16 @@ interface StepNavigationProps {
   totalSteps: number;
   onNextStep: () => void;
   onPrevStep: () => void;
-  // Save functionality props
-  hasUnsavedChanges?: boolean;
-  isSaving?: boolean;
-  onSaveDraft?: (formData: any) => void;
 }
 
 export const StepNavigation = ({
   activeStep,
   totalSteps,
   onNextStep,
-  onPrevStep,
-  hasUnsavedChanges = false,
-  isSaving = false,
-  onSaveDraft
+  onPrevStep
 }: StepNavigationProps) => {
   const theme = useTheme();
   const methods = useFormContext();
-
-  const handleSaveDraft = () => {
-    if (onSaveDraft) {
-      const formData = methods.getValues();
-      onSaveDraft(formData);
-    }
-  };
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -191,37 +177,8 @@ export const StepNavigation = ({
           ) : null}
         </Box>
 
-        {/* Center - Save Draft button */}
-        <Box>
-          {hasUnsavedChanges && onSaveDraft && (
-            <Button
-              variant="outlined"
-              color="warning"
-              onClick={handleSaveDraft}
-              disabled={isSaving}
-              startIcon={
-                isSaving ? (
-                  <CircularProgress size={16} />
-                ) : (
-                  <Iconify icon="eva:save-fill" />
-                )
-              }
-              sx={{
-                borderRadius: '24px',
-                minWidth: '140px',
-                textTransform: 'none',
-                borderColor: 'warning.main',
-                color: 'warning.main',
-                '&:hover': {
-                  borderColor: 'warning.dark',
-                  bgcolor: 'warning.lighter',
-                }
-              }}
-            >
-              {isSaving ? 'Saving...' : 'Save Draft'}
-            </Button>
-          )}
-        </Box>
+        {/* Center - Empty space for cleaner layout */}
+        <Box />
 
         {/* Right side - Next/Action buttons */}
         <Box>

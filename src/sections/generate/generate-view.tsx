@@ -26,6 +26,7 @@ import { STEPS_KEYS } from './constants';
 import { DraftGuard } from './components/DraftGuard';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
+import { SaveDraftToast } from './components/SaveDraftToast';
 // Types and constants
 import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 
@@ -379,6 +380,10 @@ export function GeneratingView() {
             totalSteps={steps.length}
             onNextStep={handleNextStep}
             onPrevStep={handlePrevStep}
+          />
+
+          {/* Save Draft Toast - appears when there are unsaved changes */}
+          <SaveDraftToast
             hasUnsavedChanges={articleDraft.hasUnsavedChanges}
             isSaving={articleDraft.isSaving}
             onSaveDraft={articleDraft.saveDraft}
