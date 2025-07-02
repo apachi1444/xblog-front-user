@@ -75,10 +75,10 @@ export const subscriptionApi = api.injectEndpoints({
       query: () => ({
         url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'GET',
-        providesTags: ['Subscription'],
-        // Cache the subscription details for 1 hour
-        keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS,
       }),
+      providesTags: ['Subscription'],
+      // Very short cache duration for real-time updates
+      keepUnusedDataFor: 30, // 30 seconds for immediate updates
     }),
 
     // Get subscription plans
@@ -86,10 +86,10 @@ export const subscriptionApi = api.injectEndpoints({
       query: () => ({
         url: '/all/plans',
         method: 'GET',
-        providesTags: ['Plans'],
-        // Cache the plans for 1 hour
-        keepUnusedDataFor: CACHE_DURATION.PLANS,
       }),
+      providesTags: ['Plans'],
+      // Cache the plans for 1 hour
+      keepUnusedDataFor: CACHE_DURATION.PLANS,
     }),
 
     createSubscription: builder.mutation<void, { plan_id: string }>({
@@ -97,8 +97,8 @@ export const subscriptionApi = api.injectEndpoints({
         url: `${SUBSCRIPTION_BASE_URL}`,
         method: 'POST',
         body: data,
-        invalidatesTags: ['Subscription', 'Plans'],
       }),
+      invalidatesTags: ['Subscription', 'Plans'],
     }),
 
     // Upgrade subscription
@@ -107,8 +107,8 @@ export const subscriptionApi = api.injectEndpoints({
         url: `${SUBSCRIPTION_BASE_URL}/upgrade`,
         method: 'PATCH',
         body: data,
-        invalidatesTags: ['Subscription', 'Plans'],
       }),
+      invalidatesTags: ['Subscription', 'Plans'],
     }),
   }),
 });

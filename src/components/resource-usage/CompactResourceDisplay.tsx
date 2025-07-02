@@ -14,8 +14,13 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  // Get subscription details from API
-  const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery();
+  // Get subscription details from API with forced refetch and polling
+  const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery(undefined, {
+    // Force refetch every time component mounts to ensure fresh data
+    refetchOnMountOrArgChange: true,
+    // Poll every 30 seconds to keep data fresh
+    pollingInterval: 30000,
+  });
 
   let used = 0;
   let total = 0;

@@ -14,22 +14,26 @@ import customRequest from './axios';
 // Initialize mock adapter
 const mock = new MockAdapter(customRequest, { onNoMatch: 'passthrough' });
 
+// Dynamic counters for mock data
+let mockArticleCount = 45; // Starting count
+let mockWebsiteCount = 3;  // Starting count
+
 // Mock data for subscription with expiration date in 2 days to trigger the banner
-const mockSubscriptionDetails = {
+const getMockSubscriptionDetails = () => ({
   start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
   end_date: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000).toISOString(),
   // Set expiration date to 2 days from now to trigger the banner
   expiration_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-  connected_websites: 3,
+  connected_websites: mockWebsiteCount,
   websites_limit: 5,
-  articles_created: 45,
+  articles_created: mockArticleCount,
   articles_limit: 100,
   regeneration_number: 0,
   regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
   subscription_name: 'Free',
   plan_id: '1' // Matches the Free plan ID in the plans list
-};
+});
 
 // Mock data for calendar
 const mockCalendarEvents = [...Array(10)].map((_, index) => ({
@@ -95,6 +99,10 @@ const setupMocks = () => {
       const requestData = JSON.parse(config.data);
       console.log('🔥 Mock create article endpoint called with:', requestData);
 
+      // Increment article count for subscription tracking
+      mockArticleCount++;
+      console.log('🔥 Article count incremented to:', mockArticleCount);
+
       const newArticle = {
         id: `article_${Date.now()}`,
         title: requestData.title || 'Untitled Article',
@@ -141,6 +149,9 @@ const setupMocks = () => {
       const articleExists = _posts.some(post => post.id.toString() === articleId);
 
       if (articleExists) {
+        // Decrement article count for subscription tracking
+        mockArticleCount = Math.max(0, mockArticleCount - 1);
+        console.log('🔥 Article count decremented to:', mockArticleCount);
         return [200, { message: `Article ${articleId} deleted successfully` }];
       }
       return [404, { message: 'Article not found' }];
@@ -148,9 +159,10 @@ const setupMocks = () => {
 
     // Subscription endpoints
     mock.onGet('/subscriptions').reply((config) => {
+      const subscriptionData = getMockSubscriptionDetails();
       console.log('🔥 Mock subscription endpoint called:', config.url);
-      console.log('🔥 Returning subscription data:', mockSubscriptionDetails);
-      return [200, mockSubscriptionDetails];
+      console.log('🔥 Returning subscription data:', subscriptionData);
+      return [200, subscriptionData];
     });
 
     // Mock subscription plans endpoint
@@ -457,6 +469,10 @@ const setupMocks = () => {
     mock.onDelete(/\/stores\/.*/).reply((config) => {
       const storeId = config.url?.split('/').pop();
 
+      // Decrement website count for subscription tracking
+      mockWebsiteCount = Math.max(0, mockWebsiteCount - 1);
+      console.log('🔥 Website count decremented to:', mockWebsiteCount);
+
       return [200, {
         success: true,
         message: `Store ${storeId} deleted successfully`
@@ -489,6 +505,50 @@ const setupMocks = () => {
           isConnected: true
         }
       }];
+    });
+
+    // WordPress connection mock
+    mock.onPost('/connect/wordpress').reply((config) => {
+      const requestData = JSON.parse(config.data);
+      console.log('🔥 Mock WordPress connection endpoint called with:', requestData);
+
+      // Increment website count for subscription tracking
+      mockWebsiteCount++;
+      console.log('🔥 Website count incremented to:', mockWebsiteCount);
+
+      const newStore = {
+        id: `store_${Date.now()}`,
+        name: requestData.store_url || 'WordPress Site',
+        url: requestData.store_url || 'https://example.com',
+        isConnected: true,
+        message: 'WordPress site connected successfully'
+      };
+
+      console.log('🔥 Returning connected WordPress store:', newStore);
+      return [200, newStore];
+    });
+
+    // Add store mock (generic store addition)
+    mock.onPost('/stores').reply((config) => {
+      const requestData = JSON.parse(config.data);
+      console.log('🔥 Mock add store endpoint called with:', requestData);
+
+      // Increment website count for subscription tracking
+      mockWebsiteCount++;
+      console.log('🔥 Website count incremented to:', mockWebsiteCount);
+
+      const newStore = {
+        id: `store_${Date.now()}`,
+        name: requestData.name || 'New Store',
+        url: requestData.url || 'https://example.com',
+        platform: requestData.platform || 'unknown',
+        isConnected: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('🔥 Returning created store:', newStore);
+      return [201, newStore];
     });
     // Mock generate-keywords endpoint
     mock.onPost('/generate-keywords').reply((config) => {
