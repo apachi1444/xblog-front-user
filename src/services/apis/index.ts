@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import MockAdapter from 'axios-mock-adapter';
