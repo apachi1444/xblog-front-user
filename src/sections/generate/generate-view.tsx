@@ -63,6 +63,8 @@ export function GeneratingView() {
   // Article draft management
   const articleDraft = useArticleDraft({
     onSave: (article) => {
+      // Reset unsaved changes flag after successful save
+      articleDraft.setHasUnsavedChanges(false);
       navigate('/generate');
     },
     onError: (error) => {
@@ -236,46 +238,21 @@ export function GeneratingView() {
     return current !== initial;
   }, []);
 
-  useEffect(() => {
-  if (selectedArticle) {
-    // Set the current article for the draft system (ONLY ONCE)
-    const articleResponse: CreateArticleResponse = {
-      id: selectedArticle.id.toString(),
-      title: selectedArticle.article_title || selectedArticle.title || '',
-      content: selectedArticle.content || '',
-      meta_description: selectedArticle.meta_description || '',
-      keywords: [],
-      status: (selectedArticle.status as 'draft' | 'published') || 'draft',
-      website_id: null,
-      created_at: selectedArticle.created_at,
-      updated_at: selectedArticle.created_at,
-    };
-
-    articleDraft.setCurrentArticle(articleResponse);
-    // Reset unsaved changes when loading a draft
-    articleDraft.setHasUnsavedChanges(false);
-  }
-}, [articleDraft, selectedArticle]);
+  // Stable function to handle form changes
+  const handleFormChange = useCallback((data: any, { name, type }: any) => {
+    // Trigger on ANY user input change to ANY field
+    if (type === 'change' && name) {
+      console.log('🔥 Field changed:', name, 'Type:', type);
+      // Show save toast immediately when user changes any field
+      articleDraft.setHasUnsavedChanges(true);
+    }
+  }, [articleDraft]);
 
   // Watch for form changes to show save button
   useEffect(() => {
-    const subscription = methods.watch((data, { name, type }) => {
-      // Only trigger on actual user input changes, not on navigation or programmatic changes
-      if (type === 'change' && name) {
-        // Check if any form data has changed from initial values
-        const formHasChanges = hasChanges(data, defaultValues);
-
-        // Only set unsaved changes if there are actual changes
-        if (formHasChanges) {
-          articleDraft.setHasUnsavedChanges(true);
-        } else {
-          articleDraft.setHasUnsavedChanges(false);
-        }
-      }
-    });
-
+    const subscription = methods.watch(handleFormChange);
     return () => subscription.unsubscribe();
-  }, [methods, articleDraft, defaultValues, hasChanges]);
+  }, [methods, handleFormChange]);
 
   // Dynamic steps with translations
   const steps = STEPS_KEYS.map(step => {
@@ -343,25 +320,6 @@ export function GeneratingView() {
             {!articleDraft.currentArticle && (
               <Typography variant="h5">
                 Create New Article
-              </Typography>
-            )}
-          </Box>
-
-          {/* Status Indicator Only */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {!articleDraft.hasUnsavedChanges && articleDraft.currentArticle && (
-              <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                ✓ All changes saved
-              </Typography>
-            )}
-            {articleDraft.hasUnsavedChanges && articleDraft.currentArticle && (
-              <Typography variant="body2" color="warning.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                ● Unsaved changes
-              </Typography>
-            )}
-            {articleDraft.isCreating && (
-              <Typography variant="body2" color="info.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                ● Creating article...
               </Typography>
             )}
           </Box>

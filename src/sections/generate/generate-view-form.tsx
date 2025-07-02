@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 
 import { Button } from '@mui/material';
 
@@ -9,6 +10,7 @@ import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
 import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
+import { api } from 'src/services/apis';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
@@ -38,6 +40,7 @@ export function GenerateViewForm({
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
+  const dispatch = useDispatch();
 
   // Generation hooks
   const { generateSecondaryKeywords } = useKeywordGeneration();
@@ -84,8 +87,16 @@ export function GenerateViewForm({
 
       if (generatedTitle) {
         console.log('✅ Generated title:', generatedTitle);
-        return generatedTitle;
-      } 
+
+        // Handle comma-separated alternatives - use only the first one
+        const firstTitle = generatedTitle.split(',')[0].trim();
+        console.log('✅ Using first title alternative:', firstTitle);
+
+        // Invalidate subscription cache to update regeneration count in header
+        dispatch(api.util.invalidateTags(['Subscription']));
+
+        return firstTitle;
+      }
         console.warn('⚠️ No title generated, using fallback');
         return `Complete Guide to ${primaryKeyword}`;
       
@@ -122,6 +133,9 @@ export function GenerateViewForm({
         // Update the form with generated keywords
         methods.setValue('step1.secondaryKeywords', generatedKeywords, { shouldValidate: true });
         console.log('✅ Generated secondary keywords:', generatedKeywords);
+
+        // Invalidate subscription cache to update regeneration count in header
+        dispatch(api.util.invalidateTags(['Subscription']));
       } else {
         console.warn('⚠️ No keywords generated, using fallback');
         // Fallback keywords if API fails
@@ -185,6 +199,9 @@ export function GenerateViewForm({
 
       console.log('✅ Content description optimized successfully');
 
+      // Invalidate subscription cache to update regeneration count in header
+      dispatch(api.util.invalidateTags(['Subscription']));
+
     } catch (error) {
       console.error('❌ Error optimizing content description:', error);
     } finally {
@@ -221,12 +238,16 @@ export function GenerateViewForm({
 
       if (generatedMeta) {
         console.log('✅ Generated meta tags:', generatedMeta);
+
+        // Invalidate subscription cache to update regeneration count in header
+        dispatch(api.util.invalidateTags(['Subscription']));
+
         return {
           metaTitle: generatedMeta.metaTitle,
           metaDescription: generatedMeta.metaDescription,
           urlSlug: generatedMeta.urlSlug
         };
-      } 
+      }
         console.warn('⚠️ No meta tags generated, using fallback');
         return {
           metaTitle: `${title} | Complete Guide`,
@@ -256,18 +277,15 @@ export function GenerateViewForm({
     const sections = [
       {
         id: 'section-1',
-        title: 'Introduction',
-        status: 'completed'
-      },
+        title: 'Introduction'
+      },  
       {
         id: 'section-2',
         title: 'What is SEO?',
-        status: 'completed'
       },
       {
         id: 'section-3',
         title: 'Why is SEO Important?',
-        status: 'completed'
       }
     ] as ArticleSection[];
 
@@ -277,8 +295,6 @@ export function GenerateViewForm({
     // Wait for 6 seconds to ensure the animation completes
     // The animation takes 5.5 seconds to complete
     await simulateDelay(6000);
-
-    console.log('Fake table of contents generated');
 
     // Only set isGeneratingSections to false after the animation has had time to complete
     setGenerationState((s) => ({ ...s, isGeneratingSections: false, isGenerated: true }));
