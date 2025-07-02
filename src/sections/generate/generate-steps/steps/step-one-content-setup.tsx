@@ -2,12 +2,16 @@ import type React from "react";
 import type { InputKey } from "src/types/criteria.types";
 
 import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useWatch, useFormContext } from "react-hook-form";
 
 import { useTheme } from "@mui/material/styles";
 import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material";
+
+// RTK Query
+import { api } from "src/services/apis";
 
 // Components
 import { Iconify } from "src/components/iconify";
@@ -19,7 +23,6 @@ import { GenerationLoadingAnimation } from "src/components/generate-article/Gene
 import { KeywordChip } from "../../components/KeywordChip";
 // Custom components
 import { RegenerateButton } from "../../components/RegenerateButton";
-// Custom hooks
 import { GenerationPlaceholder } from "../../components/GenerationPlaceholder";
 
 // Types
@@ -60,6 +63,9 @@ export function Step1ContentSetup({
   } = form
 
   const theme = useTheme()
+
+  // For cache invalidation after regeneration
+  const dispatch = useDispatch();
 
   const contentDescription = useWatch({
     control,
@@ -112,6 +118,11 @@ export function Step1ContentSetup({
   // Track which fields have been generated at least once
   const [hasGeneratedTitle, setHasGeneratedTitle] = useState(false);
   const [hasGeneratedMeta, setHasGeneratedMeta] = useState(false);
+  const [hasGeneratedSecondaryKeywords, setHasGeneratedSecondaryKeywords] = useState(false);
+  const [hasGeneratedContentDescription, setHasGeneratedContentDescription] = useState(false);
+
+  // Check if content already exists (for regeneration logic)
+  // Note: We now use hasGenerated... flags to determine button text instead
 
   useEffect(() => {
     evaluateCriteria("primaryKeyword", primaryKeyword);
@@ -172,15 +183,29 @@ export function Step1ContentSetup({
 
     try {
       const generatedTitle = await onGenerateTitle();
-      setValue("step1.title", generatedTitle);
+
+      // Handle comma-separated alternatives - use only the first one
+      const firstTitle = generatedTitle.split(',')[0].trim();
+
+      setValue("step1.title", firstTitle);
       setHasGeneratedTitle(true); // Mark that title has been generated
+
+      // Invalidate subscription cache to update regeneration count in header
+      dispatch(api.util.invalidateTags(['Subscription']));
     } catch (error) {
       toast.error("Error generating title:");
+    } finally {
+      // Reset loading state
+      if (externalIsGeneratingTitle === undefined) {
+        setLocalIsGeneratingTitle(false);
+      }
     }
   };
 
   // Update the secondary keywords generation handler to use the state prop
   const handleGenerateSecondaryKeywordsWithValidation = async () => {
+    // RegenerateButton component handles regeneration quota checking
+
     // Only set local state if external state is not provided
     if (externalIsGeneratingKeywords === undefined) {
       setLocalIsGeneratingSecondaryKeywords(true);
@@ -190,6 +215,10 @@ export function Step1ContentSetup({
     if (primaryKeywordValid) {
       try {
         await onGenerateSecondaryKeywords();
+        setHasGeneratedSecondaryKeywords(true); // Mark as generated
+
+        // Invalidate subscription cache to update regeneration count in header
+        dispatch(api.util.invalidateTags(['Subscription']));
       } catch (error) {
         console.error("Error generating secondary keywords:", error);
       } finally {
@@ -202,6 +231,8 @@ export function Step1ContentSetup({
   };
 
   const handleOptimizeContentDescription = async () => {
+    // RegenerateButton component handles regeneration quota checking
+
     // Only set local state if external state is not provided
     if (externalIsOptimizingDescription === undefined) {
       setLocalIsOptimizingContentDescription(true);
@@ -209,6 +240,10 @@ export function Step1ContentSetup({
 
     try {
       await onOptimizeContentDescription();
+      setHasGeneratedContentDescription(true); // Mark as generated
+
+      // Invalidate subscription cache to update regeneration count in header
+      dispatch(api.util.invalidateTags(['Subscription']));
     } catch (error) {
       console.error("Error optimizing content description:", error);
     } finally {
@@ -320,54 +355,18 @@ export function Step1ContentSetup({
             </Box>
 
             {primaryKeyword && (
-              <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, minHeight: theme.spacing(4) }}>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  onClick={handleGenerateSecondaryKeywordsWithValidation}
-                  disabled={isGeneratingSecondaryKeywords}
-                  startIcon={
-                    isGeneratingSecondaryKeywords ? (
-                      <CircularProgress
-                        size={16}
-                        color="inherit"
-                        sx={{
-                          animation: "spin 1.2s linear infinite",
-                          "@keyframes spin": {
-                            "0%": { transform: "rotate(0deg)" },
-                            "100%": { transform: "rotate(360deg)" },
-                          },
-                        }}
-                      />
-                    ) : (
-                      <Iconify icon="eva:sparkle-fill" width={16} />
-                    )
-                  }
-                  sx={{
-                    borderRadius: theme.spacing(3),
-                    borderColor: theme.palette.secondary.dark,
-                    textTransform: "none",
-                    fontSize: theme.typography.pxToRem(12),
-                    transition: "all 0.3s ease",
-                    opacity: isGeneratingTitle ? 0.8 : 1,
-                    color: theme.palette.secondary.dark,
-                    "&:hover": {
-                      color: theme.palette.secondary.dark,
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "inherit",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {isGeneratingSecondaryKeywords ? "Generating Suggestions..." : "Generate Suggestions with AI"}
-                  </Typography>
-                </Button>
-              </Box>
+              <RegenerateButton
+                onClick={handleGenerateSecondaryKeywordsWithValidation}
+                isGenerating={isGeneratingSecondaryKeywords}
+                isFirstGeneration={!hasGeneratedSecondaryKeywords}
+                label={
+                  isGeneratingSecondaryKeywords
+                    ? "Generating Suggestions..."
+                    : hasGeneratedSecondaryKeywords
+                      ? "Regenerate Suggestions with AI"
+                      : "Generate Suggestions with AI"
+                }
+              />
             )}
 
             {/* Display secondary keywords as chips */}
@@ -425,54 +424,18 @@ export function Step1ContentSetup({
 
             {/* Optimize Content Description Button */}
             {contentDescription && primaryKeyword && (
-              <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 1, minHeight: theme.spacing(4) }}>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  onClick={handleOptimizeContentDescription}
-                  disabled={isOptimizingContentDescription}
-                  startIcon={
-                    isOptimizingContentDescription ? (
-                      <CircularProgress
-                        size={16}
-                        color="inherit"
-                        sx={{
-                          animation: "spin 1.2s linear infinite",
-                          "@keyframes spin": {
-                            "0%": { transform: "rotate(0deg)" },
-                            "100%": { transform: "rotate(360deg)" },
-                          },
-                        }}
-                      />
-                    ) : (
-                      <Iconify icon="eva:sparkle-fill" width={16} />
-                    )
-                  }
-                  sx={{
-                    borderRadius: theme.spacing(3),
-                    borderColor: theme.palette.secondary.dark,
-                    textTransform: "none",
-                    fontSize: theme.typography.pxToRem(12),
-                    transition: "all 0.3s ease",
-                    opacity: isOptimizingContentDescription ? 0.8 : 1,
-                    color: theme.palette.secondary.dark,
-                    "&:hover": {
-                      color: theme.palette.secondary.dark,
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "inherit",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {isOptimizingContentDescription ? "Optimizing..." : "Optimize with AI"}
-                  </Typography>
-                </Button>
-              </Box>
+              <RegenerateButton
+                onClick={handleOptimizeContentDescription}
+                isGenerating={isOptimizingContentDescription}
+                isFirstGeneration={!hasGeneratedContentDescription}
+                label={
+                  isOptimizingContentDescription
+                    ? "Optimizing..."
+                    : hasGeneratedContentDescription
+                      ? "Re-optimize with AI"
+                      : "Optimize with AI"
+                }
+              />
             )}
 
             {/* Content Description Optimization Loading Animation */}
@@ -561,6 +524,7 @@ export function Step1ContentSetup({
                 <RegenerateButton
                   onClick={handleGenerateTitle}
                   isGenerating={isGeneratingTitle}
+                  isFirstGeneration={!hasGeneratedTitle}
                   label="Regenerate Article Title"
                 />
 
@@ -636,6 +600,7 @@ export function Step1ContentSetup({
               <RegenerateButton
                 onClick={handleGenerateMeta}
                 isGenerating={isGeneratingMeta}
+                isFirstGeneration={!hasGeneratedMeta}
                 label="Regenerate All"
               />
 

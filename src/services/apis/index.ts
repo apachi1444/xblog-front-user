@@ -24,7 +24,7 @@ const mockSubscriptionDetails = {
   websites_limit: 5,
   articles_created: 45,
   articles_limit: 100,
-  regeneration_number: 15,
+  regeneration_number: 0,
   regeneration_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
   subscription_name: 'Free',
@@ -593,8 +593,10 @@ const setupMocks = () => {
           ];
         }
 
-        const title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
-        console.log('📝 Generated mock title:', title);
+        // Return comma-separated alternatives to simulate real API behavior
+        const shuffledTitles = [...titleTemplates].sort(() => 0.5 - Math.random());
+        const title = shuffledTitles.slice(0, 3).join(', ');
+        console.log('📝 Generated mock title with alternatives:', title);
 
         return [
           200,
