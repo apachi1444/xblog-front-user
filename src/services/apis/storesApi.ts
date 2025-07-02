@@ -26,7 +26,7 @@ export const storesApi = api.injectEndpoints({
         url: `${STORES_BASE_URL}/${store_id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Stores'],
+      invalidatesTags: ['Stores', 'Subscription'],
     }),
 
     // New disconnectStore mutation endpoint
@@ -54,7 +54,7 @@ export const storesApi = api.injectEndpoints({
         method: 'POST',
         body: store,
       }),
-      invalidatesTags: ['Stores'],
+      invalidatesTags: ['Stores', 'Subscription'],
     }),
   }),
 });

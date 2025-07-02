@@ -1,9 +1,9 @@
 
+import { toast } from 'react-hot-toast';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-hot-toast';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -14,8 +14,8 @@ import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -32,10 +32,17 @@ export function CreateView() {
 
   const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
 
-  // Filter draft articles
+  // Filter and sort draft articles by most recent first
   const draftArticles = useMemo(() => {
     if (!articlesData?.articles) return [];
-    return articlesData.articles.filter(article => article.status === 'draft');
+    return articlesData.articles
+      .filter(article => article.status === 'draft')
+      .sort((a, b) => {
+        // Sort by updated_at if available, otherwise use created_at (most recent first)
+        const dateA = new Date(a.updated_at || a.created_at).getTime();
+        const dateB = new Date(b.updated_at || b.created_at).getTime();
+        return dateB - dateA;
+      });
   }, [articlesData]);
 
   const createOptions = [
@@ -288,7 +295,14 @@ export function CreateView() {
                   <Box>
                     <Typography variant="subtitle1">{article.title}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Created on {new Date(article.created_at).toLocaleDateString()}
+                      {article.updated_at
+                        ? t('create.lastUpdated', 'Last updated {{date}}', {
+                            date: new Date(article.updated_at).toLocaleDateString()
+                          })
+                        : t('create.createdOn', 'Created on {{date}}', {
+                            date: new Date(article.created_at).toLocaleDateString()
+                          })
+                      }
                     </Typography>
                   </Box>
                   <Iconify

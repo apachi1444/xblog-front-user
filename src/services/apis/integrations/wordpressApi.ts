@@ -27,6 +27,7 @@ export const wordpressApi = api.injectEndpoints({
         method: 'POST',
         body: storeData,
       }),
+      invalidatesTags: ['Stores', 'Subscription'],
     }),
     
     // Get WordPress store details

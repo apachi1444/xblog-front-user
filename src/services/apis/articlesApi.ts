@@ -84,7 +84,7 @@ export const articlesApi = api.injectEndpoints({
         method: 'POST',
         body: article,
       }),
-      invalidatesTags: ['Articles'],
+      invalidatesTags: ['Articles', 'Subscription'],
     }),
 
     // Update an existing article
@@ -103,7 +103,7 @@ export const articlesApi = api.injectEndpoints({
         url: `${ARTICLES_BASE_URL}/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Articles'],
+      invalidatesTags: ['Articles', 'Subscription'],
     }),
 
     unscheduleArticle: builder.mutation<Article, { article_id: string; store_id: number }>({
