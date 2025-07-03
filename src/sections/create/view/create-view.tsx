@@ -93,8 +93,8 @@ export function CreateView() {
           website_id: undefined,
         }).unwrap();
 
-        // Navigate to generate view with the new article ID
-        navigate(`/generate?articleId=${newArticle.id}`);
+        // Navigate to generate view for new article (no articleId in URL)
+        navigate('/generate');
 
         toast.success('New article created! Start editing...');
       } catch (error) {

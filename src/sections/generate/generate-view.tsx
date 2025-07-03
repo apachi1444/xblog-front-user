@@ -65,7 +65,12 @@ export function GeneratingView() {
     onSave: (article) => {
       // Reset unsaved changes flag after successful save
       articleDraft.setHasUnsavedChanges(false);
-      navigate('/generate');
+
+      // If this is a new article (no articleId in URL), add it to URL for future editing
+      if (!articleId) {
+        navigate(`/generate?articleId=${article.id}`);
+      }
+      // If already editing an existing draft, stay on the same URL
     },
     onError: (error) => {
       console.error('❌ Article error:', error);
@@ -247,6 +252,39 @@ export function GeneratingView() {
       articleDraft.setHasUnsavedChanges(true);
     }
   }, [articleDraft]);
+
+  // Set current article in draft when editing existing article
+  useEffect(() => {
+    if (selectedArticle) {
+      // Convert Article type to CreateArticleResponse type
+      const convertedArticle: CreateArticleResponse = {
+        id: selectedArticle.id.toString(),
+        title: selectedArticle.article_title || selectedArticle.title || 'Untitled Article',
+        content: selectedArticle.content || '',
+        meta_description: selectedArticle.meta_description || '',
+        keywords: (() => {
+          try {
+            const secondaryKeywords = selectedArticle.secondary_keywords
+              ? JSON.parse(selectedArticle.secondary_keywords)
+              : [];
+            return Array.isArray(secondaryKeywords)
+              ? secondaryKeywords.concat([selectedArticle.primary_keyword]).filter(Boolean)
+              : [selectedArticle.primary_keyword].filter(Boolean);
+          } catch {
+            return [selectedArticle.primary_keyword].filter(Boolean);
+          }
+        })(),
+        status: selectedArticle.status === 'scheduled' ? 'draft' : selectedArticle.status,
+        website_id: null, // Articles don't have website_id in current API
+        created_at: selectedArticle.created_at,
+        updated_at: selectedArticle.updated_at || selectedArticle.created_at,
+      };
+      articleDraft.setCurrentArticle(convertedArticle);
+    } else {
+      // Clear current article when creating new article
+      articleDraft.setCurrentArticle(null);
+    }
+  }, [selectedArticle, articleDraft]);
 
   // Watch for form changes to show save button
   useEffect(() => {
