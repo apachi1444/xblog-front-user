@@ -138,11 +138,11 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           p: 2,
           borderRadius: 2,
           transition: 'all 0.2s ease-in-out',
-          background: currentStore.isConnected
+          background: currentStore.is_active
             ? alpha(theme.palette.success.main, 0.08)
             : alpha(theme.palette.error.main, 0.08),
           border: '1px solid',
-          borderColor: currentStore.isConnected
+          borderColor: currentStore.is_active
             ? alpha(theme.palette.success.main, 0.2)
             : alpha(theme.palette.error.main, 0.2),
           textAlign: 'left',
@@ -181,7 +181,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
                   whiteSpace: 'nowrap',
                 }}
               >
-                {getPlatformDisplayName(currentStore.platform)}
+                {getPlatformDisplayName(currentStore.category)}
               </Typography>
             )}
 
@@ -190,13 +190,13 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               variant="caption"
               noWrap
               sx={{
-                color: currentStore.isConnected
+                color: currentStore.is_active
                   ? theme.palette.success.main
                   : theme.palette.error.main,
                 fontWeight: 600,
               }}
             >
-              {currentStore.isConnected ? 'Connected' : 'Disconnected'}
+              {currentStore.is_active ? 'Connected' : 'Disconnected'}
             </Typography>
           </Box>
         </Box>
@@ -271,7 +271,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               selected={store.id === currentStore.id}
               onClick={() => handleChangeWorkspace(store)}
             >
-              {renderAvatar(store.name, store.logo, store.platform)}
+              {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
               <Box component="span" sx={{ flexGrow: 1 }}>
                 <Typography variant="body2" noWrap>
                   {store.name}

@@ -4,11 +4,11 @@ import { _times, _company, _boolean, _postTitles, _description } from './_mock';
 
 // Platform configurations with specific names - mostly WordPress for now
 const platformConfigs = [
-  { name: 'WordPress', logo: '/assets/icons/platforms/wordpress.svg' },
-  { name: 'WordPress', logo: '/assets/icons/platforms/wordpress.svg' },
-  { name: 'WordPress', logo: '/assets/icons/platforms/wordpress.svg' },
-  { name: 'Shopify', logo: '/assets/icons/platforms/shopify.svg' }, // Not supported yet
-  { name: 'Wix', logo: '/assets/icons/platforms/wix.svg' } // Not supported yet
+  { name: 'wordpress', avatar: '/assets/icons/platforms/wordpress.svg' },
+  { name: 'wordpress', avatar: '/assets/icons/platforms/wordpress.svg' },
+  { name: 'wordpress', avatar: '/assets/icons/platforms/wordpress.svg' },
+  { name: 'shopify', avatar: '/assets/icons/platforms/shopify.svg' }, // Not supported yet
+  { name: 'wix', avatar: '/assets/icons/platforms/wix.svg' } // Not supported yet
 ];
 
 export const _fakeStores: Store[] = [...Array(5)].map((__, index) => {
@@ -18,8 +18,10 @@ export const _fakeStores: Store[] = [...Array(5)].map((__, index) => {
     id: index,
     name: _company(index),
     url: `https://${_company(index).toLowerCase().replace(/\s+/g, '-')}.com`,
-    logo: platform.logo,
-    isConnected: _boolean(index),
+    avatar: platform.avatar,
+    is_active: _boolean(index),
+    category: platform.name,
+    created_at: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
     articlesCount: Math.floor(Math.random() * 100),
     lastUpdated: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
     performance: {
@@ -33,11 +35,14 @@ export const _fakeStores: Store[] = [...Array(5)].map((__, index) => {
       featured_media: `/assets/images/cover/cover-${(articleIndex % 24) + 1}.webp`,
       created_at: _times(articleIndex),
       status: ['draft', 'published', 'scheduled'][articleIndex % 3] as 'draft' | 'published' | 'scheduled',
-      platform: platform.name.toLowerCase(),
+      platform: platform.name,
       content: _description(articleIndex),
     })),
-    platform: platform.name,
     business: ['Technology', 'E-commerce', 'Fashion', 'Food', 'Health'][index % 5],
+    // Legacy fields for backward compatibility
+    logo: platform.avatar,
+    isConnected: _boolean(index),
+    platform: platform.name,
     creationDate: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString()
   };
 });

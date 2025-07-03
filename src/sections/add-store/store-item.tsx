@@ -53,15 +53,12 @@ export function StoreItem({ store }: StoreItemProps) {
             <Grid container spacing={2}>
               <Grid item xs={4}>
                 <Typography variant="caption" color="textSecondary">Visitors</Typography>
-                <Typography variant="body2">{store.performance.visitors.toLocaleString()}</Typography>
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="textSecondary">Sales</Typography>
-                <Typography variant="body2">{store.performance.sales.toLocaleString()}</Typography>
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="textSecondary">Revenue</Typography>
-                <Typography variant="body2">${store.performance.revenue.toLocaleString()}</Typography>
               </Grid>
             </Grid>
           </Box>

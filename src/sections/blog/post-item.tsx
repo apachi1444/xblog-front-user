@@ -2,6 +2,7 @@ import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
 import { useState } from 'react';
+import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +20,6 @@ import { varAlpha } from 'src/theme/styles';
 
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
-import { formatDate } from 'date-fns';
 
 // ----------------------------------------------------------------------
 
