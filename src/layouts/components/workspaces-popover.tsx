@@ -168,7 +168,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           {/* Second row with Platform Badge and Connection Status */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {/* Platform Badge */}
-            {currentStore.platform && (
+            {currentStore.category && (
               <Typography
                 component="span"
                 variant="caption"
