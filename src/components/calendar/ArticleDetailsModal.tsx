@@ -1,6 +1,6 @@
 import type { Article } from 'src/types/article';
 
-import { format } from 'date-fns';
+import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -170,7 +170,7 @@ export function ArticleDetailsModal({
                         {t('common.created', 'Created')}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {format(new Date(article.created_at), 'MMMM d, yyyy • h:mm a')}
+                        {formatDate(article.created_at, 'MMMM d, yyyy • h:mm a')}
                       </Typography>
                     </Box>
                   </Stack>

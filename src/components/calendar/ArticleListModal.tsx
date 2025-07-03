@@ -1,6 +1,6 @@
 import type { Article } from 'src/types/article';
 
-import { format } from 'date-fns';
+import { format, formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -164,7 +164,7 @@ export function ArticleListModal({
                             sx={{ color: 'text.secondary' }} 
                           />
                           <Typography variant="caption" color="text.secondary">
-                            {format(new Date(article.created_at), 'h:mm a')}
+                            {formatDate(article.created_at, 'h:mm a')}
                           </Typography>
                           {article.content && (
                             <>

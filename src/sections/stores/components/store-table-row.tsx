@@ -1,7 +1,7 @@
 
 // First, let's update the StoreTableRow component to include a toggle button
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { formatDate } from 'date-fns';
 
 import { Box } from '@mui/material';
 import Switch from '@mui/material/Switch';
@@ -42,6 +42,8 @@ const getPlatformDisplayName = (platform: string): string => {
   if (!platform) return 'Unknown';
   return platform.charAt(0).toUpperCase() + platform.slice(1);
 };
+
+
 
 // ----------------------------------------------------------------------
 
@@ -85,7 +87,17 @@ export function StoreTableRow({
   const [openConnectionDialog, setOpenConnectionDialog] = useState(false);
   const [connectionAction, setConnectionAction] = useState<'connect' | 'disconnect'>('disconnect');
   
-  const { id, name, platform, business, creationDate, articlesCount, isConnected } = row;
+  const {
+    id,
+    name,
+    category: platform,
+    created_at: creationDate,
+    is_active: isConnected
+  } = row;
+
+  // Fallback values for fields not in API response
+  const business = row.business || 'N/A';
+  const articlesCount = row.articlesCount || 0;
 
   const handleConnectionToggle = () => {
     setConnectionAction(isConnected ? 'disconnect' : 'connect');
@@ -146,7 +158,7 @@ export function StoreTableRow({
 
         <TableCell>{business}</TableCell>
 
-        <TableCell>{format(new Date(creationDate), 'dd MMM yyyy')}</TableCell>
+        <TableCell>{formatDate(creationDate , 'dd MMM yyyy')}</TableCell>
 
         <TableCell align="center">{articlesCount}</TableCell>
 

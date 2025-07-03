@@ -126,7 +126,7 @@ const storeFormSchema = z.object({
   store_url: z.string().min(1, "WordPress URL is required")
     .url("Please enter a valid URL"),
   store_username: z.string().min(1, "WordPress username is required"),
-  store_password: z.string().min(1, "WordPress password is required"),
+  store_password: z.string().min(1, "Application password is required"),
   
   // Shopify specific fields
   shopifyStore: z.string().optional(),

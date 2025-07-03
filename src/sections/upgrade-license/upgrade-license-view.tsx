@@ -204,11 +204,26 @@ export function UpgradeLicenseView() {
                         <TableCell>{String(index + 1).padStart(2, '0')}</TableCell>
                         <TableCell>{transformedInvoice.invoiceNumber}</TableCell>
                         <TableCell>
-                          {new Date(transformedInvoice.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                          })}
+                          {(() => {
+                            try {
+                              // Handle incomplete ISO date strings from API
+                              const dateStr = transformedInvoice.created_at;
+                              const normalizedDate = dateStr.includes('T') &&
+                                                    !dateStr.includes('Z') &&
+                                                    !dateStr.includes('+') &&
+                                                    !dateStr.includes('-', 10)
+                                ? `${dateStr}Z`
+                                : dateStr;
+                              return new Date(normalizedDate).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit'
+                              });
+                            } catch (error) {
+                              console.error('Date parsing error:', error, 'Original date:', transformedInvoice.created_at);
+                              return 'Invalid Date';
+                            }
+                          })()}
                         </TableCell>
                         <TableCell>{transformedInvoice.plan}</TableCell>
                         <TableCell align="right">${transformedInvoice.amount.toFixed(2)}</TableCell>

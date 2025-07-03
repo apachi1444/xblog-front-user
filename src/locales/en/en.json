@@ -148,7 +148,7 @@
         "urlPlaceholder": "https://your-wordpress-site.com",
         "username": "WordPress Username",
         "usernamePlaceholder": "admin",
-        "password": "WordPress Password",
+        "password": "Application Password",
         "passwordPlaceholder": "••••••••",
         "description": "Connect your WordPress site"
       },

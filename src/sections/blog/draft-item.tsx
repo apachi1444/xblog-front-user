@@ -1,3 +1,4 @@
+import { formatDate } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -8,8 +9,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
-
-import { fDate } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -114,7 +113,7 @@ export function DraftItem({ draft, latestPost, latestPostLarge }: DraftItemProps
           }),
         }}
       >
-        {fDate(draft.updatedAt)}
+        {formatDate(draft.updatedAt , 'MMMM d, yyyy • h:mm a')}
       </Typography>
     </Box>
   );

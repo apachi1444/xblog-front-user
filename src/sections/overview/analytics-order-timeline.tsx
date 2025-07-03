@@ -1,6 +1,8 @@
 import type { CardProps } from '@mui/material/Card';
 import type { TimelineItemProps } from '@mui/lab/TimelineItem';
 
+import { formatDate } from 'date-fns';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -15,7 +17,6 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem';
 
-import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
@@ -129,7 +130,7 @@ function Item({ item, lastItem, ...other }: ItemProps) {
 
           <Grid xs={12}>
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-              {fDate(item.time)}
+              {formatDate(item.time || new Date(), 'dd MMM yyyy')}
             </Typography>
           </Grid>
 

@@ -15,12 +15,11 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { fDate } from 'src/utils/format-time';
-
 import { varAlpha } from 'src/theme/styles';
 
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
+import { formatDate } from 'date-fns';
 
 // ----------------------------------------------------------------------
 
@@ -440,7 +439,7 @@ export function PostItem({
           }),
         }}
       >
-        {fDate(post.created_at)}
+        {formatDate(post.created_at , 'MMMM d, yyyy • h:mm a')}
       </Typography>
     </Box>
   );

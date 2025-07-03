@@ -84,7 +84,7 @@ export function CreateView() {
     if (optionId === 'generate') {
       try {
         // Create empty article first
-        const newArticle = await createArticle({
+        await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',

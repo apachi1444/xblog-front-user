@@ -14,10 +14,10 @@ import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 import TableContainer from '@mui/material/TableContainer';
 
-import { Iconify } from 'src/components/iconify';
-
-import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
+
+import { Iconify } from 'src/components/iconify';
+import { formatDate } from 'date-fns';
 
 // ----------------------------------------------------------------------
 
@@ -215,7 +215,7 @@ export function AnalyticsOrderTable({ title, subheader, list, emptyText = 'No da
                   borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.16) : 'inherit',
                   color: isDarkMode ? theme.palette.grey[300] : 'inherit'
                 }}>
-                  {fDate(item.time)}
+                  {formatDate(item.time || new Date(), 'dd MMM yyyy')}
                 </TableCell>
                 <TableCell align="right" sx={{
                   borderBottomColor: isDarkMode ? alpha(theme.palette.grey[500], 0.16) : 'inherit'
