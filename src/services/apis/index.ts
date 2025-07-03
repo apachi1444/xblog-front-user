@@ -29,8 +29,8 @@ const getMockSubscriptionDetails = () => ({
   websites_limit: 5,
   articles_created: mockArticleCount,
   articles_limit: 100,
-  regeneration_number: 0,
-  regeneration_limit: 20,
+  regenerations_number: 0,
+  regenerations_limit: 20,
   subscription_url: 'https://example.com/manage-subscription',
   subscription_name: 'Free',
   plan_id: '1' // Matches the Free plan ID in the plans list

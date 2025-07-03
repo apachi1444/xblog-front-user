@@ -37,8 +37,8 @@ export interface SubscriptionDetails {
   websites_limit: number;
   articles_created: number;
   articles_limit: number;
-  regeneration_number: number;
-  regeneration_limit: number;
+  regenerations_number: number;
+  regenerations_limit: number;
   subscription_url: string;
   subscription_name: string;
   plan_id: string; // ID to match with plans from getSubscriptionPlans

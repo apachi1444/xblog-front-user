@@ -693,12 +693,12 @@ export function OverviewAnalyticsView() {
                 title={t('analytics.regenerationsAvailable', 'Regenerations Available')}
                 percent={
                   subscriptionDetails &&
-                  subscriptionDetails.regeneration_number > 0 &&
-                  subscriptionDetails.regeneration_limit > 0
-                    ? Number(((subscriptionDetails.regeneration_number / subscriptionDetails.regeneration_limit) * 100).toFixed(1))
+                  subscriptionDetails.regenerations_number > 0 &&
+                  subscriptionDetails.regenerations_limit > 0
+                    ? Number(((subscriptionDetails.regenerations_number / subscriptionDetails.regenerations_limit) * 100).toFixed(1))
                     : 0
                 }
-                total={subscriptionDetails?.regeneration_number || 0}
+                total={subscriptionDetails?.regenerations_number || 0}
                 color="info"
                 icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
               />
