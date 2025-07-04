@@ -236,7 +236,7 @@ export default function AddStoreFlow() {
 
       // Only show success if API call actually succeeded
       toast.success('Store connected successfully!');
-    } catch (error) {
+    } catch (error: any) {
       // Log the actual error for debugging
       console.error('WordPress connection failed:', error);
 
@@ -246,8 +246,44 @@ export default function AddStoreFlow() {
         setIntegrationSuccess(true);
         toast.success('Store connected successfully! (Test Mode)');
       } else {
-        // Properly handle the API error
-        const errorMessage = error?.data?.message || error?.message || 'Failed to connect to WordPress. Please check your credentials and try again.';
+        // Handle specific backend error messages (following auth pattern)
+        let errorMessage = 'Failed to connect to WordPress. Please check your credentials and try again.';
+
+        if (error?.data?.detail) {
+          // Use the specific error message from the backend
+          errorMessage = error.data.detail;
+        } else if (error?.status) {
+          // Handle specific HTTP status codes with custom messages
+          switch (error.status) {
+            case 400:
+              if (error?.data?.detail === 'Store already connected') {
+                errorMessage = 'This WordPress site is already connected to your account.';
+              } else {
+                errorMessage = 'Invalid request. Please check your WordPress site details.';
+              }
+              break;
+            case 403:
+              if (error?.data?.detail === "You've reached your connected website limit. Upgrade to continue.") {
+                errorMessage = "You've reached your connected website limit. Upgrade your plan to connect more websites.";
+              } else if (error?.data?.detail === 'Invalid credentials for WordPress') {
+                errorMessage = 'Invalid WordPress credentials. Please check your username and password.';
+              } else {
+                errorMessage = 'Access denied. Please check your WordPress credentials and permissions.';
+              }
+              break;
+            case 404:
+              errorMessage = 'WordPress site not found. Please check the URL and try again.';
+              break;
+            case 500:
+              errorMessage = 'Server error occurred. Please try again later.';
+              break;
+            default:
+              errorMessage = error?.message || 'Failed to connect to WordPress. Please try again.';
+          }
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+
         toast.error(errorMessage);
         throw error; // Re-throw to trigger the error animation in handleSubmit
       }
