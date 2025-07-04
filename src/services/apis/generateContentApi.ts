@@ -154,6 +154,64 @@ export interface GenerateSectionsResponse extends BaseGenerationResponse {
 }
 
 /**
+ * Structure for FAQ items in full article generation
+ */
+export interface GenerateFullArticleFaq {
+  question: string;
+  answer: string;
+}
+
+/**
+ * Structure for external links in full article generation
+ */
+export interface GenerateFullArticleExternalLink {
+  link_text: string;
+  link_url: string;
+}
+
+/**
+ * Structure for table of contents items in full article generation
+ */
+export interface GenerateFullArticleTableOfContents {
+  heading: string;
+  subheadings: string[];
+}
+
+/**
+ * Structure for sections in full article generation
+ */
+export interface GenerateFullArticleSection {
+  key: string;
+  content: string;
+}
+
+/**
+ * Request to generate complete article HTML
+ */
+export interface GenerateFullArticleRequest {
+  title: string;
+  meta_title: string;
+  meta_description: string;
+  keywords: string;
+  author: string;
+  featured_media: string;
+  reading_time_estimate: number;
+  url: string;
+  faqs: GenerateFullArticleFaq[];
+  external_links: GenerateFullArticleExternalLink[];
+  table_of_contents: GenerateFullArticleTableOfContents[];
+  sections: GenerateFullArticleSection[];
+  language: string;
+}
+
+/**
+ * Response containing complete article HTML
+ */
+export interface GenerateFullArticleResponse extends BaseGenerationResponse {
+  article_html: string; // Complete HTML content like aa.html
+}
+
+/**
  * Structure of a table of contents item
  */
 export interface GeneratedTableOfContents {
@@ -392,11 +450,11 @@ export const generateContentApi = api.injectEndpoints({
     }),
 
     /**
-     * Generate complete article content
+     * Generate complete article HTML content
      */
-    generateFullArticle: builder.mutation<GenerateSectionsResponse, GenerateSectionsRequest>({
+    generateFullArticle: builder.mutation<GenerateFullArticleResponse, GenerateFullArticleRequest>({
       query: (body) => ({
-        url: '/generate-article',
+        url: '/generate-full-article',
         method: 'POST',
         body,
       }),

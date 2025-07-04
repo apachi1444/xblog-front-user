@@ -981,6 +981,186 @@ const setupMocks = () => {
       }
     });
 
+    // Mock generate-full-article endpoint
+    mock.onPost('/generate-full-article').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const {
+          title,
+          meta_title,
+          meta_description,
+          keywords,
+          author,
+          featured_media,
+          reading_time_estimate,
+          url,
+          faqs,
+          external_links,
+          table_of_contents,
+          sections,
+          language
+        } = requestData;
+
+        // Generate complete HTML article based on the request data
+        const articleHtml = `<!DOCTYPE html>
+<html lang="${language}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="${meta_description}">
+  <meta name="keywords" content="${keywords}">
+  <meta name="author" content="${author}">
+  <meta property="og:title" content="${meta_title}">
+  <meta property="og:description" content="${meta_description}">
+  <meta property="og:image" content="${featured_media}">
+  <meta property="og:url" content="${url}">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="${url}">
+  <title>${meta_title}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+  section a, article a, div a {
+    color: #1a73e8;
+    text-decoration: underline;
+  }
+</style>
+<body>
+  <div class="max-w-4xl mx-auto px-4 py-8 bg-white min-h-screen">
+    <!-- Header Section -->
+    <header class="mb-12">
+      <div class="flex items-center text-sm text-purple-600 mb-3 font-medium">
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+        ${title}
+      </h1>
+      <div class="flex items-center text-gray-600 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Read time: ${reading_time_estimate} minutes</span>
+      </div>
+    </header>
+
+    <!-- Table of Contents -->
+    <section class="mb-8 bg-purple-50 rounded-lg p-5">
+      <div class="flex items-center mb-4 text-purple-800">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <h2 class="text-lg font-semibold">Table of Contents</h2>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          ${table_of_contents.map((item: { heading: string; subheadings: any[]; }) => `
+            <li class="font-medium list-none">
+              <a href="#${item.heading.toLowerCase().replace(/\s+/g, '-')}" class="text-purple-700 hover:text-purple-900 transition-colors">
+                ${item.heading}
+              </a>
+            </li>
+            ${item.subheadings.map(sub => `
+              <li class="list-disc list-inside text-purple-700">
+                <span>
+                  <a href="#${sub.toLowerCase().replace(/\s+/g, '-')}" class="text-purple-700 hover:text-purple-900 transition-colors">
+                    ${sub}
+                  </a>
+                </span>
+              </li>
+            `).join('')}
+          `).join('')}
+        </ul>
+      </nav>
+    </section>
+
+    <!-- Article Sections -->
+    ${sections.map((section: { content: any; }) => section.content).join('\n    ')}
+
+    <!-- FAQ Section -->
+    <section id="faq" class="mb-12">
+      <div class="flex items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 mr-2 text-purple-600">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <path d="M12 17h.01"></path>
+        </svg>
+        <h2 class="text-2xl font-bold text-gray-800">Frequently Asked Questions</h2>
+      </div>
+      <div class="border rounded-lg">
+        ${faqs.map((faq: { question: any; answer: any; }) => `
+          <details class="group px-4 py-3 border-b">
+            <summary class="flex items-center justify-between cursor-pointer list-none text-left hover:text-purple-700 font-medium">
+              ${faq.question}
+              <svg class="w-5 h-5 ml-2 transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="mt-3 text-gray-700">
+              ${faq.answer}
+            </div>
+          </details>
+        `).join('')}
+      </div>
+    </section>
+
+    <!-- External Links Section -->
+    <section class="rounded-lg border p-6 bg-gray-50 mb-12">
+      <div class="flex items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             class="h-6 w-6 mr-2 text-purple-600">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <h2 class="text-2xl font-bold text-gray-800">External Resources</h2>
+      </div>
+      <div class="space-y-5">
+        ${external_links.map((link: { link_url: any; link_text: any; }) => `
+          <div class="border-b border-gray-200 last:border-0 pb-4 last:pb-0">
+            <a
+              href="${link.link_url}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-lg font-medium text-purple-700 hover:text-purple-900 transition-colors flex items-center"
+            >
+              ${link.link_text}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="ml-1 h-4 w-4">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  </div>
+</body>
+</html>`;
+
+        return [
+          200,
+          {
+            article_html: articleHtml,
+            success: true,
+            message: 'Full article generated successfully'
+          }
+        ];
+      } catch (error) {
+        console.error('Error in full article generation mock:', error);
+        return [500, { success: false, message: 'Internal server error in full article generation' }];
+      }
+    });
+
     // Mock generate-faq endpoint
     mock.onPost('/generate-faq').reply((config) => {
       try {
