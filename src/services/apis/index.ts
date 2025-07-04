@@ -677,7 +677,7 @@ const setupMocks = () => {
     mock.onPost('/generate-topic').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { primary_keyword, secondary_keywords } = requestData;
+        const { primary_keyword } = requestData;
 
         // Generate content description based on the primary keyword
         const contentTemplates = [
@@ -801,7 +801,7 @@ const setupMocks = () => {
         }
 
         const requestData = JSON.parse(config.data);
-        const { primary_keyword, secondary_keywords, content_description, title } = requestData;
+        const { primary_keyword } = requestData;
 
         // Generate mock external links based on the primary keyword and content description
         const externalLinks = [
@@ -836,41 +836,42 @@ const setupMocks = () => {
     mock.onPost('/generate-table-of-contents').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { title, keyword } = requestData;
+        const { primary_keyword } = requestData;
+        const keyword = "test"
 
-        // Generate mock sections based on the keyword
-        const sections = [
+        // Generate mock table of contents based on the primary keyword
+        const tableOfContents = [
           {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            status: 'completed'
-          },
-          {
-            id: 'section-2',
-            title: `What is ${keyword}?`,
-            status: 'completed',
-            subsections: [
-              {
-                id: 'subsection-2-1',
-                title: `Definition of ${keyword}`,
-                status: 'completed'
-              },
-              {
-                id: 'subsection-2-2',
-                title: `History of ${keyword}`,
-                status: 'completed'
-              }
+            heading: `Introduction to ${primary_keyword}`,
+            subheadings: [
+              `What is ${primary_keyword}?`,
+              `Why ${primary_keyword} matters`,
+              `Overview of this guide`
             ]
           },
           {
-            id: 'section-3',
-            title: `Why ${keyword} Matters`,
-            status: 'completed'
+            heading: `Understanding ${primary_keyword}`,
+            subheadings: [
+              `Key concepts and definitions`,
+              `Historical background`,
+              `Current trends and developments`
+            ]
           },
           {
-            id: 'section-4',
-            title: `Key Components of ${keyword}`,
-            status: 'completed'
+            heading: `Benefits of ${primary_keyword}`,
+            subheadings: [
+              `Primary advantages`,
+              `Long-term benefits`,
+              `ROI considerations`
+            ]
+          },
+          {
+            heading: `Implementation Guide`,
+            subheadings: [
+              `Getting started`,
+              `Best practices`,
+              `Common pitfalls to avoid`
+            ]
           },
           {
             id: 'section-5',
@@ -919,7 +920,7 @@ const setupMocks = () => {
         return [
           200,
           {
-            sections,
+            tableOfContents,
             success: true,
             message: null,
             score: 85
@@ -930,7 +931,7 @@ const setupMocks = () => {
         return [500, { success: false, message: 'Internal server error in table of contents generation' }];
       }
     });
-
+    
     // Mock generate-images endpoint
     mock.onPost('/generate-images').reply((config) => {
       try {
@@ -980,8 +981,98 @@ const setupMocks = () => {
       }
     });
 
+    // Mock generate-faq endpoint
+    mock.onPost('/generate-faq').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { primary_keyword } = requestData;
+
+        // Generate mock FAQ based on the title and primary keyword
+        const faq = [
+          {
+            question: `What is ${primary_keyword}?`,
+            answer: `${primary_keyword} is a comprehensive approach that helps businesses achieve their goals through strategic implementation and best practices. It involves understanding key concepts and applying them effectively in real-world scenarios.`
+          },
+          {
+            question: `How does ${primary_keyword} work?`,
+            answer: `${primary_keyword} works by following a systematic process that includes planning, implementation, and optimization. The process typically involves analyzing current situations, identifying opportunities, and implementing targeted strategies.`
+          },
+          {
+            question: `What are the benefits of ${primary_keyword}?`,
+            answer: `The main benefits of ${primary_keyword} include improved efficiency, better results, cost savings, and enhanced performance. Organizations that implement ${primary_keyword} often see significant improvements in their operations.`
+          },
+          {
+            question: `Who should use ${primary_keyword}?`,
+            answer: `${primary_keyword} is suitable for businesses of all sizes, professionals looking to improve their skills, and organizations seeking to optimize their processes. It's particularly valuable for those in competitive industries.`
+          },
+          {
+            question: `How long does it take to see results with ${primary_keyword}?`,
+            answer: `Results from ${primary_keyword} can vary depending on implementation and specific goals. However, most organizations begin to see initial improvements within 2-4 weeks, with significant results typically visible within 3-6 months.`
+          },
+          {
+            question: `What are common mistakes to avoid with ${primary_keyword}?`,
+            answer: `Common mistakes include rushing the implementation process, not properly training team members, ignoring data and analytics, and failing to adapt strategies based on results. Proper planning and patience are key to success.`
+          }
+        ];
+
+        return [
+          200,
+          {
+            faq,
+            success: true,
+            message: 'FAQ generated successfully'
+          }
+        ];
+      } catch (error) {
+        console.error('Error in FAQ generation mock:', error);
+        return [500, { success: false, message: 'Internal server error in FAQ generation' }];
+      }
+    });
+
+    // Mock generate-sections endpoint
+    mock.onPost('/generate-sections').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { keyword } = requestData;
+
+        // Generate mock sections in string format (matching API response structure)
+        const sectionsObject = {
+          introduction: `
+html\n<section id="Introduction">\n  <h2>Introduction to ${keyword}</h2>\n  <p>Welcome to our comprehensive guide on ${keyword}. This introduction will provide you with a solid foundation and overview of what you can expect to learn throughout this article.</p>\n  <p>Understanding ${keyword} is crucial for anyone looking to improve their knowledge and skills in this area. We'll cover all the essential aspects and provide practical insights.</p>\n</section>\n
+`,
+          section_one: `
+html\n<section id="what-is-${keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>What is ${keyword}?</h2>\n  <p>${keyword} is a fundamental concept that plays a vital role in modern applications. It encompasses various techniques and methodologies that help achieve specific goals.</p>\n  <p>The importance of ${keyword} cannot be overstated, as it provides the foundation for many advanced concepts and practical implementations.</p>\n  <ul>\n    <li>Key characteristic 1 of ${keyword}</li>\n    <li>Key characteristic 2 of ${keyword}</li>\n    <li>Key characteristic 3 of ${keyword}</li>\n  </ul>\n</section>\n
+`,
+          section_two: `
+html\n<section id="benefits-of-${keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>Benefits of ${keyword}</h2>\n  <p>Implementing ${keyword} offers numerous advantages that can significantly impact your results. Here are the primary benefits you can expect:</p>\n  <div>\n    <h3>Primary Benefits</h3>\n    <ul>\n      <li><strong>Improved efficiency:</strong> ${keyword} streamlines processes and reduces complexity</li>\n      <li><strong>Better results:</strong> Consistent application leads to superior outcomes</li>\n      <li><strong>Cost savings:</strong> Optimized approaches reduce resource requirements</li>\n    </ul>\n  </div>\n</section>\n
+`,
+          section_three: `
+html\n<section id="implementation-guide">\n  <h2>How to Implement ${keyword}</h2>\n  <p>Successfully implementing ${keyword} requires a systematic approach and careful planning. Follow these steps to ensure optimal results:</p>\n  <ol>\n    <li><strong>Planning Phase:</strong> Define your objectives and requirements</li>\n    <li><strong>Preparation:</strong> Gather necessary resources and tools</li>\n    <li><strong>Implementation:</strong> Execute your plan systematically</li>\n    <li><strong>Testing:</strong> Validate results and make adjustments</li>\n    <li><strong>Optimization:</strong> Refine and improve based on feedback</li>\n  </ol>\n</section>\n
+`,
+          conclusion: `
+html\n<section id="Conclusion">\n  <h2>Conclusion</h2>\n  <p>In conclusion, ${keyword} represents a powerful approach that can deliver significant value when properly understood and implemented. Throughout this guide, we've explored the key concepts, benefits, and practical implementation strategies.</p>\n  <p>By following the guidelines and best practices outlined in this article, you'll be well-equipped to leverage ${keyword} effectively in your own projects and initiatives.</p>\n</section>\n
+`
+        };
+
+        // Convert to string format as expected by the API
+        const sectionsString = JSON.stringify(sectionsObject);
+
+        return [
+          200,
+          {
+            sections: sectionsString,
+            success: true,
+            message: 'Sections generated successfully'
+          }
+        ];
+      } catch (error) {
+        console.error('Error in sections generation mock:', error);
+        return [500, { success: false, message: 'Internal server error in sections generation' }];
+      }
+    });
+
     // Mock generate-article endpoint
-    mock.onPost('/generate-article').reply((config) => {
+    mock.onPost('/generate-full-article').reply((config) => {
       try {
         // Simulate server overload (25% chance of 500 error for testing retry functionality)
         if (Math.random() < 0.25) {
@@ -993,7 +1084,7 @@ const setupMocks = () => {
         }
 
         const requestData = JSON.parse(config.data);
-        const { title, keyword, articleSize = 'medium' } = requestData;
+        const { keyword, articleSize = 'medium' } = requestData;
 
         // Determine content length based on article size
         let contentLength = 'medium';
@@ -1117,7 +1208,7 @@ const setupMocks = () => {
 
     // Mock endpoints for drafts
     mock.onGet('/drafts').reply((config) => {
-      const { store_id = 1, page = 1, limit = 20 } = config.params || {};
+      const { page = 1, limit = 20 } = config.params || {};
 
       // Mock drafts data
       const mockDrafts = [
@@ -1250,10 +1341,7 @@ const setupMocks = () => {
 
     mock.onDelete(/\/drafts\/(.+)/).reply(() => [200, { success: true }]);
 
-    mock.onPost(/\/drafts\/(.+)\/publish/).reply((config) => {
-      const draftId = config.url?.split('/')[2];
-      return [200, { success: true, article_id: `article_${Date.now()}` }];
-    });
+    mock.onPost(/\/drafts\/(.+)\/publish/).reply((config) => [200, { success: true, article_id: `article_${Date.now()}` }]);
 
     // Mock WordPress publish endpoint
     mock.onPost('/publish/wordpress').reply((config) => {
