@@ -147,6 +147,7 @@ export default function AddStoreFlow() {
   const [activeStep, setActiveStep] = useState(0);
   const [integrationSuccess, setIntegrationSuccess] = useState(false);
   const [integrationError, setIntegrationError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   // API mutation hooks
   const [connectWordPress , {isLoading : isWordPressLoading}] = useConnectWordPressMutation();
@@ -209,15 +210,25 @@ export default function AddStoreFlow() {
         setIntegrationSuccess(true);
         navigate('/stores');
       }, 3000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Integration failed:', error);
 
-      // Show error animation instead of success
+      // Extract error message for display in modal
+      let displayErrorMessage = 'Failed to connect. Please try again.';
+      if (error?.data?.detail) {
+        displayErrorMessage = error.data.detail;
+      } else if (error?.message) {
+        displayErrorMessage = error.message;
+      }
+
+      // Set error message and show error animation
+      setErrorMessage(displayErrorMessage);
       setIntegrationError(true);
 
       // Hide error animation after 3 seconds
       setTimeout(() => {
         setIntegrationError(false);
+        setErrorMessage('');
       }, 3000);
 
       // Don't navigate to success page on error
@@ -341,7 +352,11 @@ export default function AddStoreFlow() {
         {renderStepContent()}
       </FormProvider>
       
-      <SuccessAnimation integrationSuccess={integrationSuccess} integrationError={integrationError} />
+      <SuccessAnimation
+        integrationSuccess={integrationSuccess}
+        integrationError={integrationError}
+        errorMessage={errorMessage}
+      />
     </DashboardContent>
   );
 }

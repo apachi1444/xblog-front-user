@@ -10,9 +10,10 @@ import { Box, Paper, Typography } from "@mui/material";
 interface SuccessAnimationProps {
   integrationSuccess: boolean;
   integrationError: boolean;
+  errorMessage?: string;
 }
 
-export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess, integrationError }) => (
+export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess, integrationError, errorMessage }) => (
   <AnimatePresence>
     {(integrationSuccess || integrationError) && (
       <Box
@@ -79,7 +80,7 @@ export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess
               <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
                 {integrationSuccess
                   ? t('store.redirecting', 'Redirecting to your stores...')
-                  : t('store.errorMessage', 'Please check your credentials and try again.')
+                  : (errorMessage || t('store.errorMessage', 'Please check your credentials and try again.'))
                 }
               </Typography>
             </motion.div>
@@ -108,6 +109,7 @@ export const SuccessAnimation: FC<SuccessAnimationProps> = ({ integrationSuccess
 SuccessAnimation.propTypes = {
   integrationSuccess: PropTypes.bool.isRequired,
   integrationError: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string,
 };
 
 // Default export
