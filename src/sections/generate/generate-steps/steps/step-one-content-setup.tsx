@@ -144,7 +144,11 @@ export function Step1ContentSetup({
   const isOptimizingContentDescription = externalIsOptimizingDescription !== undefined ? externalIsOptimizingDescription : localIsOptimizingContentDescription;
 
   const handleDeleteKeyword = (keyword: string) => {
-    setValue("step1.secondaryKeywords", secondaryKeywords.filter((k) => k !== keyword));
+    setValue("step1.secondaryKeywords", secondaryKeywords.filter((k) => k !== keyword), {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
     toast.error(`Keyword "${keyword}" removed`);
   };
 
@@ -161,7 +165,14 @@ export function Step1ContentSetup({
       return;
     }
 
-    setValue("step1.secondaryKeywords", [...secondaryKeywords, keyword.trim()]);
+    console.log('🔑 Adding keyword:', keyword, 'Current keywords:', secondaryKeywords);
+    const newKeywords = [...secondaryKeywords, keyword.trim()];
+    setValue("step1.secondaryKeywords", newKeywords, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+    console.log('🔑 Keywords after setValue:', newKeywords);
     setKeywordInput("");
     toast.success(`Keyword "${keyword}" added`);
   };

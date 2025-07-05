@@ -399,6 +399,17 @@ export function GenerateViewForm({
               variant="contained"
               color="primary"
               onClick={handleRegenerateConfirm}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1,
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4
+                }
+              }}
             >
               {t('regenerate.confirm', 'Regenerate')}
             </Button>

@@ -335,6 +335,28 @@
         "generateTableOfContents": "Generate Table of Contents",
         "regenerateTableOfContents": "Regenerate Table of Contents",
         "tableOfContentsGenerated": "Table of Contents Generated"
+      },
+      "generation": {
+        "modal": {
+          "title": "Generating Your Content",
+          "subtitle": "Please wait while we create your article components",
+          "steps": {
+            "tableOfContents": "Generating table of contents",
+            "images": "Generating image suggestions",
+            "faq": "Creating frequently asked questions",
+            "sections": "Writing article sections",
+            "finalizing": "Finalizing your content"
+          },
+          "progress": {
+            "tableOfContents": "We're creating a structured outline for your article...",
+            "images": "Finding the perfect images to complement your content...",
+            "faq": "Preparing helpful questions and answers for your readers...",
+            "sections": "Crafting engaging content for each section...",
+            "finalizing": "Putting everything together for the perfect article..."
+          },
+          "completed": "Content Generated Successfully!",
+          "completedMessage": "Your article components are ready. You can now review and customize them."
+        }
       }
     },
     "error": {

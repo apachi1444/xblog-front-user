@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { Box, Paper, useTheme, Typography } from '@mui/material';
+import { Box, Paper, useTheme, Typography, LinearProgress } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -12,8 +13,49 @@ interface SectionGenerationAnimationProps {
 
 export function SectionGenerationAnimation({ show, onComplete }: SectionGenerationAnimationProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
+
+  // Generation steps with translations
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const generationSteps = [
+    {
+      key: 'tableOfContents',
+      title: t('article.generation.modal.steps.tableOfContents', 'Generating table of contents'),
+      description: t('article.generation.modal.progress.tableOfContents', "We're creating a structured outline for your article..."),
+      icon: 'mdi:table-of-contents',
+      duration: 1500
+    },
+    {
+      key: 'images',
+      title: t('article.generation.modal.steps.images', 'Generating image suggestions'),
+      description: t('article.generation.modal.progress.images', 'Finding the perfect images to complement your content...'),
+      icon: 'mdi:image-multiple',
+      duration: 1200
+    },
+    {
+      key: 'faq',
+      title: t('article.generation.modal.steps.faq', 'Creating frequently asked questions'),
+      description: t('article.generation.modal.progress.faq', 'Preparing helpful questions and answers for your readers...'),
+      icon: 'mdi:help-circle',
+      duration: 1000
+    },
+    {
+      key: 'sections',
+      title: t('article.generation.modal.steps.sections', 'Writing article sections'),
+      description: t('article.generation.modal.progress.sections', 'Crafting engaging content for each section...'),
+      icon: 'mdi:text-box-multiple',
+      duration: 1800
+    },
+    {
+      key: 'finalizing',
+      title: t('article.generation.modal.steps.finalizing', 'Finalizing your content'),
+      description: t('article.generation.modal.progress.finalizing', 'Putting everything together for the perfect article...'),
+      icon: 'mdi:check-circle',
+      duration: 1000
+    }
+  ];
 
   // Animation steps
   useEffect(() => {
@@ -27,37 +69,41 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
     setStep(0);
     setShowCheckmark(false);
 
-    // Step 1: Show the initial animation
-    const timer1 = setTimeout(() => setStep(1), 500);
+    let currentDelay = 500; // Initial delay
 
-    // Step 2: Show sections being generated
-    const timer2 = setTimeout(() => setStep(2), 1500);
+    const timers: NodeJS.Timeout[] = [];
 
-    // Step 3: Show sections being organized
-    const timer3 = setTimeout(() => setStep(3), 3000);
+    // Create timers for each generation step
+    generationSteps.forEach((_, index) => {
+      const timer = setTimeout(() => setStep(index + 1), currentDelay);
+      timers.push(timer);
+      currentDelay += generationSteps[index].duration;
+    });
 
-    // Step 4: Show checkmark
-    const timer4 = setTimeout(() => {
-      setStep(4);
+    // Final step: Show checkmark and complete
+    const finalTimer = setTimeout(() => {
+      setStep(generationSteps.length + 1);
       setShowCheckmark(true);
-    }, 4500);
+    }, currentDelay);
+    timers.push(finalTimer);
 
-    // Step 5: Complete animation
-    const timer5 = setTimeout(() => {
+    // Complete animation
+    const completeTimer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 5500);
+    }, currentDelay + 1000);
+    timers.push(completeTimer);
 
     // eslint-disable-next-line consistent-return
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-      clearTimeout(timer5);
+      timers.forEach(timer => clearTimeout(timer));
     };
-  }, [show, onComplete]);
+  }, [show, onComplete, generationSteps]);
 
   if (!show) return null;
+
+  const currentStep = Math.min(step, generationSteps.length);
+  const currentStepData = generationSteps[currentStep - 1];
+  const progress = showCheckmark ? 100 : (currentStep / generationSteps.length) * 100;
 
   return (
     <AnimatePresence>
@@ -84,13 +130,30 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
             p: 4,
             borderRadius: 2,
             width: '90%',
-            maxWidth: 500,
+            maxWidth: 600,
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          <Box sx={{ mb: 3 }}>
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+              {showCheckmark
+                ? t('article.generation.modal.completed', 'Content Generated Successfully!')
+                : t('article.generation.modal.title', 'Generating Your Content')
+              }
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {showCheckmark
+                ? t('article.generation.modal.completedMessage', 'Your article components are ready. You can now review and customize them.')
+                : t('article.generation.modal.subtitle', 'Please wait while we create your article components')
+              }
+            </Typography>
+          </Box>
+
+          {/* Main Icon */}
+          <Box sx={{ mb: 4 }}>
             {showCheckmark ? (
               <motion.div
                 initial={{ scale: 0 }}
@@ -121,8 +184,7 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                     borderTopColor: 'transparent',
                   }}
                 />
-
-                {/* Document icon in the middle */}
+                {/* Center icon */}
                 <Box
                   sx={{
                     position: 'absolute',
@@ -132,9 +194,9 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
                   }}
                 >
                   <Iconify
-                    icon="eva:file-text-outline"
-                    width={40}
-                    height={40}
+                    icon={currentStepData?.icon || 'mdi:table-of-contents'}
+                    width={32}
+                    height={32}
                     sx={{ color: theme.palette.primary.main }}
                   />
                 </Box>
@@ -142,119 +204,99 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
             )}
           </Box>
 
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-            {step === 4 ? 'Sections Generated!' : 'Generating Article Sections...'}
-          </Typography>
+          {/* Current Step Display */}
+          {!showCheckmark && currentStepData && (
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                {currentStepData.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {currentStepData.description}
+              </Typography>
+            </Box>
+          )}
 
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                opacity: step >= 1 ? 1 : 0.3,
-                transition: 'opacity 0.3s ease-in-out',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 1
-              }}
-            >
-              <Iconify
-                icon={step >= 1 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
-                width={20}
-                height={20}
-                sx={{
-                  mr: 1,
-                  color: step >= 1 ? theme.palette.success.main : theme.palette.text.secondary
-                }}
-              />
-              Analyzing content requirements
-            </Typography>
+          {/* Generation Steps List */}
+          <Box sx={{ mb: 4, textAlign: 'left' }}>
+            {generationSteps.map((stepData, index) => {
+              const stepNumber = index + 1;
+              const isCompleted = stepNumber < currentStep;
+              const isCurrent = stepNumber === currentStep && !showCheckmark;
+              const isUpcoming = stepNumber > currentStep;
 
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                opacity: step >= 2 ? 1 : 0.3,
-                transition: 'opacity 0.3s ease-in-out',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 1
-              }}
-            >
-              <Iconify
-                icon={step >= 2 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
-                width={20}
-                height={20}
-                sx={{
-                  mr: 1,
-                  color: step >= 2 ? theme.palette.success.main : theme.palette.text.secondary
-                }}
-              />
-              Creating optimized sections
-            </Typography>
-
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                opacity: step >= 3 ? 1 : 0.3,
-                transition: 'opacity 0.3s ease-in-out',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mb: 1
-              }}
-            >
-              <Iconify
-                icon={step >= 3 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
-                width={20}
-                height={20}
-                sx={{
-                  mr: 1,
-                  color: step >= 3 ? theme.palette.success.main : theme.palette.text.secondary
-                }}
-              />
-              Organizing content structure
-            </Typography>
-
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                opacity: step >= 4 ? 1 : 0.3,
-                transition: 'opacity 0.3s ease-in-out',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Iconify
-                icon={step >= 4 ? "eva:checkmark-circle-2-fill" : "eva:clock-outline"}
-                width={20}
-                height={20}
-                sx={{
-                  mr: 1,
-                  color: step >= 4 ? theme.palette.success.main : theme.palette.text.secondary
-                }}
-              />
-              Finalizing article structure
-            </Typography>
+              return (
+                <Box
+                  key={stepData.key}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    mb: 2,
+                    opacity: isUpcoming ? 0.4 : 1,
+                    transition: 'opacity 0.3s ease-in-out',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: isCompleted || showCheckmark
+                        ? theme.palette.success.main
+                        : isCurrent
+                        ? theme.palette.primary.main
+                        : theme.palette.grey[300],
+                      color: 'white',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isCompleted || showCheckmark ? (
+                      <Iconify icon="eva:checkmark-fill" width={14} height={14} />
+                    ) : (
+                      stepNumber
+                    )}
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: isCurrent ? 600 : 400,
+                      color: isCompleted || isCurrent || showCheckmark
+                        ? 'text.primary'
+                        : 'text.secondary',
+                    }}
+                  >
+                    {stepData.title}
+                  </Typography>
+                </Box>
+              );
+            })}
           </Box>
 
-          {/* Progress bar */}
-          <Box sx={{ position: 'relative', height: 6, bgcolor: theme.palette.grey[200], borderRadius: 3, overflow: 'hidden' }}>
-            <motion.div
-              initial={{ width: '0%' }}
-              animate={{ width: `${(step / 4) * 100}%` }}
-              transition={{ duration: 0.5 }}
-              style={{
-                height: '100%',
-                backgroundColor: theme.palette.primary.main,
-                position: 'absolute',
-                top: 0,
-                left: 0,
+          {/* Progress Bar */}
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Progress
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {Math.round(progress)}%
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: theme.palette.grey[200],
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4,
+                  bgcolor: showCheckmark ? theme.palette.success.main : theme.palette.primary.main,
+                },
               }}
             />
           </Box>

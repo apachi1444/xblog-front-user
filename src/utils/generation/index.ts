@@ -4,6 +4,9 @@ export { useTitleGeneration } from './titleGeneration';
 // Meta tags generation
 export { useMetaTagsGeneration } from './metaTagsGeneration';
 
+// Full article generation
+export { useFullArticleGeneration } from './fullArticleGeneration';
+
 // Topic/content description generation
 export { useTopicGeneration, parseTopicResponse } from './topicGeneration';
 
@@ -15,9 +18,6 @@ export { useSectionsGeneration, parseSectionsResponse } from './sectionsGenerati
 
 // Keywords generation
 export { useKeywordGeneration, parseSecondaryKeywordsResponse } from './keywordsGeneration';
-
-// Full article generation
-export { useFullArticleGeneration, parseFullArticleResponse } from './fullArticleGeneration';
 
 // Internal links generation
 export { useInternalLinksGeneration, parseInternalLinksResponse } from './internalLinksGeneration';

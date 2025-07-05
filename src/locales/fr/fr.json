@@ -616,6 +616,36 @@
         "title": "Intégration Guidée",
         "description": "Notre équipe vous accompagnera étape par étape pour configurer votre compte et commencer à utiliser notre plateforme efficacement."
       }
+    },
+    "article": {
+      "buttons": {
+        "generating": "Génération...",
+        "generateTableOfContents": "Générer la Table des Matières",
+        "regenerateTableOfContents": "Régénérer la Table des Matières",
+        "tableOfContentsGenerated": "Table des Matières Générée"
+      },
+      "generation": {
+        "modal": {
+          "title": "Génération de Votre Contenu",
+          "subtitle": "Veuillez patienter pendant que nous créons les composants de votre article",
+          "steps": {
+            "tableOfContents": "Génération de la table des matières",
+            "images": "Génération de suggestions d'images",
+            "faq": "Création de questions fréquemment posées",
+            "sections": "Rédaction des sections de l'article",
+            "finalizing": "Finalisation de votre contenu"
+          },
+          "progress": {
+            "tableOfContents": "Nous créons un plan structuré pour votre article...",
+            "images": "Recherche des images parfaites pour compléter votre contenu...",
+            "faq": "Préparation de questions et réponses utiles pour vos lecteurs...",
+            "sections": "Création d'un contenu engageant pour chaque section...",
+            "finalizing": "Assemblage de tout pour créer l'article parfait..."
+          },
+          "completed": "Contenu Généré avec Succès !",
+          "completedMessage": "Les composants de votre article sont prêts. Vous pouvez maintenant les examiner et les personnaliser."
+        }
+      }
     }
   }
 }

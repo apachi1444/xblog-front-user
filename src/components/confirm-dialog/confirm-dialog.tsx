@@ -61,9 +61,7 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
             sx={{
               borderRadius: 3,
               overflow: 'hidden',
-              background: theme.palette.mode === 'dark'
-                ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
-                : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+              backgroundColor: theme.palette.background.paper,
               boxShadow: theme.customShadows.dialog,
             }}
           >
@@ -85,42 +83,42 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
   }}>
     
     {/* Warning Section */}
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'flex-start', 
-      gap: 1.5,
-      p: 2.5,
-      backgroundColor: 'error.light',
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 2,
+      p: 3,
+      backgroundColor: theme.palette.mode === 'dark'
+        ? alpha(theme.palette.warning.main, 0.1)
+        : alpha(theme.palette.warning.main, 0.08),
       borderRadius: 2,
-      border: '1px solid',
-      borderColor: 'error.main',
-      position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 4,
-        backgroundColor: 'error.main',
-        borderRadius: '4px 0 0 4px'
-      }
+      border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+      position: 'relative'
     }}>
-      <WarningAmberIcon 
-        sx={{ 
-          color: 'error.main', 
-          fontSize: 24,
-          mt: 0.1,
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
-        }} 
-      />
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+        borderRadius: '50%',
+        backgroundColor: alpha(theme.palette.warning.main, 0.15),
+        color: 'warning.main',
+        flexShrink: 0
+      }}>
+        <WarningAmberIcon
+          sx={{
+            fontSize: 20
+          }}
+        />
+      </Box>
       <Box sx={{ flex: 1 }}>
-        <Typography 
-          variant="body1" 
-          sx={{ 
-            color: 'error.dark',
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'text.primary',
             fontWeight: 500,
-            lineHeight: 1.5,
+            lineHeight: 1.6,
             mb: 0.5
           }}
         >
@@ -135,11 +133,11 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
       alignItems: 'center', 
       gap: 1.5,
       p: 2,
-      backgroundColor: 'warning.light',
+      backgroundColor: theme.palette.mode === 'dark'
+        ? alpha(theme.palette.info.main, 0.1)
+        : alpha(theme.palette.info.main, 0.05),
       borderRadius: 2,
-      border: '1px solid',
-      borderColor: 'warning.main',
-      background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.08) 0%, rgba(255, 193, 7, 0.04) 100%)'
+      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
     }}>
       <Box sx={{ 
         display: 'flex', 
@@ -148,9 +146,8 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
         width: 40,
         height: 40,
         borderRadius: '50%',
-        backgroundColor: 'warning.main',
-        color: 'white',
-        boxShadow: '0 2px 8px rgba(255, 193, 7, 0.3)'
+        backgroundColor: alpha(theme.palette.info.main, 0.15),
+        color: 'info.main'
       }}>
         <AccountBalanceWalletIcon sx={{ fontSize: 20 }} />
       </Box>
@@ -158,7 +155,7 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
         <Typography 
           variant="body2" 
           sx={{ 
-            color: 'warning.dark',
+            color: 'text.primary',
             fontWeight: 500,
             display: 'flex',
             alignItems: 'center',
@@ -169,16 +166,16 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
             {t('regenerate.availableCredits', 'You have {{count}} regeneration credits available.', { count })}
           </span>
           {count <= 3 && (
-            <Chip 
-              label="Low" 
-              size="small" 
-              color="warning" 
-              sx={{ 
-                height: 20, 
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                ml: 1
-              }} 
+            <Chip
+              label="Low"
+              size="small"
+              color="warning"
+              variant="outlined"
+              sx={{
+                height: 22,
+                fontSize: '0.75rem',
+                fontWeight: 600
+              }}
             />
           )}
         </Typography>
@@ -215,13 +212,23 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
               sx={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: 1,
+                gap: 2,
                 p: 3,
-                pt: 1,
-                borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                pt: 2,
+                borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
               }}
             >
-              <Button variant="outlined" color="inherit" onClick={onClose}>
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={onClose}
+                sx={{
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  fontWeight: 500
+                }}
+              >
                 Cancel
               </Button>
               {action}

@@ -1,39 +1,39 @@
-import type { GeneratedSection, GenerateSectionsRequest, GenerateSectionsResponse } from 'src/services/apis/generateContentApi';
+import type { GeneratedImage, GenerateImagesRequest, GenerateImagesResponse } from 'src/services/apis/generateContentApi';
+
+import { useApiGenerationWithRetry } from 'src/hooks/useApiGenerationWithRetry';
 
 import { useGenerateImagesMutation } from 'src/services/apis/generateContentApi';
 
 /**
- * Custom hook for generating image suggestions for article sections
+ * Custom hook for generating image suggestions for article content
  * @returns Functions and state for image generation
  */
 export const useImagesGeneration = () => {
   // Use the RTK Query mutation hook
   const [generateImages, { isLoading, isError, error }] = useGenerateImagesMutation();
 
+  // Use retry mechanism for API calls
+  const retryHandler = useApiGenerationWithRetry({
+    maxRetries: 3,
+    retryDelay: 2000, // 2 seconds delay between retries
+  });
+
   /**
-   * Generate image suggestions for article sections
-   * @param title - The article title
-   * @param keyword - The main keyword for the article
-   * @param secondaryKeywords - Array of secondary keywords
-   * @param language - Optional language parameter
-   * @param contentType - Optional content type parameter
-   * @returns The generated sections with image suggestions or null if there was an error
+   * Generate image suggestions for article content
+   * @param topic - The article topic/title
+   * @param numberOfImages - Number of images to generate (default: 3)
+   * @returns The generated images or null if there was an error
    */
   const generateArticleImages = async (
-    title: string,
-    keyword: string,
-    secondaryKeywords: string[] = [],
-    language: string = 'en-us',
-    contentType: string = 'how-to'
-  ): Promise<GeneratedSection[] | null> => {
-    try {
+    topic: string,
+    numberOfImages: number = 3
+  ): Promise<GeneratedImage[] | null> => {
+    // Create the API call function
+    const apiCall = async () => {
       // Prepare the request payload
-      const payload: GenerateSectionsRequest = {
-        title,
-        keyword,
-        secondaryKeywords,
-        language,
-        contentType
+      const payload: GenerateImagesRequest = {
+        topic,
+        number_of_images: numberOfImages
       };
 
       // Call the API
@@ -41,16 +41,14 @@ export const useImagesGeneration = () => {
 
       // Check if the request was successful
       if (!response.success) {
-        console.error('Image generation failed:', response.message);
-        return null;
+        throw new Error(response.message || 'Image generation failed');
       }
 
-      // Return the sections with image suggestions
-      return response.sections;
-    } catch (err) {
-      console.error('Error generating images:', err);
-      return null;
-    }
+      return response.images;
+    };
+
+    // Execute with retry mechanism
+    return retryHandler.executeWithRetry(apiCall, 'Image generation');
   };
 
   return {
@@ -64,13 +62,13 @@ export const useImagesGeneration = () => {
 /**
  * Parse an image generation API response
  * @param response - The API response from the image generation endpoint
- * @returns The generated sections with image suggestions or null if unsuccessful
+ * @returns The generated images or null if unsuccessful
  */
-export const parseImagesResponse = (response: GenerateSectionsResponse): GeneratedSection[] | null => {
+export const parseImagesResponse = (response: GenerateImagesResponse): GeneratedImage[] | null => {
   if (!response.success) {
     console.error('Image generation failed:', response.message);
     return null;
   }
 
-  return response.sections;
+  return response.images;
 };

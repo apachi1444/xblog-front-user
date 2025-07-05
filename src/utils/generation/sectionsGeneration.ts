@@ -1,7 +1,8 @@
 import type { GeneratedSection, GenerateSectionsRequest, GenerateSectionsResponse } from 'src/services/apis/generateContentApi';
 
-import { useGenerateSectionsMutation } from 'src/services/apis/generateContentApi';
 import { useApiGenerationWithRetry } from 'src/hooks/useApiGenerationWithRetry';
+
+import { useGenerateSectionsMutation } from 'src/services/apis/generateContentApi';
 
 /**
  * Custom hook for generating article sections/table of contents with retry functionality
@@ -59,9 +60,8 @@ export const useSectionsGeneration = () => {
       const response = await generateSections(payload).unwrap();
 
       // Check if the request was successful
-      if (!response.success) {
-        console.error('Sections generation failed:', response.message);
-        throw new Error(response.message || 'Sections generation failed');
+      if (!response) {
+        throw new Error('Sections generation failed');
       }
 
       console.log('✅ Successfully generated sections:', response.sections);
@@ -100,8 +100,7 @@ export const useSectionsGeneration = () => {
  * @returns The generated sections or null if unsuccessful
  */
 export const parseSectionsResponse = (response: GenerateSectionsResponse): GeneratedSection[] | null => {
-  if (!response.success) {
-    console.error('Sections generation failed:', response.message);
+  if (!response) {
     return null;
   }
   

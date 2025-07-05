@@ -8,33 +8,6 @@ interface BaseGenerationResponse {
   message: string;
 }
 
-// Helper functions for section mapping
-const extractTitleFromHtml = (htmlContent: string): string | null => {
-  // Extract title from h2 tag
-  const h2Match = htmlContent.match(/<h2[^>]*>(.*?)<\/h2>/i);
-  if (h2Match) {
-    return h2Match[1].replace(/<[^>]*>/g, '').trim();
-  }
-
-  // Extract title from section id attribute
-  const sectionMatch = htmlContent.match(/id="([^"]*)"[^>]*>/i);
-  if (sectionMatch) {
-    return formatSectionTitle(sectionMatch[1]);
-  }
-
-  return null;
-};
-
-const formatSectionTitle = (key: string): string => 
-  // Convert snake_case or camelCase to Title Case
-   key
-    .replace(/[_-]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-;
-
 /**
  * Request to generate meta tags for an article
  */
@@ -132,25 +105,22 @@ export interface GenerateTopicResponse extends BaseGenerationResponse {
  * Structure of a generated section
  */
 export interface GeneratedSection {
-  id: string;
   title: string;
   content: string;
-  status?: string;
 }
 
 /**
  * Raw API response structure for sections (string format)
  */
-export interface GenerateSectionsApiResponse extends BaseGenerationResponse {
-  sections: string; // This is the raw string response from API
+export interface GenerateSectionsApiResponse {
+  [key: string]: string; // Direct object with section keys (introduction, section_one, etc.) and HTML content values
 }
 
 /**
  * Response containing generated sections (mapped for UI)
  */
-export interface GenerateSectionsResponse extends BaseGenerationResponse {
+export interface GenerateSectionsResponse{
   sections: GeneratedSection[];
-  score?: number;
 }
 
 /**
@@ -419,31 +389,20 @@ export const generateContentApi = api.injectEndpoints({
       }),
       transformResponse: (response: GenerateSectionsApiResponse): GenerateSectionsResponse => {
         try {
-          // Parse the string response to extract sections
-          const sectionsData = JSON.parse(response.sections);
-
+          // Response is already an object with section keys and HTML content values
           // Map the object keys to section array
-          const sections: GeneratedSection[] = Object.entries(sectionsData).map(([key, htmlContent], index) => ({
-            id: `section-${index + 1}`,
-            title: extractTitleFromHtml(htmlContent as string) || formatSectionTitle(key),
+          const sections: GeneratedSection[] = Object.entries(response).map(([key, htmlContent]) => ({
+            title: key,
             content: htmlContent as string,
-            status: 'completed'
           }));
 
           return {
             ...response,
             sections,
-            success: response.success,
-            message: response.message
           };
         } catch (error) {
-          console.error('Error parsing sections response:', error);
-          // Fallback to empty sections if parsing fails
           return {
-            ...response,
             sections: [],
-            success: false,
-            message: 'Failed to parse sections response'
           };
         }
       },
