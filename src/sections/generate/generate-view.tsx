@@ -1,19 +1,17 @@
 // API types and hooks
-import type { CreateArticleResponse } from 'src/services/apis/articlesApi';
 
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 // Custom hooks
-import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
 // Layout components
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -23,17 +21,14 @@ import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 import { STEPS_KEYS } from './constants';
 // Custom components
-import { DraftGuard } from './components/DraftGuard';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
-import { SaveDraftToast } from './components/SaveDraftToast';
 // Types and constants
 import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
 
@@ -60,22 +55,7 @@ export function GeneratingView() {
   // Loading state - only show loading if we're expecting to find an article
   const isArticleLoading = articleId ? isArticlesLoading : false;
 
-  // Article draft management
-  const articleDraft = useArticleDraft({
-    onSave: (article) => {
-      // Reset unsaved changes flag after successful save
-      articleDraft.setHasUnsavedChanges(false);
-
-      // If this is a new article (no articleId in URL), add it to URL for future editing
-      if (!articleId) {
-        navigate(`/generate?articleId=${article.id}`);
-      }
-      // If already editing an existing draft, stay on the same URL
-    },
-    onError: (error) => {
-      console.error('❌ Article error:', error);
-    }
-  });
+  // No need for article draft management since we simplified the workflow
 
   // Helper function to parse links from string format with stable IDs
   const parseLinksFromString = useCallback((linksString: string, article_id?: number) => {
@@ -243,54 +223,11 @@ export function GeneratingView() {
     return current !== initial;
   }, []);
 
-  // Stable function to handle form changes
-  const handleFormChange = useCallback((data: any, { name, type }: any) => {
-    // Trigger on ANY user input change to ANY field
-    if (type === 'change' && name) {
-      console.log('🔥 Field changed:', name, 'Type:', type);
-      // Show save toast immediately when user changes any field
-      articleDraft.setHasUnsavedChanges(true);
-    }
-  }, [articleDraft]);
 
-  // Set current article in draft when editing existing article
-  useEffect(() => {
-    if (selectedArticle) {
-      // Convert Article type to CreateArticleResponse type
-      const convertedArticle: CreateArticleResponse = {
-        id: selectedArticle.id.toString(),
-        title: selectedArticle.article_title || selectedArticle.title || 'Untitled Article',
-        content: selectedArticle.content || '',
-        meta_description: selectedArticle.meta_description || '',
-        keywords: (() => {
-          try {
-            const secondaryKeywords = selectedArticle.secondary_keywords
-              ? JSON.parse(selectedArticle.secondary_keywords)
-              : [];
-            return Array.isArray(secondaryKeywords)
-              ? secondaryKeywords.concat([selectedArticle.primary_keyword]).filter(Boolean)
-              : [selectedArticle.primary_keyword].filter(Boolean);
-          } catch {
-            return [selectedArticle.primary_keyword].filter(Boolean);
-          }
-        })(),
-        status: selectedArticle.status === 'scheduled' ? 'draft' : selectedArticle.status,
-        website_id: null, // Articles don't have website_id in current API
-        created_at: selectedArticle.created_at,
-        updated_at: selectedArticle.updated_at || selectedArticle.created_at,
-      };
-      articleDraft.setCurrentArticle(convertedArticle);
-    } else {
-      // Clear current article when creating new article
-      articleDraft.setCurrentArticle(null);
-    }
-  }, [selectedArticle, articleDraft]);
 
-  // Watch for form changes to show save button
-  useEffect(() => {
-    const subscription = methods.watch(handleFormChange);
-    return () => subscription.unsubscribe();
-  }, [methods, handleFormChange]);
+  // No need for article management logic since we simplified the hook
+
+
 
   // Dynamic steps with translations
   const steps = STEPS_KEYS.map(step => {
@@ -341,21 +278,19 @@ export function GeneratingView() {
 
   return (
     <DashboardContent>
-      <DraftGuard>
-        {/* Header with draft info */}
+        {/* Header */}
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
-            {articleDraft.currentArticle && (
+            {selectedArticle ? (
               <Box>
                 <Typography variant="h5" gutterBottom>
-                  Editing Draft: {articleDraft.currentArticle.title || 'Untitled Draft'}
+                  Editing Draft: {selectedArticle.article_title || selectedArticle.title || 'Untitled Draft'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Created on {new Date(articleDraft.currentArticle.created_at || Date.now()).toLocaleDateString()}
+                  Created on {new Date(selectedArticle.created_at || Date.now()).toLocaleDateString()}
                 </Typography>
               </Box>
-            )}
-            {!articleDraft.currentArticle && (
+            ) : (
               <Typography variant="h5">
                 Create New Article
               </Typography>
@@ -376,16 +311,11 @@ export function GeneratingView() {
             totalSteps={steps.length}
             onNextStep={handleNextStep}
             onPrevStep={handlePrevStep}
+            articleId={selectedArticle?.id?.toString() || articleId}
           />
 
-          {/* Save Draft Toast - appears when there are unsaved changes */}
-          <SaveDraftToast
-            hasUnsavedChanges={articleDraft.hasUnsavedChanges}
-            isSaving={articleDraft.isSaving}
-            onSaveDraft={articleDraft.saveDraft}
-          />
+
         </FormProvider>
-      </DraftGuard>
     </DashboardContent>
   );
 }

@@ -84,7 +84,7 @@ export function CreateView() {
     if (optionId === 'generate') {
       try {
         // Create empty article first
-        await createArticle({
+        const response = await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',
@@ -93,8 +93,8 @@ export function CreateView() {
           website_id: undefined,
         }).unwrap();
 
-        // Navigate to generate view for new article (no articleId in URL)
-        navigate('/generate');
+        // Navigate to generate view with the created article ID
+        navigate(`/generate?articleId=${response.id}`);
 
         toast.success('New article created! Start editing...');
       } catch (error) {

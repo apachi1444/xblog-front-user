@@ -30,12 +30,26 @@ export interface CreateArticleRequest {
 
 // Article update request
 export interface UpdateArticleRequest {
-  title?: string;
+  article_title?: string | null;
+  content_description?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  url_slug?: string | null;
+  primary_keyword?: string | null;
+  secondary_keywords?: string | null;
+  target_country?: string;
+  language?: string;
+  article_type?: string | null;
+  article_size?: string | null;
+  tone_of_voice?: string | null;
+  point_of_view?: string | null;
+  plagiat_removal?: boolean;
+  include_images?: boolean;
+  include_videos?: boolean;
+  internal_links?: string | null;
+  external_links?: string | null;
   content?: string;
-  meta_description?: string;
-  keywords?: string[];
   status?: 'draft' | 'published';
-  website_id?: string;
 }
 
 // Article creation response

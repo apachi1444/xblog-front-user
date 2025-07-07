@@ -4,6 +4,8 @@ import { useFormContext } from 'react-hook-form';
 
 import { Box, Stack, Button, useTheme } from '@mui/material';
 
+import { useArticleDraft } from 'src/hooks/useArticleDraft';
+
 import { Iconify } from 'src/components/iconify';
 
 // Import modals for final step actions
@@ -16,16 +18,19 @@ interface StepNavigationProps {
   totalSteps: number;
   onNextStep: () => void;
   onPrevStep: () => void;
+  articleId?: string | null;
 }
 
 export const StepNavigation = ({
   activeStep,
   totalSteps,
   onNextStep,
-  onPrevStep
+  onPrevStep,
+  articleId
 }: StepNavigationProps) => {
   const theme = useTheme();
   const methods = useFormContext();
+  const articleDraft = useArticleDraft();
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -102,7 +107,44 @@ export const StepNavigation = ({
       }
 
       if (shouldProceed) {
-        onNextStep();
+        // Update article with current step data before proceeding
+        if (articleId) {
+          try {
+            // Prepare request body with correct API field names
+            const requestBody = {
+              article_title: values.step1?.title || null,
+              content_description: values.step1?.contentDescription || null,
+              meta_title: values.step1?.metaTitle || null,
+              meta_description: values.step1?.metaDescription || null,
+              url_slug: values.step1?.urlSlug || null,
+              primary_keyword: values.step1?.primaryKeyword || null,
+              secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : null,
+              target_country: values.step1?.targetCountry || 'global',
+              language: values.step1?.language || 'english',
+              article_type: values.step2?.articleType || null,
+              article_size: values.step2?.articleSize || null,
+              tone_of_voice: values.step2?.toneOfVoice || null,
+              point_of_view: values.step2?.pointOfView || null,
+              plagiat_removal: values.step2?.plagiaRemoval || false,
+              include_images: values.step2?.includeImages || false,
+              include_videos: values.step2?.includeVideos || false,
+              internal_links: values.step2?.internalLinking?.length ? JSON.stringify(values.step2.internalLinking) : null,
+              external_links: values.step2?.externalLinking?.length ? JSON.stringify(values.step2.externalLinking) : null,
+              content: values.step3?.sections?.length ? JSON.stringify(values.step3.sections) : values.step1?.contentDescription || '',
+              status: 'draft' as const,
+            };
+
+            await articleDraft.updateArticle(articleId, requestBody);
+            onNextStep();
+          } catch (error) {
+            console.error('Failed to update article:', error);
+            // Still proceed to next step even if update fails
+            onNextStep();
+          }
+        } else {
+          // No article ID available, just proceed
+          onNextStep();
+        }
       }
     } else {
       toast.error("Please fill out all required fields before proceeding.");
