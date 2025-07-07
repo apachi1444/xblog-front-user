@@ -151,6 +151,7 @@ export function GeneratingView() {
       images: [],
       faq: [],
       toc: [],
+      generatedHtml: '',
     };
 
     // If we have a draft article, use its values as initial form state
@@ -168,7 +169,7 @@ export function GeneratingView() {
 
       return {
         step1: {
-          contentDescription: selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : (selectedArticle.content !== null ? (selectedArticle.content || '') : baseDefaults.step1.contentDescription),
+          contentDescription: selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : baseDefaults.step1.contentDescription,
           primaryKeyword: selectedArticle.primary_keyword !== null ? (selectedArticle.primary_keyword || '') : baseDefaults.step1.primaryKeyword,
           secondaryKeywords: selectedArticle.secondary_keywords !== null ? parseSecondaryKeywords(selectedArticle.secondary_keywords || '') : baseDefaults.step1.secondaryKeywords,
           language: selectedArticle.language !== null ? (selectedArticle.language || 'en') : baseDefaults.step1.language,

@@ -1046,8 +1046,33 @@ export function Step4Publish() {
           }}
         />
 
-        {/* All Sections */}
-        {sections && sections.length > 0 ? (
+        {/* Generated Article Content */}
+        {formData.generatedHtml ? (
+          <Box
+            sx={{
+              '& *': {
+                maxWidth: '100%'
+              },
+              '& img': {
+                maxWidth: '100%',
+                height: 'auto'
+              },
+              '& body': {
+                margin: 0,
+                padding: 0
+              }
+            }}
+            dangerouslySetInnerHTML={{
+              __html: (() => {
+                // Extract body content from complete HTML document
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(formData.generatedHtml, 'text/html');
+                const bodyContent = doc.body?.innerHTML || formData.generatedHtml;
+                return bodyContent;
+              })()
+            }}
+          />
+        ) : sections && sections.length > 0 ? (
           sections.map((section, index) => (
             <Box key={index} sx={{ mb: 6 }}>
               {/* Section Title */}
@@ -1215,7 +1240,7 @@ export function Step4Publish() {
             borderRadius: 1
           }}>
             <Typography variant="body2">
-              No sections have been generated yet.
+              No content has been generated yet.
             </Typography>
           </Box>
         )}

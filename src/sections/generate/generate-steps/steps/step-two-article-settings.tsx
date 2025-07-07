@@ -6,7 +6,6 @@ import { Box, Grid, Button, Switch, Divider, Typography, FormControlLabel, Circu
 
 import { Iconify } from 'src/components/iconify';
 import { LinkManagementSection } from 'src/components/generate-article/LinkManagementSection';
-import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
 import { useLinkGeneration } from '../../hooks/useLinkGeneration';
 import { useArticleSettingsForm } from '../../hooks/useArticleSettingsForm';
@@ -71,12 +70,6 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
 
   return (
     <Grid container spacing={3}>
-      <SectionGenerationAnimation
-        show={isGenerating}
-        onComplete={() => {
-          setActiveStep(2);
-        }}
-      />
 
       <Grid item xs={12}>
         <FormContainer title={t('article.settings.title', "Article Settings")}>

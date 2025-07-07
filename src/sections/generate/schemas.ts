@@ -113,6 +113,7 @@ export const generateArticleSchema = z.object({
   images: z.array(articleImageSchema).optional(),
   faq: z.array(articleFaqSchema).optional(),
   toc: z.array(articleTocSchema).optional(),
+  generatedHtml: z.string().optional(),
 });
 
 // Export types for link management
