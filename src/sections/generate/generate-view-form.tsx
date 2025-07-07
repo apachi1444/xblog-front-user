@@ -1,7 +1,7 @@
+import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 
 import { Button } from '@mui/material';
 
@@ -10,10 +10,12 @@ import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
 import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
+
 import { api } from 'src/services/apis';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
+import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
 // Custom components
 import { ContentLayout } from './components/ContentLayout';
@@ -24,7 +26,7 @@ import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
 import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
 
-import type { ArticleSection, GenerateArticleFormData } from './schemas';
+import type { GenerateArticleFormData } from './schemas';
 
 
 interface GenerateViewFormProps {
@@ -270,37 +272,18 @@ export function GenerateViewForm({
     }
   };
 
-  const onGenerateTableOfContents = useCallback(async () => {
-    setGenerationState((s) => ({ ...s, isGeneratingSections: true }));
+  const onGenerateTableOfContents = useCallback(async (): Promise<any[]> => new Promise<any[]>((resolve, reject) => {
+      setGenerationState((s) => ({
+        ...s,
+        isGeneratingSections: true,
+        failedStep: '',
+        showRetryUI: false,
+        completedSteps: []
+      }));
 
-    // Generate mock sections
-    const sections = [
-      {
-        id: 'section-1',
-        title: 'Introduction'
-      },  
-      {
-        id: 'section-2',
-        title: 'What is SEO?',
-      },
-      {
-        id: 'section-3',
-        title: 'Why is SEO Important?',
-      }
-    ] as ArticleSection[];
-
-    // Save the sections to the form state
-    methods.setValue('step3.sections', sections);
-
-    // Wait for 6 seconds to ensure the animation completes
-    // The animation takes 5.5 seconds to complete
-    await simulateDelay(6000);
-
-    // Only set isGeneratingSections to false after the animation has had time to complete
-    setGenerationState((s) => ({ ...s, isGeneratingSections: false, isGenerated: true }));
-
-    return sections;
-  }, [methods]);
+      // Store the resolve/reject functions to be called by the animation modal
+      (window as any).__generationPromise = { resolve, reject };
+    }), []);
 
   const handleRegenerateRequest = () => {
     setGenerationState((s) => ({ ...s, showRegenerateDialog: true }));
@@ -336,6 +319,42 @@ export function GenerateViewForm({
     }
   }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
 
+  // Handle generation completion from animation modal
+  const handleGenerationComplete = useCallback(() => {
+    setGenerationState((s) => ({
+      ...s,
+      isGeneratingSections: false,
+      isGenerated: true
+    }));
+
+    // Resolve the promise with the generated sections data
+    if ((window as any).__generationPromise?.resolve) {
+      const formData = methods.getValues();
+      const sections = formData.step3?.sections || [];
+      (window as any).__generationPromise.resolve(sections);
+      delete (window as any).__generationPromise;
+    }
+
+    // Navigate to step 3 after generation completes
+    setActiveStep(2);
+  }, [setActiveStep, methods]);
+
+  // Handle generation error from animation modal
+  const handleGenerationError = useCallback((error: string, failedStep: string, completedSteps: string[]) => {
+    setGenerationState((s) => ({
+      ...s,
+      isGeneratingSections: false,
+      failedStep,
+      completedSteps,
+      showRetryUI: true
+    }));
+
+    // Reject the promise if it exists
+    if ((window as any).__generationPromise?.reject) {
+      (window as any).__generationPromise.reject(new Error(error));
+      delete (window as any).__generationPromise;
+    }
+  }, []);
 
     const renderStepContent = () => {
         // Regular steps
@@ -375,6 +394,13 @@ export function GenerateViewForm({
       {generationState.isPublishing && (
         <LoadingAnimation message={t('publishing.message', 'Publishing your content...')} />
       )}
+
+      {/* Section generation animation modal */}
+      <SectionGenerationAnimation
+        show={generationState.isGeneratingSections}
+        onComplete={handleGenerationComplete}
+        onError={handleGenerationError}
+      />
 
       {/* Stepper */}
       <StepperComponent steps={steps} activeStep={activeStep} />

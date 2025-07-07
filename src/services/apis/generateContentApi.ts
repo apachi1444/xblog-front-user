@@ -48,14 +48,25 @@ export interface GenerateKeywordsResponse extends BaseGenerationResponse {
  * Request to generate article sections
  */
 export interface GenerateSectionsRequest {
-  title: string;
-  keyword: string;
-  secondaryKeywords?: string[];
-  language?: string;
-  contentType?: string;
-  articleSize?: string;
-  toneOfVoice?: string;
-  targetCountry?: string;
+  toc: Array<{
+    heading: string;
+    subheadings: string[];
+  }>;
+  article_title: string;
+  target_audience: string;
+  tone: string;
+  point_of_view: string;
+  article_type: string;
+  article_size: string;
+  links: Array<{
+    link_text: string;
+    link_url: string;
+  }>;
+  images: Array<{
+    img_text: string;
+    img_url: string;
+  }>;
+  language: string;
 }
 
 /**

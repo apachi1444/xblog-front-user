@@ -4,8 +4,6 @@ import type { Store } from 'src/types/store';
 import toast from 'react-hot-toast';
 import { useMemo, useState, useEffect } from 'react';
 
-import { useRouter } from 'src/routes/hooks';
-
 import {
   Box,
   Modal,
@@ -23,6 +21,8 @@ import {
   FormControlLabel,
   CircularProgress,
 } from '@mui/material';
+
+import { useRouter } from 'src/routes/hooks';
 
 // API hooks
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
@@ -311,7 +311,31 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                   })}
                 </RadioGroup>
               ) : (
-                <Alert severity="warning">
+                <Alert
+                  severity="warning"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        router.push('/websites/add');
+                        onClose();
+                      }}
+                      startIcon={<Iconify icon="eva:plus-fill" />}
+                      sx={{
+                        borderColor: 'warning.main',
+                        color: 'warning.main',
+                        '&:hover': {
+                          borderColor: 'warning.dark',
+                          backgroundColor: 'warning.light',
+                        }
+                      }}
+                    >
+                      Add Website
+                    </Button>
+                  }
+                >
                   No stores available. Please connect a store first.
                 </Alert>
               )}
@@ -346,26 +370,47 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
               <Button onClick={handleClose}>
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                onClick={handlePublish}
-                disabled={
-                  !selectedStore ||
-                  stores.length === 0 ||
-                  stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress'
-                }
-                startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-                sx={{
-                  bgcolor: 'success.main',
-                  '&:hover': {
-                    bgcolor: 'success.dark',
+
+              {/* Show "Add Website" button when no stores available */}
+              {stores.length === 0 ? (
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    router.push('/websites/add');
+                    onClose();
+                  }}
+                  startIcon={<Iconify icon="eva:plus-fill" />}
+                  sx={{
+                    bgcolor: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    }
+                  }}
+                >
+                  Add Website
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handlePublish}
+                  disabled={
+                    !selectedStore ||
+                    stores.length === 0 ||
+                    stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress'
                   }
-                }}
-              >
-                {publishingSchedule === 'now' ? 'Publish Now' :
-                 publishingSchedule === 'schedule' ? 'Schedule' :
-                 'Save as Draft'}
-              </Button>
+                  startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+                  sx={{
+                    bgcolor: 'success.main',
+                    '&:hover': {
+                      bgcolor: 'success.dark',
+                    }
+                  }}
+                >
+                  {publishingSchedule === 'now' ? 'Publish Now' :
+                   publishingSchedule === 'schedule' ? 'Schedule' :
+                   'Save as Draft'}
+                </Button>
+              )}
             </Box>
           </>
         )}

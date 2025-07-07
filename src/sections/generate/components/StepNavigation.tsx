@@ -5,6 +5,7 @@ import { useFormContext } from 'react-hook-form';
 import { Box, Stack, Button, useTheme } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
+import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -31,6 +32,7 @@ export const StepNavigation = ({
   const theme = useTheme();
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
+  const [generateFullArticle, { isLoading: isGeneratingFullArticle }] = useGenerateFullArticleMutation();
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -107,6 +109,39 @@ export const StepNavigation = ({
       }
 
       if (shouldProceed) {
+        // Special handling for step 2 -> step 3: Generate full article
+        if (activeStep === 2) {
+          try {
+            const fullArticleRequest = {
+              title: values.step1?.title || '',
+              meta_title: values.step1?.metaTitle || '',
+              meta_description: values.step1?.metaDescription || '',
+              keywords: values.step1?.primaryKeyword || '',
+              author: 'AI Generated',
+              featured_media: '',
+              reading_time_estimate: 5,
+              url: values.step1?.urlSlug || '',
+              faqs: values.faq || [],
+              external_links: [],
+              table_of_contents: values.toc || [],
+              sections: values.step3?.sections?.map((section: any) => ({
+                key: section.title,
+                content: section.content
+              })) || [],
+              images: values.images || [],
+              language: values.step1?.language || 'english'
+            };
+
+            const result = await generateFullArticle(fullArticleRequest).unwrap();
+            methods.setValue('generatedHtml', result.article_html);
+
+            toast.success('Article generated successfully!');
+          } catch (error) {
+            toast.error('Failed to generate article. Please try again.');
+            return; // Don't proceed if generation fails
+          }
+        }
+
         // Update article with current step data before proceeding
         if (articleId) {
           try {

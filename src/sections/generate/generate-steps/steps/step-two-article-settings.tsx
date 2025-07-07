@@ -39,13 +39,11 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
     formState: { errors },
     setValue,
     control,
-    getValues
   } = useFormContext<GenerateArticleFormData>()
 
-  const formData = getValues();
-
-  // Check if sections have already been generated
-  const hasGeneratedSections = formData.step3?.sections && formData.step3.sections.length > 0;
+  // Check if sections have already been generated - use isGenerated prop instead of form data
+  // This ensures the button shows "Generate" initially and "Regenerate" only after successful generation
+  const hasGeneratedSections = isGenerated;
 
   const articleType = useWatch({
     control,

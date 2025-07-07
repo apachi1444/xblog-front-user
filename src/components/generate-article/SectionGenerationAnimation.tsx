@@ -1,21 +1,47 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable no-await-in-loop */
 import { useTranslation } from 'react-i18next';
+import { useFormContext } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
-import { Box, Paper, useTheme, Typography, LinearProgress } from '@mui/material';
+import { Box, Paper, Alert, Button, useTheme, Typography, LinearProgress } from '@mui/material';
+
+import {
+  useGenerateFaqMutation,
+  useGenerateImagesMutation,
+  useGenerateSectionsMutation,
+  useGenerateTableOfContentsMutation
+} from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
 
 interface SectionGenerationAnimationProps {
   show: boolean;
   onComplete?: () => void;
+  onError?: (error: string, failedStep: string, completedSteps: string[]) => void;
 }
 
-export function SectionGenerationAnimation({ show, onComplete }: SectionGenerationAnimationProps) {
+export function SectionGenerationAnimation({ show, onComplete, onError }: SectionGenerationAnimationProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const methods = useFormContext();
+
+  // State management
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [failedStep, setFailedStep] = useState<string>('');
+  const [showRetryUI, setShowRetryUI] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Ref to track if generation has already started for this show cycle
+  const generationStartedRef = useRef(false);
+
+  // API mutation hooks
+  const [generateTableOfContents] = useGenerateTableOfContentsMutation();
+  const [generateImages] = useGenerateImagesMutation();
+  const [generateFaq] = useGenerateFaqMutation();
+  const [generateSections] = useGenerateSectionsMutation();
 
   // Generation steps with translations
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,47 +83,188 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
     }
   ];
 
-  // Animation steps
+  // Execute sequential API calls
+  const executeSequentialGeneration = useCallback(async (startFromStep?: string) => {
+    const formData = methods.getValues();
+    const { primaryKeyword, secondaryKeywords, contentDescription, title, language } = formData.step1;
+
+    const steps = ['tableOfContents', 'images', 'faq', 'sections'];
+    const startIndex = startFromStep ? steps.indexOf(startFromStep) : 0;
+
+    // Store generated data to pass between API calls
+    let generatedToc = formData.toc || [];
+    let generatedImages = formData.images || [];
+
+    setIsGenerating(true);
+    setShowRetryUI(false);
+    setFailedStep('');
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = startIndex; i < steps.length; i++) {
+      const stepKey = steps[i];
+
+      try {
+        // Update current step
+        setStep(i + 1);
+
+        let result;
+
+        switch (stepKey) {
+          case 'tableOfContents':
+            result = await generateTableOfContents({
+              primary_keyword: primaryKeyword,
+              secondary_keywords: secondaryKeywords || [],
+              content_description: contentDescription,
+              title,
+              language: language || 'english'
+            }).unwrap();
+
+            // Store TOC in form and variable for later use
+            generatedToc = result.table_of_contents;
+            methods.setValue('toc', generatedToc);
+            break;
+
+          case 'images':
+            result = await generateImages({
+              topic: `${primaryKeyword} ${contentDescription}`,
+              number_of_images: 3
+            }).unwrap();
+
+            // Store images in form and variable for later use
+            generatedImages = result.images;
+            methods.setValue('images', generatedImages);
+            break;
+
+          case 'faq':
+            result = await generateFaq({
+              title,
+              primary_keyword: primaryKeyword,
+              secondary_keywords: secondaryKeywords || [],
+              content_description: contentDescription
+            }).unwrap();
+
+            // Store FAQ in form
+            methods.setValue('faq', result.faq);
+            break;
+
+          case 'sections':
+            // Log the data being sent to sections API
+            console.log('📋 Sections API Request Data:', {
+              toc: generatedToc,
+              images: generatedImages,
+              article_title: title,
+              target_audience: 'general',
+              tone: formData.step2?.toneOfVoice || 'friendly',
+              point_of_view: formData.step2?.pointOfView || 'third-person',
+              article_type: formData.step2?.articleType || 'how-to',
+              article_size: formData.step2?.articleSize || 'medium'
+            });
+
+            result = await generateSections({
+              toc: generatedToc, // ✅ Use freshly generated TOC
+              article_title: title,
+              target_audience: 'general',
+              tone: formData.step2?.toneOfVoice || 'friendly',
+              point_of_view: formData.step2?.pointOfView || 'third-person',
+              article_type: formData.step2?.articleType || 'how-to',
+              article_size: formData.step2?.articleSize || 'medium',
+              links: [], // Will be populated by link generation APIs
+              images: generatedImages, // ✅ Use freshly generated images
+              language: language || 'english'
+            }).unwrap();
+
+            // Transform sections to match our schema
+            // eslint-disable-next-line no-case-declarations
+            const transformedSections = result.sections.map((section: any, index: number) => ({
+              id: `section-${index + 1}`,
+              title: section.title,
+              content: section.content,
+              status: 'generated'
+            }));
+
+            // Store sections in form - THIS IS CRITICAL FOR STEP 3 EDITING
+            methods.setValue('step3.sections', transformedSections);
+            break;
+          default :
+            break;
+        }
+
+        // Mark step as completed
+        setCompletedSteps(prev => [...prev, stepKey]);
+
+        // Add delay between API calls
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+      } catch (error) {
+        console.error(`Failed to generate ${stepKey}:`, error);
+
+        // Mark step as failed and show retry UI
+        setFailedStep(stepKey);
+        setShowRetryUI(true);
+        setIsGenerating(false);
+
+        // Call error handler
+        if (onError) {
+          onError(`Failed to generate ${stepKey}`, stepKey, completedSteps);
+        }
+
+        throw error; // Stop the sequence
+      }
+    }
+
+    // All steps completed successfully
+    setIsGenerating(false);
+    setStep(steps.length + 1);
+    setShowCheckmark(true);
+
+    // Wait for animation to complete before calling onComplete
+    setTimeout(() => {
+      if (onComplete) onComplete();
+    }, 1000);
+
+  }, [methods, generateTableOfContents, generateImages, generateFaq, generateSections, completedSteps, onComplete, onError]);
+
+  // Retry failed generation step
+  const handleRetryGeneration = useCallback(async () => {
+    if (!failedStep) return;
+
+    try {
+      await executeSequentialGeneration(failedStep);
+    } catch (error) {
+      console.error('Retry failed:', error);
+    }
+  }, [failedStep, executeSequentialGeneration]);
+
+  // Start generation when modal is shown
   useEffect(() => {
     if (!show) {
       setStep(0);
       setShowCheckmark(false);
+      setCompletedSteps([]);
+      setFailedStep('');
+      setShowRetryUI(false);
+      setIsGenerating(false);
+      generationStartedRef.current = false;
       return;
     }
 
-    // Reset animation state when shown again
-    setStep(0);
-    setShowCheckmark(false);
+    // Only start generation if it hasn't been started for this show cycle
+    if (!generationStartedRef.current) {
+      generationStartedRef.current = true;
 
-    let currentDelay = 500; // Initial delay
+      // Reset state and start generation
+      setStep(0);
+      setShowCheckmark(false);
+      setCompletedSteps([]);
+      setFailedStep('');
+      setShowRetryUI(false);
 
-    const timers: NodeJS.Timeout[] = [];
-
-    // Create timers for each generation step
-    generationSteps.forEach((_, index) => {
-      const timer = setTimeout(() => setStep(index + 1), currentDelay);
-      timers.push(timer);
-      currentDelay += generationSteps[index].duration;
-    });
-
-    // Final step: Show checkmark and complete
-    const finalTimer = setTimeout(() => {
-      setStep(generationSteps.length + 1);
-      setShowCheckmark(true);
-    }, currentDelay);
-    timers.push(finalTimer);
-
-    // Complete animation
-    const completeTimer = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, currentDelay + 1000);
-    timers.push(completeTimer);
-
-    // eslint-disable-next-line consistent-return
-    return () => {
-      timers.forEach(timer => clearTimeout(timer));
-    };
-  }, [show, onComplete, generationSteps]);
+      // Start the generation process
+      executeSequentialGeneration();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]); // Removed executeSequentialGeneration from dependencies to prevent infinite loop
 
   if (!show) return null;
 
@@ -300,6 +467,30 @@ export function SectionGenerationAnimation({ show, onComplete }: SectionGenerati
               }}
             />
           </Box>
+
+          {/* Retry UI for failed steps */}
+          {showRetryUI && failedStep && (
+            <Box sx={{ mt: 3 }}>
+              <Alert
+                severity="error"
+                sx={{ mb: 2 }}
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleRetryGeneration}
+                    disabled={isGenerating}
+                    startIcon={<Iconify icon="eva:refresh-fill" />}
+                  >
+                    Retry
+                  </Button>
+                }
+              >
+                Failed to generate {failedStep.replace(/([A-Z])/g, ' $1').toLowerCase()}.
+                Click retry to continue from where it failed.
+              </Alert>
+            </Box>
+          )}
         </Paper>
       </motion.div>
     </AnimatePresence>
