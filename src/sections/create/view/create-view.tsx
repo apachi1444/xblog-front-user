@@ -8,14 +8,21 @@ import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Grid from '@mui/material/Unstable_Grid2';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import CardActionArea from '@mui/material/CardActionArea';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
+import { useGetArticlesQuery, useCreateArticleMutation, useDeleteArticleMutation } from 'src/services/apis/articlesApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -24,6 +31,8 @@ export function CreateView() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState<number | null>(null);
 
   // Fetch articles and filter drafts
   const currentStore = useSelector(selectCurrentStore);
@@ -31,6 +40,7 @@ export function CreateView() {
   const { data: articlesData, isLoading } = useGetArticlesQuery({ store_id: storeId });
 
   const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
+  const [deleteArticle, { isLoading: isDeletingArticle }] = useDeleteArticleMutation();
 
   // Filter and sort draft articles by most recent first
   const draftArticles = useMemo(() => {
@@ -103,6 +113,31 @@ export function CreateView() {
       }
     }
     // Add other navigation options as needed
+  };
+
+  const handleDeleteClick = (articleId: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click navigation
+    setArticleToDelete(articleId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      await deleteArticle(articleToDelete.toString()).unwrap();
+      toast.success(t('create.deleteSuccess', 'Article deleted successfully'));
+      setDeleteDialogOpen(false);
+      setArticleToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete article:', error);
+      toast.error(t('create.deleteError', 'Failed to delete article. Please try again.'));
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setArticleToDelete(null);
   };
 
   return (
@@ -285,6 +320,8 @@ export function CreateView() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  py: 2,
+                  px: 3,
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     '& .chevron-icon': {
@@ -292,11 +329,22 @@ export function CreateView() {
                     }
                   }
                 }}>
-                  <Box>
-                    <Typography variant="subtitle1">
+                  <Box sx={{ flex: 1, mr: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 0.5,
+                        color: 'text.primary'
+                      }}
+                    >
                       {article.article_title || article.title || 'Untitled Article'}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontSize: '0.875rem' }}
+                    >
                       {article.updated_at
                         ? t('create.lastUpdated', 'Last updated {{date}}', {
                             date: new Date(article.updated_at).toLocaleDateString()
@@ -307,17 +355,91 @@ export function CreateView() {
                       }
                     </Typography>
                   </Box>
-                  <Iconify
-                    icon="mdi:chevron-right"
-                    className="chevron-icon"
-                    sx={{ transition: 'transform 0.3s ease' }}
-                  />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => handleDeleteClick(article.id, e)}
+                      disabled={isDeletingArticle}
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        bgcolor: 'error.lighter',
+                        color: 'error.main',
+                        border: '1px solid',
+                        borderColor: 'error.light',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'error.main',
+                          color: 'white',
+                          transform: 'scale(1.05)',
+                        },
+                        '&:disabled': {
+                          bgcolor: 'action.disabledBackground',
+                          color: 'action.disabled',
+                          borderColor: 'action.disabled',
+                        }
+                      }}
+                    >
+                      {isDeletingArticle && articleToDelete === article.id ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : (
+                        <Iconify icon="eva:trash-2-fill" width={18} height={18} />
+                      )}
+                    </IconButton>
+                    <Iconify
+                      icon="mdi:chevron-right"
+                      className="chevron-icon"
+                      sx={{
+                        transition: 'transform 0.3s ease',
+                        color: 'text.secondary',
+                        ml: 1
+                      }}
+                    />
+                  </Box>
                 </CardContent>
               </Card>
             ))}
           </Stack>
         )}
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {t('create.deleteDialog.title', 'Delete Article')}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('create.deleteDialog.message', 'Are you sure you want to delete this article? This action cannot be undone.')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDeleteCancel}
+            disabled={isDeletingArticle}
+          >
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={isDeletingArticle}
+            startIcon={isDeletingArticle ? <CircularProgress size={16} /> : undefined}
+          >
+            {isDeletingArticle
+              ? t('common.deleting', 'Deleting...')
+              : t('common.delete', 'Delete')
+            }
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }
