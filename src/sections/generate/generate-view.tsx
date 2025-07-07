@@ -148,6 +148,9 @@ export function GeneratingView() {
       step3: {
         sections: [],
       },
+      images: [],
+      faq: [],
+      toc: [],
     };
 
     // If we have a draft article, use its values as initial form state

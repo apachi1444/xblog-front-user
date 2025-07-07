@@ -87,11 +87,32 @@ export const step3Schema = z.object({
 });
 
 
+// Image schema for article-level images
+export const articleImageSchema = z.object({
+  img_text: z.string(),
+  img_url: z.string(),
+});
+
+// FAQ schema for article-level FAQs
+export const articleFaqSchema = z.object({
+  question: z.string(),
+  answer: z.string(),
+});
+
+// Table of Contents schema for article-level TOC
+export const articleTocSchema = z.object({
+  heading: z.string(),
+  subheadings: z.array(z.string()),
+});
+
 // Combined schema for the entire form
 export const generateArticleSchema = z.object({
   step1: step1Schema,
   step2: step2Schema,
   step3: step3Schema,
+  images: z.array(articleImageSchema).optional(),
+  faq: z.array(articleFaqSchema).optional(),
+  toc: z.array(articleTocSchema).optional(),
 });
 
 // Export types for link management
@@ -103,6 +124,11 @@ export type SectionImage = z.infer<typeof sectionImageSchema>;
 export type SectionFaqItem = z.infer<typeof sectionFaqItemSchema>;
 export type SectionTableData = z.infer<typeof sectionTableDataSchema>;
 export type ArticleSection = z.infer<typeof sectionSchema>;
+
+// Export types for article-level content
+export type ArticleImage = z.infer<typeof articleImageSchema>;
+export type ArticleFaq = z.infer<typeof articleFaqSchema>;
+export type ArticleToc = z.infer<typeof articleTocSchema>;
 
 // Export form data types
 export type Step1FormData = z.infer<typeof step1Schema>;

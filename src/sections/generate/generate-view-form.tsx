@@ -184,7 +184,7 @@ export function GenerateViewForm({
       await simulateDelay(2000);
 
       // Generate optimized content (you can replace this with actual API call)
-      const optimizedContent = `${contentDescription.trim()} This comprehensive guide covers everything you need to know about ${primaryKeyword}, including best practices, expert tips, and actionable strategies. Whether you're a beginner or looking to improve your skills, this detailed resource will help you achieve your goals with proven methods and real-world examples.`;
+      const optimizedContent = `This comprehensive guide covers everything you need to know about ${primaryKeyword}, including best practices, expert tips, and actionable strategies. Whether you're a beginner or looking to improve your skills, this detailed resource will help you achieve your goals with proven methods and real-world examples.`;
 
       // Update the form field with optimized content
       methods.setValue('step1.contentDescription', optimizedContent, {
