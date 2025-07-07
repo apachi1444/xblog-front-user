@@ -293,7 +293,9 @@ export function CreateView() {
                   }
                 }}>
                   <Box>
-                    <Typography variant="subtitle1">{article.title}</Typography>
+                    <Typography variant="subtitle1">
+                      {article.article_title || article.title || 'Untitled Article'}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {article.updated_at
                         ? t('create.lastUpdated', 'Last updated {{date}}', {

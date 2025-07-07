@@ -2,10 +2,10 @@
 
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -165,29 +165,29 @@ export function GeneratingView() {
 
       return {
         step1: {
-          contentDescription: selectedArticle.content_description || selectedArticle.content || '',
-          primaryKeyword: selectedArticle.primary_keyword || '',
-          secondaryKeywords: parseSecondaryKeywords(selectedArticle.secondary_keywords || ''),
-          language: selectedArticle.language || 'en',
-          targetCountry: selectedArticle.target_country || 'us',
-          title: selectedArticle.article_title || selectedArticle.title || '',
-          metaTitle: selectedArticle.meta_title || '',
-          metaDescription: selectedArticle.meta_description || '',
-          urlSlug: selectedArticle.url_slug || '',
+          contentDescription: selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : (selectedArticle.content !== null ? (selectedArticle.content || '') : baseDefaults.step1.contentDescription),
+          primaryKeyword: selectedArticle.primary_keyword !== null ? (selectedArticle.primary_keyword || '') : baseDefaults.step1.primaryKeyword,
+          secondaryKeywords: selectedArticle.secondary_keywords !== null ? parseSecondaryKeywords(selectedArticle.secondary_keywords || '') : baseDefaults.step1.secondaryKeywords,
+          language: selectedArticle.language !== null ? (selectedArticle.language || 'en') : baseDefaults.step1.language,
+          targetCountry: selectedArticle.target_country !== null ? (selectedArticle.target_country || 'us') : baseDefaults.step1.targetCountry,
+          title: selectedArticle.article_title !== null ? (selectedArticle.article_title || '') : (selectedArticle.title !== null ? (selectedArticle.title || '') : baseDefaults.step1.title),
+          metaTitle: selectedArticle.meta_title !== null ? (selectedArticle.meta_title || '') : baseDefaults.step1.metaTitle,
+          metaDescription: selectedArticle.meta_description !== null ? (selectedArticle.meta_description || '') : baseDefaults.step1.metaDescription,
+          urlSlug: selectedArticle.url_slug !== null ? (selectedArticle.url_slug || '') : baseDefaults.step1.urlSlug,
         },
         step2: {
-          articleType: selectedArticle.article_type || 'how-to',
-          articleSize: selectedArticle.article_size || 'small',
-          toneOfVoice: selectedArticle.tone_of_voice || 'friendly',
-          pointOfView: selectedArticle.point_of_view || 'first-person',
-          plagiaRemoval: selectedArticle.plagiat_removal || false,
-          includeImages: selectedArticle.include_images ?? true,
-          includeVideos: selectedArticle.include_videos ?? false,
-          internalLinks,
-          externalLinks,
+          articleType: selectedArticle.article_type !== null ? (selectedArticle.article_type || 'how-to') : baseDefaults.step2.articleType,
+          articleSize: selectedArticle.article_size !== null ? (selectedArticle.article_size || 'small') : baseDefaults.step2.articleSize,
+          toneOfVoice: selectedArticle.tone_of_voice !== null ? (selectedArticle.tone_of_voice || 'friendly') : baseDefaults.step2.toneOfVoice,
+          pointOfView: selectedArticle.point_of_view !== null ? (selectedArticle.point_of_view || 'first-person') : baseDefaults.step2.pointOfView,
+          plagiaRemoval: selectedArticle.plagiat_removal !== null && selectedArticle.plagiat_removal !== undefined ? selectedArticle.plagiat_removal : baseDefaults.step2.plagiaRemoval,
+          includeImages: selectedArticle.include_images !== null && selectedArticle.include_images !== undefined ? selectedArticle.include_images : baseDefaults.step2.includeImages,
+          includeVideos: selectedArticle.include_videos !== null && selectedArticle.include_videos !== undefined ? selectedArticle.include_videos : baseDefaults.step2.includeVideos,
+          internalLinks: selectedArticle.internal_links !== null ? internalLinks : baseDefaults.step2.internalLinks,
+          externalLinks: selectedArticle.external_links !== null ? externalLinks : baseDefaults.step2.externalLinks,
         },
         step3: {
-          sections,
+          sections: selectedArticle.sections !== null ? sections : baseDefaults.step3.sections,
         },
       };
     }
@@ -199,6 +199,11 @@ export function GeneratingView() {
     resolver: zodResolver(generateArticleSchema) as any,
     defaultValues,
   });
+
+  // Reset form when defaultValues change (when switching between articles)
+  useEffect(() => {
+    methods.reset(defaultValues);
+  }, [defaultValues, methods]);
 
   // Helper function to deeply compare objects (memoized for performance)
   const hasChanges = useCallback((current: any, initial: any): boolean => {
