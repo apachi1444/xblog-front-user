@@ -614,7 +614,43 @@
       },
       "onboarding": {
         "title": "Intégration Guidée",
-        "description": "Notre équipe vous accompagnera étape par étape pour configurer votre compte et commencer à utiliser notre plateforme efficacement."
+        "description": "Notre équipe vous accompagnera étape par étape pour configurer votre compte et commencer à utiliser notre plateforme efficacement.",
+        "loading": "Préparation de votre expérience...",
+        "welcome": "Bienvenue sur XBlog !",
+        "choosePlan": "Choisissez Votre Plan",
+        "welcomeSubtitle": "Apprenons à mieux vous connaître pour personnaliser votre expérience.",
+        "choosePlanSubtitle": "Sélectionnez un plan qui convient le mieux à vos besoins de création de contenu.",
+        "progress": {
+          "preferences": "Vos Préférences",
+          "plan": "Plan d'Abonnement"
+        },
+        "interests": {
+          "title": "Qu'est-ce qui vous intéresse ?",
+          "subtitle": "Sélectionnez tout ce qui s'applique. Cela nous aide à personnaliser votre tableau de bord.",
+          "blogging": "Blogging",
+          "marketing": "Marketing de Contenu",
+          "seo": "Optimisation SEO",
+          "social": "Médias Sociaux",
+          "analytics": "Analytiques",
+          "ecommerce": "E-commerce"
+        },
+        "referralSources": {
+          "title": "Comment avez-vous entendu parler de nous ?",
+          "search": "Moteur de Recherche",
+          "social": "Médias Sociaux",
+          "friend": "Ami/Collègue",
+          "ad": "Publicité",
+          "blog": "Blog/Article",
+          "other": "Autre"
+        },
+        "continue": "Continuer",
+        "back": "Retour",
+        "getStarted": "Commencer",
+        "continueWithFree": "Continuer avec le Plan Gratuit",
+        "success": "Intégration terminée avec succès !",
+        "redirecting": "Redirection vers la page d'abonnement...",
+        "planUrlNotFound": "URL du plan introuvable. Veuillez sélectionner un plan depuis le tableau de bord.",
+        "error": "Échec de la sauvegarde des préférences, mais nous continuerons quand même."
       }
     },
     "article": {

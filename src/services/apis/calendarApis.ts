@@ -52,7 +52,8 @@ export const calendarApi = api.injectEndpoints({
         method: 'POST',
         body: scheduleData,
       }),
-      invalidatesTags: ['Articles'],
+      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
+      // invalidatesTags: ['Articles'],
     }),
 
     // Update calendar entry

@@ -4,6 +4,7 @@ import type { RootState } from 'src/services/store';
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
@@ -21,41 +22,45 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import {
-  useGetSubscriptionPlansQuery,
-  useCreateSubscriptionMutation
+  useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 import { ResponsivePricingPlans } from 'src/components/pricing';
 
-// Define interest options
-const INTERESTS = [
-  { id: 'blogging', label: 'Blogging', icon: 'mdi:pencil' },
-  { id: 'marketing', label: 'Content Marketing', icon: 'mdi:bullhorn' },
-  { id: 'seo', label: 'SEO Optimization', icon: 'mdi:magnify' },
-  { id: 'social', label: 'Social Media', icon: 'mdi:instagram' },
-  { id: 'analytics', label: 'Analytics', icon: 'mdi:chart-line' },
-  { id: 'ecommerce', label: 'E-commerce', icon: 'mdi:cart' },
+// Define interest options with i18n keys
+const getInterests = (t: any) => [
+  { id: 'blogging', label: t('onboarding.interests.blogging', 'Blogging'), icon: 'mdi:pencil' },
+  { id: 'marketing', label: t('onboarding.interests.marketing', 'Content Marketing'), icon: 'mdi:bullhorn' },
+  { id: 'seo', label: t('onboarding.interests.seo', 'SEO Optimization'), icon: 'mdi:magnify' },
+  { id: 'social', label: t('onboarding.interests.social', 'Social Media'), icon: 'mdi:instagram' },
+  { id: 'analytics', label: t('onboarding.interests.analytics', 'Analytics'), icon: 'mdi:chart-line' },
+  { id: 'ecommerce', label: t('onboarding.interests.ecommerce', 'E-commerce'), icon: 'mdi:cart' },
 ];
 
-// Define referral sources
-const REFERRAL_SOURCES = [
-  { id: 'search', label: 'Search Engine', icon: 'mdi:google' },
-  { id: 'social', label: 'Social Media', icon: 'mdi:facebook' },
-  { id: 'friend', label: 'Friend/Colleague', icon: 'mdi:account-group' },
-  { id: 'ad', label: 'Advertisement', icon: 'mdi:advertisement' },
-  { id: 'blog', label: 'Blog/Article', icon: 'mdi:file-document' },
-  { id: 'other', label: 'Other', icon: 'mdi:dots-horizontal' },
+// Define referral sources with i18n keys
+const getReferralSources = (t: any) => [
+  { id: 'search', label: t('onboarding.referralSources.search', 'Search Engine'), icon: 'mdi:google' },
+  { id: 'social', label: t('onboarding.referralSources.social', 'Social Media'), icon: 'mdi:facebook' },
+  { id: 'friend', label: t('onboarding.referralSources.friend', 'Friend/Colleague'), icon: 'mdi:account-group' },
+  { id: 'ad', label: t('onboarding.referralSources.ad', 'Advertisement'), icon: 'mdi:advertisement' },
+  { id: 'blog', label: t('onboarding.referralSources.blog', 'Blog/Article'), icon: 'mdi:file-document' },
+  { id: 'other', label: t('onboarding.referralSources.other', 'Other'), icon: 'mdi:dots-horizontal' },
 ];
 
 export function OnBoardingView() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
-  // Initialize the mutations
-  const [updateUser] = useUpdateUserMutation();
-  const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
+  // Initialize the mutations and queries
+  const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
+  const { data: subscriptionPlans = [] } = useGetSubscriptionPlansQuery();
+
+  // Get translated arrays
+  const INTERESTS = getInterests(t);
+  const REFERRAL_SOURCES = getReferralSources(t);
 
   // Check if onboarding is already completed
   const onboardingCompleted = useSelector((state: RootState) => state.auth.onboardingCompleted);
@@ -113,43 +118,57 @@ export function OnBoardingView() {
     setStep(2);
   };
 
+  // Helper function to check if a plan is free
+  const isFreeplan = (planId: string | null): boolean => {
+    if (!planId) return true;
+    const plan = subscriptionPlans.find(p => p.id === planId);
+    if (!plan) return true;
+
+    const planName = plan.name?.toLowerCase() || '';
+    const planPrice = plan.price || '0';
+
+    return (
+      planName.includes('free') ||
+      planName.includes('trial') ||
+      planPrice === '0'
+    );
+  };
+
   // Handle complete onboarding
   const handleComplete = async () => {
-    // Save user preferences and mark onboarding as completed
-
     try {
-      // First, create a subscription if a plan was selected
-      if (selectedPlan) {
-        try {
-          await createSubscription({ plan_id: selectedPlan }).unwrap();
-          toast.success('Subscription created successfully!');
-        } catch (subscriptionError) {
-          console.error('Failed to create subscription:', subscriptionError);
-          toast.error('Failed to create subscription. You can select a plan later.');
-        }
-      }
-
-      // Send the user preferences to the API
+      // First, save user preferences to the API
       await updateUser({
-        name: 'John Doe',
-        avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=John%20Doe',
-        telephone: '1234567890',
         is_active: true,
         interests: selectedInterests.join(","),
         heard_about_us: referralSource,
         is_completed_onboarding: true,
       }).unwrap();
 
-      toast.success('Onboarding completed successfully!');
+      toast.success(t('onboarding.success', 'Onboarding completed successfully!'));
 
       // Mark onboarding as completed in Redux store
       dispatch(setOnboardingCompleted(true));
+
+      // Handle plan selection and redirection
+      if (selectedPlan && !isFreeplan(selectedPlan)) {
+        // For paid plans: find the plan URL and open in new tab
+        const selectedPlanData = subscriptionPlans.find(p => p.id === selectedPlan);
+        if (selectedPlanData?.url) {
+          // Open subscription URL in new tab
+          window.open(selectedPlanData.url, '_blank');
+          toast.success(t('onboarding.redirecting', 'Redirecting to subscription page...'));
+        } else {
+          toast.error(t('onboarding.planUrlNotFound', 'Plan URL not found. Please select a plan from the dashboard.'));
+        }
+      }
+      // For free plans, no redirection needed
 
       // Navigate to dashboard
       navigate('/');
     } catch (error) {
       console.error('Failed to save user preferences:', error);
-      toast.error('Failed to save preferences, but we\'ll continue anyway.');
+      toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
 
       // Still mark as completed in the local store and navigate
       // to avoid blocking the user
@@ -173,7 +192,7 @@ export function OnBoardingView() {
         }}
       >
         <Typography variant="h6" sx={{ mb: 3 }}>
-          Preparing your experience...
+          {t('onboarding.loading', 'Preparing your experience...')}
         </Typography>
         <LinearProgress sx={{ width: '50%', maxWidth: 300 }} />
       </Box>
@@ -204,12 +223,16 @@ export function OnBoardingView() {
         {/* Header */}
         <Stack spacing={2} sx={{ mb: 5, textAlign: 'center' }}>
           <Typography variant="h3">
-            {step === 1 ? 'Welcome to XBlog!' : 'Choose Your Plan'}
+            {step === 1
+              ? t('onboarding.welcome', 'Welcome to XBlog!')
+              : t('onboarding.choosePlan', 'Choose Your Plan')
+            }
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
             {step === 1
-              ? 'Let\'s get to know you better so we can personalize your experience.'
-              : 'Select a plan that works best for your content creation needs.'}
+              ? t('onboarding.welcomeSubtitle', 'Let\'s get to know you better so we can personalize your experience.')
+              : t('onboarding.choosePlanSubtitle', 'Select a plan that works best for your content creation needs.')
+            }
           </Typography>
         </Stack>
 
@@ -217,10 +240,10 @@ export function OnBoardingView() {
         <Box sx={{ width: '100%', mb: 5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color={step === 1 ? 'primary.main' : 'text.secondary'}>
-              Your Preferences
+              {t('onboarding.progress.preferences', 'Your Preferences')}
             </Typography>
             <Typography variant="body2" color={step === 2 ? 'primary.main' : 'text.secondary'}>
-              Subscription Plan
+              {t('onboarding.progress.plan', 'Subscription Plan')}
             </Typography>
           </Box>
           <Box sx={{ width: '100%', height: 8, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 4 }}>
@@ -242,10 +265,10 @@ export function OnBoardingView() {
             {/* Interests section */}
             <Box>
               <Typography variant="h5" sx={{ mb: 3 }}>
-                What are you interested in?
+                {t('onboarding.interests.title', 'What are you interested in?')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Select all that apply. This helps us personalize your dashboard.
+                {t('onboarding.interests.subtitle', 'Select all that apply. This helps us personalize your dashboard.')}
               </Typography>
               <Grid container spacing={2}>
                 {INTERESTS.map((interest) => (
@@ -299,7 +322,7 @@ export function OnBoardingView() {
             {/* Referral section */}
             <Box>
               <Typography variant="h5" sx={{ mb: 3 }}>
-                How did you hear about us?
+                {t('onboarding.referralSources.title', 'How did you hear about us?')}
               </Typography>
               <Grid container spacing={2}>
                 {REFERRAL_SOURCES.map((source) => (
@@ -359,7 +382,7 @@ export function OnBoardingView() {
                 disabled={selectedInterests.length === 0 || !referralSource}
                 sx={{ px: 5, py: 1 }}
               >
-                Continue
+                {t('onboarding.continue', 'Continue')}
               </Button>
             </Box>
           </Stack>
@@ -381,18 +404,21 @@ export function OnBoardingView() {
                 size="large"
                 onClick={() => setStep(1)}
                 sx={{ px: 3 }}
-                disabled={isCreatingSubscription}
+                disabled={isUpdatingUser}
               >
-                Back
+                {t('onboarding.back', 'Back')}
               </Button>
               <LoadingButton
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
-                loading={isCreatingSubscription}
+                loading={isUpdatingUser}
                 sx={{ px: 5 }}
               >
-                {selectedPlan ? 'Get Started' : 'Continue with Free Plan'}
+                {selectedPlan && !isFreeplan(selectedPlan)
+                  ? t('onboarding.getStarted', 'Get Started')
+                  : t('onboarding.continueWithFree', 'Continue with Free Plan')
+                }
               </LoadingButton>
             </Box>
           </Stack>

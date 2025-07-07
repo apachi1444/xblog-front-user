@@ -14,12 +14,11 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  // Get subscription details from API with forced refetch and polling
+  // Get subscription details from API - optimized for performance
   const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery(undefined, {
-    // Force refetch every time component mounts to ensure fresh data
-    refetchOnMountOrArgChange: true,
-    // Poll every 30 seconds to keep data fresh
-    pollingInterval: 30000,
+    // Only refetch when component mounts if data is stale (older than 5 minutes)
+    refetchOnMountOrArgChange: 300, // 5 minutes in seconds
+    // Remove polling - rely on cache invalidation instead
   });
 
   let used = 0;

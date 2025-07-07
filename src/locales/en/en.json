@@ -719,7 +719,43 @@
       },
       "onboarding": {
         "title": "Guided Onboarding",
-        "description": "Our team will guide you step by step to set up your account and start using our platform effectively."
+        "description": "Our team will guide you step by step to set up your account and start using our platform effectively.",
+        "loading": "Preparing your experience...",
+        "welcome": "Welcome to XBlog!",
+        "choosePlan": "Choose Your Plan",
+        "welcomeSubtitle": "Let's get to know you better so we can personalize your experience.",
+        "choosePlanSubtitle": "Select a plan that works best for your content creation needs.",
+        "progress": {
+          "preferences": "Your Preferences",
+          "plan": "Subscription Plan"
+        },
+        "interests": {
+          "title": "What are you interested in?",
+          "subtitle": "Select all that apply. This helps us personalize your dashboard.",
+          "blogging": "Blogging",
+          "marketing": "Content Marketing",
+          "seo": "SEO Optimization",
+          "social": "Social Media",
+          "analytics": "Analytics",
+          "ecommerce": "E-commerce"
+        },
+        "referralSources": {
+          "title": "How did you hear about us?",
+          "search": "Search Engine",
+          "social": "Social Media",
+          "friend": "Friend/Colleague",
+          "ad": "Advertisement",
+          "blog": "Blog/Article",
+          "other": "Other"
+        },
+        "continue": "Continue",
+        "back": "Back",
+        "getStarted": "Get Started",
+        "continueWithFree": "Continue with Free Plan",
+        "success": "Onboarding completed successfully!",
+        "redirecting": "Redirecting to subscription page...",
+        "planUrlNotFound": "Plan URL not found. Please select a plan from the dashboard.",
+        "error": "Failed to save preferences, but we'll continue anyway."
       }
     },
     "welcome": {

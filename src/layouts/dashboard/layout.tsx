@@ -46,7 +46,10 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
 
   const currentStore = useSelector((state: RootState) => state.stores.currentStore);
 
-  const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery();
+  const { data: subscriptionData, error: subscriptionError } = useGetSubscriptionDetailsQuery(undefined, {
+    // Don't refetch on mount - use cached data
+    refetchOnMountOrArgChange: false,
+  });
 
   const { data: storesData, error: storesError } = useGetStoresQuery();
 

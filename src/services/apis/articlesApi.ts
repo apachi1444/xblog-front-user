@@ -108,7 +108,8 @@ export const articlesApi = api.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
-      invalidatesTags: ['Articles'],
+      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
+      // invalidatesTags: ['Articles'],
     }),
 
 
@@ -126,7 +127,8 @@ export const articlesApi = api.injectEndpoints({
         method: 'POST',
         body: params,
       }),
-      invalidatesTags: ['Articles'],
+      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
+      // invalidatesTags: ['Articles'],
     }),
   }),
 });

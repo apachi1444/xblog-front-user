@@ -77,8 +77,8 @@ export const subscriptionApi = api.injectEndpoints({
         method: 'GET',
       }),
       providesTags: ['Subscription'],
-      // Very short cache duration for real-time updates
-      keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS, // 30 seconds for immediate updates
+      // Longer cache duration - rely on invalidation for updates
+      keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS, // 1 hour - only refetch when needed
     }),
 
     // Get subscription plans

@@ -22,7 +22,12 @@ export interface SubscriptionExpirationResult {
 export function useSubscriptionExpiration(warningThresholdDays: number = 3): SubscriptionExpirationResult {
   // Get subscription details from Redux store and API
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
-  const { isLoading, error, refetch } = useGetSubscriptionDetailsQuery();
+  const { isLoading, error, refetch } = useGetSubscriptionDetailsQuery(undefined, {
+    // Don't refetch on mount - use cached data
+    refetchOnMountOrArgChange: false,
+    // Only fetch if we don't have subscription details in Redux
+    skip: !!subscriptionDetails,
+  });
   
   // Calculate days remaining and check if expiring soon
   const { isExpiringSoon, daysRemaining, expirationDate } = useMemo(() => {

@@ -9,7 +9,13 @@ import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionAp
  * Hook to manage regeneration functionality
  */
 export function useRegenerateManager() {
-  const {data : subscription} = useGetSubscriptionDetailsQuery()
+  // Use cached data only - don't trigger new requests
+  const {data : subscription} = useGetSubscriptionDetailsQuery(undefined, {
+    // Skip if data is already cached and fresh
+    skip: false,
+    // Don't refetch on mount
+    refetchOnMountOrArgChange: false,
+  })
 
   // Get regeneration count from user data
   const regenerationsAvailable = subscription?.regenerations_number || 0;
