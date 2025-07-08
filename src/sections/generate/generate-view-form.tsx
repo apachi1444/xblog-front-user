@@ -382,7 +382,7 @@ export function GenerateViewForm({
         case 2:
           return <Step3ContentStructuring />;
         case 3:
-          return <Step4Publish />;
+          return <Step4Publish setActiveStep={setActiveStep} />;
         default:
           return null;
         }
@@ -402,8 +402,10 @@ export function GenerateViewForm({
         onError={handleGenerationError}
       />
 
-      {/* Stepper */}
-      <StepperComponent steps={steps} activeStep={activeStep} />
+      {/* Stepper - Hide in step 4 for full immersion */}
+      {activeStep !== 3 && (
+        <StepperComponent steps={steps} activeStep={activeStep} />
+      )}
 
       {/* Content layout with children */}
       <ContentLayout

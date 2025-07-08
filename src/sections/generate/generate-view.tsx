@@ -287,25 +287,27 @@ export function GeneratingView() {
 
   return (
     <DashboardContent>
-        {/* Header */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            {selectedArticle ? (
-              <Box>
-                <Typography variant="h5" gutterBottom>
-                  Editing Draft: {selectedArticle.article_title || selectedArticle.title || 'Untitled Draft'}
+        {/* Header - Hide in step 4 for full immersion */}
+        {activeStep !== 3 && (
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              {selectedArticle ? (
+                <Box>
+                  <Typography variant="h5" gutterBottom>
+                    Editing Draft: {selectedArticle.article_title || selectedArticle.title || 'Untitled Draft'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Created on {new Date(selectedArticle.created_at || Date.now()).toLocaleDateString()}
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography variant="h5">
+                  Create New Article
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Created on {new Date(selectedArticle.created_at || Date.now()).toLocaleDateString()}
-                </Typography>
-              </Box>
-            ) : (
-              <Typography variant="h5">
-                Create New Article
-              </Typography>
-            )}
+              )}
+            </Box>
           </Box>
-        </Box>
+        )}
 
         {/* Use the GenerateViewForm component */}
         <FormProvider {...methods}>

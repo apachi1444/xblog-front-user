@@ -147,11 +147,27 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             methods.setValue('faq', result.faq);
             break;
 
-          case 'sections':
+          case 'sections': {
+            // Combine and transform internal and external links for the API
+            const internalLinks = formData.step2?.internalLinks || [];
+            const externalLinks = formData.step2?.externalLinks || [];
+
+            const combinedLinks = [
+              ...internalLinks.map((link: { anchorText: string; url: string }) => ({
+                link_text: link.anchorText,
+                link_url: link.url
+              })),
+              ...externalLinks.map((link: { anchorText: string; url: string }) => ({
+                link_text: link.anchorText,
+                link_url: link.url
+              }))
+            ];
+
             // Log the data being sent to sections API
             console.log('📋 Sections API Request Data:', {
               toc: generatedToc,
               images: generatedImages,
+              links: combinedLinks,
               article_title: title,
               target_audience: 'general',
               tone: formData.step2?.toneOfVoice || 'friendly',
@@ -168,7 +184,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               point_of_view: formData.step2?.pointOfView || 'third-person',
               article_type: formData.step2?.articleType || 'how-to',
               article_size: formData.step2?.articleSize || 'medium',
-              links: [], // Will be populated by link generation APIs
+              links: combinedLinks, // ✅ Use combined internal and external links
               images: generatedImages, // ✅ Use freshly generated images
               language: language || 'english'
             }).unwrap();
@@ -185,6 +201,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             // Store sections in form - THIS IS CRITICAL FOR STEP 3 EDITING
             methods.setValue('step3.sections', transformedSections);
             break;
+          }
           default :
             break;
         }

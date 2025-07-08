@@ -984,166 +984,293 @@ const setupMocks = () => {
     // Mock generate-full-article endpoint
     mock.onPost('/generate-full-article').reply((config) => {
       try {
-        const requestData = JSON.parse(config.data);
-        const {
-          title,
-          meta_title,
-          meta_description,
-          keywords,
-          author,
-          featured_media,
-          reading_time_estimate,
-          url,
-          faqs,
-          external_links,
-          table_of_contents,
-          sections,
-          language
-        } = requestData;
+        // Parse request data (not used in this mock but kept for consistency)
+        JSON.parse(config.data);
 
-        // Generate complete HTML article based on the request data
+        // Use the aa.html content with dark theme styling to match the local display
         const articleHtml = `<!DOCTYPE html>
-<html lang="${language}">
+<html lang="english">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="${meta_description}">
-  <meta name="keywords" content="${keywords}">
-  <meta name="author" content="${author}">
-  <meta property="og:title" content="${meta_title}">
-  <meta property="og:description" content="${meta_description}">
-  <meta property="og:image" content="${featured_media}">
-  <meta property="og:url" content="${url}">
+  <meta name="description" content="Explore the best free mobile games for 2025, with in-depth reviews, gameplay tips, monetization insights, and future trends shaping the industry.">
+  <meta name="keywords" content="free mobile games 2025, best android games, free-to-play games, mobile gaming trends">
+  <meta name="author" content="Gaming Insights Team">
+  <meta property="og:title" content="Top Free Mobile Games 2025: Reviews, Tips & Trends">
+  <meta property="og:description" content="Explore the best free mobile games for 2025, with in-depth reviews, gameplay tips, monetization insights, and future trends shaping the industry.">
+  <meta property="og:image" content="https://example.com/images/top-mobile-game-2025.png">
+  <meta property="og:url" content="https://example.com/articles/best-free-mobile-games-2025">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="canonical" href="${url}">
-  <title>${meta_title}</title>
+  <link rel="canonical" href="https://example.com/articles/best-free-mobile-games-2025">
+  <title>Top Free Mobile Games 2025: Reviews, Tips & Trends</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <style>
-  section a, article a, div a {
-    color: #1a73e8;
-    text-decoration: underline;
-  }
-</style>
-<body>
-  <div class="max-w-4xl mx-auto px-4 py-8 bg-white min-h-screen">
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        section a, article a, div a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+        .dark-bg {
+            background-color: #2d2d2d;
+        }
+        .dark-border {
+            border-color: #404040;
+        }
+  </style>
+<body class="bg-gray-900 text-white">
+
+    <!---TITLE--->
+
+        <div class="max-w-4xl mx-auto px-4 py-8 bg-gray-900 min-h-screen">
     <!-- Header Section -->
     <header class="mb-12">
-      <div class="flex items-center text-sm text-purple-600 mb-3 font-medium">
+      <div class="flex items-center text-sm text-blue-400 mb-3 font-medium">
       </div>
-      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-        ${title}
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">
+        The Best Free Mobile Games to Play in 2025
       </h1>
-      <div class="flex items-center text-gray-600 text-sm">
+
+    <!---END TITLE--->
+
+    <!---READING LABEL--->
+
+            <div class="flex items-center text-gray-300 text-sm">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-1">
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <span>Read time: ${reading_time_estimate} minutes</span>
+        <span>Read time: 12 minutes</span>
       </div>
     </header>
 
-    <!-- Table of Contents -->
-    <section class="mb-8 bg-purple-50 rounded-lg p-5">
-      <div class="flex items-center mb-4 text-purple-800">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2">
-          <line x1="8" y1="6" x2="21" y2="6"></line>
-          <line x1="8" y1="12" x2="21" y2="12"></line>
-          <line x1="8" y1="18" x2="21" y2="18"></line>
-          <line x1="3" y1="6" x2="3.01" y2="6"></line>
-          <line x1="3" y1="12" x2="3.01" y2="12"></line>
-          <line x1="3" y1="18" x2="3.01" y2="18"></line>
-        </svg>
-        <h2 class="text-lg font-semibold">Table of Contents</h2>
-      </div>
-      <nav>
-        <ul class="space-y-2">
-          ${table_of_contents.map((item: { heading: string; subheadings: any[]; }) => `
-            <li class="font-medium list-none">
-              <a href="#${item.heading.toLowerCase().replace(/\s+/g, '-')}" class="text-purple-700 hover:text-purple-900 transition-colors">
-                ${item.heading}
-              </a>
-            </li>
-            ${item.subheadings.map(sub => `
-              <li class="list-disc list-inside text-purple-700">
-                <span>
-                  <a href="#${sub.toLowerCase().replace(/\s+/g, '-')}" class="text-purple-700 hover:text-purple-900 transition-colors">
-                    ${sub}
-                  </a>
-                </span>
-              </li>
-            `).join('')}
-          `).join('')}
-        </ul>
-      </nav>
-    </section>
 
-    <!-- Article Sections -->
-    ${sections.map((section: { content: any; }) => section.content).join('\n    ')}
+    <!---END READING LABEL--->
 
-    <!-- FAQ Section -->
+    <!---TABLE OF CONTENTS--->
+
+            <section class="mb-8 bg-gray-800 rounded-lg p-5 border border-gray-700">
+              <div class="flex items-center mb-4 text-blue-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <h2 class="text-lg font-semibold text-white">Table of Contents</h2>
+              </div>
+              <nav>
+                <ul class="space-y-2">
+
+                  <li class="font-medium list-none">
+                    <a href="#introduction" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Introduction
+                    </a>
+                  </li>
+                  <li class="font-medium list-none">
+                    <a href="#top-5-free-mobile-games-in-2025" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Top 5 Free Mobile Games in 2025
+                    </a>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#game-1:-realm-of-eternia:-tactics" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Game 1: Realm of Eternia: Tactics
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#game-2:-cosmic-crusaders" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Game 2: Cosmic Crusaders
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#game-3:-pocket-pet-paradise" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Game 3: Pocket Pet Paradise
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#game-4:-cyberpunk-city-racer" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Game 4: Cyberpunk City Racer
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#game-5:-mystic-match-mania" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Game 5: Mystic Match Mania
+                      </a>
+                    </span>
+                  </li>
+                  <li class="font-medium list-none">
+                    <a href="#gameplay-tips-for-casual-gaming" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Gameplay Tips for Casual Gaming
+                    </a>
+                  </li>
+                  <li class="font-medium list-none">
+                    <a href="#understanding-free-to-play-monetization" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Understanding Free-to-Play Monetization
+                    </a>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#in-app-purchases" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        In-App Purchases
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#advertising-models" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Advertising Models
+                      </a>
+                    </span>
+                  </li>
+                  <li class="list-disc list-inside text-blue-400">
+                    <span>
+                      <a href="#ethical-considerations" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        Ethical Considerations
+                      </a>
+                    </span>
+                  </li>
+                  <li class="font-medium list-none">
+                    <a href="#future-trends-in-mobile-games" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Future Trends in Mobile Games
+                    </a>
+                  </li>
+                  <li class="font-medium list-none">
+                    <a href="#conclusion" class="text-blue-400 hover:text-blue-300 transition-colors">
+                      Conclusion
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </section>
+
+    <!---END TABLE OF CONTENTS--->
+
+    <!---MAGIC--->
+
+            <!--Introduction -->
+            <section id="Introduction"> <h2 class="text-2xl font-bold mb-4 text-white">Introduction</h2> <p class="mb-4 text-gray-300 leading-relaxed">The mobile gaming landscape is constantly evolving, and 2025 promises to be a banner year for free-to-play titles...</p> </section>
+            <!--Section one -->
+            <section id="top-5-free-mobile-games"> <h2 class="text-2xl font-bold mb-4 text-white">Top 5 Free Mobile Games in 2025</h2> <p class="mb-4 text-gray-300 leading-relaxed">The mobile gaming market continues to explode...</p> </section>
+            <!--Section two -->
+            <section id="gameplay-tips-for-casual-gaming"> <h2 class="text-2xl font-bold mb-4 text-white">Gameplay Tips for Casual Gaming</h2> <p class="mb-4 text-gray-300 leading-relaxed">Casual mobile gaming offers a fantastic escape...</p> </section>
+            <!--Section three -->
+            <section id="gameplay-tips-advanced"> <h2 class="text-2xl font-bold mb-4 text-white">Gameplay Tips for Casual Gaming</h2> <p class="mb-4 text-gray-300 leading-relaxed">So, you've downloaded a few free mobile games and are ready to dive in...</p> </section>
+            <!--conclusion -->
+            <section id="Conclusion"> <h2 class="text-2xl font-bold mb-4 text-white">Conclusion</h2> <p class="mb-4 text-gray-300 leading-relaxed">The mobile gaming landscape in 2025 offers a wealth of free and engaging experiences...</p> </section>
+
+    <!---END MAGIC--->
+
+    <!---FAQ--->
+
     <section id="faq" class="mb-12">
-      <div class="flex items-center mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 mr-2 text-purple-600">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-          <path d="M12 17h.01"></path>
-        </svg>
-        <h2 class="text-2xl font-bold text-gray-800">Frequently Asked Questions</h2>
-      </div>
-      <div class="border rounded-lg">
-        ${faqs.map((faq: { question: any; answer: any; }) => `
-          <details class="group px-4 py-3 border-b">
-            <summary class="flex items-center justify-between cursor-pointer list-none text-left hover:text-purple-700 font-medium">
-              ${faq.question}
-              <svg class="w-5 h-5 ml-2 transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="mt-3 text-gray-700">
-              ${faq.answer}
-            </div>
-          </details>
-        `).join('')}
-      </div>
-    </section>
+        <div class="flex items-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 mr-2 text-blue-400">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <path d="M12 17h.01"></path>
+            </svg>
+            <h2 class="text-2xl font-bold text-white">Frequently Asked Questions</h2>
+        </div>
+        <div class="border border-gray-700 rounded-lg bg-gray-800">
 
-    <!-- External Links Section -->
-    <section class="rounded-lg border p-6 bg-gray-50 mb-12">
-      <div class="flex items-center mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="h-6 w-6 mr-2 text-purple-600">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-          <polyline points="15 3 21 3 21 9"></polyline>
-          <line x1="10" y1="14" x2="21" y2="3"></line>
-        </svg>
-        <h2 class="text-2xl font-bold text-gray-800">External Resources</h2>
-      </div>
-      <div class="space-y-5">
-        ${external_links.map((link: { link_url: any; link_text: any; }) => `
-          <div class="border-b border-gray-200 last:border-0 pb-4 last:pb-0">
-            <a
-              href="${link.link_url}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-lg font-medium text-purple-700 hover:text-purple-900 transition-colors flex items-center"
-            >
-              ${link.link_text}
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                   class="ml-1 h-4 w-4">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </a>
-          </div>
-        `).join('')}
-      </div>
-    </section>
-  </div>
+        <details class="group px-4 py-3 border-b border-gray-700">
+              <summary class="flex items-center justify-between cursor-pointer list-none text-left hover:text-blue-400 font-medium text-white">
+                Are free mobile games in 2025 safe to download?
+                <svg class="w-5 h-5 ml-2 transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="mt-3 text-gray-300">
+              Most games from official stores like Google Play and App Store are safe, but always check reviews and permissions before installing.
+              </div>
+            </details>
+
+        <details class="group px-4 py-3 border-b border-gray-700">
+              <summary class="flex items-center justify-between cursor-pointer list-none text-left hover:text-blue-400 font-medium text-white">
+                Do free mobile games really stay free?
+                <svg class="w-5 h-5 ml-2 transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="mt-3 text-gray-300">
+              Generally, yes, but many include optional in-app purchases or ads to support development.
+              </div>
+            </details>
+        </div></section>
+    <!---END FAQ--->
+
+    <!---EXTERNAL LINKS--->
+
+            <section class="rounded-lg border border-gray-700 p-6 bg-gray-800 mb-12">
+                <div class="flex items-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="h-6 w-6 mr-2 text-blue-400">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-white">External Resources</h2>
+                </div>
+
+                <div class="space-y-5">
+
+                <div class="border-b border-gray-600 last:border-0 pb-4 last:pb-0">
+                    <a
+                        href="https://www.statista.com/topics/1906/mobile-gaming/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-lg font-medium text-blue-400 hover:text-blue-300 transition-colors flex items-center"
+                    >
+                        Statista: Mobile Gaming Market
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="ml-1 h-4 w-4">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="border-b border-gray-600 last:border-0 pb-4 last:pb-0">
+                    <a
+                        href="https://play.google.com/store/apps/category/GAME"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-lg font-medium text-blue-400 hover:text-blue-300 transition-colors flex items-center"
+                    >
+                        Google Play Free Games Ranking
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="ml-1 h-4 w-4">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+
+                </div>
+            </section>
+
+    <!---END EXTERNAL LINKS--->
+
 </body>
 </html>`;
 
