@@ -26,7 +26,6 @@ import { Step4Publish } from './generate-steps/steps/step-four-publish';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
-import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring-and-publish';
 
 import type { GenerateArticleFormData } from './schemas';
 
@@ -382,8 +381,6 @@ export function GenerateViewForm({
                     setActiveStep={setActiveStep}
                     />;
         case 2:
-          return <Step3ContentStructuring />;
-        case 3:
           return <Step4Publish setActiveStep={setActiveStep} />;
         default:
           return null;

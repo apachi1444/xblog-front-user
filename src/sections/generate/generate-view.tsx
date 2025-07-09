@@ -243,7 +243,6 @@ export function GeneratingView() {
     const fallbacks: Record<string, string> = {
       'generate.steps.contentSetup': 'Content Setup',
       'generate.steps.articleSettings': 'Article Settings',
-      'generate.steps.contentStructuring': 'Content Structuring',
       'generate.steps.publish': 'Publish'
     };
 
@@ -254,7 +253,7 @@ export function GeneratingView() {
   });
 
   const handleNextStep = () => {
-    setActiveStep((prev) => Math.min(prev + 1, 4));
+    setActiveStep((prev) => Math.min(prev + 1, 3));
   };
 
   const handlePrevStep = () => {
@@ -286,8 +285,8 @@ export function GeneratingView() {
 
   return (
     <DashboardContent>
-        {/* Header - Hide in step 4 for full immersion */}
-        {activeStep !== 3 && (
+        {/* Header - Hide in step 3 for full immersion */}
+        {activeStep !== 2 && (
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
               {selectedArticle ? (

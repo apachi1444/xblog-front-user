@@ -10,7 +10,8 @@ import {
   useGenerateFaqMutation,
   useGenerateImagesMutation,
   useGenerateSectionsMutation,
-  useGenerateTableOfContentsMutation
+  useGenerateTableOfContentsMutation,
+  useGenerateFullArticleMutation
 } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -42,6 +43,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const [generateImages] = useGenerateImagesMutation();
   const [generateFaq] = useGenerateFaqMutation();
   const [generateSections] = useGenerateSectionsMutation();
+  const [generateFullArticle] = useGenerateFullArticleMutation();
 
   // Generation steps with translations
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,11 +77,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       duration: 1800
     },
     {
-      key: 'finalizing',
-      title: t('article.generation.modal.steps.finalizing', 'Finalizing your content'),
-      description: t('article.generation.modal.progress.finalizing', 'Putting everything together for the perfect article...'),
-      icon: 'mdi:check-circle',
-      duration: 1000
+      key: 'fullArticle',
+      title: t('article.generation.modal.steps.fullArticle', 'Generating complete article'),
+      description: t('article.generation.modal.progress.fullArticle', 'Creating the final HTML version of your article...'),
+      icon: 'mdi:file-document',
+      duration: 2000
     }
   ];
 
@@ -88,12 +90,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     const formData = methods.getValues();
     const { primaryKeyword, secondaryKeywords, contentDescription, title, language } = formData.step1;
 
-    const steps = ['tableOfContents', 'images', 'faq', 'sections'];
+    const steps = ['tableOfContents', 'images', 'faq', 'sections', 'fullArticle'];
     const startIndex = startFromStep ? steps.indexOf(startFromStep) : 0;
 
     // Store generated data to pass between API calls
     let generatedToc = formData.toc || [];
     let generatedImages = formData.images || [];
+    let generatedFaq = formData.faq || [];
 
     setIsGenerating(true);
     setShowRetryUI(false);
@@ -143,49 +146,58 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               content_description: contentDescription
             }).unwrap();
 
-            // Store FAQ in form
-            methods.setValue('faq', result.faq);
+            // Store FAQ in form and variable for later use
+            generatedFaq = result.faq;
+            methods.setValue('faq', generatedFaq);
             break;
 
           case 'sections': {
+            // Ensure we have valid arrays for all required fields
+            const safeToc = Array.isArray(generatedToc) ? generatedToc : [];
+            const safeImages = Array.isArray(generatedImages) ? generatedImages : [];
+
             // Combine and transform internal and external links for the API
-            const internalLinks = formData.step2?.internalLinks || [];
-            const externalLinks = formData.step2?.externalLinks || [];
+            const internalLinks = Array.isArray(formData.step2?.internalLinks) ? formData.step2.internalLinks : [];
+            const externalLinks = Array.isArray(formData.step2?.externalLinks) ? formData.step2.externalLinks : [];
 
             const combinedLinks = [
               ...internalLinks.map((link: { anchorText: string; url: string }) => ({
-                link_text: link.anchorText,
-                link_url: link.url
+                link_text: link.anchorText || '',
+                link_url: link.url || ''
               })),
               ...externalLinks.map((link: { anchorText: string; url: string }) => ({
-                link_text: link.anchorText,
-                link_url: link.url
+                link_text: link.anchorText || '',
+                link_url: link.url || ''
               }))
             ];
 
-            // Log the data being sent to sections API
-            console.log('📋 Sections API Request Data:', {
-              toc: generatedToc,
-              images: generatedImages,
+            // Log the data being sent to sections API with safety checks
+            console.log('📋 Sections API Request Data (with safety checks):', {
+              toc: safeToc,
+              tocLength: safeToc.length,
+              images: safeImages,
+              imagesLength: safeImages.length,
               links: combinedLinks,
-              article_title: title,
-              target_audience: 'general',
-              tone: formData.step2?.toneOfVoice || 'friendly',
-              point_of_view: formData.step2?.pointOfView || 'third-person',
-              article_type: formData.step2?.articleType || 'how-to',
-              article_size: formData.step2?.articleSize || 'medium'
-            });
-
-            result = await generateSections({
-              toc: generatedToc, // ✅ Use freshly generated TOC
-              article_title: title,
+              linksLength: combinedLinks.length,
+              article_title: title || '',
               target_audience: 'general',
               tone: formData.step2?.toneOfVoice || 'friendly',
               point_of_view: formData.step2?.pointOfView || 'third-person',
               article_type: formData.step2?.articleType || 'how-to',
               article_size: formData.step2?.articleSize || 'medium',
-              links: combinedLinks, // ✅ Use combined internal and external links
-              images: generatedImages, // ✅ Use freshly generated images
+              language: language || 'english'
+            });
+
+            result = await generateSections({
+              toc: safeToc, // ✅ Use safe TOC array
+              article_title: title || '',
+              target_audience: 'general',
+              tone: formData.step2?.toneOfVoice || 'friendly',
+              point_of_view: formData.step2?.pointOfView || 'third-person',
+              article_type: formData.step2?.articleType || 'how-to',
+              article_size: formData.step2?.articleSize || 'medium',
+              links: combinedLinks, // ✅ Use safe combined links array
+              images: safeImages, // ✅ Use safe images array
               language: language || 'english'
             }).unwrap();
 
@@ -202,6 +214,39 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             methods.setValue('step3.sections', transformedSections);
             break;
           }
+
+          case 'fullArticle': {
+            // Generate complete article HTML
+            const fullArticleRequest = {
+              title: formData.step1?.title || '',
+              meta_title: formData.step1?.metaTitle || '',
+              meta_description: formData.step1?.metaDescription || '',
+              keywords: formData.step1?.primaryKeyword || '',
+              author: 'AI Generated',
+              featured_media: '',
+              reading_time_estimate: 5,
+              url: formData.step1?.urlSlug || '',
+              faqs: generatedFaq, // ✅ Use freshly generated FAQ
+              external_links: formData.step2?.externalLinks?.map((link: any) => ({
+                link_text: link.anchorText,
+                link_url: link.url
+              })) || [],
+              table_of_contents: generatedToc,
+              sections: formData.step3?.sections?.map((section: any) => ({
+                key: section.title,
+                content: section.content
+              })) || [],
+              images: generatedImages,
+              language: language || 'english'
+            };
+
+            result = await generateFullArticle(fullArticleRequest).unwrap();
+
+            // Store generated HTML in form
+            methods.setValue('generatedHtml', result);
+            break;
+          }
+
           default :
             break;
         }
@@ -240,7 +285,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       if (onComplete) onComplete();
     }, 1000);
 
-  }, [methods, generateTableOfContents, generateImages, generateFaq, generateSections, completedSteps, onComplete, onError]);
+  }, [methods, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, completedSteps, onComplete, onError]);
 
   // Retry failed generation step
   const handleRetryGeneration = useCallback(async () => {

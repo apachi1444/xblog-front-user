@@ -6,8 +6,7 @@ import { Box, Stack, Button, useTheme } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
-import { useUpdateArticleMutation } from 'src/services/apis/articlesApi';
-import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
+
 
 import { Iconify } from 'src/components/iconify';
 
@@ -34,8 +33,7 @@ export const StepNavigation = ({
   const theme = useTheme();
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
-  const [generateFullArticle] = useGenerateFullArticleMutation();
-  const [updateArticle] = useUpdateArticleMutation();
+
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -98,70 +96,18 @@ export const StepNavigation = ({
           shouldProceed = false;
         }
       } else if (activeStep === 1) {
-        // Check if table of contents has been generated in step 2
+        // Check if sections and full article have been generated in step 2
         if (!values.step3?.sections?.length) {
-          toast.error("Please generate a table of contents before proceeding");
+          toast.error("Please generate content before proceeding");
           shouldProceed = false;
         }
-      } else if (activeStep === 2) {
-        // Check if sections have been generated before proceeding to step 3
-        if (!values.step3?.sections?.length) {
-          toast.error("Please generate sections before proceeding");
+        if (!values.generatedHtml) {
+          toast.error("Please wait for article generation to complete");
           shouldProceed = false;
         }
       }
 
       if (shouldProceed) {
-        // Special handling for step 2 -> step 3: Generate full article
-        if (activeStep === 2) {
-          try {
-            const fullArticleRequest = {
-              title: values.step1?.title || '',
-              meta_title: values.step1?.metaTitle || '',
-              meta_description: values.step1?.metaDescription || '',
-              keywords: values.step1?.primaryKeyword || '',
-              author: 'AI Generated',
-              featured_media: '',
-              reading_time_estimate: 5,
-              url: values.step1?.urlSlug || '',
-              faqs: values.faq || [],
-              external_links: values.step2?.externalLinks?.map((link: any) => ({
-                link_text: link.anchorText,
-                link_url: link.url
-              })) || [],
-              table_of_contents: values.toc || [],
-              sections: values.step3?.sections?.map((section: any) => ({
-                key: section.title,
-                content: section.content
-              })) || [],
-              images: values.images || [],
-              language: values.step1?.language || 'english'
-            };
-
-            console.log('🚀 Generate Full Article Request:', fullArticleRequest);
-            const result = await generateFullArticle(fullArticleRequest).unwrap();
-            methods.setValue('generatedHtml', result);
-
-            // Save the generated HTML content to the article
-            if (articleId && result) {
-              try {
-                await updateArticle({
-                  id: articleId,
-                  data: {
-                    content: result // Direct HTML string
-                  }
-                }).unwrap();
-              } catch (updateError) {
-                // Don't show error to user as the generation was successful
-              }
-            }
-
-            toast.success('Article generated successfully!');
-          } catch (error) {
-            toast.error('Failed to generate article. Please try again.');
-            return; // Don't proceed if generation fails
-          }
-        }
 
         // Update article with current step data before proceeding
         if (articleId) {

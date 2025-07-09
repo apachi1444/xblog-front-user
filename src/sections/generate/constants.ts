@@ -2,8 +2,7 @@
 export const STEPS_KEYS = [
   { id: 1, labelKey: "generate.steps.contentSetup" },
   { id: 2, labelKey: "generate.steps.articleSettings" },
-  { id: 3, labelKey: "generate.steps.contentStructuring" },
-  { id: 4, labelKey: "generate.steps.publish" }
+  { id: 3, labelKey: "generate.steps.publish" }
 ] as const;
 
 export const SEO_DASHBOARD_WIDTH = {
