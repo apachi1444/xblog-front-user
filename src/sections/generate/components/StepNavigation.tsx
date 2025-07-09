@@ -5,8 +5,9 @@ import { useFormContext } from 'react-hook-form';
 import { Box, Stack, Button, useTheme } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
-import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
+
 import { useUpdateArticleMutation } from 'src/services/apis/articlesApi';
+import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -33,7 +34,7 @@ export const StepNavigation = ({
   const theme = useTheme();
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
-  const [generateFullArticle, { isLoading: isGeneratingFullArticle }] = useGenerateFullArticleMutation();
+  const [generateFullArticle] = useGenerateFullArticleMutation();
   const [updateArticle] = useUpdateArticleMutation();
 
   // State for modals (only for final step)
@@ -139,20 +140,18 @@ export const StepNavigation = ({
 
             console.log('🚀 Generate Full Article Request:', fullArticleRequest);
             const result = await generateFullArticle(fullArticleRequest).unwrap();
-            methods.setValue('generatedHtml', result.article_html);
+            methods.setValue('generatedHtml', result);
 
             // Save the generated HTML content to the article
-            if (articleId && result.article_html) {
+            if (articleId && result) {
               try {
                 await updateArticle({
                   id: articleId,
                   data: {
-                    content: result.article_html
+                    content: result // Direct HTML string
                   }
                 }).unwrap();
-                console.log('✅ Article content saved successfully');
               } catch (updateError) {
-                console.error('❌ Failed to save article content:', updateError);
                 // Don't show error to user as the generation was successful
               }
             }
@@ -170,7 +169,7 @@ export const StepNavigation = ({
             // Prepare request body with correct API field names
             const requestBody = {
               article_title: values.step1?.title || null,
-              content_description: values.step1?.contentDescription || null,
+              content__description: values.step1?.contentDescription || null,
               meta_title: values.step1?.metaTitle || null,
               meta_description: values.step1?.metaDescription || null,
               url_slug: values.step1?.urlSlug || null,
@@ -187,7 +186,7 @@ export const StepNavigation = ({
               include_videos: values.step2?.includeVideos || false,
               internal_links: values.step2?.internalLinking?.length ? JSON.stringify(values.step2.internalLinking) : null,
               external_links: values.step2?.externalLinking?.length ? JSON.stringify(values.step2.externalLinking) : null,
-              content: values.step3?.sections?.length ? JSON.stringify(values.step3.sections) : values.step1?.contentDescription || '',
+              content: values.step3?.sections?.length ? JSON.stringify(values.step3.sections) : '',
               status: 'draft' as const,
             };
 

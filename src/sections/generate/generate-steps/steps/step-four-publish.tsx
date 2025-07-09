@@ -46,34 +46,59 @@ interface Step4PublishProps {
 }
 
 export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4PublishProps) {
-  // Get form data from context
-  const { getValues } = useFormContext<GenerateArticleFormData>();
+  // Get form data from context with watch for real-time updates
+  const { getValues, watch } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
+
+  // Watch for changes in generatedHtml to trigger re-render
+  const watchedGeneratedHtml = watch('generatedHtml');
 
   // State to hold the HTML content
   const [htmlContent, setHtmlContent] = useState<string>('');
 
-  // Load the aa.html file content
+  // Load HTML content with intelligent priority system and detailed debugging
   useEffect(() => {
     const loadHtmlContent = async () => {
       try {
-        // If we have generated HTML from API, use it
-        if (formData.generatedHtml) {
+        // Debug: Log all form data to see what we have
+        console.log('🔍 Step 4 Debug - Full form data:', formData);
+        console.log('🔍 Step 4 Debug - generatedHtml exists:', !!formData.generatedHtml);
+        console.log('🔍 Step 4 Debug - generatedHtml length:', formData.generatedHtml?.length || 0);
+        console.log('🔍 Step 4 Debug - generatedHtml preview:', formData.generatedHtml?.substring(0, 200) || 'None');
+
+        // Priority 1: Use API-generated HTML from generate-full-article endpoint
+        if (formData.generatedHtml && formData.generatedHtml.trim()) {
+          console.log('✅ Using API-generated HTML content from generate-full-article');
           setHtmlContent(formData.generatedHtml);
           return;
         }
 
-        // Otherwise, load the aa.html file directly
+        // Priority 2: Build HTML from form data if sections exist but no generated HTML
+        if (formData.step3?.sections && formData.step3.sections.length > 0) {
+          console.log('⚠️ No API HTML found, but sections exist. Consider calling generate-full-article API');
+          console.log('🔍 Available sections:', formData.step3.sections.length);
+          // You could trigger the API call here or show a message to the user
+          // For now, fall back to static file
+        }
+
+        // Priority 3: Fallback to static aa.html file for demo/development purposes
+        console.log('⚠️ No API content found, loading static aa.html file for demo');
         const response = await fetch('/aa.html');
+        if (!response.ok) {
+          throw new Error(`Failed to load aa.html: ${response.status}`);
+        }
         const htmlText = await response.text();
         setHtmlContent(htmlText);
+
       } catch (error) {
+        console.error('❌ Failed to load HTML content:', error);
+        // Set empty content if all methods fail
         setHtmlContent('');
       }
     };
 
     loadHtmlContent();
-  }, [formData.generatedHtml]);
+  }, [formData, formData.generatedHtml, formData.step3.sections, watchedGeneratedHtml]);
 
   const { sections } = formData.step3;
 
@@ -81,8 +106,35 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
 
   // If we have HTML content, show contained preview
   if (htmlContent) {
+    // Determine content source for user feedback
+    const contentSource = formData.generatedHtml ? 'API Generated' : 'Demo Content';
+    const isApiGenerated = !!formData.generatedHtml;
+
     return (
       <Box sx={{ pb: 2 }}>
+        {/* Content Source Indicator */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 2,
+          p: 1,
+          bgcolor: isApiGenerated ? 'success.lighter' : 'warning.lighter',
+          borderRadius: 1,
+          border: 1,
+          borderColor: isApiGenerated ? 'success.main' : 'warning.main'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Iconify
+              icon={isApiGenerated ? 'eva:checkmark-circle-2-fill' : 'eva:info-fill'}
+              sx={{ color: isApiGenerated ? 'success.main' : 'warning.main' }}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {contentSource}: {isApiGenerated ? 'Your article has been generated successfully!' : 'Showing demo content - generate your article to see the real result'}
+            </Typography>
+          </Box>
+        </Box>
+
         {/* Action Buttons */}
         <Box sx={{
           display: 'flex',

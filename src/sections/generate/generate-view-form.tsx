@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
 import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
 
 import { api } from 'src/services/apis';
+import { useGenerateTopicMutation } from 'src/services/apis/generateContentApi';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
@@ -24,7 +26,7 @@ import { Step4Publish } from './generate-steps/steps/step-four-publish';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
-import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring';
+import { Step3ContentStructuring } from './generate-steps/steps/step-three-content-structuring-and-publish';
 
 import type { GenerateArticleFormData } from './schemas';
 
@@ -48,6 +50,7 @@ export function GenerateViewForm({
   const { generateSecondaryKeywords } = useKeywordGeneration();
   const { generateArticleTitle } = useTitleGeneration();
   const { generateMetaTags } = useMetaTagsGeneration();
+  const [generateTopic] = useGenerateTopicMutation();
 
   const [generationState, setGenerationState] = useState({
     isGeneratingTitle: false,
@@ -61,9 +64,6 @@ export function GenerateViewForm({
   });
 
   const { evaluateCriteria} = useCriteriaEvaluation()
-
-  const simulateDelay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleGenerateTitle = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingTitle: true }));
@@ -182,11 +182,14 @@ export function GenerateViewForm({
 
       console.log('🔧 Optimizing content description with:', { primaryKeyword, language, contentDescription });
 
-      // Simulate API call for content optimization
-      await simulateDelay(2000);
+      // Call the actual generate-topic API for content optimization
+      const result = await generateTopic({
+        primary_keyword: primaryKeyword,
+        secondary_keywords: formData.step1.secondaryKeywords || [],
+      }).unwrap();
 
-      // Generate optimized content (you can replace this with actual API call)
-      const optimizedContent = `This comprehensive guide covers everything you need to know about ${primaryKeyword}, including best practices, expert tips, and actionable strategies. Whether you're a beginner or looking to improve your skills, this detailed resource will help you achieve your goals with proven methods and real-world examples.`;
+      console.log('✅ API Response for content optimization:', result);
+      const optimizedContent = result.content; // Extract content from response
 
       // Update the form field with optimized content
       methods.setValue('step1.contentDescription', optimizedContent, {
@@ -194,18 +197,17 @@ export function GenerateViewForm({
         shouldDirty: true,
       });
 
+
+
       // Trigger criteria evaluation for the updated content description
       setTimeout(() => {
         evaluateCriteria('contentDescription', optimizedContent);
       }, 100);
 
-      console.log('✅ Content description optimized successfully');
-
-      // Invalidate subscription cache to update regeneration count in header
       dispatch(api.util.invalidateTags(['Subscription']));
 
     } catch (error) {
-      console.error('❌ Error optimizing content description:', error);
+      toast.error('Failed to optimize content description. Please try again.');
     } finally {
       setGenerationState((s) => ({ ...s, isOptimizingDescription: false }));
     }

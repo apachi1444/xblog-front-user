@@ -163,13 +163,12 @@ export function GeneratingView() {
       const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
       const sections = parseSectionsFromString(selectedArticle.sections || '');
 
-      console.log('📎 Parsed internal links:', internalLinks);
-      console.log('📎 Parsed external links:', externalLinks);
-      console.log('📋 Parsed sections:', sections);
+
+      const finalContentDescription = selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : baseDefaults.step1.contentDescription;
 
       return {
         step1: {
-          contentDescription: selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : baseDefaults.step1.contentDescription,
+          contentDescription: finalContentDescription,
           primaryKeyword: selectedArticle.primary_keyword !== null ? (selectedArticle.primary_keyword || '') : baseDefaults.step1.primaryKeyword,
           secondaryKeywords: selectedArticle.secondary_keywords !== null ? parseSecondaryKeywords(selectedArticle.secondary_keywords || '') : baseDefaults.step1.secondaryKeywords,
           language: selectedArticle.language !== null ? (selectedArticle.language || 'en') : baseDefaults.step1.language,

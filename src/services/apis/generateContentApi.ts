@@ -187,10 +187,9 @@ export interface GenerateFullArticleRequest {
 
 /**
  * Response containing complete article HTML
+ * Note: API returns HTML content directly as string, not wrapped in object
  */
-export interface GenerateFullArticleResponse extends BaseGenerationResponse {
-  article_html: string; // Complete HTML content like aa.html
-}
+export type GenerateFullArticleResponse = string; // Direct HTML content
 
 /**
  * Structure of a table of contents item
