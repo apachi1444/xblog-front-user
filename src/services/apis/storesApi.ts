@@ -33,7 +33,7 @@ export const storesApi = api.injectEndpoints({
     disconnectStore: builder.mutation<void, number>({
       query: (store_id) => ({
         url: `${STORES_BASE_URL}/disconnect/${store_id}`,
-        method: 'POST',
+        method: 'PATCH',
       }),
       invalidatesTags: ['Stores'],
     }),
@@ -42,7 +42,7 @@ export const storesApi = api.injectEndpoints({
     reconnectStore: builder.mutation<void, number>({
       query: (store_id) => ({
         url: `${STORES_BASE_URL}/reconnect/${store_id}`,
-        method: 'POST',
+        method: 'PATCH',
       }),
       invalidatesTags: ['Stores'],
     }),

@@ -481,7 +481,7 @@ const setupMocks = () => {
     });
 
     // Disconnect store mock
-    mock.onPost(/\/stores\/disconnect\/.*/).reply((config) => {
+    mock.onPatch(/\/stores\/disconnect\/.*/).reply((config) => {
       const storeId = config.url?.match(/\/disconnect\/(\d+)$/)?.[1];
 
       return [200, {
@@ -495,7 +495,7 @@ const setupMocks = () => {
     });
 
     // Reconnect store mock
-    mock.onPost(/\/stores\/reconnect\/.*/).reply((config) => {
+    mock.onPatch(/\/stores\/reconnect\/.*/).reply((config) => {
       const storeId = config.url?.match(/\/reconnect\/(\d+)$/)?.[1];
 
       return [200, {

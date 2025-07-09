@@ -32,11 +32,6 @@ export const navData = [
     path: '/templates',
     icon: icon('material-symbols:temple-buddhist-outline-sharp'),
   },
-  {
-    title: 'Article Preview',
-    path: '/article-preview-demo',
-    icon: icon('mdi:eye'),
-  },
 ];
 
 export const bottomNavData = [
