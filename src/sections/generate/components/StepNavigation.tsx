@@ -6,8 +6,6 @@ import { Box, Stack, Button, useTheme } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
-
-
 import { Iconify } from 'src/components/iconify';
 
 // Import modals for final step actions
@@ -39,6 +37,9 @@ export const StepNavigation = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+
+  // State for loading (prevent multiple clicks)
+  const [isNextLoading, setIsNextLoading] = useState(false);
 
   // Helper function to get the field names for a specific step
   const getFieldsForStep = (step: number): string[] => {
@@ -74,11 +75,17 @@ export const StepNavigation = ({
 
   // Handle next button click with validation
   const handleNext = async () => {
-    // Get the fields for the current step
-    const currentStepFields = getFieldsForStep(activeStep);
+    // Prevent multiple clicks
+    if (isNextLoading) return;
 
-    // Trigger validation for the current step's fields
-    const isStepValid = await methods.trigger(currentStepFields as any);
+    setIsNextLoading(true);
+
+    try {
+      // Get the fields for the current step
+      const currentStepFields = getFieldsForStep(activeStep);
+
+      // Trigger validation for the current step's fields
+      const isStepValid = await methods.trigger(currentStepFields as any);
 
     if (isStepValid) {
       const values = methods.getValues();
@@ -96,12 +103,13 @@ export const StepNavigation = ({
           shouldProceed = false;
         }
       } else if (activeStep === 1) {
-        // Check if sections and full article have been generated in step 2
-        if (!values.step3?.sections?.length) {
-          toast.error("Please generate content before proceeding");
-          shouldProceed = false;
-        }
-        if (!values.generatedHtml) {
+        // Check for generatedHtml OR existing article content
+        // Allow navigation if article has existing content (from DTO)
+        const hasExistingContent = articleId && values.step3?.sections?.some((section: { content: string; }) =>
+          section.content && section.content.trim() !== ''
+        );
+
+        if (!values.generatedHtml && !hasExistingContent) {
           toast.error("Please wait for article generation to complete");
           shouldProceed = false;
         }
@@ -150,6 +158,10 @@ export const StepNavigation = ({
       }
     } else {
       toast.error("Please fill out all required fields before proceeding.");
+    }
+    } finally {
+      // Always reset loading state
+      setIsNextLoading(false);
     }
   };
 
@@ -271,14 +283,15 @@ export const StepNavigation = ({
             // Other steps - show next button
             <Button
               variant="contained"
-              endIcon={<Iconify icon="eva:arrow-forward-fill" />}
+              endIcon={<Iconify icon={isNextLoading ? "eos-icons:loading" : "eva:arrow-forward-fill"} />}
               sx={{
                 borderRadius: '24px',
                 minWidth: '120px',
               }}
               onClick={handleNext}
+              disabled={isNextLoading} // ✅ Disable during loading
             >
-              Next
+              {isNextLoading ? 'Processing...' : 'Next'}
             </Button>
           )}
         </Box>

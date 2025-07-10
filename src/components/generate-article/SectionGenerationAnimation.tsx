@@ -35,6 +35,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showRetryUI, setShowRetryUI] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Ref to track if generation has already started for this show cycle
   const generationStartedRef = useRef(false);
@@ -103,6 +104,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     setShowRetryUI(false);
     setFailedStep('');
     setErrorMessage('');
+    setHasError(false); // ✅ Reset error state
 
     // eslint-disable-next-line no-plusplus
     for (let i = startIndex; i < steps.length; i++) {
@@ -141,6 +143,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             break;
 
           case 'faq':
+            console.log('🚀 Starting FAQ generation...');
+
             result = await generateFaq({
               title,
               primary_keyword: primaryKeyword,
@@ -148,8 +152,31 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               content_description: contentDescription
             }).unwrap();
 
-            generatedFaq = result || [];
+            console.log('🔍 Raw FAQ API Response:', result);
+            console.log('🔍 Response type:', typeof result);
+            console.log('🔍 Response keys:', Object.keys(result || {}));
+
+            // Handle different possible FAQ response structures
+            // eslint-disable-next-line no-case-declarations
+            let extractedFaq = [];
+            if (result && typeof result === 'object') {
+              // Try different possible structures
+              extractedFaq = (result as any).faqs || result.faq || result || [];
+            }
+
+            console.log('🔍 Extracted FAQ:', extractedFaq);
+            console.log('🔍 FAQ is array:', Array.isArray(extractedFaq));
+            console.log('🔍 FAQ length:', extractedFaq.length);
+
+            // Update both local variable and form
+            generatedFaq = extractedFaq;
             methods.setValue('faq', generatedFaq);
+
+            // Verify form was updated
+            // eslint-disable-next-line no-case-declarations
+            const formDataAfterSave = methods.getValues();
+            console.log('✅ Form updated - FAQ in form:', formDataAfterSave.faq);
+            console.log('✅ generatedFaq variable:', generatedFaq);
 
             break;
 
@@ -174,15 +201,15 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             ];
 
             result = await generateSections({
-              toc: safeToc, // ✅ Use safe TOC array
+              toc: safeToc,
               article_title: title || '',
               target_audience: 'general',
               tone: formData.step2?.toneOfVoice || 'friendly',
               point_of_view: formData.step2?.pointOfView || 'third-person',
               article_type: formData.step2?.articleType || 'how-to',
               article_size: formData.step2?.articleSize || 'medium',
-              links: combinedLinks, // ✅ Use safe combined links array
-              images: safeImages, // ✅ Use safe images array
+              links: combinedLinks,
+              images: safeImages,
               language: language || 'english'
             }).unwrap();
 
@@ -200,8 +227,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             break;
           }
 
-          case 'fullArticle': {
-                   // Generate complete article HTML
+          case 'fullArticle': {            
             const fullArticleRequest = {
               title: formData.step1?.title || '',
               meta_title: formData.step1?.metaTitle || '',
@@ -211,7 +237,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               featured_media: '',
               reading_time_estimate: 5,
               url: formData.step1?.urlSlug || '',
-              faqs: generatedFaq, // ✅ Use freshly generated FAQ
+              faqs: generatedFaq || [],
               external_links: formData.step2?.externalLinks?.map((link: any) => ({
                 link_text: link.anchorText,
                 link_url: link.url
@@ -265,10 +291,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
         }
 
         // Mark step as failed and show retry UI
+        console.log('🚨 Error occurred in step:', stepKey, 'Error:', errorMsg);
         setFailedStep(stepKey);
         setErrorMessage(errorMsg);
         setShowRetryUI(true);
         setIsGenerating(false);
+        setHasError(true); // ✅ Prevent success state from showing
+        console.log('🚨 Error state set, hasError should be true');
 
         // Call error handler
         if (onError) {
@@ -279,17 +308,23 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       }
     }
 
-    // All steps completed successfully
-    setIsGenerating(false);
-    setStep(steps.length + 1);
-    setShowCheckmark(true);
+    // All steps completed successfully - only if no errors occurred
+    console.log('🎯 Checking completion state:', { hasError, steps: steps.length });
+    if (!hasError) {
+      console.log('✅ No errors detected, showing success animation');
+      setIsGenerating(false);
+      setStep(steps.length + 1);
+      setShowCheckmark(true);
 
-    // Wait for animation to complete before calling onComplete
-    setTimeout(() => {
-      if (onComplete) onComplete();
-    }, 1000);
+      // Wait for animation to complete before calling onComplete
+      setTimeout(() => {
+        if (onComplete) onComplete();
+      }, 1000);
+    } else {
+      console.log('❌ Error detected, NOT showing success animation');
+    }
 
-  }, [methods, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, completedSteps, onComplete, onError]);
+  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, onComplete]);
 
   // Retry failed generation step
   const handleRetryGeneration = useCallback(async () => {
@@ -312,6 +347,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setErrorMessage('');
       setShowRetryUI(false);
       setIsGenerating(false);
+      setHasError(false); // ✅ Reset error state
       generationStartedRef.current = false;
       return;
     }
@@ -327,6 +363,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setFailedStep('');
       setErrorMessage('');
       setShowRetryUI(false);
+      setHasError(false); // ✅ Reset error state
 
       // Start the generation process
       executeSequentialGeneration();
