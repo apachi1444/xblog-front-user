@@ -18,6 +18,7 @@ import {
 import { Iconify } from "src/components/iconify";
 
 import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEvaluation";
+import { TOTAL_POSSIBLE_SCORE } from "src/utils/seo-criteria-definitions";
 
 import { PreviewSEOTab } from "./PreviewSEOTab";
 import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";
@@ -63,7 +64,7 @@ export function SEODashboard({
 
   // Calculate normalized score (out of 100)
   const normalizedScore = useMemo(() =>
-    Math.round((totalScore / 98) * 100) || 0,
+    Math.round((totalScore / TOTAL_POSSIBLE_SCORE) * 100) || 0,
     [totalScore]
   );
 

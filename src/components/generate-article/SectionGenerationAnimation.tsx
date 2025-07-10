@@ -15,6 +15,7 @@ import {
 } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
+import { useCriteriaEvaluation } from 'src/sections/generate/hooks/useCriteriaEvaluation';
 
 interface SectionGenerationAnimationProps {
   show: boolean;
@@ -26,6 +27,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const theme = useTheme();
   const { t } = useTranslation();
   const methods = useFormContext();
+  const { evaluateAllCriteria } = useCriteriaEvaluation();
 
   // State management
   const [step, setStep] = useState(0);
@@ -316,6 +318,12 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setStep(steps.length + 1);
       setShowCheckmark(true);
 
+      // Trigger SEO criteria re-evaluation after successful generation
+      console.log('🔄 Triggering SEO criteria re-evaluation after content generation');
+      setTimeout(() => {
+        evaluateAllCriteria();
+      }, 500);
+
       // Wait for animation to complete before calling onComplete
       setTimeout(() => {
         if (onComplete) onComplete();
@@ -324,7 +332,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       console.log('❌ Error detected, NOT showing success animation');
     }
 
-  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, onComplete]);
+  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, onComplete, evaluateAllCriteria]);
 
   // Retry failed generation step
   const handleRetryGeneration = useCallback(async () => {

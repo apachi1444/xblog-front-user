@@ -101,74 +101,55 @@ export function useCriteriaEvaluation() {
   // Evaluate all criteria at once (useful for initial load or form submission)
   const evaluateAllCriteria = useCallback(() => {
     const formData = formMethods.getValues();
-    console.log('Evaluating all criteria with form data:', formData);
+    console.log('🔍 Evaluating all criteria with complete form data:', {
+      step1: !!formData.step1,
+      step3: !!formData.step3,
+      sections: formData.step3?.sections?.length || 0,
+      generatedHtml: !!formData.generatedHtml,
+      images: formData.images?.length || 0,
+      toc: formData.toc?.length || 0,
+      faq: formData.faq?.length || 0
+    });
 
-    // Process step1 fields specifically since they're the ones used in criteria
-    if (formData.step1) {
-      const step1Data = formData.step1;
-
-      // Evaluate primary keyword first as it affects many criteria
-      if (step1Data.primaryKeyword) {
-        console.log('Evaluating primary keyword:', step1Data.primaryKeyword);
-
-        // Get all criteria that use primaryKeyword
-        const affectedCriteria: number[] = [];
-
-        // Scan through all criteria to find those that use primaryKeyword
-        SEO_CRITERIA.forEach(section => {
-          section.criteria.forEach(criterion => {
-            if (criterion.inputKeys.includes("primaryKeyword")) {
-              affectedCriteria.push(criterion.id);
-            }
-          });
-        });
-
-        console.log('Primary keyword affects these criteria:', affectedCriteria);
-
-        // Directly update all affected criteria
-        setCriteriaState((prevState) => {
-          const newState = { ...prevState };
-
-          affectedCriteria.forEach(criteriaId => {
-            const evaluationFn = EVALUATION_FUNCTIONS[criteriaId];
-            if (evaluationFn) {
-              const result = evaluationFn(step1Data.primaryKeyword, formData);
-              console.log(`Evaluating criterion ${criteriaId} with result:`, result);
-              newState[criteriaId] = result;
-            } else {
-              console.warn(`No evaluation function found for criterion ${criteriaId}`);
-            }
-          });
-
-          return newState;
-        });
-      }
-
-      // Then evaluate other fields
-      if (step1Data.title) evaluateCriteria("title", step1Data.title);
-      if (step1Data.metaDescription) evaluateCriteria("metaDescription", step1Data.metaDescription);
-      if (step1Data.urlSlug) evaluateCriteria("urlSlug", step1Data.urlSlug);
-      if (step1Data.contentDescription) evaluateCriteria("content", step1Data.contentDescription);
-    }
-
-    // Evaluate all criteria directly to ensure complete coverage
+    // Evaluate all criteria with complete form data
     setCriteriaState((prevState) => {
       const newState = { ...prevState };
 
-      // Evaluate all criteria
-      Object.values(SEO_CRITERIA).forEach(section => {
+      // Iterate through all criteria and evaluate them
+      SEO_CRITERIA.forEach(section => {
         section.criteria.forEach(criterion => {
           const evaluationFn = EVALUATION_FUNCTIONS[criterion.id];
           if (evaluationFn) {
-            const result = evaluationFn(null, formData);
-            newState[criterion.id] = result;
+            try {
+              const result = evaluationFn(null, formData); // Pass complete formData
+              console.log(`✅ Criterion ${criterion.id} evaluated:`, result);
+              newState[criterion.id] = result;
+            } catch (error) {
+              console.error(`❌ Error evaluating criterion ${criterion.id}:`, error);
+              newState[criterion.id] = {
+                status: 'error',
+                message: 'Evaluation error',
+                score: 0
+              };
+            }
+          } else {
+            console.warn(`⚠️ No evaluation function found for criterion ${criterion.id}`);
+            // Keep existing state or set to pending
+            if (!newState[criterion.id]) {
+              newState[criterion.id] = {
+                status: 'pending',
+                message: 'Waiting for evaluation',
+                score: 0
+              };
+            }
           }
         });
       });
 
+      console.log('🎯 Final criteria state:', newState);
       return newState;
     });
-  }, [formMethods, evaluateCriteria]);
+  }, [formMethods]);
 
   // Get overall status based on criteria state
   const overallStatus = useMemo((): CriterionStatus => {

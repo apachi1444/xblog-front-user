@@ -26,7 +26,7 @@ import {
 import { EVALUATION_FUNCTIONS, IMPROVEMENT_FUNCTIONS } from 'src/utils/seo-criteria-evaluators';
 
 import { isFreeplan } from 'src/services/invoicePdfService';
-import { useGetSubscriptionDetailsQuery, useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
+import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -182,11 +182,6 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
   const handleOptimize = async () => {
     if (!criterionId || !criterion || state.isOptimizing) return;
 
-    if (!isPremiumUser) {
-      updateState({ optimizedValue: state.currentValue });
-      return;
-    }
-
     updateState({ isOptimizing: true, aiProgress: 0 });
 
     try {
@@ -198,11 +193,14 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
         }));
       }, 200);
 
-      // AI processing
+      // AI processing simulation
       await new Promise(resolve => setTimeout(resolve, 2000));
 
+      // Get improvement function and apply it with current value
       const improvementFn = IMPROVEMENT_FUNCTIONS[criterionId];
-      const improved = improvementFn ? improvementFn(null, form.getValues()) : state.currentValue;
+      const improved = improvementFn ? improvementFn(state.currentValue, form.getValues()) : state.currentValue;
+
+      console.log('AI optimization improved value:', improved);
 
       // Immediately evaluate the optimized value to get potential score
       const optimizedResult = evaluateCriterion(criterionId, improved);
@@ -276,9 +274,7 @@ export function OptimizationModal({ open, onClose, criterionId, fieldPath, curre
         sx: {
           borderRadius: 3,
           overflow: 'hidden',
-          background: theme.palette.mode === 'dark'
-            ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
-            : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          bgcolor: 'background.paper', // Use solid white/dark background like other modals
         }
       }}
     >

@@ -74,7 +74,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       warning: "seo.criteria.core.content_length.warning",
       error: "seo.criteria.core.content_length.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["generatedHtml", "sections"],
     warningScore: 3, // 75% of the weight
     optimizable: false // Cannot be automatically optimized
   }
@@ -94,7 +94,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.keyword_in_subheadings.success",
       error: "seo.criteria.boosters.keyword_in_subheadings.error"
     },
-    inputKeys: ["content", "primaryKeyword"],
+    inputKeys: ["sections", "generatedHtml", "primaryKeyword"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one !
@@ -108,7 +108,7 @@ const SEO_BOOSTERS: Criterion[] = [
       warning: "seo.criteria.boosters.keyword_density.warning",
       error: "seo.criteria.boosters.keyword_density.error"
     },
-    inputKeys: ["content", "primaryKeyword"],
+    inputKeys: ["sections", "generatedHtml", "primaryKeyword"],
     warningScore: 2, // ~67% of the weight
     optimizable: false // Cannot be automatically optimized
   },
@@ -134,7 +134,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.external_links.success",
       error: "seo.criteria.boosters.external_links.error"
     },
-    inputKeys: ["content"]
+    inputKeys: ["sections", "generatedHtml", "externalLinks"]
   },
   {
     id: 205,
@@ -145,7 +145,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.dofollow_links.success",
       error: "seo.criteria.boosters.dofollow_links.error"
     },
-    inputKeys: ["content"]
+    inputKeys: ["sections", "generatedHtml", "externalLinks"]
   },
   {
     id: 206,
@@ -156,7 +156,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.internal_links.success",
       error: "seo.criteria.boosters.internal_links.error"
     },
-    inputKeys: ["content"]
+    inputKeys: ["sections", "generatedHtml", "internalLinks"]
   }
 ];
 
@@ -215,7 +215,7 @@ const CONTENT_CLARITY: Criterion[] = [
       success: "seo.criteria.clarity.table_of_contents.success",
       error: "seo.criteria.clarity.table_of_contents.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["toc", "sections"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one !
@@ -229,7 +229,7 @@ const CONTENT_CLARITY: Criterion[] = [
       warning: "seo.criteria.clarity.short_paragraphs.warning",
       error: "seo.criteria.clarity.short_paragraphs.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["sections", "generatedHtml"],
     warningScore: 3, // 75% of the weight
     optimizable: false // Cannot be automatically optimized
   },
@@ -243,7 +243,7 @@ const CONTENT_CLARITY: Criterion[] = [
       success: "seo.criteria.clarity.media_content.success",
       error: "seo.criteria.clarity.media_content.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["images", "sections", "generatedHtml"],
     optimizable: false // Cannot be automatically optimized
   }
 ];

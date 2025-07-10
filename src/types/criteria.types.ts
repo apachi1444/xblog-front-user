@@ -8,7 +8,7 @@
 export type CriteriaStatusType = 'binary' | 'ternary';
 
 export type InputKey = 'title' | 'metaDescription' | 'urlSlug' | 'contentDescription' | 'primaryKeyword' | 'secondaryKeywords'
-| 'content' | 'metaTitle'
+| 'content' | 'metaTitle' | 'sections' | 'generatedHtml' | 'toc' | 'images' | 'faq' | 'externalLinks' | 'internalLinks'
 
 /**
  * Evaluation status messages for criteria

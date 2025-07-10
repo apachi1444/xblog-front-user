@@ -19,7 +19,7 @@ import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEv
 import { ItemSectionNew } from "./ItemSectionNew";
 import { OptimizationModal } from "./OptimizationModal";
 import { CriterionDetailsModal } from "./CriterionDetailsModal";
-import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from "../../utils/seo-criteria-definitions";
+import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP, TOTAL_POSSIBLE_SCORE } from "../../utils/seo-criteria-definitions";
 
 // Types
 
@@ -91,6 +91,36 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
       }
     });
 
+    // Check generated content fields for changes
+    const generatedContentFields = [
+      { key: 'sections', path: 'step3.sections' },
+      { key: 'generatedHtml', path: 'generatedHtml' },
+      { key: 'images', path: 'images' },
+      { key: 'toc', path: 'toc' },
+      { key: 'faq', path: 'faq' }
+    ];
+
+    generatedContentFields.forEach(({ key, path }) => {
+      const currentValue = path.includes('.')
+        ? currentValues?.[path.split('.')[0]]?.[path.split('.')[1]]
+        : currentValues?.[path];
+      const previousValue = path.includes('.')
+        ? previousValues?.[path.split('.')[0]]?.[path.split('.')[1]]
+        : previousValues?.[path];
+
+      // For arrays, check length and content changes
+      if (Array.isArray(currentValue) && Array.isArray(previousValue)) {
+        if (currentValue.length !== previousValue.length ||
+            JSON.stringify(currentValue) !== JSON.stringify(previousValue)) {
+          const affectedCriteria = INPUT_TO_CRITERIA_MAP[key] || [];
+          affectedCriteria.forEach(criteriaId => changedCriteria.add(criteriaId));
+        }
+      } else if (currentValue !== previousValue) {
+        const affectedCriteria = INPUT_TO_CRITERIA_MAP[key] || [];
+        affectedCriteria.forEach(criteriaId => changedCriteria.add(criteriaId));
+      }
+    });
+
     return changedCriteria;
   }, []);
 
@@ -121,25 +151,35 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
 
   // Initialize criteria evaluation when the component mounts or form data changes
   useEffect(() => {
+    console.log('🔄 Triggering criteria re-evaluation due to form data changes');
     evaluateAllCriteria();
   }, [
     evaluateAllCriteria,
+    // Step 1 fields
     formValues?.step1?.primaryKeyword,
     formValues?.step1?.title,
     formValues?.step1?.metaTitle,
     formValues?.step1?.metaDescription,
     formValues?.step1?.urlSlug,
-    formValues?.step1?.contentDescription
+    formValues?.step1?.contentDescription,
+    // Generated content fields
+    formValues?.step3?.sections,
+    formValues?.generatedHtml,
+    formValues?.images,
+    formValues?.toc,
+    formValues?.faq,
+    // Also watch for changes in the length of arrays to detect additions/removals
+    formValues?.step3?.sections?.length,
+    formValues?.images?.length,
+    formValues?.toc?.length,
+    formValues?.faq?.length
   ]);
 
 
-  // We're using a hardcoded value of 98 as the actual max score
-  // but we'll display it as 100 for better user understanding
-
   // Calculate score percentage - always normalize to 100
   const scorePercentage = useMemo(() =>
-    // Normalize to 100 using the hardcoded value of 98 as the actual max
-    Math.round((totalScore / 98) * 100) || 0
+    // Normalize to 100 using the actual total possible score
+    Math.round((totalScore / TOTAL_POSSIBLE_SCORE) * 100) || 0
   , [totalScore]);
 
   // Helper function to determine color based on score
