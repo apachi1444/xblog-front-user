@@ -481,6 +481,7 @@ export function OverviewAnalyticsView() {
 
   // Calculate platform distribution
   const platformCounts = useMemo(() => {
+
     if (!storesData?.stores || storesData.stores.length === 0) {
       return {
         wordpress: 0,
@@ -490,6 +491,7 @@ export function OverviewAnalyticsView() {
       };
     }
 
+
     const counts = {
       wordpress: 0,
       shopify: 0,
@@ -498,17 +500,28 @@ export function OverviewAnalyticsView() {
     };
 
     storesData.stores.forEach(store => {
-      const platform = (store.platform || '').toLowerCase();
-      if (platform.includes('wordpress')) {
+      // Check both platform and category fields, prioritize platform
+      const platformField = store.platform || store.category || '';
+      const platform = platformField.toLowerCase().trim();
+
+      // More precise matching
+      if (platform === 'wordpress') {
         counts.wordpress += 1;
-      } else if (platform.includes('shopify')) {
+      } else if (platform === 'shopify') {
         counts.shopify += 1;
-      } else if (platform.includes('wix')) {
+      } else if (platform === 'wix') {
         counts.wix += 1;
       } else {
         counts.other += 1;
       }
     });
+
+    // Ensure we have at least some data if stores exist
+    const totalStores = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    if (storesData.stores.length > 0 && totalStores === 0) {
+      // Fallback: if we have stores but no platforms detected, put them in "other"
+      counts.other = storesData.stores.length;
+    }
 
     return counts;
   }, [storesData]);
@@ -773,19 +786,19 @@ export function OverviewAnalyticsView() {
               series: [
                 {
                   label: t('platforms.wordpress', 'WordPress'),
-                  value: platformCounts.wordpress || 0
+                  value: platformCounts.wordpress
                 },
                 {
                   label: t('platforms.shopify', 'Shopify'),
-                  value: platformCounts.shopify || 0
+                  value: platformCounts.shopify
                 },
                 {
                   label: t('platforms.wix', 'Wix'),
-                  value: platformCounts.wix || 0
+                  value: platformCounts.wix
                 },
                 {
                   label: t('platforms.other', 'Other'),
-                  value: platformCounts.other || 0
+                  value: platformCounts.other
                 },
               ],
             }}
