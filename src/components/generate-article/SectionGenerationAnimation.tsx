@@ -10,8 +10,8 @@ import {
   useGenerateFaqMutation,
   useGenerateImagesMutation,
   useGenerateSectionsMutation,
-  useGenerateTableOfContentsMutation,
-  useGenerateFullArticleMutation
+  useGenerateFullArticleMutation,
+  useGenerateTableOfContentsMutation
 } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -32,6 +32,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const [showCheckmark, setShowCheckmark] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [failedStep, setFailedStep] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [showRetryUI, setShowRetryUI] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -101,6 +102,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     setIsGenerating(true);
     setShowRetryUI(false);
     setFailedStep('');
+    setErrorMessage('');
 
     // eslint-disable-next-line no-plusplus
     for (let i = startIndex; i < steps.length; i++) {
@@ -146,9 +148,9 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               content_description: contentDescription
             }).unwrap();
 
-            // Store FAQ in form and variable for later use
-            generatedFaq = result.faq;
+            generatedFaq = result || [];
             methods.setValue('faq', generatedFaq);
+
             break;
 
           case 'sections': {
@@ -170,23 +172,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
                 link_url: link.url || ''
               }))
             ];
-
-            // Log the data being sent to sections API with safety checks
-            console.log('📋 Sections API Request Data (with safety checks):', {
-              toc: safeToc,
-              tocLength: safeToc.length,
-              images: safeImages,
-              imagesLength: safeImages.length,
-              links: combinedLinks,
-              linksLength: combinedLinks.length,
-              article_title: title || '',
-              target_audience: 'general',
-              tone: formData.step2?.toneOfVoice || 'friendly',
-              point_of_view: formData.step2?.pointOfView || 'third-person',
-              article_type: formData.step2?.articleType || 'how-to',
-              article_size: formData.step2?.articleSize || 'medium',
-              language: language || 'english'
-            });
 
             result = await generateSections({
               toc: safeToc, // ✅ Use safe TOC array
@@ -216,7 +201,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
           }
 
           case 'fullArticle': {
-            // Generate complete article HTML
+                   // Generate complete article HTML
             const fullArticleRequest = {
               title: formData.step1?.title || '',
               meta_title: formData.step1?.metaTitle || '',
@@ -239,7 +224,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               images: generatedImages,
               language: language || 'english'
             };
-
             result = await generateFullArticle(fullArticleRequest).unwrap();
 
             // Store generated HTML in form
@@ -258,17 +242,37 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
         // eslint-disable-next-line no-await-in-loop
         await new Promise(resolve => setTimeout(resolve, 500));
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to generate ${stepKey}:`, error);
+
+        // Extract error message from API response
+        let errorMsg = `Failed to generate ${stepKey}`;
+        if (error?.data?.detail) {
+          errorMsg = error.data.detail;
+        } else if (error?.message) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        }
+
+        // Check if it's a quota limit error
+        const isQuotaError = errorMsg.toLowerCase().includes('regenerations limit') ||
+                           errorMsg.toLowerCase().includes('quota') ||
+                           errorMsg.toLowerCase().includes('upgrade');
+
+        if (isQuotaError) {
+          errorMsg = `${errorMsg} Please upgrade your plan to continue generating content.`;
+        }
 
         // Mark step as failed and show retry UI
         setFailedStep(stepKey);
+        setErrorMessage(errorMsg);
         setShowRetryUI(true);
         setIsGenerating(false);
 
         // Call error handler
         if (onError) {
-          onError(`Failed to generate ${stepKey}`, stepKey, completedSteps);
+          onError(errorMsg, stepKey, completedSteps);
         }
 
         throw error; // Stop the sequence
@@ -305,6 +309,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setShowCheckmark(false);
       setCompletedSteps([]);
       setFailedStep('');
+      setErrorMessage('');
       setShowRetryUI(false);
       setIsGenerating(false);
       generationStartedRef.current = false;
@@ -320,6 +325,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setShowCheckmark(false);
       setCompletedSteps([]);
       setFailedStep('');
+      setErrorMessage('');
       setShowRetryUI(false);
 
       // Start the generation process
@@ -537,19 +543,35 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
                 severity="error"
                 sx={{ mb: 2 }}
                 action={
-                  <Button
-                    color="inherit"
-                    size="small"
-                    onClick={handleRetryGeneration}
-                    disabled={isGenerating}
-                    startIcon={<Iconify icon="eva:refresh-fill" />}
-                  >
-                    Retry
-                  </Button>
+                  // Hide retry button for quota errors since retrying won't help
+                  !errorMessage?.toLowerCase().includes('regenerations limit') &&
+                  !errorMessage?.toLowerCase().includes('quota') &&
+                  !errorMessage?.toLowerCase().includes('upgrade') ? (
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={handleRetryGeneration}
+                      disabled={isGenerating}
+                      startIcon={<Iconify icon="eva:refresh-fill" />}
+                    >
+                      Retry
+                    </Button>
+                  ) : null
                 }
               >
-                Failed to generate {failedStep.replace(/([A-Z])/g, ' $1').toLowerCase()}.
-                Click retry to continue from where it failed.
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                  Generation Failed
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  {errorMessage || `Failed to generate ${failedStep.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                </Typography>
+                {!errorMessage?.toLowerCase().includes('regenerations limit') &&
+                 !errorMessage?.toLowerCase().includes('quota') &&
+                 !errorMessage?.toLowerCase().includes('upgrade') && (
+                  <Typography variant="caption" color="text.secondary">
+                    Click retry to continue from where it failed.
+                  </Typography>
+                )}
               </Alert>
             </Box>
           )}
