@@ -192,6 +192,10 @@ export function GeneratingView() {
         step3: {
           sections: selectedArticle.sections !== null ? sections : baseDefaults.step3.sections,
         },
+        images: baseDefaults.images, // Always empty array for now
+        faq: baseDefaults.faq, // Always empty array for now
+        toc: baseDefaults.toc, // Always empty array for now
+        generatedHtml: selectedArticle.content || baseDefaults.generatedHtml, // Use content field
       };
     }
     

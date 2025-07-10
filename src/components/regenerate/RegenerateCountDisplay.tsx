@@ -22,7 +22,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
   const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();
 
   // Calculate used regenerations
-  const regenerationsUsed = regenerationsTotal - regenerationsAvailable;
+  const regenerationsUsed = regenerationsAvailable;
 
   // Calculate percentage for color determination (based on available/total)
   const percentage = Math.min((regenerationsAvailable / regenerationsTotal) * 100, 100);
@@ -111,7 +111,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
               fontWeight: 600,
             }}
           >
-            {regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
+            {regenerationsTotal - regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
           </Typography>
           <Typography
             variant="caption"

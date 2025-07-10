@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useFormContext } from 'react-hook-form';
+import { useWatch, useFormContext } from 'react-hook-form';
 
 import { Box, Stack, Button, useTheme } from '@mui/material';
 
@@ -32,6 +32,9 @@ export const StepNavigation = ({
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
 
+
+
+  const { control } = methods;
 
   // State for modals (only for final step)
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -73,6 +76,13 @@ export const StepNavigation = ({
     }
   };
 
+  const generatedHtml = useWatch({
+    control,
+    name: 'generatedHtml',
+  });
+
+
+
   // Handle next button click with validation
   const handleNext = async () => {
     // Prevent multiple clicks
@@ -88,7 +98,7 @@ export const StepNavigation = ({
       const isStepValid = await methods.trigger(currentStepFields as any);
 
     if (isStepValid) {
-      const values = methods.getValues();
+      const values = methods.getValues()
 
       // Additional validation for specific steps
       let shouldProceed = true;
@@ -103,25 +113,22 @@ export const StepNavigation = ({
           shouldProceed = false;
         }
       } else if (activeStep === 1) {
-        // Check for generatedHtml OR existing article content
-        // Allow navigation if article has existing content (from DTO)
-        const hasExistingContent = articleId && values.step3?.sections?.some((section: { content: string; }) =>
-          section.content && section.content.trim() !== ''
-        );
-
-        if (!values.generatedHtml && !hasExistingContent) {
+        // Step 2 → Step 3: Only check if generatedHtml exists
+        // No article update needed here since SectionGenerationAnimation already handles it
+        if (!generatedHtml || generatedHtml.trim() === '') {
           toast.error("Please wait for article generation to complete");
           shouldProceed = false;
         }
       }
 
       if (shouldProceed) {
-
-        // Update article with current step data before proceeding
-        if (articleId) {
+        // Only update article when moving from Step 1 → Step 2
+        if (activeStep === 0 && articleId) {
           try {
-            // Prepare request body with correct API field names
+            // 🎯 Prepare request body with ALL existing data + Step 1 updates
+            // This ensures we don't lose any existing step 2 or other data
             const requestBody = {
+              // Step 1 fields (updated values)
               article_title: values.step1?.title || null,
               content__description: values.step1?.contentDescription || null,
               meta_title: values.step1?.metaTitle || null,
@@ -131,6 +138,8 @@ export const StepNavigation = ({
               secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : null,
               target_country: values.step1?.targetCountry || 'global',
               language: values.step1?.language || 'english',
+
+              // Step 2 fields (preserve existing values)
               article_type: values.step2?.articleType || null,
               article_size: values.step2?.articleSize || null,
               tone_of_voice: values.step2?.toneOfVoice || null,
@@ -140,7 +149,10 @@ export const StepNavigation = ({
               include_videos: values.step2?.includeVideos || false,
               internal_links: values.step2?.internalLinking?.length ? JSON.stringify(values.step2.internalLinking) : null,
               external_links: values.step2?.externalLinking?.length ? JSON.stringify(values.step2.externalLinking) : null,
-              content: values.step3?.sections?.length ? JSON.stringify(values.step3.sections) : '',
+
+              // Content fields (preserve existing values)
+              content: values.generatedHtml || '',
+
               status: 'draft' as const,
             };
 
@@ -152,7 +164,8 @@ export const StepNavigation = ({
             onNextStep();
           }
         } else {
-          // No article ID available, just proceed
+          // For Step 2 → Step 3 or when no articleId, just proceed
+          // (SectionGenerationAnimation already updated the article with full content)
           onNextStep();
         }
       }
@@ -186,7 +199,8 @@ export const StepNavigation = ({
         contentDescription: values.step1?.contentDescription || '',
         createdAt: new Date().toISOString(),
       },
-      sections: values.step3?.sections || []
+      sections: values.step3?.sections || [],
+      generatedHtml: values.generatedHtml || ''
     };
   };
 

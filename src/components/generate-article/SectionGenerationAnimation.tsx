@@ -1,10 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Box, Paper, Alert, Button, useTheme, Typography, LinearProgress } from '@mui/material';
+
+import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
 import {
   useGenerateFaqMutation,
@@ -15,6 +18,7 @@ import {
 } from 'src/services/apis/generateContentApi';
 
 import { Iconify } from 'src/components/iconify';
+
 import { useCriteriaEvaluation } from 'src/sections/generate/hooks/useCriteriaEvaluation';
 
 interface SectionGenerationAnimationProps {
@@ -28,6 +32,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const { t } = useTranslation();
   const methods = useFormContext();
   const { evaluateAllCriteria } = useCriteriaEvaluation();
+  const articleDraft = useArticleDraft();
+  const [searchParams] = useSearchParams();
+
+  // Get article ID from URL params
+  const articleId = searchParams.get('articleId') || searchParams.get('draft');
 
   // State management
   const [step, setStep] = useState(0);
@@ -101,6 +110,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     let generatedToc = formData.toc || [];
     let generatedImages = formData.images || [];
     let generatedFaq = formData.faq || [];
+    let generatedSections = formData.step3?.sections || [];
 
     setIsGenerating(true);
     setShowRetryUI(false);
@@ -145,18 +155,12 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             break;
 
           case 'faq':
-            console.log('🚀 Starting FAQ generation...');
-
             result = await generateFaq({
               title,
               primary_keyword: primaryKeyword,
               secondary_keywords: secondaryKeywords || [],
               content_description: contentDescription
             }).unwrap();
-
-            console.log('🔍 Raw FAQ API Response:', result);
-            console.log('🔍 Response type:', typeof result);
-            console.log('🔍 Response keys:', Object.keys(result || {}));
 
             // Handle different possible FAQ response structures
             // eslint-disable-next-line no-case-declarations
@@ -166,19 +170,9 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               extractedFaq = (result as any).faqs || result.faq || result || [];
             }
 
-            console.log('🔍 Extracted FAQ:', extractedFaq);
-            console.log('🔍 FAQ is array:', Array.isArray(extractedFaq));
-            console.log('🔍 FAQ length:', extractedFaq.length);
-
             // Update both local variable and form
             generatedFaq = extractedFaq;
             methods.setValue('faq', generatedFaq);
-
-            // Verify form was updated
-            // eslint-disable-next-line no-case-declarations
-            const formDataAfterSave = methods.getValues();
-            console.log('✅ Form updated - FAQ in form:', formDataAfterSave.faq);
-            console.log('✅ generatedFaq variable:', generatedFaq);
 
             break;
 
@@ -224,7 +218,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               status: 'generated'
             }));
 
-            // Store sections in form - THIS IS CRITICAL FOR STEP 3 EDITING
+            // Store sections in both form and variable for later use
+            generatedSections = transformedSections;
             methods.setValue('step3.sections', transformedSections);
             break;
           }
@@ -245,10 +240,10 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
                 link_url: link.url
               })) || [],
               table_of_contents: generatedToc,
-              sections: formData.step3?.sections?.map((section: any) => ({
+              sections: generatedSections.map((section: any) => ({
                 key: section.title,
                 content: section.content
-              })) || [],
+              })),
               images: generatedImages,
               language: language || 'english'
             };
@@ -293,13 +288,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
         }
 
         // Mark step as failed and show retry UI
-        console.log('🚨 Error occurred in step:', stepKey, 'Error:', errorMsg);
         setFailedStep(stepKey);
         setErrorMessage(errorMsg);
         setShowRetryUI(true);
         setIsGenerating(false);
         setHasError(true); // ✅ Prevent success state from showing
-        console.log('🚨 Error state set, hasError should be true');
 
         // Call error handler
         if (onError) {
@@ -311,28 +304,64 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     }
 
     // All steps completed successfully - only if no errors occurred
-    console.log('🎯 Checking completion state:', { hasError, steps: steps.length });
     if (!hasError) {
-      console.log('✅ No errors detected, showing success animation');
       setIsGenerating(false);
       setStep(steps.length + 1);
       setShowCheckmark(true);
 
       // Trigger SEO criteria re-evaluation after successful generation
-      console.log('🔄 Triggering SEO criteria re-evaluation after content generation');
       setTimeout(() => {
         evaluateAllCriteria();
       }, 500);
+
+      if (articleId) {
+        setTimeout(async () => {
+          try {
+            const newFormData = methods.getValues();
+
+            // Only update if we have generated HTML content
+            if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
+              // Prepare request body with all generated AI content
+              const requestBody = {
+                article_title: newFormData.step1?.title || null,
+                content__description: newFormData.step1?.contentDescription || null,
+                meta_title: newFormData.step1?.metaTitle || null,
+                meta_description: newFormData.step1?.metaDescription || null,
+                url_slug: newFormData.step1?.urlSlug || null,
+                primary_keyword: newFormData.step1?.primaryKeyword || null,
+                secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : null,
+                target_country: newFormData.step1?.targetCountry || 'global',
+                language: newFormData.step1?.language || 'english',
+                article_type: newFormData.step2?.articleType || null,
+                article_size: newFormData.step2?.articleSize || null,
+                tone_of_voice: newFormData.step2?.toneOfVoice || null,
+                point_of_view: newFormData.step2?.pointOfView || null,
+                plagiat_removal: newFormData.step2?.plagiaRemoval || false,
+                include_images: newFormData.step2?.includeImages || false,
+                include_videos: newFormData.step2?.includeVideos || false,
+                internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : null,
+                external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
+                // 🎯 Use the generated HTML from form data directly
+                content: newFormData.generatedHtml,
+                status: 'draft' as const,
+              };
+
+              await articleDraft.updateArticle(articleId, requestBody);
+            }
+          } catch (error) {
+            console.error('❌ Failed to auto-update article:', error);
+            // Don't show error to user as this is automatic - generation was successful
+          }
+        }, 750);
+      }
 
       // Wait for animation to complete before calling onComplete
       setTimeout(() => {
         if (onComplete) onComplete();
       }, 1000);
-    } else {
-      console.log('❌ Error detected, NOT showing success animation');
     }
 
-  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, onComplete, evaluateAllCriteria]);
+  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, articleId, evaluateAllCriteria, articleDraft, onComplete]);
 
   // Retry failed generation step
   const handleRetryGeneration = useCallback(async () => {

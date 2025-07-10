@@ -332,9 +332,9 @@
       },
       "buttons": {
         "generating": "Generating...",
-        "generateTableOfContents": "Generate Table of Contents",
-        "regenerateTableOfContents": "Regenerate Table of Contents",
-        "tableOfContentsGenerated": "Table of Contents Generated"
+        "generateTableOfContents": "Generate Full Article",
+        "regenerateTableOfContents": "Regenerate Full Article",
+        "tableOfContentsGenerated": "Full Article Generated"
       },
       "generation": {
         "modal": {
