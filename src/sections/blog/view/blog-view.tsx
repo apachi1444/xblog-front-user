@@ -54,6 +54,15 @@ export function BlogView() {
 
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
 
+  // Ensure articles are fetched when component mounts
+  useEffect(() => {
+    // If we have a valid storeId and no articles data yet, trigger refetch
+    if (storeId && !articlesData && !isLoadingArticles) {
+      console.log('🔄 Triggering articles fetch for store:', storeId);
+      refetchArticles();
+    }
+  }, [storeId, articlesData, isLoadingArticles, refetchArticles]);
+
   // Combine articles and drafts
   const allPosts = useMemo(() => {
     const combinedPosts = [
