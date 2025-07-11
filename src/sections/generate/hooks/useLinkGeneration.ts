@@ -95,13 +95,14 @@ export function useLinkGeneration(): UseLinkGenerationReturn {
   const generateExternalLinks = async () => {
     const apiCall = async () => {
       const formData = getValues();
-      const { contentDescription, primaryKeyword, secondaryKeywords, title } = formData.step1;
+      const { contentDescription, primaryKeyword, secondaryKeywords, title, language } = formData.step1;
 
       const response = await generateExternalLinksMutation({
         primary_keyword: primaryKeyword,
         secondary_keywords: secondaryKeywords,
         content_description: contentDescription,
         title: title || '',
+        language: language || 'english'
       }).unwrap();
 
       if (!response.success) {

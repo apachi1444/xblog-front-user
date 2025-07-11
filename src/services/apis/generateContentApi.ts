@@ -103,6 +103,7 @@ export interface GenerateTitleResponse extends BaseGenerationResponse {
 export interface GenerateTopicRequest {
   primary_keyword: string;
   secondary_keywords: string[];
+  language?: string;
 }
 
 /**
@@ -212,6 +213,7 @@ export interface GenerateTableOfContentsResponse extends BaseGenerationResponse 
 export interface GenerateImagesRequest {
   topic: string;
   number_of_images: number;
+  language?: string;
 }
 
 /**
@@ -237,6 +239,7 @@ export interface GenerateFaqRequest {
   primary_keyword: string;
   secondary_keywords: string[];
   content_description: string;
+  language?: string;
 }
 
 /**
@@ -274,6 +277,7 @@ export interface ExternalLinksRequest {
   secondary_keywords: string[];
   content_description: string;
   title: string;
+  language?: string;
 }
 
 export interface ExternalLinksResponse {
@@ -291,17 +295,6 @@ export interface ExternalLinksResponse {
 export const generateContentApi = api.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Generate article title based on keywords and content description
-     */
-    generateTitle: builder.mutation<GenerateTitleResponse, GenerateTitleRequest>({
-      query: (data) => ({
-        url: '/generate-title',
-        method: 'POST',
-        body: data,
-      }),
-    }),
-
-    /**
      * Generate secondary keywords based on primary keyword
      */
     generateKeywords: builder.mutation<GenerateKeywordsResponse, GenerateKeywordsRequest>({
@@ -318,6 +311,17 @@ export const generateContentApi = api.injectEndpoints({
     generateTopic: builder.mutation<GenerateTopicResponse, GenerateTopicRequest>({
       query: (data) => ({
         url: '/generate-topic',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    /**
+     * Generate article title based on keywords and content description
+     */
+    generateTitle: builder.mutation<GenerateTitleResponse, GenerateTitleRequest>({
+      query: (data) => ({
+        url: '/generate-title',
         method: 'POST',
         body: data,
       }),

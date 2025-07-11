@@ -39,7 +39,16 @@ export function BlogView() {
   const {
     data: articlesData,
     isLoading: isLoadingArticles,
-  } = useGetArticlesQuery({ store_id: storeId });
+    refetch: refetchArticles,
+  } = useGetArticlesQuery(
+    { store_id: storeId },
+    {
+      // Ensure the query runs immediately when component mounts
+      refetchOnMountOrArgChange: true,
+      // Skip the query only if storeId is null/undefined (not if it's 0 or 1)
+      skip: !storeId && storeId !== 0,
+    }
+  );
 
   const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
 

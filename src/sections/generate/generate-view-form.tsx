@@ -185,6 +185,7 @@ export function GenerateViewForm({
       const result = await generateTopic({
         primary_keyword: primaryKeyword,
         secondary_keywords: formData.step1.secondaryKeywords || [],
+        language: language || 'english'
       }).unwrap();
 
       console.log('✅ API Response for content optimization:', result);

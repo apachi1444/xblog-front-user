@@ -147,7 +147,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
           case 'images':
             result = await generateImages({
               topic: `${primaryKeyword} ${contentDescription}`,
-              number_of_images: 3
+              number_of_images: 3,
+              language: language || 'english'
             }).unwrap();
 
             // 🎯 Check if result is valid
@@ -165,7 +166,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               title,
               primary_keyword: primaryKeyword,
               secondary_keywords: secondaryKeywords || [],
-              content_description: contentDescription
+              content_description: contentDescription,
+              language: language || 'english'
             }).unwrap();
 
             // Handle different possible FAQ response structures
