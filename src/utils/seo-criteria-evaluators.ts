@@ -94,16 +94,29 @@ const hasImages = (images: any[], _sections: any[], generatedHtml?: string): boo
 };
 
 const hasTableOfContents = (toc: any[], sections: any[]): boolean => {
+  // 🔍 Debug logging
+  console.log('🔍 hasTableOfContents Debug:', {
+    toc,
+    tocIsArray: Array.isArray(toc),
+    tocLength: toc ? toc.length : 'N/A',
+    sections,
+    sectionsIsArray: Array.isArray(sections),
+    sectionsLength: sections ? sections.length : 'N/A'
+  });
+
   // Check if TOC array exists and has content
   if (toc && Array.isArray(toc) && toc.length > 0) {
+    console.log('✅ TOC found - has valid TOC array');
     return true;
   }
 
   // Check if we have multiple sections (implies TOC structure)
   if (sections && Array.isArray(sections) && sections.length > 2) {
+    console.log('✅ TOC found - has multiple sections');
     return true;
   }
 
+  console.log('❌ No TOC found');
   return false;
 };
 
@@ -222,7 +235,16 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const { urlSlug, primaryKeyword } = formData.step1;
 
+    // 🔍 Debug URL keyword check
+    console.log('🔍 URL Keyword Debug:', {
+      urlSlug,
+      primaryKeyword,
+      step1Data: formData.step1,
+      step1Keys: formData.step1 ? Object.keys(formData.step1) : 'No step1 data'
+    });
+
     if (!urlSlug || !primaryKeyword) {
+      console.log('❌ URL Keyword Check: Missing data', { urlSlug, primaryKeyword });
       return {
         status: 'pending',
         message: 'Waiting for URL slug and primary keyword',
@@ -230,7 +252,16 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    if (urlSlug.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+    const keywordInUrl = urlSlug.toLowerCase().includes(primaryKeyword.toLowerCase());
+    console.log('🔍 URL Keyword Check Result:', {
+      urlSlug,
+      primaryKeyword,
+      keywordInUrl,
+      urlSlugLower: urlSlug.toLowerCase(),
+      primaryKeywordLower: primaryKeyword.toLowerCase()
+    });
+
+    if (keywordInUrl) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -250,18 +281,29 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { contentDescription, primaryKeyword } = formData.step1;
+    const { primaryKeyword } = formData.step1;
 
-    if (!contentDescription || !primaryKeyword) {
+    if (!primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for content and primary keyword',
+        message: 'Waiting for primary keyword',
         score: 0,
       };
     }
 
-    // Get first 10% of content
-    const firstTenPercent = contentDescription.substring(0, Math.floor(contentDescription.length * 0.1));
+    // Get content from generated HTML body
+    const bodyContent = getContentText(formData);
+
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
+    // Get first 10% of body content
+    const firstTenPercent = bodyContent.substring(0, Math.floor(bodyContent.length * 0.1));
 
     if (firstTenPercent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
@@ -283,17 +325,28 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { contentDescription, primaryKeyword } = formData.step1;
+    const { primaryKeyword } = formData.step1;
 
-    if (!contentDescription || !primaryKeyword) {
+    if (!primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for content and primary keyword',
+        message: 'Waiting for primary keyword',
         score: 0,
       };
     }
 
-    if (contentDescription.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+    // Get content from generated HTML body
+    const bodyContent = getContentText(formData);
+
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
+    if (bodyContent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -357,6 +410,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const { primaryKeyword } = formData.step1;
     const sections_data = formData.step3?.sections;
+    const toc_data = formData.toc;
 
     if (!primaryKeyword) {
       return {
@@ -366,7 +420,11 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    if (!sections_data || sections_data.length === 0) {
+    // Check both TOC and sections data
+    const hasTocData = toc_data && Array.isArray(toc_data) && toc_data.length > 0;
+    const hasSectionsData = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
+
+    if (!hasTocData && !hasSectionsData) {
       return {
         status: 'pending',
         message: 'Waiting for content generation',
@@ -374,8 +432,17 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Check if keyword appears in section titles (subheadings)
-    const hasKeywordInSubheadings = findKeywordInSubheadings(sections_data, primaryKeyword);
+    // Check if keyword appears in TOC titles first (preferred)
+    let hasKeywordInSubheadings = false;
+
+    if (hasTocData) {
+      hasKeywordInSubheadings = findKeywordInSubheadings(toc_data, primaryKeyword);
+    }
+
+    // If not found in TOC, check section titles as fallback
+    if (!hasKeywordInSubheadings && hasSectionsData) {
+      hasKeywordInSubheadings = findKeywordInSubheadings(sections_data, primaryKeyword);
+    }
 
     if (hasKeywordInSubheadings) {
       return {
@@ -489,18 +556,19 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const sections_data = formData.step3?.sections;
     const {generatedHtml} = formData;
+    const externalLinksArray = formData.step2?.externalLinks;
 
-    if (!sections_data && !generatedHtml) {
-      return {
-        status: 'pending',
-        message: 'Waiting for content generation',
-        score: 0,
-      };
-    }
+    // 🔍 Debug external links check
+    console.log('🔍 External Links Debug:', {
+      externalLinksArray,
+      externalLinksCount: externalLinksArray ? externalLinksArray.length : 0,
+      hasGeneratedHtml: !!generatedHtml,
+      hasSections: !!sections_data
+    });
 
-    const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
-
-    if (hasExtLinks) {
+    // Check if we have external links in form data first
+    if (externalLinksArray && Array.isArray(externalLinksArray) && externalLinksArray.length > 0) {
+      console.log('✅ External links found in form data');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -508,6 +576,21 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
+    // If no form data links, check generated HTML
+    if (generatedHtml) {
+      const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
+      if (hasExtLinks) {
+        console.log('✅ External links found in generated HTML');
+        return {
+          status: 'success',
+          message: criterion.evaluationStatus.success,
+          score: criterion.weight,
+        };
+      }
+    }
+
+    // No external links found anywhere
+    console.log('❌ No external links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -521,19 +604,18 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const sections_data = formData.step3?.sections;
     const {generatedHtml} = formData;
+    const externalLinksArray = formData.step2?.externalLinks;
 
-    if (!sections_data && !generatedHtml) {
-      return {
-        status: 'pending',
-        message: 'Waiting for content generation',
-        score: 0,
-      };
-    }
+    // 🔍 Debug dofollow links check
+    console.log('🔍 DoFollow Links Debug:', {
+      externalLinksArray,
+      externalLinksCount: externalLinksArray ? externalLinksArray.length : 0,
+      hasGeneratedHtml: !!generatedHtml
+    });
 
-    // For now, assume external links are dofollow by default
-    const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
-
-    if (hasExtLinks) {
+    // Check if we have external links in form data first (assume dofollow by default)
+    if (externalLinksArray && Array.isArray(externalLinksArray) && externalLinksArray.length > 0) {
+      console.log('✅ DoFollow links found in form data');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -541,6 +623,21 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
+    // If no form data links, check generated HTML
+    if (generatedHtml) {
+      const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
+      if (hasExtLinks) {
+        console.log('✅ DoFollow links found in generated HTML');
+        return {
+          status: 'success',
+          message: criterion.evaluationStatus.success,
+          score: criterion.weight,
+        };
+      }
+    }
+
+    // No external links found anywhere
+    console.log('❌ No DoFollow links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -554,18 +651,19 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const sections_data = formData.step3?.sections;
     const {generatedHtml} = formData;
+    const internalLinksArray = formData.step2?.internalLinks;
 
-    if (!sections_data && !generatedHtml) {
-      return {
-        status: 'pending',
-        message: 'Waiting for content generation',
-        score: 0,
-      };
-    }
+    // 🔍 Debug internal links check
+    console.log('🔍 Internal Links Debug:', {
+      internalLinksArray,
+      internalLinksCount: internalLinksArray ? internalLinksArray.length : 0,
+      hasGeneratedHtml: !!generatedHtml,
+      hasSections: !!sections_data
+    });
 
-    const hasIntLinks = hasInternalLinks(sections_data || [], generatedHtml);
-
-    if (hasIntLinks) {
+    // Check if we have internal links in form data first
+    if (internalLinksArray && Array.isArray(internalLinksArray) && internalLinksArray.length > 0) {
+      console.log('✅ Internal links found in form data');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -573,6 +671,21 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
+    // If no form data links, check generated HTML
+    if (generatedHtml) {
+      const hasIntLinks = hasInternalLinks(sections_data || [], generatedHtml);
+      if (hasIntLinks) {
+        console.log('✅ Internal links found in generated HTML');
+        return {
+          status: 'success',
+          message: criterion.evaluationStatus.success,
+          score: criterion.weight,
+        };
+      }
+    }
+
+    // No internal links found anywhere
+    console.log('❌ No internal links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -699,6 +812,19 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const {toc} = formData;
     const sections_data = formData.step3?.sections;
 
+    // 🔍 Debug logging to see what data we have
+    console.log('🔍 TOC Criteria Debug:', {
+      toc,
+      tocType: typeof toc,
+      tocIsArray: Array.isArray(toc),
+      tocLength: toc ? toc.length : 'N/A',
+      sections_data,
+      sectionsType: typeof sections_data,
+      sectionsIsArray: Array.isArray(sections_data),
+      sectionsLength: sections_data ? sections_data.length : 'N/A',
+      formDataKeys: Object.keys(formData)
+    });
+
     if (!toc && !sections_data) {
       return {
         status: 'pending',
@@ -708,6 +834,8 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     }
 
     const hasTOC = hasTableOfContents(toc || [], sections_data || []);
+
+    console.log('🔍 TOC Check Result:', { hasTOC, toc: toc || [], sections: sections_data || [] });
 
     if (hasTOC) {
       return {

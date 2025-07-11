@@ -159,13 +159,9 @@ export const StepNavigation = ({
             await articleDraft.updateArticle(articleId, requestBody);
             onNextStep();
           } catch (error) {
-            console.error('Failed to update article:', error);
-            // Still proceed to next step even if update fails
-            onNextStep();
+            toast.error('Failed to save article. Please try again before proceeding.');
           }
         } else {
-          // For Step 2 → Step 3 or when no articleId, just proceed
-          // (SectionGenerationAnimation already updated the article with full content)
           onNextStep();
         }
       }

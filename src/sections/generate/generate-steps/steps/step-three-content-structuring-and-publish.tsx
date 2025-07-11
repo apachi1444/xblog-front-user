@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
 
 import {
@@ -23,11 +23,8 @@ import { FormContainer } from '../../../../components/generate-article/FormConta
 
 import type { ArticleSection, GenerateArticleFormData } from '../../schemas';
 
-// Type alias for content types
-type ContentType = 'paragraph' | 'bullet-list' | 'table' | 'faq' | 'image-gallery';
-
 export function Step3ContentStructuring() {
-  const { setValue, getValues, control } = useFormContext<GenerateArticleFormData>();
+  const { setValue, control } = useFormContext<GenerateArticleFormData>();
 
   // Watch for changes in the sections array
   const watchedSections = useWatch({
@@ -39,8 +36,6 @@ export function Step3ContentStructuring() {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editTitle, setEditTitle] = useState("");
-  const [editContentType, setEditContentType] = useState<ContentType>("paragraph");
-  const [showAutoSaved, setShowAutoSaved] = useState(false);
 
   // State for tracking expanded sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -73,34 +68,7 @@ export function Step3ContentStructuring() {
     setEditingSectionId(section.id);
     setEditContent(section.content || "");
     setEditTitle(section.title || "");
-    setEditContentType(section.contentType || "paragraph");
   }, []);
-
-  // Function to auto-save the edited section content
-  const autoSaveSection = useCallback(() => {
-    if (!editingSectionId) return;
-
-    const updatedSections = sections.map(section =>
-      section.id === editingSectionId
-        ? {
-            ...section,
-            content: editContent,
-            title: editTitle,
-            contentType: section.contentType // Keep existing contentType
-          }
-        : section
-    );
-
-    setValue('step3.sections', updatedSections, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-
-    // Show auto-saved indicator
-    setShowAutoSaved(true);
-    setTimeout(() => setShowAutoSaved(false), 2000);
-  }, [editingSectionId, sections, setValue, editContent, editTitle]);
 
   // Function to save the edited section and close editor
   const handleSaveSection = useCallback(() => {
@@ -184,14 +152,6 @@ export function Step3ContentStructuring() {
                 </Button>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {showAutoSaved && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Iconify icon="eva:checkmark-circle-fill" sx={{ color: 'success.main' }} />
-                      <Typography variant="caption" sx={{ color: 'success.main' }}>
-                        Auto-saved
-                      </Typography>
-                    </Box>
-                  )}
                   <Button
                     variant="contained"
                     onClick={handleSaveSection}

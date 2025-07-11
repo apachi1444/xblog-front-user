@@ -44,7 +44,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   // Ref to track if generation has already started for this show cycle
@@ -107,11 +106,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
 
     // Store generated data to pass between API calls
     let generatedToc = formData.toc || [];
+
+    console.log(generatedToc, " generated toc");
+    
     let generatedImages = formData.images || [];
     let generatedFaq = formData.faq || [];
     let generatedSections = formData.step3?.sections || [];
 
-    setIsGenerating(true);
     setHasError(false); // ✅ Reset error state
 
     // eslint-disable-next-line no-plusplus
@@ -141,7 +142,16 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
 
             // Store TOC in form and variable for later use
             generatedToc = result.table_of_contents;
+
+            console.log('🔍 TOC Debug - API Result:', result);
+            console.log('🔍 TOC Debug - Extracted TOC:', generatedToc);
+
             methods.setValue('toc', generatedToc);
+
+            // 🎯 Trigger criteria re-evaluation after TOC is generated
+            setTimeout(() => {
+              evaluateAllCriteria();
+            }, 100);
             break;
 
           case 'images':
@@ -159,6 +169,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             // Store images in form and variable for later use
             generatedImages = result.images;
             methods.setValue('images', generatedImages);
+
+            // 🎯 Trigger criteria re-evaluation after images are generated
+            setTimeout(() => {
+              evaluateAllCriteria();
+            }, 100);
             break;
 
           case 'faq':
@@ -182,6 +197,10 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             generatedFaq = extractedFaq;
             methods.setValue('faq', generatedFaq);
 
+            // 🎯 Trigger criteria re-evaluation after FAQ is generated
+            setTimeout(() => {
+              evaluateAllCriteria();
+            }, 100);
             break;
 
           case 'sections': {
@@ -229,6 +248,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             // Store sections in both form and variable for later use
             generatedSections = transformedSections;
             methods.setValue('step3.sections', transformedSections);
+
+            // 🎯 Trigger criteria re-evaluation after sections are generated
+            setTimeout(() => {
+              evaluateAllCriteria();
+            }, 100);
             break;
           }
 
@@ -259,6 +283,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
 
             // Store generated HTML in form
             methods.setValue('generatedHtml', result);
+
+            // 🎯 Trigger criteria re-evaluation after full article is generated
+            setTimeout(() => {
+              evaluateAllCriteria();
+            }, 100);
             break;
           }
 
@@ -320,7 +349,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
 
     // All steps completed successfully - only if no errors occurred
     if (!hasError) {
-      setIsGenerating(false);
       setStep(steps.length + 1);
       setShowCheckmark(true);
 
@@ -393,7 +421,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
       setStep(0);
       setShowCheckmark(false);
       setCompletedSteps([]);
-      setIsGenerating(false);
       setHasError(false); // ✅ Reset error state
       generationStartedRef.current = false;
       return;
