@@ -399,6 +399,7 @@ export function GenerateViewForm({
         show={generationState.isGeneratingSections}
         onComplete={handleGenerationComplete}
         onError={handleGenerationError}
+        onClose={() => setGenerationState(prev => ({ ...prev, isGeneratingSections: false }))}
       />
 
       {/* Stepper - Hide in step 4 for full immersion */}

@@ -149,7 +149,7 @@ export function PostItem({
         }),
       }}
     >
-      {post.title}
+      {post.article_title}
     </Link>
   );
 
@@ -460,27 +460,7 @@ export function PostItem({
     />
   );
 
-  // Render a short excerpt of the content
-  const renderExcerpt = (
-    <Typography
-      variant="body2"
-      sx={{
-        mt: 1,
-        color: 'text.secondary',
-        height: 40,
-        overflow: 'hidden',
-        WebkitLineClamp: 2,
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical',
-        ...((latestPostLarge || latestPost) && {
-          color: 'common.white',
-          opacity: 0.8,
-        }),
-      }}
-    >
-      {post.content}
-    </Typography>
-  );
+
 
   return (
     <Card
@@ -551,7 +531,6 @@ export function PostItem({
       >
         {renderDate}
         {renderTitle}
-        {renderExcerpt}
         {renderInfo}
       </Box>
     </Card>

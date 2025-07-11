@@ -1,11 +1,12 @@
 /* eslint-disable no-await-in-loop */
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
-import { Box, Paper, Alert, Button, useTheme, Typography, LinearProgress } from '@mui/material';
+import { Box, Paper, useTheme, Typography, LinearProgress } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
@@ -25,9 +26,10 @@ interface SectionGenerationAnimationProps {
   show: boolean;
   onComplete?: () => void;
   onError?: (error: string, failedStep: string, completedSteps: string[]) => void;
+  onClose?: () => void;
 }
 
-export function SectionGenerationAnimation({ show, onComplete, onError }: SectionGenerationAnimationProps) {
+export function SectionGenerationAnimation({ show, onComplete, onError, onClose }: SectionGenerationAnimationProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const methods = useFormContext();
@@ -42,9 +44,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [failedStep, setFailedStep] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [showRetryUI, setShowRetryUI] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -113,9 +112,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
     let generatedSections = formData.step3?.sections || [];
 
     setIsGenerating(true);
-    setShowRetryUI(false);
-    setFailedStep('');
-    setErrorMessage('');
     setHasError(false); // ✅ Reset error state
 
     // eslint-disable-next-line no-plusplus
@@ -138,6 +134,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               language: language || 'english'
             }).unwrap();
 
+            // 🎯 Check if result is valid
+            if (!result || !result.table_of_contents) {
+              throw new Error('Invalid response: No table of contents received');
+            }
+
             // Store TOC in form and variable for later use
             generatedToc = result.table_of_contents;
             methods.setValue('toc', generatedToc);
@@ -148,6 +149,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
               topic: `${primaryKeyword} ${contentDescription}`,
               number_of_images: 3
             }).unwrap();
+
+            // 🎯 Check if result is valid
+            if (!result || !result.images || !Array.isArray(result.images)) {
+              throw new Error('Invalid response: No images received');
+            }
 
             // Store images in form and variable for later use
             generatedImages = result.images;
@@ -268,9 +274,26 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       } catch (error: any) {
         console.error(`Failed to generate ${stepKey}:`, error);
 
+        // 🎯 ALWAYS close modal and clear content on ANY error
+        // Clear all generated content to allow fresh retry
+        methods.setValue('images', []);
+        methods.setValue('faq', []);
+        methods.setValue('toc', []);
+        methods.setValue('step3.sections', []);
+        methods.setValue('generatedHtml', '');
+
+        // Close modal immediately
+        if (onClose) {
+          onClose();
+        }
+
         // Extract error message from API response
         let errorMsg = `Failed to generate ${stepKey}`;
-        if (error?.data?.detail) {
+
+        // Check for HTTP status codes >= 400
+        if (error?.status && error.status >= 400) {
+          errorMsg = `API Error (${error.status}): ${error?.data?.detail || error?.data?.message || 'Request failed'}`;
+        } else if (error?.data?.detail) {
           errorMsg = error.data.detail;
         } else if (error?.message) {
           errorMsg = error.message;
@@ -278,28 +301,18 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
           errorMsg = error;
         }
 
-        // Check if it's a quota limit error
-        const isQuotaError = errorMsg.toLowerCase().includes('regenerations limit') ||
-                           errorMsg.toLowerCase().includes('quota') ||
-                           errorMsg.toLowerCase().includes('upgrade');
-
-        if (isQuotaError) {
-          errorMsg = `${errorMsg} Please upgrade your plan to continue generating content.`;
-        }
-
-        // Mark step as failed and show retry UI
-        setFailedStep(stepKey);
-        setErrorMessage(errorMsg);
-        setShowRetryUI(true);
-        setIsGenerating(false);
-        setHasError(true); // ✅ Prevent success state from showing
+        // Show generic user-friendly toast message
+        setTimeout(() => {
+          toast.error('Generation failed. Please try again.');
+        }, 100);
 
         // Call error handler
         if (onError) {
           onError(errorMsg, stepKey, completedSteps);
         }
 
-        throw error; // Stop the sequence
+        // Stop the sequence completely
+        return;
       }
     }
 
@@ -321,6 +334,11 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
 
             // Only update if we have generated HTML content
             if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
+              // Get the first image URL for featured media
+              const firstImageUrl = newFormData.images && newFormData.images.length > 0
+                ? newFormData.images[0].img_url
+                : '';
+
               // Prepare request body with all generated AI content
               const requestBody = {
                 article_title: newFormData.step1?.title || null,
@@ -343,6 +361,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
                 external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
                 // 🎯 Use the generated HTML from form data directly
                 content: newFormData.generatedHtml,
+                // 🎯 Set first image as featured media
+                featured_media: firstImageUrl,
                 status: 'draft' as const,
               };
 
@@ -361,18 +381,9 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       }, 1000);
     }
 
-  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onError, completedSteps, articleId, evaluateAllCriteria, articleDraft, onComplete]);
+  }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onClose, onError, completedSteps, articleId, evaluateAllCriteria, articleDraft, onComplete]);
 
-  // Retry failed generation step
-  const handleRetryGeneration = useCallback(async () => {
-    if (!failedStep) return;
 
-    try {
-      await executeSequentialGeneration(failedStep);
-    } catch (error) {
-      console.error('Retry failed:', error);
-    }
-  }, [failedStep, executeSequentialGeneration]);
 
   // Start generation when modal is shown
   useEffect(() => {
@@ -380,9 +391,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setStep(0);
       setShowCheckmark(false);
       setCompletedSteps([]);
-      setFailedStep('');
-      setErrorMessage('');
-      setShowRetryUI(false);
       setIsGenerating(false);
       setHasError(false); // ✅ Reset error state
       generationStartedRef.current = false;
@@ -397,9 +405,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
       setStep(0);
       setShowCheckmark(false);
       setCompletedSteps([]);
-      setFailedStep('');
-      setErrorMessage('');
-      setShowRetryUI(false);
       setHasError(false); // ✅ Reset error state
 
       // Start the generation process
@@ -610,45 +615,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError }: Sectio
             />
           </Box>
 
-          {/* Retry UI for failed steps */}
-          {showRetryUI && failedStep && (
-            <Box sx={{ mt: 3 }}>
-              <Alert
-                severity="error"
-                sx={{ mb: 2 }}
-                action={
-                  // Hide retry button for quota errors since retrying won't help
-                  !errorMessage?.toLowerCase().includes('regenerations limit') &&
-                  !errorMessage?.toLowerCase().includes('quota') &&
-                  !errorMessage?.toLowerCase().includes('upgrade') ? (
-                    <Button
-                      color="inherit"
-                      size="small"
-                      onClick={handleRetryGeneration}
-                      disabled={isGenerating}
-                      startIcon={<Iconify icon="eva:refresh-fill" />}
-                    >
-                      Retry
-                    </Button>
-                  ) : null
-                }
-              >
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                  Generation Failed
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  {errorMessage || `Failed to generate ${failedStep.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                </Typography>
-                {!errorMessage?.toLowerCase().includes('regenerations limit') &&
-                 !errorMessage?.toLowerCase().includes('quota') &&
-                 !errorMessage?.toLowerCase().includes('upgrade') && (
-                  <Typography variant="caption" color="text.secondary">
-                    Click retry to continue from where it failed.
-                  </Typography>
-                )}
-              </Alert>
-            </Box>
-          )}
+
         </Paper>
       </motion.div>
     </AnimatePresence>
