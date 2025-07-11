@@ -15,10 +15,11 @@ import {
   Typography,
 } from "@mui/material";
 
+import { TOTAL_POSSIBLE_SCORE } from "src/utils/seo-criteria-definitions";
+
 import { Iconify } from "src/components/iconify";
 
 import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEvaluation";
-import { TOTAL_POSSIBLE_SCORE } from "src/utils/seo-criteria-definitions";
 
 import { PreviewSEOTab } from "./PreviewSEOTab";
 import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";

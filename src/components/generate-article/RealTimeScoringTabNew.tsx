@@ -363,7 +363,7 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
                   fontWeight: 500
                 }}
               >
-                {`${totalScore} / 100`}
+                {`${scorePercentage} / 100`}
               </Typography>
             </Box>
           </Box>
