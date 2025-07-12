@@ -1,6 +1,9 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable @typescript-eslint/no-shadow */
 import type { GenerateArticleFormData } from 'src/sections/generate/schemas';
 
+import { MARKETING_WORDS } from './powerWords';
+import { SENTIMENT_WORDS } from './sentimentWords';
 import { sections, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from './seo-criteria-definitions';
 
 import type { CriterionStatus } from '../types/criteria.types';
@@ -44,34 +47,6 @@ const calculateKeywordDensity = (text: string, keyword: string): number => {
   const keywordCount = words.filter(word => word.includes(keyword.toLowerCase())).length;
 
   return words.length > 0 ? (keywordCount / words.length) * 100 : 0;
-};
-
-const hasExternalLinks = (_sections: any[], generatedHtml?: string): boolean => {
-  // Only check in generated HTML body content
-  if (generatedHtml) {
-    // Extract content between <body> tags
-    const bodyMatch = generatedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const contentToCheck = bodyMatch && bodyMatch[1] ? bodyMatch[1] : generatedHtml;
-
-    const externalLinkRegex = /<a[^>]+href=["']https?:\/\/[^"']+["'][^>]*>/gi;
-    return externalLinkRegex.test(contentToCheck);
-  }
-
-  return false;
-};
-
-const hasInternalLinks = (_sections: any[], generatedHtml?: string): boolean => {
-  // Only check in generated HTML body content
-  if (generatedHtml) {
-    // Extract content between <body> tags
-    const bodyMatch = generatedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const contentToCheck = bodyMatch && bodyMatch[1] ? bodyMatch[1] : generatedHtml;
-
-    const internalLinkRegex = /<a[^>]+href=["'][^h][^t][^t][^p][^"']*["'][^>]*>/gi;
-    return internalLinkRegex.test(contentToCheck);
-  }
-
-  return false;
 };
 
 const hasImages = (images: any[], _sections: any[], generatedHtml?: string): boolean => {
@@ -235,16 +210,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     const { urlSlug, primaryKeyword } = formData.step1;
 
-    // 🔍 Debug URL keyword check
-    console.log('🔍 URL Keyword Debug:', {
-      urlSlug,
-      primaryKeyword,
-      step1Data: formData.step1,
-      step1Keys: formData.step1 ? Object.keys(formData.step1) : 'No step1 data'
-    });
-
     if (!urlSlug || !primaryKeyword) {
-      console.log('❌ URL Keyword Check: Missing data', { urlSlug, primaryKeyword });
       return {
         status: 'pending',
         message: 'Waiting for URL slug and primary keyword',
@@ -252,20 +218,100 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    const keywordInUrl = urlSlug.toLowerCase().includes(primaryKeyword.toLowerCase());
-    console.log('🔍 URL Keyword Check Result:', {
-      urlSlug,
-      primaryKeyword,
-      keywordInUrl,
-      urlSlugLower: urlSlug.toLowerCase(),
-      primaryKeywordLower: primaryKeyword.toLowerCase()
-    });
+    // Advanced keyword matching algorithm with fuzzy matching and percentage calculation
+    const calculateKeywordUrlMatch = (keyword: string, urlSlug: string) => {
+      // Normalize both strings
+      const normalizeString = (str: string) => str.toLowerCase()
+        .replace(/[^\w\s]/g, ' ') // Replace special characters with spaces
+        .replace(/\s+/g, ' ') // Normalize multiple spaces
+        .trim();
 
-    if (keywordInUrl) {
+      const normalizedKeyword = normalizeString(keyword);
+      const normalizedUrl = normalizeString(urlSlug.replace(/-/g, ' ')); // Convert hyphens to spaces
+
+      // Extract words from keyword (filter out common stop words)
+      const stopWords = new Set(['a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'the']);
+      const keywordWords = normalizedKeyword.split(' ')
+        .filter(word => word.length > 1 && !stopWords.has(word));
+
+      if (keywordWords.length === 0) return { percentage: 0, matchedWords: [], missedWords: [] };
+
+      const urlWords = normalizedUrl.split(' ').filter(word => word.length > 1);
+
+      // Calculate exact matches
+      const exactMatches = keywordWords.filter(keywordWord =>
+        urlWords.some(urlWord => urlWord === keywordWord)
+      );
+
+      // Calculate fuzzy matches for remaining words
+      const remainingKeywordWords = keywordWords.filter(word => !exactMatches.includes(word));
+      const fuzzyMatches = remainingKeywordWords.filter(keywordWord => urlWords.some(urlWord => {
+          // Check if keyword word is contained in URL word or vice versa
+          if (keywordWord.includes(urlWord) || urlWord.includes(keywordWord)) {
+            return true;
+          }
+
+          // Check for similar words (Levenshtein distance)
+          const similarity = calculateSimilarity(keywordWord, urlWord);
+          return similarity >= 0.8; // 80% similarity threshold
+        }));
+
+      const totalMatches = exactMatches.length + fuzzyMatches.length;
+      const percentage = (totalMatches / keywordWords.length) * 100;
+
+      return {
+        percentage,
+        matchedWords: [...exactMatches, ...fuzzyMatches],
+        missedWords: keywordWords.filter(word =>
+          !exactMatches.includes(word) && !fuzzyMatches.includes(word)
+        ),
+        keywordWords,
+        urlWords
+      };
+    };
+
+    // Simple Levenshtein distance for similarity calculation
+    const calculateSimilarity = (str1: string, str2: string): number => {
+      const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+
+      for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+      for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+      for (let j = 1; j <= str2.length; j++) {
+        for (let i = 1; i <= str1.length; i++) {
+          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          matrix[j][i] = Math.min(
+            matrix[j][i - 1] + 1,     // deletion
+            matrix[j - 1][i] + 1,     // insertion
+            matrix[j - 1][i - 1] + indicator // substitution
+          );
+        }
+      }
+
+      const maxLength = Math.max(str1.length, str2.length);
+      return maxLength === 0 ? 1 : (maxLength - matrix[str2.length][str1.length]) / maxLength;
+    };
+
+    const matchResult = calculateKeywordUrlMatch(primaryKeyword, urlSlug);
+
+    // Scoring based on percentage match
+    if (matchResult.percentage >= 90) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
         score: criterion.weight,
+      };
+    } if (matchResult.percentage >= 70) {
+      return {
+        status: 'warning',
+        message: criterion.evaluationStatus.warning || `${matchResult.percentage.toFixed(0)}% of keywords found in URL`,
+        score: Math.floor(criterion.weight * 0.7),
+      };
+    } if (matchResult.percentage >= 50) {
+      return {
+        status: 'warning',
+        message: criterion.evaluationStatus.warning || `${matchResult.percentage.toFixed(0)}% of keywords found in URL`,
+        score: Math.floor(criterion.weight * 0.5),
       };
     }
 
@@ -554,21 +600,9 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[1].criteria[3]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const sections_data = formData.step3?.sections;
-    const {generatedHtml} = formData;
-    const externalLinksArray = formData.step2?.externalLinks;
+    const externalLinks = formData.step2?.externalLinks;
 
-    // 🔍 Debug external links check
-    console.log('🔍 External Links Debug:', {
-      externalLinksArray,
-      externalLinksCount: externalLinksArray ? externalLinksArray.length : 0,
-      hasGeneratedHtml: !!generatedHtml,
-      hasSections: !!sections_data
-    });
-
-    // Check if we have external links in form data first
-    if (externalLinksArray && Array.isArray(externalLinksArray) && externalLinksArray.length > 0) {
-      console.log('✅ External links found in form data');
+    if (externalLinks && Array.isArray(externalLinks) && externalLinks.length > 0) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -576,21 +610,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // If no form data links, check generated HTML
-    if (generatedHtml) {
-      const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
-      if (hasExtLinks) {
-        console.log('✅ External links found in generated HTML');
-        return {
-          status: 'success',
-          message: criterion.evaluationStatus.success,
-          score: criterion.weight,
-        };
-      }
-    }
-
-    // No external links found anywhere
-    console.log('❌ No external links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -602,20 +621,9 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[1].criteria[4]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const sections_data = formData.step3?.sections;
-    const {generatedHtml} = formData;
-    const externalLinksArray = formData.step2?.externalLinks;
+    const externalLinks = formData.step2?.externalLinks;
 
-    // 🔍 Debug dofollow links check
-    console.log('🔍 DoFollow Links Debug:', {
-      externalLinksArray,
-      externalLinksCount: externalLinksArray ? externalLinksArray.length : 0,
-      hasGeneratedHtml: !!generatedHtml
-    });
-
-    // Check if we have external links in form data first (assume dofollow by default)
-    if (externalLinksArray && Array.isArray(externalLinksArray) && externalLinksArray.length > 0) {
-      console.log('✅ DoFollow links found in form data');
+    if (externalLinks && Array.isArray(externalLinks) && externalLinks.length > 0) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -623,21 +631,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // If no form data links, check generated HTML
-    if (generatedHtml) {
-      const hasExtLinks = hasExternalLinks(sections_data || [], generatedHtml);
-      if (hasExtLinks) {
-        console.log('✅ DoFollow links found in generated HTML');
-        return {
-          status: 'success',
-          message: criterion.evaluationStatus.success,
-          score: criterion.weight,
-        };
-      }
-    }
-
-    // No external links found anywhere
-    console.log('❌ No DoFollow links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -649,21 +642,9 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[1].criteria[5]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const sections_data = formData.step3?.sections;
-    const {generatedHtml} = formData;
-    const internalLinksArray = formData.step2?.internalLinks;
+    const internalLinks = formData.step2?.internalLinks;
 
-    // 🔍 Debug internal links check
-    console.log('🔍 Internal Links Debug:', {
-      internalLinksArray,
-      internalLinksCount: internalLinksArray ? internalLinksArray.length : 0,
-      hasGeneratedHtml: !!generatedHtml,
-      hasSections: !!sections_data
-    });
-
-    // Check if we have internal links in form data first
-    if (internalLinksArray && Array.isArray(internalLinksArray) && internalLinksArray.length > 0) {
-      console.log('✅ Internal links found in form data');
+    if (internalLinks && Array.isArray(internalLinks) && internalLinks.length > 0) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -671,21 +652,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // If no form data links, check generated HTML
-    if (generatedHtml) {
-      const hasIntLinks = hasInternalLinks(sections_data || [], generatedHtml);
-      if (hasIntLinks) {
-        console.log('✅ Internal links found in generated HTML');
-        return {
-          status: 'success',
-          message: criterion.evaluationStatus.success,
-          score: criterion.weight,
-        };
-      }
-    }
-
-    // No internal links found anywhere
-    console.log('❌ No internal links found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -738,13 +704,10 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Simple sentiment check - look for positive/negative words
-    const positiveWords = ['best', 'top', 'ultimate', 'complete', 'essential', 'amazing', 'perfect', 'great', 'excellent'];
-    const negativeWords = ['worst', 'terrible', 'awful', 'bad', 'horrible', 'avoid', 'never', 'don\'t'];
-
+    // Check for sentiment words using TypeScript file
     const titleLower = title.toLowerCase();
-    const hasPositive = positiveWords.some(word => titleLower.includes(word));
-    const hasNegative = negativeWords.some(word => titleLower.includes(word));
+    const hasPositive = SENTIMENT_WORDS.positive.some(word => titleLower.includes(word.toLowerCase()));
+    const hasNegative = SENTIMENT_WORDS.negative.some(word => titleLower.includes(word.toLowerCase()));
 
     if (hasPositive || hasNegative) {
       return {
@@ -775,11 +738,11 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Power words that grab attention
-    const powerWords = ['ultimate', 'complete', 'essential', 'proven', 'secret', 'exclusive', 'instant', 'guaranteed', 'powerful', 'effective'];
+    // Get all power words from all categories using TypeScript file
+    const allPowerWords = Object.values(MARKETING_WORDS).flat();
 
     const titleLower = title.toLowerCase();
-    const powerWordCount = powerWords.filter(word => titleLower.includes(word)).length;
+    const powerWordCount = allPowerWords.filter(word => titleLower.includes(word.toLowerCase())).length;
 
     if (powerWordCount >= 2) {
       return {

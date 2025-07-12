@@ -458,6 +458,7 @@
           "keyword_in_url": {
             "description": "Focus keyword used in the URL",
             "success": "Focus keyword is used in the URL.",
+            "warning": "Some focus keyword words are missing from the URL.",
             "error": "Focus keyword is not used in the URL."
           },
           "keyword_in_first_10": {

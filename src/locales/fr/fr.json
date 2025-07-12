@@ -410,6 +410,7 @@
           "keyword_in_url": {
             "description": "Mot-clé principal utilisé dans l'URL",
             "success": "Le mot-clé principal est utilisé dans l'URL.",
+            "warning": "Certains mots du mot-clé principal manquent dans l'URL.",
             "error": "Le mot-clé principal n'est pas utilisé dans l'URL."
           },
           "keyword_in_first_10": {

@@ -14,25 +14,15 @@ import {
 
 import { Iconify } from 'src/components/iconify';
 
-import type { ArticleSection } from '../../schemas';
+import type { GenerateArticleFormData } from '../../schemas';
 
 interface ExportModalProps {
   open: boolean;
   onClose: () => void;
-  articleInfo: {
-    title: string;
-    metaTitle: string;
-    metaDescription: string;
-    primaryKeyword: string;
-    secondaryKeywords: string[];
-    language: string;
-    targetCountry: string;
-    createdAt: string;
-  };
-  sections: ArticleSection[];
+  formData: GenerateArticleFormData;
 }
 
-export const ExportModal = ({ open, onClose, articleInfo, sections }: ExportModalProps) => {
+export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -48,12 +38,27 @@ export const ExportModal = ({ open, onClose, articleInfo, sections }: ExportModa
       let filename = '';
       let mimeType = '';
 
-      // Import converters dynamically
-      const { articleToMarkdown, articleToHtml } = await import('src/utils/markdownConverter');
+      // Extract article info from form data
+      const articleInfo = {
+        title: formData.step1?.title || 'Untitled Article',
+        metaTitle: formData.step1?.metaTitle || '',
+        metaDescription: formData.step1?.metaDescription || '',
+        urlSlug: formData.step1?.urlSlug || '',
+        primaryKeyword: formData.step1?.primaryKeyword || '',
+        secondaryKeywords: formData.step1?.secondaryKeywords || [],
+        language: formData.step1?.language || 'en',
+        targetCountry: formData.step1?.targetCountry || '',
+        contentDescription: formData.step1?.contentDescription || '',
+        createdAt: new Date().toISOString(),
+        articleType: formData.step2?.articleType || '',
+        articleSize: formData.step2?.articleSize || '',
+        toneOfVoice: formData.step2?.toneOfVoice || '',
+      };
+
+      const sections = formData.step3?.sections || [];
 
       switch (activeTab) {
         case 0: // Markdown
-          content = articleToMarkdown(articleInfo, sections);
           filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
           mimeType = 'text/markdown';
           break;
@@ -62,15 +67,22 @@ export const ExportModal = ({ open, onClose, articleInfo, sections }: ExportModa
           setIsExporting(false);
           return;
         case 2: // HTML
-          content = articleToHtml(articleInfo, sections);
+          // For HTML export, use the generated HTML if available, otherwise convert from sections
+          if (formData.generatedHtml) {
+            content = formData.generatedHtml;
+          } else {
+            const { articleToHtml } = await import('src/utils/markdownConverter');
+            content = articleToHtml(articleInfo, sections);
+          }
           filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
           mimeType = 'text/html';
           break;
         case 3: // JSON
+          // Export complete form data with proper schema structure
           content = JSON.stringify({
-            articleInfo,
-            sections,
-            exportedAt: new Date().toISOString()
+            formData,
+            exportedAt: new Date().toISOString(),
+            version: '1.0'
           }, null, 2);
           filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
           mimeType = 'application/json';

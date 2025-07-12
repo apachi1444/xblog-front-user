@@ -1,8 +1,5 @@
 import type { Criterion, CriteriaStructure, CriteriaStatusType } from '../types/criteria.types';
 
-/**
- * SEO Core Essentials criteria
- */
 const SEO_CORE_ESSENTIALS: Criterion[] = [
   {
     id: 101,
@@ -30,14 +27,16 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     id: 103,
     description: "seo.criteria.core.keyword_in_url.description",
     weight: 3,
-    statusType: "binary" as CriteriaStatusType,
+    statusType: "ternary" as CriteriaStatusType,
     evaluationStatus: {
       success: "seo.criteria.core.keyword_in_url.success",
+      warning: "seo.criteria.core.keyword_in_url.warning",
       error: "seo.criteria.core.keyword_in_url.error"
     },
-    inputKeys: ["urlSlug"]
+    inputKeys: ["urlSlug"],
+    optimizable: false, // Cannot be automatically optimized - user must edit manually
+    warningScore: 2 // ~67% of the weight for partial matches
   },
-  // this one !
   {
     id: 104,
     description: "seo.criteria.core.keyword_in_first_10.description",

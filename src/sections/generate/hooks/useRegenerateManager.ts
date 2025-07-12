@@ -10,7 +10,7 @@ import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionAp
  */
 export function useRegenerateManager() {
   // Use cached data only - don't trigger new requests
-  const {data : subscription} = useGetSubscriptionDetailsQuery(undefined, {
+  const {data : subscription, isLoading} = useGetSubscriptionDetailsQuery(undefined, {
     // Skip if data is already cached and fresh
     skip: false,
     // Don't refetch on mount
@@ -31,5 +31,6 @@ export function useRegenerateManager() {
     regenerationsAvailable,
     regenerationsTotal,
     hasRegenerationsAvailable,
+    isLoading
   };
 }

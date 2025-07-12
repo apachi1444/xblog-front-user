@@ -13,6 +13,8 @@ import { CopyModal } from '../generate-steps/modals/CopyModal';
 import { ExportModal } from '../generate-steps/modals/ExportModal';
 import { PublishModal } from '../generate-steps/modals/PublishModal';
 
+import type { GenerateArticleFormData } from '../schemas';
+
 interface StepNavigationProps {
   activeStep: number;
   totalSteps: number;
@@ -319,8 +321,7 @@ export const StepNavigation = ({
           <ExportModal
             open={exportModalOpen}
             onClose={() => setExportModalOpen(false)}
-            articleInfo={getArticleData().articleInfo}
-            sections={getArticleData().sections}
+            formData={methods.getValues() as GenerateArticleFormData}
           />
           <PublishModal
             open={publishModalOpen}
