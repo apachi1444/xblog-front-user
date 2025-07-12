@@ -15,7 +15,7 @@ export function RegenerateCountDisplay() {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();
+  const { regenerationsAvailable, regenerationsTotal, isLoading } = useRegenerateManager();
 
   // Calculate used regenerations
   const regenerationsUsed = regenerationsTotal - regenerationsAvailable;
@@ -83,8 +83,11 @@ export function RegenerateCountDisplay() {
               fontWeight: 600,
             }}
           >
-            {regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
+            {isLoading
+              ? '...'
+              : `${regenerationsAvailable}/${regenerationsTotal} ${t('regenerate.availableLabel', 'available')}`}
           </Typography>
+
           <Typography
             variant="caption"
             sx={{
