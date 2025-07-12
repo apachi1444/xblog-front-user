@@ -25,7 +25,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
   const regenerationsUsed = regenerationsAvailable;
 
   // Calculate percentage for color determination (based on available/total)
-  const percentage = Math.min((regenerationsAvailable / regenerationsTotal) * 100, 100);
+  const percentage = Math.min(((regenerationsTotal - regenerationsAvailable) / regenerationsTotal) * 100, 100);
 
   // Determine color based on remaining regenerations
   const getRegenerateColor = () => {
@@ -49,34 +49,10 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
         {t('regenerate.used', 'Used')}: {regenerationsUsed}/{regenerationsTotal}
       </Typography>
       <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
-        {t('regenerate.available', 'Available')}: {regenerationsAvailable}
-      </Typography>
-      <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'text.secondary' }}>
-        {t('regenerate.info', 'Regenerations allow you to recreate content.')}
+        {t('resources.available', 'Available')}: {regenerationsTotal- regenerationsUsed}
       </Typography>
     </Box>
   );
-
-  // Compact version (for mobile or sidebar)
-  if (compact) {
-    return (
-      <Tooltip title={tooltipContent}>
-        <Chip
-          icon={<AutorenewIcon fontSize="small" />}
-          label={`${regenerationsAvailable}/${regenerationsTotal} ${t('regenerate.availableLabel', 'available')}`}
-          size="small"
-          sx={{
-            bgcolor: alpha(regenerateColor, 0.1),
-            color: regenerateColor,
-            fontWeight: 'bold',
-            '& .MuiChip-icon': {
-              color: regenerateColor,
-            },
-          }}
-        />
-      </Tooltip>
-    );
-  }
 
   // Full version
   return (

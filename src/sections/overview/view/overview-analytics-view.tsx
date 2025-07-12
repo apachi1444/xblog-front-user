@@ -711,7 +711,7 @@ export function OverviewAnalyticsView() {
                     ? Number(((subscriptionDetails.regenerations_number / subscriptionDetails.regenerations_limit) * 100).toFixed(1))
                     : 0
                 }
-                total={subscriptionDetails?.regenerations_number || 0}
+                total={( (subscriptionDetails?.regenerations_limit || 0) - (subscriptionDetails?.regenerations_number || 0)) || 0}
                 color="info"
                 icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
               />
