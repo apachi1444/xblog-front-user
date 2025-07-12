@@ -246,8 +246,11 @@
       "available": "Regenerate ({{count}} remaining)",
       "button": "Regenerate",
       "confirm": "Regenerate",
+      "insufficientCreditsButton": "Insufficient Credits",
+      "upgradeButton": "Upgrade Plan",
       "confirmTitle": "Confirm Regeneration",
-      "confirmMessage": "Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.",
+      "confirmMessage": "This will override your current sections and consume <strong>5 regenerations</strong>.",
+      "insufficientCredits": "You need <strong>{{required}} regenerations</strong> but only have <strong>{{available}}</strong> available.",
       "availableCredits": "You have {{count}} regeneration credits available.",
       "example": {
         "title": "Regeneration System Example",

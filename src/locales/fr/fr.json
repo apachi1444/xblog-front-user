@@ -123,6 +123,31 @@
       "purchaseHistorySubheader": "Activité d'abonnement récente",
       "noPurchaseHistory": "Aucun historique de facturation disponible pour le moment. Vos enregistrements d'achat apparaîtront ici."
     },
+    "regenerate": {
+      "label": "Régénérations",
+      "remaining": "{{count}} régénérations restantes",
+      "info": "Les régénérations vous permettent de recréer du contenu. Chaque régénération diminue votre nombre disponible.",
+      "noCredits": "Aucune régénération disponible. Mettez à niveau votre plan pour obtenir plus de régénérations.",
+      "upgradeMessage": "Mettez à niveau votre plan pour obtenir plus de régénérations.",
+      "error": "Échec de l'utilisation de la régénération. Veuillez réessayer.",
+      "loading": "Régénération de {{type}}...",
+      "success": "{{type}} régénéré avec succès !",
+      "available": "Régénérer ({{count}} restantes)",
+      "button": "Régénérer",
+      "confirm": "Régénérer",
+      "insufficientCreditsButton": "Crédits Insuffisants",
+      "upgradeButton": "Mettre à Niveau",
+      "confirmTitle": "Confirmer la Régénération",
+      "confirmMessage": "Cela remplacera vos sections actuelles et consommera <strong>5 régénérations</strong>.",
+      "insufficientCredits": "Vous avez besoin de <strong>{{required}} régénérations</strong> mais n'en avez que <strong>{{available}}</strong> disponibles.",
+      "availableCredits": "Vous avez {{count}} crédits de régénération disponibles.",
+      "example": {
+        "title": "Exemple de Système de Régénération",
+        "description": "Ceci est un exemple de comment utiliser le système de régénération. Vous avez {{count}} régénérations disponibles.",
+        "content": "Contenu d'Exemple",
+        "contentDescription": "Ceci est du contenu d'exemple qui peut être régénéré."
+      }
+    },
     "months": {
       "jan": "Jan",
       "feb": "Fév",

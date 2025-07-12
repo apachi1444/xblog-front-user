@@ -18,7 +18,7 @@ export function useRegenerateManager() {
   })
 
   // Get regeneration count from user data
-  const regenerationsAvailable = subscription?.regenerations_number || 0;
+  const regenerationsAvailable = (subscription?.regenerations_limit || 0 ) - ( subscription?.regenerations_number || 0 );
   const regenerationsTotal = subscription?.regenerations_limit || 10;
 
   /**

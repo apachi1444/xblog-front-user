@@ -7,25 +7,21 @@ import { alpha } from '@mui/material/styles';
 // Icons
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 // MUI components
-import { Box, Chip, Tooltip, useTheme, Typography } from '@mui/material';
+import { Box, Tooltip, useTheme, Typography } from '@mui/material';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
-interface RegenerateCountDisplayProps {
-  compact?: boolean;
-}
-
-export function RegenerateCountDisplay({ compact = false }: RegenerateCountDisplayProps) {
+export function RegenerateCountDisplay() {
   const { t } = useTranslation();
   const theme = useTheme();
 
   const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();
 
   // Calculate used regenerations
-  const regenerationsUsed = regenerationsAvailable;
+  const regenerationsUsed = regenerationsTotal - regenerationsAvailable;
 
   // Calculate percentage for color determination (based on available/total)
-  const percentage = Math.min(((regenerationsTotal - regenerationsAvailable) / regenerationsTotal) * 100, 100);
+  const percentage = Math.min((regenerationsAvailable / regenerationsTotal) * 100, 100);
 
   // Determine color based on remaining regenerations
   const getRegenerateColor = () => {
@@ -49,7 +45,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
         {t('regenerate.used', 'Used')}: {regenerationsUsed}/{regenerationsTotal}
       </Typography>
       <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
-        {t('resources.available', 'Available')}: {regenerationsTotal- regenerationsUsed}
+        {t('resources.available', 'Available')}: {regenerationsAvailable}
       </Typography>
     </Box>
   );
@@ -87,7 +83,7 @@ export function RegenerateCountDisplay({ compact = false }: RegenerateCountDispl
               fontWeight: 600,
             }}
           >
-            {regenerationsTotal - regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
+            {regenerationsAvailable}/{regenerationsTotal} {t('regenerate.availableLabel', 'available')}
           </Typography>
           <Typography
             variant="caption"

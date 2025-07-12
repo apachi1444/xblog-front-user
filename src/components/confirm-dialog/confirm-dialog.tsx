@@ -21,12 +21,15 @@ interface ConfirmDialogProps {
   open: boolean;
   onClose: VoidFunction;
   count: number;
+  requiredCredits?: number;
 }
 
-export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDialogProps) {
+export function ConfirmDialog({ title, action, open, onClose, count, requiredCredits = 5 }: ConfirmDialogProps) {
   const theme = useTheme();
 
   const { t } = useTranslation();
+
+  const hasInsufficientCredits = requiredCredits > count;
 
   return (
     <Modal
@@ -89,10 +92,10 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
       gap: 2,
       p: 3,
       backgroundColor: theme.palette.mode === 'dark'
-        ? alpha(theme.palette.warning.main, 0.1)
-        : alpha(theme.palette.warning.main, 0.08),
+        ? alpha(hasInsufficientCredits ? theme.palette.error.main : theme.palette.warning.main, 0.1)
+        : alpha(hasInsufficientCredits ? theme.palette.error.main : theme.palette.warning.main, 0.08),
       borderRadius: 2,
-      border: `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+      border: `1px solid ${alpha(hasInsufficientCredits ? theme.palette.error.main : theme.palette.warning.main, 0.3)}`,
       position: 'relative'
     }}>
       <Box sx={{
@@ -102,8 +105,8 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
         width: 40,
         height: 40,
         borderRadius: '50%',
-        backgroundColor: alpha(theme.palette.warning.main, 0.15),
-        color: 'warning.main',
+        backgroundColor: alpha(hasInsufficientCredits ? theme.palette.error.main : theme.palette.warning.main, 0.15),
+        color: hasInsufficientCredits ? 'error.main' : 'warning.main',
         flexShrink: 0
       }}>
         <WarningAmberIcon
@@ -119,11 +122,18 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
             color: 'text.primary',
             fontWeight: 500,
             lineHeight: 1.6,
-            mb: 0.5
+            mb: 0.5,
+            '& strong': {
+              color: hasInsufficientCredits ? 'error.main' : 'warning.main',
+              fontWeight: 700
+            }
           }}
-        >
-          {t('regenerate.confirmMessage', 'Regenerating the table of contents will override your current sections and consume one regeneration credit from your balance.')}
-        </Typography>
+          dangerouslySetInnerHTML={{
+            __html: hasInsufficientCredits
+              ? t('regenerate.insufficientCredits', 'You need <strong>{{required}} regenerations</strong> but only have <strong>{{available}}</strong> available.', { required: requiredCredits, available: count })
+              : t('regenerate.confirmMessage', 'This will override your current sections and consume <strong>5 regenerations</strong>.')
+          }}
+        />
       </Box>
     </Box>
 
@@ -231,7 +241,38 @@ export function ConfirmDialog({ title, action, open, onClose,count }: ConfirmDia
               >
                 Cancel
               </Button>
-              {action}
+              {hasInsufficientCredits ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => window.open('/upgrade-license', '_blank')}
+                    sx={{
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                      fontWeight: 500,
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    {t('regenerate.upgradeButton', 'Upgrade Plan')}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    disabled
+                    sx={{
+                      borderRadius: 2,
+                      px: 3,
+                      py: 1,
+                      fontWeight: 500
+                    }}
+                  >
+                    {t('regenerate.insufficientCreditsButton', 'Insufficient Credits')}
+                  </Button>
+                </>
+              ) : (
+                action
+              )}
             </Box>
           </Paper>
         </Box>

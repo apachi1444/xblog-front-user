@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
@@ -16,7 +15,6 @@ interface UseRegenerationCheckReturn {
  * Returns a function to check credits and state to manage the dialog
  */
 export const useRegenerationCheck = (): UseRegenerationCheckReturn => {
-  const { t } = useTranslation();
   const [showRegenerationDialog, setShowRegenerationDialog] = useState(false);
   
   // Get regeneration data from the regenerate manager
