@@ -10,7 +10,8 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_title.success",
       error: "seo.criteria.core.keyword_in_title.error"
     },
-    inputKeys: ["title"]
+    inputKeys: ["title"],
+    optimizable: false
   },
   {
     id: 102,
@@ -21,7 +22,8 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_meta.success",
       error: "seo.criteria.core.keyword_in_meta.error"
     },
-    inputKeys: ["metaDescription"]
+    inputKeys: ["metaDescription"],
+    optimizable: false
   },
   {
     id: 103,
@@ -133,7 +135,8 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.external_links.success",
       error: "seo.criteria.boosters.external_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "externalLinks"]
+    inputKeys: ["sections", "generatedHtml", "externalLinks"],
+    optimizable: false
   },
   {
     id: 205,
@@ -144,7 +147,8 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.dofollow_links.success",
       error: "seo.criteria.boosters.dofollow_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "externalLinks"]
+    inputKeys: ["sections", "generatedHtml", "externalLinks"],
+    optimizable: false
   },
   {
     id: 206,
@@ -155,7 +159,8 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.internal_links.success",
       error: "seo.criteria.boosters.internal_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "internalLinks"]
+    inputKeys: ["sections", "generatedHtml", "internalLinks"],
+    optimizable: false
   }
 ];
 
@@ -172,7 +177,8 @@ const TITLE_OPTIMIZATION: Criterion[] = [
       success: "seo.criteria.title.keyword_at_start.success",
       error: "seo.criteria.title.keyword_at_start.error"
     },
-    inputKeys: ["title", "primaryKeyword"]
+    inputKeys: ["title", "primaryKeyword"],
+    optimizable: false
   },
   {
     id: 302,
@@ -183,7 +189,8 @@ const TITLE_OPTIMIZATION: Criterion[] = [
       success: "seo.criteria.title.sentiment.success",
       error: "seo.criteria.title.sentiment.error"
     },
-    inputKeys: ["title"]
+    inputKeys: ["title"],
+    optimizable: false
   },
   {
     id: 303,

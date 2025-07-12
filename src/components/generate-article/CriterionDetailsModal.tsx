@@ -38,7 +38,8 @@ interface ModalState {
   currentStatus: 'success' | 'warning' | 'error' | 'pending';
   evaluationMessage: string;
   evaluationDetails: {
-    actualValue?: string | number;
+    inputValue?: string;
+    primaryKeyword?: string;
     threshold?: string;
     explanation?: string;
   };
@@ -67,156 +68,140 @@ export function CriterionDetailsModal({
 
   // Get detailed evaluation information for specific criteria
   const getEvaluationDetails = useCallback((criterionIdToEvaluate: number, formData: GenerateArticleFormData) => {
-    const { step1 } = formData;
+    const { step1, step2 } = formData;
 
     switch (criterionIdToEvaluate) {
-      case 202: { // keyword_density
-        if (!step1.contentDescription || !step1.primaryKeyword) {
-          return {
-            actualValue: 'N/A',
-            threshold: '1% - 3% (optimal)',
-            explanation: 'Waiting for content and primary keyword to calculate density'
-          };
-        }
+      case 101: { // keyword_in_title
+        return {
+          inputValue: step1?.title || 'Not provided',
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword must be present in title',
+          explanation: 'Checks if the primary keyword appears anywhere in the article title'
+        };
+      }
 
-        const words = step1.contentDescription.toLowerCase().split(/\s+/).filter(word => word.length > 0);
-        const keywordCount = words.filter(word => word.includes(step1.primaryKeyword.toLowerCase())).length;
-        const density = (keywordCount / words.length) * 100;
+      case 102: { // keyword_in_meta
+        return {
+          inputValue: step1?.metaDescription || 'Not provided',
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword must be present in meta description',
+          explanation: 'Checks if the primary keyword appears in the meta description for better search visibility'
+        };
+      }
+
+      case 103: { // keyword_in_url
+        return {
+          inputValue: step1?.urlSlug || 'Not provided',
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword words should be present in URL slug',
+          explanation: 'Analyzes URL slug for keyword presence using fuzzy matching and stop word filtering'
+        };
+      }
+
+      case 202: { // keyword_density
+        const contentPreview = step1?.contentDescription ?
+          (step1.contentDescription.length > 150 ?
+            `${step1.contentDescription.substring(0, 150)  }...` :
+            step1.contentDescription) : 'Not provided';
 
         return {
-          actualValue: `${density.toFixed(2)}%`,
-          threshold: '1% - 3% (optimal)',
-          explanation: `Found "${step1.primaryKeyword}" ${keywordCount} times in ${words.length} words`
+          inputValue: contentPreview,
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: '1% - 3% keyword density (optimal range)',
+          explanation: 'Calculates how often the primary keyword appears relative to total word count'
         };
       }
 
       case 104: { // keyword_in_first_10
-        if (!step1.contentDescription || !step1.primaryKeyword) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'First 10% of content',
-            explanation: 'Waiting for content and primary keyword'
-          };
-        }
-
-        const firstTenPercent = step1.contentDescription.substring(0, Math.floor(step1.contentDescription.length * 0.1));
-        const found = firstTenPercent.toLowerCase().includes(step1.primaryKeyword.toLowerCase());
+        const contentPreview = step1?.contentDescription ?
+          (step1.contentDescription.length > 100 ?
+            `${step1.contentDescription.substring(0, 100)  }...` :
+            step1.contentDescription) : 'Not provided';
 
         return {
-          actualValue: found ? 'Found' : 'Not found',
-          threshold: 'First 10% of content',
-          explanation: `Checking first ${Math.floor(step1.contentDescription.length * 0.1)} characters for "${step1.primaryKeyword}"`
+          inputValue: contentPreview,
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword must appear in first 10% of content',
+          explanation: 'Ensures the primary keyword appears early in the content for better SEO ranking'
         };
       }
 
-      case 105: { // keyword_in_content
-        if (!step1.contentDescription || !step1.primaryKeyword) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'At least once',
-            explanation: 'Waiting for content and primary keyword'
-          };
-        }
-
-        const found = step1.contentDescription.toLowerCase().includes(step1.primaryKeyword.toLowerCase());
-
+      case 201: { // images_included
+        const imageCount = formData.images?.length || 0;
         return {
-          actualValue: found ? 'Found' : 'Not found',
-          threshold: 'At least once',
-          explanation: `Searching for "${step1.primaryKeyword}" in content`
+          inputValue: imageCount > 0 ? `${imageCount} images generated` : 'No images generated',
+          threshold: 'At least one image required',
+          explanation: 'Articles with images have better engagement and SEO performance'
         };
       }
 
-      case 106: { // content_length
-        if (!step1.contentDescription) {
-          return {
-            actualValue: '0 words',
-            threshold: '1500+ words (optimal), 1000+ words (acceptable)',
-            explanation: 'Waiting for content'
-          };
-        }
-
-        const wordCount = step1.contentDescription.split(/\s+/).filter(word => word.length > 0).length;
-
+      case 203: { // keyword_in_subheadings
+        const tocCount = formData.toc?.length || 0;
         return {
-          actualValue: `${wordCount} words`,
-          threshold: '1500+ words (optimal), 1000+ words (acceptable)',
-          explanation: `Content length affects SEO ranking potential`
+          inputValue: tocCount > 0 ? `${tocCount} table of contents items` : 'No TOC generated',
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword should appear in at least one subheading',
+          explanation: 'Checks if the primary keyword is used in article subheadings/table of contents'
         };
       }
 
-      case 201: { // keyword_in_subheadings
-        if (!step1.contentDescription || !step1.primaryKeyword) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'At least one subheading',
-            explanation: 'Waiting for content and primary keyword'
-          };
-        }
-
+      case 204: { // external_links
+        const linkCount = step2?.externalLinks?.length || 0;
         return {
-          actualValue: 'Analysis pending',
-          threshold: 'At least one subheading',
-          explanation: `Looking for "${step1.primaryKeyword}" in H2, H3, H4 tags`
+          inputValue: linkCount > 0 ? `${linkCount} external links added` : 'No external links added',
+          threshold: 'At least one external link required',
+          explanation: 'External links to authoritative sources improve content credibility and SEO'
         };
       }
 
-      case 401: { // table_of_contents
-        if (!step1.contentDescription) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'Present in content',
-            explanation: 'Waiting for content'
-          };
-        }
-
+      case 205: { // dofollow_links
+        const linkCount = step2?.externalLinks?.length || 0;
         return {
-          actualValue: 'Analysis pending',
-          threshold: 'Present in content',
-          explanation: 'Checking for table of contents structure'
+          inputValue: linkCount > 0 ? `${linkCount} external links (dofollow by default)` : 'No external links added',
+          threshold: 'At least one dofollow external link required',
+          explanation: 'Dofollow links pass SEO authority to linked sites and show search engines you link to quality content'
         };
       }
 
-      case 402: { // short_paragraphs
-        if (!step1.contentDescription) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'Most paragraphs under 150 words',
-            explanation: 'Waiting for content'
-          };
-        }
-
-        const paragraphs = step1.contentDescription.split('\n\n').filter(p => p.trim().length > 0);
-        const avgWordsPerParagraph = paragraphs.reduce((acc, p) => acc + p.split(/\s+/).length, 0) / paragraphs.length;
-
+      case 206: { // internal_links
+        const linkCount = step2?.internalLinks?.length || 0;
         return {
-          actualValue: `${avgWordsPerParagraph.toFixed(1)} words/paragraph`,
-          threshold: 'Most paragraphs under 150 words',
-          explanation: `${paragraphs.length} paragraphs analyzed`
+          inputValue: linkCount > 0 ? `${linkCount} internal links added` : 'No internal links added',
+          threshold: 'At least one internal link required',
+          explanation: 'Internal links help users navigate your site and distribute page authority across your content'
         };
       }
 
-      case 403: { // media_content
-        if (!step1.contentDescription) {
-          return {
-            actualValue: 'N/A',
-            threshold: 'Images or videos present',
-            explanation: 'Waiting for content'
-          };
-        }
-
+      case 301: { // keyword_at_start
         return {
-          actualValue: 'Analysis pending',
-          threshold: 'Images or videos present',
-          explanation: 'Checking for media references in content'
+          inputValue: step1?.title || 'Not provided',
+          primaryKeyword: step1?.primaryKeyword || 'Not provided',
+          threshold: 'Primary keyword should appear at the beginning of title',
+          explanation: 'Keywords at the start of titles have more SEO weight and better click-through rates'
+        };
+      }
+
+      case 302: { // sentiment
+        return {
+          inputValue: step1?.title || 'Not provided',
+          threshold: 'Title should contain positive sentiment words',
+          explanation: 'Positive sentiment in titles improves click-through rates and user engagement'
+        };
+      }
+
+      case 303: { // power_words
+        return {
+          inputValue: step1?.title || 'Not provided',
+          threshold: 'Title should contain at least 2 power words',
+          explanation: 'Power words create emotional impact and increase the likelihood of clicks and engagement'
         };
       }
 
       default:
         return {
-          actualValue: 'N/A',
-          threshold: 'Criterion-specific',
-          explanation: 'Evaluation details not available'
+          inputValue: 'Not available',
+          threshold: 'Criterion-specific requirements',
+          explanation: 'Detailed evaluation information not available for this criterion'
         };
     }
   }, []);
@@ -427,62 +412,85 @@ export function CriterionDetailsModal({
             </Typography>
 
             <Stack spacing={2}>
-              {/* Actual Value */}
+              {/* Input Value */}
               <Box>
-                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-                  Current Value
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Iconify icon="eva:edit-2-fill" width={16} height={16} />
+                  Input Value
                 </Typography>
                 <Box
                   sx={{
-                    p: 1.5,
-                    borderRadius: 1.5,
+                    p: 2,
+                    borderRadius: 2,
                     bgcolor: alpha(theme.palette.primary.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+                    maxHeight: 120,
+                    overflow: 'auto'
                   }}
                 >
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>
-                    {state.evaluationDetails.actualValue || 'N/A'}
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>
+                    {state.evaluationDetails.inputValue || 'Not provided'}
                   </Typography>
                 </Box>
               </Box>
 
-              <Divider sx={{ my: 1 }} />
+              {/* Primary Keyword (if applicable) */}
+              {state.evaluationDetails.primaryKeyword && (
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Iconify icon="eva:search-fill" width={16} height={16} />
+                    Primary Keyword
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: alpha(theme.palette.warning.main, 0.05),
+                      border: `1px solid ${alpha(theme.palette.warning.main, 0.15)}`,
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.warning.main }}>
+                      {state.evaluationDetails.primaryKeyword}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
 
-              {/* Threshold */}
+              {/* Requirement */}
               <Box>
-                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-                  Required Threshold
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Iconify icon="eva:checkmark-circle-2-fill" width={16} height={16} />
+                  Requirement
                 </Typography>
                 <Box
                   sx={{
-                    p: 1.5,
-                    borderRadius: 1.5,
+                    p: 2,
+                    borderRadius: 2,
                     bgcolor: alpha(theme.palette.info.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`,
                   }}
                 >
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {state.evaluationDetails.threshold || 'Criterion-specific'}
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {state.evaluationDetails.threshold || 'Criterion-specific requirements'}
                   </Typography>
                 </Box>
               </Box>
-
-              <Divider sx={{ my: 1 }} />
 
               {/* Explanation */}
               <Box>
-                <Typography variant="caption" color="text.secondary" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-                  How It s Calculated
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Iconify icon="eva:info-fill" width={16} height={16} />
+                  How It Works
                 </Typography>
                 <Box
                   sx={{
-                    p: 1.5,
-                    borderRadius: 1.5,
+                    p: 2,
+                    borderRadius: 2,
                     bgcolor: alpha(theme.palette.grey[500], 0.05),
-                    border: `1px solid ${alpha(theme.palette.grey[500], 0.2)}`,
+                    border: `1px solid ${alpha(theme.palette.grey[500], 0.15)}`,
                   }}
                 >
-                  <Typography variant="body2">
+                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
                     {state.evaluationDetails.explanation || 'Evaluation details not available'}
                   </Typography>
                 </Box>
