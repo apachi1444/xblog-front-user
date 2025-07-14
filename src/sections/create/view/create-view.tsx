@@ -37,7 +37,14 @@ export function CreateView() {
   // Fetch articles and filter drafts
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
-  const { data: articlesData, isLoading } = useGetArticlesQuery({ store_id: storeId });
+
+  const { data: articlesData, isLoading } = useGetArticlesQuery(
+    { store_id: storeId },
+    {
+      // Always refetch when component mounts or args change
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
   const [deleteArticle, { isLoading: isDeletingArticle }] = useDeleteArticleMutation();
@@ -94,7 +101,7 @@ export function CreateView() {
     if (optionId === 'generate') {
       try {
         // Create empty article first
-        await createArticle({
+        const result = await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',
@@ -103,11 +110,15 @@ export function CreateView() {
           website_id: undefined,
         }).unwrap();
 
+        // Store the new article ID in localStorage for the generate view
+        localStorage.setItem('currentArticleId', result.id.toString());
+        localStorage.setItem('isNewArticle', 'true');
+
+        // Navigate to generate page WITHOUT article ID in URL
         navigate('/generate');
 
         toast.success('New article created! Start editing...');
-      } catch (error) {
-        console.error('Failed to create article:', error);
+      } catch (errore) {
         toast.error('Failed to create article. Please try again.');
       }
     }
@@ -128,8 +139,7 @@ export function CreateView() {
       toast.success(t('create.deleteSuccess', 'Article deleted successfully'));
       setDeleteDialogOpen(false);
       setArticleToDelete(null);
-    } catch (error) {
-      console.error('Failed to delete article:', error);
+    } catch (errora) {
       toast.error(t('create.deleteError', 'Failed to delete article. Please try again.'));
     }
   };
@@ -313,7 +323,12 @@ export function CreateView() {
                   },
                   cursor: 'pointer'
                 }}
-                onClick={() => navigate(`/generate?articleId=${article.id}`)}
+                onClick={() => {
+                  // Clear any localStorage article ID when editing existing draft
+                  localStorage.removeItem('currentArticleId');
+                  localStorage.removeItem('isNewArticle');
+                  navigate(`/generate?articleId=${article.id}`);
+                }}
               >
                 <CardContent sx={{
                   display: 'flex',

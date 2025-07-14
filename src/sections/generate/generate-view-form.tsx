@@ -174,14 +174,16 @@ export function GenerateViewForm({
       const formData = methods.getValues();
       const { primaryKeyword, contentDescription, language } = formData.step1;
 
-      if (!primaryKeyword || !contentDescription) {
-        console.error('Missing required fields for content optimization:', { primaryKeyword, contentDescription });
+      // If no primary keyword, show error and return
+      if (!primaryKeyword) {
+        toast.error('Please enter a primary keyword first before optimizing content description.');
         return;
       }
 
       console.log('🔧 Optimizing content description with:', { primaryKeyword, language, contentDescription });
 
       // Call the actual generate-topic API for content optimization
+      // If no content description exists, the API will generate one from scratch
       const result = await generateTopic({
         primary_keyword: primaryKeyword,
         secondary_keywords: formData.step1.secondaryKeywords || [],
@@ -196,8 +198,6 @@ export function GenerateViewForm({
         shouldValidate: true,
         shouldDirty: true,
       });
-
-
 
       // Trigger criteria evaluation for the updated content description
       setTimeout(() => {

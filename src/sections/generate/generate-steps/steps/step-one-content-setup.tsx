@@ -433,21 +433,19 @@ export function Step1ContentSetup({
               }}
             />
 
-            {/* Optimize Content Description Button */}
-            {contentDescription && primaryKeyword && (
-              <RegenerateButton
-                onClick={handleOptimizeContentDescription}
-                isGenerating={isOptimizingContentDescription}
-                isFirstGeneration={!hasGeneratedContentDescription}
-                label={
-                  isOptimizingContentDescription
-                    ? "Optimizing..."
-                    : hasGeneratedContentDescription
-                      ? "Re-optimize with AI"
-                      : "Optimize with AI"
-                }
-              />
-            )}
+            {/* Optimize Content Description Button - Always visible */}
+            <RegenerateButton
+              onClick={handleOptimizeContentDescription}
+              isGenerating={isOptimizingContentDescription}
+              isFirstGeneration={!hasGeneratedContentDescription}
+              label={
+                isOptimizingContentDescription
+                  ? "Optimizing..."
+                  : hasGeneratedContentDescription
+                    ? "Re-optimize with AI"
+                    : "Optimize with AI"
+              }
+            />
 
             {/* Content Description Optimization Loading Animation */}
             <AnimatePresence>

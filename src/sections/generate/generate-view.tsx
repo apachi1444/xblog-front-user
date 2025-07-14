@@ -2,9 +2,9 @@
 
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -30,10 +30,40 @@ import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { t } = useTranslation();
 
   // Check if we're editing an existing draft article
-  const articleId = searchParams.get('articleId') || searchParams.get('draft');
+  // Priority: URL params > localStorage (for new articles) > navigation state (fallback)
+  const urlArticleId = searchParams.get('articleId') || searchParams.get('draft');
+  const localStorageArticleId = localStorage.getItem('currentArticleId');
+  const navigationArticleId = (location.state as any)?.newArticleId;
+
+  const articleId = urlArticleId || localStorageArticleId || navigationArticleId;
+
+  console.log('🔍 Generate View - URL Article ID:', urlArticleId);
+  console.log('🔍 Generate View - LocalStorage Article ID:', localStorageArticleId);
+  console.log('🔍 Generate View - Navigation Article ID:', navigationArticleId);
+  console.log('🔍 Generate View - Final Article ID:', articleId);
+
+  // Clear localStorage article ID if we have a URL param (editing existing draft)
+  useEffect(() => {
+    if (urlArticleId && localStorageArticleId) {
+      localStorage.removeItem('currentArticleId');
+      localStorage.removeItem('isNewArticle');
+      console.log('🧹 Cleared localStorage article ID (editing existing draft)');
+    }
+  }, [urlArticleId, localStorageArticleId]);
+
+  // Cleanup localStorage when component unmounts (user navigates away)
+  useEffect(() => () => {
+      // Only clear if we're using localStorage article ID (new article)
+      if (!urlArticleId && localStorageArticleId) {
+        localStorage.removeItem('currentArticleId');
+        localStorage.removeItem('isNewArticle');
+        console.log('🧹 Cleaned up localStorage on unmount');
+      }
+    }, [urlArticleId, localStorageArticleId]);
 
   // Get current store
   const currentStore = useSelector(selectCurrentStore);

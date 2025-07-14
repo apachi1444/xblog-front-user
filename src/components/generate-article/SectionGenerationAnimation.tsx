@@ -357,12 +357,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
         evaluateAllCriteria();
       }, 500);
 
+      // Auto-save generated content to existing article only
       if (articleId) {
         setTimeout(async () => {
           try {
             const newFormData = methods.getValues();
 
-            // Only update if we have generated HTML content
+            // Only save if we have generated HTML content
             if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
               // Get the first image URL for featured media
               const firstImageUrl = newFormData.images && newFormData.images.length > 0
@@ -372,7 +373,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               // Prepare request body with all generated AI content
               const requestBody = {
                 article_title: newFormData.step1?.title || null,
-                content__description: newFormData.step1?.contentDescription || null,
+                content_description: newFormData.step1?.contentDescription || null,
                 meta_title: newFormData.step1?.metaTitle || null,
                 meta_description: newFormData.step1?.metaDescription || null,
                 url_slug: newFormData.step1?.urlSlug || null,
@@ -398,10 +399,12 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 status: 'draft' as const,
               };
 
+              // Only update existing article - never create new ones during generation
               await articleDraft.updateArticle(articleId, requestBody);
+              console.log('✅ Updated existing article:', articleId);
             }
           } catch (error) {
-            console.error('❌ Failed to auto-update article:', error);
+            console.error('❌ Failed to auto-save article:', error);
             // Don't show error to user as this is automatic - generation was successful
           }
         }, 750);

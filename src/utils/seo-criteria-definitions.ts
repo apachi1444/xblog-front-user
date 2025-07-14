@@ -5,13 +5,15 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
     id: 101,
     description: "seo.criteria.core.keyword_in_title.description",
     weight: 30,
-    statusType: "binary" as CriteriaStatusType,
+    statusType: "ternary" as CriteriaStatusType,
     evaluationStatus: {
       success: "seo.criteria.core.keyword_in_title.success",
+      warning: "seo.criteria.core.keyword_in_title.warning",
       error: "seo.criteria.core.keyword_in_title.error"
     },
-    inputKeys: ["title"],
-    optimizable: false
+    inputKeys: ["metaTitle"],
+    optimizable: false,
+    warningScore: 21 // 70% of the weight (30 * 0.7)
   },
   {
     id: 102,
@@ -172,13 +174,15 @@ const TITLE_OPTIMIZATION: Criterion[] = [
     id: 301,
     description: "seo.criteria.title.keyword_at_start.description",
     weight: 10,
-    statusType: "binary" as CriteriaStatusType,
+    statusType: "ternary" as CriteriaStatusType,
     evaluationStatus: {
       success: "seo.criteria.title.keyword_at_start.success",
+      warning: "seo.criteria.title.keyword_at_start.warning",
       error: "seo.criteria.title.keyword_at_start.error"
     },
-    inputKeys: ["title", "primaryKeyword"],
-    optimizable: false
+    inputKeys: ["metaTitle", "primaryKeyword"],
+    optimizable: false,
+    warningScore: 7 // 70% of the weight (10 * 0.7)
   },
   {
     id: 302,
@@ -203,7 +207,8 @@ const TITLE_OPTIMIZATION: Criterion[] = [
       error: "seo.criteria.title.power_words.error"
     },
     inputKeys: ["title"],
-    warningScore: 2 // ~67% of the weight
+    warningScore: 2,
+    optimizable: false
   }
 ];
 

@@ -34,8 +34,6 @@ export const StepNavigation = ({
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
 
-
-
   const { control } = methods;
 
   // State for modals (only for final step)
@@ -124,15 +122,14 @@ export const StepNavigation = ({
       }
 
       if (shouldProceed) {
-        // Only update article when moving from Step 1 → Step 2
+        // Only save article data when moving from Step 1 → Step 2 AND we have an existing article
         if (activeStep === 0 && articleId) {
           try {
-            // 🎯 Prepare request body with ALL existing data + Step 1 updates
-            // This ensures we don't lose any existing step 2 or other data
+            // 🎯 Prepare request body with ALL form data
             const requestBody = {
               // Step 1 fields (updated values)
               article_title: values.step1?.title || null,
-              content__description: values.step1?.contentDescription || null,
+              content_description: values.step1?.contentDescription || null,
               meta_title: values.step1?.metaTitle || null,
               meta_description: values.step1?.metaDescription || null,
               url_slug: values.step1?.urlSlug || null,
@@ -159,12 +156,17 @@ export const StepNavigation = ({
               status: 'draft' as const,
             };
 
+            // Only update existing article - never create new ones during navigation
             await articleDraft.updateArticle(articleId, requestBody);
+            console.log('✅ Updated existing article:', articleId);
+
             onNextStep();
           } catch (error) {
+            console.error('❌ Failed to save article:', error);
             toast.error('Failed to save article. Please try again before proceeding.');
           }
         } else {
+          // For new articles or other steps, just proceed without saving
           onNextStep();
         }
       }

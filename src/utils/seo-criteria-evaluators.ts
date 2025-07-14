@@ -146,20 +146,35 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[0].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { title, primaryKeyword } = formData.step1;
+    // ✅ Check metaTitle (SEO title) instead of title (article title)
+    const { title, metaTitle, primaryKeyword } = formData.step1;
+    const seoTitle = metaTitle || title; // Use metaTitle if available, fallback to title
 
-    console.log(title, primaryKeyword, " title and primary keyword");
+    console.log('🔍 Keyword in Title - Article Title:', title);
+    console.log('🔍 Keyword in Title - SEO Title (metaTitle):', metaTitle);
+    console.log('🔍 Keyword in Title - Using:', seoTitle);
+    console.log('🔍 Keyword in Title - Primary Keyword:', primaryKeyword);
+    console.log('🔍 Keyword in Title - Are they equal?', seoTitle === primaryKeyword);
+    console.log('🔍 Keyword in Title - Lengths:', { seoTitle: seoTitle?.length, primaryKeyword: primaryKeyword?.length });
 
-
-    if (!title || !primaryKeyword) {
+    if (!seoTitle || !primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for title and primary keyword',
+        message: 'Waiting for SEO title and primary keyword',
         score: 0,
       };
     }
 
-    if (title.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+    const titleLower = seoTitle.toLowerCase();
+    const keywordLower = primaryKeyword.toLowerCase();
+
+    console.log('🔍 Comparison - Title Lower:', `"${titleLower}"`);
+    console.log('🔍 Comparison - Keyword Lower:', `"${keywordLower}"`);
+    console.log('🔍 Comparison - Includes check:', titleLower.includes(keywordLower));
+
+    // First check: exact phrase match (highest score)
+    if (titleLower.includes(keywordLower)) {
+      console.log('✅ Exact phrase match found');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -167,6 +182,26 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
+    // Second check: word-based matching for partial credit
+    const keywordWords = keywordLower.split(/\s+/).filter(word => word.length > 2); // Ignore short words
+    const matchingWords = keywordWords.filter(word => titleLower.includes(word));
+    const matchPercentage = keywordWords.length > 0 ? matchingWords.length / keywordWords.length : 0;
+
+    console.log('🔍 Keyword words:', keywordWords);
+    console.log('🔍 Matching words:', matchingWords);
+    console.log('🔍 Match percentage:', matchPercentage);
+
+    // If at least 50% of significant words match, give partial credit
+    if (matchPercentage >= 0.5) {
+      console.log('⚠️ Partial word match found');
+      return {
+        status: 'warning',
+        message: criterion.evaluationStatus.warning || 'Some keyword words found in title',
+        score: criterion.warningScore || Math.floor(criterion.weight * 0.7),
+      };
+    }
+
+    console.log('❌ No significant keyword match found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -664,22 +699,41 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[2].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { title, primaryKeyword } = formData.step1;
+    const { title, metaTitle, primaryKeyword } = formData.step1;
+    const seoTitle = metaTitle || title; // Use metaTitle if available, fallback to title
 
-    if (!title || !primaryKeyword) {
+    if (!seoTitle || !primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for title and primary keyword',
+        message: 'Waiting for SEO title and primary keyword',
         score: 0,
       };
     }
 
-    // Check if title starts with the primary keyword
-    if (title.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
+    const titleLower = seoTitle.toLowerCase().trim();
+    const keywordLower = primaryKeyword.toLowerCase().trim();
+
+    console.log('🔍 Keyword at Start - Title Lower:', `"${titleLower}"`);
+    console.log('🔍 Keyword at Start - Keyword Lower:', `"${keywordLower}"`);
+
+    // Check if SEO title starts with the primary keyword (exact match)
+    if (titleLower.startsWith(keywordLower)) {
+      console.log('✅ Exact keyword match at start');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
         score: criterion.weight,
+      };
+    }
+
+    // Check if SEO title starts with the first significant word of the keyword
+    const keywordWords = keywordLower.split(/\s+/).filter(word => word.length > 2);
+    if (keywordWords.length > 0 && titleLower.startsWith(keywordWords[0])) {
+      console.log('⚠️ First keyword word found at start');
+      return {
+        status: 'warning',
+        message: criterion.evaluationStatus.warning || 'Title starts with part of the focus keyword',
+        score: criterion.warningScore || Math.floor(criterion.weight * 0.7),
       };
     }
 
@@ -963,13 +1017,14 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   },
 
   301: (currentValue, formData) => { // keyword_at_start
-    const { title, primaryKeyword } = formData.step1;
-    const valueToOptimize = currentValue || title;
+    const { title, metaTitle, primaryKeyword } = formData.step1;
+    const seoTitle = metaTitle || title;
+    const valueToOptimize = currentValue || seoTitle;
     if (!valueToOptimize) return primaryKeyword || 'Untitled';
     if (!primaryKeyword) return valueToOptimize;
 
-    if (!valueToOptimize.toLowerCase().startsWith(primaryKeyword.toLowerCase())) {
-      return `${primaryKeyword}: ${valueToOptimize}`;
+    if (!valueToOptimize.toLowerCase().trim().startsWith(primaryKeyword.toLowerCase().trim())) {
+      return `${primaryKeyword} - ${valueToOptimize}`;
     }
 
     return valueToOptimize;
