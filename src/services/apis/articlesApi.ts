@@ -49,6 +49,7 @@ export interface UpdateArticleRequest {
   internal_links?: string | null;
   external_links?: string | null;
   content?: string;
+  toc?: string | null;
   status?: 'draft' | 'published';
 }
 

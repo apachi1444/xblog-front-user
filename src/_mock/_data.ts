@@ -75,6 +75,20 @@ export const _posts: Article[] = [
 
     // Legacy and additional fields
     content: 'A comprehensive guide to getting started with digital marketing strategies for modern businesses.',
+    toc: JSON.stringify([
+      {
+        heading: 'Introduction to Digital Marketing',
+        subheadings: ['What is Digital Marketing?', 'Why Digital Marketing Matters', 'Key Benefits']
+      },
+      {
+        heading: 'Essential Digital Marketing Strategies',
+        subheadings: ['Social Media Marketing', 'Content Marketing', 'Email Marketing', 'SEO Optimization']
+      },
+      {
+        heading: 'Implementation and Best Practices',
+        subheadings: ['Getting Started', 'Measuring Success', 'Common Mistakes to Avoid']
+      }
+    ]),
     sections: JSON.stringify([
       {
         id: 'section-1',
@@ -148,6 +162,20 @@ export const _posts: Article[] = [
 
     // Legacy and additional fields
     content: 'Learn how to optimize your e-commerce website for search engines.',
+    toc: JSON.stringify([
+      {
+        heading: 'E-commerce SEO Fundamentals',
+        subheadings: ['Understanding E-commerce SEO', 'Key Differences from Regular SEO', 'Setting Up Analytics']
+      },
+      {
+        heading: 'Product Page Optimization',
+        subheadings: ['Product Title Optimization', 'Product Descriptions', 'Image SEO', 'Schema Markup']
+      },
+      {
+        heading: 'Technical SEO for E-commerce',
+        subheadings: ['Site Speed Optimization', 'Mobile Responsiveness', 'URL Structure', 'Internal Linking']
+      }
+    ]),
     sections: JSON.stringify([
       {
         id: 'section-1',

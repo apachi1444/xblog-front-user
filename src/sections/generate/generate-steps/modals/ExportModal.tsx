@@ -53,6 +53,7 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
         articleType: formData.step2?.articleType || '',
         articleSize: formData.step2?.articleSize || '',
         toneOfVoice: formData.step2?.toneOfVoice || '',
+        toc: formData.toc || [],
       };
 
       const sections = formData.step3?.sections || [];

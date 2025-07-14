@@ -391,6 +391,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
                 // 🎯 Use the generated HTML from form data directly
                 content: newFormData.generatedHtml,
+                // 🎯 Save generated TOC as JSON string
+                toc: newFormData.toc?.length ? JSON.stringify(newFormData.toc) : null,
                 // 🎯 Set first image as featured media
                 featured_media: firstImageUrl,
                 status: 'draft' as const,

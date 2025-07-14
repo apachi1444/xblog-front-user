@@ -119,6 +119,24 @@ export function GeneratingView() {
     return [];
   }, []);
 
+  // Helper function to parse TOC from JSON string
+  const parseTocFromString = useCallback((tocString: string) => {
+    if (!tocString || tocString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON array
+      const parsed = JSON.parse(tocString);
+      if (Array.isArray(parsed)) {
+        console.log('📋 Parsed TOC from draft:', parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error('❌ Failed to parse TOC from string:', error);
+    }
+
+    return [];
+  }, []);
+
   // Calculate initial form values - either from draft or defaults
   const defaultValues = useMemo((): GenerateArticleFormData => {
     // Base default values for new articles
@@ -158,10 +176,11 @@ export function GeneratingView() {
     if (selectedArticle) {
       console.log('🔄 Using draft article values as initial form state:', selectedArticle);
 
-      // Parse links and sections once
+      // Parse links, sections, and toc once
       const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
       const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
       const sections = parseSectionsFromString(selectedArticle.sections || '');
+      const toc = parseTocFromString(selectedArticle.toc || '');
 
 
       const finalContentDescription = selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : baseDefaults.step1.contentDescription;
@@ -194,13 +213,13 @@ export function GeneratingView() {
         },
         images: baseDefaults.images, // Always empty array for now
         faq: baseDefaults.faq, // Always empty array for now
-        toc: baseDefaults.toc, // Always empty array for now
+        toc,
         generatedHtml: selectedArticle.content || baseDefaults.generatedHtml, // Use content field
       };
     }
     
     return baseDefaults;
-  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString]);
+  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,

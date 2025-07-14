@@ -47,6 +47,7 @@ export interface KeywordData {
     external_links?: string;
     content?: string;
     sections?: string; // JSON string containing ArticleSection[]
+    toc?: string; // JSON string containing table of contents
     featured_media?: string;
     status: 'draft' | 'published' | 'scheduled';
     platform?: string;

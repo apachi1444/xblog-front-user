@@ -53,6 +53,7 @@ export interface ArticleInfo {
   articleType?: string;
   articleSize?: string;
   toneOfVoice?: string;
+  toc?: Array<{ heading: string; subheadings: string[] }>;
 }
 
 /**
@@ -158,6 +159,21 @@ export const articleToMarkdown = (articleInfo: ArticleInfo, sections: ArticleSec
     markdown += `> ${articleInfo.metaDescription}\n\n`;
   }
 
+  // Add table of contents if available
+  if (articleInfo.toc && articleInfo.toc.length > 0) {
+    markdown += '## Table of Contents\n\n';
+    articleInfo.toc.forEach((tocItem, index) => {
+      markdown += `${index + 1}. **${tocItem.heading}**\n`;
+      if (tocItem.subheadings && tocItem.subheadings.length > 0) {
+        tocItem.subheadings.forEach(subheading => {
+          markdown += `   - ${subheading}\n`;
+        });
+      }
+      markdown += '\n';
+    });
+    markdown += '\n';
+  }
+
   // Add horizontal rule before content
   markdown += '---\n\n';
 
@@ -197,6 +213,24 @@ export const articleToHtml = (articleInfo: ArticleInfo, sections: ArticleSection
   // Add meta description if available
   if (articleInfo.metaDescription) {
     html += `<blockquote>${articleInfo.metaDescription}</blockquote>`;
+  }
+
+  // Add table of contents if available
+  if (articleInfo.toc && articleInfo.toc.length > 0) {
+    html += '<h2>Table of Contents</h2>';
+    html += '<ol>';
+    articleInfo.toc.forEach(tocItem => {
+      html += `<li><strong>${tocItem.heading}</strong>`;
+      if (tocItem.subheadings && tocItem.subheadings.length > 0) {
+        html += '<ul>';
+        tocItem.subheadings.forEach(subheading => {
+          html += `<li>${subheading}</li>`;
+        });
+        html += '</ul>';
+      }
+      html += '</li>';
+    });
+    html += '</ol>';
   }
 
   // Add horizontal rule before content
