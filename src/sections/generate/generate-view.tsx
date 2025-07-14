@@ -2,9 +2,9 @@
 
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useLocation, useSearchParams } from 'react-router-dom';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -30,60 +30,78 @@ import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
   const [searchParams] = useSearchParams();
-  const location = useLocation();
   const { t } = useTranslation();
 
+  // State to store the generation trigger function
+  const [generationTrigger, setGenerationTrigger] = useState<(() => void) | null>(null);
+
   // Check if we're editing an existing draft article
-  // Priority: URL params > localStorage (for new articles) > navigation state (fallback)
   const urlArticleId = searchParams.get('articleId') || searchParams.get('draft');
-  const localStorageArticleId = localStorage.getItem('currentArticleId');
-  const navigationArticleId = (location.state as any)?.newArticleId;
+  const isNewArticle = localStorage.getItem('isNewArticle') === 'true';
 
-  const articleId = urlArticleId || localStorageArticleId || navigationArticleId;
-
-  console.log('🔍 Generate View - URL Article ID:', urlArticleId);
-  console.log('🔍 Generate View - LocalStorage Article ID:', localStorageArticleId);
-  console.log('🔍 Generate View - Navigation Article ID:', navigationArticleId);
-  console.log('🔍 Generate View - Final Article ID:', articleId);
-
-  // Clear localStorage article ID if we have a URL param (editing existing draft)
+  // Clear localStorage when we have a URL param (editing existing draft)
   useEffect(() => {
-    if (urlArticleId && localStorageArticleId) {
-      localStorage.removeItem('currentArticleId');
+    if (urlArticleId) {
       localStorage.removeItem('isNewArticle');
-      console.log('🧹 Cleared localStorage article ID (editing existing draft)');
+      localStorage.removeItem('articleCreationTimestamp');
+      console.log('🧹 Cleared localStorage (editing existing draft)');
     }
-  }, [urlArticleId, localStorageArticleId]);
+  }, [urlArticleId]);
 
-  // Cleanup localStorage when component unmounts (user navigates away)
+
+
+  // Cleanup localStorage when component unmounts
   useEffect(() => () => {
-      // Only clear if we're using localStorage article ID (new article)
-      if (!urlArticleId && localStorageArticleId) {
-        localStorage.removeItem('currentArticleId');
-        localStorage.removeItem('isNewArticle');
-        console.log('🧹 Cleaned up localStorage on unmount');
-      }
-    }, [urlArticleId, localStorageArticleId]);
+    if (isNewArticle && !urlArticleId) {
+      localStorage.removeItem('isNewArticle');
+      localStorage.removeItem('articleCreationTimestamp');
+    }
+    }, [isNewArticle, urlArticleId]);
 
   // Get current store
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
 
-  // Fetch all articles
+  // Fetch articles (needed for both editing existing and getting latest ID for new articles)
   const { data: articlesData, isLoading: isArticlesLoading } = useGetArticlesQuery({
     store_id: storeId
   });
 
-  // Find the specific article by ID from the list
+  // Determine the selected article for form injection (URL takes priority)
   const selectedArticle = useMemo(() => {
-    if (!articleId || !articlesData?.articles) return null;
-    return articlesData.articles.find(article =>
-      article.id.toString() === articleId.toString()
-    ) || null;
-  }, [articleId, articlesData]);
+    if (urlArticleId && articlesData?.articles) {
+      // Editing existing article from URL - fetch its data
+      const article = articlesData.articles.find(articleItem =>
+        articleItem.id.toString() === urlArticleId.toString()
+      ) || null;
+      return article;
+    } if (isNewArticle) {
+      return null;
+    }
 
-  // Loading state - only show loading if we're expecting to find an article
-  const isArticleLoading = articleId ? isArticlesLoading : false;
+    // Default case - no article data
+    return null;
+  }, [urlArticleId, isNewArticle, articlesData]);
+
+  // Determine articleId for StepNavigation (for update API)
+  const articleIdForNavigation = useMemo(() => {
+    if (urlArticleId) {
+      // Use URL article ID
+      return urlArticleId;
+    } if (isNewArticle && articlesData?.articles?.length) {
+      // For new articles, get the latest article ID (highest ID) for update API
+      const latestArticle = articlesData.articles.reduce((latest, current) =>
+        current.id > latest.id ? current : latest
+      );
+      console.log('🔄 Using latest article ID for navigation:', latestArticle.id);
+      return latestArticle.id.toString();
+    }
+
+    return null;
+  }, [urlArticleId, isNewArticle, articlesData]);
+
+  // Loading state - only show loading if we're editing an existing article
+  const isArticleLoading = urlArticleId ? isArticlesLoading : false;
 
   // No need for article draft management since we simplified the workflow
 
@@ -247,7 +265,8 @@ export function GeneratingView() {
         generatedHtml: selectedArticle.content || baseDefaults.generatedHtml, // Use content field
       };
     }
-    
+
+    // Return base defaults if no draft article
     return baseDefaults;
   }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString]);
 
@@ -313,6 +332,11 @@ export function GeneratingView() {
     setActiveStep((prev) => Math.max(prev - 1, 0));
   };
 
+  // Callback to receive generation trigger function from GenerateViewForm
+  const handleGenerationTrigger = (triggerFunction: () => void) => {
+    setGenerationTrigger(() => triggerFunction);
+  };
+
   // Show loading state while fetching article
   if (isArticleLoading) {
     return (
@@ -366,6 +390,8 @@ export function GeneratingView() {
             activeStep={activeStep}
             steps={steps}
             setActiveStep={setActiveStep}
+            onGenerationTrigger={handleGenerationTrigger}
+            articleId={articleIdForNavigation}
           />
           {/* Navigation buttons with internal validation logic */}
           <StepNavigation
@@ -373,7 +399,8 @@ export function GeneratingView() {
             totalSteps={steps.length}
             onNextStep={handleNextStep}
             onPrevStep={handlePrevStep}
-            articleId={selectedArticle?.id?.toString() || articleId}
+            articleId={articleIdForNavigation}
+            onTriggerGeneration={generationTrigger || undefined}
           />
 
 

@@ -2,7 +2,6 @@ import type React from "react";
 import type { InputKey } from "src/types/criteria.types";
 
 import { toast } from "react-hot-toast";
-import { useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useWatch, useFormContext } from "react-hook-form";
@@ -11,7 +10,6 @@ import { useTheme } from "@mui/material/styles";
 import { Box, Grid, Stack, Button, Tooltip, Typography, CircularProgress } from "@mui/material";
 
 // RTK Query
-import { api } from "src/services/apis";
 
 // Components
 import { Iconify } from "src/components/iconify";
@@ -63,9 +61,6 @@ export function Step1ContentSetup({
   } = form
 
   const theme = useTheme()
-
-  // For cache invalidation after regeneration
-  const dispatch = useDispatch();
 
   const contentDescription = useWatch({
     control,
@@ -130,10 +125,14 @@ export function Step1ContentSetup({
 
   // Check if form already has generated content (e.g., from draft)
   useEffect(() => {
-    if (title && !hasGeneratedTitle) {
+    console.log('🔍 Checking generated content:', { title, metaTitle, metaDescription, urlSlug, hasGeneratedTitle, hasGeneratedMeta });
+
+    if (title && title.trim() && !hasGeneratedTitle) {
+      console.log('✅ Setting hasGeneratedTitle to true');
       setHasGeneratedTitle(true);
     }
-    if ((metaTitle || metaDescription || urlSlug) && !hasGeneratedMeta) {
+    if ((metaTitle?.trim() || metaDescription?.trim() || urlSlug?.trim()) && !hasGeneratedMeta) {
+      console.log('✅ Setting hasGeneratedMeta to true');
       setHasGeneratedMeta(true);
     }
   }, [title, metaTitle, metaDescription, urlSlug, hasGeneratedTitle, hasGeneratedMeta]);
@@ -201,8 +200,7 @@ export function Step1ContentSetup({
       setValue("step1.title", firstTitle);
       setHasGeneratedTitle(true); // Mark that title has been generated
 
-      // Invalidate subscription cache to update regeneration count in header
-      dispatch(api.util.invalidateTags(['Subscription']));
+      // Note: Subscription cache will be invalidated at the end of generation process
     } catch (error) {
       toast.error("Error generating title:");
     } finally {
@@ -228,8 +226,7 @@ export function Step1ContentSetup({
         await onGenerateSecondaryKeywords();
         setHasGeneratedSecondaryKeywords(true); // Mark as generated
 
-        // Invalidate subscription cache to update regeneration count in header
-        dispatch(api.util.invalidateTags(['Subscription']));
+        // Note: Subscription cache will be invalidated at the end of generation process
       } catch (error) {
         console.error("Error generating secondary keywords:", error);
       } finally {
@@ -253,8 +250,7 @@ export function Step1ContentSetup({
       await onOptimizeContentDescription();
       setHasGeneratedContentDescription(true); // Mark as generated
 
-      // Invalidate subscription cache to update regeneration count in header
-      dispatch(api.util.invalidateTags(['Subscription']));
+      // Note: Subscription cache will be invalidated at the end of generation process
     } catch (error) {
       console.error("Error optimizing content description:", error);
     } finally {

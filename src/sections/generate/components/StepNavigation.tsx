@@ -1,8 +1,11 @@
+import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useWatch, useFormContext } from 'react-hook-form';
 
-import { Box, Stack, Button, useTheme } from '@mui/material';
+import { Box, Stack, Button, Dialog, useTheme, Typography, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
@@ -21,6 +24,7 @@ interface StepNavigationProps {
   onNextStep: () => void;
   onPrevStep: () => void;
   articleId?: string | null;
+  onTriggerGeneration?: () => void; // Function to trigger generation process
 }
 
 export const StepNavigation = ({
@@ -28,8 +32,10 @@ export const StepNavigation = ({
   totalSteps,
   onNextStep,
   onPrevStep,
-  articleId
+  articleId,
+  onTriggerGeneration
 }: StepNavigationProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
@@ -40,6 +46,9 @@ export const StepNavigation = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+
+  // State for generation confirmation modal (Step 2 → Step 3)
+  const [showGenerationModal, setShowGenerationModal] = useState(false);
 
   // State for loading (prevent multiple clicks)
   const [isNextLoading, setIsNextLoading] = useState(false);
@@ -113,23 +122,24 @@ export const StepNavigation = ({
           shouldProceed = false;
         }
       } else if (activeStep === 1) {
-        // Step 2 → Step 3: Only check if generatedHtml exists
-        // No article update needed here since SectionGenerationAnimation already handles it
+        // Step 2 → Step 3: Check if generatedHtml exists
         if (!generatedHtml || generatedHtml.trim() === '') {
-          toast.error("Please wait for article generation to complete");
+          // Show modal asking if user wants to generate full article
+          setShowGenerationModal(true);
           shouldProceed = false;
         }
       }
 
       if (shouldProceed) {
-        // Only save article data when moving from Step 1 → Step 2 AND we have an existing article
-        if (activeStep === 0 && articleId) {
+        if (articleId && (activeStep === 0 || activeStep === 1)) {
           try {
+            console.log('🔄 Saving article data on step navigation:', { activeStep, articleId });
+
             // 🎯 Prepare request body with ALL form data
-            const requestBody = {
+            const requestBody: UpdateArticleRequest = {
               // Step 1 fields (updated values)
               article_title: values.step1?.title || null,
-              content_description: values.step1?.contentDescription || null,
+              content__description: values.step1?.contentDescription || null,
               meta_title: values.step1?.metaTitle || null,
               meta_description: values.step1?.metaDescription || null,
               url_slug: values.step1?.urlSlug || null,
@@ -138,7 +148,7 @@ export const StepNavigation = ({
               target_country: values.step1?.targetCountry || 'global',
               language: values.step1?.language || 'english',
 
-              // Step 2 fields (preserve existing values)
+              // Step 2 fields (updated values)
               article_type: values.step2?.articleType || null,
               article_size: values.step2?.articleSize || null,
               tone_of_voice: values.step2?.toneOfVoice || null,
@@ -146,8 +156,8 @@ export const StepNavigation = ({
               plagiat_removal: values.step2?.plagiaRemoval || false,
               include_images: values.step2?.includeImages || false,
               include_videos: values.step2?.includeVideos || false,
-              internal_links: values.step2?.internalLinking?.length ? JSON.stringify(values.step2.internalLinking) : null,
-              external_links: values.step2?.externalLinking?.length ? JSON.stringify(values.step2.externalLinking) : null,
+              internal_links: values.step2?.internalLinks?.length ? JSON.stringify(values.step2.internalLinks) : null,
+              external_links: values.step2?.externalLinks?.length ? JSON.stringify(values.step2.externalLinks) : null,
 
               // Content fields (preserve existing values)
               content: values.generatedHtml || '',
@@ -156,10 +166,7 @@ export const StepNavigation = ({
               status: 'draft' as const,
             };
 
-            // Only update existing article - never create new ones during navigation
             await articleDraft.updateArticle(articleId, requestBody);
-            console.log('✅ Updated existing article:', articleId);
-
             onNextStep();
           } catch (error) {
             console.error('❌ Failed to save article:', error);
@@ -177,6 +184,23 @@ export const StepNavigation = ({
       // Always reset loading state
       setIsNextLoading(false);
     }
+  };
+
+  // Handle generation modal confirmation
+  const handleGenerateConfirm = () => {
+    setShowGenerationModal(false);
+    // Trigger generation process
+    if (onTriggerGeneration) {
+      onTriggerGeneration();
+    } else {
+      // Fallback: just proceed to next step
+      onNextStep();
+    }
+  };
+
+  const handleGenerateCancel = () => {
+    setShowGenerationModal(false);
+    // Stay on current step
   };
 
   // Handle back button click
@@ -334,6 +358,52 @@ export const StepNavigation = ({
           />
         </>
       )}
+
+      {/* Generation Confirmation Modal */}
+      <Dialog
+        open={showGenerationModal}
+        onClose={handleGenerateCancel}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            bgcolor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            {t('generate.modal.title', 'Generate Full Article?')}
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: 'center', px: 3, py: 2 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+            {t('generate.modal.message', 'No content has been generated yet. Would you like to generate the full article now before proceeding to the next step?')}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+            <Button
+              onClick={handleGenerateCancel}
+              variant="outlined"
+              sx={{ flex: 1 }}
+            >
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              onClick={handleGenerateConfirm}
+              variant="contained"
+              sx={{ flex: 1 }}
+              startIcon={<Iconify icon="mdi:lightning-bolt" />}
+            >
+              {t('generate.modal.confirm', 'Generate Article')}
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

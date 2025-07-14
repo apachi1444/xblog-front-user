@@ -24,6 +24,11 @@
         "seoDesc": "Contenu qui se classe bien dans les moteurs de recherche",
         "fast": "Gagner du Temps",
         "fastDesc": "Créer des articles en minutes, pas en heures"
+      },
+      "modal": {
+        "title": "Générer l'Article Complet ?",
+        "message": "Aucun contenu n'a encore été généré. Souhaitez-vous générer l'article complet maintenant avant de passer à l'étape suivante ?",
+        "confirm": "Générer l'Article"
       }
     },
     "navigation": {
@@ -512,6 +517,32 @@
         "subscriptionId": "ID d'abonnement : {{id}}",
         "getStarted": "Commencer",
         "startCreating": "Commencer à Créer du Contenu Incroyable"
+      },
+      "limit": {
+        "articles": {
+          "title": "Limite d'Articles Atteinte",
+          "message": "Vous avez atteint votre limite d'articles. Mettez à niveau votre plan pour créer plus d'articles et débloquer des fonctionnalités avancées."
+        },
+        "regenerations": {
+          "title": "Limite de Régénérations Atteinte",
+          "message": "Vous avez utilisé toutes vos régénérations. Mettez à niveau pour obtenir plus de régénérations et continuer à améliorer votre contenu."
+        },
+        "websites": {
+          "title": "Limite de Sites Web Atteinte",
+          "message": "Vous avez atteint votre limite de sites web. Mettez à niveau pour gérer plus de sites web et étendre votre création de contenu."
+        },
+        "generic": {
+          "title": "Limite Atteinte",
+          "message": "Vous avez atteint la limite de votre plan. Mettez à niveau pour continuer à utiliser toutes les fonctionnalités."
+        },
+        "usage": "Utilisation actuelle :",
+        "benefits": {
+          "title": "Avantages de la mise à niveau :",
+          "unlimited": "Articles et contenu illimités",
+          "regenerations": "Plus de régénérations IA",
+          "features": "Fonctionnalités avancées et support prioritaire"
+        },
+        "upgrade": "Mettre à Niveau le Plan"
       }
     },
     "profile": {

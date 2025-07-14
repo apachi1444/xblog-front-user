@@ -1,12 +1,13 @@
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
 
 import { Button } from '@mui/material';
 
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
+import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
@@ -34,16 +35,21 @@ interface GenerateViewFormProps {
   activeStep: number;
   steps: { id: number; label: string }[];
   setActiveStep: (step: number) => void;
+  onGenerationTrigger?: (triggerFunction: () => void) => void; // Callback to expose generation function
+  articleId?: string | null; // Article ID for updating after generation
 }
 
 export function GenerateViewForm({
   activeStep,
   steps,
-  setActiveStep
+  setActiveStep,
+  onGenerationTrigger,
+  articleId
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
   const dispatch = useDispatch();
+  const articleDraft = useArticleDraft();
 
   // Generation hooks
   const { generateSecondaryKeywords } = useKeywordGeneration();
@@ -93,8 +99,7 @@ export function GenerateViewForm({
         const firstTitle = generatedTitle.split(',')[0].trim();
         console.log('✅ Using first title alternative:', firstTitle);
 
-        // Invalidate subscription cache to update regeneration count in header
-        dispatch(api.util.invalidateTags(['Subscription']));
+        // Note: Subscription cache will be invalidated at the end of generation process
 
         return firstTitle;
       }
@@ -135,8 +140,7 @@ export function GenerateViewForm({
         methods.setValue('step1.secondaryKeywords', generatedKeywords, { shouldValidate: true });
         console.log('✅ Generated secondary keywords:', generatedKeywords);
 
-        // Invalidate subscription cache to update regeneration count in header
-        dispatch(api.util.invalidateTags(['Subscription']));
+        // Note: Subscription cache will be invalidated at the end of generation process
       } else {
         console.warn('⚠️ No keywords generated, using fallback');
         // Fallback keywords if API fails
@@ -204,7 +208,7 @@ export function GenerateViewForm({
         evaluateCriteria('contentDescription', optimizedContent);
       }, 100);
 
-      dispatch(api.util.invalidateTags(['Subscription']));
+      // Note: Subscription cache will be invalidated at the end of generation process
 
     } catch (error) {
       toast.error('Failed to optimize content description. Please try again.');
@@ -243,8 +247,7 @@ export function GenerateViewForm({
       if (generatedMeta) {
         console.log('✅ Generated meta tags:', generatedMeta);
 
-        // Invalidate subscription cache to update regeneration count in header
-        dispatch(api.util.invalidateTags(['Subscription']));
+        // Note: Subscription cache will be invalidated at the end of generation process
 
         return {
           metaTitle: generatedMeta.metaTitle,
@@ -321,8 +324,16 @@ export function GenerateViewForm({
     }
   }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
 
+  // Expose generation function to parent component
+  useEffect(() => {
+    if (onGenerationTrigger) {
+      onGenerationTrigger(onGenerateTableOfContents);
+    }
+  }, [onGenerationTrigger, onGenerateTableOfContents]);
+
   // Handle generation completion from animation modal
-  const handleGenerationComplete = useCallback(() => {
+  const handleGenerationComplete = useCallback(async () => {
+    console.log('🎯 handleGenerationComplete called with articleId:', articleId);
     setGenerationState((s) => ({
       ...s,
       isGeneratingSections: false,
@@ -337,9 +348,56 @@ export function GenerateViewForm({
       delete (window as any).__generationPromise;
     }
 
+    // Update article with all generated content after successful generation
+    if (articleId) {
+      try {
+        console.log('🔄 Updating article after successful generation:', articleId);
+        const formData = methods.getValues();
+
+        const requestBody = {
+          // Step 1 fields
+          article_title: formData.step1?.title || null,
+          content__description: formData.step1?.contentDescription || null,
+          meta_title: formData.step1?.metaTitle || null,
+          meta_description: formData.step1?.metaDescription || null,
+          url_slug: formData.step1?.urlSlug || null,
+          primary_keyword: formData.step1?.primaryKeyword || null,
+          secondary_keywords: formData.step1?.secondaryKeywords?.length ? JSON.stringify(formData.step1.secondaryKeywords) : null,
+          target_country: formData.step1?.targetCountry || 'global',
+          language: formData.step1?.language || 'english',
+
+          // Step 2 fields
+          article_type: formData.step2?.articleType || null,
+          article_size: formData.step2?.articleSize || null,
+          tone_of_voice: formData.step2?.toneOfVoice || null,
+          point_of_view: formData.step2?.pointOfView || null,
+          plagiat_removal: formData.step2?.plagiaRemoval || false,
+          include_images: formData.step2?.includeImages || false,
+          include_videos: formData.step2?.includeVideos || false,
+          internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : null,
+          external_links: formData.step2?.externalLinks?.length ? JSON.stringify(formData.step2.externalLinks) : null,
+
+          // Generated content
+          content: formData.generatedHtml || '',
+          toc: formData.toc?.length ? JSON.stringify(formData.toc) : null,
+
+          status: 'draft' as const,
+        };
+
+        await articleDraft.updateArticle(articleId, requestBody);
+        console.log('✅ Article updated successfully after generation');
+      } catch (error) {
+        console.error('❌ Failed to update article after generation:', error);
+        // Don't show error to user as generation was successful
+      }
+    }
+
+    // Invalidate subscription cache ONCE at the end of generation process
+    dispatch(api.util.invalidateTags(['Subscription']));
+
     // Navigate to step 3 after generation completes
     setActiveStep(2);
-  }, [setActiveStep, methods]);
+  }, [setActiveStep, methods, dispatch, articleId, articleDraft]);
 
   // Handle generation error from animation modal
   const handleGenerationError = useCallback((error: string, failedStep: string, completedSteps: string[]) => {

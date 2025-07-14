@@ -29,6 +29,11 @@
         "seoDesc": "Content that ranks well in search engines",
         "fast": "Save Time",
         "fastDesc": "Create articles in minutes, not hours"
+      },
+      "modal": {
+        "title": "Generate Full Article?",
+        "message": "No content has been generated yet. Would you like to generate the full article now before proceeding to the next step?",
+        "confirm": "Generate Article"
       }
     },
     "navigation": {
@@ -579,6 +584,32 @@
         "subscriptionId": "Subscription ID: {{id}}",
         "getStarted": "Get Started",
         "startCreating": "Start Creating Amazing Content"
+      },
+      "limit": {
+        "articles": {
+          "title": "Article Limit Reached",
+          "message": "You've reached your article limit. Upgrade your plan to create more articles and unlock advanced features."
+        },
+        "regenerations": {
+          "title": "Regeneration Limit Reached",
+          "message": "You've used all your regenerations. Upgrade to get more regenerations and continue improving your content."
+        },
+        "websites": {
+          "title": "Website Limit Reached",
+          "message": "You've reached your website limit. Upgrade to manage more websites and expand your content creation."
+        },
+        "generic": {
+          "title": "Limit Reached",
+          "message": "You've reached your plan limit. Upgrade to continue using all features."
+        },
+        "usage": "Current usage:",
+        "benefits": {
+          "title": "Upgrade benefits:",
+          "unlimited": "Unlimited articles and content",
+          "regenerations": "More AI regenerations",
+          "features": "Advanced features and priority support"
+        },
+        "upgrade": "Upgrade Plan"
       }
     },
     "profile": {

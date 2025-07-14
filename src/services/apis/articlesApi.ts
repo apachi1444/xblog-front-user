@@ -31,7 +31,7 @@ export interface CreateArticleRequest {
 // Article update request
 export interface UpdateArticleRequest {
   article_title?: string | null;
-  content_description?: string | null;
+  content__description?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
   url_slug?: string | null;

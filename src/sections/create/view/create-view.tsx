@@ -25,6 +25,7 @@ import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useGetArticlesQuery, useCreateArticleMutation, useDeleteArticleMutation } from 'src/services/apis/articlesApi';
 
 import { Iconify } from 'src/components/iconify';
+import { SubscriptionLimitModal } from 'src/components/modals/SubscriptionLimitModal';
 
 
 export function CreateView() {
@@ -33,6 +34,7 @@ export function CreateView() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState<number | null>(null);
+  const [subscriptionLimitModalOpen, setSubscriptionLimitModalOpen] = useState(false);
 
   // Fetch articles and filter drafts
   const currentStore = useSelector(selectCurrentStore);
@@ -100,26 +102,42 @@ export function CreateView() {
     // Navigate to the appropriate page based on selection
     if (optionId === 'generate') {
       try {
-        // Create empty article first
+        console.log('🚀 Creating new article...');
         const result = await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',
           keywords: [],
           status: 'draft',
-          website_id: undefined,
+          website_id: storeId.toString(), // Use actual store ID instead of undefined
         }).unwrap();
 
-        // Store the new article ID in localStorage for the generate view
-        localStorage.setItem('currentArticleId', result.id.toString());
-        localStorage.setItem('isNewArticle', 'true');
+        console.log('✅ Article creation response:', result);
 
-        // Navigate to generate page WITHOUT article ID in URL
+        // Mark as new article creation (generate view will fetch the latest article)
+        localStorage.setItem('isNewArticle', 'true');
+        localStorage.setItem('articleCreationTimestamp', Date.now().toString());
+
         navigate('/generate');
 
         toast.success('New article created! Start editing...');
-      } catch (errore) {
-        toast.error('Failed to create article. Please try again.');
+      } catch (error: any) {
+        console.error('❌ Failed to create article:', error);
+
+        // Check if it's a subscription limit error (403)
+        if (error?.status === 403) {
+          console.error('❌ Article limit reached:', error.data);
+          setSubscriptionLimitModalOpen(true);
+        } else if (error?.status) {
+          console.error('❌ HTTP Status:', error.status);
+          console.error('❌ Response Data:', error.data);
+          toast.error(`Failed to create article: ${error.data?.message || error.status}`);
+        } else if (error?.message) {
+          console.error('❌ Error Message:', error.message);
+          toast.error(`Failed to create article: ${error.message}`);
+        } else {
+          toast.error('Failed to create article. Please try again.');
+        }
       }
     }
     // Add other navigation options as needed
@@ -147,6 +165,12 @@ export function CreateView() {
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setArticleToDelete(null);
+  };
+
+  const handleUpgrade = () => {
+    setSubscriptionLimitModalOpen(false);
+    // Open upgrade page in new tab
+    window.open('/pricing', '_blank');
   };
 
   return (
@@ -454,6 +478,14 @@ export function CreateView() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Subscription Limit Modal */}
+      <SubscriptionLimitModal
+        open={subscriptionLimitModalOpen}
+        onClose={() => setSubscriptionLimitModalOpen(false)}
+        onUpgrade={handleUpgrade}
+        limitType="articles"
+      />
     </DashboardContent>
   );
 }
