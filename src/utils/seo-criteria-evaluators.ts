@@ -31,6 +31,22 @@ const getContentText = (formData: GenerateArticleFormData): string => {
   return formData.step1?.contentDescription || '';
 };
 
+const getSectionsContentText = (formData: GenerateArticleFormData): string => {
+  // Get content from sections only (not the full generated HTML)
+  const sections = formData.step3?.sections;
+
+  if (sections && Array.isArray(sections) && sections.length > 0) {
+    // Concatenate all section content and strip HTML tags
+    const concatenatedContent = sections
+      .map(section => section.content || '')
+      .join(' ');
+    return stripHtmlTags(concatenatedContent);
+  }
+
+  // Fallback: Use content description only if no sections
+  return formData.step1?.contentDescription || '';
+};
+
 const findKeywordInSubheadings = (sections: any[], keyword: string): boolean => {
   if (!sections || !Array.isArray(sections) || !keyword) return false;
 
@@ -372,19 +388,19 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Get content from generated HTML body
-    const bodyContent = getContentText(formData);
+    // Get content from sections only (not the full generated HTML)
+    const sectionsContent = getSectionsContentText(formData);
 
-    if (!bodyContent) {
+    if (!sectionsContent) {
       return {
         status: 'pending',
-        message: 'Waiting for content generation',
+        message: 'Waiting for sections generation',
         score: 0,
       };
     }
 
-    // Get first 10% of body content
-    const firstTenPercent = bodyContent.substring(0, Math.floor(bodyContent.length * 0.1));
+    // Get first 10% of sections content
+    const firstTenPercent = sectionsContent.substring(0, Math.floor(sectionsContent.length * 0.1));
 
     if (firstTenPercent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
@@ -416,18 +432,18 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Get content from generated HTML body
-    const bodyContent = getContentText(formData);
+    // Get content from sections only (not the full generated HTML)
+    const sectionsContent = getSectionsContentText(formData);
 
-    if (!bodyContent) {
+    if (!sectionsContent) {
       return {
         status: 'pending',
-        message: 'Waiting for content generation',
+        message: 'Waiting for sections generation',
         score: 0,
       };
     }
 
-    if (bodyContent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
+    if (sectionsContent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -554,19 +570,19 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    // Get content from generated HTML or sections
-    const contentText = getContentText(formData);
+    // Get content from sections only (not the full generated HTML)
+    const sectionsContent = getSectionsContentText(formData);
 
-    if (!contentText || contentText.trim().length === 0) {
+    if (!sectionsContent || sectionsContent.trim().length === 0) {
       return {
         status: 'pending',
-        message: 'Waiting for content generation',
+        message: 'Waiting for sections generation',
         score: 0,
       };
     }
 
-    // Calculate keyword density in actual content
-    const density = calculateKeywordDensity(contentText, primaryKeyword);
+    // Calculate keyword density in sections content
+    const density = calculateKeywordDensity(sectionsContent, primaryKeyword);
 
     if (density >= 1 && density <= 3) {
       return {
@@ -986,16 +1002,20 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   },
 
   104: (currentValue, formData) => { // keyword_in_first_10
-    const { contentDescription, primaryKeyword } = formData.step1;
-    const valueToOptimize = currentValue || contentDescription;
+    const { primaryKeyword } = formData.step1;
+
+    // Get sections content for optimization
+    const sectionsContent = getSectionsContentText(formData);
+    const valueToOptimize = currentValue || sectionsContent;
+
     if (!valueToOptimize) return `${primaryKeyword || 'This topic'} is an important subject to understand...`;
     if (!primaryKeyword) return valueToOptimize;
 
-    // Get first 10% of content
+    // Get first 10% of sections content
     const firstTenPercent = valueToOptimize.substring(0, Math.floor(valueToOptimize.length * 0.1));
 
     if (!firstTenPercent.toLowerCase().includes(primaryKeyword.toLowerCase())) {
-      // Insert the keyword at the beginning
+      // Insert the keyword at the beginning of the first section
       return `${primaryKeyword} - ${valueToOptimize}`;
     }
 
@@ -1003,13 +1023,17 @@ export const IMPROVEMENT_FUNCTIONS: Record<number, ImprovementFunction> = {
   },
 
   105: (currentValue, formData) => { // keyword_in_content
-    const { contentDescription, primaryKeyword } = formData.step1;
-    const valueToOptimize = currentValue || contentDescription;
+    const { primaryKeyword } = formData.step1;
+
+    // Get sections content for optimization
+    const sectionsContent = getSectionsContentText(formData);
+    const valueToOptimize = currentValue || sectionsContent;
+
     if (!valueToOptimize) return `This article is about ${primaryKeyword || 'an important topic'}.`;
     if (!primaryKeyword) return valueToOptimize;
 
     if (!valueToOptimize.toLowerCase().includes(primaryKeyword.toLowerCase())) {
-      // Add the keyword to the content
+      // Add the keyword to the sections content
       return `${valueToOptimize} In conclusion, ${primaryKeyword} is an important topic to understand.`;
     }
 

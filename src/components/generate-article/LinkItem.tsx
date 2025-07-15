@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Box,
+  Link,
   alpha,
   Button,
   Tooltip,
@@ -183,17 +184,38 @@ export function LinkItem({
         <Typography variant="body2" fontWeight={500} noWrap>
           {link.anchorText}
         </Typography>
-        <Typography
+        <Link
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
           variant="caption"
           color="text.secondary"
           sx={{
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
             mt: 0.5,
             wordBreak: 'break-all',
+            textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+              color: 'primary.main',
+            },
           }}
         >
-          {link.url}
-        </Typography>
+          <span style={{ flex: 1 }}>{link.url}</span>
+          <Iconify
+            icon="eva:external-link-outline"
+            width={12}
+            height={12}
+            sx={{
+              opacity: 0.6,
+              '&:hover': {
+                opacity: 1,
+              },
+            }}
+          />
+        </Link>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>

@@ -309,7 +309,7 @@ const sectionToHtml = (section: ArticleSection): string => {
   if (section.internalLinks && section.internalLinks.length > 0) {
     html += '<div><strong>Related Content:</strong><ul>';
     section.internalLinks.forEach(link => {
-      html += `<li><a href="${link.url}">${link.text}</a></li>`;
+      html += `<li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a></li>`;
     });
     html += '</ul></div>';
   }
@@ -318,7 +318,7 @@ const sectionToHtml = (section: ArticleSection): string => {
   if (section.externalLinks && section.externalLinks.length > 0) {
     html += '<div><strong>Sources:</strong><ul>';
     section.externalLinks.forEach(link => {
-      html += `<li><a href="${link.url}" target="_blank" rel="noopener">${link.text}</a></li>`;
+      html += `<li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a></li>`;
     });
     html += '</ul></div>';
   }
