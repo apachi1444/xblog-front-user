@@ -221,7 +221,7 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                   onChange={(e) => setSelectedStore(Number(e.target.value))}
                 >
                   {stores.map((store: Store) => {
-                    const isWordPress = store.platform?.toLowerCase() === 'wordpress';
+                    const isWordPress = store.category?.toLowerCase() === 'wordpress';
 
                     return (
                       <FormControlLabel
@@ -284,7 +284,7 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                                     opacity: isWordPress ? 1 : 0.5
                                   }}
                                 >
-                                  {store.platform || 'Unknown Platform'}
+                                  {store.category || 'Unknown Platform'}
                                 </Typography>
                                 {!isWordPress && (
                                   <Typography
@@ -396,7 +396,7 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                   disabled={
                     !selectedStore ||
                     stores.length === 0 ||
-                    stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress'
+                    stores.find(s => s.id === selectedStore)?.category?.toLowerCase() !== 'wordpress'
                   }
                   startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
                   sx={{
@@ -453,7 +453,7 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
                   {(() => {
                     const store = stores.find(s => s.id === selectedStore);
-                    return `Publishing to ${store?.name || 'selected store'} via ${store?.platform || 'Unknown Platform'}`;
+                    return `Publishing to ${store?.name || 'selected store'} via ${store?.category || 'Unknown Platform'}`;
                   })()}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>

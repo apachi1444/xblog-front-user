@@ -11,11 +11,6 @@ export interface Store {
   created_at: string
   articlesCount?: number
   lastUpdated?: string
-  performance?: {
-    visitors: number
-    sales: number
-    revenue: number
-  }
   articles_list?: Article[]
   business?: string
   // Legacy fields for backward compatibility
