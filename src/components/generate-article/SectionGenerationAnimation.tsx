@@ -1,4 +1,8 @@
 /* eslint-disable no-await-in-loop */
+import type {
+  GenerateSectionsRequest
+} from 'src/services/apis/generateContentApi';
+
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
@@ -223,7 +227,9 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               }))
             ];
 
-            result = await generateSections({
+            const sectionsRequest : GenerateSectionsRequest = {
+              primary_keyword: primaryKeyword || '',
+              secondary_keywords: secondaryKeywords || [],
               toc: safeToc,
               article_title: title || '',
               target_audience: 'general',
@@ -234,7 +240,16 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               links: combinedLinks,
               images: safeImages,
               language: language || 'english'
-            }).unwrap();
+            };
+
+            console.log('🚀 Generating sections with new fields:', {
+              primary_keyword: sectionsRequest.primary_keyword,
+              secondary_keywords: sectionsRequest.secondary_keywords,
+              article_title: sectionsRequest.article_title,
+              language: sectionsRequest.language
+            });
+
+            result = await generateSections(sectionsRequest).unwrap();
 
             // Transform sections to match our schema
             // eslint-disable-next-line no-case-declarations
@@ -244,6 +259,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               content: section.content,
               status: 'generated'
             }));
+
+            console.log('✅ Sections generated successfully with new fields:', {
+              sectionsCount: transformedSections.length,
+              primary_keyword: sectionsRequest.primary_keyword,
+              secondary_keywords: sectionsRequest.secondary_keywords,
+              sectionTitles: transformedSections.map(s => s.title)
+            });
 
             // Store sections in both form and variable for later use
             generatedSections = transformedSections;
