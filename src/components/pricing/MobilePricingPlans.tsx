@@ -163,6 +163,13 @@ export function MobilePricingPlans({
           boxShadow: (currentPlan.current || isSelected) ? theme.customShadows?.z8 : 'none',
           bgcolor: currentPlan.highlight ? alpha(theme.palette.primary.main, 0.04) : 'background.paper',
           position: 'relative',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          '&:hover': {
+            borderColor: 'primary.main',
+            boxShadow: theme.customShadows?.z4,
+            transform: 'translateY(-2px)',
+          },
           ...(currentPlan.popular && {
             '&:before': {
               content: '""',
@@ -178,6 +185,7 @@ export function MobilePricingPlans({
             },
           }),
         }}
+        onClick={() => handleSelectPlan(currentPlan.id)}
       >
         {currentPlan.popular && (
           <Box
@@ -317,7 +325,10 @@ export function MobilePricingPlans({
             variant={buttonVariant}
             color="primary"
             disabled={currentPlan.disabled}
-            onClick={() => handleSelectPlan(currentPlan.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent double-click when clicking button
+              handleSelectPlan(currentPlan.id);
+            }}
             sx={{ mt: 1 }}
           >
             {buttonText}

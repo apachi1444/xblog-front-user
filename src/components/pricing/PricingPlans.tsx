@@ -135,6 +135,12 @@ export function PricingPlans({
           boxShadow: (plan.current || isSelected) ? theme.customShadows?.z8 : 'none',
           bgcolor: plan.highlight ? alpha(theme.palette.primary.main, 0.04) : 'background.paper',
           position: 'relative',
+          cursor: 'pointer',
+          '&:hover': {
+            borderColor: 'primary.main',
+            boxShadow: theme.customShadows?.z4,
+            transform: 'translateY(-2px)',
+          },
           ...(plan.popular && {
             '&:before': {
               content: '""',
@@ -151,6 +157,7 @@ export function PricingPlans({
           }),
           ...sx,
         }}
+        onClick={() => handleSelectPlan(plan.id)}
       >
         {plan.popular && (
           <Box
@@ -293,7 +300,10 @@ export function PricingPlans({
             variant={buttonVariant}
             color="primary"
             disabled={plan.disabled}
-            onClick={() => handleSelectPlan(plan.id)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent double-click when clicking button
+              handleSelectPlan(plan.id);
+            }}
             sx={{ mt: 'auto' }}
           >
             {buttonText}

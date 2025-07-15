@@ -108,9 +108,51 @@ export function OnBoardingView() {
     setReferralSource(sourceId);
   };
 
-  // Handle plan selection
+  // Handle plan selection (just select, don't redirect)
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
+    // No immediate redirect - wait for continue button click
+  };
+
+  // Handle paid plan selection and immediate redirect
+  const handlePaidPlanSelection = async (planId: string) => {
+    try {
+      // Save user preferences first
+      await updateUser({
+        interests: selectedInterests.join(","),
+        heard_about_us: referralSource,
+        is_completed_onboarding: true,
+      }).unwrap();
+
+      // Find the plan data
+      const selectedPlanData = subscriptionPlans.find(p => p.id === planId);
+
+      // Show loading message
+      toast.success(t('onboarding.redirectingToPlan', 'Redirecting to payment...'));
+
+      // Check if we're in development mode or if plan URL is missing
+      const isDevelopment = process.env.NODE_ENV === 'development';
+      const useMockPayment = isDevelopment || !selectedPlanData?.url;
+
+      if (useMockPayment) {
+        // Use mock payment for development/testing
+        const returnUrl = encodeURIComponent(`${window.location.origin}/onboarding/success`);
+        const mockPaymentUrl = `${window.location.origin}/mock-payment?return_url=${returnUrl}&plan_name=${encodeURIComponent(selectedPlanData?.name || 'Premium Plan')}&plan_price=${encodeURIComponent(selectedPlanData?.price || '$29.99')}`;
+
+        // Redirect to mock payment page
+        window.location.href = mockPaymentUrl;
+      } else {
+        // Use real payment URL for production
+        const returnUrl = encodeURIComponent(`${window.location.origin}/onboarding/success`);
+        const paymentUrl = `${selectedPlanData.url + (selectedPlanData.url.includes('?') ? '&' : '?')}return_url=${returnUrl}`;
+
+        // Redirect to real payment page
+        window.location.href = paymentUrl;
+      }
+    } catch (error) {
+      console.error('Failed to save user preferences before payment:', error);
+      toast.error(t('onboarding.errorBeforePayment', 'Failed to save preferences. Please try again.'));
+    }
   };
 
   // Handle next step
@@ -121,6 +163,10 @@ export function OnBoardingView() {
   // Helper function to check if a plan is free
   const isFreeplan = (planId: string | null): boolean => {
     if (!planId) return true;
+
+    // Handle our custom 'free' plan ID
+    if (planId === 'free') return true;
+
     const plan = subscriptionPlans.find(p => p.id === planId);
     if (!plan) return true;
 
@@ -136,8 +182,17 @@ export function OnBoardingView() {
 
   // Handle complete onboarding
   const handleComplete = async () => {
+    if (!selectedPlan) return;
+
+    // If it's a paid plan, redirect to payment
+    if (selectedPlan !== 'free' && !isFreeplan(selectedPlan)) {
+      await handlePaidPlanSelection(selectedPlan);
+      return;
+    }
+
+    // For free plan, complete onboarding normally
     try {
-      // First, save user preferences to the API
+      // Save user preferences to the API
       await updateUser({
         is_active: true,
         interests: selectedInterests.join(","),
@@ -145,24 +200,10 @@ export function OnBoardingView() {
         is_completed_onboarding: true,
       }).unwrap();
 
-      toast.success(t('onboarding.success', 'Onboarding completed successfully!'));
+      toast.success(t('onboarding.freeSelected', 'Welcome! You\'re all set with the free plan.'));
 
       // Mark onboarding as completed in Redux store
       dispatch(setOnboardingCompleted(true));
-
-      // Handle plan selection and redirection
-      if (selectedPlan && !isFreeplan(selectedPlan)) {
-        // For paid plans: find the plan URL and open in new tab
-        const selectedPlanData = subscriptionPlans.find(p => p.id === selectedPlan);
-        if (selectedPlanData?.url) {
-          // Open subscription URL in new tab
-          window.open(selectedPlanData.url, '_blank');
-          toast.success(t('onboarding.redirecting', 'Redirecting to subscription page...'));
-        } else {
-          toast.error(t('onboarding.planUrlNotFound', 'Plan URL not found. Please select a plan from the dashboard.'));
-        }
-      }
-      // For free plans, no redirection needed
 
       // Navigate to dashboard
       navigate('/');
@@ -171,7 +212,6 @@ export function OnBoardingView() {
       toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
 
       // Still mark as completed in the local store and navigate
-      // to avoid blocking the user
       dispatch(setOnboardingCompleted(true));
       navigate('/');
     }
@@ -390,12 +430,120 @@ export function OnBoardingView() {
 
         {step === 2 && (
           <Stack spacing={5}>
-            <ResponsivePricingPlans
-              onSelectPlan={handlePlanSelect}
-              selectedPlan={selectedPlan}
-              title=""
-              subtitle=""
-            />
+            {/* Plan Selection Header */}
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Typography variant="h5" gutterBottom>
+                {t('onboarding.choosePlan', 'Choose Your Plan')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {t('onboarding.planDescription', 'Select a plan that fits your needs. You can always upgrade later.')}
+              </Typography>
+
+              {/* Development Mode Notice */}
+              {process.env.NODE_ENV === 'development' && (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 1.5,
+                    borderRadius: 1,
+                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+                    maxWidth: 400,
+                    mx: 'auto',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Iconify
+                      icon="mdi:information"
+                      sx={{ color: 'info.main', mr: 1, fontSize: 16 }}
+                    />
+                    <Typography variant="caption" color="info.main" fontWeight="medium">
+                      {t('onboarding.devMode', 'Development Mode - Mock Payment Enabled')}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+
+            {/* Paid Plans Carousel */}
+            <Box>
+              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                {t('onboarding.paidPlans', 'Premium Plans')}
+              </Typography>
+              <ResponsivePricingPlans
+                onSelectPlan={handlePlanSelect}
+                selectedPlan={selectedPlan}
+                title=""
+                subtitle=""
+                hideFreePlans={false}
+              />
+            </Box>
+
+            {/* Free Plan Option - Smaller and Less Prominent */}
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
+                {t('onboarding.freePlanOption', 'Or start for free')}
+              </Typography>
+              <Card
+                sx={{
+                  maxWidth: 280,
+                  mx: 'auto',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  borderColor: selectedPlan === 'free' ? 'primary.main' : alpha(theme.palette.divider, 0.5),
+                  borderWidth: selectedPlan === 'free' ? 2 : 1,
+                  borderStyle: 'solid',
+                  boxShadow: selectedPlan === 'free' ? theme.customShadows?.z4 : 'none',
+                  bgcolor: alpha(theme.palette.grey[50], 0.5),
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    boxShadow: theme.customShadows?.card,
+                  }
+                }}
+                onClick={() => handlePlanSelect('free')}
+              >
+                <CardActionArea sx={{ p: 2 }}>
+                  <Stack spacing={1.5} alignItems="center">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                      }}
+                    >
+                      <Iconify
+                        icon="mdi:gift-outline"
+                        sx={{ color: 'success.main', fontSize: 20 }}
+                      />
+                    </Box>
+                    <Typography variant="subtitle2">
+                      {t('onboarding.freePlan', 'Free Plan')}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" align="center">
+                      {t('onboarding.freePlanDescription', '5 articles/month with basic features')}
+                    </Typography>
+                    <Typography variant="h6" color="success.main">
+                      {t('onboarding.freePrice', '$0')}
+                      <Typography component="span" variant="caption" color="text.secondary">
+                        {t('onboarding.perMonth', '/month')}
+                      </Typography>
+                    </Typography>
+                    {selectedPlan === 'free' && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
+                        <CheckCircleOutlineIcon sx={{ mr: 0.5, fontSize: 16 }} />
+                        <Typography variant="caption" fontWeight="medium">
+                          {t('onboarding.selected', 'Selected')}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </CardActionArea>
+              </Card>
+            </Box>
 
             {/* Action buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
@@ -408,16 +556,29 @@ export function OnBoardingView() {
               >
                 {t('onboarding.back', 'Back')}
               </Button>
+
+              {/* Continue button - shows for all plan selections */}
               <LoadingButton
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
                 loading={isUpdatingUser}
-                sx={{ px: 5 }}
+                disabled={!selectedPlan}
+                sx={{
+                  px: 5,
+                  ...(selectedPlan === 'free' && {
+                    bgcolor: 'success.main',
+                    '&:hover': {
+                      bgcolor: 'success.dark',
+                    }
+                  })
+                }}
               >
-                {selectedPlan && !isFreeplan(selectedPlan)
-                  ? t('onboarding.getStarted', 'Get Started')
-                  : t('onboarding.continueWithFree', 'Continue with Free Plan')
+                {selectedPlan === 'free'
+                  ? t('onboarding.startWithFree', 'Start with Free Plan')
+                  : selectedPlan && !isFreeplan(selectedPlan)
+                  ? t('onboarding.continueWithPremium', 'Continue with Premium Plan')
+                  : t('onboarding.selectPlan', 'Select a Plan')
                 }
               </LoadingButton>
             </Box>
