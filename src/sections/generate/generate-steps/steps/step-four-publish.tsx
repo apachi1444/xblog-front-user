@@ -318,7 +318,7 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
                             </ListItemIcon>
                             <ListItemText
                               primary={
-                                <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener noreferrer">
+                                <Link href={link.url} color="primary" underline="hover">
                                   {link.text}
                                 </Link>
                               }
@@ -343,7 +343,7 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
                             </ListItemIcon>
                             <ListItemText
                               primary={
-                                <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener noreferrer">
+                                <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener">
                                   {link.text}
                                 </Link>
                               }
