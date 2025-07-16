@@ -94,7 +94,7 @@ export function ProfileForm({ userData }: ProfileFormProps) {
               sx={{
                 width: 120,
                 height: 120,
-                border: `3px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                border: `3px solid rgba(79, 70, 229, 0.2)`,
                 boxShadow: theme.palette.mode === 'dark'
                   ? '0 4px 20px rgba(0,0,0,0.3)'
                   : '0 4px 20px rgba(0,0,0,0.1)',

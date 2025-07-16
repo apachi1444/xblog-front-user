@@ -10,7 +10,6 @@ import {
   Chip,
   Grid,
   Stack,
-  alpha,
   Avatar,
   Button,
   useTheme,
@@ -192,9 +191,9 @@ export function ProfileView() {
               sx={{
                 borderRadius: 3,
                 background: theme.palette.mode === 'dark'
-                  ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
-                  : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${varAlpha('79 70 229', 0.05)} 100%)`
+                  : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${varAlpha('79 70 229', 0.02)} 100%)`,
+                border: `1px solid ${varAlpha('79 70 229', 0.1)}`,
                 boxShadow: theme.palette.mode === 'dark'
                   ? '0 8px 32px rgba(0,0,0,0.3)'
                   : '0 4px 20px rgba(0,0,0,0.08)',
@@ -213,9 +212,9 @@ export function ProfileView() {
                   p: 3,
                   borderRadius: 3,
                   background: theme.palette.mode === 'dark'
-                    ? `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.1)} 100%)`
-                    : `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
-                  border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                    ? `linear-gradient(135deg, ${varAlpha('16 185 129', 0.1)} 0%, ${varAlpha('0 184 217', 0.1)} 100%)`
+                    : `linear-gradient(135deg, ${varAlpha('16 185 129', 0.05)} 0%, ${varAlpha('0 184 217', 0.05)} 100%)`,
+                  border: `1px solid ${varAlpha('16 185 129', 0.2)}`,
                   boxShadow: theme.palette.mode === 'dark'
                     ? '0 8px 32px rgba(0,0,0,0.3)'
                     : '0 4px 20px rgba(0,0,0,0.08)',
@@ -271,9 +270,9 @@ export function ProfileView() {
                   p: 3,
                   borderRadius: 3,
                   background: theme.palette.mode === 'dark'
-                    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`
-                    : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                    ? `linear-gradient(135deg, ${varAlpha('79 70 229', 0.1)} 0%, ${varAlpha('200 220 253', 0.1)} 100%)`
+                    : `linear-gradient(135deg, ${varAlpha('79 70 229', 0.05)} 0%, ${varAlpha('200 220 253', 0.05)} 100%)`,
+                  border: `1px solid ${varAlpha('79 70 229', 0.2)}`,
                   boxShadow: theme.palette.mode === 'dark'
                     ? '0 8px 32px rgba(0,0,0,0.3)'
                     : '0 4px 20px rgba(0,0,0,0.08)',
@@ -292,11 +291,11 @@ export function ProfileView() {
                     sx={{
                       borderRadius: 2,
                       py: 1.5,
-                      background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.main, 0.7)} 0%, ${varAlpha(theme.palette.primary.darker, 0.7)} 100%)`,
+                      background: `linear-gradient(135deg, ${varAlpha('79 70 229', 0.7)} 0%, ${varAlpha('41 37 131', 0.7)} 100%)`,
                       color: theme.palette.primary.contrastText,
                       opacity: 0.85,
                       '&:hover': {
-                        background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darker, 0.8)} 0%, ${varAlpha(theme.palette.primary.main, 0.8)} 100%)`,
+                        background: `linear-gradient(135deg, ${varAlpha('41 37 131', 0.8)} 0%, ${varAlpha('79 70 229', 0.8)} 100%)`,
                         opacity: 0.95,
                       }
                     }}

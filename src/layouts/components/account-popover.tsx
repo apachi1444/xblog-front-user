@@ -352,7 +352,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               sx={{
                 p: 0.5,
                 color: !isDarkMode ? theme.palette.primary.main : 'text.secondary',
-                bgcolor: !isDarkMode ? alpha(theme.palette.primary.main, 0.08) : 'transparent'
+                bgcolor: !isDarkMode ? 'rgba(79, 70, 229, 0.08)' : 'transparent'
               }}
             >
               <Iconify icon="mdi:desktop-mac" width={18} height={18} />
@@ -363,7 +363,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               sx={{
                 p: 0.5,
                 color: !isDarkMode ? 'text.secondary' : theme.palette.primary.main,
-                bgcolor: !isDarkMode ? 'transparent' : alpha(theme.palette.primary.main, 0.08)
+                bgcolor: !isDarkMode ? 'transparent' : 'rgba(79, 70, 229, 0.08)'
               }}
             >
               <Iconify icon="mdi:weather-sunny" width={18} height={18} />

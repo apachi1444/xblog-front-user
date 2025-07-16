@@ -23,129 +23,6 @@ import { Iconify } from 'src/components/iconify';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
-// Feature Card Component
-function FeatureCard({
-  title,
-  description,
-  icon,
-  isLocked = false,
-  badge,
-  onClick
-}: {
-  title: string;
-  description: string;
-  icon: string;
-  isLocked?: boolean;
-  badge?: string;
-  onClick?: () => void;
-}) {
-  const theme = useTheme();
-
-  return (
-    <Card
-      onClick={!isLocked ? onClick : undefined}
-      sx={{
-        height: '100%',
-        cursor: !isLocked ? 'pointer' : 'default',
-        transition: 'all 0.3s ease-in-out',
-        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-        position: 'relative',
-        overflow: 'hidden',
-        opacity: isLocked ? 0.6 : 1,
-        '&:hover': !isLocked ? {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
-          borderColor: alpha(theme.palette.primary.main, 0.3),
-        } : {},
-        ...(isLocked && {
-          bgcolor: alpha(theme.palette.grey[500], 0.05),
-        }),
-      }}
-    >
-      {/* Badge */}
-      {badge && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 1,
-            bgcolor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            zIndex: 1,
-          }}
-        >
-          {badge}
-        </Box>
-      )}
-
-      {/* Lock Icon */}
-      {isLocked && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 2,
-            bgcolor: alpha(theme.palette.background.paper, 0.9),
-            borderRadius: '50%',
-            p: 2,
-            boxShadow: theme.shadows[4],
-          }}
-        >
-          <Iconify
-            icon="mdi:lock"
-            width={32}
-            height={32}
-            sx={{ color: theme.palette.text.secondary }}
-          />
-        </Box>
-      )}
-
-      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Icon */}
-        <Box
-          sx={{
-            width: 56,
-            height: 56,
-            borderRadius: 2,
-            bgcolor: alpha(theme.palette.primary.main, 0.1),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mb: 2,
-          }}
-        >
-          <Iconify
-            icon={icon}
-            width={28}
-            height={28}
-            sx={{ color: theme.palette.primary.main }}
-          />
-        </Box>
-
-        {/* Content */}
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-          {title}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.6, flex: 1 }}
-        >
-          {description}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-}
-
 // Draft Articles Component
 function DraftArticlesSection() {
   const { t } = useTranslation();
@@ -416,7 +293,6 @@ function DraftArticlesSection() {
 
 // Clean License Information Component
 function LicenseInfoSection() {
-  const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -514,31 +390,33 @@ function LicenseInfoSection() {
             </Box>
 
             <Button
-              variant={isFreePlan ? "contained" : "outlined"}
+              variant="contained"
               onClick={() => navigate('/upgrade-license')}
               size="large"
+              startIcon={
+                <Iconify
+                  icon="mdi:rocket-launch"
+                  width={20}
+                  height={20}
+                />
+              }
               sx={{
-                borderRadius: 2.5,
+                borderRadius: 3,
                 textTransform: 'none',
                 px: 4,
                 py: 1.5,
                 fontWeight: 600,
-                ...(isFreePlan ? {
-                  bgcolor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-                  '&:hover': {
-                    bgcolor: theme.palette.primary.dark,
-                    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.4)}`,
-                  }
-                } : {
-                  borderColor: theme.palette.primary.main,
-                  color: theme.palette.primary.main,
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.04),
-                    borderColor: theme.palette.primary.dark,
-                  }
-                })
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                color: theme.palette.primary.main,
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                boxShadow: 'none',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.15),
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                  color: theme.palette.primary.dark,
+                  boxShadow: 'none',
+                  transform: 'translateY(-1px)',
+                }
               }}
             >
               {isFreePlan ? 'Upgrade Plan' : 'Manage Plan'}
@@ -725,47 +603,10 @@ function LicenseInfoSection() {
 }
 
 export function OverviewAnalyticsView() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  // Features data
-  const features = [
-    {
-      title: t('dashboard.features.generate.title', 'Generate'),
-      description: t('dashboard.features.generate.description', 'Create from a one-line prompt in a few seconds'),
-      icon: 'mdi:lightning-bolt',
-      badge: t('dashboard.features.popular', 'Popular'),
-      onClick: () => navigate('/generate'),
-    },
-    {
-      title: t('dashboard.features.templates.title', 'Built-in Templates Coming Soon'),
-      description: t('dashboard.features.templates.description', 'Use Built In Template'),
-      icon: 'mdi:file-document-multiple',
-      isLocked: true,
-    },
-    {
-      title: t('dashboard.features.bulk.title', 'Bulk Generation Coming Soon'),
-      description: t('dashboard.features.bulk.description', 'Bulk Generate'),
-      icon: 'mdi:file-multiple',
-      isLocked: true,
-    },
-  ];
-
   return (
     <DashboardContent maxWidth="xl">
-      {/* Features Section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-          {t('dashboard.toolsToHelp', 'Our features')}
-        </Typography>
-
-        <Grid container spacing={3}>
-          {features.map((feature, index) => (
-            <Grid key={index} xs={12} sm={6} md={3}>
-              <FeatureCard {...feature} />
-            </Grid>
-          ))}
-        </Grid>
+      <Box sx={{mb: 4}}>
+        <LicenseInfoSection />
       </Box>
 
       {/* Main Content Grid */}
@@ -775,9 +616,6 @@ export function OverviewAnalyticsView() {
           <DraftArticlesSection />
         </Grid>
       </Grid>
-
-      {/* License Information Section */}
-      <LicenseInfoSection />
     </DashboardContent>
   );
 }
