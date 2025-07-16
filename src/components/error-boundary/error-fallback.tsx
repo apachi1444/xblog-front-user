@@ -1,14 +1,15 @@
+import type { FallbackProps } from 'react-error-boundary';
+
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FallbackProps } from 'react-error-boundary';
 
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
+import Container from '@mui/material/Container';
+import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
 import { Iconify } from 'src/components/iconify';
@@ -45,7 +46,6 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: theme.customShadows.z16,
             '&:before': {
               content: '""',
               position: 'absolute',

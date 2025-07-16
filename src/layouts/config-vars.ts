@@ -14,8 +14,8 @@ export const baseVars = (theme: Theme) => ({
   '--layout-nav-item-height': '40px',
   '--layout-nav-item-color': theme.palette.text.secondary,
   '--layout-nav-item-active-color': theme.palette.primary.main,
-  '--layout-nav-item-active-bg': varAlpha(theme.palette.primary.main, 0.08),
-  '--layout-nav-item-hover-bg': varAlpha(theme.palette.primary.main, 0.16),
+  '--layout-nav-item-active-bg': varAlpha('79 70 229', 0.08),
+  '--layout-nav-item-hover-bg': varAlpha('79 70 229', 0.16),
   // header
   '--layout-header-blur': '8px',
   '--layout-header-zIndex': 1100,

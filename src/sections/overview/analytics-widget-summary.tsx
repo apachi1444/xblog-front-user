@@ -48,12 +48,12 @@ export function AnalyticsWidgetSummary({
           ? `linear-gradient(135deg, ${varAlpha(theme.palette[color].main, 0.05)} 0%, ${varAlpha(theme.palette.background.paper, 0.95)} 100%)`
           : `linear-gradient(135deg, ${varAlpha(theme.palette[color].main, 0.02)} 0%, ${varAlpha(theme.palette.common.whiteChannel, 1)} 100%)`,
         boxShadow: isDarkMode
-          ? `0 6px 16px ${varAlpha(theme.palette.common.blackChannel, 0.3)}`
+          ? `0 6px 16px ${varAlpha(theme.palette.common.black, 0.3)}`
           : `0 3px 12px ${varAlpha(theme.palette.grey['500Channel'], 0.12)}`,
         '&:hover': {
           transform: 'translateY(-2px)',
           boxShadow: isDarkMode
-            ? `0 10px 28px ${varAlpha(theme.palette.common.blackChannel, 0.5)}`
+            ? `0 10px 28px ${varAlpha(theme.palette.common.black, 0.5)}`
             : `0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.18)}`,
         },
         ...sx,
