@@ -1,15 +1,16 @@
+import { motion } from 'framer-motion';
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 
 import {
-  IconButton,
+  alpha,
   Tooltip,
   useTheme,
-  alpha,
+  IconButton,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+
 import { SupportModal } from './SupportModal';
 
 export function SupportButton() {

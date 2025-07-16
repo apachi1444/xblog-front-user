@@ -23,16 +23,14 @@ import { useGetStoresQuery } from 'src/services/apis/storesApi';
 // Components
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
-import { SupportButton } from 'src/components/support';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
-import { LanguageSwitcher } from 'src/components/language/language-switcher';
 import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
 
 // Local components
 import { NavMobile } from './nav';
 import { AccountPopover } from '../components/account-popover';
-import { navData, bottomNavData, primaryCTA } from '../config-nav-dashboard';
 import { ComingSoonPopover } from '../components/coming-soon-popover';
+import { navData, primaryCTA, bottomNavData } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -242,16 +240,9 @@ export function TopHeader() {
               gap: 2,
             }}>
               {/* Use the extracted ResourceDisplays component */}
-              <ResourceDisplays />
-
-              {/* Language Switcher */}
-              <LanguageSwitcher />
-
+              {/*               <ResourceDisplays />  */}
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />
-
-              {/* Support Button */}
-              <SupportButton />
 
               {/* Use the extracted ThemeToggle component */}
               <ThemeToggle isDarkMode={isDarkMode} onToggle={handleToggleTheme} />

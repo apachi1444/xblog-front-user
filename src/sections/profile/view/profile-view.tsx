@@ -19,6 +19,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { varAlpha } from 'src/theme/styles/utils';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { isFreeplan } from 'src/services/invoicePdfService';
 import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
@@ -29,7 +30,6 @@ import {
 
 import { Iconify } from 'src/components/iconify';
 import { ProfileForm } from 'src/components/profile/ProfileForm';
-import { varAlpha } from 'src/theme/styles/utils';
 
 export function ProfileView() {
   const theme = useTheme();
@@ -292,11 +292,11 @@ export function ProfileView() {
                     sx={{
                       borderRadius: 2,
                       py: 1.5,
-                      background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)} 0%, ${varAlpha(theme.palette.primary.darkChannel, 0.7)} 100%)`,
+                      background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.main, 0.7)} 0%, ${varAlpha(theme.palette.primary.darker, 0.7)} 100%)`,
                       color: theme.palette.primary.contrastText,
                       opacity: 0.85,
                       '&:hover': {
-                        background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)} 0%, ${varAlpha(theme.palette.primary.mainChannel, 0.8)} 100%)`,
+                        background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darker, 0.8)} 0%, ${varAlpha(theme.palette.primary.main, 0.8)} 100%)`,
                         opacity: 0.95,
                       }
                     }}

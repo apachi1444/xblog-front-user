@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,6 +5,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import {
   Box,
   Card,
+  alpha,
   Button,
   useTheme,
   Typography,
@@ -13,825 +13,771 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import { useScheduledArticles } from 'src/hooks/useScheduledArticles';
+import { formatMetrics, getContentQuality, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
-import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { generateInvoicePdf } from 'src/services/invoicePdfService';
-import { type Invoice, useGetUserInvoicesQuery, useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
-import { AnalyticsOrderTable } from '../analytics-order-table';
-import { AnalyticsCurrentVisits } from '../analytics-current-visits';
-import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
+import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
-// ----------------------------------------------------------------------
-
-// Generate Content Card Component
-function GenerateContentCard() {
-  const { t } = useTranslation();
+// Feature Card Component
+function FeatureCard({
+  title,
+  description,
+  icon,
+  isLocked = false,
+  badge,
+  onClick
+}: {
+  title: string;
+  description: string;
+  icon: string;
+  isLocked?: boolean;
+  badge?: string;
+  onClick?: () => void;
+}) {
   const theme = useTheme();
-  const navigate = useNavigate();
-
-  const handleNavigateToGenerate = () => {
-    navigate('/generate');
-  };
-
-  // Content generation benefits
-  const benefits = [
-    {
-      icon: 'mdi:search-web',
-      title: t('generate.benefits.seo', 'SEO Optimized'),
-      description: t('generate.benefits.seoDesc', 'Content that ranks well in search engines')
-    },
-    {
-      icon: 'mdi:clock-time-four-outline',
-      title: t('generate.benefits.fast', 'Save Time'),
-      description: t('generate.benefits.fastDesc', 'Create articles in minutes, not hours')
-    }
-  ];
-
-  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <Card
+      onClick={!isLocked ? onClick : undefined}
       sx={{
+        height: '100%',
+        cursor: !isLocked ? 'pointer' : 'default',
+        transition: 'all 0.3s ease-in-out',
+        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
         position: 'relative',
         overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 2,
-        background: isDarkMode
-          ? theme.palette.background.paper
-          : theme.palette.common.white,
-        border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.2) : varAlpha(theme.palette.grey['500Channel'], 0.15)}`,
-        boxShadow: isDarkMode
-          ? `0 8px 20px ${varAlpha(theme.palette.common.blackChannel, 0.4)}`
-          : `0 4px 16px ${varAlpha(theme.palette.grey['500Channel'], 0.12)}`,
-        transition: 'all 0.3s ease-in-out',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: isDarkMode
-            ? `0 12px 32px ${varAlpha(theme.palette.common.blackChannel, 0.5)}`
-            : `0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.16)}`,
-        },
+        opacity: isLocked ? 0.6 : 1,
+        '&:hover': !isLocked ? {
+          transform: 'translateY(-4px)',
+          boxShadow: theme.shadows[8],
+          borderColor: alpha(theme.palette.primary.main, 0.3),
+        } : {},
+        ...(isLocked && {
+          bgcolor: alpha(theme.palette.grey[500], 0.05),
+        }),
       }}
     >
-      {/* Subtle background decoration */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -20,
-          right: -20,
-          width: 120,
-          height: 120,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.03)}, transparent)`,
-          zIndex: 0,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: -15,
-          left: -15,
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${varAlpha(theme.palette.secondary.mainChannel, 0.02)}, transparent)`,
-          zIndex: 0,
-        }}
-      />
-
-      {/* Main content */}
-      <Box sx={{ position: 'relative', zIndex: 1, p: { xs: 2, md: 3 } }}>
-        <Grid container spacing={3} alignItems="center">
-          {/* Left side - Text content */}
-          <Grid xs={12} md={7} sx={{ order: { xs: 2, md: 1 } }}>
-            <Box sx={{ mb: 3 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1,
-                  color: 'text.primary',
-                  lineHeight: 1.2,
-                }}
-              >
-                {t('generate.startCreating', 'Supercharge Your Content Creation')}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
-                {t('generate.description', 'Our AI-powered platform helps you create high-quality, engaging content in minutes. Perfect for blogs, websites, and social media.')}
-              </Typography>
-            </Box>
-
-            {/* Refined Benefits */}
-            <Box sx={{ mb: 3 }}>
-              {benefits.map((benefit, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    mb: 1.5,
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: isDarkMode
-                      ? varAlpha(theme.palette.background.defaultChannel, 0.4)
-                      : varAlpha(theme.palette.grey['50Channel'], 0.8),
-                    border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.08) : varAlpha(theme.palette.grey['500Channel'], 0.05)}`,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      backgroundColor: isDarkMode
-                        ? varAlpha(theme.palette.background.defaultChannel, 0.6)
-                        : varAlpha(theme.palette.grey['100Channel'], 0.8),
-                      transform: 'translateX(4px)',
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.5,
-                      borderRadius: 2,
-                      backgroundColor: isDarkMode
-                        ? varAlpha(theme.palette.primary.mainChannel, 0.15)
-                        : varAlpha(theme.palette.primary.mainChannel, 0.08),
-                      color: theme.palette.primary.main,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: 44,
-                      minHeight: 44
-                    }}
-                  >
-                    <Iconify icon={benefit.icon} width={20} height={20} />
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.primary' }}>
-                      {benefit.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                      {benefit.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-
-            {/* Refined CTA Button */}
-            <Button
-              variant="contained"
-              size="large"
-              color="primary"
-              startIcon={<Iconify icon="mdi:rocket-launch" width={20} />}
-              onClick={handleNavigateToGenerate}
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                fontWeight: 600,
-                fontSize: '1rem',
-                textTransform: 'none',
-                boxShadow: isDarkMode
-                  ? `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`
-                  : `0 4px 12px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
-                '&:hover': {
-                  boxShadow: isDarkMode
-                    ? `0 8px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`
-                    : `0 8px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`,
-                  transform: 'translateY(-2px)',
-                },
-                transition: 'all 0.3s ease-in-out',
-              }}
-            >
-              {t('generate.createNow', 'Start Creating Now')}
-            </Button>
-          </Grid>
-
-          {/* Right side - Illustration */}
-          <Grid xs={12} md={5} sx={{ order: { xs: 1, md: 2 } }}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                position: 'relative',
-                p: 2
-              }}
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: '15%',
-                  left: '5%',
-                  p: 1.5,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.background.paper,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  border: `1px solid ${varAlpha(theme.palette.warning.mainChannel, 0.3)}`,
-                  animation: 'pulse 3s ease-in-out 1.5s infinite',
-                  zIndex: 2
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify icon="mdi:lightning-bolt" width={18} height={18} sx={{ color: theme.palette.warning.main, mr: 0.8 }} />
-                  <Typography variant="body2" fontWeight="bold" sx={{ color: theme.palette.warning.main }}>AI Powered</Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </Card>
-  );
-}
-
-// Premium Features Card Component
-function PremiumFeaturesCard() {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  const navigate = useNavigate();
-
-  const handleUpgrade = () => {
-    navigate('/upgrade-license');
-  };
-
-  const features = [
-    {
-      icon: 'mdi:text-box-check-outline',
-      text: t('premium.features.unlimitedArticles', 'Unlimited article generation')
-    },
-    {
-      icon: 'mdi:search-web',
-      text: t('premium.features.seoTools', 'Advanced SEO optimization tools')
-    },
-    {
-      icon: 'mdi:headset',
-      text: t('premium.features.prioritySupport', 'Priority customer support')
-    }
-  ];
-
-  const isDarkMode = theme.palette.mode === 'dark';
-
-  return (
-    <Card
-      sx={{
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 2,
-        background: isDarkMode
-          ? `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darkerChannel, 0.15)}, ${varAlpha(theme.palette.background.paperChannel, 0.95)})`
-          : `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.08)}, ${varAlpha(theme.palette.common.whiteChannel, 0.95)})`,
-        border: `2px solid ${isDarkMode ? varAlpha(theme.palette.primary.mainChannel, 0.3) : varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
-        boxShadow: isDarkMode
-          ? `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}, 0 4px 12px ${varAlpha(theme.palette.common.blackChannel, 0.3)}`
-          : `0 6px 20px ${varAlpha(theme.palette.primary.mainChannel, 0.15)}, 0 2px 8px ${varAlpha(theme.palette.grey['500Channel'], 0.1)}`,
-        transition: 'all 0.3s ease-in-out',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: isDarkMode
-            ? `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}, 0 8px 24px ${varAlpha(theme.palette.common.blackChannel, 0.4)}`
-            : `0 10px 28px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}, 0 8px 24px ${varAlpha(theme.palette.grey['500Channel'], 0.15)}`,
-        },
-      }}
-    >
-      {/* Refined Premium badge */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          display: 'flex',
-          alignItems: 'center',
-          bgcolor: isDarkMode
-            ? varAlpha(theme.palette.warning.mainChannel, 0.15)
-            : varAlpha(theme.palette.warning.mainChannel, 0.1),
-          color: theme.palette.warning.main,
-          borderRadius: 2,
-          px: 1.5,
-          py: 0.75,
-          border: `1px solid ${varAlpha(theme.palette.warning.mainChannel, 0.2)}`,
-        }}
-      >
-        <Iconify icon="mdi:crown" width={16} height={16} sx={{ color: theme.palette.warning.main, mr: 0.5 }} />
-        <Typography variant="caption" fontWeight="bold" sx={{ color: theme.palette.warning.main }}>
-          {t('premium.label', 'Pro Plan')}
-        </Typography>
-      </Box>
-
-      {/* Subtle decorative elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -15,
-          right: -15,
-          width: 80,
-          height: 80,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${varAlpha(theme.palette.primary.mainChannel, 0.05)}, transparent)`,
-          zIndex: 0,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: -20,
-          left: '20%',
-          width: 60,
-          height: 60,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${varAlpha(theme.palette.secondary.mainChannel, 0.03)}, transparent)`,
-          zIndex: 0,
-        }}
-      />
-
-      <CardContent sx={{ position: 'relative', zIndex: 1, p: 3, flexGrow: 1 }}>
-        <Typography
-          variant="h5"
-          component="h3"
-          fontWeight="bold"
-          color="text.primary"
-          sx={{ mb: 1, mt: 3 }}
+      {/* Badge */}
+      {badge && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+            bgcolor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            zIndex: 1,
+          }}
         >
-          {t('premium.title', 'Unlock Premium Features')}
-        </Typography>
+          {badge}
+        </Box>
+      )}
 
+      {/* Lock Icon */}
+      {isLocked && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 2,
+            bgcolor: alpha(theme.palette.background.paper, 0.9),
+            borderRadius: '50%',
+            p: 2,
+            boxShadow: theme.shadows[4],
+          }}
+        >
+          <Iconify
+            icon="mdi:lock"
+            width={32}
+            height={32}
+            sx={{ color: theme.palette.text.secondary }}
+          />
+        </Box>
+      )}
+
+      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {/* Icon */}
+        <Box
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: 2,
+            bgcolor: alpha(theme.palette.primary.main, 0.1),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 2,
+          }}
+        >
+          <Iconify
+            icon={icon}
+            width={28}
+            height={28}
+            sx={{ color: theme.palette.primary.main }}
+          />
+        </Box>
+
+        {/* Content */}
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+          {title}
+        </Typography>
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mb: 2, lineHeight: 1.6 }}
+          sx={{ lineHeight: 1.6, flex: 1 }}
         >
-          {t('premium.description', 'Upgrade to Pro and get unlimited articles, advanced SEO tools, and priority support.')}
+          {description}
         </Typography>
-
-        <Box sx={{ mb: 3 }}>
-          {features.map((feature, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mb: 1.5,
-                p: 1.5,
-                borderRadius: 2,
-                backgroundColor: isDarkMode
-                  ? varAlpha(theme.palette.background.defaultChannel, 0.3)
-                  : varAlpha(theme.palette.grey['50Channel'], 0.6),
-                border: `1px solid ${isDarkMode ? varAlpha(theme.palette.grey['500Channel'], 0.05) : varAlpha(theme.palette.grey['500Channel'], 0.03)}`,
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: isDarkMode
-                    ? varAlpha(theme.palette.background.defaultChannel, 0.5)
-                    : varAlpha(theme.palette.grey['100Channel'], 0.6),
-                }
-              }}
-            >
-              <Iconify
-                icon={feature.icon}
-                width={20}
-                height={20}
-                sx={{
-                  color: theme.palette.primary.main,
-                  mr: 1.5,
-                }}
-              />
-              <Typography
-                variant="body2"
-                color="text.primary"
-                sx={{ fontWeight: 500 }}
-              >
-                {feature.text}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-
-        <Button
-          variant="contained"
-          onClick={handleUpgrade}
-          endIcon={<Iconify icon="mdi:arrow-right" />}
-          fullWidth
-          sx={{
-            fontWeight: 500,
-            textTransform: 'none',
-            py: 1.5,
-            borderRadius: 2,
-            background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)}, ${varAlpha(theme.palette.primary.darkChannel, 0.7)})`,
-            color: theme.palette.primary.contrastText,
-            opacity: 0.85,
-            '&:hover': {
-              background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)}, ${varAlpha(theme.palette.primary.mainChannel, 0.8)})`,
-              opacity: 0.95,
-            },
-            boxShadow: isDarkMode
-              ? `0 3px 8px ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`
-              : `0 3px 8px ${varAlpha(theme.palette.primary.mainChannel, 0.15)}`,
-          }}
-        >
-          {t('premium.upgradeButton', 'Upgrade to Pro')}
-        </Button>
       </CardContent>
     </Card>
   );
 }
 
-export function OverviewAnalyticsView() {
+// Draft Articles Component
+function DraftArticlesSection() {
   const { t } = useTranslation();
-
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-
   const navigate = useNavigate();
 
-  // Fetch subscription details from API
-  const { data: subscriptionDetails, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
-
-  // Fetch stores data for platform distribution
-  const { data: storesData } = useGetStoresQuery();
-
-  // Fetch invoices data for purchase history
-  const { data: invoicesData } = useGetUserInvoicesQuery();
-
-  // Only fetch subscription plans if we have invoices to display
-  const hasInvoices = invoicesData?.invoices && invoicesData.invoices.length > 0;
-  const { data: plansData } = useGetSubscriptionPlansQuery(undefined, {
-    skip: !hasInvoices
+  // Fetch draft articles
+  const { data: articles, isLoading } = useGetArticlesQuery({
+    page: 1,
+    limit: 5,
   });
 
-  const articles_limit = subscriptionDetails?.articles_limit || 0;
+  const draftArticles = articles?.articles?.filter((article: any) => article.status === 'draft') || [];
 
-  // Handle PDF download for invoices
-  const handleDownloadInvoice = async (invoice: Invoice) => {
-    try {
-      await generateInvoicePdf(invoice, plansData);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
-
-  // Get scheduled articles count
-  const { scheduledArticles } = useScheduledArticles('scheduled');
-
-  // Calculate platform distribution
-  const platformCounts = useMemo(() => {
-
-    if (!storesData?.stores || storesData.stores.length === 0) {
-      return {
-        wordpress: 0,
-        shopify: 0,
-        wix: 0,
-        other: 0
-      };
-    }
-
-
-    const counts = {
-      wordpress: 0,
-      shopify: 0,
-      wix: 0,
-      other: 0
-    };
-
-    storesData.stores.forEach(store => {
-      // Check both platform and category fields, prioritize platform
-      const platformField = store.platform || store.category || '';
-      const platform = platformField.toLowerCase().trim();
-
-      // More precise matching
-      if (platform === 'wordpress') {
-        counts.wordpress += 1;
-      } else if (platform === 'shopify') {
-        counts.shopify += 1;
-      } else if (platform === 'wix') {
-        counts.wix += 1;
-      } else {
-        counts.other += 1;
-      }
-    });
-
-    // Ensure we have at least some data if stores exist
-    const totalStores = Object.values(counts).reduce((sum, count) => sum + count, 0);
-    if (storesData.stores.length > 0 && totalStores === 0) {
-      // Fallback: if we have stores but no platforms detected, put them in "other"
-      counts.other = storesData.stores.length;
-    }
-
-    return counts;
-  }, [storesData]);
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <DashboardContent
-      maxWidth="xl"
-      sx={{
-        backgroundColor: isDarkMode
-          ? varAlpha(theme.palette.background.defaultChannel, 0.4)
-          : varAlpha(theme.palette.grey['50Channel'], 0.3),
-        minHeight: '100vh',
-        borderRadius: 0,
-      }}
-    >
-      {/* Enhanced Welcome Section with Prominent CTA */}
-      <Box
-        sx={{
-          mb: { xs: 3, md: 5 },
-          p: { xs: 3, md: 4 },
-          borderRadius: 3,
-          background: isDarkMode
-            ? `linear-gradient(135deg, ${varAlpha(theme.palette.primary.darkChannel, 0.1)}, ${varAlpha(theme.palette.secondary.darkChannel, 0.1)})`
-            : `linear-gradient(135deg, ${varAlpha(theme.palette.primary.lightChannel, 0.1)}, ${varAlpha(theme.palette.secondary.lightChannel, 0.1)})`,
-          border: `1px solid ${varAlpha(theme.palette.primary.mainChannel, 0.2)}`,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: isDarkMode
-              ? `radial-gradient(circle at 20% 80%, ${varAlpha(theme.palette.primary.mainChannel, 0.1)} 0%, transparent 50%)`
-              : `radial-gradient(circle at 20% 80%, ${varAlpha(theme.palette.primary.mainChannel, 0.05)} 0%, transparent 50%)`,
-            pointerEvents: 'none',
-          }
-        }}
-      >
-        <Grid container spacing={3} alignItems="center">
-          {/* Left side - Welcome text */}
-          <Grid xs={12} md={8}>
-            <Typography
-              variant="h4"
+    <Card sx={{ height: '100%' }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {t('dashboard.lastDocuments', 'Last documents')}
+          </Typography>
+          {draftArticles.length > 0 && (
+            <Button
+              size="small"
+              onClick={() => navigate('/create')}
+              sx={{ textTransform: 'none' }}
+            >
+              {t('dashboard.viewAll', 'View all')}
+            </Button>
+          )}
+        </Box>
+
+        {draftArticles.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <Box
               sx={{
-                mb: 2,
-                color: isDarkMode ? 'common.white' : 'inherit',
-                textShadow: isDarkMode ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none',
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                bgcolor: alpha(theme.palette.grey[500], 0.1),
                 display: 'flex',
                 alignItems: 'center',
-                fontWeight: 700,
-                '& .emoji': {
-                  display: 'inline-block',
-                  ml: 1,
-                  animation: 'wave 1.8s infinite',
-                  transformOrigin: '70% 70%',
-                  '@keyframes wave': {
-                    '0%': { transform: 'rotate(0deg)' },
-                    '10%': { transform: 'rotate(14deg)' },
-                    '20%': { transform: 'rotate(-8deg)' },
-                    '30%': { transform: 'rotate(14deg)' },
-                    '40%': { transform: 'rotate(-4deg)' },
-                    '50%': { transform: 'rotate(10deg)' },
-                    '60%': { transform: 'rotate(0deg)' },
-                    '100%': { transform: 'rotate(0deg)' },
-                  }
-                }
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
               }}
             >
-              {t('analytics.welcome', 'Hi, Welcome back xBlogger')}<span className="emoji">👋</span>
+              <Iconify
+                icon="mdi:file-document-outline"
+                width={40}
+                height={40}
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            </Box>
+            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+              {t('dashboard.noDocs', 'No docs yet!')}
             </Typography>
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                mb: 0,
-                lineHeight: 1.6,
-                fontSize: '1.1rem'
-              }}
-            >
-              {t('analytics.welcomeSubtext', 'Ready to create amazing content? Start generating high-quality, SEO-optimized articles in minutes!')}
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {t('dashboard.createArticles', 'Create Articles That Are SEO-Optimized & Ready To Hit The Top of Google Searches.')}
             </Typography>
-          </Grid>
-
-          {/* Right side - Prominent CTA */}
-          <Grid xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
             <Button
               variant="contained"
-              size="large"
-              color="primary"
-              startIcon={<Iconify icon="mdi:rocket-launch" width={24} />}
-              onClick={() => {
-                navigate('/generate');
-              }}
+              onClick={() => navigate('/generate')}
               sx={{
-                px: 4,
-                py: 2,
-                borderRadius: 3,
-                fontWeight: 700,
-                fontSize: '1.1rem',
+                borderRadius: 2,
                 textTransform: 'none',
-                minWidth: 200,
-                boxShadow: isDarkMode
-                  ? `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`
-                  : `0 8px 24px ${varAlpha(theme.palette.primary.mainChannel, 0.3)}`,
-                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                '&:hover': {
-                  boxShadow: isDarkMode
-                    ? `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.5)}`
-                    : `0 12px 32px ${varAlpha(theme.palette.primary.mainChannel, 0.4)}`,
-                  transform: 'translateY(-3px) scale(1.02)',
-                  background: `linear-gradient(45deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-                },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: '-100%',
-                  width: '100%',
-                  height: '100%',
-                  background: `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.common.whiteChannel, 0.2)}, transparent)`,
-                  transition: 'left 0.6s',
-                },
-                '&:hover::before': {
-                  left: '100%',
-                }
+                px: 3,
               }}
             >
-              {t('generate.createNow', 'Start Creating Now')}
+              {t('dashboard.newDocument', 'New Document')}
             </Button>
+          </Box>
+        ) : (
+          <Grid container spacing={2}>
+            {draftArticles.map((article: any) => {
+              const metrics = calculateArticleMetrics(article);
+              const formattedMetrics = formatMetrics(metrics);
+              const quality = getContentQuality(metrics);
+
+              return (
+                <Grid key={article.id} xs={12} sm={6} md={4}>
+                  <Card
+                    onClick={() => navigate(`/generate?articleId=${article.id}`)}
+                    sx={{
+                      height: '100%',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: theme.shadows[4],
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ p: 2.5 }}>
+                      {/* Header with Icon and Quality Badge */}
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                        {/* Article Icon */}
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 2,
+                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Iconify
+                            icon="mdi:file-document-edit-outline"
+                            width={20}
+                            height={20}
+                            sx={{ color: theme.palette.primary.main }}
+                          />
+                        </Box>
+
+                        {/* Quality Badge */}
+                        <Box
+                          sx={{
+                            px: 1,
+                            py: 0.5,
+                            borderRadius: 1,
+                            bgcolor: alpha(theme.palette[quality.color].main, 0.1),
+                            border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette[quality.color].main,
+                              fontWeight: 600,
+                              fontSize: '0.65rem',
+                            }}
+                          >
+                            {quality.label}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Article Title */}
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          mb: 1.5,
+                          fontWeight: 600,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          minHeight: '2.5em',
+                        }}
+                      >
+                        {article.article_title || article.title || t('dashboard.untitledArticle', 'Untitled Article')}
+                      </Typography>
+
+                      {/* Article Metrics */}
+                      <Box sx={{ mb: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Iconify icon="mdi:text" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                              {formattedMetrics.wordCount}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                              {formattedMetrics.readingTime}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Primary Keyword */}
+                        {article.primary_keyword && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Iconify icon="mdi:key" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {article.primary_keyword}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Last Modified */}
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5 }}>
+                        {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
+                      </Typography>
+
+                      {/* Status Badge */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            px: 1,
+                            py: 0.5,
+                            borderRadius: 1,
+                            bgcolor: alpha(theme.palette.warning.main, 0.1),
+                            border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              bgcolor: theme.palette.warning.main,
+                              mr: 0.5,
+                            }}
+                          />
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette.warning.main,
+                              fontWeight: 500,
+                              fontSize: '0.7rem',
+                            }}
+                          >
+                            {t('dashboard.draft', 'Draft')}
+                          </Typography>
+                        </Box>
+
+                        {/* Language Badge */}
+                        {article.language && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              textTransform: 'uppercase',
+                              fontSize: '0.65rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {article.language}
+                          </Typography>
+                        )}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
           </Grid>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Clean License Information Component
+function LicenseInfoSection() {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery();
+  const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();
+
+  if (isLoading || !subscriptionDetails) {
+    return null;
+  }
+
+  const planName = subscriptionDetails.subscription_name || 'Free Plan';
+  const isFreePlan = planName.toLowerCase().includes('free');
+  const expirationDate = subscriptionDetails.expiration_date;
+
+  // Calculate usage data
+  const articlesUsed = subscriptionDetails.articles_created || 0;
+  const articlesTotal = subscriptionDetails.articles_limit || 0;
+  const articlesRemaining = articlesTotal - articlesUsed;
+
+  const websitesUsed = subscriptionDetails.connected_websites || 0;
+  const websitesTotal = subscriptionDetails.websites_limit || 0;
+  const websitesRemaining = websitesTotal - websitesUsed;
+
+  const regenerationsUsed = regenerationsTotal - regenerationsAvailable;
+
+  // Calculate overall health
+  const overallUsage = ((articlesUsed / articlesTotal) + (websitesUsed / websitesTotal) + (regenerationsUsed / regenerationsTotal)) / 3 * 100;
+  const healthStatus = overallUsage < 70 ? 'excellent' : overallUsage < 85 ? 'good' : 'attention';
+
+  const statusConfig = {
+    excellent: { color: theme.palette.success.main, label: 'Excellent', icon: 'mdi:check-circle' },
+    good: { color: theme.palette.info.main, label: 'Good', icon: 'mdi:information' },
+    attention: { color: theme.palette.warning.main, label: 'Needs Attention', icon: 'mdi:alert-circle' }
+  };
+
+  return (
+    <Box sx={{ mt: 4 }}>
+      <Card
+        sx={{
+          border: 'none',
+          boxShadow: `0 2px 12px ${alpha(theme.palette.grey[500], 0.08)}`,
+          borderRadius: 3,
+        }}
+      >
+        <CardContent sx={{ p: 4 }}>
+          {/* Header Section */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Box
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 3,
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify
+                  icon={isFreePlan ? "mdi:account-outline" : "mdi:crown"}
+                  width={28}
+                  height={28}
+                  sx={{ color: theme.palette.primary.main }}
+                />
+              </Box>
+
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: 'text.primary' }}>
+                  {planName}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Iconify
+                    icon={statusConfig[healthStatus].icon}
+                    width={16}
+                    height={16}
+                    sx={{ color: statusConfig[healthStatus].color }}
+                  />
+                  <Typography variant="body2" sx={{ color: statusConfig[healthStatus].color, fontWeight: 600 }}>
+                    {statusConfig[healthStatus].label}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    • {Math.round(100 - overallUsage)}% capacity remaining
+                  </Typography>
+                  {expirationDate && (
+                    <>
+                      <Typography variant="body2" color="text.secondary">•</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Expires {new Date(expirationDate).toLocaleDateString()}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+
+            <Button
+              variant={isFreePlan ? "contained" : "outlined"}
+              onClick={() => navigate('/upgrade-license')}
+              size="large"
+              sx={{
+                borderRadius: 2.5,
+                textTransform: 'none',
+                px: 4,
+                py: 1.5,
+                fontWeight: 600,
+                ...(isFreePlan ? {
+                  bgcolor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  '&:hover': {
+                    bgcolor: theme.palette.primary.dark,
+                    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  }
+                } : {
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    borderColor: theme.palette.primary.dark,
+                  }
+                })
+              }}
+            >
+              {isFreePlan ? 'Upgrade Plan' : 'Manage Plan'}
+            </Button>
+          </Box>
+
+          {/* Resource Cards */}
+          <Grid container spacing={3}>
+            {/* Articles */}
+            <Grid xs={12} md={4}>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2.5,
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:file-document-outline" width={20} height={20} sx={{ color: theme.palette.primary.main }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                      Articles
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
+                      {articlesRemaining}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      of {articlesTotal} remaining
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: '100%',
+                      width: `${Math.min((articlesUsed / articlesTotal) * 100, 100)}%`,
+                      bgcolor: theme.palette.primary.main,
+                      borderRadius: 4,
+                      transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Websites */}
+            <Grid xs={12} md={4}>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2.5,
+                  bgcolor: alpha(theme.palette.secondary.main, 0.04),
+                  border: `1px solid ${alpha(theme.palette.secondary.main, 0.08)}`,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      bgcolor: alpha(theme.palette.secondary.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:web" width={20} height={20} sx={{ color: theme.palette.secondary.main }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                      Websites
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.secondary.main }}>
+                      {websitesRemaining}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      of {websitesTotal} remaining
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: alpha(theme.palette.secondary.main, 0.1),
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: '100%',
+                      width: `${Math.min((websitesUsed / websitesTotal) * 100, 100)}%`,
+                      bgcolor: theme.palette.secondary.main,
+                      borderRadius: 4,
+                      transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Regenerations */}
+            <Grid xs={12} md={4}>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2.5,
+                  bgcolor: alpha(theme.palette.info.main, 0.04),
+                  border: `1px solid ${alpha(theme.palette.info.main, 0.08)}`,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      bgcolor: alpha(theme.palette.info.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:autorenew" width={20} height={20} sx={{ color: theme.palette.info.main }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                      Regenerations
+                    </Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.info.main }}>
+                      {regenerationsAvailable}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      of {regenerationsTotal} remaining
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      height: '100%',
+                      width: `${Math.min((regenerationsUsed / regenerationsTotal) * 100, 100)}%`,
+                      bgcolor: theme.palette.info.main,
+                      borderRadius: 4,
+                      transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}
+
+export function OverviewAnalyticsView() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Features data
+  const features = [
+    {
+      title: t('dashboard.features.generate.title', 'Generate'),
+      description: t('dashboard.features.generate.description', 'Create from a one-line prompt in a few seconds'),
+      icon: 'mdi:lightning-bolt',
+      badge: t('dashboard.features.popular', 'Popular'),
+      onClick: () => navigate('/generate'),
+    },
+    {
+      title: t('dashboard.features.templates.title', 'Built-in Templates Coming Soon'),
+      description: t('dashboard.features.templates.description', 'Use Built In Template'),
+      icon: 'mdi:file-document-multiple',
+      isLocked: true,
+    },
+    {
+      title: t('dashboard.features.bulk.title', 'Bulk Generation Coming Soon'),
+      description: t('dashboard.features.bulk.description', 'Bulk Generate'),
+      icon: 'mdi:file-multiple',
+      isLocked: true,
+    },
+  ];
+
+  return (
+    <DashboardContent maxWidth="xl">
+      {/* Features Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
+          {t('dashboard.toolsToHelp', 'Our features')}
+        </Typography>
+
+        <Grid container spacing={3}>
+          {features.map((feature, index) => (
+            <Grid key={index} xs={12} sm={6} md={3}>
+              <FeatureCard {...feature} />
+            </Grid>
+          ))}
         </Grid>
       </Box>
 
-      <Grid container spacing={4}>
-        {isLoadingSubscription ? (
-          // Show loading spinner in the center while data is being fetched
-          <Grid xs={12} sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
-            <CircularProgress />
-          </Grid>
-        ) : (
-          <>
-            <Grid xs={12} sm={6} md={3}>
-              <AnalyticsWidgetSummary
-                title={t('analytics.articlesGenerated', 'Articles Generated')}
-                percent={
-                  subscriptionDetails &&
-                  subscriptionDetails.articles_created > 0 &&
-                  subscriptionDetails.articles_limit > 0
-                    ? Number(((subscriptionDetails.articles_created / subscriptionDetails.articles_limit) * 100).toFixed(1))
-                    : 0
-                }
-                total={subscriptionDetails?.articles_created || 0}
-                icon={<Iconify icon="mdi:file-document-edit-outline" width={48} height={48} />}
-              />
-            </Grid>
-
-            {/* For scheduled articles, we use the scheduledArticles hook */}
-            <Grid xs={12} sm={6} md={3}>
-              <AnalyticsWidgetSummary
-                title={t('analytics.scheduledArticles', 'Scheduled Articles')}
-                percent={
-                  scheduledArticles &&
-                  scheduledArticles.length > 0 &&
-                  articles_limit > 0
-                    ? Number(((scheduledArticles.length / articles_limit) * 100).toFixed(1))
-                    : 0
-                }
-                total={scheduledArticles?.length || 0}
-                color="warning"
-                icon={<Iconify icon="mdi:calendar-clock" width={48} height={48} />}
-              />
-            </Grid>
-
-            <Grid xs={12} sm={6} md={3}>
-              <AnalyticsWidgetSummary
-                title={t('analytics.regenerationsAvailable', 'Regenerations Available')}
-                percent={
-                  subscriptionDetails &&
-                  subscriptionDetails.regenerations_number > 0 &&
-                  subscriptionDetails.regenerations_limit > 0
-                    ? Number(((subscriptionDetails.regenerations_number / subscriptionDetails.regenerations_limit) * 100).toFixed(1))
-                    : 0
-                }
-                total={( (subscriptionDetails?.regenerations_limit || 0) - (subscriptionDetails?.regenerations_number || 0)) || 0}
-                color="info"
-                icon={<Iconify icon="mdi:autorenew" width={48} height={48} />}
-              />
-            </Grid>
-
-            <Grid xs={12} sm={6} md={3}>
-              <AnalyticsWidgetSummary
-                title={t('analytics.totalWebsites', 'Connected Websites')}
-                percent={
-                  subscriptionDetails &&
-                  subscriptionDetails.connected_websites > 0 &&
-                  subscriptionDetails.websites_limit > 0
-                    ? Number(((subscriptionDetails.connected_websites / subscriptionDetails.websites_limit) * 100).toFixed(1))
-                    : 0
-                }
-                total={subscriptionDetails?.connected_websites || 0}
-                color="secondary"
-                icon={<Iconify icon="mdi:web" width={48} height={48} />}
-              />
-            </Grid>
-          </>
-        )}
-
-        {/* Section Divider */}
-        <Grid xs={12} sx={{ my: 2 }}>
-          <Box
-            sx={{
-              height: 1,
-              background: isDarkMode
-                ? `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.2)}, transparent)`
-                : `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.15)}, transparent)`,
-              mx: 2,
-            }}
-          />
-        </Grid>
-
-        {/* Supercharge Your Content Creation and Coming Soon in the same row */}
-        <Grid xs={12} md={6} lg={6}>
-          <GenerateContentCard />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={6}>
-          <PremiumFeaturesCard />
-        </Grid>
-
-        {/* Section Divider */}
-        <Grid xs={12} sx={{ my: 3 }}>
-          <Box
-            sx={{
-              height: 1,
-              background: isDarkMode
-                ? `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.2)}, transparent)`
-                : `linear-gradient(90deg, transparent, ${varAlpha(theme.palette.grey['500Channel'], 0.15)}, transparent)`,
-              mx: 2,
-            }}
-          />
-        </Grid>
-
-        {/* Detailed Analytics Section - Moved to bottom as supplementary information */}
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title={t('analytics.websiteIntegrations', 'Website Integrations')}
-            subheader={t('analytics.websiteIntegrationsSubheader', 'Distribution by platform')}
-            emptyText={t('analytics.noWebsiteIntegrations', 'No website integrations yet. Connect your first website to see platform distribution.')}
-            chart={{
-              colors: [
-                theme.palette.primary.main,
-                theme.palette.secondary.main,
-                theme.palette.info.main,
-                theme.palette.warning.main,
-              ],
-              series: [
-                {
-                  label: t('platforms.wordpress', 'WordPress'),
-                  value: platformCounts.wordpress
-                },
-                {
-                  label: t('platforms.shopify', 'Shopify'),
-                  value: platformCounts.shopify
-                },
-                {
-                  label: t('platforms.wix', 'Wix'),
-                  value: platformCounts.wix
-                },
-                {
-                  label: t('platforms.other', 'Other'),
-                  value: platformCounts.other
-                },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsOrderTable
-            title={t('analytics.purchaseHistory', 'Purchase History')}
-            subheader={t('analytics.purchaseHistorySubheader', 'Recent subscription activity')}
-            emptyText={t('analytics.noPurchaseHistory', 'No billing history available yet. Your purchase records will appear here.')}
-            onDownloadInvoice={handleDownloadInvoice}
-            list={
-              invoicesData?.invoices && invoicesData.invoices.length > 0
-                ? invoicesData.invoices.map((invoice, index) => {
-                    // Find the plan name from the plans data
-                    const planDetails = plansData?.find(plan => plan.id === invoice.plan_id);
-                    const planName = planDetails?.name || `Plan ID: ${invoice.plan_id}`;
-
-                    return {
-                      id: invoice.payment_id?.toString() || String(index + 1),
-                      title: planName || 'Subscription Payment',
-                      type: `order${index + 1}`,
-                      status: invoice.status === 'paid' ? 'completed' : 'pending',
-                      time: invoice.created_at ? new Date(invoice.created_at).getTime() : new Date().getTime(),
-                      invoice, // Add invoice data for download
-                    };
-                  })
-                : []
-            }
-          />
+      {/* Main Content Grid */}
+      <Grid container spacing={3}>
+        {/* Draft Articles Section - Full Width */}
+        <Grid xs={12}>
+          <DraftArticlesSection />
         </Grid>
       </Grid>
+
+      {/* License Information Section */}
+      <LicenseInfoSection />
     </DashboardContent>
   );
 }

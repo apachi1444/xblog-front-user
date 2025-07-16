@@ -25,6 +25,9 @@ import { selectSubscriptionDetails } from 'src/services/slices/subscription/subs
 
 import { Iconify } from 'src/components/iconify';
 import { varAlpha } from 'src/theme/styles/utils';
+import { SupportButton } from 'src/components/support';
+import { LanguageSwitcher } from 'src/components/language/language-switcher';
+
 
 // ----------------------------------------------------------------------
 
@@ -303,6 +306,34 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Typography>
         </Box>
 
+        {/* Language Switcher */}
+        <Box
+          sx={{
+            px: 2.5,
+            pb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <Typography variant="body2">{t('account.language', 'Language')}</Typography>
+          <LanguageSwitcher />
+        </Box>
+
+        {/* Support Button */}
+        <Box
+          sx={{
+            px: 2.5,
+            pb: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <Typography variant="body2">{t('account.support', 'Support')}</Typography>
+          <SupportButton />
+        </Box>
+
         {/* Theme Toggle */}
         <Box
           sx={{
@@ -351,23 +382,25 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Box>
         </Box>
 
+
+
         {/* Upgrade Plan Button */}
-        <Box sx={{ p: 2, pt: 1.5 }}>
+        <Box sx={{ p: 2, pt: 1 }}>
           <Button
             fullWidth
-            variant="contained"
+            variant="outlined"
             onClick={() => handleClickItem('/upgrade-license')}
             sx={{
               py: 1,
               borderRadius: 1,
               fontWeight: 'medium',
               textTransform: 'none',
-              background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.mainChannel, 0.7)}, ${varAlpha(theme.palette.primary.darkChannel, 0.7)})`,
-              color: theme.palette.primary.contrastText,
-              opacity: 0.85,
+              borderColor: alpha(theme.palette.grey[500], 0.3),
+              color: theme.palette.text.primary,
+              bgcolor: alpha(theme.palette.grey[500], 0.05),
               '&:hover': {
-                background: `linear-gradient(45deg, ${varAlpha(theme.palette.primary.darkChannel, 0.8)}, ${varAlpha(theme.palette.primary.mainChannel, 0.8)})`,
-                opacity: 0.95,
+                borderColor: alpha(theme.palette.grey[500], 0.5),
+                bgcolor: alpha(theme.palette.grey[500], 0.1),
               }
             }}
           >

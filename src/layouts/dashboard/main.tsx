@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 
 import { layoutClasses } from 'src/layouts/classes';
-import DashboardBanners from 'src/components/banners/DashboardBanners';
+
 
 // ----------------------------------------------------------------------
 
@@ -53,10 +53,7 @@ export function DashboardContent({
   return (
     <>
       {/* Banners above the content */}
-      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, mb: 2, mt: 1, mx: { xs: 2, sm: 3, md: 5 } }}>
-        <DashboardBanners />
-      </Box>
-
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, mb: 2, mt: 1, mx: { xs: 2, sm: 3, md: 5 } }}/>
       <Container
         className={layoutClasses.content}
         maxWidth={maxWidth || false}
