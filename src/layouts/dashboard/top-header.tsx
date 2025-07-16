@@ -240,6 +240,7 @@ export function TopHeader() {
               gap: 2,
             }}>
               {/* Use the extracted ResourceDisplays component */}
+              <ResourceDisplays />
               {/*               <ResourceDisplays />  */}
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />
