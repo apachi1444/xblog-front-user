@@ -31,7 +31,7 @@ import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCoun
 // Local components
 import { NavMobile } from './nav';
 import { AccountPopover } from '../components/account-popover';
-import { navData, bottomNavData } from '../config-nav-dashboard';
+import { navData, bottomNavData, primaryCTA } from '../config-nav-dashboard';
 import { ComingSoonPopover } from '../components/coming-soon-popover';
 
 // ----------------------------------------------------------------------
@@ -279,6 +279,7 @@ export function TopHeader() {
         open={openNav}
         onClose={handleCloseNav}
         data={navData}
+        primaryCTA={primaryCTA}
         bottomNavData={bottomNavData}
         workspaces={workspaces}
         emptyStoresAction={emptyStoresAction}

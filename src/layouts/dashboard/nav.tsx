@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import { Divider } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
@@ -30,6 +31,11 @@ export type NavContentProps = {
     icon: React.ReactNode;
     info?: React.ReactNode;
   }[];
+  primaryCTA?: {
+    path: string;
+    title: string;
+    icon: React.ReactNode;
+  };
   bottomNavData: {
     path: string;
     title: string;
@@ -48,6 +54,7 @@ export type NavContentProps = {
 export function NavDesktop({
   sx,
   data,
+  primaryCTA,
   bottomNavData,
   slots,
   workspaces,
@@ -106,6 +113,7 @@ export function NavDesktop({
 
       <NavContent
         data={data}
+        primaryCTA={primaryCTA}
         slots={slots}
         workspaces={workspaces}
         bottomNavData={bottomNavData}
@@ -120,6 +128,7 @@ export function NavDesktop({
 export function NavMobile({
   sx,
   data,
+  primaryCTA,
   bottomNavData,
   open,
   slots,
@@ -162,6 +171,7 @@ export function NavMobile({
     >
       <NavContent
         data={data}
+        primaryCTA={primaryCTA}
         slots={slots}
         workspaces={workspaces}
         bottomNavData={bottomNavData}
@@ -173,7 +183,7 @@ export function NavMobile({
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptyStoresAction }: NavContentProps) {
+export function NavContent({ data, primaryCTA, slots, workspaces, sx, bottomNavData, emptyStoresAction }: NavContentProps) {
   // Determine if we're in a mobile drawer by checking if we're inside a Drawer component
   const [isMobileDrawer, setIsMobileDrawer] = useState(false);
 
@@ -248,6 +258,33 @@ export function NavContent({ data, slots, workspaces, sx, bottomNavData, emptySt
       ) : !isCollapsed ? (
         emptyStoresAction
       ) : null}
+
+      {/* Primary CTA Button (like Koyeb's "Create Service") */}
+      {!isCollapsed && primaryCTA && (
+        <Box sx={{ mb: 2, mt: 1 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            component={RouterLink}
+            href={primaryCTA.path}
+            startIcon={primaryCTA.icon}
+            sx={{
+              py: 1.5,
+              borderRadius: 2,
+              fontWeight: 600,
+              fontSize: '14px',
+              textTransform: 'none',
+              boxShadow: theme.shadows[3],
+              '&:hover': {
+                boxShadow: theme.shadows[4],
+              },
+            }}
+          >
+            {t(`navigation.${primaryCTA.title.toLowerCase()}`, primaryCTA.title)}
+          </Button>
+        </Box>
+      )}
 
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>

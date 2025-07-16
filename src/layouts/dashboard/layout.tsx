@@ -26,7 +26,7 @@ import { NavDesktop } from './nav';
 import { TopHeader } from './top-header';
 import { layoutClasses } from '../classes';
 import { LayoutSection } from '../core/layout-section';
-import { navData, bottomNavData } from '../config-nav-dashboard';
+import { navData, bottomNavData, primaryCTA } from '../config-nav-dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -165,6 +165,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       sidebarSection={
         <NavDesktop
           data={navData}
+          primaryCTA={primaryCTA}
           layoutQuery={layoutQuery}
           workspaces={storesCount > 0 ? customWorkspaces : []}
           bottomNavData={bottomNavData}

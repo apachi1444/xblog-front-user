@@ -6,16 +6,19 @@ const icon = (name: string) => (
   <Iconify icon={name} width={22} height={22} />
 );
 
+// Primary CTA button (like Koyeb's "Create Service")
+export const primaryCTA = {
+  title: 'Generate',
+  path: '/create',
+  icon: icon('mdi:rocket-launch'),
+};
+
+// Main navigation items (excluding the primary CTA)
 export const navData = [
   {
     title: 'Dashboard',
     path: '/',
     icon: icon('mdi:view-dashboard'),
-  },
-  {
-    title: 'Generate',
-    path: '/create',
-    icon: icon('mdi:rocket-launch'),
   },
   {
     title: 'Blogs',
