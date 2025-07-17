@@ -291,11 +291,14 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               sx={{
                 py: 1,
                 borderStyle: 'dashed',
-                borderColor: 'primary.main',
-                color: 'primary.main',
+                borderColor: 'rgba(79, 70, 229, 0.4)',
+                color: 'rgba(79, 70, 229, 0.7)',
+                bgcolor: 'rgba(79, 70, 229, 0.02)',
                 '&:hover': {
                   borderStyle: 'solid',
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  borderColor: 'rgba(79, 70, 229, 0.6)',
+                  backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                  color: 'primary.main',
                 },
               }}
             >

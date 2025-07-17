@@ -174,15 +174,22 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
               <Box>
                 <Button
                   fullWidth
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
                   startIcon={<Iconify icon="solar:add-circle-bold" />}
                   onClick={handleAddNewWebsite}
                   sx={{
                     py: 2,
                     my: 2,
                     borderRadius: 1,
-                    boxShadow: theme.shadows[3],
+                    borderColor: 'rgba(79, 70, 229, 0.3)',
+                    color: 'rgba(79, 70, 229, 0.8)',
+                    bgcolor: 'rgba(79, 70, 229, 0.02)',
+                    boxShadow: 'none',
+                    '&:hover': {
+                      borderColor: 'rgba(79, 70, 229, 0.5)',
+                      bgcolor: 'rgba(79, 70, 229, 0.08)',
+                      color: 'primary.main',
+                    }
                   }}
                 >
                   {t('websites.addNew', 'Add New Website')}

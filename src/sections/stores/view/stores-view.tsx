@@ -185,12 +185,17 @@ export function StoresView() {
           Websites
         </Typography>
         <Button
-          variant="contained"
+          variant="outlined"
           onClick={handleAddNewStore}
           startIcon={<Iconify icon="mingcute:add-line" />}
           sx={{
-            bgcolor: 'primary.main',
-            color: 'text.light',
+            borderColor: 'primary.main',
+            color: 'primary.main',
+            bgcolor: 'transparent',
+            '&:hover': {
+              bgcolor: 'rgba(79, 70, 229, 0.08)',
+              borderColor: 'primary.dark',
+            }
           }}
         >
           New website
