@@ -1,8 +1,8 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
@@ -22,9 +22,9 @@ import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
+import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
-import { varAlpha } from 'src/theme/styles/utils';
 import { SupportButton } from 'src/components/support';
 import { LanguageSwitcher } from 'src/components/language/language-switcher';
 
@@ -49,9 +49,24 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
 
+  const { data: subscriptionData} = useGetSubscriptionDetailsQuery();
 
-  console.log(user , " user " , subscriptionDetails , " subscriptionDetails ");
-  
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
+
+  let currentPlan = null;
+
+  if (subscriptionData?.plan_id && availablePlans.length > 0) {
+    // First try: Match by plan_id
+    currentPlan = availablePlans.find(plan => plan.id === subscriptionData.plan_id || plan.id === String(subscriptionData.plan_id));
+
+    // Second try: If no match by ID, try matching by name
+    if (!currentPlan && subscriptionData.subscription_name) {
+      currentPlan = availablePlans.find(plan =>
+        plan.name.toLowerCase() === subscriptionData.subscription_name.toLowerCase()
+      );
+    
+    }
+  }
 
   // Simple state for popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -185,16 +200,52 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
               </Typography>
             </Box>
           </Box>
-          <Typography
-            variant="caption"
+          <Box
             sx={{
-              display: 'block',
-              color: theme.palette.text.secondary,
-              fontWeight: 'medium'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.5,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 2,
+              bgcolor: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                ? 'rgba(156, 163, 175, 0.1)'
+                : 'rgba(79, 70, 229, 0.1)',
+              border: `1px solid ${subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                ? 'rgba(156, 163, 175, 0.2)'
+                : 'rgba(79, 70, 229, 0.2)'}`,
             }}
           >
-            {subscriptionDetails?.subscription_name || t('account.freePlan', 'Free')}
-          </Typography>
+            <Iconify
+              icon={subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                ? 'mdi:gift-outline'
+                : subscriptionDetails?.subscription_name?.toLowerCase().includes('enterprise')
+                  ? 'mdi:crown'
+                  : subscriptionDetails?.subscription_name?.toLowerCase().includes('pro')
+                    ? 'mdi:diamond'
+                    : 'mdi:rocket-launch'
+              }
+              width={14}
+              height={14}
+              sx={{
+                color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                  ? 'text.secondary'
+                  : 'primary.main'
+              }}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                  ? 'text.secondary'
+                  : 'primary.main',
+                fontWeight: 600,
+                fontSize: '0.75rem'
+              }}
+            >
+              {currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
+            </Typography>
+          </Box>
         </Box>
 
         {/* Menu Items */}
@@ -270,7 +321,17 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             sx={{
               py: 1.5,
               px: 2.5,
-              '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.04) }
+              borderRadius: 1.5,
+              mx: 1,
+              mb: 1,
+              border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+              bgcolor: alpha(theme.palette.error.main, 0.05),
+              '&:hover': {
+                bgcolor: alpha(theme.palette.error.main, 0.1),
+                borderColor: alpha(theme.palette.error.main, 0.3),
+                transform: 'translateY(-1px)',
+              },
+              transition: 'all 0.2s ease-in-out',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -280,10 +341,18 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
                   width: 20,
                   height: 20,
                   mr: 1,
-                  color: 'text.secondary'
+                  color: 'error.main'
                 }}
               />
-              <Typography variant="body2">{t('account.signOut', 'Sign Out')}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'error.main',
+                  fontWeight: 600
+                }}
+              >
+                {t('account.signOut', 'Sign Out')}
+              </Typography>
             </Box>
           </MenuItem>
         </MenuList>
@@ -388,20 +457,32 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         <Box sx={{ p: 2, pt: 1 }}>
           <Button
             fullWidth
-            variant="outlined"
+            variant="contained"
             onClick={() => handleClickItem('/upgrade-license')}
+            startIcon={
+              <Iconify
+                icon="mdi:rocket-launch"
+                width={18}
+                height={18}
+              />
+            }
             sx={{
-              py: 1,
-              borderRadius: 1,
-              fontWeight: 'medium',
+              py: 1.5,
+              borderRadius: 3,
+              fontWeight: 600,
               textTransform: 'none',
-              borderColor: alpha(theme.palette.grey[500], 0.3),
-              color: theme.palette.text.primary,
-              bgcolor: alpha(theme.palette.grey[500], 0.05),
+              bgcolor: 'rgba(79, 70, 229, 0.1)',
+              color: 'primary.main',
+              border: `1px solid rgba(79, 70, 229, 0.2)`,
+              boxShadow: 'none',
               '&:hover': {
-                borderColor: alpha(theme.palette.grey[500], 0.5),
-                bgcolor: alpha(theme.palette.grey[500], 0.1),
-              }
+                bgcolor: 'rgba(79, 70, 229, 0.15)',
+                borderColor: 'rgba(79, 70, 229, 0.3)',
+                color: 'primary.dark',
+                boxShadow: 'none',
+                transform: 'translateY(-1px)',
+              },
+              transition: 'all 0.2s ease-in-out',
             }}
           >
             {t('account.upgradePlan', 'Upgrade Plan')}

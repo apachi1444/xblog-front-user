@@ -42,25 +42,13 @@ export function ProfileView() {
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
 
   // Fetch plans using RTK Query (will use cache if available)
-  const { data: availablePlans = [], isLoading: isLoadingPlans } = useGetSubscriptionPlansQuery();
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
 
-  console.log('🔍 Debug Profile Data:');
-  console.log('Subscription Data:', subscriptionData);
-  console.log('Available Plans:', availablePlans);
-  console.log('Plans Loading:', isLoadingPlans);
-  console.log('Plan ID from subscription:', subscriptionData?.plan_id);
-  console.log('Available Plan IDs:', availablePlans.map(p => ({ id: p.id, name: p.name })));
-
-  // Try to match plan by ID first, then by name as fallback
   let currentPlan = null;
 
   if (subscriptionData?.plan_id && availablePlans.length > 0) {
     // First try: Match by plan_id
-    currentPlan = availablePlans.find(plan => {
-      console.log(`Comparing plan.id "${plan.id}" (${typeof plan.id}) with subscription.plan_id "${subscriptionData.plan_id}" (${typeof subscriptionData.plan_id})`);
-      // Handle both string and number comparisons
-      return plan.id === subscriptionData.plan_id || plan.id === String(subscriptionData.plan_id);
-    });
+    currentPlan = availablePlans.find(plan => plan.id === subscriptionData.plan_id || plan.id === String(subscriptionData.plan_id));
 
     // Second try: If no match by ID, try matching by name
     if (!currentPlan && subscriptionData.subscription_name) {
@@ -71,19 +59,7 @@ export function ProfileView() {
     }
   }
 
-
-  const isCurrentPlanFree = currentPlan ? isFreeplan(currentPlan) : false;
-
-
-  // Additional debugging
-  if (subscriptionData?.plan_id && !currentPlan) {
-    console.error('❌ Plan matching failed!');
-    console.error('Looking for plan_id:', subscriptionData.plan_id);
-    console.error('Available plans:', availablePlans);
-    console.error('Type of plan_id:', typeof subscriptionData.plan_id);
-    console.error('Type of plan.id:', availablePlans.length > 0 ? typeof availablePlans[0].id : 'no plans');
-  }
-  
+  const isCurrentPlanFree : boolean = currentPlan ? isFreeplan(currentPlan) : false;
 
   // Handle upgrade license navigation
   const handleUpgradeLicense = () => {
@@ -240,12 +216,55 @@ export function ProfileView() {
                     <Typography variant="body2" color="text.secondary">
                       {t('profile.stats.currentPlan', 'Current Plan')}
                     </Typography>
-                    <Chip
-                      label={currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
-                      size="small"
-                      color="success"
-                      sx={{ fontWeight: 600 }}
-                    />
+                    <Box
+                      sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.8,
+                        px: 2,
+                        py: 1,
+                        borderRadius: 3,
+                        bgcolor: (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                          ? 'rgba(156, 163, 175, 0.1)'
+                          : 'rgba(79, 70, 229, 0.1)',
+                        border: `1px solid ${(currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                          ? 'rgba(156, 163, 175, 0.2)'
+                          : 'rgba(79, 70, 229, 0.2)'}`,
+                        boxShadow: (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                          ? 'none'
+                          : '0 2px 8px rgba(79, 70, 229, 0.15)',
+                      }}
+                    >
+                      <Iconify
+                        icon={(currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                          ? 'mdi:gift-outline'
+                          : (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('enterprise')
+                            ? 'mdi:crown'
+                            : (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('pro')
+                              ? 'mdi:diamond'
+                              : 'mdi:rocket-launch'
+                        }
+                        width={18}
+                        height={18}
+                        sx={{
+                          color: (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                            ? 'text.secondary'
+                            : 'primary.main'
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: (currentPlan?.name || subscriptionData?.subscription_name || 'Free').toLowerCase().includes('free')
+                            ? 'text.secondary'
+                            : 'primary.main',
+                          fontWeight: 700,
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        {currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
+                      </Typography>
+                    </Box>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" color="text.secondary">

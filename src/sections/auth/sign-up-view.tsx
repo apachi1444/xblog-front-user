@@ -4,7 +4,7 @@ import type { SignUpFormData } from 'src/validation/auth-schemas';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,10 +14,8 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
 import { CircularProgress } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
 
@@ -35,8 +33,7 @@ export function SignUpView() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // UI state
-  const [showPassword, setShowPassword] = useState(false);
+
 
   // RTK Query hooks
   const [signUp, { isLoading }] = useSignUpMutation();
@@ -182,21 +179,11 @@ export function SignUpView() {
           />
 
           <PasswordElement
-            {...formMethods.register('password')}
             name="password"
             label={t('auth.signup.password', "Password")}
             fullWidth
             margin="normal"
-            type={showPassword ? 'text' : 'password'}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                    <Iconify icon={showPassword ? 'ic:round-visibility' : 'ic:round-visibility-off'} />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            required
           />
 
           <LoadingButton
