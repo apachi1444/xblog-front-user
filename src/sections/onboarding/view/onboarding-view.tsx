@@ -9,11 +9,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
+import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -27,7 +29,6 @@ import {
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
-import { ResponsivePricingPlans } from 'src/components/pricing';
 
 // Define interest options with i18n keys
 const getInterests = (t: any) => [
@@ -58,7 +59,10 @@ export function OnBoardingView() {
   // Initialize the mutations and queries
   const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
   const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
-  const { data: subscriptionPlans = [] } = useGetSubscriptionPlansQuery();
+  const { data: plans } = useGetSubscriptionPlansQuery();
+
+  // Debug: Log plans data to understand the structure
+  console.log('📋 Plans from API:', plans);
 
   // Get translated arrays
   const INTERESTS = getInterests(t);
@@ -77,6 +81,29 @@ export function OnBoardingView() {
 
   // State for selected plan
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
+  // State for billing period
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Handle billing period change and clear selected plan if it doesn't match
+  const handleBillingPeriodChange = (newPeriod: 'monthly' | 'yearly') => {
+    setBillingPeriod(newPeriod);
+
+    // Clear selected plan if it doesn't match the new billing period
+    if (selectedPlan && selectedPlan !== 'free') {
+      const selectedPlanData = plans?.find(p => p.id === selectedPlan);
+      if (selectedPlanData) {
+        const planName = selectedPlanData.name.toLowerCase();
+        const isYearlyPlan = planName.includes('yearly') || planName.includes('annual');
+        const isMonthlyPlan = planName.includes('monthly') || (!planName.includes('yearly') && !planName.includes('annual'));
+
+        // Clear selection if plan doesn't match new period
+        if ((newPeriod === 'yearly' && !isYearlyPlan) || (newPeriod === 'monthly' && !isMonthlyPlan)) {
+          setSelectedPlan(null);
+        }
+      }
+    }
+  };
 
   // Check if user has already completed onboarding
   useEffect(() => {
@@ -127,33 +154,17 @@ export function OnBoardingView() {
       }).unwrap();
 
       // Find the plan data
-      const selectedPlanData = subscriptionPlans.find(p => p.id === planId);
+      const selectedPlanData = plans?.find(p => p.id === planId);
 
-      // Show loading message
-      toast.success(t('onboarding.redirectingToPlan', 'Redirecting to payment...'));
-
-      // Check if we're in development mode or if plan URL is missing
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      const useMockPayment = isDevelopment || !selectedPlanData?.url;
-
-      if (useMockPayment) {
-        // Use mock payment for development/testing
-        const returnUrl = encodeURIComponent(`${window.location.origin}/onboarding/success`);
-        const mockPaymentUrl = `${window.location.origin}/mock-payment?return_url=${returnUrl}&plan_name=${encodeURIComponent(selectedPlanData?.name || 'Premium Plan')}&plan_price=${encodeURIComponent(selectedPlanData?.price || '$29.99')}`;
-
-        // Redirect to mock payment page
-        window.location.href = mockPaymentUrl;
+      if (selectedPlanData?.url) {
+        // Redirect to the plan's payment URL
+        window.location.href = selectedPlanData.url;
       } else {
-        // Use real payment URL for production
-        const returnUrl = encodeURIComponent(`${window.location.origin}/onboarding/success`);
-        const paymentUrl = `${selectedPlanData.url + (selectedPlanData.url.includes('?') ? '&' : '?')}return_url=${returnUrl}`;
-
-        // Redirect to real payment page
-        window.location.href = paymentUrl;
+        toast.error('Payment URL not available for this plan');
       }
     } catch (error) {
       console.error('Failed to save user preferences before payment:', error);
-      toast.error(t('onboarding.errorBeforePayment', 'Failed to save preferences. Please try again.'));
+      toast.error('Failed to save preferences. Please try again.');
     }
   };
 
@@ -169,7 +180,7 @@ export function OnBoardingView() {
     // Handle our custom 'free' plan ID
     if (planId === 'free') return true;
 
-    const plan = subscriptionPlans.find(p => p.id === planId);
+    const plan = plans?.find(p => p.id === planId);
     if (!plan) return true;
 
     const planName = plan.name?.toLowerCase() || '';
@@ -184,7 +195,10 @@ export function OnBoardingView() {
 
   // Handle complete onboarding
   const handleComplete = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan) {
+      toast.error(t('onboarding.selectPlan', 'Please select a plan to continue.'));
+      return;
+    }
 
     // If it's a paid plan, redirect to payment
     if (selectedPlan !== 'free' && !isFreeplan(selectedPlan)) {
@@ -275,16 +289,10 @@ export function OnBoardingView() {
               : t('onboarding.choosePlan', 'Choose Your Plan')
             }
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            {step === 1
-              ? t('onboarding.welcomeSubtitle', 'Let\'s get to know you better so we can personalize your experience.')
-              : t('onboarding.choosePlanSubtitle', 'Select a plan that works best for your content creation needs.')
-            }
-          </Typography>
         </Stack>
 
         {/* Progress indicator */}
-        <Box sx={{ width: '100%', mb: 5 }}>
+        <Box sx={{ width: '100%', mb: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color={step === 1 ? 'primary.main' : 'text.secondary'}>
               {t('onboarding.progress.preferences', 'Your Preferences')}
@@ -437,152 +445,293 @@ export function OnBoardingView() {
 
         {step === 2 && (
           <Stack spacing={5}>
-            {/* Plan Selection Header */}
-            <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <Typography variant="h5" gutterBottom>
-                {t('onboarding.choosePlan', 'Choose Your Plan')}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {t('onboarding.planDescription', 'Select a plan that fits your needs. You can always upgrade later.')}
-              </Typography>
-
-              {/* Development Mode Notice */}
-              {process.env.NODE_ENV === 'development' && (
-                <Box
+            {/* Modern Header with Step Indicator */}
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              {/* Continue for Free Plan Option */}
+              <Box sx={{ mt: 4, mb: 4, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => handlePlanSelect('free')}
                   sx={{
-                    mt: 2,
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor: alpha(theme.palette.info.main, 0.1),
-                    border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
-                    maxWidth: 400,
-                    mx: 'auto',
+                    borderRadius: 3,
+                    px: 4,
+                    py: 1.5,
+                    borderColor: alpha(theme.palette.grey[500], 0.3),
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    },
+                    ...(selectedPlan === 'free' && {
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    })
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Iconify
-                      icon="mdi:information"
-                      sx={{ color: 'info.main', mr: 1, fontSize: 16 }}
-                    />
-                    <Typography variant="caption" color="info.main" fontWeight="medium">
-                      {t('onboarding.devMode', 'Development Mode - Mock Payment Enabled')}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-            </Box>
+                  {t('onboarding.continueForFree', 'Continue for Free')}
+                </Button>
+              </Box>
 
-            {/* Paid Plans Carousel */}
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                {t('onboarding.paidPlans', 'Premium Plans')}
-              </Typography>
-              <ResponsivePricingPlans
-                onSelectPlan={handlePlanSelect}
-                selectedPlan={selectedPlan}
-                title=""
-                subtitle=""
-                hideFreePlans={false}
-              />
-            </Box>
-
-            {/* Free Plan Option - Smaller and Less Prominent */}
-            <Box sx={{ textAlign: 'center', mt: 4 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
-                {t('onboarding.freePlanOption', 'Or start for free')}
-              </Typography>
-              <Card
-                sx={{
-                  maxWidth: 280,
-                  mx: 'auto',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  borderColor: selectedPlan === 'free' ? 'primary.main' : alpha(theme.palette.divider, 0.5),
-                  borderWidth: selectedPlan === 'free' ? 2 : 1,
-                  borderStyle: 'solid',
-                  boxShadow: selectedPlan === 'free' ? theme.customShadows?.z4 : 'none',
-                  bgcolor: alpha(theme.palette.grey[50], 0.5),
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    boxShadow: theme.customShadows?.card,
-                  }
-                }}
-                onClick={() => handlePlanSelect('free')}
-              >
-                <CardActionArea sx={{ p: 2 }}>
-                  <Stack spacing={1.5} alignItems="center">
-                    <Box
+              {/* Billing Toggle */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 3 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    bgcolor: alpha(theme.palette.grey[500], 0.1),
+                    borderRadius: 3,
+                    p: 0.5,
+                  }}
+                >
+                  
+                  <Button
+                    variant={billingPeriod === 'monthly' ? 'contained' : 'text'}
+                    size="small"
+                    onClick={() => handleBillingPeriodChange('monthly')}
+                    sx={{
+                      borderRadius: 2.5,
+                      px: 3,
+                      py: 1,
+                      bgcolor: billingPeriod === 'monthly' ? 'primary.main' : 'transparent',
+                      color: billingPeriod === 'monthly' ? 'white' : 'text.secondary',
+                      fontWeight: 500,
+                      '&:hover': {
+                        bgcolor: billingPeriod === 'monthly' ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08)
+                      }
+                    }}
+                  >
+                    {t('onboarding.monthly', 'Monthly')}
+                  </Button>
+                  <Button
+                    variant={billingPeriod === 'yearly' ? 'contained' : 'text'}
+                    size="small"
+                    onClick={() => handleBillingPeriodChange('yearly')}
+                    sx={{
+                      borderRadius: 2.5,
+                      px: 3,
+                      py: 1,
+                      bgcolor: billingPeriod === 'yearly' ? 'primary.main' : 'transparent',
+                      color: billingPeriod === 'yearly' ? 'white' : 'text.secondary',
+                      fontWeight: 600,
+                      '&:hover': {
+                        bgcolor: billingPeriod === 'yearly' ? 'primary.dark' : alpha(theme.palette.primary.main, 0.08)
+                      }
+                    }}
+                  >
+                    {t('onboarding.yearly', 'Yearly')}
+                    <Chip
+                      label="-25%"
+                      size="small"
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                        ml: 1,
+                        bgcolor: 'success.main',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        height: 20
                       }}
-                    >
-                      <Iconify
-                        icon="mdi:gift-outline"
-                        sx={{ color: 'success.main', fontSize: 20 }}
-                      />
-                    </Box>
-                    <Typography variant="subtitle2">
-                      {t('onboarding.freePlan', 'Free Plan')}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" align="center">
-                      {t('onboarding.freePlanDescription', '5 articles/month with basic features')}
-                    </Typography>
-                    <Typography variant="h6" color="success.main">
-                      {t('onboarding.freePrice', '$0')}
-                      <Typography component="span" variant="caption" color="text.secondary">
-                        {t('onboarding.perMonth', '/month')}
-                      </Typography>
-                    </Typography>
-                    {selectedPlan === 'free' && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
-                        <CheckCircleOutlineIcon sx={{ mr: 0.5, fontSize: 16 }} />
-                        <Typography variant="caption" fontWeight="medium">
-                          {t('onboarding.selected', 'Selected')}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </CardActionArea>
-              </Card>
+                    />
+                  </Button>
+                </Box>
+              </Box>
             </Box>
 
+            {/* Premium Plans Grid */}
+            <Box sx={{ position: 'relative' }}>
+              <Grid container spacing={3} justifyContent="center">
+                {plans
+                  ?.filter(plan => {
+                    const planName = plan.name.toLowerCase();
+
+                    // Exclude free plans
+                    if (planName.includes('free')) {
+                      return false;
+                    }
+
+                    // Filter based on billing period
+                    if (billingPeriod === 'yearly') {
+                      const isYearly = planName.includes('yearly') || planName.includes('annual');
+                      return isYearly;
+                    }
+                      const isMonthly = planName.includes('monthly') || (!planName.includes('yearly') && !planName.includes('annual'));
+                      return isMonthly;
+
+                  })
+                  .sort((a, b) => {
+                    // Sort by price from smallest to greatest
+                    const priceA = parseFloat(a.price) || 0;
+                    const priceB = parseFloat(b.price) || 0;
+                    console.log(`💰 Sorting: ${a.name} (${priceA}) vs ${b.name} (${priceB})`);
+                    return priceA - priceB;
+                  })
+                  .slice(0, 2)
+                  .map((plan, index) => {
+                    const isSelected = selectedPlan === plan.id;
+                    const isPopular = false; // Make second plan popular
+
+                    return (
+                      <Grid xs={12} sm={6} md={5} key={plan.id}>
+                        <Card
+                          onClick={() => handlePlanSelect(plan.id)}
+                          sx={{
+                            cursor: 'pointer',
+                            borderRadius: 4,
+                            border: isSelected
+                              ? `2px solid ${theme.palette.primary.main}`
+                              : isPopular
+                                ? `2px solid ${theme.palette.primary.main}`
+                                : `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                            bgcolor: isPopular ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
+                            transition: 'all 0.3s ease',
+                            position: 'relative',
+                            overflow: 'visible',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: theme.customShadows?.z20,
+                            },
+                            ...(isSelected && {
+                              transform: 'translateY(-4px)',
+                              boxShadow: theme.customShadows?.primary,
+                            })
+                          }}
+                        >
+                          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                            {/* Plan Badge */}
+                            <Box sx={{ mb: 3 }}>
+                              <Chip
+                                label={plan.name}
+                                sx={{
+                                  bgcolor: isPopular ? 'primary.main' : alpha(theme.palette.grey[500], 0.1),
+                                  color: isPopular ? 'white' : 'text.primary',
+                                  fontWeight: 600,
+                                  fontSize: '0.875rem',
+                                  px: 2,
+                                  py: 1,
+                                  height: 32,
+                                }}
+                              />
+                              {isPopular && (
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    display: 'block',
+                                    mt: 1,
+                                    color: 'primary.main',
+                                    fontWeight: 600,
+                                    fontSize: '0.75rem'
+                                  }}
+                                >
+                                  Save 25%
+                                </Typography>
+                              )}
+                            </Box>
+
+                            {/* Price */}
+                            <Box sx={{ mb: 4 }}>
+                              <Typography
+                                variant="h3"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: 'text.primary',
+                                  mb: 0.5,
+                                }}
+                              >
+                                {plan.price}
+                                <Typography
+                                  component="span"
+                                  variant="body1"
+                                  sx={{ color: 'text.secondary', fontWeight: 400 }}
+                                >
+                                  /mo
+                                </Typography>
+                              </Typography>
+                            </Box>
+
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', mb: 3 }}
+                            >
+                              {t('onboarding.securePayment', 'Secure payment powered by Stripe')}
+                            </Typography>
+
+                            {/* Features */}
+                            <Box sx={{ textAlign: 'left' }}>
+                              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                                {t('onboarding.features', 'Features')}
+                              </Typography>
+                              <Stack spacing={1.5}>
+                                {(plan.features || [
+                                  'Unlimited articles',
+                                  'AI content generation',
+                                  'SEO optimization',
+                                  'Analytics dashboard',
+                                  'Priority support'
+                                ]).slice(0, 5).map((feature, idx) => (
+                                  <Box key={idx} sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <CheckCircleOutlineIcon
+                                      sx={{
+                                        color: 'primary.main',
+                                        fontSize: 18,
+                                        mr: 1.5
+                                      }}
+                                    />
+                                    <Typography variant="body2" color="text.primary">
+                                      {feature}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Stack>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
+              </Grid>
+            </Box>
             {/* Action buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 6 }}>
               <Button
-                variant="outlined"
+                variant="text"
                 size="large"
                 onClick={() => setStep(1)}
-                sx={{ px: 3 }}
+                sx={{
+                  px: 4,
+                  color: 'text.secondary',
+                  '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.08) }
+                }}
                 disabled={isUpdatingUser || isCreatingSubscription}
               >
                 {t('onboarding.back', 'Back')}
               </Button>
 
-              {/* Continue button - shows for all plan selections */}
               <LoadingButton
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
                 loading={isUpdatingUser || isCreatingSubscription}
-                disabled={!selectedPlan}
+                disabled={false}
                 sx={{
-                  px: 5,
-                  ...(selectedPlan === 'free' && {
-                    bgcolor: 'success.main',
-                    '&:hover': {
-                      bgcolor: 'success.dark',
-                    }
-                  })
+                  px: 6,
+                  py: 1.5,
+                  borderRadius: 3,
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  background: selectedPlan === 'free'
+                    ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
+                    : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  boxShadow: selectedPlan === 'free' ? theme.customShadows?.success : theme.customShadows?.primary,
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: selectedPlan === 'free' ? theme.customShadows?.success : theme.customShadows?.primary,
+                  }
                 }}
               >
                 {selectedPlan === 'free'
-                  ? t('onboarding.startWithFree', 'Start with Free Plan')
+                  ? t('onboarding.continueWithFree', 'Continue with Free Plan')
                   : selectedPlan && !isFreeplan(selectedPlan)
                   ? t('onboarding.continueWithPremium', 'Continue with Premium Plan')
                   : t('onboarding.selectPlan', 'Select a Plan')
