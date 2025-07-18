@@ -85,18 +85,7 @@ export function RegenerateCountDisplay() {
           >
             {isLoading
               ? '...'
-              : `${regenerationsAvailable}/${regenerationsTotal} ${t('regenerate.availableLabel', 'available')}`}
-          </Typography>
-
-          <Typography
-            variant="caption"
-            sx={{
-              lineHeight: 1,
-              color: theme.palette.text.secondary,
-              display: 'block',
-            }}
-          >
-            {t('regenerate.label', 'Regenerations')}
+              : `${regenerationsAvailable} ${t('regenerate.label', 'Regenerations')}`}
           </Typography>
         </Box>
       </Box>
