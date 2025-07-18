@@ -17,7 +17,7 @@ import { formatMetrics, getContentQuality, calculateArticleMetrics } from 'src/u
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
-import { useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
+import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -93,7 +93,7 @@ function DraftArticlesSection() {
             </Typography>
             <Button
               variant="contained"
-              onClick={() => navigate('/generate')}
+              onClick={() => navigate('/create')}
               sx={{
                 borderRadius: 2,
                 textTransform: 'none',
@@ -297,13 +297,29 @@ function LicenseInfoSection() {
   const navigate = useNavigate();
 
   const { data: subscriptionDetails, isLoading } = useGetSubscriptionDetailsQuery();
-  const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();
+  const { regenerationsAvailable, regenerationsTotal } = useRegenerateManager();  
+  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
 
   if (isLoading || !subscriptionDetails) {
     return null;
   }
 
-  const planName = subscriptionDetails.subscription_name || 'Free Plan';
+  let currentPlan = null;
+
+  if (subscriptionDetails?.plan_id && availablePlans.length > 0) {
+    // First try: Match by plan_id
+    currentPlan = availablePlans.find(plan => plan.id === subscriptionDetails.plan_id || plan.id === String(subscriptionDetails.plan_id));
+
+    // Second try: If no match by ID, try matching by name
+    if (!currentPlan && subscriptionDetails.subscription_name) {
+      currentPlan = availablePlans.find(plan =>
+        plan.name.toLowerCase() === subscriptionDetails.subscription_name.toLowerCase()
+      );
+    
+    }
+  }
+
+  const planName = currentPlan?.name || 'Free Plan';
   const isFreePlan = planName.toLowerCase().includes('free');
   const expirationDate = subscriptionDetails.expiration_date;
 

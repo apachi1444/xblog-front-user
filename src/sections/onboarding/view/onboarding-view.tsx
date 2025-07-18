@@ -22,7 +22,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import {
-  useGetSubscriptionPlansQuery
+  useGetSubscriptionPlansQuery,
+  useCreateSubscriptionMutation
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -56,6 +57,7 @@ export function OnBoardingView() {
 
   // Initialize the mutations and queries
   const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
+  const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
   const { data: subscriptionPlans = [] } = useGetSubscriptionPlansQuery();
 
   // Get translated arrays
@@ -200,6 +202,11 @@ export function OnBoardingView() {
         is_completed_onboarding: true,
       }).unwrap();
 
+      // Create free subscription with plan_id "FreePlan-001"
+      await createSubscription({
+        plan_id: "FreePlan-001"
+      }).unwrap();
+
       toast.success(t('onboarding.freeSelected', 'Welcome! You\'re all set with the free plan.'));
 
       // Mark onboarding as completed in Redux store
@@ -208,7 +215,7 @@ export function OnBoardingView() {
       // Navigate to dashboard
       navigate('/');
     } catch (error) {
-      console.error('Failed to save user preferences:', error);
+      console.error('Failed to save user preferences or create subscription:', error);
       toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
 
       // Still mark as completed in the local store and navigate
@@ -552,7 +559,7 @@ export function OnBoardingView() {
                 size="large"
                 onClick={() => setStep(1)}
                 sx={{ px: 3 }}
-                disabled={isUpdatingUser}
+                disabled={isUpdatingUser || isCreatingSubscription}
               >
                 {t('onboarding.back', 'Back')}
               </Button>
@@ -562,7 +569,7 @@ export function OnBoardingView() {
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
-                loading={isUpdatingUser}
+                loading={isUpdatingUser || isCreatingSubscription}
                 disabled={!selectedPlan}
                 sx={{
                   px: 5,
