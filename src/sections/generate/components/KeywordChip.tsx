@@ -15,12 +15,20 @@ export function KeywordChip({ keyword, index, onDelete }: KeywordChipProps) {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        bgcolor: theme.palette.primary.lighter,
-        color: theme.palette.primary.dark,
+        bgcolor: theme.palette.mode === 'dark'
+          ? `${theme.palette.primary.main}30`
+          : theme.palette.primary.lighter,
+        color: theme.palette.mode === 'dark'
+          ? theme.palette.common.white
+          : theme.palette.primary.dark,
+        border: theme.palette.mode === 'dark'
+          ? `1px solid ${theme.palette.primary.main}40`
+          : `1px solid ${theme.palette.primary.main}30`,
         borderRadius: theme.shape.borderRadius * 2,
         py: 0.75,
         px: 2,
         fontSize: theme.typography.pxToRem(14),
+        fontWeight: 600,
         animation: `fadeIn 0.3s ease-in-out ${index * 0.05}s both`,
         '@keyframes fadeIn': {
           '0%': { opacity: 0, transform: 'translateY(5px)' },
@@ -43,8 +51,15 @@ export function KeywordChip({ keyword, index, onDelete }: KeywordChipProps) {
           fontSize: theme.typography.pxToRem(16),
           fontWeight: 'bold',
           lineHeight: 1,
-          transition: 'opacity 0.2s ease',
-          '&:hover': { opacity: 0.7 },
+          color: theme.palette.mode === 'dark'
+            ? theme.palette.common.white
+            : theme.palette.primary.dark,
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            opacity: 0.7,
+            color: theme.palette.error.main,
+            transform: 'scale(1.1)'
+          },
         }}
       >
         ×

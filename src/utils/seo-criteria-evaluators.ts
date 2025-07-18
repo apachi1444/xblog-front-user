@@ -27,8 +27,15 @@ const getContentText = (formData: GenerateArticleFormData): string => {
     return stripHtmlTags(formData.generatedHtml);
   }
 
-  // Fallback: Use content description only if no HTML
-  return formData.step1?.contentDescription || '';
+  // Check if we have sections data (step 3)
+  if (formData.step3?.sections && Array.isArray(formData.step3.sections) && formData.step3.sections.length > 0) {
+    // Concatenate all section content
+    return formData.step3.sections.map(section => stripHtmlTags(section.content || '')).join(' ');
+  }
+
+  // Return empty string if no actual content is generated
+  // Don't use contentDescription as it's just a description, not actual content
+  return '';
 };
 
 const findKeywordInSubheadings = (sections: any[], keyword: string): boolean => {
@@ -146,35 +153,30 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[0].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    // ✅ Check metaTitle (SEO title) instead of title (article title)
-    const { title, metaTitle, primaryKeyword } = formData.step1;
-    const seoTitle = metaTitle || title; // Use metaTitle if available, fallback to title
+    // ✅ ONLY check metaTitle (SEO title), NOT article title
+    const { metaTitle, primaryKeyword } = formData.step1;
 
-    console.log('🔍 Keyword in Title - Article Title:', title);
-    console.log('🔍 Keyword in Title - SEO Title (metaTitle):', metaTitle);
-    console.log('🔍 Keyword in Title - Using:', seoTitle);
-    console.log('🔍 Keyword in Title - Primary Keyword:', primaryKeyword);
-    console.log('🔍 Keyword in Title - Are they equal?', seoTitle === primaryKeyword);
-    console.log('🔍 Keyword in Title - Lengths:', { seoTitle: seoTitle?.length, primaryKeyword: primaryKeyword?.length });
-
-    if (!seoTitle || !primaryKeyword) {
+    if (!primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for SEO title and primary keyword',
+        message: 'Waiting for primary keyword',
         score: 0,
       };
     }
 
-    const titleLower = seoTitle.toLowerCase();
-    const keywordLower = primaryKeyword.toLowerCase();
+    if (!metaTitle) {
+      return {
+        status: 'pending',
+        message: 'Waiting for SEO title generation',
+        score: 0,
+      };
+    }
 
-    console.log('🔍 Comparison - Title Lower:', `"${titleLower}"`);
-    console.log('🔍 Comparison - Keyword Lower:', `"${keywordLower}"`);
-    console.log('🔍 Comparison - Includes check:', titleLower.includes(keywordLower));
+    const titleLower = metaTitle.toLowerCase();
+    const keywordLower = primaryKeyword.toLowerCase();
 
     // First check: exact phrase match (highest score)
     if (titleLower.includes(keywordLower)) {
-      console.log('✅ Exact phrase match found');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -187,13 +189,8 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const matchingWords = keywordWords.filter(word => titleLower.includes(word));
     const matchPercentage = keywordWords.length > 0 ? matchingWords.length / keywordWords.length : 0;
 
-    console.log('🔍 Keyword words:', keywordWords);
-    console.log('🔍 Matching words:', matchingWords);
-    console.log('🔍 Match percentage:', matchPercentage);
-
     // If at least 50% of significant words match, give partial credit
     if (matchPercentage >= 0.5) {
-      console.log('⚠️ Partial word match found');
       return {
         status: 'warning',
         message: criterion.evaluationStatus.warning || 'Some keyword words found in title',
@@ -201,7 +198,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    console.log('❌ No significant keyword match found');
     return {
       status: 'error',
       message: criterion.evaluationStatus.error,
@@ -635,6 +631,16 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[1].criteria[3]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
+    // Check if we have generated content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
     const externalLinks = formData.step2?.externalLinks;
 
     if (externalLinks && Array.isArray(externalLinks) && externalLinks.length > 0) {
@@ -656,6 +662,16 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[1].criteria[4]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
+    // Check if we have generated content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
     const externalLinks = formData.step2?.externalLinks;
 
     if (externalLinks && Array.isArray(externalLinks) && externalLinks.length > 0) {
@@ -676,6 +692,16 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
   206: (_, formData) => { // internal_links
     const criterion = sections[1].criteria[5]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
+
+    // Check if we have generated content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
 
     const internalLinks = formData.step2?.internalLinks;
 
@@ -699,26 +725,30 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[2].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
-    const { title, metaTitle, primaryKeyword } = formData.step1;
-    const seoTitle = metaTitle || title; // Use metaTitle if available, fallback to title
+    // ✅ ONLY check metaTitle (SEO title), NOT article title
+    const { metaTitle, primaryKeyword } = formData.step1;
 
-    if (!seoTitle || !primaryKeyword) {
+    if (!primaryKeyword) {
       return {
         status: 'pending',
-        message: 'Waiting for SEO title and primary keyword',
+        message: 'Waiting for primary keyword',
         score: 0,
       };
     }
 
-    const titleLower = seoTitle.toLowerCase().trim();
-    const keywordLower = primaryKeyword.toLowerCase().trim();
+    if (!metaTitle) {
+      return {
+        status: 'pending',
+        message: 'Waiting for SEO title generation',
+        score: 0,
+      };
+    }
 
-    console.log('🔍 Keyword at Start - Title Lower:', `"${titleLower}"`);
-    console.log('🔍 Keyword at Start - Keyword Lower:', `"${keywordLower}"`);
+    const titleLower = metaTitle.toLowerCase().trim();
+    const keywordLower = primaryKeyword.toLowerCase().trim();
 
     // Check if SEO title starts with the primary keyword (exact match)
     if (titleLower.startsWith(keywordLower)) {
-      console.log('✅ Exact keyword match at start');
       return {
         status: 'success',
         message: criterion.evaluationStatus.success,
@@ -729,7 +759,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     // Check if SEO title starts with the first significant word of the keyword
     const keywordWords = keywordLower.split(/\s+/).filter(word => word.length > 2);
     if (keywordWords.length > 0 && titleLower.startsWith(keywordWords[0])) {
-      console.log('⚠️ First keyword word found at start');
       return {
         status: 'warning',
         message: criterion.evaluationStatus.warning || 'Title starts with part of the focus keyword',
@@ -826,23 +855,24 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[3].criteria[0]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
+    // Check if we have any actual content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
     const {toc} = formData;
     const sections_data = formData.step3?.sections;
 
-    // 🔍 Debug logging to see what data we have
-    console.log('🔍 TOC Criteria Debug:', {
-      toc,
-      tocType: typeof toc,
-      tocIsArray: Array.isArray(toc),
-      tocLength: toc ? toc.length : 'N/A',
-      sections_data,
-      sectionsType: typeof sections_data,
-      sectionsIsArray: Array.isArray(sections_data),
-      sectionsLength: sections_data ? sections_data.length : 'N/A',
-      formDataKeys: Object.keys(formData)
-    });
+    // Check if we have valid TOC or sections data
+    const hasValidToc = toc && Array.isArray(toc) && toc.length > 0;
+    const hasValidSections = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
 
-    if (!toc && !sections_data) {
+    if (!hasValidToc && !hasValidSections) {
       return {
         status: 'pending',
         message: 'Waiting for content generation',
@@ -851,8 +881,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     }
 
     const hasTOC = hasTableOfContents(toc || [], sections_data || []);
-
-    console.log('🔍 TOC Check Result:', { hasTOC, toc: toc || [], sections: sections_data || [] });
 
     if (hasTOC) {
       return {
@@ -873,10 +901,24 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[3].criteria[1]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
+    // Check if we have any actual content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
     const sections_data = formData.step3?.sections;
     const {generatedHtml} = formData;
 
-    if (!sections_data && !generatedHtml) {
+    // Double check with more specific validation
+    const hasValidSections = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
+    const hasValidHtml = generatedHtml && generatedHtml.trim().length > 0;
+
+    if (!hasValidSections && !hasValidHtml) {
       return {
         status: 'pending',
         message: 'Waiting for content generation',
@@ -913,11 +955,26 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const criterion = sections[3].criteria[2]
     if (!criterion) return { status: 'error', message: 'Criterion not found', score: 0 };
 
+    // Check if we have any actual content first
+    const bodyContent = getContentText(formData);
+    if (!bodyContent) {
+      return {
+        status: 'pending',
+        message: 'Waiting for content generation',
+        score: 0,
+      };
+    }
+
     const {images} = formData;
     const sections_data = formData.step3?.sections;
     const {generatedHtml} = formData;
 
-    if (!images && !sections_data && !generatedHtml) {
+    // More specific validation for media content
+    const hasValidImages = images && Array.isArray(images) && images.length > 0;
+    const hasValidSections = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
+    const hasValidHtml = generatedHtml && generatedHtml.trim().length > 0;
+
+    if (!hasValidImages && !hasValidSections && !hasValidHtml) {
       return {
         status: 'pending',
         message: 'Waiting for content generation',

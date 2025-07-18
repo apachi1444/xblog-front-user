@@ -50,7 +50,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_first_10.success",
       error: "seo.criteria.core.keyword_in_first_10.error"
     },
-    inputKeys: ["content"],
+    inputKeys: ["generatedHtml"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one also !
@@ -63,7 +63,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       success: "seo.criteria.core.keyword_in_content.success",
       error: "seo.criteria.core.keyword_in_content.error"
     },
-    inputKeys: ["content", "primaryKeyword"],
+    inputKeys: ["content"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one !
@@ -77,7 +77,7 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
       warning: "seo.criteria.core.content_length.warning",
       error: "seo.criteria.core.content_length.error"
     },
-    inputKeys: ["generatedHtml", "sections"],
+    inputKeys: ["generatedHtml"],
     warningScore: 3, // 75% of the weight
     optimizable: false // Cannot be automatically optimized
   }
@@ -97,7 +97,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.keyword_in_subheadings.success",
       error: "seo.criteria.boosters.keyword_in_subheadings.error"
     },
-    inputKeys: ["sections", "generatedHtml", "primaryKeyword"],
+    inputKeys: ["toc"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one !
@@ -111,7 +111,7 @@ const SEO_BOOSTERS: Criterion[] = [
       warning: "seo.criteria.boosters.keyword_density.warning",
       error: "seo.criteria.boosters.keyword_density.error"
     },
-    inputKeys: ["sections", "generatedHtml", "primaryKeyword"],
+    inputKeys: ["generatedHtml"],
     warningScore: 2, // ~67% of the weight
     optimizable: false // Cannot be automatically optimized
   },
@@ -137,7 +137,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.external_links.success",
       error: "seo.criteria.boosters.external_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "externalLinks"],
+    inputKeys: ["externalLinks"],
     optimizable: false
   },
   {
@@ -149,7 +149,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.dofollow_links.success",
       error: "seo.criteria.boosters.dofollow_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "externalLinks"],
+    inputKeys: ["externalLinks"],
     optimizable: false
   },
   {
@@ -161,7 +161,7 @@ const SEO_BOOSTERS: Criterion[] = [
       success: "seo.criteria.boosters.internal_links.success",
       error: "seo.criteria.boosters.internal_links.error"
     },
-    inputKeys: ["sections", "generatedHtml", "internalLinks"],
+    inputKeys: ["internalLinks"],
     optimizable: false
   }
 ];
@@ -180,9 +180,9 @@ const TITLE_OPTIMIZATION: Criterion[] = [
       warning: "seo.criteria.title.keyword_at_start.warning",
       error: "seo.criteria.title.keyword_at_start.error"
     },
-    inputKeys: ["metaTitle", "primaryKeyword"],
+    inputKeys: ["metaTitle"],
     optimizable: false,
-    warningScore: 7 // 70% of the weight (10 * 0.7)
+    warningScore: 7
   },
   {
     id: 302,
@@ -226,7 +226,7 @@ const CONTENT_CLARITY: Criterion[] = [
       success: "seo.criteria.clarity.table_of_contents.success",
       error: "seo.criteria.clarity.table_of_contents.error"
     },
-    inputKeys: ["toc", "sections"],
+    inputKeys: ["toc"],
     optimizable: false // Cannot be automatically optimized
   },
   // this one !
@@ -240,7 +240,7 @@ const CONTENT_CLARITY: Criterion[] = [
       warning: "seo.criteria.clarity.short_paragraphs.warning",
       error: "seo.criteria.clarity.short_paragraphs.error"
     },
-    inputKeys: ["sections", "generatedHtml"],
+    inputKeys: ["generatedHtml"],
     warningScore: 3, // 75% of the weight
     optimizable: false // Cannot be automatically optimized
   },
@@ -255,7 +255,7 @@ const CONTENT_CLARITY: Criterion[] = [
       error: "seo.criteria.clarity.media_content.error"
     },
     inputKeys: ["images", "sections", "generatedHtml"],
-    optimizable: false // Cannot be automatically optimized
+    optimizable: false
   }
 ];
 
