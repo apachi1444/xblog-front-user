@@ -41,13 +41,13 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
       total = subscriptionDetails.articles_limit || 100;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining} ${t('resources.articles', 'Articles')}`;
+      label = `${remaining}/${total} ${t('resources.articles', 'Articles')}`;
     } else {
       used = subscriptionDetails.connected_websites || 0;
       total = subscriptionDetails.websites_limit || 5;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining} ${t('resources.websites', 'Websites')}`;
+      label = `${remaining}/${total} ${t('resources.websites', 'Websites')}`;
     }
   } else {
     // Fallback if no data

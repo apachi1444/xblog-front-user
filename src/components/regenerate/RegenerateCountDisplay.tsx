@@ -85,7 +85,7 @@ export function RegenerateCountDisplay() {
           >
             {isLoading
               ? '...'
-              : `${regenerationsAvailable} ${t('regenerate.label', 'Regenerations')}`}
+              : `${regenerationsAvailable}/${regenerationsTotal} ${  t('regenerate.label', 'Regenerations')}`}
           </Typography>
         </Box>
       </Box>
