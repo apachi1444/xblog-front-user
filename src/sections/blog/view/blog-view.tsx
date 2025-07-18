@@ -112,25 +112,7 @@ export function BlogView() {
   };
 
   const handleNewArticle = async () => {
-    try {
-      // Create empty article first
-      const newArticle = await createArticle({
-        title: 'Untitled Article',
-        content: '',
-        meta_description: '',
-        keywords: [],
-        status: 'draft',
-        website_id: undefined,
-      }).unwrap();
-
-      // Navigate to generate view for new article (no articleId in URL)
-      navigate('/generate');
-
-      toast.success('New article created! Start editing...');
-    } catch (error) {
-      console.error('Failed to create article:', error);
-      toast.error('Failed to create article. Please try again.');
-    }
+    navigate('/create');
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
