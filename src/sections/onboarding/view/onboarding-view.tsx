@@ -85,6 +85,9 @@ export function OnBoardingView() {
   // State for billing period
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
+  // State for payment processing
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
   // Handle billing period change and clear selected plan if it doesn't match
   const handleBillingPeriodChange = (newPeriod: 'monthly' | 'yearly') => {
     setBillingPeriod(newPeriod);
@@ -146,6 +149,11 @@ export function OnBoardingView() {
   // Handle paid plan selection and immediate redirect
   const handlePaidPlanSelection = async (planId: string) => {
     try {
+      setIsProcessingPayment(true);
+
+      // Show processing message
+      toast.loading('Processing your payment...', { id: 'payment-processing' });
+
       // Save user preferences first
       await updateUser({
         interests: selectedInterests.join(","),
@@ -157,14 +165,24 @@ export function OnBoardingView() {
       const selectedPlanData = plans?.find(p => p.id === planId);
 
       if (selectedPlanData?.url) {
+        // Update toast message
+        toast.loading('Redirecting to payment...', { id: 'payment-processing' });
+
+        // Small delay to show the message
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Redirect to the plan's payment URL
         window.location.href = selectedPlanData.url;
       } else {
+        toast.dismiss('payment-processing');
         toast.error('Payment URL not available for this plan');
+        setIsProcessingPayment(false);
       }
     } catch (error) {
       console.error('Failed to save user preferences before payment:', error);
+      toast.dismiss('payment-processing');
       toast.error('Failed to save preferences. Please try again.');
+      setIsProcessingPayment(false);
     }
   };
 
@@ -712,8 +730,8 @@ export function OnBoardingView() {
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
-                loading={isUpdatingUser || isCreatingSubscription}
-                disabled={false}
+                loading={isUpdatingUser || isCreatingSubscription || isProcessingPayment}
+                disabled={!selectedPlan}
                 sx={{
                   px: 6,
                   py: 1.5,
@@ -730,7 +748,9 @@ export function OnBoardingView() {
                   }
                 }}
               >
-                {selectedPlan === 'free'
+                {isProcessingPayment
+                  ? 'Processing Payment...'
+                  : selectedPlan === 'free'
                   ? t('onboarding.continueWithFree', 'Continue with Free Plan')
                   : selectedPlan && !isFreeplan(selectedPlan)
                   ? t('onboarding.continueWithPremium', 'Continue with Premium Plan')

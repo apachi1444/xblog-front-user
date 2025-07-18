@@ -41,13 +41,13 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
       total = subscriptionDetails.articles_limit || 100;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining}/${total} ${t('resources.articles', 'Articles')}`;
+      label = `${remaining} / ${total} ${t('resources.articles', 'Articles')}`;
     } else {
       used = subscriptionDetails.connected_websites || 0;
       total = subscriptionDetails.websites_limit || 5;
       remaining = total - used;
       percentage = Math.min((used / total) * 100, 100);
-      label = `${remaining}/${total} ${t('resources.websites', 'Websites')}`;
+      label = `${remaining} / ${total} ${t('resources.websites', 'Websites')}`;
     }
   } else {
     // Fallback if no data
@@ -73,8 +73,8 @@ export function CompactResourceDisplay({ type }: CompactResourceDisplayProps) {
   // Set detailed tooltip content
   if (subscriptionDetails) {
     tooltipTitle = type === 'articles'
-      ? `${t('resources.articlesUsed', 'Articles Used')}: ${used}/${total}\n${t('resources.articlesRemaining', 'Articles Remaining')}: ${remaining}`
-      : `${t('resources.websitesUsed', 'Websites Used')}: ${used}/${total}\n${t('resources.websitesRemaining', 'Websites Remaining')}: ${remaining}`;
+      ? `${t('resources.articlesUsed', 'Articles Used')}: ${used} / ${total}\n${t('resources.articlesRemaining', 'Articles Remaining')}: ${remaining}`
+      : `${t('resources.websitesUsed', 'Websites Used')}: ${used} / ${total}\n${t('resources.websitesRemaining', 'Websites Remaining')}: ${remaining}`;
   } else {
     tooltipTitle = type === 'articles' ? t('resources.articles', 'Articles') : t('resources.websites', 'Websites');
   }

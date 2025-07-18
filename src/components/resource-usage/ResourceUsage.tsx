@@ -19,13 +19,11 @@ export function ResourceUsage({ compact = false }: ResourceUsageProps) {
   const articlesUsed = subscriptionDetails?.articles_created || 0;
   const articlesTotal = subscriptionDetails?.articles_limit || 100;
   const articlesPercentage = Math.min((articlesUsed / articlesTotal) * 100, 100);
-  const articlesRemaining = articlesTotal - articlesUsed;
 
   // Websites usage data from subscription details
   const websitesUsed = subscriptionDetails?.connected_websites || 0;
   const websitesTotal = subscriptionDetails?.websites_limit || 5;
   const websitesPercentage = Math.min((websitesUsed / websitesTotal) * 100, 100);
-  const websitesRemaining = websitesTotal - websitesUsed;
 
   // Dynamic color calculation function based on percentage
   const getProgressColor = (theme: any, percentage: number) => {
