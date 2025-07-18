@@ -50,6 +50,7 @@ export interface UpdateArticleRequest {
   external_links?: string | null;
   content?: string;
   toc?: string | null;
+  featured_media?: string | null;
   status?: 'draft' | 'published';
 }
 

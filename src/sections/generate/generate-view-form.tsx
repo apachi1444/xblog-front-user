@@ -1,13 +1,13 @@
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
-import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@mui/material';
 
-import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
+import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
@@ -66,6 +66,7 @@ export function GenerateViewForm({
     isPublishing: false,
     isGenerated: false,
     showRegenerateDialog: false,
+    showFirstTimeGenerationDialog: false, // ✅ Add first-time generation dialog
   });
 
   const { evaluateCriteria} = useCriteriaEvaluation()
@@ -294,6 +295,10 @@ export function GenerateViewForm({
     setGenerationState((s) => ({ ...s, showRegenerateDialog: true }));
   };
 
+  // Handle first-time generation request (show confirmation dialog)
+  const handleFirstTimeGenerationRequest = () => {
+    setGenerationState((s) => ({ ...s, showFirstTimeGenerationDialog: true }));
+  };
 
   // Use the regeneration check hook to check for available regenerations
   const {
@@ -321,6 +326,27 @@ export function GenerateViewForm({
     } else {
       // If no credits, the checkRegenerationCredits function will show the no credits dialog
       setGenerationState((s) => ({ ...s, showRegenerateDialog: false }));
+    }
+  }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
+
+  // Handle first-time generation confirmation
+  const handleFirstTimeGenerationConfirm = useCallback(async () => {
+    // Check if user has regeneration credits (5 required for full generation)
+    if (checkRegenerationCredits()) {
+      // Close dialog and generate
+      setGenerationState((s) => ({ ...s, showFirstTimeGenerationDialog: false }));
+
+      // Call the generate table of contents function
+      if (activeStep === 1) {
+        try {
+          await onGenerateTableOfContents();
+        } catch (error) {
+          console.error('Failed to generate table of contents:', error);
+        }
+      }
+    } else {
+      // If no credits, the checkRegenerationCredits function will show the no credits dialog
+      setGenerationState((s) => ({ ...s, showFirstTimeGenerationDialog: false }));
     }
   }, [activeStep, checkRegenerationCredits, onGenerateTableOfContents]);
 
@@ -435,8 +461,9 @@ export function GenerateViewForm({
           return <Step2ArticleSettings
                     isGenerated={generationState.isGenerated}
                     isGenerating={generationState.isGeneratingSections}
-                    onGenerate={onGenerateTableOfContents}
+                    onGenerate={onGenerateTableOfContents} // ✅ Actual generation function for fallback
                     onRegenerateRequest={handleRegenerateRequest}
+                    onFirstTimeGenerationRequest={handleFirstTimeGenerationRequest} // ✅ Show confirmation dialog for first-time generation
                     setActiveStep={setActiveStep}
                     />;
         case 2:
@@ -481,6 +508,7 @@ export function GenerateViewForm({
           }}
           title={t('regenerate.confirmTitle', 'Confirm Regeneration')}
           count={regenerationsAvailable}
+          requiredCredits={5} // ✅ Show that 5 credits will be consumed
           action={
             <Button
               variant="contained"
@@ -499,6 +527,37 @@ export function GenerateViewForm({
               }}
             >
               {t('regenerate.confirm', 'Regenerate')}
+            </Button>
+          }
+        />
+
+      {/* First-time generation confirmation dialog */}
+      <ConfirmDialog
+          open={generationState.showFirstTimeGenerationDialog}
+          onClose={() => {
+            setGenerationState((s) => ({ ...s, showFirstTimeGenerationDialog: false }));
+          }}
+          title={t('generate.confirmTitle', 'Generate Full Article?')}
+          count={regenerationsAvailable}
+          requiredCredits={5} // ✅ Show that 5 credits will be consumed
+          action={
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleFirstTimeGenerationConfirm}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1,
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4
+                }
+              }}
+            >
+              {t('generate.confirm', 'Generate Article')}
             </Button>
           }
         />

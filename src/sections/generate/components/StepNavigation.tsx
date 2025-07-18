@@ -133,7 +133,12 @@ export const StepNavigation = ({
       if (shouldProceed) {
         if (articleId && (activeStep === 0 || activeStep === 1)) {
           try {
-            console.log('🔄 Saving article data on step navigation:', { activeStep, articleId });
+            console.log('🔄 Saving article data on step navigation:', {
+              activeStep,
+              articleId,
+              featuredMedia: values.step1?.featuredMedia,
+              hasImages: values.images?.length > 0
+            });
 
             // 🎯 Prepare request body with ALL form data
             const requestBody: UpdateArticleRequest = {
@@ -147,6 +152,7 @@ export const StepNavigation = ({
               secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : null,
               target_country: values.step1?.targetCountry || 'global',
               language: values.step1?.language || 'english',
+              featured_media: values.step1?.featuredMedia || null,
 
               // Step 2 fields (updated values)
               article_type: values.step2?.articleType || null,
@@ -379,9 +385,27 @@ export const StepNavigation = ({
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: 'center', px: 3, py: 2 }}>
-          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, mb: 2 }}>
             {t('generate.modal.message', 'No content has been generated yet. Would you like to generate the full article now before proceeding to the next step?')}
           </Typography>
+
+          {/* Credit consumption warning */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: theme.palette.mode === 'dark' ? 'warning.dark' : 'warning.light',
+              border: `1px solid ${theme.palette.warning.main}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <Iconify icon="mdi:alert-circle" sx={{ color: 'warning.main', flexShrink: 0 }} />
+            <Typography variant="body2" color="warning.dark" sx={{ fontWeight: 500 }}>
+              {t('generate.modal.creditWarning', 'This action will consume 5 regeneration credits from your account.')}
+            </Typography>
+          </Box>
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 1 }}>

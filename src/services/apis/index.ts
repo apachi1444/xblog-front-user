@@ -936,43 +936,20 @@ const setupMocks = () => {
     mock.onPost('/generate-images').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { keyword } = requestData;
+        const { topic, number_of_images = 3 } = requestData;
 
-        // Generate mock sections with image suggestions
-        const sections = [
-          {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            content: `This is an introduction to ${keyword}.`,
-            status: 'completed',
-            imagePrompt: `A professional illustration showing the concept of ${keyword} with modern design elements`,
-            imageUrl: `https://via.placeholder.com/800x400?text=Introduction+to+${  encodeURIComponent(keyword)}`
-          },
-          {
-            id: 'section-2',
-            title: `What is ${keyword}?`,
-            content: `${keyword} is a methodology that helps businesses improve their online presence.`,
-            status: 'completed',
-            imagePrompt: `An infographic explaining the key components of ${keyword} with icons and text`,
-            imageUrl: `https://via.placeholder.com/800x400?text=What+is+${  encodeURIComponent(keyword)}`
-          },
-          {
-            id: 'section-3',
-            title: `Why ${keyword} Matters`,
-            content: `${keyword} is crucial because it drives traffic and conversions.`,
-            status: 'completed',
-            imagePrompt: `A chart or graph showing the benefits of ${keyword} with upward trending lines`,
-            imageUrl: `https://via.placeholder.com/800x400?text=Why+${  encodeURIComponent(keyword)  }+Matters`
-          }
-        ];
+        // Generate mock images array with correct format
+        const images = Array.from({ length: number_of_images }, (_, index) => ({
+          img_text: `Professional image for ${topic} - Image ${index + 1}`,
+          img_url: `https://via.placeholder.com/800x400?text=Image+${index + 1}+for+${encodeURIComponent(topic)}`
+        }));
 
         return [
           200,
           {
-            sections,
+            images,
             success: true,
-            message: null,
-            score: 92
+            message: 'Images generated successfully'
           }
         ];
       } catch (error) {

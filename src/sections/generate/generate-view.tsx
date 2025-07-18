@@ -199,6 +199,7 @@ export function GeneratingView() {
         metaTitle: '',
         metaDescription: '',
         urlSlug: '',
+        featuredMedia: '',
       },
       step2: {
         articleType: 'how-to',
@@ -244,6 +245,7 @@ export function GeneratingView() {
           metaTitle: selectedArticle.meta_title !== null ? (selectedArticle.meta_title || '') : baseDefaults.step1.metaTitle,
           metaDescription: selectedArticle.meta_description !== null ? (selectedArticle.meta_description || '') : baseDefaults.step1.metaDescription,
           urlSlug: selectedArticle.url_slug !== null ? (selectedArticle.url_slug || '') : baseDefaults.step1.urlSlug,
+          featuredMedia: selectedArticle.featured_media !== null ? (selectedArticle.featured_media || '') : baseDefaults.step1.featuredMedia,
         },
         step2: {
           articleType: selectedArticle.article_type !== null ? (selectedArticle.article_type || 'how-to') : baseDefaults.step2.articleType,

@@ -96,7 +96,7 @@ export function Step1ContentSetup({
   const urlSlug = useWatch({
     control,
     name: "step1.urlSlug",
-  })
+  })  
 
   // Primary keyword should always be enabled since we have default values for language and targetCountry
   const isPrimaryKeywordDisabled = false

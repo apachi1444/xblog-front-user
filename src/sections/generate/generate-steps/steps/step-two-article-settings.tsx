@@ -19,10 +19,11 @@ interface Step2ArticleSettingsProps {
   isGenerated: boolean
   onGenerate: () => Promise<ArticleSection[]>
   onRegenerateRequest?: () => void
+  onFirstTimeGenerationRequest?: () => void
   setActiveStep: (step: number) => void
 }
 
-export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest, setActiveStep }: Step2ArticleSettingsProps) {
+export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, onRegenerateRequest, onFirstTimeGenerationRequest, setActiveStep }: Step2ArticleSettingsProps) {
   const { t } = useTranslation();
   const { options } = useArticleSettingsForm();
   const {
@@ -327,8 +328,11 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                 if (hasGeneratedSections && onRegenerateRequest) {
                   // If sections already exist and we have a regenerate request handler, call it
                   onRegenerateRequest();
+                } else if (onFirstTimeGenerationRequest) {
+                  // If no sections exist and we have a first-time generation request handler, call it (shows confirmation dialog)
+                  onFirstTimeGenerationRequest();
                 } else {
-                  // If no sections exist, generate directly
+                  // Fallback: generate directly (shouldn't happen in normal flow)
                   onGenerate();
                 }
               }}

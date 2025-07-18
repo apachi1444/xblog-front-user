@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
 import type {
   GenerateSectionsRequest
 } from 'src/services/apis/generateContentApi';
@@ -111,8 +112,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
     // Store generated data to pass between API calls
     let generatedToc = formData.toc || [];
 
-    console.log(generatedToc, " generated toc");
-    
     let generatedImages = formData.images || [];
     let generatedFaq = formData.faq || [];
     let generatedSections = formData.step3?.sections || [];
@@ -147,9 +146,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             // Store TOC in form and variable for later use
             generatedToc = result.table_of_contents;
 
-            console.log('🔍 TOC Debug - API Result:', result);
-            console.log('🔍 TOC Debug - Extracted TOC:', generatedToc);
-
             methods.setValue('toc', generatedToc);
 
             // 🎯 Trigger criteria re-evaluation after TOC is generated
@@ -173,6 +169,15 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             // Store images in form and variable for later use
             generatedImages = result.images;
             methods.setValue('images', generatedImages);
+
+            // 🎯 Set first image as featured media automatically
+            if (generatedImages && generatedImages.length > 0 && generatedImages[0].img_url) {
+              methods.setValue('step1.featuredMedia', generatedImages[0].img_url);
+              console.log('✅ Featured media set to first image:', generatedImages[0].img_url);
+              console.log('🖼️ Generated images:', generatedImages);
+            } else {
+              console.warn('⚠️ No images generated or first image has no URL');
+            }
 
             // 🎯 Trigger criteria re-evaluation after images are generated
             setTimeout(() => {
@@ -242,13 +247,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               language: language || 'english'
             };
 
-            console.log('🚀 Generating sections with new fields:', {
-              primary_keyword: sectionsRequest.primary_keyword,
-              secondary_keywords: sectionsRequest.secondary_keywords,
-              article_title: sectionsRequest.article_title,
-              language: sectionsRequest.language
-            });
-
             result = await generateSections(sectionsRequest).unwrap();
 
             // Transform sections to match our schema
@@ -258,14 +256,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               title: section.title,
               content: section.content,
               status: 'generated'
-            }));
-
-            console.log('✅ Sections generated successfully with new fields:', {
-              sectionsCount: transformedSections.length,
-              primary_keyword: sectionsRequest.primary_keyword,
-              secondary_keywords: sectionsRequest.secondary_keywords,
-              sectionTitles: transformedSections.map(s => s.title)
-            });
+            }))
 
             // Store sections in both form and variable for later use
             generatedSections = transformedSections;
@@ -285,7 +276,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               meta_description: formData.step1?.metaDescription || '',
               keywords: formData.step1?.primaryKeyword || '',
               author: 'AI Generated',
-              featured_media: '',
+              featured_media: formData.step1?.featuredMedia || (generatedImages && generatedImages.length > 0 ? generatedImages[0].img_url : ''),
               reading_time_estimate: 5,
               url: formData.step1?.urlSlug || '',
               faqs: generatedFaq || [],
@@ -383,19 +374,52 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
       if (articleId) {
         setTimeout(async () => {
           try {
+            // Small delay to ensure form data is fully updated
+            await new Promise(resolve => setTimeout(resolve, 100));
             const newFormData = methods.getValues();
 
             // Only save if we have generated HTML content
             if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
-              // Get the first image URL for featured media
+              // Debug: Log the form data structure to understand what's available
+              console.log('🔍 Form data structure:', {
+                images: newFormData.images,
+                imagesLength: newFormData.images?.length,
+                firstImage: newFormData.images?.[0],
+                step1FeaturedMedia: newFormData.step1?.featuredMedia,
+                generatedImages
+              });
+
+              // Get the first image URL for featured media - try multiple sources
               const firstImageUrl = newFormData.images && newFormData.images.length > 0
                 ? newFormData.images[0].img_url
                 : '';
 
+              // Fallback to generatedImages variable if form data doesn't have images
+              const fallbackImageUrl = generatedImages && generatedImages.length > 0
+                ? generatedImages[0].img_url
+                : '';
+
+              // Use form's featured media first, then first image, then fallback
+              const featuredMediaUrl = newFormData.step1?.featuredMedia || firstImageUrl || fallbackImageUrl;
+
+              // If we still don't have featured media but we have images, force set it
+              if (!featuredMediaUrl && (firstImageUrl || fallbackImageUrl)) {
+                const imageToUse = firstImageUrl || fallbackImageUrl;
+                methods.setValue('step1.featuredMedia', imageToUse);
+                console.log('🔧 Force setting featured media:', imageToUse);
+              }
+
+              console.log('🖼️ Featured media resolution:', {
+                formFeaturedMedia: newFormData.step1?.featuredMedia,
+                firstImageUrl,
+                fallbackImageUrl,
+                finalFeaturedMedia: featuredMediaUrl
+              });
+
               // Prepare request body with all generated AI content
-              const requestBody = {
+              const requestBody : UpdateArticleRequest = {
                 article_title: newFormData.step1?.title || null,
-                content_description: newFormData.step1?.contentDescription || null,
+                content__description: newFormData.step1?.contentDescription || null,
                 meta_title: newFormData.step1?.metaTitle || null,
                 meta_description: newFormData.step1?.metaDescription || null,
                 url_slug: newFormData.step1?.urlSlug || null,
@@ -412,21 +436,17 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 include_videos: newFormData.step2?.includeVideos || false,
                 internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : null,
                 external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
-                // 🎯 Use the generated HTML from form data directly
                 content: newFormData.generatedHtml,
-                // 🎯 Save generated TOC as JSON string
                 toc: newFormData.toc?.length ? JSON.stringify(newFormData.toc) : null,
-                // 🎯 Set first image as featured media
-                featured_media: firstImageUrl,
+                featured_media: featuredMediaUrl || firstImageUrl || fallbackImageUrl,
                 status: 'draft' as const,
               };
 
               // Only update existing article - never create new ones during generation
               await articleDraft.updateArticle(articleId, requestBody);
-              console.log('✅ Updated existing article:', articleId);
             }
           } catch (error) {
-            console.error('❌ Failed to auto-save article:', error);
+            toast.error('❌ Failed to auto-save article:', error);
             // Don't show error to user as this is automatic - generation was successful
           }
         }, 750);

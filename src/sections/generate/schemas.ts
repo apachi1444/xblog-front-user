@@ -11,6 +11,7 @@ export const step1Schema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   urlSlug: z.string().optional(),
+  featuredMedia: z.string().optional(),
 });
 
 // Link management schemas
