@@ -185,6 +185,42 @@ export function GeneratingView() {
     return [];
   }, []);
 
+  // Helper function to parse images from JSON string
+  const parseImagesFromString = useCallback((imagesString: string) => {
+    if (!imagesString || imagesString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON array
+      const parsed = JSON.parse(imagesString);
+      if (Array.isArray(parsed)) {
+        console.log('🖼️ Parsed images from article:', parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error('❌ Error parsing images JSON:', error);
+    }
+
+    return [];
+  }, []);
+
+  // Helper function to parse FAQ from JSON string
+  const parseFaqFromString = useCallback((faqString: string) => {
+    if (!faqString || faqString.trim() === '') return [];
+
+    try {
+      // Try to parse as JSON array
+      const parsed = JSON.parse(faqString);
+      if (Array.isArray(parsed)) {
+        console.log('❓ Parsed FAQ from article:', parsed);
+        return parsed;
+      }
+    } catch (error) {
+      console.error('❌ Error parsing FAQ JSON:', error);
+    }
+
+    return [];
+  }, []);
+
   // Calculate initial form values - either from draft or defaults
   const defaultValues = useMemo((): GenerateArticleFormData => {
     // Base default values for new articles
@@ -261,8 +297,8 @@ export function GeneratingView() {
         step3: {
           sections: selectedArticle.sections !== null ? sections : baseDefaults.step3.sections,
         },
-        images: baseDefaults.images, // Always empty array for now
-        faq: baseDefaults.faq, // Always empty array for now
+        images: selectedArticle.images !== null ? parseImagesFromString(selectedArticle.images || '') : baseDefaults.images,
+        faq: selectedArticle.faq !== null ? parseFaqFromString(selectedArticle.faq || '') : baseDefaults.faq,
         toc,
         generatedHtml: selectedArticle.content || baseDefaults.generatedHtml, // Use content field
       };
@@ -270,7 +306,7 @@ export function GeneratingView() {
 
     // Return base defaults if no draft article
     return baseDefaults;
-  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString]);
+  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString, parseImagesFromString, parseFaqFromString]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,

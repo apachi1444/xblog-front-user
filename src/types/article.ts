@@ -48,6 +48,8 @@ export interface KeywordData {
     content?: string;
     sections?: string; // JSON string containing ArticleSection[]
     toc?: string; // JSON string containing table of contents
+    images?: string; // JSON string containing images array
+    faq?: string; // JSON string containing FAQ array
     featured_media?: string;
     status: 'draft' | 'published' | 'scheduled';
     platform?: string;

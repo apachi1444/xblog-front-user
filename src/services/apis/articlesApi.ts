@@ -50,7 +50,10 @@ export interface UpdateArticleRequest {
   external_links?: string | null;
   content?: string;
   toc?: string | null;
+  images?: string | null;
+  faq?: string | null;
   featured_media?: string | null;
+  template_name?: string | null;
   status?: 'draft' | 'published';
 }
 

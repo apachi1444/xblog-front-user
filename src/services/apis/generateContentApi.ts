@@ -186,6 +186,7 @@ export interface GenerateFullArticleRequest {
   table_of_contents: GenerateFullArticleTableOfContents[];
   sections: GenerateFullArticleSection[];
   language: string;
+  template_name?: string;
 }
 
 /**

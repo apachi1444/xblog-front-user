@@ -217,35 +217,54 @@ export function SEODashboard({
                 width: "100%",
                 flexGrow: 1,
                 "& .MuiTab-root": {
-                  borderRadius: "5px",
-                  fontSize: "12px",
-                  fontWeight: 500,
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 600,
                   color: theme.palette.mode === 'dark'
                     ? theme.palette.text.primary
-                    : theme.palette.primary.main,
+                    : theme.palette.text.primary,
                   textTransform: "none",
-                  py: 0.5,
-                  px: 1.5,
+                  py: 1,
+                  px: 2,
                   flexGrow: 1,
                   maxWidth: 'none',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  background: theme.palette.mode === 'dark'
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.08) 100%)'
+                    : 'linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.06) 100%)',
+                  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
                   '&:hover': {
+                    color: theme.palette.mode === 'dark'
+                      ? '#ffffff'
+                      : theme.palette.primary.main,
                     bgcolor: theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : 'rgba(0, 0, 0, 0.04)',
+                      ? 'rgba(255, 255, 255, 0.12)'
+                      : 'rgba(102, 126, 234, 0.08)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? '0 4px 12px rgba(0,0,0,0.3)'
+                      : '0 4px 12px rgba(102, 126, 234, 0.15)',
+                    border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(102, 126, 234, 0.3)'}`,
                   }
                 },
                 "& .Mui-selected": {
-                  bgcolor: theme.palette.mode === 'dark'
-                    ? theme.palette.background.paper
-                    : "white",
-                  borderRadius: "5px",
-                  color: theme.palette.mode === 'dark'
-                    ? theme.palette.primary.main
-                    : theme.palette.primary.main,
+                  color: '#ffffff !important',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important',
+                  borderRadius: "8px",
+                  fontWeight: 700,
                   boxShadow: theme.palette.mode === 'dark'
-                    ? '0 2px 4px rgba(0,0,0,0.2)'
-                    : '0 1px 3px rgba(0,0,0,0.1)',
+                    ? '0 6px 20px rgba(102, 126, 234, 0.4)'
+                    : '0 6px 20px rgba(102, 126, 234, 0.3)',
+                  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(102, 126, 234, 0.6)' : 'rgba(102, 126, 234, 0.4)'} !important`,
+                  transform: 'translateY(-2px)',
+                  '&:hover': {
+                    color: '#ffffff !important',
+                    background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important',
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? '0 8px 25px rgba(102, 126, 234, 0.5)'
+                      : '0 8px 25px rgba(102, 126, 234, 0.4)',
+                  }
                 },
                 "& .MuiTabs-indicator": {
                   display: "none",

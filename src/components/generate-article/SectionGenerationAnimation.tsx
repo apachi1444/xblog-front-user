@@ -290,7 +290,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 content: section.content
               })),
               images: generatedImages,
-              language: language || 'english'
+              language: language || 'english',
+              template_name: 'template1' // Default template
             };
             result = await generateFullArticle(fullArticleRequest).unwrap();
 
@@ -438,6 +439,8 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
                 content: newFormData.generatedHtml,
                 toc: newFormData.toc?.length ? JSON.stringify(newFormData.toc) : null,
+                images: newFormData.images?.length ? JSON.stringify(newFormData.images) : null,
+                faq: newFormData.faq?.length ? JSON.stringify(newFormData.faq) : null,
                 featured_media: featuredMediaUrl || firstImageUrl || fallbackImageUrl,
                 status: 'draft' as const,
               };

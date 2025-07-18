@@ -168,6 +168,8 @@ export const StepNavigation = ({
               // Content fields (preserve existing values)
               content: values.generatedHtml || '',
               toc: values.toc?.length ? JSON.stringify(values.toc) : null,
+              images: values.images?.length ? JSON.stringify(values.images) : null,
+              faq: values.faq?.length ? JSON.stringify(values.faq) : null,
 
               status: 'draft' as const,
             };
