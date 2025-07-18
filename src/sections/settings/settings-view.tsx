@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Sun, Bell, Moon, Save, Globe, Trash } from "lucide-react";
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
+import { alpha, useTheme } from '@mui/material/styles';
 import {
   Box,
   Card,
-  Grid,
-  Alert,
+  Stack,
   Switch,
   Button,
   Divider,
-  Snackbar,
   Container,
   Typography,
   CardContent,
@@ -18,235 +17,175 @@ import {
 } from "@mui/material";
 
 import { useThemeMode } from "src/hooks/useThemeMode";
+
 import { DashboardContent } from "src/layouts/dashboard";
 
+import { Iconify } from 'src/components/iconify';
+
 export function SettingsView() {
-  // We still need dispatch for other potential actions
-  const dispatch = useDispatch();
-  // Use the theme hook directly
+  const theme = useTheme();
+  const { t } = useTranslation();
   const { isDarkMode, toggleTheme } = useThemeMode();
 
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    pushNotifications: false,
-    articlePublished: true,
-    commentReceived: true,
-    weeklyDigest: true,
+  // Settings state
+  const [settings, setSettings] = useState({
+    // Core settings
+    darkMode: isDarkMode,
+    emailUpdates: true,
+
+    // Content preferences
+    defaultLanguage: 'en',
+    autoSave: true,
+    autoSaveInterval: 30, // seconds
+
+    // AI preferences
+    aiTone: 'professional',
+    aiCreativity: 7, // 1-10 scale
+
+    // SEO preferences
+    autoSeoOptimization: true,
+    focusKeywordReminders: true,
+
+    // Publishing preferences
+    defaultVisibility: 'draft',
+    enableAnalytics: true,
   });
 
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-
-  const handleNotificationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNotifications({
-      ...notifications,
-      [event.target.name]: event.target.checked,
-    });
-  };
-
-  const handleThemeToggle = () => {
-    toggleTheme();
+  const handleSettingChange = (key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   const handleSaveSettings = () => {
-    setShowSaveSuccess(true);
-  };
-
-  const handleClearSettings = () => {
-    // Reset to defaults
-    setNotifications({
-      emailNotifications: true,
-      pushNotifications: false,
-      articlePublished: true,
-      commentReceived: true,
-      weeklyDigest: true,
-    });
+    // Here you would typically save to API
+    toast.success(t('settings.saved', 'Settings saved successfully!'));
   };
 
   return (
     <DashboardContent>
-      <Container maxWidth="lg">
+      <Container maxWidth="md">
+        {/* Header */}
         <Box sx={{ mb: 4, mt: 2 }}>
           <Typography variant="h4" gutterBottom>
-            Settings
+            {t('settings.title', 'Settings')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage your account settings and preferences
+            {t('settings.subtitle', 'Customize your content creation experience')}
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          {/* Theme Settings */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
-                  <Typography variant="h6" sx={{ ml: 1 }}>
-                    Appearance
+        {/* Single Settings Container */}
+        <Card
+          sx={{
+            borderRadius: 3,
+            boxShadow: theme.customShadows?.card,
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Stack spacing={4}>
+
+              {/* Appearance Section */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Iconify
+                    icon={isDarkMode ? 'solar:moon-bold' : 'solar:sun-bold'}
+                    width={24}
+                    sx={{ color: 'primary.main', mr: 2 }}
+                  />
+                  <Typography variant="h6">
+                    {t('settings.appearance.title', 'Appearance')}
                   </Typography>
                 </Box>
-
-                <Divider sx={{ mb: 3 }} />
 
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={isDarkMode}
-                      onChange={handleThemeToggle}
-                      name="darkMode"
+                      checked={settings.darkMode}
+                      onChange={(e) => {
+                        handleSettingChange('darkMode', e.target.checked);
+                        toggleTheme();
+                      }}
+                      sx={{
+                        '& .MuiSwitch-thumb': {
+                          backgroundColor: settings.darkMode ? '#1976d2' : '#ffa726',
+                        }
+                      }}
                     />
                   }
                   label={
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography>Dark Mode</Typography>
-                      {isDarkMode ?
-                        <Moon size={16} style={{ marginLeft: 8 }} /> :
-                        <Sun size={16} style={{ marginLeft: 8 }} />
-                      }
+                    <Box>
+                      <Typography variant="body1">
+                        {t('settings.appearance.darkMode', 'Dark Mode')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {t('settings.appearance.darkModeDesc', 'Switch between light and dark theme')}
+                      </Typography>
                     </Box>
                   }
+                  sx={{ alignItems: 'flex-start', ml: 0 }}
                 />
+              </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Switch between light and dark theme for your dashboard
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+              <Divider />
 
-          {/* Notification Settings */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Bell size={20} />
-                  <Typography variant="h6" sx={{ ml: 1 }}>
-                    Notifications
+              {/* Communication Section */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Iconify
+                    icon="solar:letter-bold"
+                    width={24}
+                    sx={{ color: 'primary.main', mr: 2 }}
+                  />
+                  <Typography variant="h6">
+                    {t('settings.communication.title', 'Communication')}
                   </Typography>
                 </Box>
 
-                <Divider sx={{ mb: 3 }} />
-
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={notifications.emailNotifications}
-                      onChange={handleNotificationChange}
-                      name="emailNotifications"
+                      checked={settings.emailUpdates}
+                      onChange={(e) => handleSettingChange('emailUpdates', e.target.checked)}
                     />
                   }
-                  label="Email Notifications"
-                />
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={notifications.pushNotifications}
-                      onChange={handleNotificationChange}
-                      name="pushNotifications"
-                    />
+                  label={
+                    <Box>
+                      <Typography variant="body1">
+                        {t('settings.communication.emailUpdates', 'Email Updates')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {t('settings.communication.emailUpdatesDesc', 'Receive updates about new features and improvements')}
+                      </Typography>
+                    </Box>
                   }
-                  label="Push Notifications"
+                  sx={{ alignItems: 'flex-start', ml: 0 }}
                 />
+              </Box>
 
-                <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
-                  Notification Events
-                </Typography>
+              <Divider />
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={notifications.articlePublished}
-                      onChange={handleNotificationChange}
-                      name="articlePublished"
-                    />
-                  }
-                  label="When an article is published"
-                />
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveSettings}
+                  startIcon={<Iconify icon="solar:diskette-bold" width={18} />}
+                  sx={{
+                    px: 4,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                    boxShadow: theme.customShadows?.primary,
+                  }}
+                >
+                  {t('settings.save', 'Save Settings')}
+                </Button>
+              </Box>
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={notifications.commentReceived}
-                      onChange={handleNotificationChange}
-                      name="commentReceived"
-                    />
-                  }
-                  label="When you receive a comment"
-                />
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={notifications.weeklyDigest}
-                      onChange={handleNotificationChange}
-                      name="weeklyDigest"
-                    />
-                  }
-                  label="Weekly performance digest"
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Language Settings */}
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Globe size={20} />
-                  <Typography variant="h6" sx={{ ml: 1 }}>
-                    Language & Region
-                  </Typography>
-                </Box>
-
-                <Divider sx={{ mb: 3 }} />
-
-                <Typography variant="body2" color="text.secondary">
-                  Your dashboard is currently set to English (US). Language settings will be added in a future update.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Action Buttons */}
-          <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<Trash size={18} />}
-                onClick={handleClearSettings}
-              >
-                Reset to Defaults
-              </Button>
-
-              <Button
-                variant="contained"
-                startIcon={<Save size={18} />}
-                onClick={handleSaveSettings}
-              >
-                Save Settings
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-
-        {/* Success Notification */}
-        <Snackbar
-          open={showSaveSuccess}
-          autoHideDuration={4000}
-          onClose={() => setShowSaveSuccess(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        >
-          <Alert
-            onClose={() => setShowSaveSuccess(false)}
-            severity="success"
-            sx={{ width: '100%' }}
-          >
-            Settings saved successfully!
-          </Alert>
-        </Snackbar>
+            </Stack>
+          </CardContent>
+        </Card>
       </Container>
     </DashboardContent>
   );
