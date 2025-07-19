@@ -105,7 +105,7 @@ export function TemplateView() {
       localStorage.setItem('isNewArticle', 'true');
 
       // Navigate to generate page with the new article ID
-      navigate(`/generate/${result.id}?template=${templateId}`);
+      navigate(`/generate?template=${templateId}`);
 
       toast.success(t('templates.articleCreated', 'Article created! Starting with your selected template.'));
 

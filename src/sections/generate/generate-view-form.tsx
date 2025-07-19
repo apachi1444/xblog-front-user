@@ -407,6 +407,9 @@ export function GenerateViewForm({
           content: formData.generatedHtml || '',
           toc: formData.toc?.length ? JSON.stringify(formData.toc) : null,
 
+          // Template information
+          template_name: formData.template_name || 'template1',
+
           status: 'draft' as const,
         };
 

@@ -79,8 +79,8 @@ export function CreateView() {
       description: t('create.options.template.description', 'Create an article from an existing template'),
       icon: 'mdi:content-paste',
       color: '#F8BBD0',
-      locked: true,
-      comingSoon: true
+      locked: false,
+      comingSoon: false
     },
     {
       id: 'bulk',
@@ -140,7 +140,10 @@ export function CreateView() {
         }
       }
     }
-    // Add other navigation options as needed
+    
+    if (optionId === 'template') {
+      navigate('/templates')
+    }
   };
 
   const handleDeleteClick = (articleId: number, event: React.MouseEvent) => {

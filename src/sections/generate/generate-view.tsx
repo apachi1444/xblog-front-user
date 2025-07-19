@@ -39,6 +39,16 @@ export function GeneratingView() {
   const urlArticleId = searchParams.get('articleId') || searchParams.get('draft');
   const isNewArticle = localStorage.getItem('isNewArticle') === 'true';
 
+  // Extract template ID from URL params
+  const templateId = searchParams.get('template');
+
+  // Debug log for template ID
+  useEffect(() => {
+    if (templateId) {
+      console.log('🎨 Template ID extracted from URL:', templateId);
+    }
+  }, [templateId]);
+
   // Clear localStorage when we have a URL param (editing existing draft)
   useEffect(() => {
     if (urlArticleId) {
@@ -255,7 +265,11 @@ export function GeneratingView() {
       faq: [],
       toc: [],
       generatedHtml: '',
+      template_name: templateId || 'template1', // Use template from URL params or default
     };
+
+    // Debug log for template in form data
+    console.log('🎨 Template name in form data:', baseDefaults.template_name);
 
     // If we have a draft article, use its values as initial form state
     if (selectedArticle) {
@@ -300,13 +314,14 @@ export function GeneratingView() {
         images: selectedArticle.images !== null ? parseImagesFromString(selectedArticle.images || '') : baseDefaults.images,
         faq: selectedArticle.faq !== null ? parseFaqFromString(selectedArticle.faq || '') : baseDefaults.faq,
         toc,
-        generatedHtml: selectedArticle.content || baseDefaults.generatedHtml, // Use content field
+        generatedHtml: selectedArticle.content || baseDefaults.generatedHtml,
+        template_name: selectedArticle.template_name || baseDefaults.template_name,
       };
     }
 
     // Return base defaults if no draft article
     return baseDefaults;
-  }, [selectedArticle, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString, parseImagesFromString, parseFaqFromString]);
+  }, [selectedArticle, templateId, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString, parseImagesFromString, parseFaqFromString]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,

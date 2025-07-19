@@ -115,6 +115,7 @@ export const generateArticleSchema = z.object({
   faq: z.array(articleFaqSchema).optional(),
   toc: z.array(articleTocSchema).optional(),
   generatedHtml: z.string().optional(),
+  template_name: z.string().default('template1'),
 });
 
 // Export types for link management

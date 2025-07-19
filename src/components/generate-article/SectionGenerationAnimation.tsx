@@ -291,7 +291,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               })),
               images: generatedImages,
               language: language || 'english',
-              template_name: 'template1' // Default template
+              template_name: formData.template_name || 'template1' // Use template from form data
             };
             result = await generateFullArticle(fullArticleRequest).unwrap();
 
