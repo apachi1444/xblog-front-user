@@ -39,7 +39,12 @@ export function SupportForm({ methods, onSubmit, isSubmitting }: SupportFormProp
     watchedValues.message;
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        p: 3,
+        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#ffffff',
+      }}
+    >
       <FormContainer formContext={methods} onSuccess={onSubmit}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* Email Field */}

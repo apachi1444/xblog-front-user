@@ -28,7 +28,7 @@ import {
   useGetSubscriptionPlansQuery
 } from 'src/services/apis/subscriptionApi';
 
-import { ResponsivePricingPlans } from 'src/components/pricing';
+import { ModernPricingPlans } from 'src/components/pricing/ModernPricingPlans';
 
 
 export function UpgradeLicenseView() {
@@ -149,13 +149,13 @@ export function UpgradeLicenseView() {
           mb={4}
           mt={4}
         >
-          {/* Use the ResponsivePricingPlans component with filtered plans */}
-          <ResponsivePricingPlans
+          {/* Use the ModernPricingPlans component */}
+          <ModernPricingPlans
             onSelectPlan={handleChoosePlan}
-            gridColumns={{ xs: 1, sm: 1, md: 3 }}
-            title=""
-            subtitle=""
-            hideFreePlans
+            showFreePlan={false}
+            maxPlans={3}
+            title={t('upgrade.choosePlan', 'Choose Your Plan')}
+            subtitle={t('upgrade.upgradeDescription', 'Upgrade to unlock premium features and boost your content creation')}
           />
         </Box>
 

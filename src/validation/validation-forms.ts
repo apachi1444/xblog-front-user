@@ -117,10 +117,8 @@ export const profileFormSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Invalid email format'),
-  company: z.string().optional(),
   country: z.string().optional(),
   phone: z.string().optional(),
-  birthday: z.string().optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileFormSchema>;

@@ -1,22 +1,18 @@
 import type { AuthUser } from 'src/types/user';
 
+import { Edit } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Edit, Upload } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
   Box,
   Grid,
-  alpha,
   Stack,
   Button,
-  Avatar,
-  useTheme,
   TextField,
   Typography,
-  IconButton,
 } from '@mui/material';
 
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
@@ -29,7 +25,6 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ userData }: ProfileFormProps) {
-  const theme = useTheme();
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
@@ -44,10 +39,8 @@ export function ProfileForm({ userData }: ProfileFormProps) {
     defaultValues: {
       name: userData?.name || '',
       email: userData?.email || '',
-      company: '',
       country: '',
       phone: userData?.telephone || '',
-      birthday: '',
     },
   });
 
@@ -68,84 +61,8 @@ export function ProfileForm({ userData }: ProfileFormProps) {
     setIsEditing(false);
   };
 
-  const handleImageUpload = () => {
-    // Upload functionality is disabled
-    console.log('Profile picture upload is currently disabled');
-  };
-
-  const handleAvatarUpload = async () => {
-    // Upload functionality is disabled
-    console.log('Profile picture upload is currently disabled');
-  };
-
   return (
     <Box sx={{ p: 4 }}>
-      {/* Profile Picture Section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-          <User size={20} />
-          {t('profile.picture.title', 'Profile Picture')}
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-          <Box sx={{ position: 'relative', mb: 2 }}>
-            <Avatar
-              src={userData?.avatar}
-              alt={userData?.name || 'User'}
-              sx={{
-                width: 120,
-                height: 120,
-                border: `3px solid rgba(79, 70, 229, 0.2)`,
-                boxShadow: theme.palette.mode === 'dark'
-                  ? '0 4px 20px rgba(0,0,0,0.3)'
-                  : '0 4px 20px rgba(0,0,0,0.1)',
-              }}
-            >
-              {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </Avatar>
-            <IconButton
-              onClick={handleImageUpload}
-              disabled
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                bgcolor: theme.palette.action.disabled,
-                color: theme.palette.action.disabled,
-                width: 36,
-                height: 36,
-                cursor: 'not-allowed',
-                '&:hover': {
-                  bgcolor: theme.palette.action.disabled,
-                },
-              }}
-            >
-              <Upload size={18} />
-            </IconButton>
-          </Box>
-
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t('profile.picture.description', 'Profile picture upload is currently disabled')}
-          </Typography>
-
-          <Button
-            variant="outlined"
-            onClick={handleImageUpload}
-            disabled
-            startIcon={<Upload size={16} />}
-            sx={{
-              borderRadius: 2,
-              cursor: 'not-allowed',
-              '&.Mui-disabled': {
-                color: theme.palette.action.disabled,
-                borderColor: theme.palette.action.disabled,
-              }
-            }}
-          >
-            {t('profile.picture.upload', 'Upload Disabled')}
-          </Button>
-        </Box>
-      </Box>
-
       {/* Account Details Section */}
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -220,26 +137,6 @@ export function ProfileForm({ userData }: ProfileFormProps) {
                       label={t('profile.details.phone', 'Phone Number')}
                       error={!!errors.phone}
                       helperText={errors.phone?.message}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Controller
-                  name="company"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t('profile.details.company', 'Company')}
-                      error={!!errors.company}
-                      helperText={errors.company?.message}
                       sx={{
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,

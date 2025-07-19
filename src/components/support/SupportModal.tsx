@@ -92,13 +92,14 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
       open={open}
       onClose={handleClose}
       closeAfterTransition
+      sx={{ zIndex: 9999 }}
       slots={{ backdrop: Backdrop }}
       slotProps={{
         backdrop: {
           timeout: 500,
           sx: {
-            backgroundColor: alpha(theme.palette.common.black, 0.7),
-            backdropFilter: 'blur(8px)',
+            backgroundColor: alpha(theme.palette.common.black, 0.5),
+            backdropFilter: 'blur(4px)',
           },
         },
       }}
@@ -125,65 +126,30 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
             sx={{
               borderRadius: 3,
               overflow: 'hidden',
-              background: theme.palette.mode === 'dark'
-                ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`
-                : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
-              boxShadow: theme.customShadows.dialog,
+              backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#ffffff',
+              border: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.grey[800]}` : 'none',
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 24px 48px rgba(0, 0, 0, 0.4)'
+                : '0 24px 48px rgba(0, 0, 0, 0.15)',
             }}
           >
             {/* Header */}
             <Box
               sx={{
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                backgroundColor: theme.palette.primary.main,
                 color: 'white',
                 p: 3,
-                position: 'relative',
-                overflow: 'hidden',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: -50,
-                  right: -50,
-                  width: 100,
-                  height: 100,
-                  borderRadius: '50%',
-                  background: alpha(theme.palette.common.white, 0.1),
-                },
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: -30,
-                  left: -30,
-                  width: 60,
-                  height: 60,
-                  borderRadius: '50%',
-                  background: alpha(theme.palette.common.white, 0.05),
-                },
+                borderBottom: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.grey[800]}` : 'none',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: '50%',
-                      background: alpha(theme.palette.common.white, 0.2),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Iconify icon="material-symbols:support-agent" width={24} height={24} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      {t('support.title', 'Contact Support')}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      {t('support.subtitle', 'Complete the form below to file a ticket and our support team will get back to you as soon as possible.')}
-                    </Typography>
-                  </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {t('support.title', 'Contact Support')}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    {t('support.subtitle', 'Complete the form below to file a ticket and our support team will get back to you as soon as possible.')}
+                  </Typography>
                 </Box>
                 <IconButton
                   onClick={handleClose}
@@ -201,7 +167,13 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
             </Box>
 
             {/* Content */}
-            <Box sx={{ position: 'relative', minHeight: 400 }}>
+            <Box
+              sx={{
+                position: 'relative',
+                minHeight: 400,
+                backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#ffffff',
+              }}
+            >
               <AnimatePresence mode="wait">
                 {showSuccess ? (
                   <SupportSuccessAnimation key="success" />
