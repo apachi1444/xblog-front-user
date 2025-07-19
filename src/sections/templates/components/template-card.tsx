@@ -10,12 +10,12 @@ import CardActionArea from '@mui/material/CardActionArea';
 
 import { Iconify } from 'src/components/iconify';
 
-import type { ArticleTemplate } from '../template-types';
+import type { Template } from 'src/utils/templateUtils';
 
 // ----------------------------------------------------------------------
 
 interface TemplateCardProps {
-  template: ArticleTemplate;
+  template: Template;
   onSelect: () => void;
 }
 
