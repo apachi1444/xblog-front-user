@@ -8,25 +8,8 @@ import React, { useState, useEffect } from 'react';
 // Material UI imports
 import {
   Box,
-  Chip,
-  Link,
-  List,
-  Paper,
-  Table,
   Button,
-  Divider,
-  ListItem,
-  TableRow,
-  Accordion,
-  TableBody,
-  TableCell,
-  TableHead,
-  Typography,
-  ListItemIcon,
-  ListItemText,
-  TableContainer,
-  AccordionDetails,
-  AccordionSummary
+  Typography
 } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
@@ -45,9 +28,10 @@ import type {
 
 interface Step4PublishProps {
   setActiveStep?: (step: number) => void;
+  onTriggerFeedback?: () => void;
 }
 
-export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4PublishProps) {
+export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishProps = {} as Step4PublishProps) {
   // Get form data from context with watch for real-time updates
   const { getValues, watch, setValue } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
@@ -63,33 +47,27 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
   const [isRegeneratingWithTemplate, setIsRegeneratingWithTemplate] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<string>('template1');
 
+  // Feedback state
+  const [feedbackShown, setFeedbackShown] = useState(false);
+
   // Load HTML content with intelligent priority system and detailed debugging
   useEffect(() => {
     const loadHtmlContent = async () => {
       try {
-        // Debug: Log all form data to see what we have
-        console.log('🔍 Step 4 Debug - Full form data:', formData);
-        console.log('🔍 Step 4 Debug - generatedHtml exists:', !!formData.generatedHtml);
-        console.log('🔍 Step 4 Debug - generatedHtml length:', formData.generatedHtml?.length || 0);
-        console.log('🔍 Step 4 Debug - generatedHtml preview:', formData.generatedHtml?.substring(0, 200) || 'None');
-
         // Priority 1: Use API-generated HTML from generate-full-article endpoint
         if (formData.generatedHtml && formData.generatedHtml.trim()) {
-          console.log('✅ Using API-generated HTML content from generate-full-article');
           setHtmlContent(formData.generatedHtml);
+
+          // Trigger feedback modal if content is generated and feedback hasn't been shown
+          if (!feedbackShown && onTriggerFeedback) {
+            setTimeout(() => {
+              onTriggerFeedback();
+              setFeedbackShown(true);
+            }, 1500); // Show feedback modal after 1.5 seconds
+          }
           return;
         }
 
-        // Priority 2: Build HTML from form data if sections exist but no generated HTML
-        if (formData.step3?.sections && formData.step3.sections.length > 0) {
-          console.log('⚠️ No API HTML found, but sections exist. Consider calling generate-full-article API');
-          console.log('🔍 Available sections:', formData.step3.sections.length);
-          // You could trigger the API call here or show a message to the user
-          // For now, fall back to static file
-        }
-
-        // Priority 3: Fallback to static aa.html file for demo/development purposes
-        console.log('⚠️ No API content found, loading static aa.html file for demo');
         const response = await fetch('/aa.html');
         if (!response.ok) {
           throw new Error(`Failed to load aa.html: ${response.status}`);
@@ -98,16 +76,13 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
         setHtmlContent(htmlText);
 
       } catch (error) {
-        console.error('❌ Failed to load HTML content:', error);
         // Set empty content if all methods fail
         setHtmlContent('');
       }
     };
 
     loadHtmlContent();
-  }, [formData, formData.generatedHtml, formData.step3.sections, watchedGeneratedHtml]);
-
-  const { sections } = formData.step3;
+  }, [formData, formData.generatedHtml, formData.step3.sections, watchedGeneratedHtml, feedbackShown, onTriggerFeedback]);
 
   // API hooks for template regeneration
   const [generateFullArticle] = useGenerateFullArticleMutation();
@@ -274,7 +249,6 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
                 URL.revokeObjectURL(url);
                 toast.success('HTML file downloaded successfully');
               } catch (error) {
-                console.error('Error downloading HTML file:', error);
                 toast.error('Failed to download HTML file');
               }
             }}
@@ -305,171 +279,6 @@ export function Step4Publish({ setActiveStep }: Step4PublishProps = {} as Step4P
           isRegenerating={isRegeneratingWithTemplate}
           currentTemplate={currentTemplate}
         />
-      </Box>
-    );
-  }
-
-  // Fallback: Show sections if available
-  if (sections && sections.length > 0) {
-    return (
-      <Box sx={{ pb: 2 }}>
-        {sections.map((section, index) => (
-            <Box key={index} sx={{ mb: 6 }}>
-              {/* Section Title */}
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                {section.title || `Section ${index + 1}`}
-              </Typography>
-
-              {/* Content Type Badge */}
-              {(section.type === 'faq' || section.contentType) && (
-                <Chip
-                  label={
-                    section.type === 'faq'
-                      ? 'FAQ Section'
-                      : section.contentType === 'bullet-list'
-                        ? 'List Section'
-                        : section.contentType === 'table'
-                          ? 'Table Section'
-                          : section.contentType === 'image-gallery'
-                            ? 'Image Gallery'
-                            : section.contentType || 'Paragraph'
-                  }
-                  size="small"
-                  sx={{
-                    mb: 1.5,
-                    bgcolor: 'background.neutral',
-                    color: 'text.secondary',
-                    fontWeight: 500,
-                    fontSize: '0.75rem'
-                  }}
-                />
-              )}
-
-              {/* Main Content */}
-              {section.content && (
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
-                  {section.content}
-                </Typography>
-              )}
-
-              {/* Bullet Points */}
-              {section.bulletPoints && section.bulletPoints.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <List disablePadding>
-                    {section.bulletPoints.map((point, i) => (
-                      <ListItem key={i} sx={{ py: 0.5 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Iconify icon="mdi:circle-small" />
-                        </ListItemIcon>
-                        <ListItemText primary={point} />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-              )}
-
-              {/* Table Data */}
-              {section.tableData && section.tableData.headers && section.tableData.rows && (
-                <TableContainer component={Paper} sx={{ mb: 2, overflow: 'auto' }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'background.neutral' }}>
-                        {section.tableData.headers.map((header, i) => (
-                          <TableCell key={i} sx={{ fontWeight: 'bold' }}>
-                            {header}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {section.tableData.rows.map((row: string[], rowIndex: number) => (
-                        <TableRow key={rowIndex}>
-                          {row.map((cell: string, cellIndex: number) => (
-                            <TableCell key={cellIndex}>{cell}</TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-
-              {/* FAQ Items */}
-              {section.faqItems && section.faqItems.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  {section.faqItems.map((faq, i) => (
-                    <Accordion key={i} sx={{ mb: 1 }}>
-                      <AccordionSummary expandIcon={<Iconify icon="mdi:chevron-down" />}>
-                        <Typography variant="subtitle1">{faq.question}</Typography>
-                      </AccordionSummary>
-                      <Divider />
-                      <AccordionDetails>
-                        <Typography variant="body2">{faq.answer}</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </Box>
-              )}
-
-              {/* Internal and External Links */}
-              {((section.internalLinks && section.internalLinks.length > 0) ||
-                (section.externalLinks && section.externalLinks.length > 0)) && (
-                <Box sx={{ mb: 2, mt: 2 }}>
-                  {/* Internal Links */}
-                  {section.internalLinks && section.internalLinks.length > 0 && (
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Related Content:
-                      </Typography>
-                      <List disablePadding>
-                        {section.internalLinks.map((link, i) => (
-                          <ListItem key={i} sx={{ py: 0.5 }}>
-                            <ListItemIcon sx={{ minWidth: 36 }}>
-                              <Iconify icon="mdi:link-variant" />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Link href={link.url} color="primary" underline="hover">
-                                  {link.text}
-                                </Link>
-                              }
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Box>
-                  )}
-
-                  {/* External Links */}
-                  {section.externalLinks && section.externalLinks.length > 0 && (
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Sources:
-                      </Typography>
-                      <List disablePadding>
-                        {section.externalLinks.map((link, i) => (
-                          <ListItem key={i} sx={{ py: 0.5 }}>
-                            <ListItemIcon sx={{ minWidth: 36 }}>
-                              <Iconify icon="mdi:open-in-new" />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={
-                                <Link href={link.url} color="primary" underline="hover" target="_blank" rel="noopener">
-                                  {link.text}
-                                </Link>
-                              }
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Box>
-                  )}
-                </Box>
-              )}
-
-              {index < sections.length - 1 && <Divider sx={{ my: 3 }} />}
-            </Box>
-        ))}
       </Box>
     );
   }

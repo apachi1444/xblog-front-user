@@ -17,13 +17,14 @@ import { api } from 'src/services/apis';
 import { useGenerateTopicMutation } from 'src/services/apis/generateContentApi';
 
 import { ConfirmDialog } from 'src/components/confirm-dialog';
+import { FeedbackModal } from 'src/components/feedback';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
 // Custom components
 import { ContentLayout } from './components/ContentLayout';
 import {useCriteriaEvaluation} from './hooks/useCriteriaEvaluation';
-import { Step4Publish } from './generate-steps/steps/step-four-publish';
+import { Step4Publish } from './generate-steps/steps/step-three-publish';
 import { StepperComponent } from '../../components/generate-article/FormStepper';
 import { Step1ContentSetup } from './generate-steps/steps/step-one-content-setup';
 import { Step2ArticleSettings } from './generate-steps/steps/step-two-article-settings';
@@ -67,9 +68,21 @@ export function GenerateViewForm({
     isGenerated: false,
     showRegenerateDialog: false,
     showFirstTimeGenerationDialog: false, // ✅ Add first-time generation dialog
+    showFeedbackModal: false, // ✅ Add feedback modal state
   });
 
   const { evaluateCriteria} = useCriteriaEvaluation()
+
+  // Feedback modal handlers
+  const handleFeedbackSubmit = (rating: number, comment?: string) => {
+    console.log('📝 User feedback submitted:', { rating, comment, step: 'content-generation' });
+    // TODO: Send feedback to analytics/backend
+    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
+  };
+
+  const handleFeedbackClose = () => {
+    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
+  };
 
   const handleGenerateTitle = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingTitle: true }));
@@ -470,7 +483,10 @@ export function GenerateViewForm({
                     setActiveStep={setActiveStep}
                     />;
         case 2:
-          return <Step4Publish setActiveStep={setActiveStep} />;
+          return <Step4Publish
+            setActiveStep={setActiveStep}
+            onTriggerFeedback={() => setGenerationState((s) => ({ ...s, showFeedbackModal: true }))}
+          />;
         default:
           return null;
         }
@@ -564,6 +580,13 @@ export function GenerateViewForm({
             </Button>
           }
         />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        open={generationState.showFeedbackModal}
+        onClose={handleFeedbackClose}
+        onSubmit={handleFeedbackSubmit}
+      />
     </>
   );
 }

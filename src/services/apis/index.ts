@@ -920,7 +920,7 @@ const setupMocks = () => {
         return [
           200,
           {
-            tableOfContents,
+            table_of_contents: tableOfContents, // ✅ Fixed: use underscore format
             success: true,
             message: null,
             score: 85
@@ -961,8 +961,13 @@ const setupMocks = () => {
     // Mock generate-full-article endpoint
     mock.onPost('/generate-full-article').reply((config) => {
       try {
-        // Parse request data (not used in this mock but kept for consistency)
-        JSON.parse(config.data);
+        // Parse request data and log for debugging
+        const requestData = JSON.parse(config.data);
+        console.log('🔥 Mock generate-full-article endpoint called with:', {
+          title: requestData.title,
+          template_name: requestData.template_name,
+          language: requestData.language
+        });
 
         // Use the aa.html content with dark theme styling to match the local display
         const articleHtml = `<!DOCTYPE html>
@@ -1251,14 +1256,9 @@ const setupMocks = () => {
 </body>
 </html>`;
 
-        return [
-          200,
-          {
-            article_html: articleHtml,
-            success: true,
-            message: 'Full article generated successfully'
-          }
-        ];
+        // Return HTML content directly as string (not wrapped in object)
+        console.log('✅ Mock generate-full-article returning HTML content successfully');
+        return [200, articleHtml];
       } catch (error) {
         console.error('Error in full article generation mock:', error);
         return [500, { success: false, message: 'Internal server error in full article generation' }];
@@ -1317,178 +1317,44 @@ const setupMocks = () => {
     mock.onPost('/generate-sections').reply((config) => {
       try {
         const requestData = JSON.parse(config.data);
-        const { keyword } = requestData;
+        const { primary_keyword } = requestData;
+        console.log('🔥 Mock generate-sections endpoint called with:', {
+          primary_keyword,
+          toc: requestData.toc?.length || 0,
+          language: requestData.language
+        });
 
         // Generate mock sections in string format (matching API response structure)
         const sectionsObject = {
           introduction: `
-html\n<section id="Introduction">\n  <h2>Introduction to ${keyword}</h2>\n  <p>Welcome to our comprehensive guide on ${keyword}. This introduction will provide you with a solid foundation and overview of what you can expect to learn throughout this article.</p>\n  <p>Understanding ${keyword} is crucial for anyone looking to improve their knowledge and skills in this area. We'll cover all the essential aspects and provide practical insights.</p>\n</section>\n
+html\n<section id="Introduction">\n  <h2>Introduction to ${primary_keyword}</h2>\n  <p>Welcome to our comprehensive guide on ${primary_keyword}. This introduction will provide you with a solid foundation and overview of what you can expect to learn throughout this article.</p>\n  <p>Understanding ${primary_keyword} is crucial for anyone looking to improve their knowledge and skills in this area. We'll cover all the essential aspects and provide practical insights.</p>\n</section>\n
 `,
           section_one: `
-html\n<section id="what-is-${keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>What is ${keyword}?</h2>\n  <p>${keyword} is a fundamental concept that plays a vital role in modern applications. It encompasses various techniques and methodologies that help achieve specific goals.</p>\n  <p>The importance of ${keyword} cannot be overstated, as it provides the foundation for many advanced concepts and practical implementations.</p>\n  <ul>\n    <li>Key characteristic 1 of ${keyword}</li>\n    <li>Key characteristic 2 of ${keyword}</li>\n    <li>Key characteristic 3 of ${keyword}</li>\n  </ul>\n</section>\n
+html\n<section id="what-is-${primary_keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>What is ${primary_keyword}?</h2>\n  <p>${primary_keyword} is a fundamental concept that plays a vital role in modern applications. It encompasses various techniques and methodologies that help achieve specific goals.</p>\n  <p>The importance of ${primary_keyword} cannot be overstated, as it provides the foundation for many advanced concepts and practical implementations.</p>\n  <ul>\n    <li>Key characteristic 1 of ${primary_keyword}</li>\n    <li>Key characteristic 2 of ${primary_keyword}</li>\n    <li>Key characteristic 3 of ${primary_keyword}</li>\n  </ul>\n</section>\n
 `,
           section_two: `
-html\n<section id="benefits-of-${keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>Benefits of ${keyword}</h2>\n  <p>Implementing ${keyword} offers numerous advantages that can significantly impact your results. Here are the primary benefits you can expect:</p>\n  <div>\n    <h3>Primary Benefits</h3>\n    <ul>\n      <li><strong>Improved efficiency:</strong> ${keyword} streamlines processes and reduces complexity</li>\n      <li><strong>Better results:</strong> Consistent application leads to superior outcomes</li>\n      <li><strong>Cost savings:</strong> Optimized approaches reduce resource requirements</li>\n    </ul>\n  </div>\n</section>\n
+html\n<section id="benefits-of-${primary_keyword.toLowerCase().replace(/\s+/g, '-')}">\n  <h2>Benefits of ${primary_keyword}</h2>\n  <p>Implementing ${primary_keyword} offers numerous advantages that can significantly impact your results. Here are the primary benefits you can expect:</p>\n  <div>\n    <h3>Primary Benefits</h3>\n    <ul>\n      <li><strong>Improved efficiency:</strong> ${primary_keyword} streamlines processes and reduces complexity</li>\n      <li><strong>Better results:</strong> Consistent application leads to superior outcomes</li>\n      <li><strong>Cost savings:</strong> Optimized approaches reduce resource requirements</li>\n    </ul>\n  </div>\n</section>\n
 `,
           section_three: `
-html\n<section id="implementation-guide">\n  <h2>How to Implement ${keyword}</h2>\n  <p>Successfully implementing ${keyword} requires a systematic approach and careful planning. Follow these steps to ensure optimal results:</p>\n  <ol>\n    <li><strong>Planning Phase:</strong> Define your objectives and requirements</li>\n    <li><strong>Preparation:</strong> Gather necessary resources and tools</li>\n    <li><strong>Implementation:</strong> Execute your plan systematically</li>\n    <li><strong>Testing:</strong> Validate results and make adjustments</li>\n    <li><strong>Optimization:</strong> Refine and improve based on feedback</li>\n  </ol>\n</section>\n
+html\n<section id="implementation-guide">\n  <h2>How to Implement ${primary_keyword}</h2>\n  <p>Successfully implementing ${primary_keyword} requires a systematic approach and careful planning. Follow these steps to ensure optimal results:</p>\n  <ol>\n    <li><strong>Planning Phase:</strong> Define your objectives and requirements</li>\n    <li><strong>Preparation:</strong> Gather necessary resources and tools</li>\n    <li><strong>Implementation:</strong> Execute your plan systematically</li>\n    <li><strong>Testing:</strong> Validate results and make adjustments</li>\n    <li><strong>Optimization:</strong> Refine and improve based on feedback</li>\n  </ol>\n</section>\n
 `,
           conclusion: `
-html\n<section id="Conclusion">\n  <h2>Conclusion</h2>\n  <p>In conclusion, ${keyword} represents a powerful approach that can deliver significant value when properly understood and implemented. Throughout this guide, we've explored the key concepts, benefits, and practical implementation strategies.</p>\n  <p>By following the guidelines and best practices outlined in this article, you'll be well-equipped to leverage ${keyword} effectively in your own projects and initiatives.</p>\n</section>\n
+html\n<section id="Conclusion">\n  <h2>Conclusion</h2>\n  <p>In conclusion, ${primary_keyword} represents a powerful approach that can deliver significant value when properly understood and implemented. Throughout this guide, we've explored the key concepts, benefits, and practical implementation strategies.</p>\n  <p>By following the guidelines and best practices outlined in this article, you'll be well-equipped to leverage ${primary_keyword} effectively in your own projects and initiatives.</p>\n</section>\n
 `
         };
 
-        // Convert to string format as expected by the API
-        const sectionsString = JSON.stringify(sectionsObject);
-
-        return [
-          200,
-          {
-            sections: sectionsString,
-            success: true,
-            message: 'Sections generated successfully'
-          }
-        ];
+        // Return the sections object directly (not wrapped in another object)
+        // The transformResponse function will convert this to the expected format
+        console.log('✅ Mock generate-sections returning sections object successfully');
+        return [200, sectionsObject];
       } catch (error) {
         console.error('Error in sections generation mock:', error);
         return [500, { success: false, message: 'Internal server error in sections generation' }];
       }
     });
 
-    // Mock generate-article endpoint
-    mock.onPost('/generate-full-article').reply((config) => {
-      try {
-        // Simulate server overload (25% chance of 500 error for testing retry functionality)
-        if (Math.random() < 0.25) {
-          console.log('🔥 Simulating server overload (500 error) for full article generation');
-          return [500, {
-            success: false,
-            message: 'Internal Server Error - Server is temporarily overloaded. Please try again.'
-          }];
-        }
 
-        const requestData = JSON.parse(config.data);
-        const { keyword, articleSize = 'medium' } = requestData;
 
-        // Determine content length based on article size
-        let contentLength = 'medium';
-        switch (articleSize.toLowerCase()) {
-          case 'small':
-            contentLength = 'brief';
-            break;
-          case 'large':
-            contentLength = 'comprehensive';
-            break;
-          default:
-            contentLength = 'detailed';
-        }
-
-        // Generate mock full article with sections
-        const sections = [
-          {
-            id: 'section-1',
-            title: `Introduction to ${keyword}`,
-            content: `Welcome to our ${contentLength} guide on ${keyword}. In this article, we'll explore everything you need to know about ${keyword}, from basic concepts to advanced strategies. Whether you're a beginner or an experienced professional, you'll find valuable insights to enhance your understanding and implementation of ${keyword}.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-2',
-            title: `What is ${keyword}?`,
-            content: `${keyword} refers to a set of practices and techniques designed to improve online visibility and reach target audiences effectively. It encompasses various elements including content optimization, technical setup, and strategic planning. Understanding the fundamentals of ${keyword} is essential for anyone looking to establish a strong online presence.`,
-            status: 'completed',
-            subsections: [
-              {
-                id: 'subsection-2-1',
-                title: `Definition of ${keyword}`,
-                content: `At its core, ${keyword} can be defined as the process of optimizing digital content and properties to increase visibility, attract relevant traffic, and achieve specific business objectives. It involves a combination of technical knowledge, creative content creation, and analytical skills.`,
-                status: 'completed'
-              },
-              {
-                id: 'subsection-2-2',
-                title: `History of ${keyword}`,
-                content: `The concept of ${keyword} has evolved significantly over the years. What began as simple optimization techniques has transformed into a sophisticated discipline that integrates multiple aspects of digital marketing. This evolution reflects the changing landscape of the internet and user behavior.`,
-                status: 'completed'
-              }
-            ]
-          },
-          {
-            id: 'section-3',
-            title: `Why ${keyword} Matters`,
-            content: `Implementing effective ${keyword} strategies is crucial for several reasons. First, it helps increase visibility among your target audience. Second, it builds credibility and authority in your industry. Third, it drives qualified traffic to your digital properties, potentially leading to higher conversion rates and business growth.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-4',
-            title: `Key Components of ${keyword}`,
-            content: `Successful ${keyword} implementation requires attention to several key components. These include thorough research, strategic planning, quality content creation, technical optimization, and continuous performance monitoring. Each component plays a vital role in the overall effectiveness of your ${keyword} efforts.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-5',
-            title: `How to Implement ${keyword}`,
-            content: `Implementing ${keyword} effectively involves a systematic approach. Begin with comprehensive research to understand your audience and competition. Then, develop a strategic plan that outlines your goals and tactics. Finally, execute your plan methodically, making adjustments based on performance data.`,
-            status: 'completed',
-            subsections: [
-              {
-                id: 'subsection-5-1',
-                title: `Step 1: Research`,
-                content: `The research phase is foundational to successful ${keyword} implementation. During this stage, identify your target audience, analyze competitor strategies, and determine relevant keywords and topics. This information will guide your content creation and optimization efforts.`,
-                status: 'completed'
-              },
-              {
-                id: 'subsection-5-2',
-                title: `Step 2: Planning`,
-                content: `Based on your research findings, develop a comprehensive ${keyword} plan. This should include content calendars, resource allocation, and specific tactics for different channels or platforms. A well-structured plan ensures consistent execution and helps track progress toward your goals.`,
-                status: 'completed'
-              },
-              {
-                id: 'subsection-5-3',
-                title: `Step 3: Execution`,
-                content: `The execution phase involves implementing your ${keyword} plan across various channels. This includes creating and optimizing content, setting up technical elements, and launching campaigns. Maintain quality control throughout this process to ensure all elements align with your strategy.`,
-                status: 'completed'
-              }
-            ]
-          },
-          {
-            id: 'section-6',
-            title: `Best Practices for ${keyword}`,
-            content: `To maximize the effectiveness of your ${keyword} efforts, follow these best practices: focus on user experience, create high-quality content, optimize for mobile devices, leverage data for decision-making, and stay updated on industry trends and algorithm changes. These practices will help you achieve sustainable results.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-7',
-            title: `Common Mistakes to Avoid with ${keyword}`,
-            content: `When implementing ${keyword}, avoid these common pitfalls: neglecting user experience for technical optimization, creating low-quality content, ignoring mobile optimization, failing to track performance metrics, and using outdated tactics. Being aware of these mistakes will help you develop more effective strategies.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-8',
-            title: `Tools and Resources for ${keyword}`,
-            content: `Numerous tools and resources can support your ${keyword} efforts. These include research tools for keyword analysis, content creation platforms, technical optimization solutions, analytics software, and educational resources. Selecting the right tools for your specific needs can significantly enhance your efficiency and effectiveness.`,
-            status: 'completed'
-          },
-          {
-            id: 'section-9',
-            title: `Conclusion: Mastering ${keyword}`,
-            content: `Mastering ${keyword} requires a combination of knowledge, strategic thinking, and consistent execution. By understanding the fundamental concepts, implementing best practices, and continuously learning and adapting, you can achieve significant results. Remember that ${keyword} is an ongoing process that requires patience and persistence.`,
-            status: 'completed'
-          }
-        ];
-
-        return [
-          200,
-          {
-            sections,
-            success: true,
-            message: null,
-            score: 95
-          }
-        ];
-      } catch (error) {
-        console.error('Error in full article generation mock:', error);
-        return [500, { success: false, message: 'Internal server error in full article generation' }];
-      }
-    });
 
     // Mock endpoints for drafts
     mock.onGet('/drafts').reply((config) => {

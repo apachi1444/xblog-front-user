@@ -317,10 +317,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
         await new Promise(resolve => setTimeout(resolve, 500));
 
       } catch (error: any) {
-        console.error(`Failed to generate ${stepKey}:`, error);
-
-        // 🎯 ALWAYS close modal and clear content on ANY error
-        // Clear all generated content to allow fresh retry
         methods.setValue('images', []);
         methods.setValue('faq', []);
         methods.setValue('toc', []);
