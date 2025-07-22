@@ -194,10 +194,7 @@ export function Step1ContentSetup({
     try {
       const generatedTitle = await onGenerateTitle();
 
-      // Handle comma-separated alternatives - use only the first one
-      const firstTitle = generatedTitle.split(',')[0].trim();
-
-      setValue("step1.title", firstTitle);
+      setValue("step1.title", generatedTitle);
       setHasGeneratedTitle(true); // Mark that title has been generated
 
       // Note: Subscription cache will be invalidated at the end of generation process

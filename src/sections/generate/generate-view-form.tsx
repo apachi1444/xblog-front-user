@@ -120,13 +120,9 @@ export function GenerateViewForm({
       if (generatedTitle) {
         console.log('✅ Generated title:', generatedTitle);
 
-        // Handle comma-separated alternatives - use only the first one
-        const firstTitle = generatedTitle.split(',')[0].trim();
-        console.log('✅ Using first title alternative:', firstTitle);
-
         // Note: Subscription cache will be invalidated at the end of generation process
 
-        return firstTitle;
+        return generatedTitle;
       }
         console.warn('⚠️ No title generated, using fallback');
         return `Complete Guide to ${primaryKeyword}`;

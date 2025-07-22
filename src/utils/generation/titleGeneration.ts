@@ -40,18 +40,16 @@ export const useTitleGeneration = () => {
         language: language || 'english' // Default to English if no language provided
       };
 
-      console.log('📝 Generating title with payload:', payload);
-
       // Call the API
       const response = await generateTitle(payload).unwrap();
 
       // Check if the request was successful
-      if (response.success) {
-        console.log('✅ Successfully generated title:', response.title);
-        return response.title;
+      if (response.success && response.titles && response.titles.length > 0) {
+        const randomIndexNumber = Math.floor(Math.random() * response.titles.length);
+        const firstTitle = response.titles[randomIndexNumber];
+        return firstTitle;
       }
 
-      console.error('Title generation failed:', response.message);
       throw new Error(response.message || 'Title generation failed');
     };
 
@@ -87,7 +85,7 @@ export const useTitleGeneration = () => {
  * @returns The generated title or null if unsuccessful
  */
 export const parseTitleResponse = (response: {
-  title: string;
+  titles: string[];
   success: boolean;
   message: string;
 }): string | null => {
@@ -96,5 +94,11 @@ export const parseTitleResponse = (response: {
     return null;
   }
 
-  return response.title;
+  if (!response.titles || response.titles.length === 0) {
+    console.error('No titles returned in response');
+    return null;
+  }
+
+  // Return the first title from the array
+  return response.titles[0];
 };

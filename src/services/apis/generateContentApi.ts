@@ -93,10 +93,10 @@ export interface GenerateTitleRequest {
 }
 
 /**
- * Response containing generated article title
+ * Response containing generated article titles
  */
 export interface GenerateTitleResponse extends BaseGenerationResponse {
-  title: string;
+  titles: string[];
 }
 
 /**

@@ -654,15 +654,14 @@ const setupMocks = () => {
           ];
         }
 
-        // Return comma-separated alternatives to simulate real API behavior
+        // Return array of title alternatives to match new API format
         const shuffledTitles = [...titleTemplates].sort(() => 0.5 - Math.random());
-        const title = shuffledTitles.slice(0, 3).join(', ');
-        console.log('📝 Generated mock title with alternatives:', title);
+        const titles = shuffledTitles.slice(0, 3);
 
         return [
           200,
           {
-            title,
+            titles,
             success: true,
             message: null
           }
