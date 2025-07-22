@@ -177,7 +177,6 @@ export const StepNavigation = ({
             await articleDraft.updateArticle(articleId, requestBody);
             onNextStep();
           } catch (error) {
-            console.error('❌ Failed to save article:', error);
             toast.error('Failed to save article. Please try again before proceeding.');
           }
         } else {

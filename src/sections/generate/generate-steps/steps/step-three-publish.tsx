@@ -30,11 +30,12 @@ import type {
 } from '../../schemas';
 
 interface Step4PublishProps {
+  articleId ?: string | null;
   setActiveStep?: (step: number) => void;
   onTriggerFeedback?: () => void;
 }
 
-export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishProps = {} as Step4PublishProps) {
+export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: Step4PublishProps = {} as Step4PublishProps) {
   // Get form data from context with watch for real-time updates
   const { getValues, watch, setValue } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
@@ -154,11 +155,6 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
 
       // Update the HTML content state
       setHtmlContent(result);
-
-      // 🔄 Update the article in the database with the new content and all form data
-      // Extract articleId from URL params for editing existing articles
-      const urlParams = new URLSearchParams(window.location.search);
-      const articleId = urlParams.get('articleId');
 
       if (articleId) {
         try {

@@ -103,7 +103,6 @@ export function GeneratingView() {
       const latestArticle = articlesData.articles.reduce((latest, current) =>
         current.id > latest.id ? current : latest
       );
-      console.log('🔄 Using latest article ID for navigation:', latestArticle.id);
       return latestArticle.id.toString();
     }
 

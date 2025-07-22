@@ -495,6 +495,7 @@ export function GenerateViewForm({
                     />;
         case 2:
           return <Step4Publish
+            articleId={articleId}
             setActiveStep={setActiveStep}
             onTriggerFeedback={() => setGenerationState((s) => ({ ...s, showFeedbackModal: true }))}
           />;
