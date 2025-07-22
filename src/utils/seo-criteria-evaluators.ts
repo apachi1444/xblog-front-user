@@ -497,8 +497,18 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
+    // Parse TOC from string if needed
+    let parsedToc = [];
+    if (toc_data && typeof toc_data === 'string') {
+      try {
+        parsedToc = JSON.parse(toc_data);
+      } catch (error) {
+        console.error('Error parsing TOC for keyword_in_subheadings:', error);
+      }
+    }
+
     // Check both TOC and sections data
-    const hasTocData = toc_data && Array.isArray(toc_data) && toc_data.length > 0;
+    const hasTocData = parsedToc && Array.isArray(parsedToc) && parsedToc.length > 0;
     const hasSectionsData = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
 
     if (!hasTocData && !hasSectionsData) {
@@ -513,7 +523,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     let hasKeywordInSubheadings = false;
 
     if (hasTocData) {
-      hasKeywordInSubheadings = findKeywordInSubheadings(toc_data, primaryKeyword);
+      hasKeywordInSubheadings = findKeywordInSubheadings(parsedToc, primaryKeyword);
     }
 
     // If not found in TOC, check section titles as fallback
@@ -868,8 +878,18 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     const {toc} = formData;
     const sections_data = formData.step3?.sections;
 
+    // Parse TOC from string if it exists
+    let parsedToc = [];
+    if (toc && typeof toc === 'string') {
+      try {
+        parsedToc = JSON.parse(toc);
+      } catch (error) {
+        console.error('Error parsing TOC string:', error);
+      }
+    }
+
     // Check if we have valid TOC or sections data
-    const hasValidToc = toc && Array.isArray(toc) && toc.length > 0;
+    const hasValidToc = parsedToc && Array.isArray(parsedToc) && parsedToc.length > 0;
     const hasValidSections = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
 
     if (!hasValidToc && !hasValidSections) {
@@ -880,7 +900,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    const hasTOC = hasTableOfContents(toc || [], sections_data || []);
+    const hasTOC = hasTableOfContents(parsedToc || [], sections_data || []);
 
     if (hasTOC) {
       return {
@@ -982,7 +1002,7 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       };
     }
 
-    const hasMediaContent = hasImages(images || [], sections_data || [], generatedHtml);
+    const hasMediaContent = hasImages(images && typeof images === 'string' ? JSON.parse(images) : [], sections_data || [], generatedHtml);
 
     if (hasMediaContent) {
       return {

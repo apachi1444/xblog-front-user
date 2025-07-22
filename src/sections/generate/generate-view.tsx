@@ -177,60 +177,6 @@ export function GeneratingView() {
     return [];
   }, []);
 
-  // Helper function to parse TOC from JSON string
-  const parseTocFromString = useCallback((tocString: string) => {
-    if (!tocString || tocString.trim() === '') return [];
-
-    try {
-      // Try to parse as JSON array
-      const parsed = JSON.parse(tocString);
-      if (Array.isArray(parsed)) {
-        console.log('📋 Parsed TOC from draft:', parsed);
-        return parsed;
-      }
-    } catch (error) {
-      console.error('❌ Failed to parse TOC from string:', error);
-    }
-
-    return [];
-  }, []);
-
-  // Helper function to parse images from JSON string
-  const parseImagesFromString = useCallback((imagesString: string) => {
-    if (!imagesString || imagesString.trim() === '') return [];
-
-    try {
-      // Try to parse as JSON array
-      const parsed = JSON.parse(imagesString);
-      if (Array.isArray(parsed)) {
-        console.log('🖼️ Parsed images from article:', parsed);
-        return parsed;
-      }
-    } catch (error) {
-      console.error('❌ Error parsing images JSON:', error);
-    }
-
-    return [];
-  }, []);
-
-  // Helper function to parse FAQ from JSON string
-  const parseFaqFromString = useCallback((faqString: string) => {
-    if (!faqString || faqString.trim() === '') return [];
-
-    try {
-      // Try to parse as JSON array
-      const parsed = JSON.parse(faqString);
-      if (Array.isArray(parsed)) {
-        console.log('❓ Parsed FAQ from article:', parsed);
-        return parsed;
-      }
-    } catch (error) {
-      console.error('❌ Error parsing FAQ JSON:', error);
-    }
-
-    return [];
-  }, []);
-
   // Calculate initial form values - either from draft or defaults
   const defaultValues = useMemo((): GenerateArticleFormData => {
     // Base default values for new articles
@@ -261,25 +207,19 @@ export function GeneratingView() {
       step3: {
         sections: [],
       },
-      images: [],
-      faq: [],
-      toc: [],
+      images: '',
+      faq: '',
+      toc: '',
       generatedHtml: '',
       template_name: templateId || 'template1', // Use template from URL params or default
     };
 
-    // Debug log for template in form data
-    console.log('🎨 Template name in form data:', baseDefaults.template_name);
-
     // If we have a draft article, use its values as initial form state
     if (selectedArticle) {
-      console.log('🔄 Using draft article values as initial form state:', selectedArticle);
-
       // Parse links, sections, and toc once
       const internalLinks = parseLinksFromString(selectedArticle.internal_links || '', selectedArticle.id);
       const externalLinks = parseLinksFromString(selectedArticle.external_links || '', selectedArticle.id);
       const sections = parseSectionsFromString(selectedArticle.sections || '');
-      const toc = parseTocFromString(selectedArticle.toc || '');
 
 
       const finalContentDescription = selectedArticle.content_description !== null ? (selectedArticle.content_description || '') : baseDefaults.step1.contentDescription;
@@ -311,9 +251,9 @@ export function GeneratingView() {
         step3: {
           sections: selectedArticle.sections !== null ? sections : baseDefaults.step3.sections,
         },
-        images: selectedArticle.images !== null ? parseImagesFromString(selectedArticle.images || '') : baseDefaults.images,
-        faq: selectedArticle.faq !== null ? parseFaqFromString(selectedArticle.faq || '') : baseDefaults.faq,
-        toc,
+        images: selectedArticle.images || baseDefaults.images,
+        faq: selectedArticle.faq || baseDefaults.faq,
+        toc: selectedArticle.toc || baseDefaults.toc,
         generatedHtml: selectedArticle.content || baseDefaults.generatedHtml,
         template_name: selectedArticle.template_name || baseDefaults.template_name,
       };
@@ -321,7 +261,7 @@ export function GeneratingView() {
 
     // Return base defaults if no draft article
     return baseDefaults;
-  }, [selectedArticle, templateId, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString, parseTocFromString, parseImagesFromString, parseFaqFromString]);
+  }, [selectedArticle, templateId, parseLinksFromString, parseSecondaryKeywords, parseSectionsFromString]);
 
   const methods = useForm<GenerateArticleFormData>({
     resolver: zodResolver(generateArticleSchema) as any,
@@ -356,13 +296,6 @@ export function GeneratingView() {
     return current !== initial;
   }, []);
 
-
-
-  // No need for article management logic since we simplified the hook
-
-
-
-  // Dynamic steps with translations
   const steps = STEPS_KEYS.map(step => {
     // Define fallback values for each step
     const fallbacks: Record<string, string> = {
@@ -455,8 +388,6 @@ export function GeneratingView() {
             articleId={articleIdForNavigation}
             onTriggerGeneration={generationTrigger || undefined}
           />
-
-
         </FormProvider>
     </DashboardContent>
   );

@@ -101,14 +101,34 @@ export function useCriteriaEvaluation() {
   // Evaluate all criteria at once (useful for initial load or form submission)
   const evaluateAllCriteria = useCallback(() => {
     const formData = formMethods.getValues();
+
+    // Parse string data for logging
+    let parsedImages = [];
+    let parsedToc = [];
+    let parsedFaq = [];
+
+    try {
+      if (formData.images && typeof formData.images === 'string') {
+        parsedImages = JSON.parse(formData.images);
+      }
+      if (formData.toc && typeof formData.toc === 'string') {
+        parsedToc = JSON.parse(formData.toc);
+      }
+      if (formData.faq && typeof formData.faq === 'string') {
+        parsedFaq = JSON.parse(formData.faq);
+      }
+    } catch (error) {
+      console.error('Error parsing form data for logging:', error);
+    }
+
     console.log('🔍 Evaluating all criteria with complete form data:', {
       step1: !!formData.step1,
       step3: !!formData.step3,
       sections: formData.step3?.sections?.length || 0,
       generatedHtml: !!formData.generatedHtml,
-      images: formData.images?.length || 0,
-      toc: formData.toc?.length || 0,
-      faq: formData.faq?.length || 0
+      images: parsedImages.length || 0,
+      toc: parsedToc.length || 0,
+      faq: parsedFaq.length || 0
     });
 
     // Evaluate all criteria with complete form data

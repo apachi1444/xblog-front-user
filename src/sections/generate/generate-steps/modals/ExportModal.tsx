@@ -38,6 +38,16 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
       let filename = '';
       let mimeType = '';
 
+      // Parse TOC from string if needed
+      let parsedToc = [];
+      try {
+        if (formData.toc && typeof formData.toc === 'string') {
+          parsedToc = JSON.parse(formData.toc);
+        }
+      } catch (error) {
+        console.error('Error parsing TOC for export:', error);
+      }
+
       // Extract article info from form data
       const articleInfo = {
         title: formData.step1?.title || 'Untitled Article',
@@ -53,7 +63,7 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
         articleType: formData.step2?.articleType || '',
         articleSize: formData.step2?.articleSize || '',
         toneOfVoice: formData.step2?.toneOfVoice || '',
-        toc: formData.toc || [],
+        toc: parsedToc,
       };
 
       const sections = formData.step3?.sections || [];

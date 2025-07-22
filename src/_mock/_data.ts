@@ -126,6 +126,30 @@ export const _posts: Article[] = [
         subsections: []
       }
     ]),
+    images: JSON.stringify([
+      {
+        img_text: 'Digital marketing strategy overview infographic',
+        img_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800'
+      },
+      {
+        img_text: 'Social media marketing platforms comparison',
+        img_url: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800'
+      }
+    ]),
+    faq: JSON.stringify([
+      {
+        question: 'What is digital marketing?',
+        answer: 'Digital marketing encompasses all marketing efforts that use electronic devices or the internet to reach customers.'
+      },
+      {
+        question: 'How long does it take to see results from digital marketing?',
+        answer: 'Results can vary, but typically you can expect to see initial improvements within 3-6 months of consistent effort.'
+      },
+      {
+        question: 'What is the most important digital marketing strategy?',
+        answer: 'There is no single most important strategy. Success comes from integrating multiple channels like SEO, content marketing, and social media.'
+      }
+    ]),
     featured_media: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
     status: 'draft',
     platform: 'shopify',
@@ -197,6 +221,30 @@ export const _posts: Article[] = [
         content: 'Technical SEO is crucial for large e-commerce sites. Learn about site speed, mobile optimization, and structured data implementation.',
         status: 'completed',
         subsections: []
+      }
+    ]),
+    images: JSON.stringify([
+      {
+        img_text: 'E-commerce website optimization dashboard',
+        img_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800'
+      },
+      {
+        img_text: 'Product page SEO optimization example',
+        img_url: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800'
+      }
+    ]),
+    faq: JSON.stringify([
+      {
+        question: 'How is e-commerce SEO different from regular SEO?',
+        answer: 'E-commerce SEO focuses on product pages, category pages, and conversion optimization, while regular SEO typically focuses on content and information pages.'
+      },
+      {
+        question: 'What are the most important e-commerce SEO factors?',
+        answer: 'Key factors include product page optimization, site speed, mobile responsiveness, structured data, and internal linking structure.'
+      },
+      {
+        question: 'How can I optimize product descriptions for SEO?',
+        answer: 'Use unique descriptions for each product, include target keywords naturally, focus on benefits, and write for both users and search engines.'
       }
     ]),
     featured_media: '',

@@ -1356,6 +1356,46 @@ html\n<section id="Conclusion">\n  <h2>Conclusion</h2>\n  <p>In conclusion, ${pr
 
 
 
+    // Mock feedback/ratings endpoint
+    mock.onPost('/api/v1/ratings').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        const { stars, comment } = requestData;
+
+        console.log('🔥 Mock feedback API called with:', { stars, comment });
+
+        // Validate required fields
+        if (!stars || stars < 1 || stars > 5) {
+          return [400, {
+            success: false,
+            message: 'Invalid rating. Stars must be between 1 and 5.'
+          }];
+        }
+
+        // Simulate successful feedback submission
+        const feedbackId = `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        console.log('✅ Mock feedback submitted successfully:', {
+          feedback_id: feedbackId,
+          stars,
+          comment: comment || 'No comment provided'
+        });
+
+        return [200, {
+          success: true,
+          message: 'Thank you for your feedback! Your input helps us improve our service.',
+          feedback_id: feedbackId
+        }];
+
+      } catch (error) {
+        console.error('❌ Error in feedback mock API:', error);
+        return [500, {
+          success: false,
+          message: 'Internal server error while processing feedback'
+        }];
+      }
+    });
+
     // Mock endpoints for drafts
     mock.onGet('/drafts').reply((config) => {
       const { page = 1, limit = 20 } = config.params || {};

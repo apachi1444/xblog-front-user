@@ -127,7 +127,16 @@ export function CriterionDetailsModal({
       }
 
       case 201: { // images_included
-        const imageCount = formData.images?.length || 0;
+        let imageCount = 0;
+        try {
+          if (formData.images && typeof formData.images === 'string') {
+            const parsedImages = JSON.parse(formData.images);
+            imageCount = parsedImages.length || 0;
+          }
+        } catch (error) {
+          console.error('Error parsing images for criterion details:', error);
+        }
+
         return {
           inputValue: imageCount > 0 ? `${imageCount} images generated` : 'No images generated',
           threshold: 'At least one image required',
@@ -136,7 +145,16 @@ export function CriterionDetailsModal({
       }
 
       case 203: { // keyword_in_subheadings
-        const tocCount = formData.toc?.length || 0;
+        let tocCount = 0;
+        try {
+          if (formData.toc && typeof formData.toc === 'string') {
+            const parsedToc = JSON.parse(formData.toc);
+            tocCount = parsedToc.length || 0;
+          }
+        } catch (error) {
+          console.error('Error parsing TOC for criterion details:', error);
+        }
+
         return {
           inputValue: tocCount > 0 ? `${tocCount} table of contents items` : 'No TOC generated',
           primaryKeyword: step1?.primaryKeyword || 'Not provided',

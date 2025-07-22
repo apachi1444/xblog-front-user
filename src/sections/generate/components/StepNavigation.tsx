@@ -149,7 +149,7 @@ export const StepNavigation = ({
               meta_description: values.step1?.metaDescription || null,
               url_slug: values.step1?.urlSlug || null,
               primary_keyword: values.step1?.primaryKeyword || null,
-              secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : null,
+              secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : undefined,
               target_country: values.step1?.targetCountry || 'global',
               language: values.step1?.language || 'english',
               featured_media: values.step1?.featuredMedia || null,

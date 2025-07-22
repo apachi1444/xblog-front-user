@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
+import { alpha, useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
@@ -9,12 +10,13 @@ import {
   Rating,
   TextField,
   Typography,
+  IconButton,
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
 } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
+
+import { useCreateFeedbackMutation } from 'src/services/apis/feedbackApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -33,31 +35,54 @@ export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
   const [comment, setComment] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-  const handleSubmit = () => {
-    if (onSubmit && rating !== null) {
-      onSubmit(rating, comment.trim() || undefined);
+  // API mutation hook
+  const [createFeedback, { isLoading: isSubmitting }] = useCreateFeedbackMutation();
+
+  const handleSubmit = async () => {
+    if (!rating || rating === 0) return;
+
+    try {
+      // Call the real API
+      const result = await createFeedback({
+        stars: rating,
+        comment: comment.trim() || undefined,
+      }).unwrap();
+
+      console.log('✅ Feedback API response:', result);
+
+      // Call parent callback if provided
+      if (onSubmit) {
+        onSubmit(rating, comment.trim() || undefined);
+      }
+
+      // Mark as submitted
+      setIsSubmitted(true);
+
+      // Show thank you message based on rating
+      const thankYouMessage = rating >= 4
+        ? t('feedback.thankYouHigh', '🎉 Thank you for your amazing feedback!')
+        : t('feedback.thankYou', '💙 Thank you for your valuable feedback!');
+
+      toast.success(thankYouMessage, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.primary.main}`,
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: 500,
+        },
+      });
+
+    } catch (error) {
+      console.error('❌ Error submitting feedback:', error);
+      toast.error(t('feedback.error', 'Failed to submit feedback. Please try again.'), {
+        duration: 4000,
+        position: 'top-center',
+      });
     }
-
-    // Mark as submitted and show thank you toast
-    setIsSubmitted(true);
-
-    // Show thank you message based on rating
-    const thankYouMessage = rating && rating >= 4
-      ? t('feedback.thankYouHigh', '🎉 Thank you for your amazing feedback!')
-      : t('feedback.thankYou', '💙 Thank you for your valuable feedback!');
-
-    toast.success(thankYouMessage, {
-      duration: 4000,
-      position: 'top-center',
-      style: {
-        background: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-        border: `1px solid ${theme.palette.primary.main}`,
-        borderRadius: '12px',
-        fontSize: '14px',
-        fontWeight: 500,
-      },
-    });
 
     // Don't close modal - let user close it manually
   };
@@ -259,7 +284,7 @@ export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={(!rating || rating === 0) || isSubmitted}
+          disabled={(!rating || rating === 0) || isSubmitted || isSubmitting}
           sx={{
             flex: 1,
             borderRadius: 2,
@@ -283,9 +308,11 @@ export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
             }
           }}
         >
-          {isSubmitted
-            ? t('feedback.submitted', '✅ Feedback Submitted')
-            : t('feedback.submit', 'Submit Feedback')
+          {isSubmitting
+            ? t('feedback.submitting', '⏳ Submitting...')
+            : isSubmitted
+              ? t('feedback.submitted', '✅ Feedback Submitted')
+              : t('feedback.submit', 'Submit Feedback')
           }
         </Button>
       </DialogActions>

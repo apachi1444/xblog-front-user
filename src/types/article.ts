@@ -1,3 +1,5 @@
+import type { ArticleFaq, ArticleImage } from "src/sections/generate/schemas";
+
 export interface KeywordData {
     primary: string;
     secondary?: string[]; // Optional secondary keywords
@@ -47,9 +49,9 @@ export interface KeywordData {
     external_links?: string;
     content?: string;
     sections?: string; // JSON string containing ArticleSection[]
-    toc?: string; // JSON string containing table of contents
-    images?: string; // JSON string containing images array
-    faq?: string; // JSON string containing FAQ array
+    toc?: string | null; // JSON string containing table of contents array
+    images?: string | null; // JSON string containing images array
+    faq?: string | null; // JSON string containing FAQ array
     featured_media?: string;
     status: 'draft' | 'published' | 'scheduled';
     platform?: string;
@@ -79,5 +81,12 @@ export interface KeywordData {
     images: string[];
     videos: string | null;
     generatingSection: string | null;
+  }
+
+  // Helper types for array data conversion
+  export interface ArticleArrayData {
+    toc: TableOfContentsItem[];
+    images: ArticleImage[];
+    faq: ArticleFaq[];
   }
   

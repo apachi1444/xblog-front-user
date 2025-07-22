@@ -1,3 +1,5 @@
+import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
+
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -16,8 +18,8 @@ import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
 import { api } from 'src/services/apis';
 import { useGenerateTopicMutation } from 'src/services/apis/generateContentApi';
 
-import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { FeedbackModal } from 'src/components/feedback';
+import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
 
@@ -75,9 +77,18 @@ export function GenerateViewForm({
 
   // Feedback modal handlers
   const handleFeedbackSubmit = (rating: number, comment?: string) => {
-    console.log('📝 User feedback submitted:', { rating, comment, step: 'content-generation' });
-    // TODO: Send feedback to analytics/backend
-    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
+    console.log('📝 User feedback submitted:', {
+      rating,
+      comment,
+      step: 'content-generation',
+      timestamp: new Date().toISOString()
+    });
+
+    // Note: API call is handled inside FeedbackModal component
+    // Modal will stay open until user manually closes it
+
+    // Optional: Track analytics event
+    // trackEvent('feedback_submitted', { rating, has_comment: !!comment });
   };
 
   const handleFeedbackClose = () => {
@@ -393,32 +404,36 @@ export function GenerateViewForm({
         console.log('🔄 Updating article after successful generation:', articleId);
         const formData = methods.getValues();
 
-        const requestBody = {
+        const requestBody : UpdateArticleRequest = {
           // Step 1 fields
-          article_title: formData.step1?.title || null,
-          content__description: formData.step1?.contentDescription || null,
-          meta_title: formData.step1?.metaTitle || null,
-          meta_description: formData.step1?.metaDescription || null,
-          url_slug: formData.step1?.urlSlug || null,
-          primary_keyword: formData.step1?.primaryKeyword || null,
-          secondary_keywords: formData.step1?.secondaryKeywords?.length ? JSON.stringify(formData.step1.secondaryKeywords) : null,
+          article_title: formData.step1?.title || undefined,
+          content__description: formData.step1?.contentDescription || undefined,
+          meta_title: formData.step1?.metaTitle || undefined,
+          meta_description: formData.step1?.metaDescription || undefined,
+          url_slug: formData.step1?.urlSlug || undefined,
+          primary_keyword: formData.step1?.primaryKeyword || undefined,
+          secondary_keywords: formData.step1?.secondaryKeywords?.length ? JSON.stringify(formData.step1.secondaryKeywords) : undefined,
           target_country: formData.step1?.targetCountry || 'global',
           language: formData.step1?.language || 'english',
 
           // Step 2 fields
-          article_type: formData.step2?.articleType || null,
-          article_size: formData.step2?.articleSize || null,
-          tone_of_voice: formData.step2?.toneOfVoice || null,
-          point_of_view: formData.step2?.pointOfView || null,
+          article_type: formData.step2?.articleType || undefined,
+          article_size: formData.step2?.articleSize || undefined,
+          tone_of_voice: formData.step2?.toneOfVoice || undefined,
+          point_of_view: formData.step2?.pointOfView || undefined,
           plagiat_removal: formData.step2?.plagiaRemoval || false,
           include_images: formData.step2?.includeImages || false,
           include_videos: formData.step2?.includeVideos || false,
-          internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : null,
-          external_links: formData.step2?.externalLinks?.length ? JSON.stringify(formData.step2.externalLinks) : null,
+          internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : '',
+          external_links: formData.step2?.externalLinks?.length ? JSON.stringify(formData.step2.externalLinks) : '',
 
           // Generated content
           content: formData.generatedHtml || '',
-          toc: formData.toc?.length ? JSON.stringify(formData.toc) : null,
+          sections: formData.step3?.sections?.length ? JSON.stringify(formData.step3.sections) : '',
+          toc: formData.toc || null,
+          images: formData.images || null,
+          faq: formData.faq || null,
+          featured_media: formData.step1?.featuredMedia || undefined,
 
           // Template information
           template_name: formData.template_name || 'template1',

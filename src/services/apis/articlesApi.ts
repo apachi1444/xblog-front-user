@@ -28,33 +28,36 @@ export interface CreateArticleRequest {
   website_id?: string;
 }
 
-// Article update request
+// Article update request - matches Article type structure
 export interface UpdateArticleRequest {
-  article_title?: string | null;
-  content__description?: string | null;
-  meta_title?: string | null;
-  meta_description?: string | null;
-  url_slug?: string | null;
-  primary_keyword?: string | null;
-  secondary_keywords?: string | null;
+  article_title?: string;
+  content__description?: string;
+  meta_title?: string;
+  meta_description?: string;
+  url_slug?: string;
+  primary_keyword?: string;
+  secondary_keywords?: string;
   target_country?: string;
   language?: string;
-  article_type?: string | null;
-  article_size?: string | null;
-  tone_of_voice?: string | null;
-  point_of_view?: string | null;
+  article_type?: string;
+  article_size?: string;
+  tone_of_voice?: string;
+  point_of_view?: string;
   plagiat_removal?: boolean;
   include_images?: boolean;
   include_videos?: boolean;
   internal_links?: string | null;
   external_links?: string | null;
   content?: string;
-  toc?: string | null;
-  images?: string | null;
-  faq?: string | null;
-  featured_media?: string | null;
-  template_name?: string | null;
-  status?: 'draft' | 'published';
+  sections?: string; // JSON string containing ArticleSection[]
+  toc?: string | null; // JSON string containing table of contents array
+  images?: string | null; // JSON string containing images array
+  faq?: string | null; // JSON string containing FAQ array
+  featured_media?: string;
+  template_name?: string;
+  status?: 'draft' | 'published' | 'scheduled';
+  platform?: string;
+  scheduled_publish_date?: string;
 }
 
 // Article creation response

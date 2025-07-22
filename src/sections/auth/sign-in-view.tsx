@@ -23,6 +23,8 @@ import { useRouter } from 'src/routes/hooks';
 
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
+import { trackTestModeToggle } from 'src/utils/analytics';
+
 import { signInSchema } from 'src/validation/auth-schemas';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
@@ -215,6 +217,9 @@ export function SignInView() {
     const newTestMode = !testMode;
     dispatch(setTestMode(newTestMode));
 
+    // Track test mode toggle with proper analytics
+    trackTestModeToggle(newTestMode);    
+
     toast.success(
       newTestMode
         ? t('auth.testMode.enabled', 'Test mode enabled - Mock API active')
@@ -285,19 +290,19 @@ export function SignInView() {
       </Typography>
 
       {testMode && (
-        <Typography
-          variant="body2"
-          sx={{
-            mb: 2,
-            textAlign: 'center',
-            color: 'warning.main',
-            bgcolor: 'warning.lighter',
-            py: 1,
-            px: 2,
-            borderRadius: 1
-          }}
-        >
-          🔔 Test mode is active. Sign in will bypass authentication.
+          <Typography
+            variant="body2"
+            sx={{
+              mb: 2,
+              textAlign: 'center',
+              color: 'warning.main',
+              bgcolor: 'warning.lighter',
+              py: 1,
+              px: 2,
+              borderRadius: 1
+            }}
+          >
+            🔔 Test mode is active. Sign in will bypass authentication.
         </Typography>
       )}
 

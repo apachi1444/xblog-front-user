@@ -63,7 +63,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
             setTimeout(() => {
               onTriggerFeedback();
               setFeedbackShown(true);
-            }, 1500); // Show feedback modal after 1.5 seconds
+            }, 15000); // Show feedback modal after 15 seconds - gives user time to read content
           }
           return;
         }
@@ -102,6 +102,25 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
     setCurrentTemplate(templateId);
 
     try {
+      // Parse string data back to arrays for API call
+      let parsedImages = [];
+      let parsedFaq = [];
+      let parsedToc = [];
+
+      try {
+        if (formData.images && typeof formData.images === 'string') {
+          parsedImages = JSON.parse(formData.images);
+        }
+        if (formData.faq && typeof formData.faq === 'string') {
+          parsedFaq = JSON.parse(formData.faq);
+        }
+        if (formData.toc && typeof formData.toc === 'string') {
+          parsedToc = JSON.parse(formData.toc);
+        }
+      } catch (error) {
+        console.error('Error parsing form data:', error);
+      }
+
       // Prepare the full article request with the new template - matching SectionGenerationAnimation structure exactly
       const fullArticleRequest = {
         title: formData.step1?.title || '',
@@ -109,20 +128,19 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
         meta_description: formData.step1?.metaDescription || '',
         keywords: formData.step1?.primaryKeyword || '',
         author: 'AI Generated',
-        featured_media: formData.step1?.featuredMedia || (formData.images && formData.images.length > 0 ? formData.images[0].img_url : ''),
+        featured_media: formData.step1?.featuredMedia || (parsedImages && parsedImages.length > 0 ? parsedImages[0].img_url : ''),
         reading_time_estimate: 5,
         url: formData.step1?.urlSlug || '',
-        faqs: formData.faq || [],
+        faqs: parsedFaq || [],
         external_links: formData.step2?.externalLinks?.map((link: any) => ({
           link_text: link.anchorText,
           link_url: link.url
         })) || [],
-        table_of_contents: formData.toc || [],
+        table_of_contents: parsedToc || [],
         sections: formData.step3?.sections?.map((section: any) => ({
           key: section.title,
           content: section.content
         })) || [],
-        images: formData.images || [],
         language: formData.step1?.language || 'english',
         template_name: templateId
       };
@@ -201,15 +219,6 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
           mb: 2,
           justifyContent: 'flex-end'
         }}>
-          {setActiveStep && (
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="eva:edit-2-outline" />}
-              onClick={() => setActiveStep(2)}
-            >
-              Edit Content
-            </Button>
-          )}
           {isApiGenerated && (
             <Button
               variant="outlined"

@@ -109,11 +109,24 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
     const steps = ['tableOfContents', 'images', 'faq', 'sections', 'fullArticle'];
     const startIndex = startFromStep ? steps.indexOf(startFromStep) : 0;
 
-    // Store generated data to pass between API calls
-    let generatedToc = formData.toc || [];
+    // Store generated data to pass between API calls - parse strings if needed
+    let generatedToc = [];
+    let generatedImages = [];
+    let generatedFaq = [];
 
-    let generatedImages = formData.images || [];
-    let generatedFaq = formData.faq || [];
+    try {
+      if (formData.toc && typeof formData.toc === 'string') {
+        generatedToc = JSON.parse(formData.toc);
+      }
+      if (formData.images && typeof formData.images === 'string') {
+        generatedImages = JSON.parse(formData.images);
+      }
+      if (formData.faq && typeof formData.faq === 'string') {
+        generatedFaq = JSON.parse(formData.faq);
+      }
+    } catch (error) {
+      console.error('Error parsing existing form data:', error);
+    }
     let generatedSections = formData.step3?.sections || [];
 
     setHasError(false); // ✅ Reset error state
@@ -146,7 +159,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
             // Store TOC in form and variable for later use
             generatedToc = result.table_of_contents;
 
-            methods.setValue('toc', generatedToc);
+            methods.setValue('toc', JSON.stringify(generatedToc));
 
             // 🎯 Trigger criteria re-evaluation after TOC is generated
             setTimeout(() => {
@@ -161,22 +174,13 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               language: language || 'english'
             }).unwrap();
 
-            // 🎯 Check if result is valid
-            if (!result || !result.images || !Array.isArray(result.images)) {
-              throw new Error('Invalid response: No images received');
-            }
-
             // Store images in form and variable for later use
             generatedImages = result.images;
-            methods.setValue('images', generatedImages);
+            methods.setValue('images', JSON.stringify(generatedImages));
 
             // 🎯 Set first image as featured media automatically
             if (generatedImages && generatedImages.length > 0 && generatedImages[0].img_url) {
               methods.setValue('step1.featuredMedia', generatedImages[0].img_url);
-              console.log('✅ Featured media set to first image:', generatedImages[0].img_url);
-              console.log('🖼️ Generated images:', generatedImages);
-            } else {
-              console.warn('⚠️ No images generated or first image has no URL');
             }
 
             // 🎯 Trigger criteria re-evaluation after images are generated
@@ -204,7 +208,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
 
             // Update both local variable and form
             generatedFaq = extractedFaq;
-            methods.setValue('faq', generatedFaq);
+            methods.setValue('faq', JSON.stringify(generatedFaq));
 
             // 🎯 Trigger criteria re-evaluation after FAQ is generated
             setTimeout(() => {
@@ -371,73 +375,52 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
       if (articleId) {
         setTimeout(async () => {
           try {
-            // Small delay to ensure form data is fully updated
-            await new Promise(resolve => setTimeout(resolve, 100));
             const newFormData = methods.getValues();
 
             // Only save if we have generated HTML content
             if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
-              // Debug: Log the form data structure to understand what's available
-              console.log('🔍 Form data structure:', {
-                images: newFormData.images,
-                imagesLength: newFormData.images?.length,
-                firstImage: newFormData.images?.[0],
-                step1FeaturedMedia: newFormData.step1?.featuredMedia,
-                generatedImages
-              });
 
               // Get the first image URL for featured media - try multiple sources
               const firstImageUrl = newFormData.images && newFormData.images.length > 0
                 ? newFormData.images[0].img_url
                 : '';
 
-              // Fallback to generatedImages variable if form data doesn't have images
-              const fallbackImageUrl = generatedImages && generatedImages.length > 0
-                ? generatedImages[0].img_url
-                : '';
-
               // Use form's featured media first, then first image, then fallback
-              const featuredMediaUrl = newFormData.step1?.featuredMedia || firstImageUrl || fallbackImageUrl;
+              const featuredMediaUrl = newFormData.step1?.featuredMedia || firstImageUrl;
 
               // If we still don't have featured media but we have images, force set it
-              if (!featuredMediaUrl && (firstImageUrl || fallbackImageUrl)) {
-                const imageToUse = firstImageUrl || fallbackImageUrl;
+              if (!featuredMediaUrl && (firstImageUrl)) {
+                const imageToUse = firstImageUrl;
                 methods.setValue('step1.featuredMedia', imageToUse);
-                console.log('🔧 Force setting featured media:', imageToUse);
               }
-
-              console.log('🖼️ Featured media resolution:', {
-                formFeaturedMedia: newFormData.step1?.featuredMedia,
-                firstImageUrl,
-                fallbackImageUrl,
-                finalFeaturedMedia: featuredMediaUrl
-              });
 
               // Prepare request body with all generated AI content
               const requestBody : UpdateArticleRequest = {
-                article_title: newFormData.step1?.title || null,
-                content__description: newFormData.step1?.contentDescription || null,
-                meta_title: newFormData.step1?.metaTitle || null,
-                meta_description: newFormData.step1?.metaDescription || null,
-                url_slug: newFormData.step1?.urlSlug || null,
-                primary_keyword: newFormData.step1?.primaryKeyword || null,
-                secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : null,
+                article_title: newFormData.step1?.title || undefined,
+                content__description: newFormData.step1?.contentDescription || undefined,
+                meta_title: newFormData.step1?.metaTitle || undefined,
+                meta_description: newFormData.step1?.metaDescription || undefined,
+                url_slug: newFormData.step1?.urlSlug || undefined,
+                primary_keyword: newFormData.step1?.primaryKeyword || undefined,
+                secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : undefined,
                 target_country: newFormData.step1?.targetCountry || 'global',
                 language: newFormData.step1?.language || 'english',
-                article_type: newFormData.step2?.articleType || null,
-                article_size: newFormData.step2?.articleSize || null,
-                tone_of_voice: newFormData.step2?.toneOfVoice || null,
-                point_of_view: newFormData.step2?.pointOfView || null,
+                article_type: newFormData.step2?.articleType || undefined,
+                article_size: newFormData.step2?.articleSize || undefined,
+                tone_of_voice: newFormData.step2?.toneOfVoice || undefined,
+                point_of_view: newFormData.step2?.pointOfView || undefined,
                 plagiat_removal: newFormData.step2?.plagiaRemoval || false,
                 include_images: newFormData.step2?.includeImages || false,
                 include_videos: newFormData.step2?.includeVideos || false,
-                internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : null,
-                external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : null,
+                internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : '',
+                external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : '',
                 content: newFormData.generatedHtml,
-                toc: newFormData.toc?.length ? JSON.stringify(newFormData.toc) : null,
-                images: newFormData.images?.length ? JSON.stringify(newFormData.images) : null,
-                faq: newFormData.faq?.length ? JSON.stringify(newFormData.faq) : null,
-                featured_media: featuredMediaUrl || firstImageUrl || fallbackImageUrl,
+                sections: newFormData.step3?.sections?.length ? JSON.stringify(newFormData.step3.sections) : '',
+                toc: newFormData.toc || null,
+                images: newFormData.images || null,
+                faq: newFormData.faq || null,
+                featured_media: featuredMediaUrl || firstImageUrl,
+                template_name: newFormData.template_name || 'template1',
                 status: 'draft' as const,
               };
 
@@ -454,7 +437,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
       // Wait for animation to complete before calling onComplete
       setTimeout(() => {
         if (onComplete) onComplete();
-      }, 1000);
+      }, 200);
     }
 
   }, [methods, hasError, generateTableOfContents, generateImages, generateFaq, generateSections, generateFullArticle, onClose, onError, completedSteps, articleId, evaluateAllCriteria, articleDraft, onComplete]);

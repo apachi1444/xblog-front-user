@@ -111,9 +111,9 @@ export const generateArticleSchema = z.object({
   step1: step1Schema,
   step2: step2Schema,
   step3: step3Schema,
-  images: z.array(articleImageSchema).optional(),
-  faq: z.array(articleFaqSchema).optional(),
-  toc: z.array(articleTocSchema).optional(),
+  images: z.string().optional(), // JSON string containing ArticleImage[]
+  faq: z.string().optional(), // JSON string containing ArticleFaq[]
+  toc: z.string().optional(), // JSON string containing ArticleToc[]
   generatedHtml: z.string().optional(),
   template_name: z.string().default('template1'),
 });
