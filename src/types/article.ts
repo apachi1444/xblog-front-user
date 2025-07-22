@@ -57,8 +57,7 @@ export interface KeywordData {
     platform?: string;
     scheduled_publish_date?: string;
     created_at: string;
-    updated_at?: string; // Optional since not all API responses include it
-    // make default value for template name
+    updated_at?: string;
     template_name?: string;
     // Legacy fields for backward compatibility
     title?: string; // Maps to article_title

@@ -1,6 +1,10 @@
 // External imports
 // Types
 
+import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
+// API hooks
+import type { GenerateFullArticleRequest} from 'src/services/apis/generateContentApi';
+
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
 import React, { useState, useEffect } from 'react';
@@ -14,7 +18,6 @@ import {
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
-// API hooks
 import { useGenerateFullArticleMutation } from 'src/services/apis/generateContentApi';
 
 // Components
@@ -50,11 +53,9 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
   // Feedback state
   const [feedbackShown, setFeedbackShown] = useState(false);
 
-  // Load HTML content with intelligent priority system and detailed debugging
   useEffect(() => {
     const loadHtmlContent = async () => {
       try {
-        // Priority 1: Use API-generated HTML from generate-full-article endpoint
         if (formData.generatedHtml && formData.generatedHtml.trim()) {
           setHtmlContent(formData.generatedHtml);
 
@@ -63,7 +64,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
             setTimeout(() => {
               onTriggerFeedback();
               setFeedbackShown(true);
-            }, 15000); // Show feedback modal after 15 seconds - gives user time to read content
+            }, 20000);
           }
           return;
         }
@@ -122,7 +123,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
       }
 
       // Prepare the full article request with the new template - matching SectionGenerationAnimation structure exactly
-      const fullArticleRequest = {
+      const fullArticleRequest : GenerateFullArticleRequest = {
         title: formData.step1?.title || '',
         meta_title: formData.step1?.metaTitle || '',
         meta_description: formData.step1?.metaDescription || '',
@@ -154,14 +155,55 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
       // Update the HTML content state
       setHtmlContent(result);
 
-      // 🔄 Update the article in the database with the new content
-      const articleId = window.location.pathname.split('/').pop();
-      if (articleId && articleId !== 'generate') {
+      // 🔄 Update the article in the database with the new content and all form data
+      // Extract articleId from URL params for editing existing articles
+      const urlParams = new URLSearchParams(window.location.search);
+      const articleId = urlParams.get('articleId');
+
+      if (articleId) {
         try {
-          await articleDraft.updateArticle(articleId, {
-            content: result,
-            template_name: templateId
-          })
+          // Get the latest form data after HTML generation
+          const updatedFormData = getValues();
+
+          // Prepare complete request body with all form data
+          const requestBody: UpdateArticleRequest = {
+            // Step 1 fields
+            article_title: updatedFormData.step1?.title || undefined,
+            content__description: updatedFormData.step1?.contentDescription || undefined,
+            meta_title: updatedFormData.step1?.metaTitle || undefined,
+            meta_description: updatedFormData.step1?.metaDescription || undefined,
+            url_slug: updatedFormData.step1?.urlSlug || undefined,
+            primary_keyword: updatedFormData.step1?.primaryKeyword || undefined,
+            secondary_keywords: updatedFormData.step1?.secondaryKeywords?.length ? JSON.stringify(updatedFormData.step1.secondaryKeywords) : undefined,
+            target_country: updatedFormData.step1?.targetCountry || 'global',
+            language: updatedFormData.step1?.language || 'english',
+
+            // Step 2 fields
+            article_type: updatedFormData.step2?.articleType || undefined,
+            article_size: updatedFormData.step2?.articleSize || undefined,
+            tone_of_voice: updatedFormData.step2?.toneOfVoice || undefined,
+            point_of_view: updatedFormData.step2?.pointOfView || undefined,
+            plagiat_removal: updatedFormData.step2?.plagiaRemoval || false,
+            include_images: updatedFormData.step2?.includeImages || false,
+            include_videos: updatedFormData.step2?.includeVideos || false,
+            internal_links: updatedFormData.step2?.internalLinks?.length ? JSON.stringify(updatedFormData.step2.internalLinks) : '',
+            external_links: updatedFormData.step2?.externalLinks?.length ? JSON.stringify(updatedFormData.step2.externalLinks) : '',
+
+            // Generated content - including the new HTML content
+            content: result, // This is the newly generated HTML
+            sections: updatedFormData.step3?.sections?.length ? JSON.stringify(updatedFormData.step3.sections) : '',
+            toc: updatedFormData.toc || null,
+            images: updatedFormData.images || null,
+            faq: updatedFormData.faq || null,
+            featured_media: updatedFormData.step1?.featuredMedia || undefined,
+
+            // Template information
+            template_name: templateId,
+
+            status: 'draft' as const,
+          };
+
+          await articleDraft.updateArticle(articleId, requestBody);
         } catch (updateError) {
           toast.error('Content generated but failed to save. Please try saving manually.');
         }
@@ -172,7 +214,6 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback }: Step4PublishP
 
       toast.success(`Template "${templateId}" applied successfully!`);
     } catch (error) {
-      console.error('Failed to regenerate with template:', error);
       toast.error('Failed to apply template. Please try again.');
     } finally {
       setIsRegeneratingWithTemplate(false);
