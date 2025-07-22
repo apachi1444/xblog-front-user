@@ -35,7 +35,14 @@ function DraftArticlesSection() {
     limit: 5,
   });
 
-  const draftArticles = articles?.articles?.filter((article: any) => article.status === 'draft') || [];
+  const draftArticles = articles?.articles
+    ?.filter((article: any) => article.status === 'draft')
+    ?.sort((a: any, b: any) => {
+      // Sort by most recent first (updated_at if available, otherwise created_at)
+      const dateA = new Date(a.updated_at || a.created_at || 0).getTime();
+      const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
+      return dateB - dateA; // Descending order (latest first)
+    }) || [];
 
   if (isLoading) {
     return (

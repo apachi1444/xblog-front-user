@@ -1,8 +1,7 @@
 
-import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -16,8 +15,8 @@ import Pagination from '@mui/material/Pagination';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useGetArticlesQuery, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 
 import { Iconify } from 'src/components/iconify';
 import { LoadingSpinner } from 'src/components/loading';
@@ -29,7 +28,6 @@ import { DraftItem } from '../draft-item';
 
 export function BlogView() {
   const navigate = useNavigate();
-  const [sortBy, setSortBy] = useState('latest');
   const [page, setPage] = useState(1);
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,8 +47,6 @@ export function BlogView() {
       skip: !storeId && storeId !== 0,
     }
   );
-
-  const [createArticle, { isLoading: isCreatingArticle }] = useCreateArticleMutation();
 
   const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
 
@@ -75,6 +71,13 @@ export function BlogView() {
   useEffect(() => {
     let sorted = [...allPosts];
 
+    // Sort by most recent first (updated_at if available, otherwise created_at)
+    sorted.sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at || 0).getTime();
+      const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
+      return dateB - dateA; // Descending order (latest first)
+    });
+
     // Apply search filter
     if (searchQuery) {
       sorted = sorted.filter(post =>
@@ -88,24 +91,8 @@ export function BlogView() {
       sorted = sorted.filter(post => post.status.toLowerCase() === currentTab.toLowerCase());
     }
 
-    // Apply sorting
-    switch (sortBy) {
-      case 'latest':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case 'oldest':
-        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      default:
-        break;
-    }
-
     setFilteredPosts(sorted);
-  }, [allPosts, sortBy, searchQuery, currentTab]);
-
-  const handleSort = useCallback((newSort: string) => {
-    setSortBy(newSort);
-  }, []);
+  }, [allPosts, searchQuery, currentTab]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -143,13 +130,13 @@ export function BlogView() {
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={handleNewArticle}
-          disabled={isCreatingArticle}
+          disabled={false}
           sx={{
             bgcolor: 'primary.main',
             color: 'text.light',
           }}
         >
-          {isCreatingArticle ? 'Creating...' : 'New article'}
+          New Article
         </Button>
       </Box>
 
