@@ -1,6 +1,3 @@
-import type { Template } from 'src/utils/templateUtils';
-
-import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { alpha, useTheme } from '@mui/material/styles';
@@ -17,8 +14,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { type Template } from 'src/utils/templateUtils';
+
 import { Iconify } from 'src/components/iconify';
-import { HtmlIframeRenderer } from 'src/components/html-renderer';
+import { TemplatePreviewButton } from './TemplatePreviewButton';
+import { TemplatePreviewSection } from './TemplatePreviewSection';
 
 // ----------------------------------------------------------------------
 
@@ -39,34 +39,8 @@ export function TemplatePreviewModal({
 }: TemplatePreviewModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
-  // Load fake article content when template changes
-  useEffect(() => {
-    const loadFakeContent = async () => {
-      if (!template || !open) return;
 
-      setIsLoadingPreview(true);
-      try {
-        // For now, use aa.html for all templates
-        // TODO: In the future, each template will have its own fake article
-        const response = await fetch('/aa.html');
-        if (!response.ok) {
-          throw new Error(`Failed to load preview: ${response.status}`);
-        }
-        const htmlText = await response.text();
-        setHtmlContent(htmlText);
-      } catch (error) {
-        console.error('Failed to load template preview:', error);
-        setHtmlContent('<p>Preview not available</p>');
-      } finally {
-        setIsLoadingPreview(false);
-      }
-    };
-
-    loadFakeContent();
-  }, [template, open]);
 
   const handleGenerate = () => {
     if (template) {
@@ -154,101 +128,104 @@ export function TemplatePreviewModal({
       <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Template Info */}
         <Box sx={{ px: 3, py: 2, bgcolor: alpha(theme.palette.grey[500], 0.05) }}>
-          <Stack direction="row" spacing={4} alignItems="center">
-            {template.estimatedTime && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Iconify icon="mdi:clock-outline" sx={{ color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {template.estimatedTime}
-                </Typography>
-              </Box>
-            )}
-            {template.bestFor && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Iconify icon="mdi:target" sx={{ color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  Best for: {template.bestFor}
-                </Typography>
-              </Box>
-            )}
+          <Stack direction="row" spacing={4} alignItems="center" justifyContent="space-between">
+            <Stack direction="row" spacing={4} alignItems="center">
+              {template.estimatedTime && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {template.estimatedTime}
+                  </Typography>
+                </Box>
+              )}
+              {template.bestFor && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Iconify icon="mdi:target" sx={{ color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Best for: {template.bestFor}
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
+
+            {/* Prominent Preview Button */}
+            <TemplatePreviewButton
+              templateId={template.id}
+              templateColor={template.color}
+              variant="outlined"
+              size="medium"
+            />
           </Stack>
         </Box>
 
-        {/* Preview Content */}
-        <Box sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          {isLoadingPreview ? (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                flexDirection: 'column',
-                gap: 2,
-              }}
-            >
-              <CircularProgress />
-              <Typography variant="body2" color="text.secondary">
-                {t('templates.loadingPreview', 'Loading preview...')}
+        {/* Template Details */}
+        <Box sx={{ flex: 1, p: 3 }}>
+          <Stack spacing={4}>
+            {/* Central Preview Section */}
+            <TemplatePreviewSection template={template} variant="full" />
+
+            {/* Template Features */}
+            <Box>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                {t('templates.features', 'Template Features')}
               </Typography>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:palette" sx={{ color: 'primary.main', fontSize: 18 }} />
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {t('templates.customStyling', 'Custom styling and layout')}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:responsive" sx={{ color: 'primary.main', fontSize: 18 }} />
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {t('templates.responsive', 'Responsive design for all devices')}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="mdi:search-web" sx={{ color: 'primary.main', fontSize: 18 }} />
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {t('templates.seoOptimized', 'SEO optimized structure')}
+                  </Typography>
+                </Box>
+              </Stack>
             </Box>
-          ) : htmlContent ? (
-            <Box sx={{ height: '100%', position: 'relative' }}>
-              <HtmlIframeRenderer
-                htmlContent={htmlContent}
-              />
-              
-              {/* Preview Overlay */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'linear-gradient(transparent 60%, rgba(255,255,255,0.95) 100%)',
-                  pointerEvents: 'none',
-                  zIndex: 1,
-                }}
-              />
-              
-              {/* Preview Label */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  zIndex: 2,
-                }}
-              >
-                <Chip
-                  label={t('templates.preview', 'Preview')}
-                  size="small"
-                  sx={{
-                    bgcolor: alpha(theme.palette.common.black, 0.7),
-                    color: 'white',
-                    fontWeight: 500,
-                  }}
-                />
-              </Box>
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                flexDirection: 'column',
-                gap: 2,
-              }}
-            >
-              <Iconify icon="mdi:file-document-outline" sx={{ fontSize: 48, color: 'text.disabled' }} />
-              <Typography variant="body2" color="text.secondary">
-                {t('templates.previewNotAvailable', 'Preview not available')}
-              </Typography>
-            </Box>
-          )}
+          </Stack>
         </Box>
       </DialogContent>
 

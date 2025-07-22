@@ -41,6 +41,7 @@ export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
 export const ErrorTestPage = lazy(() => import('src/pages/error-test'));
 export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-preview-demo'));
 export const TestDraftEditingPage = lazy(() => import('src/pages/test-draft-editing'));
+export const TemplatePreviewPage = lazy(() => import('src/pages/template-preview'));
 
 // ----------------------------------------------------------------------
 
@@ -311,6 +312,16 @@ export function Router() {
             <ResetPasswordPage />
           </AuthLayout>
         </ErrorBoundary>
+      ),
+    },
+    {
+      path: 'templates/:encryptedId',
+      element: (
+        <Suspense fallback={renderFallback}>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <TemplatePreviewPage />
+          </ErrorBoundary>
+        </Suspense>
       ),
     },
     {

@@ -10,6 +10,7 @@ export interface Template {
   isNew?: boolean;
   locked?: boolean;
   difficulty?: 'easy' | 'medium' | 'hard';
+  htmlFile?: string;
   estimatedTime?: string;
   previewContent?: string;
   color?: string;
@@ -80,6 +81,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#9c27b0',
     gradient: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)',
     bestFor: 'tech blogs, SaaS platforms, digital services',
+    htmlFile: 'template1.html',
   },
   {
     id: 'template2',
@@ -94,6 +96,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#2196f3',
     gradient: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
     bestFor: 'corporate websites, finance, healthcare, or legal industries',
+    htmlFile: 'template2.html',
   },
   {
     id: 'template3',
@@ -108,6 +111,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#607d8b',
     gradient: 'linear-gradient(135deg, #607d8b 0%, #455a64 100%)',
     bestFor: 'product FAQs, agencies, portfolios',
+    htmlFile: 'template3.html',
   },
   {
     id: 'template4',
@@ -122,6 +126,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#ff9800',
     gradient: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
     bestFor: 'eCommerce, lifestyle brands, or mobile-first designs',
+    htmlFile: 'template4.html',
   },
   {
     id: 'template5',
@@ -136,6 +141,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#4caf50',
     gradient: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
     bestFor: 'storytelling, process documentation, step-by-step guides',
+    htmlFile: 'template5.html',
   },
 ];
 
@@ -158,4 +164,40 @@ export const searchTemplates = (query: string): Template[] => {
     template.description.toLowerCase().includes(lowercaseQuery) ||
     template.name.toLowerCase().includes(lowercaseQuery)
   );
+};
+
+// Template preview URL utilities
+export const createEncryptedTemplateId = (templateId: string): string => 
+  // Simple encoding - in production you might want to use a proper encryption
+   btoa(templateId).replace(/[+/=]/g, (match) => {
+    switch (match) {
+      case '+': return '-';
+      case '/': return '_';
+      case '=': return '';
+      default: return match;
+    }
+  })
+;
+
+export const decryptTemplateId = (encryptedId: string): string => {
+  try {
+    // Remove '_preview' suffix if present
+    const cleanId = encryptedId.replace('_preview', '');
+
+    // Reverse the encoding process
+    const base64 = cleanId.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Add padding if needed
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+
+    return atob(padded);
+  } catch (error) {
+    console.error('Failed to decrypt template ID:', error);
+    return '';
+  }
+};
+
+export const generateTemplatePreviewUrl = (templateId: string): string => {
+  const encryptedId = createEncryptedTemplateId(templateId);
+  return `/templates/${encryptedId}_preview`;
 };

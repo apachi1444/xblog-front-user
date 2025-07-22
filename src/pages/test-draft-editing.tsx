@@ -1,22 +1,24 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
 import {
   Box,
   Card,
-  Button,
-  Typography,
   Grid,
   Chip,
   Stack,
-  CardContent,
-  CardActions,
+  alpha,
+  Button,
   useTheme,
-  alpha
+  Typography,
+  CardContent,
+  CardActions
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 // Mock draft articles for testing
 const mockDraftArticles = [

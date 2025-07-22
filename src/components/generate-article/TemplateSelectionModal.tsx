@@ -22,6 +22,8 @@ import {
 import { UNIFIED_TEMPLATES } from 'src/utils/templateUtils';
 
 import { Iconify } from 'src/components/iconify';
+import { TemplatePreviewButton } from 'src/components/templates/TemplatePreviewButton';
+import { TemplatePreviewSection } from 'src/components/templates/TemplatePreviewSection';
 
 // Filter templates to only show design templates
 const DESIGN_TEMPLATES = UNIFIED_TEMPLATES.filter(template => template.category === 'design');
@@ -130,12 +132,23 @@ export function TemplateSelectionModal({
                           }}
                         />
                       </Box>
-                      {selectedTemplate === template.id && (
-                        <Iconify
-                          icon="eva:checkmark-circle-2-fill"
-                          sx={{ color: template.color || theme.palette.primary.main, fontSize: '1.5rem' }}
+
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {/* Preview Button */}
+                        <TemplatePreviewButton
+                          templateId={template.id}
+                          templateColor={template.color}
+                          variant="icon"
+                          size="small"
                         />
-                      )}
+
+                        {selectedTemplate === template.id && (
+                          <Iconify
+                            icon="eva:checkmark-circle-2-fill"
+                            sx={{ color: template.color || theme.palette.primary.main, fontSize: '1.5rem' }}
+                          />
+                        )}
+                      </Stack>
                     </Box>
 
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.5 }}>
@@ -158,21 +171,11 @@ export function TemplateSelectionModal({
         </Grid>
 
         {selectedTemplateData && (
-          <Box
-            sx={{
-              mt: 3,
-              p: 2,
-              borderRadius: 2,
-              background: alpha(selectedTemplateData.color || theme.palette.primary.main, 0.05),
-              border: `1px solid ${alpha(selectedTemplateData.color || theme.palette.primary.main, 0.2)}`,
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: selectedTemplateData.color || theme.palette.primary.main }}>
-              Selected: {selectedTemplateData.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {selectedTemplateData.description}
-            </Typography>
+          <Box sx={{ mt: 3 }}>
+            <TemplatePreviewSection
+              template={selectedTemplateData}
+              variant="compact"
+            />
           </Box>
         )}
       </DialogContent>
