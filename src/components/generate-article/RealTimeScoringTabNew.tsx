@@ -19,7 +19,7 @@ import { useCriteriaEvaluation } from "src/sections/generate/hooks/useCriteriaEv
 import { ItemSectionNew } from "./ItemSectionNew";
 import { OptimizationModal } from "./OptimizationModal";
 import { CriterionDetailsModal } from "./CriterionDetailsModal";
-import { SEO_CRITERIA, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP, TOTAL_POSSIBLE_SCORE } from "../../utils/seo-criteria-definitions";
+import { SEO_CRITERIA, TOTAL_POSSIBLE_SCORE, CRITERIA_TO_INPUT_MAP, INPUT_TO_CRITERIA_MAP } from "../../utils/seo-criteria-definitions";
 
 // Types
 
@@ -60,8 +60,6 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
     totalScore,
     evaluateAllCriteria
   } = useCriteriaEvaluation();
-
-  console.log(criteriaState, " criteria state ! ");
 
   // Get form data to watch for changes
   const form = useFormContext<GenerateArticleFormData>();

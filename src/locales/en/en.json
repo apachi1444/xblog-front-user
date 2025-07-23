@@ -453,6 +453,7 @@
           "keyword_in_title": {
             "description": "Focus keyword used in the SEO title",
             "success": "Focus keyword is used in the SEO title.",
+            "warning": "Focus keyword is partially present in the SEO title.",
             "error": "Focus keyword is not present in the SEO title."
           },
           "keyword_in_meta": {
@@ -497,9 +498,9 @@
           },
           "url_slug_length": {
             "description": "URL slug contains a reasonable number of descriptive words",
-            "success": "URL slug contains 3 to 5 words.",
-            "warning": "URL slug contains 2 or 6 words.",
-            "error": "URL slug contains less than 2 words or more than 6 words."
+            "success": "URL slug contains 3 to 6 words.",
+            "warning": "URL slug contains 2 or 7-8 words.",
+            "error": "URL slug contains less than 2 words or more than 8 words."
           },
           "external_links": {
             "description": "External links are included",
@@ -521,6 +522,7 @@
           "keyword_at_start": {
             "description": "Focus keyword at the start of the SEO title",
             "success": "SEO title starts with the focus keyword.",
+            "warning": "SEO title starts with part of the focus keyword.",
             "error": "Focus keyword is not at the beginning of the SEO title."
           },
           "sentiment": {

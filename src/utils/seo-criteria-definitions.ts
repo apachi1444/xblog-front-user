@@ -126,6 +126,7 @@ const SEO_BOOSTERS: Criterion[] = [
       error: "seo.criteria.boosters.url_slug_length.error"
     },
     inputKeys: ["urlSlug"],
+    optimizable: false, // Cannot be automatically optimized - user must edit manually
     warningScore: 3 // 75% of the weight
   },
   {
