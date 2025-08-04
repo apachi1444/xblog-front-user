@@ -18,6 +18,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 // API and selectors
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import { getArticleIdFromParams } from 'src/utils/articleIdEncoder';
 
 import { STEPS_KEYS } from './constants';
 // Custom components
@@ -36,7 +37,7 @@ export function GeneratingView() {
   const [generationTrigger, setGenerationTrigger] = useState<(() => void) | null>(null);
 
   // Check if we're editing an existing draft article
-  const urlArticleId = searchParams.get('articleId') || searchParams.get('draft');
+  const urlArticleId = getArticleIdFromParams(searchParams);
   const isNewArticle = localStorage.getItem('isNewArticle') === 'true';
 
   // Extract template ID from URL params
@@ -82,7 +83,7 @@ export function GeneratingView() {
     if (urlArticleId && articlesData?.articles) {
       // Editing existing article from URL - fetch its data
       const article = articlesData.articles.find(articleItem =>
-        articleItem.id.toString() === urlArticleId.toString()
+        articleItem.id === urlArticleId
       ) || null;
       return article;
     } if (isNewArticle) {
@@ -96,8 +97,8 @@ export function GeneratingView() {
   // Determine articleId for StepNavigation (for update API)
   const articleIdForNavigation = useMemo(() => {
     if (urlArticleId) {
-      // Use URL article ID
-      return urlArticleId;
+      // Use URL article ID (convert to string for API compatibility)
+      return urlArticleId.toString();
     } if (isNewArticle && articlesData?.articles?.length) {
       // For new articles, get the latest article ID (highest ID) for update API
       const latestArticle = articlesData.articles.reduce((latest, current) =>

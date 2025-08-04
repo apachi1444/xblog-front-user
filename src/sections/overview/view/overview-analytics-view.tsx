@@ -13,6 +13,7 @@ import {
   CircularProgress
 } from '@mui/material';
 
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
 import { formatMetrics, getContentQuality, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -120,7 +121,7 @@ function DraftArticlesSection() {
               return (
                 <Grid key={article.id} xs={12} sm={6} md={4}>
                   <Card
-                    onClick={() => navigate(`/generate?articleId=${article.id}`)}
+                    onClick={() => navigateToArticle(navigate, article.id)}
                     sx={{
                       height: '100%',
                       cursor: 'pointer',

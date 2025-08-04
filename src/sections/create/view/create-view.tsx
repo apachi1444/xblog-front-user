@@ -23,6 +23,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useGetArticlesQuery, useCreateArticleMutation, useDeleteArticleMutation } from 'src/services/apis/articlesApi';
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
 import { Iconify } from 'src/components/iconify';
 import { SubscriptionLimitModal } from 'src/components/modals/SubscriptionLimitModal';
@@ -354,7 +355,7 @@ export function CreateView() {
                   // Clear any localStorage article ID when editing existing draft
                   localStorage.removeItem('currentArticleId');
                   localStorage.removeItem('isNewArticle');
-                  navigate(`/generate?articleId=${article.id}`);
+                  navigateToArticle(navigate, article.id);
                 }}
               >
                 <CardContent sx={{

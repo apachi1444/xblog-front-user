@@ -16,6 +16,8 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
+
 import { varAlpha } from 'src/theme/styles';
 
 import { Iconify } from 'src/components/iconify';
@@ -128,7 +130,7 @@ export function PostItem({
 
   // Handle edit button click for draft articles
   const handleEditDraft = () => {
-    navigate(`/generate?articleId=${post.id}`);
+    navigateToArticle(navigate, post.id)
   };
 
 
