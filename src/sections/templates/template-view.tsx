@@ -15,7 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { type Template, UNIFIED_TEMPLATES, TEMPLATE_CATEGORIES } from 'src/utils/templateUtils';
+import { type Template, UNIFIED_TEMPLATES, TEMPLATE_CATEGORIES, PARENT_TEMPLATES } from 'src/utils/templateUtils';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useCreateArticleMutation } from 'src/services/apis/articlesApi';
@@ -25,6 +25,7 @@ import { Iconify } from 'src/components/iconify';
 import { TemplatePreviewModal } from 'src/components/templates/TemplatePreviewModal';
 
 import { TemplateCard } from './components/template-card';
+import { ParentTemplateCard } from './components/parent-template-card-new';
 import { TemplateFilter } from './components/template-filter';
 import { TemplateEmptyState } from './components/template-empty-state';
 
@@ -44,8 +45,8 @@ export function TemplateView() {
   // API hooks
   const [createArticle] = useCreateArticleMutation();
 
-  // Filter templates based on search query and selected category
-  const filteredTemplates = UNIFIED_TEMPLATES.filter((template) => {
+  // Filter parent templates based on search query and selected category
+  const filteredTemplates = PARENT_TEMPLATES.filter((template) => {
     const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          template.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -212,11 +213,11 @@ export function TemplateView() {
         {/* Templates Grid */}
         {filteredTemplates.length > 0 ? (
           <Grid container spacing={3}>
-            {filteredTemplates.map((template) => (
-              <Grid key={template.id} xs={12} sm={6} md={4}>
-                <TemplateCard
-                  template={template}
-                  onSelect={() => handleTemplateSelect(template)}
+            {filteredTemplates.map((parentTemplate) => (
+              <Grid key={parentTemplate.parent_id} xs={12} sm={6} md={4}>
+                <ParentTemplateCard
+                  parentTemplate={parentTemplate}
+                  onSelect={(childTemplateId) => handleGenerateWithTemplate(childTemplateId)}
                 />
               </Grid>
             ))}

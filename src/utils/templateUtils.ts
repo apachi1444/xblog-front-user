@@ -17,6 +17,10 @@ export interface Template {
   color?: string;
   gradient?: string;
   bestFor?: string;
+  // New parent-child layout system
+  parent_id?: number; // ID of the parent layout (e.g., 1, 2, 3)
+  isParentLayout?: boolean; // True if this is a parent layout template
+  childTemplates?: string[]; // Array of child template IDs (only for parent layouts)
   structure?: {
     sections: Array<{
       title: string;
@@ -67,10 +71,10 @@ export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
 ];
 
 // Unified template list combining both article templates and design templates
-export const UNIFIED_TEMPLATES: Template[] = [
-  // Design Templates (from TemplateSelectionModal)
+// Parent Layout Templates - These define the main template families
+export const PARENT_TEMPLATES = [
   {
-    id: 'template1',
+    parent_id: 1,
     name: 'Purple Pulse',
     title: 'Purple Pulse Design',
     description: 'A sleek, modern accordion style with a purple theme, interactive toggles, and clean spacing.',
@@ -82,45 +86,67 @@ export const UNIFIED_TEMPLATES: Template[] = [
     color: '#9c27b0',
     gradient: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)',
     bestFor: 'tech blogs, SaaS platforms, digital services',
-    htmlFile: 'template1.html',
   },
+];
+
+// Child Templates - These are the actual template variations
+export const UNIFIED_TEMPLATES : Template[] = [
   {
-    id: 'template2',
-    name: 'Blue Breeze',
-    title: 'Blue Breeze Design',
-    description: 'A calming, professional FAQ with soft blue accents, minimalist borders, and smooth transitions.',
-    icon: '🔵',
-    category: 'design',
-    popular: true,
-    isNew: false,
-    locked: false,
-    color: '#2196f3',
-    gradient: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
-    bestFor: 'corporate websites, finance, healthcare, or legal industries',
-    htmlFile: 'template2.html',
-  },
-  {
-    id: 'template3',
-    name: 'Slate Glow',
-    title: 'Slate Glow Design',
-    description: 'A neutral-toned, elegant accordion with gray hues and soft shadow effects. Polished yet approachable.',
-    icon: '⚪',
-    category: 'design',
-    popular: true,
-    isNew: true,
-    locked: false,
-    color: '#607d8b',
-    gradient: 'linear-gradient(135deg, #607d8b 0%, #455a64 100%)',
-    bestFor: 'product FAQs, agencies, portfolios',
-    htmlFile: 'template3.html',
-  },
-  {
-    id: 'template-premium',
+    id: 'template1',
     name: 'Premium Gold',
     title: 'Premium Gold Template',
     description: 'An exclusive premium template with advanced features, custom animations, and professional styling.',
     icon: '👑',
     category: 'design',
+    parent_id: 1,
+    popular: true,
+    isNew: false,
+    locked: true,
+    color: '#ffd700',
+    gradient: 'linear-gradient(135deg, #ffd700 0%, #ffb300 100%)',
+    bestFor: 'luxury brands, premium services, high-end content',
+    htmlFile: 'template1.html',
+  },
+  {
+    id: 'template2',
+    name: 'Premium Gold',
+    title: 'Premium Gold Template',
+    description: 'An exclusive premium template with advanced features, custom animations, and professional styling.',
+    icon: '👑',
+    category: 'design',
+    parent_id: 1,
+    popular: true,
+    isNew: false,
+    locked: true,
+    color: '#ffd700',
+    gradient: 'linear-gradient(135deg, #ffd700 0%, #ffb300 100%)',
+    bestFor: 'luxury brands, premium services, high-end content',
+    htmlFile: 'template2.html',
+  },
+  {
+    id: 'template3',
+    name: 'Premium Gold',
+    title: 'Premium Gold Template',
+    description: 'An exclusive premium template with advanced features, custom animations, and professional styling.',
+    icon: '👑',
+    category: 'design',
+    parent_id: 1,
+    popular: true,
+    isNew: false,
+    locked: true,
+    color: '#ffd700',
+    gradient: 'linear-gradient(135deg, #ffd700 0%, #ffb300 100%)',
+    bestFor: 'luxury brands, premium services, high-end content',
+    htmlFile: 'template3.html',
+  },
+  {
+    id: 'template4',
+    name: 'Premium Gold',
+    title: 'Premium Gold Template',
+    description: 'An exclusive premium template with advanced features, custom animations, and professional styling.',
+    icon: '👑',
+    category: 'design',
+    parent_id: 1,
     popular: true,
     isNew: false,
     locked: true,
@@ -137,6 +163,7 @@ export const UNIFIED_TEMPLATES: Template[] = [
     icon: '💎',
     category: 'design',
     popular: true,
+    parent_id: 1,
     isNew: true,
     locked: false,
     comingSoon: true,
