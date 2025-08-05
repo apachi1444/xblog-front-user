@@ -418,6 +418,7 @@ export function GenerateViewForm({
           tone_of_voice: formData.step2?.toneOfVoice || undefined,
           point_of_view: formData.step2?.pointOfView || undefined,
           plagiat_removal: formData.step2?.plagiaRemoval || false,
+          include_cta: formData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
           include_images: formData.step2?.includeImages || false,
           include_videos: formData.step2?.includeVideos || false,
           internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : '',

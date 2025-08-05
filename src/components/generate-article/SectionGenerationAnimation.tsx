@@ -410,6 +410,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 tone_of_voice: newFormData.step2?.toneOfVoice || undefined,
                 point_of_view: newFormData.step2?.pointOfView || undefined,
                 plagiat_removal: newFormData.step2?.plagiaRemoval || false,
+                include_cta: newFormData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
                 include_images: newFormData.step2?.includeImages || false,
                 include_videos: newFormData.step2?.includeVideos || false,
                 internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : '',

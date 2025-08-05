@@ -28,6 +28,7 @@ export const step2Schema = z.object({
   toneOfVoice: z.string().min(1, 'Tone of voice is required'),
   pointOfView: z.string().min(1, 'Point of view is required'),
   plagiaRemoval: z.boolean().default(false),
+  includeCta: z.boolean().default(false),
   // Simplified media settings
   includeImages: z.boolean().default(true),
   includeVideos: z.boolean().default(false),

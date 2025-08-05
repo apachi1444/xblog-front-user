@@ -199,6 +199,7 @@ export function GeneratingView() {
         toneOfVoice: 'friendly',
         pointOfView: 'first-person',
         plagiaRemoval: false,
+        includeCta: false,
         includeImages: true,
         includeVideos: false,
         internalLinks: [],

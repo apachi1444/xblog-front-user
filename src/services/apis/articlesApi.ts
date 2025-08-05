@@ -44,6 +44,7 @@ export interface UpdateArticleRequest {
   tone_of_voice?: string;
   point_of_view?: string;
   plagiat_removal?: boolean;
+  include_cta?: boolean; // Optional field as backend hasn't implemented yet
   include_images?: boolean;
   include_videos?: boolean;
   internal_links?: string | null;

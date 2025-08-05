@@ -160,6 +160,7 @@ export const StepNavigation = ({
               tone_of_voice: values.step2?.toneOfVoice || null,
               point_of_view: values.step2?.pointOfView || null,
               plagiat_removal: values.step2?.plagiaRemoval || false,
+              include_cta: values.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
               include_images: values.step2?.includeImages || false,
               include_videos: values.step2?.includeVideos || false,
               internal_links: values.step2?.internalLinks?.length ? JSON.stringify(values.step2.internalLinks) : null,

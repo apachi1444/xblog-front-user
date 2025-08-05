@@ -180,6 +180,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: St
             tone_of_voice: updatedFormData.step2?.toneOfVoice || undefined,
             point_of_view: updatedFormData.step2?.pointOfView || undefined,
             plagiat_removal: updatedFormData.step2?.plagiaRemoval || false,
+            include_cta: updatedFormData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
             include_images: updatedFormData.step2?.includeImages || false,
             include_videos: updatedFormData.step2?.includeVideos || false,
             internal_links: updatedFormData.step2?.internalLinks?.length ? JSON.stringify(updatedFormData.step2.internalLinks) : '',

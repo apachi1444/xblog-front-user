@@ -77,6 +77,51 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
 
       <Grid item xs={12}>
         <FormContainer title={t('article.settings.title', "Article Settings")}>
+          {/* Advanced Link Management Section - Moved to top for SEO priority */}
+          <Box sx={{ width: '100%', mb: 4 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 3,
+                fontWeight: 600,
+                color: 'text.primary',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%'
+              }}
+            >
+              <Iconify icon="mdi:link-variant" width={20} height={20} />
+              {t('links.management.title', "Advanced Link Management")}
+            </Typography>
+
+            {/* Link Management Sections */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} lg={6}>
+                <LinkManagementSection
+                  type="internal"
+                  title={t('links.internal.title', "Internal Links")}
+                  icon="mdi:link"
+                  onGenerateLinks={generateInternalLinks}
+                  isGenerating={isGeneratingInternal}
+                  showWebsiteUrlInput
+                />
+              </Grid>
+
+              <Grid item xs={12} lg={6}>
+                <LinkManagementSection
+                  type="external"
+                  title={t('links.external.title', "External Links")}
+                  icon="mdi:open-in-new"
+                  onGenerateLinks={generateExternalLinks}
+                  isGenerating={isGeneratingExternal}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Divider sx={{ my: 1, width: '100%' }} />
+
           <Box sx={{ width: '100%', mb: 4 }}>
             <Typography
               variant="subtitle1"
@@ -166,10 +211,40 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
               <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    {t('article.settings.plagiaRemoval', "Plagia Removal")}
+                    {t('article.settings.plagiaRemoval', "Plagiarism Removal")}
                   </Typography>
                   <Controller
                     name="step2.plagiaRemoval"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={field.value || false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label={field.value ? t('common.enabled', "Enabled") : t('common.disabled', "Disabled")}
+                        sx={{
+                          '& .MuiFormControlLabel-label': {
+                            fontSize: '0.875rem',
+                            color: field.value ? 'primary.main' : 'text.secondary'
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    {t('article.settings.includeCta', "Include CTA Button")}
+                  </Typography>
+                  <Controller
+                    name="step2.includeCta"
                     control={control}
                     render={({ field }) => (
                       <FormControlLabel
@@ -273,50 +348,7 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
           </Box>
         
 
-          <Divider sx={{ my: 1, width: '100%' }} />
 
-          {/* Advanced Link Management Section */}
-          <Box sx={{ width: '100%', mb: 4 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                mb: 3,
-                fontWeight: 600,
-                color: 'text.primary',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                width: '100%'
-              }}
-            >
-              <Iconify icon="mdi:link-variant" width={20} height={20} />
-              {t('links.management.title', "Advanced Link Management")}
-            </Typography>
-
-            {/* Link Management Sections */}
-            <Grid container spacing={3}>
-              <Grid item xs={12} lg={6}>
-                <LinkManagementSection
-                  type="internal"
-                  title={t('links.internal.title', "Internal Links")}
-                  icon="mdi:link"
-                  onGenerateLinks={generateInternalLinks}
-                  isGenerating={isGeneratingInternal}
-                  showWebsiteUrlInput
-                />
-              </Grid>
-
-              <Grid item xs={12} lg={6}>
-                <LinkManagementSection
-                  type="external"
-                  title={t('links.external.title', "External Links")}
-                  icon="mdi:open-in-new"
-                  onGenerateLinks={generateExternalLinks}
-                  isGenerating={isGeneratingExternal}
-                />
-              </Grid>
-            </Grid>
-          </Box>
 
           {/* Generate Button */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
