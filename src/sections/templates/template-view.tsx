@@ -91,7 +91,7 @@ export function TemplateView() {
     setIsGenerating(true);
 
     try {
-      const result = await createArticle({
+        await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',
@@ -110,7 +110,6 @@ export function TemplateView() {
       toast.success(t('templates.articleCreated', 'Article created! Starting with your selected template.'));
 
     } catch (error) {
-      console.error('Failed to create article with template:', error);
       toast.error(t('templates.createError', 'Failed to create article. Please try again.'));
     } finally {
       setIsGenerating(false);
@@ -118,11 +117,6 @@ export function TemplateView() {
       setSelectedTemplate(null);
     }
   };
-
-
-
-
-
 
   return (
     <DashboardContent>

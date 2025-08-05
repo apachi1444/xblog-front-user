@@ -16,8 +16,6 @@ import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
-
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -26,18 +24,6 @@ interface TemplateCardProps {
   template: Template;
   onSelect: () => void;
 }
-
-// Helper function to check if a plan is free
-const isFreeplan = (planName: string, planPrice: string): boolean => {
-  const name = planName?.toLowerCase() || '';
-  const price = planPrice || '0';
-
-  return (
-    name.includes('free') ||
-    name.includes('trial') ||
-    price === '0'
-  );
-};
 
 export function TemplateCard({ template, onSelect }: TemplateCardProps) {
   const { t } = useTranslation();
@@ -70,16 +56,7 @@ export function TemplateCard({ template, onSelect }: TemplateCardProps) {
     loadTemplate();
   }, [template.id, template.htmlFile]);
 
-  // Get subscription data
-  const { data: subscriptionDetails } = useGetSubscriptionDetailsQuery();
-  const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
-
-  // Find current plan and check access
-  const currentPlan = availablePlans.find(plan => plan.id === subscriptionDetails?.plan_id);
-  const isUserOnFreePlan = currentPlan ? isFreeplan(currentPlan.name, currentPlan.price) : true;
-
-
-
+  const isUserOnFreePlan = true
   // Event handlers
   const handleMouseEnter = () => {
     if (!isMobile) {
@@ -369,37 +346,65 @@ export function TemplateCard({ template, onSelect }: TemplateCardProps) {
           </Typography>
         </CardContent>
 
-        {/* Action Button */}
+        {/* Action Buttons */}
         <Box sx={{ p: 3, pt: 0 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            color={buttonConfig.color}
-            disabled={buttonConfig.disabled}
-            onClick={buttonConfig.action}
-            startIcon={<Iconify icon={buttonConfig.icon} />}
-            sx={{
-              py: 1.5,
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: 2,
-              transition: 'all 0.3s ease',
-              ...(buttonConfig.color === 'warning' && {
-                background: `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
+          <Stack direction="row" spacing={2}>
+            {/* Main Action Button - 70% width */}
+            <Button
+              variant="contained"
+              color={buttonConfig.color}
+              disabled={buttonConfig.disabled}
+              onClick={buttonConfig.action}
+              startIcon={<Iconify icon={buttonConfig.icon} />}
+              sx={{
+                flex: '0 0 70%',
+                py: 1.5,
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                ...(buttonConfig.color === 'warning' && {
+                  background: `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
+                  '&:hover': {
+                    background: `linear-gradient(45deg, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
+                    transform: 'translateY(-1px)',
+                    boxShadow: theme.shadows[4],
+                  },
+                }),
+                ...(buttonConfig.disabled && {
+                  bgcolor: 'action.disabledBackground',
+                  color: 'action.disabled',
+                }),
+              }}
+            >
+              {buttonConfig.label}
+            </Button>
+
+            {/* Demo Button - 30% width */}
+            <Button
+              variant="outlined"
+              onClick={handleDemoClick}
+              startIcon={<Iconify icon="mdi:play" />}
+              sx={{
+                flex: '0 0 28%',
+                py: 1.5,
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: 2,
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                color: theme.palette.primary.main,
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  background: `linear-gradient(45deg, ${theme.palette.warning.dark}, ${theme.palette.warning.main})`,
+                  borderColor: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
                   transform: 'translateY(-1px)',
-                  boxShadow: theme.shadows[4],
+                  boxShadow: theme.shadows[2],
                 },
-              }),
-              ...(buttonConfig.disabled && {
-                bgcolor: 'action.disabledBackground',
-                color: 'action.disabled',
-              }),
-            }}
-          >
-            {buttonConfig.label}
-          </Button>
+              }}
+            >
+              Demo
+            </Button>
+          </Stack>
         </Box>
       </Card>
     </motion.div>
