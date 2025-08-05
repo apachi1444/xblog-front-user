@@ -24,16 +24,16 @@ import { Iconify } from 'src/components/iconify';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
-// Draft Articles Component
-function DraftArticlesSection() {
+// Recent Articles Component
+function RecentArticlesSection() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
 
-  // Fetch draft articles
+  // Fetch all articles to check total count
   const { data: articles, isLoading } = useGetArticlesQuery({
     page: 1,
-    limit: 5,
+    limit: 50, // Fetch more to get accurate count
   });
 
   const draftArticles = articles?.articles
@@ -44,6 +44,10 @@ function DraftArticlesSection() {
       const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
       return dateB - dateA; // Descending order (latest first)
     }) || [];
+
+  // Show only first 10 articles on home page
+  const displayedArticles = draftArticles.slice(0, 10);
+  const hasMoreArticles = draftArticles.length > 10;
 
   if (isLoading) {
     return (
@@ -58,20 +62,20 @@ function DraftArticlesSection() {
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {t('dashboard.lastDocuments', 'Last documents')}
+            {t('dashboard.recentArticles', 'Recent Articles')}
           </Typography>
-          {draftArticles.length > 0 && (
+          {displayedArticles.length > 0 && (
             <Button
               size="small"
               onClick={() => navigate('/create')}
               sx={{ textTransform: 'none' }}
             >
-              {t('dashboard.viewAll', 'View all')}
+              {t('dashboard.newArticle', 'New Article')}
             </Button>
           )}
         </Box>
 
-        {draftArticles.length === 0 ? (
+        {displayedArticles.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 6 }}>
             <Box
               sx={{
@@ -112,187 +116,217 @@ function DraftArticlesSection() {
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={2}>
-            {draftArticles.map((article: any) => {
-              const metrics = calculateArticleMetrics(article);
-              const formattedMetrics = formatMetrics(metrics);
-              const quality = getContentQuality(metrics);
+          <>
+            <Grid container spacing={2}>
+              {displayedArticles.map((article) => {
+                const metrics = calculateArticleMetrics(article);
+                const formattedMetrics = formatMetrics(metrics);
+                const quality = getContentQuality(metrics);
 
-              return (
-                <Grid key={article.id} xs={12} sm={6} md={4}>
-                  <Card
-                    onClick={() => navigateToArticle(navigate, article.id)}
-                    sx={{
-                      height: '100%',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease-in-out',
-                      border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: theme.shadows[4],
-                        borderColor: alpha(theme.palette.primary.main, 0.3),
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ p: 2.5 }}>
-                      {/* Header with Icon and Quality Badge */}
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                        {/* Article Icon */}
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 2,
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Iconify
-                            icon="mdi:file-document-edit-outline"
-                            width={20}
-                            height={20}
-                            sx={{ color: theme.palette.primary.main }}
-                          />
-                        </Box>
-
-                        {/* Quality Badge */}
-                        <Box
-                          sx={{
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            bgcolor: alpha(theme.palette[quality.color].main, 0.1),
-                            border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
-                          }}
-                        >
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: theme.palette[quality.color].main,
-                              fontWeight: 600,
-                              fontSize: '0.65rem',
-                            }}
-                          >
-                            {quality.label}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      {/* Article Title */}
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          mb: 1.5,
-                          fontWeight: 600,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          minHeight: '2.5em',
-                        }}
-                      >
-                        {article.article_title || article.title || t('dashboard.untitledArticle', 'Untitled Article')}
-                      </Typography>
-
-                      {/* Article Metrics */}
-                      <Box sx={{ mb: 1.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Iconify icon="mdi:text" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                            <Typography variant="caption" color="text.secondary">
-                              {formattedMetrics.wordCount}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                            <Typography variant="caption" color="text.secondary">
-                              {formattedMetrics.readingTime}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        {/* Primary Keyword */}
-                        {article.primary_keyword && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Iconify icon="mdi:key" width={14} height={14} sx={{ color: 'text.secondary' }} />
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {article.primary_keyword}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
-
-                      {/* Last Modified */}
-                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5 }}>
-                        {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
-                      </Typography>
-
-                      {/* Status Badge */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Box
-                          sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                            border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
-                          }}
-                        >
+                return (
+                  <Grid key={article.id} xs={12} sm={6} md={4}>
+                    <Card
+                      onClick={() => navigateToArticle(navigate, article.id)}
+                      sx={{
+                        height: '100%',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: theme.shadows[4],
+                          borderColor: alpha(theme.palette.primary.main, 0.3),
+                        },
+                      }}
+                    >
+                      <CardContent sx={{ p: 2.5 }}>
+                        {/* Header with Icon and Quality Badge */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                          {/* Article Icon */}
                           <Box
                             sx={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: '50%',
-                              bgcolor: theme.palette.warning.main,
-                              mr: 0.5,
-                            }}
-                          />
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: theme.palette.warning.main,
-                              fontWeight: 500,
-                              fontSize: '0.7rem',
+                              width: 40,
+                              height: 40,
+                              borderRadius: 2,
+                              bgcolor: alpha(theme.palette.primary.main, 0.1),
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
                           >
-                            {t('dashboard.draft', 'Draft')}
-                          </Typography>
+                            <Iconify
+                              icon="mdi:file-document-edit-outline"
+                              width={20}
+                              height={20}
+                              sx={{ color: theme.palette.primary.main }}
+                            />
+                          </Box>
+
+                          {/* Quality Badge */}
+                          <Box
+                            sx={{
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              bgcolor: alpha(theme.palette[quality.color].main, 0.1),
+                              border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette[quality.color].main,
+                                fontWeight: 600,
+                                fontSize: '0.65rem',
+                              }}
+                            >
+                              {quality.label}
+                            </Typography>
+                          </Box>
                         </Box>
 
-                        {/* Language Badge */}
-                        {article.language && (
-                          <Typography
-                            variant="caption"
+                        {/* Article Title */}
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            mb: 1.5,
+                            fontWeight: 600,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            minHeight: '2.5em',
+                          }}
+                        >
+                          {article.article_title || article.title || t('dashboard.untitledArticle', 'Untitled Article')}
+                        </Typography>
+
+                        {/* Article Metrics */}
+                        <Box sx={{ mb: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Iconify icon="mdi:text" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {formattedMetrics.wordCount}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Iconify icon="mdi:clock-outline" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {formattedMetrics.readingTime}
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Primary Keyword */}
+                          {article.primary_keyword && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Iconify icon="mdi:key" width={14} height={14} sx={{ color: 'text.secondary' }} />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {article.primary_keyword}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Last Modified */}
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5 }}>
+                          {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
+                        </Typography>
+
+                        {/* Status Badge */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Box
                             sx={{
-                              color: 'text.secondary',
-                              textTransform: 'uppercase',
-                              fontSize: '0.65rem',
-                              fontWeight: 500,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              bgcolor: alpha(theme.palette.warning.main, 0.1),
+                              border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
                             }}
                           >
-                            {article.language}
-                          </Typography>
-                        )}
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: '50%',
+                                bgcolor: theme.palette.warning.main,
+                                mr: 0.5,
+                              }}
+                            />
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette.warning.main,
+                                fontWeight: 500,
+                                fontSize: '0.7rem',
+                              }}
+                            >
+                              {t('dashboard.draft', 'Draft')}
+                            </Typography>
+                          </Box>
+
+                          {/* Language Badge */}
+                          {article.language && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: 'text.secondary',
+                                textTransform: 'uppercase',
+                                fontSize: '0.65rem',
+                                fontWeight: 500,
+                              }}
+                            >
+                              {article.language}
+                            </Typography>
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+
+            {/* Explore More Button - Show when there are more than 10 articles */}
+            {hasMoreArticles && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => navigate('/blog')}
+                  startIcon={<Iconify icon="mdi:view-grid-plus" />}
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    borderColor: alpha(theme.palette.primary.main, 0.3),
+                    color: theme.palette.primary.main,
+                    '&:hover': {
+                      borderColor: theme.palette.primary.main,
+                      bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    },
+                  }}
+                >
+                  {t('dashboard.exploreMore', 'Explore More Articles')}
+                </Button>
+              </Box>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
@@ -635,9 +669,9 @@ export function OverviewAnalyticsView() {
 
       {/* Main Content Grid */}
       <Grid container spacing={3}>
-        {/* Draft Articles Section - Full Width */}
+        {/* Recent Articles Section - Full Width */}
         <Grid xs={12}>
-          <DraftArticlesSection />
+          <RecentArticlesSection />
         </Grid>
       </Grid>
     </DashboardContent>
