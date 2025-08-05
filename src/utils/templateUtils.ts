@@ -9,6 +9,7 @@ export interface Template {
   popular?: boolean;
   isNew?: boolean;
   locked?: boolean;
+  comingSoon?: boolean;
   difficulty?: 'easy' | 'medium' | 'hard';
   htmlFile?: string;
   estimatedTime?: string;
@@ -127,6 +128,38 @@ export const UNIFIED_TEMPLATES: Template[] = [
     gradient: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
     bestFor: 'eCommerce, lifestyle brands, or mobile-first designs',
     htmlFile: 'template4.html',
+    estimatedTime: '6 min',
+  },
+  {
+    id: 'template-premium',
+    name: 'Premium Gold',
+    title: 'Premium Gold Template',
+    description: 'An exclusive premium template with advanced features, custom animations, and professional styling.',
+    icon: '👑',
+    category: 'design',
+    popular: true,
+    isNew: false,
+    locked: true,
+    color: '#ffd700',
+    gradient: 'linear-gradient(135deg, #ffd700 0%, #ffb300 100%)',
+    bestFor: 'luxury brands, premium services, high-end content',
+    htmlFile: 'template-premium.html',
+  },
+  {
+    id: 'template-coming-soon',
+    name: 'Future Vision',
+    title: 'Future Vision Template',
+    description: 'An innovative template with cutting-edge design patterns. Coming soon with revolutionary features.',
+    icon: '🚀',
+    category: 'design',
+    popular: false,
+    isNew: true,
+    locked: false,
+    comingSoon: true,
+    color: '#9c27b0',
+    gradient: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)',
+    bestFor: 'innovative brands, tech startups, future-focused content',
+    estimatedTime: '8 min',
   },
   {
     id: 'template5',

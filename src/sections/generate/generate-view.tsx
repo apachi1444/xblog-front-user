@@ -13,12 +13,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 // Custom hooks
 
+import { getArticleIdFromParams } from 'src/utils/articleIdEncoder';
+
 // Layout components
 import { DashboardContent } from 'src/layouts/dashboard';
 // API and selectors
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { getArticleIdFromParams } from 'src/utils/articleIdEncoder';
 
 import { STEPS_KEYS } from './constants';
 // Custom components
@@ -239,6 +240,7 @@ export function GeneratingView() {
           featuredMedia: selectedArticle.featured_media !== null ? (selectedArticle.featured_media || '') : baseDefaults.step1.featuredMedia,
         },
         step2: {
+          includeCta: selectedArticle.include_cta !== null && selectedArticle.include_cta !== undefined ? selectedArticle.include_cta : baseDefaults.step2.includeCta,
           articleType: selectedArticle.article_type !== null ? (selectedArticle.article_type || 'how-to') : baseDefaults.step2.articleType,
           articleSize: selectedArticle.article_size !== null ? (selectedArticle.article_size || 'small') : baseDefaults.step2.articleSize,
           toneOfVoice: selectedArticle.tone_of_voice !== null ? (selectedArticle.tone_of_voice || 'friendly') : baseDefaults.step2.toneOfVoice,

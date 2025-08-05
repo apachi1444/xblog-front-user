@@ -43,6 +43,7 @@ export interface KeywordData {
     tone_of_voice?: string;
     point_of_view?: string;
     plagiat_removal?: boolean;
+    include_cta?: boolean;
     include_images?: boolean;
     include_videos?: boolean;
     internal_links?: string;
