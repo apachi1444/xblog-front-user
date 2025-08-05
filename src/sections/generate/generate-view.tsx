@@ -214,6 +214,8 @@ export function GeneratingView() {
       toc: '',
       generatedHtml: '',
       template_name: templateId || 'template1', // Use template from URL params or default
+      template_id: templateId || 'template1',
+      use_single_template: Boolean(templateId), // True if template was selected from URL
     };
 
     // If we have a draft article, use its values as initial form state
@@ -259,6 +261,8 @@ export function GeneratingView() {
         toc: selectedArticle.toc || baseDefaults.toc,
         generatedHtml: selectedArticle.content || baseDefaults.generatedHtml,
         template_name: selectedArticle.template_name || baseDefaults.template_name,
+        template_id: selectedArticle.template_name || templateId || 'template1',
+        use_single_template: Boolean(selectedArticle.template_name || templateId),
       };
     }
 

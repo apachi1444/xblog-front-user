@@ -236,6 +236,12 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               }))
             ];
 
+            // Check if user has selected a template
+            const selectedTemplate = localStorage.getItem('selectedTemplate');
+            const isNewArticle = localStorage.getItem('isNewArticle') === 'true';
+            const templateId = selectedTemplate || formData.template_name || 'template1';
+            const useSingleTemplate = Boolean(selectedTemplate) || isNewArticle;
+
             const sectionsRequest : GenerateSectionsRequest = {
               primary_keyword: primaryKeyword || '',
               secondary_keywords: secondaryKeywords || [],
@@ -248,7 +254,9 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               article_size: formData.step2?.articleSize || 'medium',
               links: combinedLinks,
               images: safeImages,
-              language: language || 'english'
+              language: language || 'english',
+              template_id: templateId,
+              use_single_template: useSingleTemplate
             };
 
             result = await generateSections(sectionsRequest).unwrap();
@@ -295,7 +303,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
               })),
               images: generatedImages,
               language: language || 'english',
-              template_name: formData.template_name || 'template1' // Use template from form data
+              template_name: "template1"
             };
             result = await generateFullArticle(fullArticleRequest).unwrap();
 

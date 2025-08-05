@@ -117,6 +117,8 @@ export const generateArticleSchema = z.object({
   toc: z.string().optional(), // JSON string containing ArticleToc[]
   generatedHtml: z.string().optional(),
   template_name: z.string().default('template1'),
+  template_id: z.string().default('template1'),
+  use_single_template: z.boolean().default(false),
 });
 
 // Export types for link management

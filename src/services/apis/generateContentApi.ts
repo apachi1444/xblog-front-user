@@ -69,6 +69,8 @@ export interface GenerateSectionsRequest {
     img_url: string;
   }>;
   language: string;
+  template_id: string;
+  use_single_template: boolean;
 }
 
 /**
@@ -186,7 +188,7 @@ export interface GenerateFullArticleRequest {
   table_of_contents: GenerateFullArticleTableOfContents[];
   sections: GenerateFullArticleSection[];
   language: string;
-  template_name?: string;
+  template_name: string;
 }
 
 /**
