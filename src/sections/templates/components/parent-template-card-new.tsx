@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import Box from '@mui/material/Box';
@@ -38,44 +38,252 @@ export function ParentTemplateCard({ parentTemplate, onSelect }: ParentTemplateC
   const [isHovered, setIsHovered] = useState(false);
   const [currentChildIndex, setCurrentChildIndex] = useState(0);
   const [htmlContent, setHtmlContent] = useState<string>('');
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
 
-  // Auto-slideshow functionality
+  // Use refs to store interval and animation frame IDs
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const slideshowIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-slideshow functionality - pause when hovering
   useEffect(() => {
-    if (children.length <= 1) return;
+    // Clear existing interval
+    if (slideshowIntervalRef.current) {
+      clearInterval(slideshowIntervalRef.current);
+      slideshowIntervalRef.current = null;
+    }
 
-    const interval = setInterval(() => {
+    if (children.length <= 1 || isHovered) return; // Pause when hovering or single child
+
+    slideshowIntervalRef.current = setInterval(() => {
       setCurrentChildIndex(prev => (prev + 1) % children.length);
     }, 3000); // Change every 3 seconds
 
     // eslint-disable-next-line consistent-return
-    return () => clearInterval(interval);
-  }, [children.length]);
+    return () => {
+      if (slideshowIntervalRef.current) {
+        clearInterval(slideshowIntervalRef.current);
+        slideshowIntervalRef.current = null;
+      }
+    };
+  }, [children.length, isHovered]);
 
-  // Load HTML content for current child
+  // Enhanced HTML content processing with proper iframe setup
+  const processHtmlContent = (htmlString: string): string => {
+    // Add responsive viewport meta tag and ensure proper scaling
+    const enhancedHtml = htmlString.replace(
+      /<head>/i,
+      `<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <style>
+          /* Ensure the iframe content scales properly */
+          * {
+            box-sizing: border-box;
+          }
+          
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: none;
+            -moz-text-size-adjust: none;
+            -ms-text-size-adjust: none;
+            text-size-adjust: none;
+          }
+          
+          body {
+            transform-origin: top left;
+            /* Scale down content to fit preview */
+            transform: scale(0.7);
+            width: 142.86%; /* 100% / 0.7 to compensate for scaling */
+          }
+          
+          /* Prevent any fixed positioning issues */
+          * {
+            position: relative !important;
+          }
+          
+          /* Ensure images and media scale properly */
+          img, video, iframe {
+            max-width: 100%;
+            height: auto;
+          }
+          
+          /* Remove any potential scroll bars */
+          ::-webkit-scrollbar {
+            display: none;
+          }
+          
+          /* Ensure text is readable at smaller scales */
+          * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+        </style>`
+    );
+
+    return enhancedHtml;
+  };
+
+  // Load HTML content for current child - optimized with enhanced processing
   useEffect(() => {
+    let isCancelled = false;
+
     const loadTemplate = async () => {
       if (children.length === 0) return;
-      
+
       try {
         const currentChild = children[currentChildIndex];
-        const templateFile = currentChild.htmlFile || `template${currentChild.id.replace('template', '')}.html`;
-        const response = await fetch(`/${templateFile}`);
+        if (!currentChild?.htmlFile) {
+          setHtmlContent(`
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                    text-align: center;
+                    color: #999;
+                    background: #f5f5f5;
+                  }
+                </style>
+              </head>
+              <body>
+                <div>
+                  <h3>Preview Unavailable</h3>
+                  <p>Template file not found</p>
+                </div>
+              </body>
+            </html>
+          `);
+          return;
+        }
+
+        const response = await fetch(`/${currentChild.htmlFile}`);
         if (response.ok) {
           const content = await response.text();
-          setHtmlContent(content);
+          if (!isCancelled) {
+            // Process the HTML content for better iframe display
+            const processedContent = processHtmlContent(content);
+            setHtmlContent(processedContent);
+          }
         }
       } catch (error) {
-        console.error('Failed to load template:', error);
-        setHtmlContent('<div style="padding: 20px; text-align: center; color: #999;">Preview unavailable</div>');
+        if (!isCancelled) {
+          setHtmlContent(`
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body {
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                    text-align: center;
+                    color: #999;
+                    background: #f5f5f5;
+                  }
+                </style>
+              </head>
+              <body>
+                <div>
+                  <h3>Preview Unavailable</h3>
+                  <p>Error loading template</p>
+                </div>
+              </body>
+            </html>
+          `);
+        }
       }
     };
 
     loadTemplate();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentChildIndex, children]);
 
+  // Auto-scroll functionality on hover - optimized
+  useEffect(() => {
+    // Clear existing animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    if (isAutoScrolling && htmlContent) {
+      const startTime = Date.now();
+      const scrollDuration = 10000; // 10 seconds to scroll through entire content
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = (elapsed % scrollDuration) / scrollDuration;
+        
+        // Scroll smoothly through the content
+        // Since iframe height is increased to 200%, we can scroll up to 50% to show all content
+        const maxScrollPercentage = 50; // This will show the bottom half of the 200% height iframe
+        const newScrollPosition = progress * maxScrollPercentage;
+
+        setScrollPosition(newScrollPosition);
+
+        if (isAutoScrolling) {
+          animationFrameRef.current = requestAnimationFrame(animate);
+        }
+      };
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isAutoScrolling, htmlContent]);
+
+  // Reset scroll position when changing templates
+  useEffect(() => {
+    setScrollPosition(0);
+    setIsAutoScrolling(false);
+  }, [currentChildIndex]);
+
+  // Cleanup on unmount
+  useEffect(() => () => {
+      if (scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (slideshowIntervalRef.current) {
+        clearInterval(slideshowIntervalRef.current);
+      }
+    }, []);
+
   // Event handlers
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    setIsAutoScrolling(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setIsAutoScrolling(false);
+    setScrollPosition(0); // Reset to starting position
+  };
 
   const handleDemoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -254,27 +462,42 @@ export function ParentTemplateCard({ parentTemplate, onSelect }: ParentTemplateC
           <Box
             sx={{
               position: 'relative',
-              height: 340, // Increased from 200 to 280
+              height: 340, // Increased from 200 to 340
               overflow: 'hidden',
               bgcolor: 'background.neutral',
               borderRadius: 2,
               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              '&:hover': {
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.1)}`,
+              },
+              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            {/* HTML Preview Content */}
+            {/* HTML Preview Content with Enhanced iframe */}
             {htmlContent ? (
               <iframe
+                key={`${currentChildIndex}-${currentChild?.id}`} // Force re-render on template change
                 srcDoc={htmlContent}
                 title={`${currentChild?.title || title} Preview`}
+                sandbox="allow-same-origin allow-scripts"
+                loading="lazy"
                 style={{
-                  width: '166.67%',
-                  height: '166.67%',
+                  width: '100%',
+                  height: '200%', // Make iframe taller to contain more content
                   border: 'none',
                   pointerEvents: 'none',
-                  transform: 'scale(0.6)',
+                  transform: `translateY(-${scrollPosition}%)`,
                   transformOrigin: 'top left',
+                  transition: isAutoScrolling ? 'none' : 'transform 0.3s ease-out',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  background: 'white',
+                  // Ensure iframe content is properly scaled
+                  zoom: 1,
                 }}
               />
             ) : (
@@ -290,6 +513,32 @@ export function ParentTemplateCard({ parentTemplate, onSelect }: ParentTemplateC
               >
                 <Iconify icon="mdi:file-document-outline" sx={{ fontSize: 48, mb: 1 }} />
                 <Typography variant="caption">Preview unavailable</Typography>
+              </Box>
+            )}
+
+            {/* Auto-scroll Progress Indicator */}
+            {isAutoScrolling && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  width: 4,
+                  height: 60,
+                  bgcolor: alpha(theme.palette.common.white, 0.3),
+                  borderRadius: 2,
+                  zIndex: 5,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: `${(scrollPosition / 50) * 100}%`, // Adjust for 50% max scroll range
+                    bgcolor: theme.palette.primary.main,
+                    borderRadius: 2,
+                    transition: 'height 0.05s linear',
+                  }}
+                />
               </Box>
             )}
 
