@@ -1,9 +1,9 @@
 import { api } from "..";
 
 // Generic publish request interface
-interface PublishRequest {
-  store_id: string;
-  article_id: string;
+export interface PublishRequest {
+  store_id: number;
+  article_id: number;
   scheduled_date?: string;
 }
 

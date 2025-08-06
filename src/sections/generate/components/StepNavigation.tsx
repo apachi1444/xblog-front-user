@@ -361,6 +361,7 @@ export const StepNavigation = ({
           <PublishModal
             open={publishModalOpen}
             onClose={() => setPublishModalOpen(false)}
+            articleId={articleId} // Pass the article ID to PublishModal
             articleInfo={getArticleData().articleInfo}
             sections={getArticleData().sections}
           />

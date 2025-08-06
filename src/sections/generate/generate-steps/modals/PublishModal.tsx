@@ -26,7 +26,7 @@ import { useRouter } from 'src/routes/hooks';
 
 // API hooks
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
+import { PublishRequest, usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -35,6 +35,7 @@ import type { ArticleSection } from '../../schemas';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
+  articleId?: string | null; // Add articleId prop
   articleInfo: {
     title: string;
     metaTitle: string;
@@ -53,7 +54,7 @@ interface PublishResult {
   message?: string;
 }
 
-export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishModalProps) => {
+export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }: PublishModalProps) => {
   // Hooks
   const router = useRouter();
 
@@ -75,18 +76,24 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
   // Reset modal state when opened
   useEffect(() => {
     if (open) {
+      console.log('📝 PublishModal opened with articleId:', articleId);
       setPublishingStep('selection');
       setIsPublishing(false);
       setSuccessMessage('');
       setSelectedStore(null); // Reset store selection to force user to choose
       setRedirectCountdown(3);
     }
-  }, [open]);
+  }, [open, articleId]);
 
   // Handle publish action
   const handlePublish = async () => {
     if (!selectedStore) {
       toast.error('Please select a store before publishing');
+      return;
+    }
+
+    if (!articleId) {
+      toast.error('Article ID is missing. Please save your article as a draft first.');
       return;
     }
 
@@ -101,29 +108,21 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
         throw new Error('Store not found');
       }
 
-      // Determine which publish API to use based on store platform
-      let publishResult: PublishResult;
-
-      const publishData = {
-        store_id: String(selectedStore),
-        article_id: 'current-article-id', // This would come from the article being created
-        scheduled_date: publishingSchedule === 'schedule' ? new Date().toISOString() : undefined,
+      const publishData :  PublishRequest = {
+        store_id: selectedStore,
+        article_id: Number(articleId) || 0, // Use the actual article ID from props
+        scheduled_date: new Date().toISOString(),
       };
 
-      const platform = store.platform?.toLowerCase();
+      console.log('🚀 Publishing article with data:', publishData);
+
+      const platform = store.category?.toLowerCase();
 
       if (platform === 'wordpress') {
         // Use WordPress API
-        publishResult = await publishWordPress(publishData).unwrap() as PublishResult;
-      } else {
-        // For non-WordPress platforms, show not supported message
-        throw new Error(`Publishing to ${store.platform || 'this platform'} is not supported yet. Only WordPress is currently available.`);
-      }
-
-      if (publishResult.success) {
-        setSuccessMessage(publishResult.message || 'Content published successfully!');
+        await publishWordPress(publishData).unwrap();
+        setSuccessMessage('Content published successfully!');
         setPublishingStep('success');
-        toast.success(publishResult.message || 'Content published successfully!');
 
         // Start countdown for auto-redirect
         setRedirectCountdown(3);
@@ -131,7 +130,7 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
           setRedirectCountdown(prev => {
             if (prev <= 1) {
               clearInterval(countdownInterval);
-              router.push('/blog');
+              router.push('/blog'); 
               onClose();
               return 0;
             }
@@ -139,10 +138,11 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
           });
         }, 1000);
       } else {
-        throw new Error(publishResult.message || 'Unknown error');
+        // For non-WordPress platforms, show not supported message
+        throw new Error(`Publishing to ${store.platform || 'this platform'} is not supported yet. Only WordPress is currently available.`);
       }
+
     } catch (error: any) {
-      console.error('Publishing error:', error);
       setIsPublishing(false);
       setPublishingStep('selection');
 
@@ -340,14 +340,6 @@ export const PublishModal = ({ open, onClose, articleInfo, sections }: PublishMo
                 </Alert>
               )}
             </Box>
-
-            {/* Warning for non-WordPress stores */}
-            {selectedStore && stores.find(s => s.id === selectedStore)?.platform?.toLowerCase() !== 'wordpress' && (
-              <Alert severity="warning" sx={{ mb: 3 }}>
-                Publishing to {stores.find(s => s.id === selectedStore)?.platform || 'this platform'} is not supported yet.
-                Only WordPress stores are currently available for publishing.
-              </Alert>
-            )}
 
             {/* Publishing Schedule */}
             <Box sx={{ mb: 3 }}>
