@@ -1,21 +1,17 @@
-import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
 
 import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
 import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@mui/material';
 
-import { useArticleDraft } from 'src/hooks/useArticleDraft';
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
 import { useKeywordGeneration } from 'src/utils/generation/keywordsGeneration';
 import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
 
-import { api } from 'src/services/apis';
 import { useGenerateTopicMutation } from 'src/services/apis/generateContentApi';
 
 import { FeedbackModal } from 'src/components/feedback';
@@ -51,8 +47,6 @@ export function GenerateViewForm({
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
-  const dispatch = useDispatch();
-  const articleDraft = useArticleDraft();
 
   // Generation hooks
   const { generateSecondaryKeywords } = useKeywordGeneration();
@@ -163,7 +157,6 @@ export function GenerateViewForm({
 
         // Note: Subscription cache will be invalidated at the end of generation process
       } else {
-        console.warn('⚠️ No keywords generated, using fallback');
         // Fallback keywords if API fails
         const fallbackKeywords = [
           `${primaryKeyword} guide`,
@@ -175,7 +168,6 @@ export function GenerateViewForm({
         methods.setValue('step1.secondaryKeywords', fallbackKeywords, { shouldValidate: true });
       }
     } catch (error) {
-      console.error('❌ Error generating secondary keywords:', error);
       // Fallback on error
       const formData = methods.getValues();
       const primaryKeyword = formData.step1?.primaryKeyword;
@@ -197,15 +189,13 @@ export function GenerateViewForm({
 
     try {
       const formData = methods.getValues();
-      const { primaryKeyword, contentDescription, language } = formData.step1;
+      const { primaryKeyword, language } = formData.step1;
 
       // If no primary keyword, show error and return
       if (!primaryKeyword) {
         toast.error('Please enter a primary keyword first before optimizing content description.');
         return;
       }
-
-      console.log('🔧 Optimizing content description with:', { primaryKeyword, language, contentDescription });
 
       // Call the actual generate-topic API for content optimization
       // If no content description exists, the API will generate one from scratch
@@ -215,7 +205,6 @@ export function GenerateViewForm({
         language: language || 'english'
       }).unwrap();
 
-      console.log('✅ API Response for content optimization:', result);
       const optimizedContent = result.content; // Extract content from response
 
       // Update the form field with optimized content
@@ -253,9 +242,6 @@ export function GenerateViewForm({
           urlSlug: ''
         };
       }
-
-      console.log('🏷️ Generating meta tags with language:', { primaryKeyword, language, title, contentDescription });
-
       // Call the real API with language support
       const generatedMeta = await generateMetaTags(
         primaryKeyword,
@@ -276,7 +262,6 @@ export function GenerateViewForm({
           urlSlug: generatedMeta.urlSlug
         };
       }
-        console.warn('⚠️ No meta tags generated, using fallback');
         return {
           metaTitle: `${title} | Complete Guide`,
           metaDescription: `Learn everything about ${primaryKeyword}. ${contentDescription || 'Comprehensive guide with expert tips and strategies.'}`,
@@ -284,7 +269,6 @@ export function GenerateViewForm({
         };
       
     } catch (error) {
-      console.error('❌ Error generating meta tags:', error);
       // Fallback meta tags
       const formData = methods.getValues();
       const { primaryKeyword, title } = formData.step1;
@@ -377,82 +361,6 @@ export function GenerateViewForm({
     }
   }, [onGenerationTrigger, onGenerateTableOfContents]);
 
-  // Handle generation completion from animation modal
-  const handleGenerationComplete = useCallback(async () => {
-    console.log('🎯 handleGenerationComplete called with articleId:', articleId);
-    setGenerationState((s) => ({
-      ...s,
-      isGeneratingSections: false,
-      isGenerated: true
-    }));
-
-    // Resolve the promise with the generated sections data
-    if ((window as any).__generationPromise?.resolve) {
-      const formData = methods.getValues();
-      const sections = formData.step3?.sections || [];
-      (window as any).__generationPromise.resolve(sections);
-      delete (window as any).__generationPromise;
-    }
-
-    // Update article with all generated content after successful generation
-    if (articleId) {
-      try {
-        console.log('🔄 Updating article after successful generation:', articleId);
-        const formData = methods.getValues();
-
-        const requestBody : UpdateArticleRequest = {
-          // Step 1 fields
-          article_title: formData.step1?.title || undefined,
-          content__description: formData.step1?.contentDescription || undefined,
-          meta_title: formData.step1?.metaTitle || undefined,
-          meta_description: formData.step1?.metaDescription || undefined,
-          url_slug: formData.step1?.urlSlug || undefined,
-          primary_keyword: formData.step1?.primaryKeyword || undefined,
-          secondary_keywords: formData.step1?.secondaryKeywords?.length ? JSON.stringify(formData.step1.secondaryKeywords) : undefined,
-          target_country: formData.step1?.targetCountry || 'global',
-          language: formData.step1?.language || 'english',
-
-          // Step 2 fields
-          article_type: formData.step2?.articleType || undefined,
-          article_size: formData.step2?.articleSize || undefined,
-          tone_of_voice: formData.step2?.toneOfVoice || undefined,
-          point_of_view: formData.step2?.pointOfView || undefined,
-          plagiat_removal: formData.step2?.plagiaRemoval || false,
-          include_cta: formData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
-          include_images: formData.step2?.includeImages || false,
-          include_videos: formData.step2?.includeVideos || false,
-          internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : '',
-          external_links: formData.step2?.externalLinks?.length ? JSON.stringify(formData.step2.externalLinks) : '',
-
-          // Generated content
-          content: formData.generatedHtml || '',
-          sections: formData.step3?.sections?.length ? JSON.stringify(formData.step3.sections) : '',
-          toc: formData.toc || null,
-          images: formData.images || null,
-          faq: formData.faq || null,
-          featured_media: formData.step1?.featuredMedia || undefined,
-
-          // Template information
-          template_name: formData.template_name || 'template1',
-
-          status: 'draft' as const,
-        };
-
-        await articleDraft.updateArticle(articleId, requestBody);
-        console.log('✅ Article updated successfully after generation');
-      } catch (error) {
-        console.error('❌ Failed to update article after generation:', error);
-        // Don't show error to user as generation was successful
-      }
-    }
-
-    // Invalidate subscription cache ONCE at the end of generation process
-    dispatch(api.util.invalidateTags(['Subscription']));
-
-    // Navigate to step 3 after generation completes
-    setActiveStep(2);
-  }, [setActiveStep, methods, dispatch, articleId, articleDraft]);
-
   // Handle generation error from animation modal
   const handleGenerationError = useCallback((error: string, failedStep: string, completedSteps: string[]) => {
     setGenerationState((s) => ({
@@ -515,7 +423,16 @@ export function GenerateViewForm({
       {/* Section generation animation modal */}
       <SectionGenerationAnimation
         show={generationState.isGeneratingSections}
-        onComplete={handleGenerationComplete}
+        onComplete={() => {
+          setGenerationState((s) => ({
+            ...s,
+            isGeneratingSections: false,
+            isGenerated: true
+          }));
+          setTimeout(() => {
+            setActiveStep(2);
+          }, 500);
+        }}
         onError={handleGenerationError}
         onClose={() => setGenerationState(prev => ({ ...prev, isGeneratingSections: false }))}
       />

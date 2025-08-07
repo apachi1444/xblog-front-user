@@ -131,15 +131,8 @@ export const StepNavigation = ({
       }
 
       if (shouldProceed) {
-        if (articleId && (activeStep === 0 || activeStep === 1)) {
+        if (articleId && (activeStep === 0)) {
           try {
-            console.log('🔄 Saving article data on step navigation:', {
-              activeStep,
-              articleId,
-              featuredMedia: values.step1?.featuredMedia,
-              hasImages: values.images?.length > 0
-            });
-
             // 🎯 Prepare request body with ALL form data
             const requestBody: UpdateArticleRequest = {
               // Step 1 fields (updated values)

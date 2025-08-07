@@ -49,12 +49,6 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
   const decodedArticleId = encodedArticleId ? getArticleIdFromParams(searchParams) : null;
   const articleId = decodedArticleId?.toString() || null;
 
-  // Validate that we have a proper article ID for API calls
-  if (encodedArticleId && !decodedArticleId) {
-    console.warn('⚠️ Failed to decode article ID:', encodedArticleId);
-  }
-
-
   // State management
   const [step, setStep] = useState(0);
   const [showCheckmark, setShowCheckmark] = useState(false);
@@ -412,43 +406,42 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
                 methods.setValue('step1.featuredMedia', imageToUse);
               }
 
-              // Prepare request body with all generated AI content
               const requestBody : UpdateArticleRequest = {
-                article_title: newFormData.step1?.title || undefined,
-                content__description: newFormData.step1?.contentDescription || undefined,
-                meta_title: newFormData.step1?.metaTitle || undefined,
-                meta_description: newFormData.step1?.metaDescription || undefined,
-                url_slug: newFormData.step1?.urlSlug || undefined,
-                primary_keyword: newFormData.step1?.primaryKeyword || undefined,
-                secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : undefined,
-                target_country: newFormData.step1?.targetCountry || 'global',
-                language: newFormData.step1?.language || 'english',
-                article_type: newFormData.step2?.articleType || undefined,
-                article_size: newFormData.step2?.articleSize || undefined,
-                tone_of_voice: newFormData.step2?.toneOfVoice || undefined,
-                point_of_view: newFormData.step2?.pointOfView || undefined,
-                plagiat_removal: newFormData.step2?.plagiaRemoval || false,
-                include_cta: newFormData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
-                include_images: newFormData.step2?.includeImages || false,
-                include_videos: newFormData.step2?.includeVideos || false,
-                internal_links: newFormData.step2?.internalLinking?.length ? JSON.stringify(newFormData.step2.internalLinking) : '',
-                external_links: newFormData.step2?.externalLinking?.length ? JSON.stringify(newFormData.step2.externalLinking) : '',
-                content: newFormData.generatedHtml,
-                sections: newFormData.step3?.sections?.length ? JSON.stringify(newFormData.step3.sections) : '',
-                toc: newFormData.toc || null,
-                images: newFormData.images || null,
-                faq: newFormData.faq || null,
-                featured_media: featuredMediaUrl || firstImageUrl,
-                template_name: newFormData.template_name || 'template1',
+                article_title: formData.step1?.title || undefined,
+                content__description: formData.step1?.contentDescription || undefined,
+                meta_title: formData.step1?.metaTitle || undefined,
+                meta_description: formData.step1?.metaDescription || undefined,
+                url_slug: formData.step1?.urlSlug || undefined,
+                primary_keyword: formData.step1?.primaryKeyword || undefined,
+                secondary_keywords: formData.step1?.secondaryKeywords?.length ? JSON.stringify(formData.step1.secondaryKeywords) : undefined,
+                target_country: formData.step1?.targetCountry || 'global',
+                language: formData.step1?.language || 'english',
+
+                article_type: formData.step2?.articleType || undefined,
+                article_size: formData.step2?.articleSize || undefined,
+                tone_of_voice: formData.step2?.toneOfVoice || undefined,
+                point_of_view: formData.step2?.pointOfView || undefined,
+                plagiat_removal: formData.step2?.plagiaRemoval || false,
+                include_cta: formData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
+                include_images: formData.step2?.includeImages || false,
+                include_videos: formData.step2?.includeVideos || false,
+                internal_links: formData.step2?.internalLinks?.length ? JSON.stringify(formData.step2.internalLinks) : '',
+                external_links: formData.step2?.externalLinks?.length ? JSON.stringify(formData.step2.externalLinks) : '',
+
+                content: formData.generatedHtml || '',
+                sections: formData.step3?.sections?.length ? JSON.stringify(formData.step3.sections) : '',
+                toc: formData.toc || null,
+                images: formData.images || null,
+                faq: formData.faq || null,
+                featured_media: formData.step1?.featuredMedia || undefined,
+                template_name: formData.template_name || 'template1',
                 status: 'draft' as const,
               };
 
-              // Only update existing article - never create new ones during generation
               await articleDraft.updateArticle(articleId, requestBody);
             }
           } catch (error) {
             toast.error('❌ Failed to auto-save article:', error);
-            // Don't show error to user as this is automatic - generation was successful
           }
         }, 750);
       }
