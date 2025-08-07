@@ -15,6 +15,8 @@ import { Box, Paper, useTheme, Typography, LinearProgress } from '@mui/material'
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
+import { getArticleIdFromParams } from 'src/utils/articleIdEncoder';
+
 import {
   useGenerateFaqMutation,
   useGenerateImagesMutation,
@@ -42,8 +44,16 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
   const articleDraft = useArticleDraft();
   const [searchParams] = useSearchParams();
 
-  // Get article ID from URL params
-  const articleId = searchParams.get('articleId') || searchParams.get('draft');
+  // Get article ID from URL params and decode it
+  const encodedArticleId = searchParams.get('articleId') || searchParams.get('draft');
+  const decodedArticleId = encodedArticleId ? getArticleIdFromParams(searchParams) : null;
+  const articleId = decodedArticleId?.toString() || null;
+
+  // Validate that we have a proper article ID for API calls
+  if (encodedArticleId && !decodedArticleId) {
+    console.warn('⚠️ Failed to decode article ID:', encodedArticleId);
+  }
+
 
   // State management
   const [step, setStep] = useState(0);
