@@ -54,7 +54,7 @@ export interface KeywordData {
     images?: string | null; // JSON string containing images array
     faq?: string | null; // JSON string containing FAQ array
     featured_media?: string;
-    status: 'draft' | 'published' | 'scheduled';
+    status: 'draft' | 'publish' | 'scheduled';
     platform?: string;
     scheduled_publish_date?: string;
     created_at: string;

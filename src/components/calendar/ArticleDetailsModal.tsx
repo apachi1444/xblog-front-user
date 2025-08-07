@@ -98,7 +98,7 @@ export function ArticleDetailsModal({
                   <Chip
                     label={t(`common.statuses.${article.status}`, article.status)}
                     size="small"
-                    color={article.status === 'published' ? 'success' : article.status === 'scheduled' ? 'warning' : 'default'}
+                    color={article.status === 'publish' ? 'success' : article.status === 'scheduled' ? 'warning' : 'default'}
                     sx={{ fontWeight: 600 }}
                   />
                 </Box>

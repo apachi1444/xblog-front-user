@@ -263,7 +263,7 @@ export const _posts: Article[] = [
     // Some articles have no featured_media to test "Image not set" functionality
     featured_media: index % 5 === 0 ? '' : 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDkxMTJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc0Njk4NDAwM3ww&ixlib=rb-4.1.0&q=80&w=1080',
     created_at: _times(index),
-    status: index === 0 ? 'scheduled' : ['published', 'draft', 'scheduled'][index % 3] as 'published' | 'draft' | 'scheduled',
+    status: index === 0 ? 'scheduled' : ['publish', 'draft', 'scheduled'][index % 3] as 'publish' | 'draft' | 'scheduled',
     platform: ['shopify', 'wordpress', 'wix', 'squarespace'][index % 4],
     content: _description(index),
   }))

@@ -66,7 +66,7 @@ const PLATFORM_ICONS = {
 };
 
 const getPlatformIcons = (post: Article) => {
-  if (post.status !== 'published') return [];
+  if (post.status !== 'publish') return [];
 
   // Use the platform from the API response
   if (post.platform && post.platform !== 'string') {
@@ -99,7 +99,7 @@ export function PostItem({
   // Determine status color and icon
   const getStatusConfig = () => {
     switch (post.status) {
-      case 'published':
+      case 'publish':
         return {
           color: 'success',
           icon: 'mdi:check-circle',

@@ -34,7 +34,7 @@ export const _fakeStores: Store[] = [...Array(5)].map((__, index) => {
       title: _postTitles(articleIndex),
       featured_media: `/assets/images/cover/cover-${(articleIndex % 24) + 1}.webp`,
       created_at: _times(articleIndex),
-      status: ['draft', 'published', 'scheduled'][articleIndex % 3] as 'draft' | 'published' | 'scheduled',
+      status: ['draft', 'published', 'scheduled'][articleIndex % 3] as 'draft' | 'publish' | 'scheduled',
       platform: platform.name,
       content: _description(articleIndex),
     })),

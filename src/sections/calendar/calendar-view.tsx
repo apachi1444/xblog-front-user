@@ -170,7 +170,7 @@ export default function CalendarPage() {
 
     if (isBefore(day, new Date()) && !isToday(day)) {
       if (scheduledArticles.length === 0) return 'past-empty';
-      if (scheduledArticles.some(article => article.status === 'published')) return 'published';
+      if (scheduledArticles.some(article => article.status === 'publish')) return 'publish';
       return 'past-missed';
     }
 

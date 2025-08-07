@@ -8,12 +8,12 @@ import {
   Box,
   Grid,
   Chip,
+  alpha,
   Button,
+  Tooltip,
+  useTheme,
   Typography,
   IconButton,
-  useTheme,
-  alpha,
-  Tooltip,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
@@ -145,11 +145,11 @@ export function CalendarDayCell({
                 height: 20,
                 fontSize: '0.65rem',
                 fontWeight: 500,
-                bgcolor: article.status === 'published' 
+                bgcolor: article.status === 'publish' 
                   ? alpha(theme.palette.success.main, 0.9)
                   : alpha(theme.palette.warning.main, 0.9),
                 color: theme.palette.getContrastText(
-                  article.status === 'published' 
+                  article.status === 'publish' 
                     ? theme.palette.success.main 
                     : theme.palette.warning.main
                 ),

@@ -147,7 +147,7 @@ export function ArticleListModal({
                           <Chip
                             label={t(`common.statuses.${article.status}`, article.status)}
                             size="small"
-                            color={article.status === 'published' ? 'success' : 'warning'}
+                            color={article.status === 'publish' ? 'success' : 'warning'}
                             sx={{
                               fontWeight: 600,
                               fontSize: '0.7rem',

@@ -21,6 +21,7 @@ import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
+import { StatusBadge } from 'src/components/status-badge';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
@@ -243,39 +244,9 @@ function RecentArticlesSection() {
                           {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
                         </Typography>
 
-                        {/* Status Badge */}
+                        {/* Dynamic Status Badge */}
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Box
-                            sx={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              bgcolor: alpha(theme.palette.warning.main, 0.1),
-                              border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: '50%',
-                                bgcolor: theme.palette.warning.main,
-                                mr: 0.5,
-                              }}
-                            />
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: theme.palette.warning.main,
-                                fontWeight: 500,
-                                fontSize: '0.7rem',
-                              }}
-                            >
-                              {t('dashboard.draft', 'Draft')}
-                            </Typography>
-                          </Box>
+                          <StatusBadge status={article.status} />
 
                           {/* Language Badge */}
                           {article.language && (
