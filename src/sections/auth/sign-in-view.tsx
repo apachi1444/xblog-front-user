@@ -22,6 +22,7 @@ import { Switch, Tooltip, CircularProgress, FormControlLabel } from "@mui/materi
 import { useRouter } from 'src/routes/hooks';
 
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
+import { useEnhancedAnalytics } from 'src/hooks/useEnhancedAnalytics';
 
 import { trackTestModeToggle } from 'src/utils/analytics';
 
@@ -50,6 +51,7 @@ export function SignInView() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const analytics = useEnhancedAnalytics();
 
   const testMode = useSelector(selectIsTestMode);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -143,8 +145,12 @@ export function SignInView() {
 
   // Handle email/password sign in
   const handleSignIn = useCallback(async (data: SignInFormData) => {
+    // Track sign-in attempt
+    analytics.trackSignInAttempt('email');
+
     if (testMode) {
       handleTestModeLogin();
+      analytics.trackSignInSuccess('test_mode');
       return;
     }
 
@@ -163,9 +169,12 @@ export function SignInView() {
         accessToken: result.token_access,
       }));
 
+      analytics.trackSignInSuccess('email');
       toast.success('Successfully signed in!');
       await handleAuthSuccess(result.token_access);
     } catch (error: any) {
+      analytics.trackSignInFailure('email', error?.data?.detail || 'Unknown error');
+
       // Check if the error has a detail field (common in API validation errors)
       if (error.data && error.data.detail) {
         // Display the specific error message from the API
@@ -176,12 +185,16 @@ export function SignInView() {
       }
       console.error('Login error:', error);
     }
-  }, [login, handleAuthSuccess, testMode, handleTestModeLogin]);
+  }, [login, handleAuthSuccess, testMode, handleTestModeLogin, analytics]);
 
   // Handle Google authentication
   const handleGoogleSuccess = useCallback(async (response: CredentialResponse) => {
+    // Track Google sign-in attempt
+    analytics.trackSignInAttempt('google');
+
     if (testMode) {
       handleTestModeLogin();
+      analytics.trackSignInSuccess('test_mode_google');
       return;
     }
 
@@ -198,9 +211,12 @@ export function SignInView() {
         accessToken: result.token_access,
       }));
 
+      analytics.trackSignInSuccess('google');
       toast.success('Successfully signed in with Google!');
       await handleAuthSuccess(result.token_access);
     } catch (error: any) {
+      analytics.trackSignInFailure('google', error?.data?.detail || 'Unknown error');
+
       // Check if the error has a detail field (common in API validation errors)
       if (error.data && error.data.detail) {
         // Display the specific error message from the API
@@ -211,7 +227,7 @@ export function SignInView() {
       }
       console.error('Google auth error:', error);
     }
-  }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin]);
+  }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin, analytics]);
 
   const handleToggleTestMode = useCallback(() => {
     const newTestMode = !testMode;

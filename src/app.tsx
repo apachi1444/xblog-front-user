@@ -16,6 +16,7 @@ import { useSubscriptionSuccess } from 'src/hooks/useSubscriptionSuccess';
 
 import { logout } from 'src/services/slices/auth/authSlice';
 import { CustomThemeProvider } from 'src/theme/theme-provider';
+import { AnalyticsProvider } from 'src/contexts/analytics-context';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
 import { WelcomePopupContextProvider } from 'src/contexts/WelcomePopupContext';
 import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
@@ -28,6 +29,7 @@ import { ErrorFallback } from './components/error-boundary';
 import { SupportChatProvider } from './contexts/SupportChatContext';
 import { AuthPersistence } from './components/auth/auth-persistence';
 import { SubscriptionSuccessAnimation } from './components/subscription';
+import { PageViewTracker } from './components/analytics/page-view-tracker';
 import { SessionExpiredModal } from './components/auth/session-expired-modal';
 
 // Get Google OAuth client ID from environment variables
@@ -76,13 +78,15 @@ export default function App() {
         <I18nextProvider i18n={i18n}>
           <LanguageContextProvider>
             <CustomThemeProvider>
-              <SessionExpiredProvider onSessionExpired={handleSessionExpired}>
-                <SessionExpiredContent
-                  successData={successData}
-                  showSuccessAnimation={showSuccessAnimation}
-                  hideSuccessAnimation={hideSuccessAnimation}
-                />
-              </SessionExpiredProvider>
+              <AnalyticsProvider>
+                <SessionExpiredProvider onSessionExpired={handleSessionExpired}>
+                  <SessionExpiredContent
+                    successData={successData}
+                    showSuccessAnimation={showSuccessAnimation}
+                    hideSuccessAnimation={hideSuccessAnimation}
+                  />
+                </SessionExpiredProvider>
+              </AnalyticsProvider>
             </CustomThemeProvider>
           </LanguageContextProvider>
         </I18nextProvider>
@@ -109,6 +113,7 @@ function SessionExpiredContent({
     <>
       <ToasterWithTheme />
       <AuthPersistence />
+      <PageViewTracker />
       <ToastProvider>
         <SupportChatProvider>
           <WelcomePopupContextProvider>

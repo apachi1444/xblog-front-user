@@ -1,7 +1,6 @@
 import type { Article } from 'src/types/article';
 import type { CardProps } from '@mui/material/Card';
 
-import { useState } from 'react';
 import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +11,6 @@ import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -92,10 +90,6 @@ export function PostItem({
   const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [isHovered, setIsHovered] = useState(false);
-  const [isThreeDotsHovered, setIsThreeDotsHovered] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   // Get platform icons for this post
   const platforms = getPlatformIcons(post);
 
@@ -408,7 +402,7 @@ export function PostItem({
                         document.querySelector('.MuiDialog-root');
 
     // Only navigate if menu is not open, not hovering three dots, and no modals are open
-    if (!isMenuOpen && !isThreeDotsHovered && !hasOpenModal) {
+    if (!hasOpenModal) {
       navigateToArticle(navigate, post.id);
     } else if (hasOpenModal) {
       // Prevent navigation when modals are open
@@ -420,11 +414,6 @@ export function PostItem({
   return (
     <Card
       onClick={handleCardClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setIsThreeDotsHovered(false);
-      }}
       sx={{
         position: 'relative',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
@@ -482,44 +471,9 @@ export function PostItem({
           buttonSize="large"
           buttonStyle="overlay"
           position="left"
-          onMouseEnter={() => setIsThreeDotsHovered(true)}
-          onMouseLeave={() => setIsThreeDotsHovered(false)}
-          onMenuOpen={() => setIsMenuOpen(true)}
-          onMenuClose={() => setIsMenuOpen(false)}
         />
 
-        {/* Edit Button - Right Side (appears on hover) */}
-        {isHovered && !isThreeDotsHovered && !isMenuOpen && (
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent card click
-              navigateToArticle(navigate, post.id);
-            }}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 10,
-              bgcolor: alpha(theme.palette.primary.main, 0.9),
-              color: 'common.white',
-              width: 40,
-              height: 40,
-              '&:hover': {
-                bgcolor: alpha(theme.palette.primary.main, 1),
-                transform: 'scale(1.05)',
-              },
-              transition: 'all 0.2s ease-in-out',
-              ...((latestPostLarge || latestPost) && {
-                bgcolor: alpha(theme.palette.primary.main, 0.9),
-                '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 1),
-                },
-              }),
-            }}
-          >
-            <Iconify icon="mdi:pencil" width={20} height={20} />
-          </IconButton>
-        )}
+
       </Box>
 
       <Box
