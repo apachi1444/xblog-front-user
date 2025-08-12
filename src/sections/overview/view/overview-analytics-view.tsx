@@ -13,7 +13,6 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import { navigateToArticle } from 'src/utils/articleIdEncoder';
 import { formatMetrics, getContentQuality, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -22,6 +21,7 @@ import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'sr
 
 import { Iconify } from 'src/components/iconify';
 import { StatusBadge } from 'src/components/status-badge';
+import { ArticleActionsMenu } from 'src/components/article-actions-menu';
 
 import { useRegenerateManager } from 'src/sections/generate/hooks/useRegenerateManager';
 
@@ -30,6 +30,8 @@ function RecentArticlesSection() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
+
+
 
   // Fetch all articles to check total count
   const { data: articles, isLoading } = useGetArticlesQuery({
@@ -48,6 +50,8 @@ function RecentArticlesSection() {
 
   // Show only first 10 articles on home page
   const displayedArticles = draftArticles.slice(0, 10);
+
+
   const hasMoreArticles = draftArticles.length > 10;
 
   if (isLoading) {
@@ -67,7 +71,7 @@ function RecentArticlesSection() {
           </Typography>
           {displayedArticles.length > 0 && (
             <Button
-              size="small"
+              size="large"
               onClick={() => navigate('/create')}
               sx={{ textTransform: 'none' }}
             >
@@ -127,7 +131,6 @@ function RecentArticlesSection() {
                 return (
                   <Grid key={article.id} xs={12} sm={6} md={4}>
                     <Card
-                      onClick={() => navigateToArticle(navigate, article.id)}
                       sx={{
                         height: '100%',
                         cursor: 'pointer',
@@ -141,48 +144,38 @@ function RecentArticlesSection() {
                       }}
                     >
                       <CardContent sx={{ p: 2.5 }}>
-                        {/* Header with Icon and Quality Badge */}
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-                          {/* Article Icon */}
-                          <Box
-                            sx={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 2,
-                              bgcolor: alpha(theme.palette.primary.main, 0.1),
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Iconify
-                              icon="mdi:file-document-edit-outline"
-                              width={20}
-                              height={20}
-                              sx={{ color: theme.palette.primary.main }}
-                            />
-                          </Box>
+                        {/* Header with Icon, Quality Badge, and Menu */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'justify-between', mb: 2 }}>
 
-                          {/* Quality Badge */}
-                          <Box
-                            sx={{
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              bgcolor: alpha(theme.palette[quality.color].main, 0.1),
-                              border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
+                          {/* Right side: Quality Badge and Menu */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {/* Quality Badge */}
+                            <Box
                               sx={{
-                                color: theme.palette[quality.color].main,
-                                fontWeight: 600,
-                                fontSize: '0.65rem',
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette[quality.color].main, 0.1),
+                                border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
                               }}
                             >
-                              {quality.label}
-                            </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: theme.palette[quality.color].main,
+                                  fontWeight: 600,
+                                  fontSize: '0.65rem',
+                                }}
+                              >
+                                {quality.label}
+                              </Typography>
+                            </Box>
+                            <ArticleActionsMenu
+                              article={article}
+                              buttonSize="large"
+                              buttonStyle="overlay"
+                              position="right"
+                            />
                           </Box>
                         </Box>
 
@@ -244,24 +237,36 @@ function RecentArticlesSection() {
                           {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
                         </Typography>
 
-                        {/* Dynamic Status Badge */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <StatusBadge status={article.status} />
+                        {/* Status and Language Badges */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <StatusBadge status={article.status} />
 
-                          {/* Language Badge */}
-                          {article.language && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: 'text.secondary',
-                                textTransform: 'uppercase',
-                                fontSize: '0.65rem',
-                                fontWeight: 500,
-                              }}
-                            >
-                              {article.language}
-                            </Typography>
-                          )}
+                            {/* Language Label */}
+                            {article.language && (
+                              <Box
+                                sx={{
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                                  border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: theme.palette.info.main,
+                                    textTransform: 'uppercase',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {article.language}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>

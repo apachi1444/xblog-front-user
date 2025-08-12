@@ -114,9 +114,6 @@ export function GeneratingView() {
   // Loading state - only show loading if we're editing an existing article
   const isArticleLoading = urlArticleId ? isArticlesLoading : false;
 
-  // No need for article draft management since we simplified the workflow
-
-  // Helper function to parse links from string format with stable IDs
   const parseLinksFromString = useCallback((linksString: string, article_id?: number) => {
     if (!linksString || linksString.trim() === '') return [];
 

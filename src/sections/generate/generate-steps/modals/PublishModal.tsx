@@ -1,5 +1,6 @@
 // Types
 import type { Store } from 'src/types/store';
+import type { PublishRequest} from 'src/services/apis/integrations/publishApi';
 
 import toast from 'react-hot-toast';
 import { useMemo, useState, useEffect } from 'react';
@@ -26,7 +27,7 @@ import { useRouter } from 'src/routes/hooks';
 
 // API hooks
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { PublishRequest, usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
+import { usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -47,11 +48,6 @@ interface PublishModalProps {
     createdAt: string;
   };
   sections: ArticleSection[];
-}
-
-interface PublishResult {
-  success: boolean;
-  message?: string;
 }
 
 export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }: PublishModalProps) => {
@@ -166,7 +162,11 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (event?: any) => {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     if (!isPublishing) {
       onClose();
     }
@@ -177,8 +177,17 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
       open={open}
       onClose={handleClose}
       aria-labelledby="publish-modal-title"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
     >
-      <Box sx={{
+      <Box
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+        sx={{
         position: 'absolute',
         top: '50%',
         left: '50%',
