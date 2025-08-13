@@ -22,7 +22,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
-import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
+import { logout, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import {
   useGetSubscriptionPlansQuery,
   useCreateCheckoutSessionMutation
@@ -190,6 +190,15 @@ export function OnBoardingView() {
     setStep(2);
   };
 
+  // Handle logout - exit onboarding flow
+  const handleLogout = () => {
+    // Dispatch logout action (this will handle all storage cleanup)
+    dispatch(logout());
+
+    // Navigate to sign-in page
+    navigate('/sign-in');
+  };
+
   // Helper function to check if a plan is free
   const isFreeplan = (planId: string | null): boolean => {
     if (!planId) return true;
@@ -292,6 +301,52 @@ export function OnBoardingView() {
           position: 'relative',
         }}
       >
+        {/* Logout Button - Top Right */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: { xs: 16, md: 24 },
+            right: { xs: 16, md: 24 },
+            zIndex: 10
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleLogout}
+            startIcon={
+              <Box
+                component="span"
+                sx={{
+                  width: 16,
+                  height: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                🚪
+              </Box>
+            }
+            sx={{
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+              bgcolor: alpha(theme.palette.error.main, 0.05),
+              '&:hover': {
+                bgcolor: alpha(theme.palette.error.main, 0.1),
+                borderColor: alpha(theme.palette.error.main, 0.5),
+              }
+            }}
+          >
+            {t('onboarding.logout', 'Sign Out')}
+          </Button>
+        </Box>
+
         {/* Header */}
         <Stack spacing={2} sx={{ mb: 5, textAlign: 'center' }}>
           <Typography variant="h3">
