@@ -117,8 +117,14 @@ export const articlesApi = api.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
-      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
-      // invalidatesTags: ['Articles'],
+      // Invalidate Articles cache when scheduling/updating status
+      invalidatesTags: (result, error, { data }) => {
+        // Only invalidate cache if we're changing status (like scheduling)
+        if (data.status || data.scheduled_publish_date) {
+          return ['Articles'];
+        }
+        return [];
+      },
     }),
 
 
@@ -130,15 +136,7 @@ export const articlesApi = api.injectEndpoints({
       invalidatesTags: ['Articles', 'Subscription'],
     }),
 
-    unscheduleArticle: builder.mutation<Article, { article_id: string; store_id: number }>({
-      query: (params) => ({
-        url: `${ARTICLES_BASE_URL}/unschedule`,
-        method: 'POST',
-        body: params,
-      }),
-      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
-      // invalidatesTags: ['Articles'],
-    }),
+
   }),
 });
 
@@ -147,5 +145,4 @@ export const {
   useCreateArticleMutation,
   useUpdateArticleMutation,
   useDeleteArticleMutation,
-  useUnscheduleArticleMutation,
 } = articlesApi;

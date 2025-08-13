@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,10 +14,11 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import { formatMetrics, getContentQuality, calculateArticleMetrics } from 'src/utils/articleMetrics';
+import { formatMetrics, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -31,26 +33,31 @@ function RecentArticlesSection() {
   const theme = useTheme();
   const navigate = useNavigate();
 
-
+  const currentStore = useSelector(selectCurrentStore);
+  const storeId = currentStore?.id || 1;
 
   // Fetch all articles to check total count
-  const { data: articles, isLoading } = useGetArticlesQuery({
-    page: 1,
-    limit: 50, // Fetch more to get accurate count
-  });
+  const { data: articles, isLoading } = useGetArticlesQuery(
+    { store_id: storeId },
+    {
+      // Ensure the query runs immediately when component mounts
+      refetchOnMountOrArgChange: true,
+      // Skip the query only if storeId is null/undefined (not if it's 0 or 1)
+      skip: !storeId && storeId !== 0,
+    }
+  );
 
-  const draftArticles = articles?.articles
-    ?.filter((article: any) => article.status === 'draft')
-    ?.sort((a: any, b: any) => {
-      // Sort by most recent first (updated_at if available, otherwise created_at)
-      const dateA = new Date(a.updated_at || a.created_at || 0).getTime();
-      const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
-      return dateB - dateA; // Descending order (latest first)
-    }) || [];
+  const draftArticles = articles?.articles 
+  ? Array.from(articles.articles)
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateB - dateA; // Descending order
+    })
+  : [];
 
   // Show only first 10 articles on home page
   const displayedArticles = draftArticles.slice(0, 10);
-
 
   const hasMoreArticles = draftArticles.length > 10;
 
@@ -126,7 +133,6 @@ function RecentArticlesSection() {
               {displayedArticles.map((article) => {
                 const metrics = calculateArticleMetrics(article);
                 const formattedMetrics = formatMetrics(metrics);
-                const quality = getContentQuality(metrics);
 
                 return (
                   <Grid key={article.id} xs={12} sm={6} md={4}>
@@ -144,32 +150,16 @@ function RecentArticlesSection() {
                       }}
                     >
                       <CardContent sx={{ p: 2.5 }}>
-                        {/* Header with Icon, Quality Badge, and Menu */}
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'justify-between', mb: 2 }}>
-
-                          {/* Right side: Quality Badge and Menu */}
+                        {/* Header with Status Badge and Menu */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                          {/* Right side: Prominent Status Badge and Menu */}
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {/* Quality Badge */}
-                            <Box
-                              sx={{
-                                px: 1,
-                                py: 0.5,
-                                borderRadius: 1,
-                                bgcolor: alpha(theme.palette[quality.color].main, 0.1),
-                                border: `1px solid ${alpha(theme.palette[quality.color].main, 0.2)}`,
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: theme.palette[quality.color].main,
-                                  fontWeight: 600,
-                                  fontSize: '0.65rem',
-                                }}
-                              >
-                                {quality.label}
-                              </Typography>
-                            </Box>
+                            {/* Prominent Status Badge */}
+                            <StatusBadge
+                              status={article.status}
+                              size="large"
+                              variant="prominent"
+                            />
                             <ArticleActionsMenu
                               article={article}
                               buttonSize="large"
@@ -237,37 +227,32 @@ function RecentArticlesSection() {
                           {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
                         </Typography>
 
-                        {/* Status and Language Badges */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <StatusBadge status={article.status} />
-
-                            {/* Language Label */}
-                            {article.language && (
-                              <Box
+                        {/* Language Badge */}
+                        {article.language && (
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                            <Box
+                              sx={{
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.info.main, 0.1),
+                                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
                                 sx={{
-                                  px: 1,
-                                  py: 0.5,
-                                  borderRadius: 1,
-                                  bgcolor: alpha(theme.palette.info.main, 0.1),
-                                  border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                  color: theme.palette.info.main,
+                                  textTransform: 'uppercase',
+                                  fontSize: '0.65rem',
+                                  fontWeight: 600,
                                 }}
                               >
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    color: theme.palette.info.main,
-                                    textTransform: 'uppercase',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {article.language}
-                                </Typography>
-                              </Box>
-                            )}
+                                {article.language}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>

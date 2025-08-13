@@ -17,8 +17,8 @@ import {
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
-import { useGetArticlesQuery, useUnscheduleArticleMutation } from 'src/services/apis/articlesApi';
+import { useScheduleArticleMutation, useDeleteCalendarMutation, calendarApi } from 'src/services/apis/calendarApis';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 
 import { LoadingSpinner } from 'src/components/loading';
 import {
@@ -41,7 +41,10 @@ export default function CalendarPage() {
 
 
   const [scheduleArticle] = useScheduleArticleMutation();
-  const [unscheduleArticle, { isLoading: isUnscheduling }] = useUnscheduleArticleMutation();
+  const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
+
+  // Get calendar entries to find calendar_id for unscheduling
+  const { data: calendarData } = calendarApi.endpoints.getScheduledArticles.useQuery();
 
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
@@ -69,11 +72,19 @@ export default function CalendarPage() {
   const handleUnscheduleArticle = useCallback(async () => {
     if (!selectedArticleDetails) return;
 
+    // Find the calendar entry for this article
+    const calendarEntry = calendarData?.calendars?.find(
+      (entry) => entry.article_id === selectedArticleDetails.id
+    );
+
+    if (!calendarEntry) {
+      toast.error('Calendar entry not found. Please try again.');
+      return;
+    }
+
     try {
-      await unscheduleArticle({
-        article_id: selectedArticleDetails.id,
-        store_id: storeId
-      }).unwrap();
+      // Delete the calendar entry using the calendar_id
+      await deleteCalendar(calendarEntry.id).unwrap();
 
       toast.success(t('calendar.unscheduledSuccessfully', 'Article unscheduled successfully'));
       setIsArticleDetailsModalOpen(false);
@@ -85,7 +96,7 @@ export default function CalendarPage() {
       console.error('Error unscheduling article:', error);
       toast.error(t('calendar.unschedulingFailed', 'Failed to unschedule article. Please try again.'));
     }
-  }, [selectedArticleDetails, storeId, unscheduleArticle, refetchArticles, t]);
+  }, [selectedArticleDetails, calendarData, deleteCalendar, refetchArticles, t]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);

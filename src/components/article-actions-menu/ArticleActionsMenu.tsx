@@ -2,6 +2,7 @@ import type { Article } from 'src/types/article';
 import type { Theme, SxProps } from '@mui/material/styles';
 
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
@@ -24,9 +25,12 @@ import {
 
 import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
+import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useDeleteArticleMutation } from 'src/services/apis/articlesApi';
+import { useDeleteCalendarMutation, calendarApi } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
+import { ScheduleModal } from 'src/components/schedule-modal';
 
 import { PublishModal } from 'src/sections/generate/generate-steps/modals/PublishModal';
 
@@ -54,25 +58,30 @@ export function ArticleActionsMenu({
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
+  const currentStore = useSelector(selectCurrentStore);
 
   // State management
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
-  const [isThreeDotsHovered, setIsThreeDotsHovered] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [unscheduleDialogOpen, setUnscheduleDialogOpen] = useState(false);
 
   const menuOpen = Boolean(anchorEl);
 
-  // Delete mutation
+  // API mutations
   const [deleteArticle, { isLoading: isDeleting }] = useDeleteArticleMutation();
+  const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
+
+  // Get calendar entries to find calendar_id for unscheduling
+  const { data: calendarData } = calendarApi.endpoints.getScheduledArticles.useQuery();
 
   // Auto-close menu when modals open
   useEffect(() => {
-    if (deleteDialogOpen || publishModalOpen) {
+    if (deleteDialogOpen || publishModalOpen || scheduleModalOpen || unscheduleDialogOpen) {
       setAnchorEl(null);
     }
-  }, [deleteDialogOpen, publishModalOpen]);
+  }, [deleteDialogOpen, publishModalOpen, scheduleModalOpen, unscheduleDialogOpen]);
 
   // Prevent navigation when modals are open
   // eslint-disable-next-line consistent-return
@@ -104,21 +113,10 @@ export function ArticleActionsMenu({
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation(); // Prevent card click
     setAnchorEl(event.currentTarget);
-    setIsMenuOpen(true);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setIsMenuOpen(false);
-  };
-
-  // Mouse handlers
-  const handleMouseEnter = () => {
-    setIsThreeDotsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsThreeDotsHovered(false);
   };
 
   const handleEdit = (event?: React.MouseEvent) => {
@@ -136,6 +134,16 @@ export function ArticleActionsMenu({
     handleMenuClose();
   };
 
+  const handleScheduleClick = () => {
+    setScheduleModalOpen(true);
+    handleMenuClose();
+  };
+
+  const handleUnscheduleClick = () => {
+    setUnscheduleDialogOpen(true);
+    handleMenuClose();
+  };
+
   const handleDeleteConfirm = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent event bubbling
     if (onDelete) {
@@ -150,6 +158,33 @@ export function ArticleActionsMenu({
       }
     }
     setDeleteDialogOpen(false);
+  };
+
+  const handleUnscheduleConfirm = async (event?: React.MouseEvent) => {
+    event?.stopPropagation(); // Prevent event bubbling
+
+    // Find the calendar entry for this article
+    const calendarEntry = calendarData?.calendars?.find(
+      (entry) => entry.article_id === article.id
+    );
+
+    if (!calendarEntry) {
+      toast.error('Calendar entry not found. Please try again.');
+      return;
+    }
+
+    try {
+      toast.loading(t('common.unscheduling', 'Unscheduling article...'), { id: 'unschedule-article' });
+
+      // Delete the calendar entry using the calendar_id
+      await deleteCalendar(calendarEntry.id).unwrap();
+
+      toast.success(t('common.unscheduleSuccess', 'Article unscheduled successfully!'), { id: 'unschedule-article' });
+    } catch (error) {
+      console.error('Failed to unschedule article:', error);
+      toast.error(t('common.unscheduleError', 'Failed to unschedule article. Please try again.'), { id: 'unschedule-article' });
+    }
+    setUnscheduleDialogOpen(false);
   };
 
   const handlePublishClick = (event?: React.MouseEvent) => {
@@ -279,8 +314,6 @@ export function ArticleActionsMenu({
       {/* Three Dots Menu Button */}
       <IconButton
         onClick={handleMenuOpen}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         sx={getButtonStyles()}
       >
         <Iconify icon="mdi:dots-vertical" width={currentSize.iconSize} height={currentSize.iconSize} />
@@ -325,6 +358,34 @@ export function ArticleActionsMenu({
             <Iconify icon="mdi:publish" width={16} height={16} sx={{ mr: 1.5, color: 'text.secondary' }} />
             <Typography variant="body2">{t('common.publish', 'Publish')}</Typography>
           </MenuItem>
+
+          {/* Schedule Button - Only for draft articles */}
+          {article.status === 'draft' && (
+            <MenuItem
+              onClick={handleScheduleClick}
+              sx={{ py: 1 }}
+            >
+              <Iconify icon="mdi:calendar-clock" width={16} height={16} sx={{ mr: 1.5, color: 'text.secondary' }} />
+              <Typography variant="body2">{t('common.schedule', 'Schedule')}</Typography>
+            </MenuItem>
+          )}
+
+          {/* Unschedule Button - Only for scheduled articles */}
+          {article.status === 'scheduled' && (
+            <MenuItem
+              onClick={handleUnscheduleClick}
+              sx={{
+                py: 1,
+                color: 'warning.main',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.warning.main, 0.08),
+                },
+              }}
+            >
+              <Iconify icon="mdi:calendar-remove" width={16} height={16} sx={{ mr: 1.5 }} />
+              <Typography variant="body2">{t('common.unschedule', 'Unschedule')}</Typography>
+            </MenuItem>
+          )}
 
           <MenuItem
             onClick={handleDeleteClick}
@@ -379,6 +440,43 @@ export function ArticleActionsMenu({
         </DialogActions>
       </Dialog>
 
+      {/* Unschedule Confirmation Dialog */}
+      <Dialog
+        open={unscheduleDialogOpen}
+        onClose={() => setUnscheduleDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Iconify icon="mdi:calendar-remove" sx={{ color: 'warning.main' }} />
+            {t('common.confirmUnschedule', 'Confirm Unschedule')}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {t('common.unscheduleConfirmMessage', 'Are you sure you want to unschedule this article? It will be moved back to draft status.')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {article.title || article.article_title || t('common.untitledArticle', 'Untitled Article')}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setUnscheduleDialogOpen(false)} variant="outlined">
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button
+            onClick={handleUnscheduleConfirm}
+            variant="contained"
+            color="warning"
+            disabled={isUnscheduling}
+            startIcon={isUnscheduling ? <CircularProgress size={16} /> : <Iconify icon="mdi:calendar-remove" />}
+          >
+            {isUnscheduling ? t('common.unscheduling', 'Unscheduling...') : t('common.unschedule', 'Unschedule')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Publish Modal */}
       <PublishModal
         open={publishModalOpen}
@@ -386,6 +484,14 @@ export function ArticleActionsMenu({
         articleId={article.id.toString()}
         articleInfo={getArticleData().articleInfo}
         sections={sections}
+      />
+
+      {/* Schedule Modal */}
+      <ScheduleModal
+        open={scheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+        articleId={article.id.toString()}
+        articleTitle={article.title || article.article_title || t('common.untitledArticle', 'Untitled Article')}
       />
     </>
   );

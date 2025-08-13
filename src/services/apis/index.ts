@@ -7,7 +7,7 @@ import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
 
-import { _posts } from 'src/_mock/_data';
+import { _posts, _calendars } from 'src/_mock/_data';
 import { _fakeStores } from 'src/_mock/stores';
 
 import customRequest from './axios';
@@ -373,8 +373,8 @@ const setupMocks = () => {
 
     // Calendar endpoints
     mock.onGet('/calendars').reply(200, {
-      events: mockCalendarEvents,
-      total: mockCalendarEvents.length,
+      calendars: _calendars,
+      total: _calendars.length,
     });
 
     mock.onPost('/schedule-article').reply((config) => {
@@ -404,35 +404,6 @@ const setupMocks = () => {
       }];
     });
 
-    // Mock unschedule article endpoint
-    mock.onPost('/articles/unschedule').reply((config) => {
-      const unscheduleData = JSON.parse(config.data);
-      const { article_id } = unscheduleData;
-
-      // Find the article in the mock data
-      const articleIndex = _posts.findIndex(post => post.id.toString() === article_id.toString());
-
-      if (articleIndex !== -1) {
-        // Update the article status and remove scheduledAt date
-        _posts[articleIndex] = {
-          ..._posts[articleIndex],
-          status: 'draft' // Change status back to draft
-        };
-
-        console.log(`Article ${article_id} unscheduled successfully`);
-
-        // Return the updated article
-        return [200, {
-          ..._posts[articleIndex],
-          message: 'Article unscheduled successfully'
-        }];
-      }
-
-      // If article not found
-      console.warn(`Article ${article_id} not found for removing schedule`);
-      return [404, { message: 'Article not found' }];
-    });
-
     mock.onGet('/regenerations/status').reply(200, {
       success: true,
       regenerationsAvailable: 15,
@@ -457,9 +428,32 @@ const setupMocks = () => {
       }];
     });
 
-    // Mock delete calendar entry
+    // Mock delete calendar entry (unschedule)
     mock.onDelete(/\/calendars\/.*/).reply((config) => {
       const calendarId = config.url?.split('/').pop();
+
+      // Find the calendar entry to get the article_id
+      const calendarEntry = _calendars.find(cal => cal.id.toString() === calendarId);
+
+      if (calendarEntry) {
+        // Update the corresponding article status to 'draft'
+        const articleIndex = _posts.findIndex(post => post.id === calendarEntry.article_id);
+        if (articleIndex !== -1) {
+          _posts[articleIndex] = {
+            ..._posts[articleIndex],
+            status: 'draft',
+            scheduled_publish_date: undefined // Remove the scheduled date
+          };
+          console.log(`Article ${calendarEntry.article_id} unscheduled and moved to draft`);
+        }
+
+        // Remove the calendar entry from the mock data
+        const calendarIndex = _calendars.findIndex(cal => cal.id.toString() === calendarId);
+        if (calendarIndex !== -1) {
+          _calendars.splice(calendarIndex, 1);
+        }
+      }
+
       return [200, {
         success: true,
         message: `Calendar entry ${calendarId} deleted successfully`

@@ -341,6 +341,46 @@ export const _langs = [
 
 // ----------------------------------------------------------------------
 
+// Calendar mock data for scheduled articles
+export const _calendars = [
+  {
+    id: 1,
+    store_id: 1,
+    article_id: 6, // Corresponds to the first scheduled article
+    status: 'scheduled',
+    job_id: 'job_123456',
+    scheduled_date: '2025-06-25T10:00:00',
+    color: '#1890FF',
+    created_at: '2025-06-18T00:53:09',
+    updated_at: '2025-06-18T00:53:09',
+  },
+  {
+    id: 2,
+    store_id: 1,
+    article_id: 8, // Corresponds to another scheduled article (index 0 from the array)
+    status: 'scheduled',
+    job_id: 'job_789012',
+    scheduled_date: '2025-06-26T14:30:00',
+    color: '#00AB55',
+    created_at: '2025-06-18T10:15:00',
+    updated_at: '2025-06-18T10:15:00',
+  },
+  // Add more calendar entries for other scheduled articles
+  ...Array.from({ length: 5 }, (_, index) => ({
+    id: index + 3,
+    store_id: 1,
+    article_id: index + 11, // Articles that have scheduled status
+    status: 'scheduled',
+    job_id: `job_${Math.random().toString(36).substr(2, 9)}`,
+    scheduled_date: new Date(Date.now() + (index + 1) * 24 * 60 * 60 * 1000).toISOString(),
+    color: ['#FFC107', '#FF4842', '#94D82D', '#FFC0CB', '#000000'][index],
+    created_at: new Date(Date.now() - index * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - index * 60 * 60 * 1000).toISOString(),
+  }))
+];
+
+// ----------------------------------------------------------------------
+
 export const _timeline = [...Array(5)].map((_, index) => ({
   id: _id(index),
   title: [
