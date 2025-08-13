@@ -292,7 +292,7 @@ export function OnBoardingView() {
     >
       <Box
         sx={{
-          maxWidth: 1000,
+          maxWidth: 1200,
           width: '100%',
           mx: 'auto',
           pt: { xs: 4, md: 8 },
@@ -606,7 +606,7 @@ export function OnBoardingView() {
 
             {/* Premium Plans Grid */}
             <Box sx={{ position: 'relative' }}>
-              <Grid container spacing={3} justifyContent="center">
+              <Grid container spacing={4} justifyContent="center">
                 {plans
                   ?.filter(plan => {
                     const planName = plan.name.toLowerCase();
@@ -629,16 +629,15 @@ export function OnBoardingView() {
                     // Sort by price from smallest to greatest
                     const priceA = parseFloat(a.price) || 0;
                     const priceB = parseFloat(b.price) || 0;
-                    console.log(`💰 Sorting: ${a.name} (${priceA}) vs ${b.name} (${priceB})`);
                     return priceA - priceB;
                   })
-                  .slice(0, 2)
+                  // Show all plans (removed .slice(0, 2) to include Enterprise plans)
                   .map((plan, index) => {
                     const isSelected = selectedPlan === plan.id;
                     const isPopular = false; // Make second plan popular
 
                     return (
-                      <Grid xs={12} sm={6} md={5} key={plan.id}>
+                      <Grid xs={12} sm={6} md={4} key={plan.id}>
                         <Card
                           onClick={() => handlePlanSelect(plan.id)}
                           sx={{

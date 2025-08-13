@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { alpha, useTheme } from '@mui/material/styles';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
   Box,
   Card,
@@ -10,14 +12,10 @@ import {
   Button,
   Typography,
   CardContent,
-  CardActionArea,
 } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import { useGetSubscriptionPlansQuery, type SubscriptionPlan } from 'src/services/apis/subscriptionApi';
+import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
-import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -206,8 +204,7 @@ export function ModernPricingPlans({
       <Grid container spacing={3} justifyContent="center">
         {filteredPlans.map((plan, index) => {
           const isSelected = selectedPlan === plan.id;
-          const isPopular = index === 1; // Make second plan popular
-
+      
           return (
             <Grid item xs={12} sm={6} md={4} key={plan.id}>
               <Card
@@ -217,10 +214,10 @@ export function ModernPricingPlans({
                   borderRadius: 4,
                   border: isSelected
                     ? `2px solid ${theme.palette.primary.main}`
-                    : isPopular
-                      ? `2px solid ${theme.palette.primary.main}`
-                      : `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-                  bgcolor: isPopular ? alpha(theme.palette.primary.main, 0.02) : 'background.paper',
+                    : `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+                  bgcolor: isSelected
+                    ? alpha(theme.palette.primary.main, 0.05)
+                    : 'background.paper',
                   transition: 'all 0.3s ease',
                   position: 'relative',
                   overflow: 'visible',
@@ -229,8 +226,9 @@ export function ModernPricingPlans({
                     boxShadow: theme.customShadows?.z20,
                   },
                   ...(isSelected && {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.customShadows?.primary,
+                    transform: 'translateY(-8px)',
+                    boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.3)}`,
+                    border: `3px solid ${theme.palette.primary.main}`,
                   })
                 }}
               >
@@ -240,29 +238,20 @@ export function ModernPricingPlans({
                     <Chip
                       label={plan.name}
                       sx={{
-                        bgcolor: isPopular ? 'primary.main' : alpha(theme.palette.grey[500], 0.1),
-                        color: isPopular ? 'white' : 'text.primary',
+                        bgcolor: isSelected
+                          ? 'primary.main'
+                          : alpha(theme.palette.grey[500], 0.1),
+                        color: isSelected
+                          ? 'white'
+                          : 'text.primary',
                         fontWeight: 600,
                         fontSize: '0.875rem',
                         px: 2,
                         py: 1,
                         height: 32,
+                        border: isSelected ? `2px solid ${theme.palette.primary.main}` : 'none',
                       }}
                     />
-                    {isPopular && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: 'block',
-                          mt: 1,
-                          color: 'primary.main',
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        {t('pricing.mostPopular', 'Most Popular')}
-                      </Typography>
-                    )}
                   </Box>
 
                   {/* Price */}

@@ -1,8 +1,9 @@
 import toast from 'react-hot-toast';
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw } from "lucide-react";
 
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Box,
   Card,
@@ -34,6 +35,10 @@ import { ModernPricingPlans } from 'src/components/pricing/ModernPricingPlans';
 
 export function UpgradeLicenseView() {
   const { t } = useTranslation();
+
+  // State for selected plan and checkout process
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
 
   // Fetch subscription plans
@@ -71,7 +76,6 @@ export function UpgradeLicenseView() {
 
       toast.success('Data refreshed successfully');
     } catch (error) {
-      console.error('Error refreshing data:', error);
       toast.error('Failed to refresh data');
     }
   }, [refetchPlans, refetchInvoices]);
@@ -99,26 +103,37 @@ export function UpgradeLicenseView() {
     }
   };
 
-  // Handle opening plan in new tab using Stripe checkout
-  const handleChoosePlan = useCallback(async (planId: string) => {
-    console.log(`Creating checkout session for plan ${planId}`);
+  // Handle plan selection (just select, don't redirect immediately)
+  const handleChoosePlan = useCallback((planId: string) => {
+    setSelectedPlan(planId);
+  }, []);
+
+  // Handle continue with selected plan - create checkout session and redirect
+  const handleContinueWithPlan = useCallback(async () => {
+    if (!selectedPlan) {
+      toast.error('Please select a plan first.');
+      return;
+    }
+
+    setIsCreatingCheckout(true);
 
     try {
       // Create checkout session with Stripe
-      const response = await createCheckoutSession({ plan_id: planId }).unwrap();
+      const response = await createCheckoutSession({ plan_id: selectedPlan }).unwrap();
 
       if (response.url) {
         // Open the checkout URL in a new tab
         window.open(response.url, '_blank');
-        console.log(`Opened checkout URL: ${response.url}`);
+        toast.success('Redirecting to checkout...');
       } else {
         toast.error('Failed to create checkout session. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
       toast.error('Failed to create checkout session. Please try again later.');
+    } finally {
+      setIsCreatingCheckout(false);
     }
-  }, [createCheckoutSession]);
+  }, [selectedPlan, createCheckoutSession]);
 
 
 
@@ -159,11 +174,67 @@ export function UpgradeLicenseView() {
           {/* Use the ModernPricingPlans component */}
           <ModernPricingPlans
             onSelectPlan={handleChoosePlan}
+            selectedPlan={selectedPlan}
             showFreePlan={false}
             maxPlans={3}
             title={t('upgrade.choosePlan', 'Choose Your Plan')}
             subtitle={t('upgrade.upgradeDescription', 'Upgrade to unlock premium features and boost your content creation')}
           />
+
+          {/* Continue Button - Only show when a plan is selected */}
+          {selectedPlan && (() => {
+            const selectedPlanData = plansData?.find(plan => plan.id === selectedPlan);
+            const planName = selectedPlanData?.name || 'Selected Plan';
+
+            return (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  mt: 4,
+                  mb: 2
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  sx={{
+                    mb: 2,
+                    color: 'text.secondary',
+                    textAlign: 'center'
+                  }}
+                >
+                  Selected: <strong>{planName}</strong>
+                </Typography>
+                <LoadingButton
+                  variant="contained"
+                  size="large"
+                  loading={isCreatingCheckout}
+                  onClick={handleContinueWithPlan}
+                  sx={{
+                    px: 6,
+                    py: 1.5,
+                    borderRadius: 3,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    boxShadow: '0 8px 32px rgba(79, 70, 229, 0.3)',
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    '&:hover': {
+                      boxShadow: '0 12px 40px rgba(79, 70, 229, 0.4)',
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:disabled': {
+                      background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                    },
+                    transition: 'all 0.3s ease-in-out',
+                  }}
+                >
+                  {isCreatingCheckout ? 'Creating checkout...' : 'Continue to Checkout'}
+                </LoadingButton>
+              </Box>
+            );
+          })()}
         </Box>
 
         <Box sx={{ mt: 6 }}>
