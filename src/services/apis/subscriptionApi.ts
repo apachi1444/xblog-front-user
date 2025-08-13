@@ -41,6 +41,7 @@ export interface SubscriptionDetails {
   regenerations_limit: number;
   subscription_url: string;
   subscription_name: string;
+  status: string;
   plan_id: string; // ID to match with plans from getSubscriptionPlans
 }
 
@@ -54,6 +55,16 @@ export interface SubscriptionPlan {
   // Additional properties that might be used in the UI
   current?: boolean;
   highlight?: boolean;
+}
+
+// Interface for Stripe checkout session response
+export interface CheckoutSessionResponse {
+  url: string; // The checkout session URL to redirect to
+}
+
+// Interface for Stripe portal session response
+export interface PortalSessionResponse {
+  url: string; // The portal session URL to redirect to
 }
 
 // RTK Query endpoints for subscription operations
@@ -110,6 +121,23 @@ export const subscriptionApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Subscription', 'Plans'],
     }),
+
+    // Create Stripe checkout session
+    createCheckoutSession: builder.mutation<CheckoutSessionResponse, { plan_id: string }>({
+      query: (data) => ({
+        url: '/webhook/create-checkout-session',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    // Create Stripe portal session for subscription management
+    createPortalSession: builder.query<PortalSessionResponse, void>({
+      query: () => ({
+        url: '/webhook/manage-subscription',
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -121,5 +149,7 @@ export const {
   useGetSubscriptionPlansQuery,
   useLazyGetSubscriptionPlansQuery,
   useUpgradeSubscriptionMutation,
-  useCreateSubscriptionMutation
+  useCreateCheckoutSessionMutation,
+  useCreatePortalSessionQuery,
+  useLazyCreatePortalSessionQuery
 } = subscriptionApi;

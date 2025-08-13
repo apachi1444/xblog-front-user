@@ -25,7 +25,7 @@ import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import { setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import {
   useGetSubscriptionPlansQuery,
-  useCreateSubscriptionMutation
+  useCreateCheckoutSessionMutation
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -58,11 +58,8 @@ export function OnBoardingView() {
 
   // Initialize the mutations and queries
   const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation();
-  const [createSubscription, { isLoading: isCreatingSubscription }] = useCreateSubscriptionMutation();
   const { data: plans } = useGetSubscriptionPlansQuery();
-
-  // Debug: Log plans data to understand the structure
-  console.log('📋 Plans from API:', plans);
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
 
   // Get translated arrays
   const INTERESTS = getInterests(t);
@@ -146,7 +143,7 @@ export function OnBoardingView() {
     // No immediate redirect - wait for continue button click
   };
 
-  // Handle paid plan selection and immediate redirect
+  // Handle paid plan selection and immediate redirect using Stripe
   const handlePaidPlanSelection = async (planId: string) => {
     try {
       setIsProcessingPayment(true);
@@ -161,27 +158,29 @@ export function OnBoardingView() {
         is_completed_onboarding: true,
       }).unwrap();
 
-      // Find the plan data
-      const selectedPlanData = plans?.find(p => p.id === planId);
+      // Create Stripe checkout session
+      toast.loading('Creating checkout session...', { id: 'payment-processing' });
 
-      if (selectedPlanData?.url) {
+      const response = await createCheckoutSession({ plan_id: planId }).unwrap();
+
+      if (response.url) {
         // Update toast message
         toast.loading('Redirecting to payment...', { id: 'payment-processing' });
 
         // Small delay to show the message
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Redirect to the plan's payment URL
-        window.location.href = selectedPlanData.url;
+        // Redirect to the Stripe checkout URL
+        window.location.href = response.url;
       } else {
         toast.dismiss('payment-processing');
-        toast.error('Payment URL not available for this plan');
+        toast.error('Failed to create checkout session. Please try again.');
         setIsProcessingPayment(false);
       }
     } catch (error) {
-      console.error('Failed to save user preferences before payment:', error);
+      console.error('Error creating checkout session:', error);
       toast.dismiss('payment-processing');
-      toast.error('Failed to save preferences. Please try again.');
+      toast.error('Failed to create checkout session. Please try again.');
       setIsProcessingPayment(false);
     }
   };
@@ -234,11 +233,6 @@ export function OnBoardingView() {
         is_completed_onboarding: true,
       }).unwrap();
 
-      // Create free subscription with plan_id "FreePlan-001"
-      await createSubscription({
-        plan_id: "FreePlan-001"
-      }).unwrap();
-
       toast.success(t('onboarding.freeSelected', 'Welcome! You\'re all set with the free plan.'));
 
       // Mark onboarding as completed in Redux store
@@ -247,7 +241,6 @@ export function OnBoardingView() {
       // Navigate to dashboard
       navigate('/');
     } catch (error) {
-      console.error('Failed to save user preferences or create subscription:', error);
       toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
 
       // Still mark as completed in the local store and navigate
@@ -721,7 +714,7 @@ export function OnBoardingView() {
                   color: 'text.secondary',
                   '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.08) }
                 }}
-                disabled={isUpdatingUser || isCreatingSubscription}
+                disabled={isUpdatingUser}
               >
                 {t('onboarding.back', 'Back')}
               </Button>
@@ -730,7 +723,7 @@ export function OnBoardingView() {
                 variant="contained"
                 size="large"
                 onClick={handleComplete}
-                loading={isUpdatingUser || isCreatingSubscription || isProcessingPayment}
+                loading={isUpdatingUser || isProcessingPayment}
                 disabled={!selectedPlan}
                 sx={{
                   px: 6,

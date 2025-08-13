@@ -25,7 +25,8 @@ import {
   type Invoice,
   useGetUserInvoicesQuery,
   useLazyGetUserInvoicesQuery,
-  useGetSubscriptionPlansQuery
+  useGetSubscriptionPlansQuery,
+  useCreateCheckoutSessionMutation
 } from 'src/services/apis/subscriptionApi';
 
 import { ModernPricingPlans } from 'src/components/pricing/ModernPricingPlans';
@@ -53,6 +54,9 @@ export function UpgradeLicenseView() {
     triggerRefreshInvoices,
     { isLoading: isRefreshingInvoices }
   ] = useLazyGetUserInvoicesQuery();
+
+  // Stripe checkout session mutation
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
 
   // Helper function to transform API invoice data for UI compatibility
   const transformInvoiceData = (invoice: Invoice) => transformInvoiceForPdf(invoice, plansData);
@@ -95,23 +99,26 @@ export function UpgradeLicenseView() {
     }
   };
 
-  // Handle opening plan in new tab
-  const handleChoosePlan = useCallback((planId: string) => {
-    console.log(`Opening plan ${planId} in new tab`);
+  // Handle opening plan in new tab using Stripe checkout
+  const handleChoosePlan = useCallback(async (planId: string) => {
+    console.log(`Creating checkout session for plan ${planId}`);
 
-    // Find the specific plan from the API data
-    const selectedPlan = plansData?.find(plan => plan.id === planId);
+    try {
+      // Create checkout session with Stripe
+      const response = await createCheckoutSession({ plan_id: planId }).unwrap();
 
-    if (selectedPlan && selectedPlan.url) {
-      // Open the specific plan URL in a new tab
-      window.open(selectedPlan.url, '_blank');
-      console.log(`Opened plan URL: ${selectedPlan.url}`);
-    } else {
-      // Fallback: show error message
-      toast.error('Plan URL not available. Please try again later.');
-      console.error(`Plan not found or URL missing for planId: ${planId}`);
+      if (response.url) {
+        // Open the checkout URL in a new tab
+        window.open(response.url, '_blank');
+        console.log(`Opened checkout URL: ${response.url}`);
+      } else {
+        toast.error('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast.error('Failed to create checkout session. Please try again later.');
     }
-  }, [plansData]);
+  }, [createCheckoutSession]);
 
 
 

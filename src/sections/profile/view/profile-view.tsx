@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CreditCard, ExternalLink } from 'lucide-react';
 
 import {
@@ -34,15 +34,36 @@ export function ProfileView() {
   const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Fetch user data from API
   const { data: userData, isLoading: isLoadingUser } = useGetCurrentUserQuery();
 
   // Fetch subscription details
-  const { data: subscriptionData, isLoading: isLoadingSubscription } = useGetSubscriptionDetailsQuery();
+  const { data: subscriptionData, isLoading: isLoadingSubscription, refetch: refetchSubscription } = useGetSubscriptionDetailsQuery();
 
   // Fetch plans using RTK Query (will use cache if available)
   const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
+
+  // Auto-refresh data when returning from Stripe checkout
+  useEffect(() => {
+    // Check if we're on the profile page and if there are any URL parameters that might indicate a return from payment
+    const urlParams = new URLSearchParams(location.search);
+    const hasPaymentParams = urlParams.has('session_id') || urlParams.has('payment_intent') || urlParams.has('success');
+
+    // Also check if we just navigated to profile (could be from Stripe redirect)
+    const isProfilePage = location.pathname === '/profile';
+
+    if (isProfilePage && hasPaymentParams) {
+      // Refresh subscription data after successful payment
+      console.log('Detected return from payment, refreshing subscription data...');
+      refetchSubscription();
+
+      // Clean up URL parameters after refresh
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, [location, refetchSubscription]);
 
   let currentPlan = null;
 

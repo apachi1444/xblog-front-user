@@ -18,6 +18,8 @@ import { alpha, useTheme } from '@mui/material/styles';
 // Router import removed as we're using direct navigation
 import { useThemeMode } from 'src/hooks/useThemeMode';
 
+import { getStatusColors } from 'src/utils/subscriptionStatusUtils';
+
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
 import { selectAuthUser } from 'src/services/slices/auth/selectors';
@@ -48,9 +50,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
-
-  const { data: subscriptionData} = useGetSubscriptionDetailsQuery();
-
+  const { data: subscriptionData } = useGetSubscriptionDetailsQuery();
   const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
 
   let currentPlan = null;
@@ -81,6 +81,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     setAnchorEl(event.currentTarget);
   };
 
+  console.log('🔍 Subscription Data Debug:', {
+    subscriptionData,
+    status: subscriptionData?.status,
+    hasStatus: !!subscriptionData?.status,
+    statusType: typeof subscriptionData?.status
+  });
+  
   // Close handler is now directly using setAnchorEl(null) where needed
 
   // Handle menu item click with improved navigation and proper closing
@@ -202,49 +209,102 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           </Box>
           <Box
             sx={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              gap: 0.5,
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 2,
-              bgcolor: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
-                ? 'rgba(156, 163, 175, 0.1)'
-                : 'rgba(79, 70, 229, 0.1)',
-              border: `1px solid ${subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
-                ? 'rgba(156, 163, 175, 0.2)'
-                : 'rgba(79, 70, 229, 0.2)'}`,
+              gap: 1,
+              flexWrap: 'wrap'
             }}
           >
-            <Iconify
-              icon={subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
-                ? 'mdi:gift-outline'
-                : subscriptionDetails?.subscription_name?.toLowerCase().includes('enterprise')
-                  ? 'mdi:crown'
-                  : subscriptionDetails?.subscription_name?.toLowerCase().includes('pro')
-                    ? 'mdi:diamond'
-                    : 'mdi:rocket-launch'
-              }
-              width={14}
-              height={14}
+            {/* Plan Name with Icon */}
+            <Box
               sx={{
-                color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
-                  ? 'text.secondary'
-                  : 'primary.main'
-              }}
-            />
-            <Typography
-              variant="caption"
-              sx={{
-                color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
-                  ? 'text.secondary'
-                  : 'primary.main',
-                fontWeight: 600,
-                fontSize: '0.75rem'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
+                px: 1.5,
+                py: 0.75,
+                borderRadius: 2,
+                bgcolor: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                  ? 'rgba(156, 163, 175, 0.1)'
+                  : 'rgba(79, 70, 229, 0.1)',
+                border: `1px solid ${subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                  ? 'rgba(156, 163, 175, 0.2)'
+                  : 'rgba(79, 70, 229, 0.2)'}`,
               }}
             >
-              {currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
-            </Typography>
+              <Iconify
+                icon={subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                  ? 'mdi:gift-outline'
+                  : subscriptionDetails?.subscription_name?.toLowerCase().includes('enterprise')
+                    ? 'mdi:crown'
+                    : subscriptionDetails?.subscription_name?.toLowerCase().includes('pro')
+                      ? 'mdi:diamond'
+                      : 'mdi:rocket-launch'
+                }
+                width={16}
+                height={16}
+                sx={{
+                  color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                    ? 'text.secondary'
+                    : 'primary.main'
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: subscriptionDetails?.subscription_name?.toLowerCase().includes('free')
+                    ? 'text.secondary'
+                    : 'primary.main',
+                  fontWeight: 600,
+                  fontSize: '0.85rem'
+                }}
+              >
+                {currentPlan?.name || subscriptionData?.subscription_name || 'Free'}
+              </Typography>
+            </Box>
+
+            {/* Subscription Status */}
+            {(() => {
+              // Show status if available, or debug info if not
+              const status = subscriptionData?.status || 'unknown';
+              const statusColors = getStatusColors(status);
+              const statusText = status;
+
+              return (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    px: 1.25,
+                    py: 0.5,
+                    borderRadius: 1.5,
+                    bgcolor: statusColors.background,
+                    border: `1px solid ${statusColors.border}`,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: statusColors.dot
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: statusColors.text,
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {statusText}
+                  </Typography>
+                </Box>
+              );
+            })()}
           </Box>
         </Box>
 
