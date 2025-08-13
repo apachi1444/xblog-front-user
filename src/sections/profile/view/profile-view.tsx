@@ -1,8 +1,9 @@
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { CreditCard, ExternalLink } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import {
   Box,
@@ -24,7 +25,8 @@ import { isFreeplan } from 'src/services/invoicePdfService';
 import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import {
   useGetSubscriptionPlansQuery,
-  useGetSubscriptionDetailsQuery
+  useGetSubscriptionDetailsQuery,
+  useLazyCreatePortalSessionQuery
 } from 'src/services/apis/subscriptionApi';
 
 import { Iconify } from 'src/components/iconify';
@@ -44,6 +46,9 @@ export function ProfileView() {
 
   // Fetch plans using RTK Query (will use cache if available)
   const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
+
+  // Portal session for subscription management
+  const [triggerPortalSession] = useLazyCreatePortalSessionQuery();
 
   // Auto-refresh data when returning from Stripe checkout
   useEffect(() => {
@@ -87,10 +92,26 @@ export function ProfileView() {
     navigate('/upgrade-license');
   };
 
-  // Handle manage subscription - open in new tab
-  const handleManageSubscription = () => {
-    if (subscriptionData?.subscription_url) {
-      window.open(subscriptionData.subscription_url, '_blank');
+  // Handle manage subscription - create portal session and open in new tab
+  const handleManageSubscription = async () => {
+    try {
+      console.log('🔄 Creating Stripe portal session...');
+      toast.loading('Opening subscription management...', { id: 'portal-loading' });
+
+      const response = await triggerPortalSession().unwrap();
+
+      if (response.url) {
+        // Open the portal URL in a new tab
+        window.open(response.url, '_blank');
+        console.log(`✅ Opened portal URL: ${response.url}`);
+        toast.success('Subscription management opened in new tab', { id: 'portal-loading' });
+      } else {
+        console.error('❌ No portal URL received');
+        toast.error('Failed to open subscription management. Please try again.', { id: 'portal-loading' });
+      }
+    } catch (error) {
+      console.error('❌ Error creating portal session:', error);
+      toast.error('Failed to open subscription management. Please try again later.', { id: 'portal-loading' });
     }
   };
 
@@ -343,7 +364,7 @@ export function ProfileView() {
                     {t('profile.subscription.upgrade', 'Upgrade License')}
                   </Button>
                   {/* Only show manage subscription if user has a paid plan */}
-                  {!isCurrentPlanFree && subscriptionData?.subscription_url && (
+                  {!isCurrentPlanFree && (
                     <Button
                       variant="outlined"
                       fullWidth
