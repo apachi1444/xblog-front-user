@@ -52,8 +52,7 @@ export const calendarApi = api.injectEndpoints({
         method: 'POST',
         body: scheduleData,
       }),
-      // Don't invalidate Articles cache - avoid unnecessary refetch of articles list
-      // invalidatesTags: ['Articles'],
+      invalidatesTags: ['Articles', 'Subscription'],
     }),
 
     // Update calendar entry
@@ -63,6 +62,7 @@ export const calendarApi = api.injectEndpoints({
         method: 'PUT',
         body: data,
       }),
+      invalidatesTags: ['Articles', 'Subscription'],
     }),
 
     // Delete calendar entry
@@ -71,12 +71,14 @@ export const calendarApi = api.injectEndpoints({
         url: `/calendars/${calendarId}`,
         method: 'DELETE',
       }),
+      invalidatesTags: ['Articles', 'Subscription'],
     }),
   }),
 });
 
 // Export the hooks for use in components
 export const {
+  useGetScheduledArticlesQuery,
   useScheduleArticleMutation,
   useUpdateCalendarMutation,
   useDeleteCalendarMutation,

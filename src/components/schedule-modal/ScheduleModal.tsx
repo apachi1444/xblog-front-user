@@ -1,7 +1,10 @@
+import type { Store } from 'src/types/store';
+
 import toast from 'react-hot-toast';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useMemo, useState, useEffect } from 'react';
 
 import { alpha, useTheme } from '@mui/material/styles';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -13,18 +16,26 @@ import {
   Card,
   Alert,
   Stack,
+  Radio,
   Dialog,
   Button,
   Divider,
   Typography,
+  RadioGroup,
   DialogTitle,
   CardContent,
   DialogContent,
   DialogActions,
   CircularProgress,
+  FormControlLabel,
 } from '@mui/material';
 
-import { useGetArticlesQuery, useUpdateArticleMutation } from 'src/services/apis/articlesApi';
+import { useRouter } from 'src/routes/hooks';
+
+import { useGetStoresQuery } from 'src/services/apis/storesApi';
+import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -40,14 +51,23 @@ interface ScheduleModalProps {
 export function ScheduleModal({ open, onClose, articleId, articleTitle }: ScheduleModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const router = useRouter();
+
+  const currentStore = useSelector(selectCurrentStore);
+  const storeId = currentStore?.id || 1;
 
   // API hooks
-  const [updateArticle, { isLoading }] = useUpdateArticleMutation();
-  const { data: articlesData } = useGetArticlesQuery({ page: 1, limit: 100 });
+  const [scheduleArticle, { isLoading }] = useScheduleArticleMutation();
+  const { data: articlesData } = useGetArticlesQuery({ store_id: storeId });
+  const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
 
   // State management
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const [selectedStore, setSelectedStore] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Get stores from API with useMemo to prevent unnecessary re-renders
+  const stores = useMemo(() => storesData?.stores || [], [storesData?.stores]);
 
   // Get scheduled articles from API data
   const scheduledArticles = articlesData?.articles?.filter(article => article.status === 'scheduled') || [];
@@ -73,6 +93,12 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   const handleSchedule = async () => {
     if (isLoading) return; // Prevent double-clicking
 
+    if (!selectedStore) {
+      setError('Please select a store before scheduling');
+      toast.error('Please select a store before scheduling');
+      return;
+    }
+
     if (!selectedDate) {
       setError('Please select a date and time');
       return;
@@ -86,13 +112,11 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
     setError(null);
 
     try {
-      // Call the update article API to schedule the article
-      await updateArticle({
-        id: articleId,
-        data: {
-          status: 'scheduled',
-          scheduled_publish_date: selectedDate.toISOString(),
-        }
+      // Call the schedule article API
+      await scheduleArticle({
+        store_id: selectedStore,
+        article_id: articleId,
+        scheduled_date: selectedDate.toISOString(),
       }).unwrap();
 
       // Success - close modal and show success message
@@ -115,6 +139,7 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   useEffect(() => {
     if (open) {
       setSelectedDate(dayjs());
+      setSelectedStore(null); // Reset store selection to force user to choose
       setError(null);
     }
   }, [open]);
@@ -163,6 +188,103 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
 
         <DialogContent sx={{ pt: 2 }}>
           <Stack spacing={3}>
+            {/* Store Selection */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                {t('schedule.selectStore', 'Select Store')}
+              </Typography>
+              {isLoadingStores ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : stores.length > 0 ? (
+                <RadioGroup
+                  value={selectedStore?.toString() || ''}
+                  onChange={(e) => setSelectedStore(Number(e.target.value))}
+                >
+                  {stores.map((store: Store) => (
+                    <FormControlLabel
+                      key={store.id}
+                      value={store.id.toString()}
+                      control={<Radio />}
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {store.logo ? (
+                            <img
+                              src={store.logo}
+                              alt={store.name}
+                              style={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              {store.name.charAt(0).toUpperCase()}
+                            </Box>
+                          )}
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {store.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {store.category || 'Website'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  ))}
+                </RadioGroup>
+              ) : (
+                <Alert
+                  severity="warning"
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        router.push('/stores/add');
+                        onClose();
+                      }}
+                      startIcon={<Iconify icon="eva:plus-fill" />}
+                      sx={{
+                        borderColor: 'warning.main',
+                        color: 'warning.main',
+                        '&:hover': {
+                          borderColor: 'warning.dark',
+                          backgroundColor: 'warning.light',
+                        }
+                      }}
+                    >
+                      {t('schedule.addWebsite', 'Add Website')}
+                    </Button>
+                  }
+                >
+                  {t('schedule.noStores', 'No stores available. Please connect a store first.')}
+                </Alert>
+              )}
+            </Box>
+
             {/* Date Time Picker */}
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
@@ -244,24 +366,52 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
         <Divider />
 
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={onClose} variant="outlined" disabled={isLoading}>
-            {t('common.cancel', 'Cancel')}
-          </Button>
-          <Button
-            onClick={handleSchedule}
-            variant="contained"
-            disabled={isLoading || !selectedDate || selectedDate.isBefore(dayjs())}
-            startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="mdi:calendar-check" />}
-            sx={{
-              minWidth: 140,
-              '&:disabled': {
-                bgcolor: 'action.disabledBackground',
-                color: 'action.disabled',
-              }
-            }}
-          >
-            {isLoading ? t('schedule.scheduling', 'Scheduling...') : t('schedule.scheduleNow', 'Schedule Article')}
-          </Button>
+          {/* Show "Add Website" button when no stores available */}
+          {stores.length === 0 ? (
+            <Button
+              variant="contained"
+              onClick={() => {
+                router.push('/stores/add');
+                onClose();
+              }}
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              sx={{
+                bgcolor: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              }}
+            >
+              {t('schedule.addWebsite', 'Add Website')}
+            </Button>
+          ) : (
+            <>
+              <Button onClick={onClose} variant="outlined" disabled={isLoading}>
+                {t('common.cancel', 'Cancel')}
+              </Button>
+              <Button
+                onClick={handleSchedule}
+                variant="contained"
+                disabled={
+                  isLoading ||
+                  !selectedStore ||
+                  !selectedDate ||
+                  selectedDate.isBefore(dayjs()) ||
+                  stores.length === 0
+                }
+                startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="mdi:calendar-check" />}
+                sx={{
+                  minWidth: 140,
+                  '&:disabled': {
+                    bgcolor: 'action.disabledBackground',
+                    color: 'action.disabled',
+                  }
+                }}
+              >
+                {isLoading ? t('schedule.scheduling', 'Scheduling...') : t('schedule.scheduleNow', 'Schedule Article')}
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
     </LocalizationProvider>

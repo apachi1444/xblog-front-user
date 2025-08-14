@@ -2,7 +2,6 @@ import type { Article } from 'src/types/article';
 import type { Theme, SxProps } from '@mui/material/styles';
 
 import toast from 'react-hot-toast';
-import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
@@ -25,9 +24,8 @@ import {
 
 import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
-import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useDeleteArticleMutation } from 'src/services/apis/articlesApi';
-import { useDeleteCalendarMutation, calendarApi } from 'src/services/apis/calendarApis';
+import { useDeleteCalendarMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
 import { ScheduleModal } from 'src/components/schedule-modal';
@@ -58,7 +56,6 @@ export function ArticleActionsMenu({
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
-  const currentStore = useSelector(selectCurrentStore);
 
   // State management
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -73,8 +70,8 @@ export function ArticleActionsMenu({
   const [deleteArticle, { isLoading: isDeleting }] = useDeleteArticleMutation();
   const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
 
-  // Get calendar entries to find calendar_id for unscheduling
-  const { data: calendarData } = calendarApi.endpoints.getScheduledArticles.useQuery();
+  // Get calendar entries to find calendar_id for unscheduling - use lazy query to fetch when needed
+  const { data: calendarData, refetch: refetchCalendarData } = useGetScheduledArticlesQuery()
 
   // Auto-close menu when modals open
   useEffect(() => {
@@ -163,17 +160,21 @@ export function ArticleActionsMenu({
   const handleUnscheduleConfirm = async (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent event bubbling
 
-    // Find the calendar entry for this article
-    const calendarEntry = calendarData?.calendars?.find(
-      (entry) => entry.article_id === article.id
-    );
-
-    if (!calendarEntry) {
-      toast.error('Calendar entry not found. Please try again.');
-      return;
-    }
-
     try {
+      // Fetch fresh calendar data before unscheduling
+      toast.loading('Fetching calendar data...', { id: 'unschedule-article' });
+      const { data: freshCalendarData } = await refetchCalendarData();
+
+      // Find the calendar entry for this article
+      const calendarEntry = freshCalendarData?.calendars?.find(
+        (entry) => entry.article_id === article.id
+      );
+
+      if (!calendarEntry) {
+        toast.error('Calendar entry not found. Please try again.', { id: 'unschedule-article' });
+        return;
+      }
+
       toast.loading(t('common.unscheduling', 'Unscheduling article...'), { id: 'unschedule-article' });
 
       // Delete the calendar entry using the calendar_id
@@ -181,7 +182,6 @@ export function ArticleActionsMenu({
 
       toast.success(t('common.unscheduleSuccess', 'Article unscheduled successfully!'), { id: 'unschedule-article' });
     } catch (error) {
-      console.error('Failed to unschedule article:', error);
       toast.error(t('common.unscheduleError', 'Failed to unschedule article. Please try again.'), { id: 'unschedule-article' });
     }
     setUnscheduleDialogOpen(false);

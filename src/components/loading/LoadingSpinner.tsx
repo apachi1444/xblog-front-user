@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography, useTheme } from '@mui/material';
+import { Box, useTheme, Typography, CircularProgress } from '@mui/material';
 
 interface LoadingSpinnerProps {
   size?: number;

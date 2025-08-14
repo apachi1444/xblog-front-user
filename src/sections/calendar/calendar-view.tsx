@@ -16,9 +16,9 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useScheduleArticleMutation, useDeleteCalendarMutation, calendarApi } from 'src/services/apis/calendarApis';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
+import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 
 import { LoadingSpinner } from 'src/components/loading';
 import {
@@ -38,13 +38,7 @@ export default function CalendarPage() {
   const [selectedArticleDetails, setSelectedArticleDetails] = useState<any>(null);
   const [isArticleDetailsModalOpen, setIsArticleDetailsModalOpen] = useState(false);
 
-
-
   const [scheduleArticle] = useScheduleArticleMutation();
-  const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
-
-  // Get calendar entries to find calendar_id for unscheduling
-  const { data: calendarData } = calendarApi.endpoints.getScheduledArticles.useQuery();
 
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
@@ -68,35 +62,7 @@ export default function CalendarPage() {
     setSelectedArticleDetails(null);
   }, []);
 
-  // Handle unscheduling an article
-  const handleUnscheduleArticle = useCallback(async () => {
-    if (!selectedArticleDetails) return;
 
-    // Find the calendar entry for this article
-    const calendarEntry = calendarData?.calendars?.find(
-      (entry) => entry.article_id === selectedArticleDetails.id
-    );
-
-    if (!calendarEntry) {
-      toast.error('Calendar entry not found. Please try again.');
-      return;
-    }
-
-    try {
-      // Delete the calendar entry using the calendar_id
-      await deleteCalendar(calendarEntry.id).unwrap();
-
-      toast.success(t('calendar.unscheduledSuccessfully', 'Article unscheduled successfully'));
-      setIsArticleDetailsModalOpen(false);
-      setSelectedArticleDetails(null);
-
-      // Refresh articles data after unscheduling
-      refetchArticles();
-    } catch (error) {
-      console.error('Error unscheduling article:', error);
-      toast.error(t('calendar.unschedulingFailed', 'Failed to unschedule article. Please try again.'));
-    }
-  }, [selectedArticleDetails, calendarData, deleteCalendar, refetchArticles, t]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -278,8 +244,7 @@ export default function CalendarPage() {
         open={isArticleDetailsModalOpen}
         onClose={handleCloseArticleDetails}
         article={selectedArticleDetails}
-        onUnschedule={handleUnscheduleArticle}
-        isUnscheduling={isUnscheduling}
+        onRefresh={refetchArticles}
       />
     </DashboardContent>
   );

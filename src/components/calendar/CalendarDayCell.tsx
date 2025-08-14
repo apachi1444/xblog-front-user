@@ -138,7 +138,7 @@ export function CalendarDayCell({
           {visibleArticles.map((article, idx) => (
             <Chip
               key={idx}
-              label={article.title || `Article #${article.id}`}
+              label={article.article_title || article.title || "No Title found"}
               size="small"
               onClick={() => onArticleClick(article)}
               sx={{

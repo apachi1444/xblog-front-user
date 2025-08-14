@@ -1,7 +1,9 @@
 import type { Article } from 'src/types/article';
 
+import toast from 'react-hot-toast';
 import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -15,32 +17,79 @@ import {
   useTheme,
   Typography,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
+
+import { calendarApi, useDeleteCalendarMutation } from 'src/services/apis/calendarApis';
+
 import { Iconify } from 'src/components/iconify';
-import { LoadingSpinner } from 'src/components/loading';
 
 interface ArticleDetailsModalProps {
   open: boolean;
   onClose: () => void;
   article: Article | null;
-  onUnschedule?: () => void;
-  onEdit?: () => void;
-  isUnscheduling?: boolean;
+  onRefresh?: () => void;
 }
 
 export function ArticleDetailsModal({
   open,
   onClose,
   article,
-  onUnschedule,
-  onEdit,
-  isUnscheduling = false,
+  onRefresh,
 }: ArticleDetailsModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const navigate = useNavigate();
+
+  // API hooks for unscheduling
+  const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
+  const { data: calendarData, refetch: refetchCalendarData } = calendarApi.endpoints.getScheduledArticles.useQuery(undefined, {
+    skip: true, // Skip initial fetch
+  });
 
   if (!article) return null;
+
+  // Handle unscheduling with the same logic as ArticleActionsMenu
+  const handleUnschedule = async () => {
+    try {
+      // Fetch fresh calendar data when unschedule button is clicked
+      toast.loading('Fetching calendar data...', { id: 'unschedule-article' });
+      const { data: freshCalendarData } = await refetchCalendarData();
+
+      // Find the calendar entry for this article
+      const calendarEntry = freshCalendarData?.calendars?.find(
+        (entry) => entry.article_id === article.id
+      );
+
+      if (!calendarEntry) {
+        toast.error('Calendar entry not found. Please try again.', { id: 'unschedule-article' });
+        return;
+      }
+
+      toast.loading('Unscheduling article...', { id: 'unschedule-article' });
+
+      // Delete the calendar entry using the calendar_id
+      await deleteCalendar(calendarEntry.id).unwrap();
+
+      toast.success('Article unscheduled successfully!', { id: 'unschedule-article' });
+
+      // Close modal and refresh data
+      onClose();
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      toast.error('Failed to unschedule article. Please try again.', { id: 'unschedule-article' });
+    }
+  };
+
+  // Handle edit navigation
+  const handleEdit = () => {
+    navigateToArticle(navigate, article.id.toString());
+    onClose();
+  };
 
   return (
     <Modal
@@ -120,36 +169,239 @@ export function ArticleDetailsModal({
           </Box>
 
           {/* Content */}
-          <Box sx={{ p: 3, maxHeight: 400, overflow: 'auto' }}>
+          <Box sx={{ p: 3, maxHeight: 500, overflow: 'auto' }}>
             <Stack spacing={3}>
               {/* Title */}
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                  {t('common.title', 'Title')}
+                  Article Title
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
+                <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+                  {article.article_title || article.title || "No Title Found"}
                 </Typography>
               </Box>
 
-              {/* Content */}
-              {article.content && (
+              {/* Content Description */}
+              {article.content_description && (
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                    {t('common.content', 'Content')}
+                    Content Description
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {article.content}
+                  <Typography variant="body2" color="text.secondary" sx={{
+                    lineHeight: 1.5,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {article.content_description}
                   </Typography>
                 </Box>
               )}
+
+              {/* Keywords Section */}
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Keywords
+                </Typography>
+                <Stack spacing={1.5}>
+                  {/* Primary Keyword */}
+                  {article.primary_keyword && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                        Primary Keyword
+                      </Typography>
+                      <Chip
+                        label={article.primary_keyword}
+                        size="small"
+                        color="primary"
+                        sx={{ fontWeight: 500 }}
+                      />
+                    </Box>
+                  )}
+
+                  {/* Secondary Keywords */}
+                  {article.secondary_keywords && (() => {
+                    try {
+                      const keywords = JSON.parse(article.secondary_keywords);
+                      return (
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                            Secondary Keywords
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {keywords.slice(0, 4).map((keyword: string, index: number) => (
+                              <Chip
+                                key={index}
+                                label={keyword}
+                                size="small"
+                                variant="outlined"
+                                color="secondary"
+                                sx={{ fontSize: '0.75rem' }}
+                              />
+                            ))}
+                            {keywords.length > 4 && (
+                              <Chip
+                                label={`+${keywords.length - 4} more`}
+                                size="small"
+                                variant="outlined"
+                                color="default"
+                                sx={{ fontSize: '0.75rem' }}
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      );
+                    } catch {
+                      return null;
+                    }
+                  })()}
+                </Stack>
+              </Box>
+
+              {/* SEO Information */}
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  SEO Information
+                </Typography>
+                <Stack spacing={1.5}>
+                  {/* Meta Title */}
+                  {article.meta_title && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                        Meta Title
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {article.meta_title}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Meta Description */}
+                  {article.meta_description && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                        Meta Description
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{
+                        lineHeight: 1.4,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}>
+                        {article.meta_description}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* URL Slug */}
+                  {article.url_slug && (
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                        URL Slug
+                      </Typography>
+                      <Typography variant="body2" sx={{
+                        fontFamily: 'monospace',
+                        bgcolor: alpha(theme.palette.grey[500], 0.1),
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: '0.875rem'
+                      }}>
+                        /{article.url_slug}
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </Box>
+
+              {/* Article Configuration */}
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Article Configuration
+                </Typography>
+                <Stack spacing={1.5}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                    {/* Language & Country */}
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                        Language & Country
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {article.language?.toUpperCase() || 'EN'} • {article.target_country?.toUpperCase() || 'US'}
+                      </Typography>
+                    </Box>
+
+                    {/* Article Type */}
+                    {article.article_type && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                          Article Type
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                          {article.article_type}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* Article Size */}
+                    {article.article_size && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                          Article Size
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                          {article.article_size}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* Tone of Voice */}
+                    {article.tone_of_voice && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                          Tone of Voice
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>
+                          {article.tone_of_voice}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Features */}
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                      Features
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {article.include_images && (
+                        <Chip label="Images" size="small" variant="outlined" color="info" />
+                      )}
+                      {article.include_videos && (
+                        <Chip label="Videos" size="small" variant="outlined" color="info" />
+                      )}
+                      {article.include_cta && (
+                        <Chip label="CTA" size="small" variant="outlined" color="info" />
+                      )}
+                      {article.plagiat_removal && (
+                        <Chip label="Plagiarism Check" size="small" variant="outlined" color="success" />
+                      )}
+                      {article.template_name && (
+                        <Chip label={`Template: ${article.template_name}`} size="small" variant="outlined" color="secondary" />
+                      )}
+                    </Box>
+                  </Box>
+                </Stack>
+              </Box>
 
               <Divider />
 
               {/* Metadata */}
               <Stack spacing={2}>
                 <Typography variant="subtitle2" color="text.secondary">
-                  {t('common.details', 'Details')}
+                  Timeline & Status
                 </Typography>
                 
                 <Stack spacing={1.5}>
@@ -238,30 +490,28 @@ export function ArticleDetailsModal({
           >
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               {/* Unschedule button for scheduled articles */}
-              {article.status === 'scheduled' && onUnschedule && (
+              {article.status === 'scheduled' && (
                 <Button
                   variant="outlined"
-                  color="error"
-                  onClick={onUnschedule}
+                  color="warning"
+                  onClick={handleUnschedule}
                   disabled={isUnscheduling}
-                  startIcon={isUnscheduling ? <LoadingSpinner size={16} /> : <Iconify icon="eva:calendar-outline" width={16} height={16} />}
+                  startIcon={isUnscheduling ? <CircularProgress size={16} /> : <Iconify icon="mdi:calendar-remove" width={16} height={16} />}
                   sx={{ borderRadius: 2 }}
                 >
-                  {isUnscheduling ? t('calendar.unscheduling', 'Unscheduling...') : t('calendar.unschedule', 'Unschedule')}
+                  {isUnscheduling ? t('common.unscheduling', 'Unscheduling...') : t('common.unschedule', 'Unschedule')}
                 </Button>
               )}
 
               {/* Edit button */}
-              {onEdit && (
-                <Button
-                  variant="outlined"
-                  onClick={onEdit}
-                  startIcon={<Iconify icon="eva:edit-outline" width={16} height={16} />}
-                  sx={{ borderRadius: 2 }}
-                >
-                  {t('common.edit', 'Edit')}
-                </Button>
-              )}
+              <Button
+                variant="outlined"
+                onClick={handleEdit}
+                startIcon={<Iconify icon="eva:edit-outline" width={16} height={16} />}
+                sx={{ borderRadius: 2 }}
+              >
+                {t('common.edit', 'Edit')}
+              </Button>
 
               {/* Close button */}
               <Button
