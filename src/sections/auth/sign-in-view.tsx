@@ -232,14 +232,8 @@ export function SignInView() {
     dispatch(setTestMode(newTestMode));
 
     // Track test mode toggle with proper analytics
-    trackTestModeToggle(newTestMode);    
-
-    toast.success(
-      newTestMode
-        ? t('auth.testMode.enabled', 'Test mode enabled - Mock API active')
-        : t('auth.testMode.disabled', 'Test mode disabled - Real API active')
-    );
-  }, [dispatch, t, testMode]);
+    trackTestModeToggle(newTestMode);
+  }, [dispatch, testMode]);
 
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');

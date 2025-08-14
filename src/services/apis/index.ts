@@ -7,8 +7,10 @@ import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
 
-import { _posts, _calendars } from 'src/_mock/_data';
+import { CONFIG } from 'src/config-global';
+import { logMockApiStatus, validateMockApiConfig } from 'src/utils/mockApiConfig';
 import { _fakeStores } from 'src/_mock/stores';
+import { _posts, _calendars } from 'src/_mock/_data';
 
 import customRequest from './axios';
 
@@ -51,18 +53,8 @@ const mockCalendarEvents = [...Array(10)].map((_, index) => ({
 // Make sure BASE_URL is defined
 const ARTICLES_BASE_URL = '/articles';
 
-// Helper to check if mocking should be enabled based on test mode
-const shouldUseMocks = () => {
-  try {
-    // Check if test mode is enabled in localStorage
-    const isTestMode = localStorage.getItem('isTestMode') === 'true';
-    return isTestMode;
-  } catch (error) {
-    // If localStorage is not available (e.g., SSR), default to false
-    console.warn('Could not access localStorage for test mode check:', error);
-    return false;
-  }
-}
+// Helper to check if mocking should be enabled based on environment variable
+const shouldUseMocks = () => CONFIG.useMockApi;
 
 // Setup mock endpoints
 const setupMocks = () => {
@@ -129,18 +121,69 @@ const setupMocks = () => {
       console.log('🔥 Mock update article endpoint called for ID:', articleId);
       console.log('🔥 Update data:', requestData);
 
+      // Create a comprehensive updated article object that includes all possible fields
       const updatedArticle = {
         id: articleId,
-        title: requestData.title || 'Updated Article',
+        // Basic article fields
+        title: requestData.article_title || requestData.title || 'Updated Article',
+        article_title: requestData.article_title || requestData.title || 'Updated Article',
         content: requestData.content || 'Updated content',
+        content__description: requestData.content__description || 'Updated description',
+
+        // Meta fields
+        meta_title: requestData.meta_title || 'Updated meta title',
         meta_description: requestData.meta_description || 'Updated meta description',
-        keywords: requestData.keywords || ['updated'],
+        url_slug: requestData.url_slug || 'updated-article',
+
+        // Keywords
+        primary_keyword: requestData.primary_keyword || 'updated keyword',
+        secondary_keywords: requestData.secondary_keywords || '["keyword1", "keyword2"]',
+
+        // Article configuration
+        target_country: requestData.target_country || 'global',
+        language: requestData.language || 'english',
+        article_type: requestData.article_type || 'how-to',
+        article_size: requestData.article_size || 'medium',
+        tone_of_voice: requestData.tone_of_voice || 'friendly',
+        point_of_view: requestData.point_of_view || 'third-person',
+        plagiat_removal: requestData.plagiat_removal || false,
+        include_cta: requestData.include_cta || false,
+        include_images: requestData.include_images || false,
+        include_videos: requestData.include_videos || false,
+
+        // Links
+        internal_links: requestData.internal_links || '',
+        external_links: requestData.external_links || '',
+
+        // Generated content fields - THESE ARE THE IMPORTANT ONES!
+        sections: requestData.sections || null,
+        toc: requestData.toc || null,
+        images: requestData.images || null,
+        faq: requestData.faq || null,
+
+        // Media and template
+        featured_media: requestData.featured_media || '',
+        template_name: requestData.template_name || 'template1',
+
+        // Status and timestamps
         status: requestData.status || 'draft',
+        scheduled_publish_date: requestData.scheduled_publish_date || null,
         website_id: requestData.website_id || null,
+        platform: requestData.platform || 'shopify',
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      console.log('🔥 Returning updated article:', updatedArticle);
+      console.log('🔥 Returning updated article with generated content:', {
+        id: updatedArticle.id,
+        title: updatedArticle.title,
+        content: updatedArticle.content ? `${updatedArticle.content.length} chars` : 'empty',
+        toc: updatedArticle.toc ? 'included' : 'null',
+        images: updatedArticle.images ? 'included' : 'null',
+        faq: updatedArticle.faq ? 'included' : 'null',
+        sections: updatedArticle.sections ? 'included' : 'null'
+      });
+
       return [200, updatedArticle];
     });
 
@@ -1580,16 +1623,16 @@ export const toggleMocks = (enable: boolean) => {
   }
 };
 
-// Function to initialize mocks based on current test mode
+// Function to initialize mocks based on environment configuration
 export const initializeMocks = () => {
+  // Validate the environment configuration
+  validateMockApiConfig();
+
   const isTestMode = shouldUseMocks();
   toggleMocks(isTestMode);
 
-  if (isTestMode) {
-    console.log('🔧 Mock API initialized in test mode');
-  } else {
-    console.log('🔧 Mock API disabled - using real API');
-  }
+  // Log the current configuration status
+  logMockApiStatus();
 };
 
 // Initial setup based on test mode

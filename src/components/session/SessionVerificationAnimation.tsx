@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { 
-  CheckCircle, 
+  Star, 
   Error, 
-  Close, 
-  Star,
-  AutoAwesome,
-  Warning 
+  Close,
+  CheckCircle,
+  AutoAwesome 
 } from '@mui/icons-material';
 import {
   Box,
@@ -44,6 +43,7 @@ export function SessionVerificationAnimation({
   const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
 
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (open) {
       // Delay content animation for a smooth entrance
@@ -299,6 +299,7 @@ export function SessionVerificationAnimation({
                       variant="contained"
                       size="large"
                       color="primary"
+                      // eslint-disable-next-line no-return-assign
                       onClick={() => window.location.href = 'mailto:support@xblog.com'}
                       sx={{ px: 3, py: 1.5 }}
                     >

@@ -2,15 +2,18 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { RootState } from '../store';
+import { CONFIG } from 'src/config-global';
+
 import { toggleMocks } from '../apis';
+
+import type { RootState } from '../store';
 
 interface GlobalSliceState {
   isTestMode: boolean;
 }
 
 export const initialState: GlobalSliceState = {
-  isTestMode: localStorage.getItem('isTestMode') === 'true' || false,
+  isTestMode: CONFIG.useMockApi,
 };
 
 const globalSlice = createSlice({
@@ -18,13 +21,15 @@ const globalSlice = createSlice({
   initialState,
   reducers: {
     setTestMode: (state, action: PayloadAction<boolean>) => {
+      // Note: This action is now primarily for UI state management
+      // The actual mock API state is controlled by the VITE_USE_MOCK_API environment variable
       state.isTestMode = action.payload;
-      localStorage.setItem('isTestMode', action.payload.toString());
 
       // Automatically toggle mocks when test mode changes
       try {
         toggleMocks(action.payload);
         console.log(`🔧 Mock API ${action.payload ? 'enabled' : 'disabled'} via test mode toggle`);
+        console.warn('⚠️ Test mode is now controlled by VITE_USE_MOCK_API environment variable. This toggle is for UI state only.');
       } catch (error) {
         console.warn('Failed to toggle mocks:', error);
       }

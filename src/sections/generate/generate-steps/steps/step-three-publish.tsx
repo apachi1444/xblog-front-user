@@ -67,15 +67,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: St
               setFeedbackShown(true);
             }, 20000);
           }
-          return;
         }
-
-        const response = await fetch('/aa.html');
-        if (!response.ok) {
-          throw new Error(`Failed to load aa.html: ${response.status}`);
-        }
-        const htmlText = await response.text();
-        setHtmlContent(htmlText);
 
       } catch (error) {
         // Set empty content if all methods fail
