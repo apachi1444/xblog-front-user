@@ -24,7 +24,7 @@ import {
 
 import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
-import { useDeleteArticleMutation } from 'src/services/apis/articlesApi';
+import { useDeleteArticleMutation, useCreateArticleMutation } from 'src/services/apis/articlesApi';
 import { useDeleteCalendarMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
@@ -69,6 +69,7 @@ export function ArticleActionsMenu({
   // API mutations
   const [deleteArticle, { isLoading: isDeleting }] = useDeleteArticleMutation();
   const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
+  const [createArticle, { isLoading: isDuplicating }] = useCreateArticleMutation();
 
   // Get calendar entries to find calendar_id for unscheduling - use lazy query to fetch when needed
   const { data: calendarData, refetch: refetchCalendarData } = useGetScheduledArticlesQuery()
@@ -139,6 +140,54 @@ export function ArticleActionsMenu({
   const handleUnscheduleClick = () => {
     setUnscheduleDialogOpen(true);
     handleMenuClose();
+  };
+
+  // Handle duplicate article
+  const handleDuplicateClick = async () => {
+    handleMenuClose();
+
+    try {
+      toast.loading('Duplicating article...', { id: 'duplicate-article' });
+
+      // Create new article directly with all the previous article information
+      const newArticle = await createArticle({
+        title: `${article.article_title || article.title || 'Untitled Article'} (Copy)`,
+        content: article.content || '',
+        meta_description: article.meta_description || '',
+        keywords: article.secondary_keywords ? JSON.parse(article.secondary_keywords) : [],
+        status: 'draft',
+        website_id: '1', // Default website ID
+        // Add all the additional fields from the original article
+        article_title: `${article.article_title || article.title || 'Untitled Article'} (Copy)`,
+        content__description: article.content_description || '',
+        meta_title: article.meta_title ? `${article.meta_title} (Copy)` : '',
+        url_slug: article.url_slug ? `${article.url_slug}-copy` : '',
+        primary_keyword: article.primary_keyword || '',
+        secondary_keywords: article.secondary_keywords || '',
+        target_country: article.target_country || '',
+        language: article.language || '',
+        article_type: article.article_type || '',
+        article_size: article.article_size || '',
+        tone_of_voice: article.tone_of_voice || '',
+        point_of_view: article.point_of_view || '',
+        plagiat_removal: article.plagiat_removal || false,
+        include_cta: article.include_cta || false,
+        include_images: article.include_images || false,
+        include_videos: article.include_videos || false,
+        internal_links: article.internal_links || '',
+        external_links: article.external_links || '',
+        sections: article.sections || '',
+        toc: article.toc || '',
+        images: article.images || '',
+        faq: article.faq || '',
+        template_name: article.template_name || '',
+      }).unwrap();
+
+      toast.success('Article duplicated successfully!', { id: 'duplicate-article' });
+    } catch (error: any) {
+      console.error('Failed to duplicate article:', error);
+      toast.error('Failed to duplicate article. Please try again.', { id: 'duplicate-article' });
+    }
   };
 
   const handleDeleteConfirm = async (event?: React.MouseEvent) => {
@@ -348,6 +397,18 @@ export function ArticleActionsMenu({
           <MenuItem onClick={handleEdit} sx={{ py: 1 }}>
             <Iconify icon="mdi:pencil" width={16} height={16} sx={{ mr: 1.5, color: 'text.secondary' }} />
             <Typography variant="body2">{t('common.edit', 'Edit')}</Typography>
+          </MenuItem>
+
+          {/* Duplicate Button */}
+          <MenuItem
+            onClick={handleDuplicateClick}
+            disabled={isDuplicating}
+            sx={{ py: 1 }}
+          >
+            <Iconify icon="mdi:content-copy" width={16} height={16} sx={{ mr: 1.5, color: 'text.secondary' }} />
+            <Typography variant="body2">
+              {isDuplicating ? t('common.duplicating', 'Duplicating...') : t('common.duplicate', 'Duplicate')}
+            </Typography>
           </MenuItem>
 
           <MenuItem

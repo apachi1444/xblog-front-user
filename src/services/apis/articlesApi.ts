@@ -18,7 +18,7 @@ interface ArticlesResponse {
   articles: Article[];
 }
 
-// Article creation request
+// Article creation request - Extended to support duplication
 export interface CreateArticleRequest {
   title: string;
   content?: string;
@@ -26,6 +26,30 @@ export interface CreateArticleRequest {
   keywords?: string[];
   status?: 'draft' | 'published';
   website_id?: string;
+  // Extended fields for duplication
+  article_title?: string;
+  content__description?: string;
+  meta_title?: string;
+  url_slug?: string;
+  primary_keyword?: string;
+  secondary_keywords?: string;
+  target_country?: string;
+  language?: string;
+  article_type?: string;
+  article_size?: string;
+  tone_of_voice?: string;
+  point_of_view?: string;
+  plagiat_removal?: boolean;
+  include_cta?: boolean;
+  include_images?: boolean;
+  include_videos?: boolean;
+  internal_links?: string;
+  external_links?: string;
+  sections?: string;
+  toc?: string;
+  images?: string;
+  faq?: string;
+  template_name?: string;
 }
 
 // Article update request - matches Article type structure
