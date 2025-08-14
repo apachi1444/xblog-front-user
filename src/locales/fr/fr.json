@@ -41,6 +41,14 @@
       "book_demo": "Réserver une démo",
       "ai_assistance_chat": "Chat d'assistance IA"
     },
+    "blog": {
+      "published": "Publié",
+      "draft": "Brouillon",
+      "scheduled": "Programmé",
+      "scheduledFor": "Programmé pour {{date}}",
+      "unknown": "Inconnu",
+      "inProgress": "EN COURS"
+    },
     "auth": {
       "signup": {
         "title": "Rejoignez Notre Communauté Créative",
@@ -363,6 +371,8 @@
       "scheduleArticles": "Planifier des Articles pour le {{date}}",
       "selectArticles": "Sélectionnez les articles à planifier :",
       "noArticles": "Aucun article disponible pour la planification",
+      "scheduledDate": "Date Programmée",
+      "scheduledFor": "Programmé pour",
       "scheduledSuccessfully": "Articles planifiés avec succès",
       "unscheduledSuccessfully": "Article déplanifié avec succès",
       "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",

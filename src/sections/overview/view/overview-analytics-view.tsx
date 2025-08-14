@@ -14,6 +14,8 @@ import {
   CircularProgress
 } from '@mui/material';
 
+import { formatDate } from 'date-fns';
+
 import { formatMetrics, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -222,10 +224,26 @@ function RecentArticlesSection() {
                           )}
                         </Box>
 
-                        {/* Last Modified */}
-                        <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5 }}>
-                          {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
-                        </Typography>
+                        {/* Last Modified / Scheduled Date */}
+                        {article.status === 'scheduled' && article.scheduled_publish_date ? (
+                          <Box sx={{ mb: 1.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                              <Iconify icon="mdi:calendar-clock" width={14} height={14} sx={{ color: 'warning.main' }} />
+                              <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 600 }}>
+                                {t('blog.scheduledFor', 'Scheduled for {{date}}', {
+                                  date: formatDate(new Date(article.scheduled_publish_date), 'MMM d, yyyy • h:mm a')
+                                })}
+                              </Typography>
+                            </Box>
+                            <Typography variant="caption" color="text.secondary">
+                              {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5 }}>
+                            {t('dashboard.lastModified', 'Created At')}: {new Date(article.created_at).toLocaleDateString()}
+                          </Typography>
+                        )}
 
                         {/* Language Badge */}
                         {article.language && (

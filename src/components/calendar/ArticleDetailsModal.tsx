@@ -175,6 +175,30 @@ export function ArticleDetailsModal({
                     </Box>
                   </Stack>
 
+                  {/* Scheduled Date - Only show for scheduled articles */}
+                  {article.status === 'scheduled' && article.scheduled_publish_date && (
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 1,
+                          bgcolor: alpha(theme.palette.warning.main, 0.1),
+                          color: theme.palette.warning.main,
+                        }}
+                      >
+                        <Iconify icon="eva:clock-outline" width={16} height={16} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {t('calendar.scheduledDate', 'Scheduled Date')}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatDate(article.scheduled_publish_date, 'MMMM d, yyyy • h:mm a')}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  )}
+
                   {/* Platform */}
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <Box

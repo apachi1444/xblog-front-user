@@ -157,14 +157,17 @@ export function ArticleListModal({
                       }
                       secondary={
                         <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
-                          <Iconify 
-                            icon="eva:clock-outline" 
-                            width={14} 
-                            height={14} 
-                            sx={{ color: 'text.secondary' }} 
+                          <Iconify
+                            icon={article.status === 'scheduled' ? "eva:calendar-outline" : "eva:clock-outline"}
+                            width={14}
+                            height={14}
+                            sx={{ color: 'text.secondary' }}
                           />
                           <Typography variant="caption" color="text.secondary">
-                            {formatDate(article.created_at, 'h:mm a')}
+                            {article.status === 'scheduled' && article.scheduled_publish_date
+                              ? `${t('calendar.scheduledFor', 'Scheduled for')} ${formatDate(article.scheduled_publish_date, 'h:mm a')}`
+                              : formatDate(article.created_at, 'h:mm a')
+                            }
                           </Typography>
                           {article.content && (
                             <>

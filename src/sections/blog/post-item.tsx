@@ -214,8 +214,48 @@ export function PostItem({
     </Box>
   );
 
-  // Render scheduled info (disabled for now since scheduledAt is not in API)
-  const renderScheduledInfo = null;
+  // Render scheduled info for scheduled articles
+  const renderScheduledInfo = post.status === 'scheduled' && post.scheduled_publish_date && (
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: 16,
+        left: 16,
+        right: 16,
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: alpha(theme.palette.info.main, 0.9),
+        color: 'white',
+        borderRadius: 1.5,
+        px: 2,
+        py: 1,
+        backdropFilter: 'blur(8px)',
+        border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+        boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`,
+      }}
+    >
+      <Iconify
+        icon="mdi:calendar-clock"
+        width={16}
+        height={16}
+        sx={{ mr: 1 }}
+      />
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 600,
+          fontSize: '0.75rem',
+          textAlign: 'center',
+        }}
+      >
+        {t('blog.scheduledFor', 'Scheduled for {{date}}', {
+          date: formatDate(new Date(post.scheduled_publish_date), 'MMM d, yyyy • h:mm a')
+        })}
+      </Typography>
+    </Box>
+  );
 
   // Render draft creative element
   const renderDraftCreative = post.status === 'draft' && (

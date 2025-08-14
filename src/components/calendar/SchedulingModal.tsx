@@ -1,6 +1,7 @@
 import type { Article } from 'src/types/article';
 
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -44,6 +45,7 @@ export function SchedulingModal({
 }: SchedulingModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Modal
@@ -205,9 +207,33 @@ export function SchedulingModal({
                   }}
                 >
                   <Iconify icon="eva:file-text-outline" width={48} height={48} sx={{ mb: 2, opacity: 0.5 }} />
-                  <Typography variant="body2">
+                  <Typography variant="body2" sx={{ mb: 3 }}>
                     {t('calendar.noArticles', 'No articles available for scheduling')}
                   </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<Iconify icon="eva:plus-fill" width={20} height={20} />}
+                    onClick={() => {
+                      navigate('/create');
+                      onClose();
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      px: 3,
+                      py: 1.5,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                      '&:hover': {
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                        transform: 'translateY(-1px)',
+                        boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {t('calendar.createNewArticle', 'Create New Article')}
+                  </Button>
                 </Box>
               )}
             </Box>
