@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   Box,
   Card,
+  alpha,
   Button,
+  useTheme,
   Typography,
   ToggleButton,
   ToggleButtonGroup,
-  useTheme,
-  alpha,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+
 import { HtmlRenderer, HtmlBodyRenderer, HtmlIframeRenderer } from '../html-renderer';
 
 interface ArticleHtmlPreviewProps {

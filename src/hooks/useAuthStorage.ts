@@ -52,7 +52,6 @@ export const useAuthStorage = (): UseAuthStorageReturn => {
   const checkStorageAvailability = useCallback(() => {
     try {
       const test = '__storage_test__';
-      localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
     } catch {

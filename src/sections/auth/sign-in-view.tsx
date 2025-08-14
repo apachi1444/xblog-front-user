@@ -27,11 +27,11 @@ import { useEnhancedAnalytics } from 'src/hooks/useEnhancedAnalytics';
 import { trackTestModeToggle } from 'src/utils/analytics';
 
 import { signInSchema } from 'src/validation/auth-schemas';
+import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
 import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
-import { setCredentials, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 
 import { Logo } from 'src/components/logo/logo';
 // Import the centralized language switcher
@@ -100,7 +100,6 @@ export function SignInView() {
       accessToken: MOCK_ACCESS_TOKEN,
       user: MOCK_USER_DATA
     }));
-    dispatch(setOnboardingCompleted(false));
     toast.success(t('auth.testMode.redirecting'));
   }, [dispatch, t]);
 
@@ -124,7 +123,6 @@ export function SignInView() {
 
       // Update with complete user data
       dispatch(setCredentials({accessToken, user: userData}));
-      dispatch(setOnboardingCompleted(isOnboardingCompleted));
 
       router.replace(isOnboardingCompleted ? '/' : '/onboarding');
     } catch (error: any) {

@@ -1,9 +1,9 @@
-export {
-  ArticleHtmlPreview,
-  SimpleHtmlPreview,
-  FullScreenHtmlPreview,
-} from './ArticleHtmlPreview';
+export * from './mockArticleData';
 
 export { ArticlePreviewDemo } from './ArticlePreviewDemo';
 export { ArticlePreviewModal } from './ArticlePreviewModal';
-export * from './mockArticleData';
+export {
+  SimpleHtmlPreview,
+  ArticleHtmlPreview,
+  FullScreenHtmlPreview,
+} from './ArticleHtmlPreview';

@@ -21,8 +21,8 @@ import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
+import { logout } from 'src/services/slices/auth/authSlice';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
-import { logout, setOnboardingCompleted } from 'src/services/slices/auth/authSlice';
 import {
   useGetSubscriptionPlansQuery,
   useCreateCheckoutSessionMutation
@@ -192,7 +192,6 @@ export function OnBoardingView() {
 
   // Handle logout - exit onboarding flow
   const handleLogout = () => {
-    // Dispatch logout action (this will handle all storage cleanup)
     dispatch(logout());
 
     // Navigate to sign-in page
@@ -244,16 +243,9 @@ export function OnBoardingView() {
 
       toast.success(t('onboarding.freeSelected', 'Welcome! You\'re all set with the free plan.'));
 
-      // Mark onboarding as completed in Redux store
-      dispatch(setOnboardingCompleted(true));
-
-      // Navigate to dashboard
       navigate('/');
     } catch (error) {
       toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
-
-      // Still mark as completed in the local store and navigate
-      dispatch(setOnboardingCompleted(true));
       navigate('/');
     }
   };

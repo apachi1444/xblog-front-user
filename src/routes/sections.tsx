@@ -5,7 +5,6 @@ import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { AuthGuard } from 'src/guards/AuthGuard';
 import { DashboardLayout } from 'src/layouts/dashboard';
@@ -15,8 +14,6 @@ import { ErrorFallback } from 'src/components/error-boundary';
 // ----------------------------------------------------------------------
 
 export const OnBoardingPage = lazy(() => import('src/pages/onboarding'));
-export const OnBoardingSuccessPage = lazy(() => import('src/pages/onboarding-success'));
-export const MockPaymentPage = lazy(() => import('src/pages/mock-payment'));
 export const HomePage = lazy(() => import('src/pages/home'));
 export const GenerateFlow = lazy(() => import('src/pages/generate'));
 export const CreatePage = lazy(() => import('src/pages/create'));
@@ -70,28 +67,6 @@ export function Router() {
             </ErrorBoundary>
           </Suspense>
         </AuthGuard>
-      ),
-    },
-    {
-      path: 'onboarding/success',
-      element: (
-        <AuthGuard>
-          <Suspense fallback={renderFallback}>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <OnBoardingSuccessPage />
-            </ErrorBoundary>
-          </Suspense>
-        </AuthGuard>
-      ),
-    },
-    {
-      path: 'mock-payment',
-      element: (
-        <Suspense fallback={renderFallback}>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <MockPaymentPage />
-          </ErrorBoundary>
-        </Suspense>
       ),
     },
     {

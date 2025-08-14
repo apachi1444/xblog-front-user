@@ -4,25 +4,10 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Chip,
-  Grid,
-  List,
   Modal,
-  Paper,
-  Table,
   Divider,
-  ListItem,
-  TableRow,
-  TableCell,
-  TableHead,
-  TableBody,
-  Accordion,
   Typography,
   IconButton,
-  ListItemIcon,
-  ListItemText,
-  TableContainer,
-  AccordionDetails,
-  AccordionSummary,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';

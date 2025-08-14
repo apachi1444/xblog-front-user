@@ -21,8 +21,6 @@ export {
   getUserDisplayName,
   isValidAuthSession,
   getStoredAccessToken,
-  getOnboardingCompleted,
-  hasCompletedOnboarding,
   isLocalStorageAvailable,
   saveAccessTokenToStorage,
   setOnboardingCompletedInStorage,

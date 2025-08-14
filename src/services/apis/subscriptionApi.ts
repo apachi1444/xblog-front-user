@@ -67,6 +67,15 @@ export interface PortalSessionResponse {
   url: string; // The portal session URL to redirect to
 }
 
+// Interface for session verification response
+export interface SessionVerificationResponse {
+  valid: boolean;
+  session_id: string;
+  customer_id?: string;
+  payment_status?: string;
+  subscription_id?: string;
+}
+
 // RTK Query endpoints for subscription operations
 export const subscriptionApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -138,6 +147,17 @@ export const subscriptionApi = api.injectEndpoints({
         method: 'GET',
       }),
     }),
+
+    // Verify Stripe checkout session (no authentication required)
+    verifyCheckoutSession: builder.query<SessionVerificationResponse, { session_id: string }>({
+      query: ({ session_id }) => ({
+        url: '/webhook/verify-checkout-session',
+        method: 'GET',
+        params: { session_id },
+        // No authentication headers for this endpoint
+        headers: {},
+      }),
+    }),
   }),
 });
 
@@ -151,5 +171,7 @@ export const {
   useUpgradeSubscriptionMutation,
   useCreateCheckoutSessionMutation,
   useCreatePortalSessionQuery,
-  useLazyCreatePortalSessionQuery
+  useLazyCreatePortalSessionQuery,
+  useVerifyCheckoutSessionQuery,
+  useLazyVerifyCheckoutSessionQuery
 } = subscriptionApi;

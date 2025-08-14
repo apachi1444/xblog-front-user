@@ -1,5 +1,4 @@
 import type { AuthUser } from 'src/types/user';
-import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -36,16 +35,10 @@ const authSlice = createSlice({
       state.isAuthenticated = !!action.payload.accessToken;
 
       localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
-        user: state.user,
         accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
-        onboardingCompleted: state.onboardingCompleted,
-        avatar: state.user?.avatar
+        avatar: state.user?.avatar,
       }));
-
-      console.log(
-        localStorage.getItem('xblog_auth_session_v2')
-      );
     },
 
     rehydrateAuth: (state) => {
@@ -58,35 +51,11 @@ const authSlice = createSlice({
           state.user = parsedAuth.user;
           state.accessToken = parsedAuth.accessToken;
           state.isAuthenticated = parsedAuth.isAuthenticated;
-          state.onboardingCompleted = parsedAuth.onboardingCompleted;
         } catch (error) {
           localStorage.removeItem('xblog_auth_session_v2');
         }
       }
     },
-
-    setOnboardingCompleted: (state, action: PayloadAction<boolean>) => {
-      state.onboardingCompleted = action.payload;
-      const savedAuth = localStorage.getItem('xblog_auth_session_v2');
-      if (savedAuth) {
-        try {
-          const parsedAuth = JSON.parse(savedAuth);
-          localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
-            ...parsedAuth,
-            onboardingCompleted: action.payload
-          }));
-        } catch (error) {
-          // If parsing fails, update with current state
-          localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
-            user: state.user,
-            accessToken: state.accessToken,
-            isAuthenticated: state.isAuthenticated,
-            onboardingCompleted: action.payload
-          }));
-        }
-      }
-    },
-
     logout: (state) => {
       // Remove both old and new keys for complete cleanup
       localStorage.removeItem('xblog_auth_session_v2');
@@ -111,7 +80,6 @@ const authSlice = createSlice({
 export const {
   setCredentials,
   logout,
-  setOnboardingCompleted,
   rehydrateAuth
 } = authSlice.actions;
 

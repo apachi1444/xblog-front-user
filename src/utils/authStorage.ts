@@ -71,13 +71,6 @@ export const getIsAuthenticated = (): boolean => {
   return session?.isAuthenticated || false;
 };
 
-/**
- * Check if onboarding is completed
- */
-export const getOnboardingCompleted = (): boolean => {
-  const session = getAuthSession();
-  return session?.onboardingCompleted || false;
-};
 
 /**
  * Save complete auth session to localStorage

@@ -15,7 +15,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { type Template, UNIFIED_TEMPLATES, TEMPLATE_CATEGORIES, PARENT_TEMPLATES } from 'src/utils/templateUtils';
+import { type Template, PARENT_TEMPLATES, TEMPLATE_CATEGORIES } from 'src/utils/templateUtils';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useCreateArticleMutation } from 'src/services/apis/articlesApi';
@@ -24,10 +24,9 @@ import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { Iconify } from 'src/components/iconify';
 import { TemplatePreviewModal } from 'src/components/templates/TemplatePreviewModal';
 
-import { TemplateCard } from './components/template-card';
-import { ParentTemplateCard } from './components/parent-template-card-new';
 import { TemplateFilter } from './components/template-filter';
 import { TemplateEmptyState } from './components/template-empty-state';
+import { ParentTemplateCard } from './components/parent-template-card-new';
 
 // ----------------------------------------------------------------------
 
@@ -70,12 +69,6 @@ export function TemplateView() {
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
-  };
-
-  const handleTemplateSelect = (template: Template) => {
-    // Always show preview modal for template selection
-    setSelectedTemplate(template);
-    setOpenModal(true);
   };
 
   const handleCloseModal = () => {

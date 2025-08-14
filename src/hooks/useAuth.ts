@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo } from 'react';
+
 import { useAuthStorage } from './useAuthStorage';
+
 import type { AuthUser } from './useAuthStorage';
 
 export interface UseAuthReturn {
