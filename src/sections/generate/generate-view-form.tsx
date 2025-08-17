@@ -422,6 +422,7 @@ export function GenerateViewForm({
 
       {/* Section generation animation modal */}
       <SectionGenerationAnimation
+        articleId={articleId}
         show={generationState.isGeneratingSections}
         onComplete={() => {
           setGenerationState((s) => ({

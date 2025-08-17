@@ -79,12 +79,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
               }
             });
           } else {
-            console.error('❌ Session verification failed');
             // Handle invalid session - could show error message
           }
         })
         .catch((error) => {
-          console.error('❌ Session verification error:', error);
           // Handle verification error
         });
     }

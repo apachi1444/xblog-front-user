@@ -7,15 +7,12 @@ import type {
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Box, Paper, useTheme, Typography, LinearProgress } from '@mui/material';
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
-
-import { getArticleIdFromParams } from 'src/utils/articleIdEncoder';
 
 import {
   useGenerateFaqMutation,
@@ -30,24 +27,19 @@ import { Iconify } from 'src/components/iconify';
 import { useCriteriaEvaluation } from 'src/sections/generate/hooks/useCriteriaEvaluation';
 
 interface SectionGenerationAnimationProps {
+  articleId: string | null | undefined;
   show: boolean;
   onComplete?: () => void;
   onError?: (error: string, failedStep: string, completedSteps: string[]) => void;
   onClose?: () => void;
 }
 
-export function SectionGenerationAnimation({ show, onComplete, onError, onClose }: SectionGenerationAnimationProps) {
+export function SectionGenerationAnimation({ show, onComplete, onError, onClose, articleId }: SectionGenerationAnimationProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const methods = useFormContext();
   const { evaluateAllCriteria } = useCriteriaEvaluation();
   const articleDraft = useArticleDraft();
-  const [searchParams] = useSearchParams();
-
-  // Get article ID from URL params and decode it
-  const encodedArticleId = searchParams.get('articleId') || searchParams.get('draft');
-  const decodedArticleId = encodedArticleId ? getArticleIdFromParams(searchParams) : null;
-  const articleId = decodedArticleId?.toString() || null;
 
   // State management
   const [step, setStep] = useState(0);
@@ -388,58 +380,48 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose 
         setTimeout(async () => {
           try {
             const newFormData = methods.getValues();
+            const firstImageUrl = newFormData.images && newFormData.images.length > 0
+              ? newFormData.images[0].img_url
+              : '';
 
-            // Only save if we have generated HTML content
-            if (newFormData.generatedHtml && newFormData.generatedHtml.trim()) {
+            const featuredMediaUrl = newFormData.step1?.featuredMedia || firstImageUrl;
 
-              // Get the first image URL for featured media - try multiple sources
-              const firstImageUrl = newFormData.images && newFormData.images.length > 0
-                ? newFormData.images[0].img_url
-                : '';
-
-              // Use form's featured media first, then first image, then fallback
-              const featuredMediaUrl = newFormData.step1?.featuredMedia || firstImageUrl;
-
-              // If we still don't have featured media but we have images, force set it
-              if (!featuredMediaUrl && (firstImageUrl)) {
-                const imageToUse = firstImageUrl;
-                methods.setValue('step1.featuredMedia', imageToUse);
-              }
-
-              const requestBody : UpdateArticleRequest = {
-                article_title: newFormData.step1?.title || undefined,
-                content__description: newFormData.step1?.contentDescription || undefined,
-                meta_title: newFormData.step1?.metaTitle || undefined,
-                meta_description: newFormData.step1?.metaDescription || undefined,
-                url_slug: newFormData.step1?.urlSlug || undefined,
-                primary_keyword: newFormData.step1?.primaryKeyword || undefined,
-                secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : undefined,
-                target_country: newFormData.step1?.targetCountry || 'global',
-                language: newFormData.step1?.language || 'english',
-
-                article_type: newFormData.step2?.articleType || undefined,
-                article_size: newFormData.step2?.articleSize || undefined,
-                tone_of_voice: newFormData.step2?.toneOfVoice || undefined,
-                point_of_view: newFormData.step2?.pointOfView || undefined,
-                plagiat_removal: newFormData.step2?.plagiaRemoval || false,
-                include_cta: newFormData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
-                include_images: newFormData.step2?.includeImages || false,
-                include_videos: newFormData.step2?.includeVideos || false,
-                internal_links: newFormData.step2?.internalLinks?.length ? JSON.stringify(newFormData.step2.internalLinks) : '',
-                external_links: newFormData.step2?.externalLinks?.length ? JSON.stringify(newFormData.step2.externalLinks) : '',
-
-                content: newFormData.generatedHtml || '',
-                sections: newFormData.step3?.sections?.length ? JSON.stringify(newFormData.step3.sections) : '',
-                toc: newFormData.toc || null,
-                images: newFormData.images || null,
-                faq: newFormData.faq || null,
-                featured_media: newFormData.step1?.featuredMedia || undefined,
-                template_name: newFormData.template_name || 'template1',
-                status: 'draft' as const,
-              };
-
-              await articleDraft.updateArticle(articleId, requestBody);
+            if (!featuredMediaUrl && (firstImageUrl)) {
+              const imageToUse = firstImageUrl;
+              methods.setValue('step1.featuredMedia', imageToUse);
             }
+            const requestBody : UpdateArticleRequest = {
+              article_title: newFormData.step1?.title || undefined,
+              content__description: newFormData.step1?.contentDescription || undefined,
+              meta_title: newFormData.step1?.metaTitle || undefined,
+              meta_description: newFormData.step1?.metaDescription || undefined,
+              url_slug: newFormData.step1?.urlSlug || undefined,
+              primary_keyword: newFormData.step1?.primaryKeyword || undefined,
+              secondary_keywords: newFormData.step1?.secondaryKeywords?.length ? JSON.stringify(newFormData.step1.secondaryKeywords) : undefined,
+              target_country: newFormData.step1?.targetCountry || 'global',
+              language: newFormData.step1?.language || 'english',
+
+              article_type: newFormData.step2?.articleType || undefined,
+              article_size: newFormData.step2?.articleSize || undefined,
+              tone_of_voice: newFormData.step2?.toneOfVoice || undefined,
+              point_of_view: newFormData.step2?.pointOfView || undefined,
+              plagiat_removal: newFormData.step2?.plagiaRemoval || false,
+              include_cta: newFormData.step2?.includeCta || undefined, // Optional field as backend hasn't implemented yet
+              include_images: newFormData.step2?.includeImages || false,
+              include_videos: newFormData.step2?.includeVideos || false,
+              internal_links: newFormData.step2?.internalLinks?.length ? JSON.stringify(newFormData.step2.internalLinks) : '',
+              external_links: newFormData.step2?.externalLinks?.length ? JSON.stringify(newFormData.step2.externalLinks) : '',
+
+              content: newFormData.generatedHtml || '',
+              sections: newFormData.step3?.sections?.length ? JSON.stringify(newFormData.step3.sections) : '',
+              toc: newFormData.toc || null,
+              images: newFormData.images || null,
+              faq: newFormData.faq || null,
+              featured_media: newFormData.step1?.featuredMedia || undefined,
+              template_name: newFormData.template_name || 'template1',
+              status: 'draft' as const,
+            };
+            await articleDraft.updateArticle(articleId, requestBody);
           } catch (error) {
             toast.error('❌ Failed to auto-save article:', error);
           }

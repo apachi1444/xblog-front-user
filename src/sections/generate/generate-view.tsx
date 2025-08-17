@@ -44,13 +44,6 @@ export function GeneratingView() {
   // Extract template ID from URL params
   const templateId = searchParams.get('template');
 
-  // Debug log for template ID
-  useEffect(() => {
-    if (templateId) {
-      console.log('🎨 Template ID extracted from URL:', templateId);
-    }
-  }, [templateId]);
-
   // Clear localStorage when we have a URL param (editing existing draft)
   useEffect(() => {
     if (urlArticleId) {
@@ -59,8 +52,6 @@ export function GeneratingView() {
       console.log('🧹 Cleared localStorage (editing existing draft)');
     }
   }, [urlArticleId]);
-
-
 
   // Cleanup localStorage when component unmounts
   useEffect(() => () => {

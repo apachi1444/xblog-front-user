@@ -19,10 +19,10 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useThemeMode } from 'src/hooks/useThemeMode';
 
 import { getStatusColors } from 'src/utils/subscriptionStatusUtils';
+import { getStoredUser, getStoredUserAvatarWithFallback } from 'src/utils/userStorage';
 
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
-import { selectAuthUser } from 'src/services/slices/auth/selectors';
 import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
@@ -47,9 +47,12 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
   const dispatch = useDispatch();
   const theme = useTheme();
   const { isDarkMode, toggleTheme } = useThemeMode();
-
-  const user = useSelector(selectAuthUser);
   const subscriptionDetails = useSelector(selectSubscriptionDetails);
+
+
+  // Get user data directly from localStorage instead of Redux selectors
+  const user = getStoredUser();
+  const userAvatar = getStoredUserAvatarWithFallback();
   const { data: subscriptionData } = useGetSubscriptionDetailsQuery();
   const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
 
@@ -148,8 +151,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         {...other}
       >
         <Avatar
-          src={user?.avatar?.includes('http') ? user?.avatar : _myAccount.photoURL}
-          alt={_myAccount.displayName}
+          src={user?.avatar?.includes('http') ? user?.avatar : userAvatar}
+          alt={user?.name || _myAccount.displayName}
           sx={{
             width: 40,
             height: 40,
@@ -194,8 +197,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar
-              src={user?.avatar?.includes('http') ? user?.avatar : _myAccount.photoURL}
-              alt={_myAccount.displayName}
+              src={user?.avatar?.includes('http') ? user?.avatar : userAvatar}
+              alt={user?.name || _myAccount.displayName}
               sx={{ width: 36, height: 36, mr: 1.5 }}
             />
             <Box>

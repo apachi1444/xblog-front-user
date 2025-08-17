@@ -36,6 +36,7 @@ const authSlice = createSlice({
 
       localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
         accessToken: state.accessToken,
+        user: state.user,
         isAuthenticated: state.isAuthenticated,
         avatar: state.user?.avatar,
       }));

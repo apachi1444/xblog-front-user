@@ -207,18 +207,3 @@ export function getArticleIdFromParams(searchParams: URLSearchParams): number | 
     return null;
   }
 }
-
-/**
- * Utility to check if an encoded ID is valid without decoding
- * 
- * @param encodedId - The encoded ID to validate
- * @returns true if the ID appears to be valid
- */
-export function isValidEncodedId(encodedId: string): boolean {
-  try {
-    decodeArticleId(encodedId);
-    return true;
-  } catch {
-    return false;
-  }
-}

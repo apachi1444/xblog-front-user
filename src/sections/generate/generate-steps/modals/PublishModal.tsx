@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-await-in-loop */
 // Types
 import type { Store } from 'src/types/store';
 import type { PublishRequest} from 'src/services/apis/integrations/publishApi';
@@ -7,9 +9,10 @@ import { useMemo, useState, useEffect } from 'react';
 
 import {
   Box,
+  Chip,
   Modal,
-  Radio,
   Alert,
+  Radio,
   Button,
   Select,
   Divider,
@@ -17,7 +20,6 @@ import {
   Typography,
   IconButton,
   InputLabel,
-  RadioGroup,
   FormControl,
   FormControlLabel,
   CircularProgress,
@@ -69,6 +71,17 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
   // Get stores from API with useMemo to prevent unnecessary re-renders
   const stores = useMemo(() => storesData?.stores || [], [storesData?.stores]);
 
+  // Helper functions for multi-store selection
+  const selectStore = (storeId: number) => {
+    setSelectedStore(storeId);
+  };
+
+  const deselectStore = () => {
+    setSelectedStore(null);
+  };
+
+  const isStoreSelected = (storeId: number) => selectedStore === storeId;
+
   useEffect(() => {
     if (open) {
       console.log('📝 PublishModal opened with articleId:', articleId);
@@ -103,9 +116,9 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
         throw new Error('Store not found');
       }
 
-      const publishData :  PublishRequest = {
+      const publishData: PublishRequest = {
         store_id: selectedStore,
-        article_id: Number(articleId) || 0, // Use the actual article ID from props
+        article_id: Number(articleId) || 0,
         scheduled_date: new Date().toISOString(),
       };
 
@@ -125,7 +138,7 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
           setRedirectCountdown(prev => {
             if (prev <= 1) {
               clearInterval(countdownInterval);
-              router.push('/blog'); 
+              router.push('/blog');
               onClose();
               return 0;
             }
@@ -216,9 +229,45 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
 
             {/* Store Selection */}
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Select Store
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2">
+                  Select Store {selectedStore && '(1 selected)'}
+                </Typography>
+                {selectedStore && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="secondary"
+                    onClick={deselectStore}
+                    startIcon={<Iconify icon="eva:close-circle-outline" />}
+                  >
+                    Deselect
+                  </Button>
+                )}
+              </Box>
+
+              {selectedStore && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                    Selected store:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {(() => {
+                      const store = stores.find(s => s.id === selectedStore);
+                      return store ? (
+                        <Chip
+                          key={selectedStore}
+                          label={`${selectedStore}. ${store.name}`}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          onDelete={() => deselectStore()}
+                        />
+                      ) : null;
+                    })()}
+                  </Box>
+                </Box>
+              )}
               {isLoadingStores ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
                   <CircularProgress size={24} />
@@ -227,23 +276,28 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                 <Box>
                   {stores.map((store: Store) => {
                     const isWordPress = store.category?.toLowerCase() === 'wordpress';
+                    const isSelected = isStoreSelected(store.id);
+                    console.log('🏪 Store:', store.name, 'Category:', store.category, 'isWordPress:', isWordPress, 'isSelected:', isSelected);
+
                     return (
                       <FormControlLabel
                         key={store.id}
                         control={
                           <Radio
-                            checked={selectedStore === store.id}
+                            checked={isSelected}
                             onChange={() => {
                               console.log('📻 Radio onChange for store:', store.id, store.name);
-                              setSelectedStore(store.id);
+                              selectStore(store.id);
                             }}
                             name="store-selection"
                           />
                         }
-                        disabled={false}
+                        disabled={!isWordPress}
                         onClick={() => {
                           console.log('🖱️ FormControlLabel clicked for store:', store.id, store.name);
-                          setSelectedStore(store.id);
+                          if (isWordPress) {
+                            selectStore(store.id);
+                          }
                         }}
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -402,9 +456,12 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                   variant="contained"
                   onClick={handlePublish}
                   disabled={
+                    isPublishing ||
                     !selectedStore ||
-                    stores.length === 0 ||
-                    stores.find(s => s.id === selectedStore)?.category?.toLowerCase() !== 'wordpress'
+                    (() => {
+                      const store = stores.find(s => s.id === selectedStore);
+                      return store?.category?.toLowerCase() !== 'wordpress';
+                    })()
                   }
                   startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
                   sx={{
