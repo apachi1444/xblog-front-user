@@ -185,7 +185,6 @@ export function ArticleActionsMenu({
 
       toast.success('Article duplicated successfully!', { id: 'duplicate-article' });
     } catch (error: any) {
-      console.error('Failed to duplicate article:', error);
       toast.error('Failed to duplicate article. Please try again.', { id: 'duplicate-article' });
     }
   };
@@ -216,7 +215,7 @@ export function ArticleActionsMenu({
 
       // Find the calendar entry for this article
       const calendarEntry = freshCalendarData?.calendars?.find(
-        (entry) => entry.article_id === article.id
+        (entry: { article_id: number; }) => entry.article_id === article.id
       );
 
       if (!calendarEntry) {

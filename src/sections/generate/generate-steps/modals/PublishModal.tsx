@@ -69,7 +69,6 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
   // Get stores from API with useMemo to prevent unnecessary re-renders
   const stores = useMemo(() => storesData?.stores || [], [storesData?.stores]);
 
-  // Reset modal state when opened
   useEffect(() => {
     if (open) {
       console.log('📝 PublishModal opened with articleId:', articleId);
@@ -225,19 +224,27 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                   <CircularProgress size={24} />
                 </Box>
               ) : stores.length > 0 ? (
-                <RadioGroup
-                  value={selectedStore?.toString() || ''}
-                  onChange={(e) => setSelectedStore(Number(e.target.value))}
-                >
+                <Box>
                   {stores.map((store: Store) => {
                     const isWordPress = store.category?.toLowerCase() === 'wordpress';
-
                     return (
                       <FormControlLabel
                         key={store.id}
-                        value={store.id.toString()}
-                        control={<Radio />}
-                        disabled={!isWordPress}
+                        control={
+                          <Radio
+                            checked={selectedStore === store.id}
+                            onChange={() => {
+                              console.log('📻 Radio onChange for store:', store.id, store.name);
+                              setSelectedStore(store.id);
+                            }}
+                            name="store-selection"
+                          />
+                        }
+                        disabled={false}
+                        onClick={() => {
+                          console.log('🖱️ FormControlLabel clicked for store:', store.id, store.name);
+                          setSelectedStore(store.id);
+                        }}
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             {store.logo ? (
@@ -318,7 +325,7 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                       />
                     );
                   })}
-                </RadioGroup>
+                </Box>
               ) : (
                 <Alert
                   severity="warning"

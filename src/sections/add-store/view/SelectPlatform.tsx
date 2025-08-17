@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Check, ChevronRight } from 'lucide-react';
 
 import { Box, Grid, Card, Paper, alpha, Button, useTheme, Container, Typography } from '@mui/material';
@@ -47,7 +46,6 @@ export default function SelectPlatform({
   platforms
 }: SelectPlatformProps) {
   const theme = useTheme();
-  const { t } = useTranslation();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {

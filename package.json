@@ -32,7 +32,7 @@
     "@fontsource/barlow": "^5.0.14",
     "@hookform/resolvers": "^5.0.1",
     "@iconify/react": "^5.0.2",
-    "@mui/icons-material": "^6.4.8",
+    "@mui/icons-material": "^5.16.7",
     "@mui/lab": "^5.0.0-alpha.173",
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.27.1",
@@ -134,6 +134,9 @@
     "i18next": "^24.2.2",
     "prettier": "^3.3.3",
     "react-i18next": "^15.4.1",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
     "typescript": "^5.5.4",
     "vite": "^5.4.2",
     "vite-plugin-checker": "^0.7.2"

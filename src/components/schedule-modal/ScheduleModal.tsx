@@ -62,7 +62,7 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
 
   // State management
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedStore, setSelectedStore] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -138,7 +138,7 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
-      setSelectedDate(dayjs());
+      setSelectedDate(null);
       setSelectedStore(null); // Reset store selection to force user to choose
       setError(null);
     }
