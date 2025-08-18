@@ -181,9 +181,9 @@ export function PostItem({
         sx={{
           bgcolor: alpha(theme.palette.info.main, 0.9),
           color: 'white',
-          borderRadius: 1,
-          px: 1,
-          py: 0.5,
+          borderRadius: 1.5,
+          px: 1.5,
+          py: 0.75,
           backdropFilter: 'blur(8px)',
           border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
           boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.3)}`,
@@ -193,14 +193,14 @@ export function PostItem({
           variant="caption"
           sx={{
             fontWeight: 600,
-            fontSize: '0.65rem',
-            lineHeight: 1,
+            fontSize: '0.8rem',
+            lineHeight: 1.2,
             display: 'flex',
             alignItems: 'center',
-            gap: 0.5,
+            gap: 0.75,
           }}
         >
-          <Iconify icon="mdi:calendar-clock" width={12} height={12} />
+          <Iconify icon="mdi:calendar-clock" width={16} height={16} />
           {formatDate(new Date(post.scheduled_publish_date), 'MMM d • h:mm a')}
         </Typography>
       </Box>

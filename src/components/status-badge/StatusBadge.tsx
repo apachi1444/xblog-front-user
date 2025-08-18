@@ -173,22 +173,23 @@ export function StatusBadge({ status, size = 'medium', variant = 'default', sche
           sx={{
             display: 'flex',
             alignItems: 'center',
-            mt: 0.5,
-            gap: 0.5,
+            mt: 0.75,
+            gap: 0.75,
           }}
         >
           <Iconify
             icon="mdi:calendar-clock"
-            width={12}
-            height={12}
+            width={16}
+            height={16}
             sx={{ color: alpha(statusConfig.color, 0.8) }}
           />
           <Typography
             variant="caption"
             sx={{
               color: alpha(statusConfig.color, 0.9),
-              fontWeight: 500,
-              fontSize: '0.65rem',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              lineHeight: 1.2,
             }}
           >
             {formatDate(new Date(scheduledDate), 'MMM d • h:mm a')}
