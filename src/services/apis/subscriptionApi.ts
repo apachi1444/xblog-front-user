@@ -67,12 +67,15 @@ export interface PortalSessionResponse {
   url: string; // The portal session URL to redirect to
 }
 
-// Interface for session verification response
+// Interface for session verification response - Updated to match actual API response
 export interface SessionVerificationResponse {
-  valid: boolean;
-  session_id: string;
+  user_id: string;
+  plan_id: string;
+  status: string; // 'paid', 'pending', 'failed', etc.
+  amount: number;
+  currency: string;
+  session_id?: string;
   customer_id?: string;
-  payment_status?: string;
   subscription_id?: string;
 }
 

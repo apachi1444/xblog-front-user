@@ -48,9 +48,8 @@ export function useSessionVerification() {
       // Verify the session
       verifySession({ session_id: sessionId })
         .then((result) => {
-          if (result.data?.valid) {
-            console.log('✅ Session verified successfully');
-            
+          if (result.data && result.data.status === 'paid') {
+
             setState(prev => ({
               ...prev,
               isVerifying: false,
@@ -58,23 +57,25 @@ export function useSessionVerification() {
               showSuccessAnimation: true,
             }));
 
-            toast.success('Payment verified successfully!');
+            toast.success(`Payment verified successfully! Plan: ${result.data.plan_id}, Amount: ${result.data.amount} ${result.data.currency.toUpperCase()}`);
           } else {
-            console.error('❌ Session verification failed - invalid session');
-            
+
+            const errorMessage = result.data?.status
+              ? `Payment status: ${result.data.status}`
+              : 'Session not found or invalid';
+
             setState(prev => ({
               ...prev,
               isVerifying: false,
               isValid: false,
-              error: 'Session not found or invalid',
+              error: errorMessage,
               showErrorAnimation: true,
             }));
 
-            toast.error('Payment verification failed - session not found');
+            toast.error(`Payment verification failed - ${errorMessage}`);
           }
         })
         .catch((error) => {
-          console.error('❌ Session verification error:', error);
           
           setState(prev => ({
             ...prev,

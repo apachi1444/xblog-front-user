@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { 
   Star, 
@@ -40,7 +39,6 @@ export function SessionVerificationAnimation({
 }: SessionVerificationAnimationProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
 
   // eslint-disable-next-line consistent-return
@@ -61,10 +59,6 @@ export function SessionVerificationAnimation({
 
   const handleContinue = () => {
     handleClose();
-    // Navigate to dashboard after animation closes
-    setTimeout(() => {
-      navigate('/');
-    }, 300);
   };
 
   const getIcon = () => {
@@ -237,28 +231,6 @@ export function SessionVerificationAnimation({
               {getMessage()}
             </Typography>
           </Fade>
-
-          {/* Session ID Display */}
-          {sessionId && (
-            <Fade in={showContent} timeout={1200}>
-              <Box
-                sx={{
-                  p: 2,
-                  mb: 3,
-                  borderRadius: 2,
-                  bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50',
-                  border: `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  Session ID
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                  {sessionId}
-                </Typography>
-              </Box>
-            </Fade>
-          )}
 
           {/* Action Buttons */}
           {!isVerifying && (

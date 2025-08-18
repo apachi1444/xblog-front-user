@@ -53,8 +53,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
       verifySession({ session_id: sessionId })
         .then((result) => {
-          if (result.data?.valid) {
-            console.log('✅ Session verified successfully');
+          if (result.data && result.data.status === 'paid') {
+            console.log('✅ Session verified successfully', result.data);
 
             // Force refetch user data after successful payment
             refetch().then((userResult) => {
@@ -83,7 +83,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
           }
         })
         .catch((error) => {
-          // Handle verification error
+          console.error('❌ Session verification error in AuthGuard:', error);
         });
     }
 

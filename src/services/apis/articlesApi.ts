@@ -141,14 +141,6 @@ export const articlesApi = api.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
-      // Invalidate Articles cache when scheduling/updating status
-      invalidatesTags: (result, error, { data }) => {
-        // Only invalidate cache if we're changing status (like scheduling)
-        if (data.status || data.scheduled_publish_date) {
-          return ['Articles'];
-        }
-        return [];
-      },
     }),
 
 

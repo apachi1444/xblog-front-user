@@ -39,7 +39,9 @@ const getContentText = (formData: GenerateArticleFormData): string => {
 };
 
 const findKeywordInSubheadings = (sections: any[], keyword: string): boolean => {
-  if (!sections || !Array.isArray(sections) || !keyword) return false;
+  if (!sections || !keyword) return false;
+
+  console.log(sections, " sections, " , keyword, " keyword");
 
   return sections.some(section => {
     const title = section.title || '';
@@ -494,8 +496,8 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
     }
 
     // Check both TOC and sections data
-    const hasTocData = parsedToc && Array.isArray(parsedToc) && parsedToc.length > 0;
-    const hasSectionsData = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
+    const hasTocData = parsedToc && parsedToc.length > 0;
+    const hasSectionsData = sections_data && sections_data.length > 0;
 
     if (!hasTocData && !hasSectionsData) {
       return {
@@ -510,11 +512,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     if (hasTocData) {
       hasKeywordInSubheadings = findKeywordInSubheadings(parsedToc, primaryKeyword);
-    }
-
-    // If not found in TOC, check section titles as fallback
-    if (!hasKeywordInSubheadings && hasSectionsData) {
-      hasKeywordInSubheadings = findKeywordInSubheadings(sections_data, primaryKeyword);
     }
 
     if (hasKeywordInSubheadings) {

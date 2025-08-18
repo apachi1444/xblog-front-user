@@ -1,14 +1,15 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-  Box,
-  CircularProgress,
-  useTheme
-} from '@mui/material';
 import { useTranslation } from 'react-i18next';
+
+import {
+  Box,
+  Dialog,
+  useTheme,
+  Typography,
+  DialogTitle,
+  DialogContent,
+  CircularProgress
+} from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 

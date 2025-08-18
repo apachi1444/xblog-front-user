@@ -23,7 +23,6 @@ export function SessionExpiredProvider({ children, onSessionExpired }: SessionEx
     // Prevent multiple modals from opening
     if (isModalOpen) return;
 
-    console.log('🔒 Showing session expired modal');
     setIsModalOpen(true);
     setCountdown(3);
 
@@ -42,10 +41,9 @@ export function SessionExpiredProvider({ children, onSessionExpired }: SessionEx
 
     // Execute logout after 3 seconds
     timeoutRef.current = setTimeout(() => {
-      console.log('🔒 Executing session expired logout');
       setIsModalOpen(false);
       onSessionExpired();
-    }, 3000);
+    }, 1000);
   }, [isModalOpen, onSessionExpired]);
 
   // Cleanup timeouts on unmount

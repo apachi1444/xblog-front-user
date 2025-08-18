@@ -1,3 +1,4 @@
+import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
 import { Box, alpha, useTheme, Typography } from '@mui/material';
@@ -10,11 +11,15 @@ interface StatusBadgeProps {
   status: 'draft' | 'publish' | 'scheduled';
   size?: 'small' | 'medium' | 'large';
   variant?: 'default' | 'prominent';
+  scheduledDate?: string; // For scheduled articles, show the date
 }
 
-export function StatusBadge({ status, size = 'medium', variant = 'default' }: StatusBadgeProps) {
+export function StatusBadge({ status, size = 'medium', variant = 'default', scheduledDate }: StatusBadgeProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+
+  // Check if we should show scheduled date
+  const showScheduledDate = status === 'scheduled' && scheduledDate && variant === 'prominent';
 
   // Get status configuration based on status value
   const getStatusConfig = () => {
@@ -104,7 +109,8 @@ export function StatusBadge({ status, size = 'medium', variant = 'default' }: St
     <Box
       sx={{
         display: 'inline-flex',
-        alignItems: 'center',
+        flexDirection: showScheduledDate ? 'column' : 'row',
+        alignItems: showScheduledDate ? 'flex-start' : 'center',
         px: sizing.px,
         py: sizing.py,
         borderRadius: sizing.borderRadius,
@@ -118,45 +124,77 @@ export function StatusBadge({ status, size = 'medium', variant = 'default' }: St
         } : {},
       }}
     >
-      {/* Icon or Dot */}
-      {isProminent ? (
-        <Iconify
-          icon={statusConfig.icon}
-          width={sizing.iconSize}
-          height={sizing.iconSize}
+      {/* Main status row */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {/* Icon or Dot */}
+        {isProminent ? (
+          <Iconify
+            icon={statusConfig.icon}
+            width={sizing.iconSize}
+            height={sizing.iconSize}
+            sx={{
+              color: statusConfig.color,
+              mr: 0.75,
+              filter: `drop-shadow(0 1px 2px ${alpha(statusConfig.color, 0.3)})`,
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: sizing.dotSize,
+              height: sizing.dotSize,
+              borderRadius: '50%',
+              bgcolor: statusConfig.color,
+              mr: 0.5,
+              boxShadow: `0 0 0 2px ${alpha(statusConfig.color, 0.2)}`,
+            }}
+          />
+        )}
+
+        {/* Label */}
+        <Typography
+          variant="caption"
           sx={{
             color: statusConfig.color,
-            mr: 0.75,
-            filter: `drop-shadow(0 1px 2px ${alpha(statusConfig.color, 0.3)})`,
+            fontWeight: isProminent ? 700 : 500,
+            fontSize: sizing.fontSize,
+            textTransform: isProminent ? 'uppercase' : 'none',
+            letterSpacing: isProminent ? '0.5px' : 'normal',
+            textShadow: isProminent ? `0 1px 2px ${alpha(statusConfig.color, 0.2)}` : 'none',
           }}
-        />
-      ) : (
+        >
+          {statusConfig.label}
+        </Typography>
+      </Box>
+
+      {/* Scheduled date display */}
+      {showScheduledDate && (
         <Box
           sx={{
-            width: sizing.dotSize,
-            height: sizing.dotSize,
-            borderRadius: '50%',
-            bgcolor: statusConfig.color,
-            mr: 0.5,
-            boxShadow: `0 0 0 2px ${alpha(statusConfig.color, 0.2)}`,
+            display: 'flex',
+            alignItems: 'center',
+            mt: 0.5,
+            gap: 0.5,
           }}
-        />
+        >
+          <Iconify
+            icon="mdi:calendar-clock"
+            width={12}
+            height={12}
+            sx={{ color: alpha(statusConfig.color, 0.8) }}
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              color: alpha(statusConfig.color, 0.9),
+              fontWeight: 500,
+              fontSize: '0.65rem',
+            }}
+          >
+            {formatDate(new Date(scheduledDate), 'MMM d • h:mm a')}
+          </Typography>
+        </Box>
       )}
-
-      {/* Label */}
-      <Typography
-        variant="caption"
-        sx={{
-          color: statusConfig.color,
-          fontWeight: isProminent ? 700 : 500,
-          fontSize: sizing.fontSize,
-          textTransform: isProminent ? 'uppercase' : 'none',
-          letterSpacing: isProminent ? '0.5px' : 'normal',
-          textShadow: isProminent ? `0 1px 2px ${alpha(statusConfig.color, 0.2)}` : 'none',
-        }}
-      >
-        {statusConfig.label}
-      </Typography>
     </Box>
   );
 }
