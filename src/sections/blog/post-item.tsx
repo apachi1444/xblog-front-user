@@ -146,8 +146,66 @@ export function PostItem({
     </Link>
   );
 
-  // Render status badge
-  const renderStatus = (
+  // Render status badge with enhanced scheduled display
+  const renderStatus = post.status === 'scheduled' && post.scheduled_publish_date ? (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: 0.5,
+      }}
+    >
+      <Chip
+        size="small"
+        icon={<Iconify icon={statusConfig.icon} />}
+        label={statusConfig.label}
+        color={statusConfig.color as any}
+        sx={{
+          height: 24,
+          fontSize: '0.75rem',
+          fontWeight: 'bold',
+          '& .MuiChip-icon': { animation: 'pulse 2s infinite' },
+          '@keyframes pulse': {
+            '0%': { opacity: 0.6 },
+            '50%': { opacity: 1 },
+            '100%': { opacity: 0.6 }
+          }
+        }}
+      />
+      <Box
+        sx={{
+          bgcolor: alpha(theme.palette.info.main, 0.9),
+          color: 'white',
+          borderRadius: 1,
+          px: 1,
+          py: 0.5,
+          backdropFilter: 'blur(8px)',
+          border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+          boxShadow: `0 2px 8px ${alpha(theme.palette.info.main, 0.3)}`,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.65rem',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+          }}
+        >
+          <Iconify icon="mdi:calendar-clock" width={12} height={12} />
+          {formatDate(new Date(post.scheduled_publish_date), 'MMM d • h:mm a')}
+        </Typography>
+      </Box>
+    </Box>
+  ) : (
     <Chip
       size="small"
       icon={<Iconify icon={statusConfig.icon} />}
@@ -161,14 +219,6 @@ export function PostItem({
         top: 16,
         right: 16,
         zIndex: 10,
-        ...(post.status === 'scheduled' && {
-          '& .MuiChip-icon': { animation: 'pulse 2s infinite' },
-          '@keyframes pulse': {
-            '0%': { opacity: 0.6 },
-            '50%': { opacity: 1 },
-            '100%': { opacity: 0.6 }
-          }
-        })
       }}
     />
   );
@@ -214,7 +264,7 @@ export function PostItem({
     </Box>
   );
 
-  // Render scheduled info for scheduled articles
+  // Render scheduled info for scheduled articles (now more subtle since date is in status)
   const renderScheduledInfo = post.status === 'scheduled' && post.scheduled_publish_date && (
     <Box
       sx={{
@@ -226,27 +276,25 @@ export function PostItem({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: alpha(theme.palette.info.main, 0.9),
-        color: 'white',
-        borderRadius: 1.5,
-        px: 2,
-        py: 1,
-        backdropFilter: 'blur(8px)',
-        border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
-        boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`,
+        bgcolor: alpha(theme.palette.info.main, 0.1),
+        color: theme.palette.info.main,
+        borderRadius: 1,
+        px: 1.5,
+        py: 0.5,
+        border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
       }}
     >
       <Iconify
-        icon="mdi:calendar-clock"
-        width={16}
-        height={16}
-        sx={{ mr: 1 }}
+        icon="mdi:clock-outline"
+        width={14}
+        height={14}
+        sx={{ mr: 0.5 }}
       />
       <Typography
         variant="caption"
         sx={{
-          fontWeight: 600,
-          fontSize: '0.75rem',
+          fontWeight: 500,
+          fontSize: '0.7rem',
           textAlign: 'center',
         }}
       >
