@@ -14,7 +14,6 @@ import { useMetaTagsGeneration } from 'src/utils/generation/metaTagsGeneration';
 
 import { useGenerateTopicMutation } from 'src/services/apis/generateContentApi';
 
-import { FeedbackModal } from 'src/components/feedback';
 import { ConfirmDialog } from 'src/components/confirm-dialog';
 import { LoadingAnimation } from 'src/components/generate-article/PublishingLoadingAnimation';
 import { SectionGenerationAnimation } from 'src/components/generate-article/SectionGenerationAnimation';
@@ -64,39 +63,17 @@ export function GenerateViewForm({
     isGenerated: false,
     showRegenerateDialog: false,
     showFirstTimeGenerationDialog: false, // ✅ Add first-time generation dialog
-    showFeedbackModal: false, // ✅ Add feedback modal state
   });
 
   const { evaluateCriteria} = useCriteriaEvaluation()
 
   // Feedback modal handlers
-  const handleFeedbackSubmit = (rating: number, comment?: string) => {
-    console.log('📝 User feedback submitted:', {
-      rating,
-      comment,
-      step: 'content-generation',
-      timestamp: new Date().toISOString()
-    });
-  };
 
-  const handleFeedbackClose = () => {
-    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
-  };
-
-  // Store reference to step component's feedback skip handler
-  const [stepFeedbackSkipHandler, setStepFeedbackSkipHandler] = useState<(() => void) | null>(null);
 
   // Store reference to generation function to avoid infinite loops
   const generationFunctionRef = useRef<(() => Promise<any[]>) | null>(null);
 
-  const handleFeedbackSkipped = () => {
-    // Call the step component's feedback skip handler to reset its state
-    if (stepFeedbackSkipHandler) {
-      stepFeedbackSkipHandler();
-    }
-    // Reset the feedback modal state so it can be shown again
-    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
-  };
+
 
   const handleGenerateTitle = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingTitle: true }));
@@ -420,9 +397,6 @@ export function GenerateViewForm({
           return <Step4Publish
             articleId={articleId}
             setActiveStep={setActiveStep}
-            onTriggerFeedback={() => setGenerationState((s) => ({ ...s, showFeedbackModal: true }))}
-            onFeedbackSkipped={handleFeedbackSkipped}
-            onRegisterFeedbackSkipHandler={setStepFeedbackSkipHandler}
           />;
         default:
           return null;
@@ -528,13 +502,7 @@ export function GenerateViewForm({
           }
         />
 
-      {/* Feedback Modal */}
-      <FeedbackModal
-        open={generationState.showFeedbackModal}
-        onClose={handleFeedbackClose}
-        onSubmit={handleFeedbackSubmit}
-        onSkip={handleFeedbackSkipped}
-      />
+
     </>
   );
 }

@@ -879,16 +879,6 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
       }
     }
 
-    // Enhanced validation: Check if TOC has meaningful content
-    const hasValidToc = parsedToc &&
-                       Array.isArray(parsedToc) &&
-                       parsedToc.length > 0 &&
-                       parsedToc.some(item => item && (item.heading || item.title || item.text));
-
-    const hasValidSections = sections_data &&
-                            Array.isArray(sections_data) &&
-                            sections_data.length > 2; // Need at least 3 sections for meaningful TOC
-
 
     if (parsedToc.length === 0) {
       return {

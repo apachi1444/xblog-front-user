@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -21,8 +21,9 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
-import { STEPS_KEYS } from './constants';
 // Custom components
+import { FeedbackModal } from 'src/components/feedback';
+import { STEPS_KEYS } from './constants';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
 // Types and constants
@@ -36,6 +37,11 @@ export function GeneratingView() {
 
   // State to store the generation trigger function
   const [generationTrigger, setGenerationTrigger] = useState<(() => void) | null>(null);
+
+  // Feedback modal state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackSkipped, setFeedbackSkipped] = useState(false);
+  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if we're editing an existing draft article
   const urlArticleId = getArticleIdFromParams(searchParams);
@@ -332,10 +338,64 @@ export function GeneratingView() {
     setGenerationTrigger(() => triggerFunction);
   };
 
+  // Feedback modal handlers
+  const handleFeedbackSubmit = (rating: number, comment?: string) => {
+    console.log('📝 User feedback submitted:', {
+      rating,
+      comment,
+      step: 'content-generation',
+      timestamp: new Date().toISOString()
+    });
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackClose = () => {
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackSkip = () => {
+    setFeedbackSkipped(true);
+    setShowFeedbackModal(false);
+    // Clear any existing timeout
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+  };
+
   // Scroll to top when activeStep changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
+
+  // Feedback modal logic - trigger when user is in step 3 with generated content
+  useEffect(() => {
+    // Clear any existing timeout when step changes
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+
+    // Only show feedback modal in step 3 (index 2) if not already skipped
+    if (activeStep === 2 && !feedbackSkipped) {
+      const formData = methods.getValues();
+      if (formData.generatedHtml && formData.generatedHtml.trim()) {
+        console.log("Setting feedback timeout for step 3");
+        feedbackTimeoutRef.current = setTimeout(() => {
+          setShowFeedbackModal(true);
+          feedbackTimeoutRef.current = null;
+        }, 20000);
+      }
+    }
+
+    // Cleanup timeout when component unmounts or step changes
+    return () => {
+      if (feedbackTimeoutRef.current) {
+        clearTimeout(feedbackTimeoutRef.current);
+        feedbackTimeoutRef.current = null;
+      }
+    };
+  }, [activeStep, feedbackSkipped, methods]);
 
   // Show loading state while fetching article
   if (isArticleLoading) {
@@ -403,6 +463,14 @@ export function GeneratingView() {
             onTriggerGeneration={generationTrigger || undefined}
           />
         </FormProvider>
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          open={showFeedbackModal}
+          onClose={handleFeedbackClose}
+          onSubmit={handleFeedbackSubmit}
+          onSkip={handleFeedbackSkip}
+        />
     </DashboardContent>
   );
 }

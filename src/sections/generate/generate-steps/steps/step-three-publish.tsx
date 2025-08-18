@@ -7,7 +7,7 @@ import type { GenerateFullArticleRequest} from 'src/services/apis/generateConten
 
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Material UI imports
 import {
@@ -32,12 +32,9 @@ import type {
 interface Step4PublishProps {
   articleId ?: string | null;
   setActiveStep?: (step: number) => void;
-  onTriggerFeedback?: () => void;
-  onFeedbackSkipped?: () => void;
-  onRegisterFeedbackSkipHandler?: (handler: () => void) => void;
 }
 
-export function Step4Publish({ setActiveStep, onTriggerFeedback, onFeedbackSkipped, onRegisterFeedbackSkipHandler, articleId }: Step4PublishProps = {} as Step4PublishProps) {
+export function Step4Publish({ setActiveStep, articleId }: Step4PublishProps = {} as Step4PublishProps) {
   // Get form data from context with watch for real-time updates
   const { getValues, watch, setValue } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
@@ -52,29 +49,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, onFeedbackSkipp
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isRegeneratingWithTemplate, setIsRegeneratingWithTemplate] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<string>('template1');
-  const [feedbackShown, setFeedbackShown] = useState(false);
-  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackInitiatedRef = useRef(false);
 
-  const handleFeedbackSkipped = useCallback(() => {
-    setFeedbackShown(false);
-    // Clear any existing timeout
-    if (feedbackTimeoutRef.current) {
-      clearTimeout(feedbackTimeoutRef.current);
-      feedbackTimeoutRef.current = null;
-    }
-    // Reset the initiated flag so feedback can be shown again when re-entering
-    feedbackInitiatedRef.current = false;
-    if (onFeedbackSkipped) {
-      onFeedbackSkipped();
-    }
-  }, [onFeedbackSkipped]);
-
-  useEffect(() => {
-    if (onRegisterFeedbackSkipHandler) {
-      onRegisterFeedbackSkipHandler(handleFeedbackSkipped);
-    }
-  }, [handleFeedbackSkipped, onRegisterFeedbackSkipHandler]);
 
   // Effect to load HTML content
   useEffect(() => {
