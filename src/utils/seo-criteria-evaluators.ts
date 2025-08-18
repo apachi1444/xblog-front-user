@@ -76,29 +76,15 @@ const hasImages = (images: any[], _sections: any[], generatedHtml?: string): boo
 };
 
 const hasTableOfContents = (toc: any[], sections: any[]): boolean => {
-  // 🔍 Debug logging
-  console.log('🔍 hasTableOfContents Debug:', {
-    toc,
-    tocIsArray: Array.isArray(toc),
-    tocLength: toc ? toc.length : 'N/A',
-    sections,
-    sectionsIsArray: Array.isArray(sections),
-    sectionsLength: sections ? sections.length : 'N/A'
-  });
-
   // Check if TOC array exists and has content
-  if (toc && Array.isArray(toc) && toc.length > 0) {
-    console.log('✅ TOC found - has valid TOC array');
+  if (toc && toc.length > 0) {
     return true;
   }
 
   // Check if we have multiple sections (implies TOC structure)
-  if (sections && Array.isArray(sections) && sections.length > 2) {
-    console.log('✅ TOC found - has multiple sections');
+  if (sections && sections.length > 2) {
     return true;
   }
-
-  console.log('❌ No TOC found');
   return false;
 };
 
@@ -880,22 +866,34 @@ export const EVALUATION_FUNCTIONS: Record<number, EvaluationFunction> = {
 
     // Parse TOC from string if it exists
     let parsedToc = [];
-    if (toc && typeof toc === 'string') {
-      try {
-        parsedToc = JSON.parse(toc);
-      } catch (error) {
-        console.error('Error parsing TOC string:', error);
+    if (toc) {
+      if (typeof toc === 'string') {
+        try {
+          parsedToc = JSON.parse(toc);
+        } catch (error) {
+          console.error('Error parsing TOC string:', error);
+          parsedToc = [];
+        }
+      } else if (Array.isArray(toc)) {
+        parsedToc = toc;
       }
     }
 
-    // Check if we have valid TOC or sections data
-    const hasValidToc = parsedToc && Array.isArray(parsedToc) && parsedToc.length > 0;
-    const hasValidSections = sections_data && Array.isArray(sections_data) && sections_data.length > 0;
+    // Enhanced validation: Check if TOC has meaningful content
+    const hasValidToc = parsedToc &&
+                       Array.isArray(parsedToc) &&
+                       parsedToc.length > 0 &&
+                       parsedToc.some(item => item && (item.heading || item.title || item.text));
 
-    if (!hasValidToc && !hasValidSections) {
+    const hasValidSections = sections_data &&
+                            Array.isArray(sections_data) &&
+                            sections_data.length > 2; // Need at least 3 sections for meaningful TOC
+
+
+    if (parsedToc.length === 0) {
       return {
-        status: 'pending',
-        message: 'Waiting for content generation',
+        status: 'error',
+        message: criterion.evaluationStatus.error,
         score: 0,
       };
     }

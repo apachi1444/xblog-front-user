@@ -2,7 +2,7 @@
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from 'react-hook-form';
-import { useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@mui/material';
 
@@ -77,15 +77,24 @@ export function GenerateViewForm({
       step: 'content-generation',
       timestamp: new Date().toISOString()
     });
-
-    // Note: API call is handled inside FeedbackModal component
-    // Modal will stay open until user manually closes it
-
-    // Optional: Track analytics event
-    // trackEvent('feedback_submitted', { rating, has_comment: !!comment });
   };
 
   const handleFeedbackClose = () => {
+    setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
+  };
+
+  // Store reference to step component's feedback skip handler
+  const [stepFeedbackSkipHandler, setStepFeedbackSkipHandler] = useState<(() => void) | null>(null);
+
+  // Store reference to generation function to avoid infinite loops
+  const generationFunctionRef = useRef<(() => Promise<any[]>) | null>(null);
+
+  const handleFeedbackSkipped = () => {
+    // Call the step component's feedback skip handler to reset its state
+    if (stepFeedbackSkipHandler) {
+      stepFeedbackSkipHandler();
+    }
+    // Reset the feedback modal state so it can be shown again
     setGenerationState((s) => ({ ...s, showFeedbackModal: false }));
   };
 
@@ -295,6 +304,11 @@ export function GenerateViewForm({
       (window as any).__generationPromise = { resolve, reject };
     }), []);
 
+  // Update the ref whenever the function changes
+  useEffect(() => {
+    generationFunctionRef.current = onGenerateTableOfContents;
+  }, [onGenerateTableOfContents]);
+
   const handleRegenerateRequest = () => {
     setGenerationState((s) => ({ ...s, showRegenerateDialog: true }));
   };
@@ -356,10 +370,10 @@ export function GenerateViewForm({
 
   // Expose generation function to parent component
   useEffect(() => {
-    if (onGenerationTrigger) {
-      onGenerationTrigger(onGenerateTableOfContents);
+    if (onGenerationTrigger && generationFunctionRef.current) {
+      onGenerationTrigger(generationFunctionRef.current);
     }
-  }, [onGenerationTrigger, onGenerateTableOfContents]);
+  }, [onGenerationTrigger]);
 
   // Handle generation error from animation modal
   const handleGenerationError = useCallback((error: string, failedStep: string, completedSteps: string[]) => {
@@ -407,6 +421,8 @@ export function GenerateViewForm({
             articleId={articleId}
             setActiveStep={setActiveStep}
             onTriggerFeedback={() => setGenerationState((s) => ({ ...s, showFeedbackModal: true }))}
+            onFeedbackSkipped={handleFeedbackSkipped}
+            onRegisterFeedbackSkipHandler={setStepFeedbackSkipHandler}
           />;
         default:
           return null;
@@ -517,6 +533,7 @@ export function GenerateViewForm({
         open={generationState.showFeedbackModal}
         onClose={handleFeedbackClose}
         onSubmit={handleFeedbackSubmit}
+        onSkip={handleFeedbackSkipped}
       />
     </>
   );

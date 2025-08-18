@@ -308,6 +308,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -319,6 +320,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -330,6 +332,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -341,6 +344,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -352,6 +356,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -363,6 +368,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -374,6 +380,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -385,6 +392,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -396,6 +404,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
     /**
      * Generate article sections
@@ -425,6 +434,7 @@ export const generateContentApi = api.injectEndpoints({
           };
         }
       },
+      invalidatesTags: ['Subscription'],
     }),
 
     /**
@@ -436,6 +446,7 @@ export const generateContentApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['Subscription'],
     }),
   }),
 });

@@ -7,7 +7,7 @@ import type { GenerateFullArticleRequest} from 'src/services/apis/generateConten
 
 import toast from 'react-hot-toast';
 import { useFormContext } from 'react-hook-form';
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 // Material UI imports
 import {
@@ -33,9 +33,11 @@ interface Step4PublishProps {
   articleId ?: string | null;
   setActiveStep?: (step: number) => void;
   onTriggerFeedback?: () => void;
+  onFeedbackSkipped?: () => void;
+  onRegisterFeedbackSkipHandler?: (handler: () => void) => void;
 }
 
-export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: Step4PublishProps = {} as Step4PublishProps) {
+export function Step4Publish({ setActiveStep, onTriggerFeedback, onFeedbackSkipped, onRegisterFeedbackSkipHandler, articleId }: Step4PublishProps = {} as Step4PublishProps) {
   // Get form data from context with watch for real-time updates
   const { getValues, watch, setValue } = useFormContext<GenerateArticleFormData>();
   const formData = getValues();
@@ -50,25 +52,37 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: St
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isRegeneratingWithTemplate, setIsRegeneratingWithTemplate] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<string>('template1');
-
-  // Feedback state
   const [feedbackShown, setFeedbackShown] = useState(false);
+  const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackInitiatedRef = useRef(false);
 
+  const handleFeedbackSkipped = useCallback(() => {
+    setFeedbackShown(false);
+    // Clear any existing timeout
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+    // Reset the initiated flag so feedback can be shown again when re-entering
+    feedbackInitiatedRef.current = false;
+    if (onFeedbackSkipped) {
+      onFeedbackSkipped();
+    }
+  }, [onFeedbackSkipped]);
+
+  useEffect(() => {
+    if (onRegisterFeedbackSkipHandler) {
+      onRegisterFeedbackSkipHandler(handleFeedbackSkipped);
+    }
+  }, [handleFeedbackSkipped, onRegisterFeedbackSkipHandler]);
+
+  // Effect to load HTML content
   useEffect(() => {
     const loadHtmlContent = async () => {
       try {
         if (formData.generatedHtml && formData.generatedHtml.trim()) {
           setHtmlContent(formData.generatedHtml);
-
-          // Trigger feedback modal if content is generated and feedback hasn't been shown
-          if (!feedbackShown && onTriggerFeedback) {
-            setTimeout(() => {
-              onTriggerFeedback();
-              setFeedbackShown(true);
-            }, 20000);
-          }
         }
-
       } catch (error) {
         // Set empty content if all methods fail
         setHtmlContent('');
@@ -76,7 +90,7 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: St
     };
 
     loadHtmlContent();
-  }, [formData, formData.generatedHtml, formData.step3.sections, watchedGeneratedHtml, feedbackShown, onTriggerFeedback]);
+  }, [formData.generatedHtml, watchedGeneratedHtml]);
 
   // API hooks for template regeneration
   const [generateFullArticle] = useGenerateFullArticleMutation();
@@ -213,35 +227,10 @@ export function Step4Publish({ setActiveStep, onTriggerFeedback, articleId }: St
 
   // If we have HTML content, show contained preview
   if (htmlContent) {
-    // Determine content source for user feedback
-    const contentSource = formData.generatedHtml ? 'API Generated' : 'Demo Content';
     const isApiGenerated = !!formData.generatedHtml;
 
     return (
       <Box sx={{ pb: 2 }}>
-        {/* Content Source Indicator */}
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 2,
-          p: 1,
-          bgcolor: isApiGenerated ? 'success.lighter' : 'warning.lighter',
-          borderRadius: 1,
-          border: 1,
-          borderColor: isApiGenerated ? 'success.main' : 'warning.main'
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Iconify
-              icon={isApiGenerated ? 'eva:checkmark-circle-2-fill' : 'eva:info-fill'}
-              sx={{ color: isApiGenerated ? 'success.main' : 'warning.main' }}
-            />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {contentSource}: {isApiGenerated ? 'Your article has been generated successfully!' : 'Showing demo content - generate your article to see the real result'}
-            </Typography>
-          </Box>
-        </Box>
-
         {/* Action Buttons */}
         <Box sx={{
           display: 'flex',

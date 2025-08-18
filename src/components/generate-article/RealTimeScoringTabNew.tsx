@@ -149,11 +149,9 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
 
   // Initialize criteria evaluation when the component mounts or form data changes
   useEffect(() => {
-    console.log('🔄 Triggering criteria re-evaluation due to form data changes');
     evaluateAllCriteria();
   }, [
     evaluateAllCriteria,
-    // Step 1 fields
     formValues?.step1?.primaryKeyword,
     formValues?.step1?.title,
     formValues?.step1?.metaTitle,

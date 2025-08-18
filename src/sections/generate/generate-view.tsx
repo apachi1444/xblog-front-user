@@ -306,17 +306,36 @@ export function GeneratingView() {
   });
 
   const handleNextStep = () => {
-    setActiveStep((prev) => Math.min(prev + 1, 3));
+    setActiveStep((prev) => {
+      const newStep = Math.min(prev + 1, 3);
+      // Scroll to top when moving to next step
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      return newStep;
+    });
   };
 
   const handlePrevStep = () => {
-    setActiveStep((prev) => Math.max(prev - 1, 0));
+    setActiveStep((prev) => {
+      const newStep = Math.max(prev - 1, 0);
+      // Scroll to top when moving to previous step
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      return newStep;
+    });
   };
 
   // Callback to receive generation trigger function from GenerateViewForm
   const handleGenerationTrigger = (triggerFunction: () => void) => {
     setGenerationTrigger(() => triggerFunction);
   };
+
+  // Scroll to top when activeStep changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeStep]);
 
   // Show loading state while fetching article
   if (isArticleLoading) {

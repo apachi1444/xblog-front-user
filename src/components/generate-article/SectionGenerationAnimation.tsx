@@ -463,7 +463,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose,
       executeSequentialGeneration();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show]); // Removed executeSequentialGeneration from dependencies to prevent infinite loop
+  }, [show]);
 
   if (!show) return null;
 

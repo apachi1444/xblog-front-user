@@ -26,9 +26,10 @@ interface FeedbackModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit?: (rating: number, comment?: string) => void;
+  onSkip?: () => void;
 }
 
-export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
+export function FeedbackModal({ open, onClose, onSubmit, onSkip }: FeedbackModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const [rating, setRating] = useState<number | null>(0);
@@ -88,6 +89,9 @@ export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
   };
 
   const handleSkip = () => {
+    if (onSkip) {
+      onSkip();
+    }
     onClose();
   };
 
@@ -265,7 +269,7 @@ export function FeedbackModal({ open, onClose, onSubmit }: FeedbackModalProps) {
       <DialogActions sx={{ p: 3, pt: 0, gap: 2 }}>
         <Button
           variant="outlined"
-          onClick={handleClose}
+          onClick={handleSkip}
           sx={{
             flex: 1,
             borderRadius: 2,
