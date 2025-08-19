@@ -20,7 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: Install all dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build # The build command of your project
