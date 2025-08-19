@@ -42,7 +42,12 @@ jobs:
           password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/beta/
+          protocol: ftp
+          port: 21
+          log-level: verbose
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
