@@ -14,8 +14,6 @@ import {
   CircularProgress
 } from '@mui/material';
 
-import { formatDate } from 'date-fns';
-
 import { formatMetrics, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -40,7 +38,7 @@ function RecentArticlesSection() {
 
   // Fetch all articles to check total count
   const { data: articles, isLoading } = useGetArticlesQuery(
-    { store_id: storeId },
+    { store_id: storeId }, 
     {
       // Ensure the query runs immediately when component mounts
       refetchOnMountOrArgChange: true,

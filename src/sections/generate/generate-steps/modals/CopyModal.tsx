@@ -16,29 +16,18 @@ import {
 
 import { Iconify } from 'src/components/iconify';
 
-import type { ArticleSection } from '../../schemas';
+import type { GenerateArticleFormData } from '../../schemas';
 
 interface CopyModalProps {
   open: boolean;
   onClose: () => void;
-  articleInfo: {
-    title: string;
-    metaTitle: string;
-    metaDescription: string;
-    primaryKeyword: string;
-    secondaryKeywords: string[];
-    language: string;
-    targetCountry: string;
-    createdAt: string;
-  };
-  sections: ArticleSection[];
+  formData: GenerateArticleFormData;
 }
 
-export const CopyModal = ({ open, onClose, articleInfo, sections }: CopyModalProps) => {
+export const CopyModal = ({ open, onClose, formData }: CopyModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [htmlContent, setHtmlContent] = useState('');
   const [markdownContent, setMarkdownContent] = useState('');
-  const [plainTextContent, setPlainTextContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -47,28 +36,51 @@ export const CopyModal = ({ open, onClose, articleInfo, sections }: CopyModalPro
 
   // Load content when modal opens
   useEffect(() => {
-    if (open && sections && sections.length > 0) {
+    if (open && formData) {
       setIsLoading(true);
 
-      // Import converters dynamically
-      import('src/utils/markdownConverter').then(({ articleToMarkdown, articleToHtml }) => {
-        const markdown = articleToMarkdown(articleInfo, sections);
-        const html = articleToHtml(articleInfo, sections);
+      try {
+        // Import converters dynamically
+        import('src/utils/markdownConverter').then(({ getHtmlContent, htmlToMarkdown }) => {
+          // Get HTML content (from generatedHtml or fallback)
+          const html = getHtmlContent(formData);
 
-        setMarkdownContent(markdown);
+          // Convert HTML to markdown using Turndown
+          const markdown = htmlToMarkdown(html);
+
+          setHtmlContent(html);
+          setMarkdownContent(markdown);
+          setIsLoading(false);
+        }).catch(error => {
+          console.error('Error importing markdown converter:', error);
+
+          // Fallback: use generatedHtml directly or create simple content
+          const html = formData.generatedHtml || `<h1>${formData.step1?.title || 'Untitled Article'}</h1><p>No content available.</p>`;
+          const markdown = `# ${formData.step1?.title || 'Untitled Article'}\n\nNo content available.`;
+
+          setHtmlContent(html);
+          setMarkdownContent(markdown);
+          setIsLoading(false);
+        });
+      } catch (error) {
+        console.error('Error in content conversion:', error);
+
+        // Emergency fallback
+        const html = formData.generatedHtml || `<h1>${formData.step1?.title || 'Untitled Article'}</h1><p>No content available.</p>`;
+        const markdown = `# ${formData.step1?.title || 'Untitled Article'}\n\nNo content available.`;
+
         setHtmlContent(html);
+        setMarkdownContent(markdown);
         setIsLoading(false);
-      }).catch(error => {
-        console.error('Error generating content:', error);
-        // Fallback to simple text format
-        const plainText = `${articleInfo.title}\n\n${sections.map(s => `${s.title}\n${s.content || ''}\n\n`).join('')}`;
-        setPlainTextContent(plainText);
-        setMarkdownContent(plainText);
-        setHtmlContent(`<h1>${articleInfo.title}</h1><p>${plainText.replace(/\n/g, '<br>')}</p>`);
-        setIsLoading(false);
-      });
+      }
+    } else if (open) {
+      // Handle case where formData is empty
+      const title = formData?.step1?.title || 'Untitled Article';
+      setMarkdownContent(`# ${title}\n\nNo content available.`);
+      setHtmlContent(`<h1>${title}</h1><p>No content available.</p>`);
+      setIsLoading(false);
     }
-  }, [open, articleInfo, sections]);
+  }, [open, formData]);
 
   // Copy content to clipboard
   const handleCopy = (content: string, format: string) => {
@@ -109,7 +121,6 @@ export const CopyModal = ({ open, onClose, articleInfo, sections }: CopyModalPro
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
           <Tab label="HTML" />
           <Tab label="Markdown" />
-          <Tab label="Plain Text" />
         </Tabs>
 
         {isLoading ? (
@@ -160,29 +171,6 @@ export const CopyModal = ({ open, onClose, articleInfo, sections }: CopyModalPro
                   sx={{ borderRadius: '24px' }}
                 >
                   Copy Markdown
-                </Button>
-              </Box>
-            )}
-
-            {activeTab === 2 && (
-              <Box>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={8}
-                  value={plainTextContent}
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  sx={{ mb: 2 }}
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<Iconify icon="mdi:content-copy" />}
-                  sx={{ borderRadius: '24px' }}
-                  onClick={() => handleCopy(plainTextContent, 'Plain Text')}
-                >
-                  Copy Plain Text
                 </Button>
               </Box>
             )}

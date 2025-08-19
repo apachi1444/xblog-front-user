@@ -6,6 +6,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@mui/material';
 
+import { useAutoSaveDraft } from 'src/hooks/useAutoSaveDraft';
 import { useRegenerationCheck } from 'src/hooks/useRegenerationCheck';
 
 import { useTitleGeneration } from 'src/utils/generation/titleGeneration';
@@ -35,6 +36,9 @@ interface GenerateViewFormProps {
   setActiveStep: (step: number) => void;
   onGenerationTrigger?: (triggerFunction: () => void) => void; // Callback to expose generation function
   articleId?: string | null; // Article ID for updating after generation
+  isEditMode?: boolean; // Whether we're editing an existing article
+  onOriginalValuesSet?: (setOriginalValues: (values: any) => void) => void; // Callback to expose setOriginalValues function
+  onAutoSaveStateChange?: (state: { hasChanges: boolean; isSaving: boolean; saveDraft: () => void }) => void; // Callback to expose auto-save state
 }
 
 export function GenerateViewForm({
@@ -42,10 +46,20 @@ export function GenerateViewForm({
   steps,
   setActiveStep,
   onGenerationTrigger,
-  articleId
+  articleId,
+  isEditMode = false,
+  onOriginalValuesSet,
+  onAutoSaveStateChange
 }: GenerateViewFormProps) {
   const { t } = useTranslation();
   const methods = useFormContext<GenerateArticleFormData>();
+
+  // Auto-save draft functionality
+  const autoSave = useAutoSaveDraft({
+    articleId,
+    isEditMode,
+    debounceMs: 1000,
+  });
 
   // Generation hooks
   const { generateSecondaryKeywords } = useKeywordGeneration();
@@ -67,13 +81,26 @@ export function GenerateViewForm({
 
   const { evaluateCriteria} = useCriteriaEvaluation()
 
-  // Feedback modal handlers
-
-
   // Store reference to generation function to avoid infinite loops
   const generationFunctionRef = useRef<(() => Promise<any[]>) | null>(null);
 
+  // Expose setOriginalValues function to parent component
+  useEffect(() => {
+    if (onOriginalValuesSet) {
+      onOriginalValuesSet(autoSave.setOriginalValues);
+    }
+  }, [onOriginalValuesSet, autoSave.setOriginalValues]);
 
+  // Expose auto-save state to parent component
+  useEffect(() => {
+    if (onAutoSaveStateChange) {
+      onAutoSaveStateChange({
+        hasChanges: autoSave.hasChanges,
+        isSaving: autoSave.isSaving,
+        saveDraft: autoSave.saveDraft,
+      });
+    }
+  }, [onAutoSaveStateChange, autoSave.hasChanges, autoSave.isSaving, autoSave.saveDraft]);
 
   const handleGenerateTitle = async () => {
     setGenerationState((s) => ({ ...s, isGeneratingTitle: true }));
@@ -83,11 +110,8 @@ export function GenerateViewForm({
       const { primaryKeyword, secondaryKeywords, contentDescription, language } = formData.step1;
 
       if (!primaryKeyword) {
-        console.error('No primary keyword provided for title generation');
         return '';
       }
-
-      console.log('📝 Generating title with language:', { primaryKeyword, language, secondaryKeywords, contentDescription });
 
       // Call the real API with language support
       const generatedTitle = await generateArticleTitle(
@@ -98,18 +122,11 @@ export function GenerateViewForm({
       );
 
       if (generatedTitle) {
-        console.log('✅ Generated title:', generatedTitle);
-
-        // Note: Subscription cache will be invalidated at the end of generation process
-
         return generatedTitle;
       }
-        console.warn('⚠️ No title generated, using fallback');
         return `Complete Guide to ${primaryKeyword}`;
       
     } catch (error) {
-      console.error('❌ Error generating title:', error);
-      // Fallback title
       const formData = methods.getValues();
       const primaryKeyword = formData.step1?.primaryKeyword;
       return primaryKeyword ? `Complete Guide to ${primaryKeyword}` : 'Untitled Article';
@@ -127,11 +144,8 @@ export function GenerateViewForm({
       const language = formData.step1?.language || 'english';
 
       if (!primaryKeyword) {
-        console.error('No primary keyword provided for secondary keywords generation');
         return;
       }
-
-      console.log('🔑 Generating secondary keywords for:', { primaryKeyword, language });
 
       // Call the real API with language parameter
       const generatedKeywords = await generateSecondaryKeywords(primaryKeyword, language);
@@ -139,8 +153,6 @@ export function GenerateViewForm({
       if (generatedKeywords && generatedKeywords.length > 0) {
         // Update the form with generated keywords
         methods.setValue('step1.secondaryKeywords', generatedKeywords, { shouldValidate: true });
-        console.log('✅ Generated secondary keywords:', generatedKeywords);
-
         // Note: Subscription cache will be invalidated at the end of generation process
       } else {
         // Fallback keywords if API fails
@@ -221,7 +233,6 @@ export function GenerateViewForm({
       const { primaryKeyword, secondaryKeywords, contentDescription, title, language } = formData.step1;
 
       if (!primaryKeyword || !title) {
-        console.error('Missing required fields for meta generation:', { primaryKeyword, title });
         return {
           metaTitle: '',
           metaDescription: '',
@@ -238,10 +249,6 @@ export function GenerateViewForm({
       );
 
       if (generatedMeta) {
-        console.log('✅ Generated meta tags:', generatedMeta);
-
-        // Note: Subscription cache will be invalidated at the end of generation process
-
         return {
           metaTitle: generatedMeta.metaTitle,
           metaDescription: generatedMeta.metaDescription,
@@ -501,6 +508,7 @@ export function GenerateViewForm({
             </Button>
           }
         />
+
 
 
     </>

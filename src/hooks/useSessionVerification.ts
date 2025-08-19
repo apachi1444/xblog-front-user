@@ -1,6 +1,6 @@
+import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
 
 import { useLazyVerifyCheckoutSessionQuery } from 'src/services/apis/subscriptionApi';
 
@@ -34,9 +34,7 @@ export function useSessionVerification() {
     const urlParams = new URLSearchParams(location.search);
     const sessionId = urlParams.get('session_id');
 
-    if (sessionId && !state.isVerifying && state.sessionId !== sessionId) {
-      console.log('🔍 Session ID detected, starting verification...', sessionId);
-      
+    if (sessionId && !state.isVerifying && state.sessionId !== sessionId) {      
       setState(prev => ({
         ...prev,
         isVerifying: true,
@@ -56,10 +54,7 @@ export function useSessionVerification() {
               isValid: true,
               showSuccessAnimation: true,
             }));
-
-            toast.success(`Payment verified successfully! Plan: ${result.data.plan_id}, Amount: ${result.data.amount} ${result.data.currency.toUpperCase()}`);
           } else {
-
             const errorMessage = result.data?.status
               ? `Payment status: ${result.data.status}`
               : 'Session not found or invalid';

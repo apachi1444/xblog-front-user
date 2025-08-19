@@ -60,8 +60,6 @@ export function ProfileView() {
     const isProfilePage = location.pathname === '/profile';
 
     if (isProfilePage && hasPaymentParams) {
-      // Refresh subscription data after successful payment
-      console.log('Detected return from payment, refreshing subscription data...');
       refetchSubscription();
 
       // Clean up URL parameters after refresh

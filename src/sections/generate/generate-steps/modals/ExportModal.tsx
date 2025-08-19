@@ -12,6 +12,8 @@ import {
   IconButton,
 } from '@mui/material';
 
+import { getHtmlContent, htmlToMarkdown } from 'src/utils/markdownConverter';
+
 import { Iconify } from 'src/components/iconify';
 
 import type { GenerateArticleFormData } from '../../schemas';
@@ -38,39 +40,17 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
       let filename = '';
       let mimeType = '';
 
-      // Parse TOC from string if needed
-      let parsedToc = [];
-      try {
-        if (formData.toc && typeof formData.toc === 'string') {
-          parsedToc = JSON.parse(formData.toc);
-        }
-      } catch (error) {
-        console.error('Error parsing TOC for export:', error);
-      }
-
-      // Extract article info from form data
-      const articleInfo = {
-        title: formData.step1?.title || 'Untitled Article',
-        metaTitle: formData.step1?.metaTitle || '',
-        metaDescription: formData.step1?.metaDescription || '',
-        urlSlug: formData.step1?.urlSlug || '',
-        primaryKeyword: formData.step1?.primaryKeyword || '',
-        secondaryKeywords: formData.step1?.secondaryKeywords || [],
-        language: formData.step1?.language || 'en',
-        targetCountry: formData.step1?.targetCountry || '',
-        contentDescription: formData.step1?.contentDescription || '',
-        createdAt: new Date().toISOString(),
-        articleType: formData.step2?.articleType || '',
-        articleSize: formData.step2?.articleSize || '',
-        toneOfVoice: formData.step2?.toneOfVoice || '',
-        toc: parsedToc,
-      };
-
-      const sections = formData.step3?.sections || [];
-
       switch (activeTab) {
         case 0: // Markdown
-          filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+          content = htmlToMarkdown(formData.generatedHtml || '');
+
+          if (!content || content.trim() === '') {
+            // Fallback content generation
+            const title = formData.step1?.title || 'Untitled Article';
+            content = `# ${title}\n\nNo content available.`;
+          }
+
+          filename = `${(formData.step1?.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
           mimeType = 'text/markdown';
           break;
         case 1: // PDF (placeholder - would need PDF generation library)
@@ -78,14 +58,9 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
           setIsExporting(false);
           return;
         case 2: // HTML
-          // For HTML export, use the generated HTML if available, otherwise convert from sections
-          if (formData.generatedHtml) {
-            content = formData.generatedHtml;
-          } else {
-            const { articleToHtml } = await import('src/utils/markdownConverter');
-            content = articleToHtml(articleInfo, sections);
-          }
-          filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
+          // For HTML export, get the HTML content directly
+          content = getHtmlContent(formData);
+          filename = `${(formData.step1?.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
           mimeType = 'text/html';
           break;
         case 3: // JSON
@@ -95,7 +70,7 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
             exportedAt: new Date().toISOString(),
             version: '1.0'
           }, null, 2);
-          filename = `${articleInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+          filename = `${(formData.step1?.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
           mimeType = 'application/json';
           break;
         default:
@@ -158,7 +133,6 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
 
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
           <Tab label="Markdown" />
-          <Tab label="PDF" />
           <Tab label="HTML" />
           <Tab label="JSON" />
         </Tabs>
@@ -183,23 +157,6 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
         {activeTab === 1 && (
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Export your content as a PDF file (Coming Soon)
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Iconify icon="mdi:file-pdf-box" />}
-              sx={{ borderRadius: '24px' }}
-              onClick={handleExport}
-              disabled
-            >
-              Export as PDF (Coming Soon)
-            </Button>
-          </Box>
-        )}
-
-        {activeTab === 2 && (
-          <Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Export your content as an HTML file
             </Typography>
             <Button
@@ -214,7 +171,7 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
           </Box>
         )}
 
-        {activeTab === 3 && (
+        {activeTab === 2 && (
           <Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Export your content as structured JSON data

@@ -49,18 +49,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     // Handle session_id verification
     if (sessionId) {
-      console.log('🔍 Session ID detected, verifying...', sessionId);
-
       verifySession({ session_id: sessionId })
         .then((result) => {
           if (result.data && result.data.status === 'paid') {
-            console.log('✅ Session verified successfully', result.data);
-
-            // Force refetch user data after successful payment
             refetch().then((userResult) => {
               if (userResult.data && userResult.data.is_completed_onboarding) {
-                console.log('✅ User onboarding completed, updating Redux state');
-
                 // Get current access token
                 const authData = localStorage.getItem('xblog_auth_session_v2');
                 if (authData) {

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useRef, useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -23,6 +23,7 @@ import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 
 // Custom components
 import { FeedbackModal } from 'src/components/feedback';
+
 import { STEPS_KEYS } from './constants';
 import { GenerateViewForm } from './generate-view-form';
 import { StepNavigation } from './components/StepNavigation';
@@ -42,6 +43,14 @@ export function GeneratingView() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackSkipped, setFeedbackSkipped] = useState(false);
   const feedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-save functionality
+  const setOriginalValuesRef = useRef<((values: GenerateArticleFormData) => void) | null>(null);
+  const [autoSaveState, setAutoSaveState] = useState({
+    hasChanges: false,
+    isSaving: false,
+    saveDraft: () => {},
+  });
 
   // Check if we're editing an existing draft article
   const urlArticleId = getArticleIdFromParams(searchParams);
@@ -272,7 +281,17 @@ export function GeneratingView() {
   // Reset form when defaultValues change (when switching between articles)
   useEffect(() => {
     methods.reset(defaultValues);
-  }, [defaultValues, methods]);
+
+    // Set original values for auto-save after form is reset with article data
+    if (selectedArticle && setOriginalValuesRef.current) {
+      // Small delay to ensure form is fully reset
+      setTimeout(() => {
+        if (setOriginalValuesRef.current) {
+          setOriginalValuesRef.current(defaultValues);
+        }
+      }, 100);
+    }
+  }, [defaultValues, methods, selectedArticle]);
 
   // Helper function to deeply compare objects (memoized for performance)
   const hasChanges = useCallback((current: any, initial: any): boolean => {
@@ -337,6 +356,16 @@ export function GeneratingView() {
   const handleGenerationTrigger = (triggerFunction: () => void) => {
     setGenerationTrigger(() => triggerFunction);
   };
+
+  // Callback to receive setOriginalValues function from GenerateViewForm
+  const handleOriginalValuesSet = useCallback((setOriginalValues: (values: GenerateArticleFormData) => void) => {
+    setOriginalValuesRef.current = setOriginalValues;
+  }, []);
+
+  // Callback to receive auto-save state from GenerateViewForm
+  const handleAutoSaveStateChange = useCallback((state: { hasChanges: boolean; isSaving: boolean; saveDraft: () => void }) => {
+    setAutoSaveState(state);
+  }, []);
 
   // Feedback modal handlers
   const handleFeedbackSubmit = (rating: number, comment?: string) => {
@@ -452,6 +481,9 @@ export function GeneratingView() {
             setActiveStep={setActiveStep}
             onGenerationTrigger={handleGenerationTrigger}
             articleId={articleIdForNavigation}
+            isEditMode={!!selectedArticle}
+            onOriginalValuesSet={handleOriginalValuesSet}
+            onAutoSaveStateChange={handleAutoSaveStateChange}
           />
           {/* Navigation buttons with internal validation logic */}
           <StepNavigation
@@ -461,6 +493,10 @@ export function GeneratingView() {
             onPrevStep={handlePrevStep}
             articleId={articleIdForNavigation}
             onTriggerGeneration={generationTrigger || undefined}
+            hasChanges={autoSaveState.hasChanges}
+            isSaving={autoSaveState.isSaving}
+            onSaveDraft={autoSaveState.saveDraft}
+            isEditMode={!!selectedArticle}
           />
         </FormProvider>
 

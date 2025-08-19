@@ -25,6 +25,11 @@ interface StepNavigationProps {
   onPrevStep: () => void;
   articleId?: string | null;
   onTriggerGeneration?: () => void; // Function to trigger generation process
+  // Auto-save props
+  hasChanges?: boolean;
+  isSaving?: boolean;
+  onSaveDraft?: () => void;
+  isEditMode?: boolean;
 }
 
 export const StepNavigation = ({
@@ -33,7 +38,11 @@ export const StepNavigation = ({
   onNextStep,
   onPrevStep,
   articleId,
-  onTriggerGeneration
+  onTriggerGeneration,
+  hasChanges = false,
+  isSaving = false,
+  onSaveDraft,
+  isEditMode = false
 }: StepNavigationProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -273,8 +282,43 @@ export const StepNavigation = ({
           ) : null}
         </Box>
 
-        {/* Center - Empty space for cleaner layout */}
-        <Box />
+        {/* Center - Save Draft button (only in edit mode for steps 1-2) */}
+        <Box>
+          {isEditMode && activeStep < 2 && hasChanges && onSaveDraft && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={onSaveDraft}
+              disabled={isSaving}
+              startIcon={
+                isSaving ? (
+                  <Iconify icon="eos-icons:loading" />
+                ) : (
+                  <Iconify icon="mdi:content-save" />
+                )
+              }
+              sx={{
+                borderRadius: '24px',
+                minWidth: '140px',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  borderColor: theme.palette.primary.dark,
+                  bgcolor: theme.palette.primary.main,
+                  color: 'white',
+                },
+                '&:disabled': {
+                  borderColor: theme.palette.action.disabled,
+                  color: theme.palette.action.disabled,
+                },
+              }}
+            >
+              {isSaving ? t('common.saving', 'Saving...') : t('common.saveDraft', 'Save Draft')}
+            </Button>
+          )}
+        </Box>
 
         {/* Right side - Next/Action buttons */}
         <Box>
@@ -343,8 +387,7 @@ export const StepNavigation = ({
           <CopyModal
             open={copyModalOpen}
             onClose={() => setCopyModalOpen(false)}
-            articleInfo={getArticleData().articleInfo}
-            sections={getArticleData().sections}
+            formData={methods.getValues() as GenerateArticleFormData}
           />
           <ExportModal
             open={exportModalOpen}
