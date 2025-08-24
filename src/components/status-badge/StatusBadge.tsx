@@ -1,25 +1,51 @@
 import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
-import { Box, alpha, useTheme, Typography } from '@mui/material';
+import { Box, Chip, alpha, useTheme, Typography } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
+
+// Platform icons mapping
+const PLATFORM_ICONS = {
+  wordpress: { icon: 'mdi:wordpress', color: '#21759b', name: 'WordPress' },
+  medium: { icon: 'mdi:medium', color: '#00ab6c', name: 'Medium' },
+  ghost: { icon: 'simple-icons:ghost', color: '#15171a', name: 'Ghost' },
+  webflow: { icon: 'simple-icons:webflow', color: '#4353ff', name: 'Webflow' },
+  shopify: { icon: 'mdi:shopify', color: '#7ab55c', name: 'Shopify' },
+  wix: { icon: 'simple-icons:wix', color: '#0c6efc', name: 'Wix' },
+  squarespace: { icon: 'simple-icons:squarespace', color: '#000000', name: 'Squarespace' },
+  default: { icon: 'mdi:web', color: '#6e7681', name: 'Website' }
+};
 
 interface StatusBadgeProps {
   status: 'draft' | 'publish' | 'scheduled';
   size?: 'small' | 'medium' | 'large';
   variant?: 'default' | 'prominent';
   scheduledDate?: string; // For scheduled articles, show the date
+  platform?: string; // For published articles, show the platform
 }
 
-export function StatusBadge({ status, size = 'medium', variant = 'default', scheduledDate }: StatusBadgeProps) {
+export function StatusBadge({ status, size = 'medium', variant = 'default', scheduledDate, platform }: StatusBadgeProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
   // Check if we should show scheduled date
   const showScheduledDate = status === 'scheduled' && scheduledDate && variant === 'prominent';
+
+  // Check if we should show platform (for published articles)
+  const showPlatform = status === 'publish' && platform && variant === 'prominent';
+
+  // Get platform info for display
+  const getPlatformInfo = () => {
+    if (!platform) return null;
+
+    const platformKey = platform.toLowerCase();
+    return PLATFORM_ICONS[platformKey as keyof typeof PLATFORM_ICONS] || PLATFORM_ICONS.default;
+  };
+
+  const platformInfo = getPlatformInfo();
 
   // Get status configuration based on status value
   const getStatusConfig = () => {
@@ -109,8 +135,8 @@ export function StatusBadge({ status, size = 'medium', variant = 'default', sche
     <Box
       sx={{
         display: 'inline-flex',
-        flexDirection: showScheduledDate ? 'column' : 'row',
-        alignItems: showScheduledDate ? 'flex-start' : 'center',
+        flexDirection: (showScheduledDate || showPlatform) ? 'column' : 'row',
+        alignItems: (showScheduledDate || showPlatform) ? 'flex-start' : 'center',
         px: sizing.px,
         py: sizing.py,
         borderRadius: sizing.borderRadius,
@@ -194,6 +220,40 @@ export function StatusBadge({ status, size = 'medium', variant = 'default', sche
           >
             {formatDate(new Date(scheduledDate), 'MMM d • h:mm a')}
           </Typography>
+        </Box>
+      )}
+
+      {/* Platform display for published articles */}
+      {showPlatform && platformInfo && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mt: 0.75,
+            gap: 0.75,
+          }}
+        >
+          <Chip
+            size="small"
+            icon={<Iconify icon={platformInfo.icon} />}
+            label={platformInfo.name}
+            sx={{
+              height: 20,
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              bgcolor: alpha(platformInfo.color, 0.1),
+              color: platformInfo.color,
+              border: `1px solid ${alpha(platformInfo.color, 0.2)}`,
+              '& .MuiChip-icon': {
+                color: platformInfo.color,
+                width: 14,
+                height: 14,
+              },
+              '& .MuiChip-label': {
+                px: 1,
+              },
+            }}
+          />
         </Box>
       )}
     </Box>

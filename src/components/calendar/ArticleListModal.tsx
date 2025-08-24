@@ -142,7 +142,7 @@ export function ArticleListModal({
                       primary={
                         <Stack direction="row" alignItems="center" spacing={2}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
-                            {article.title || t('calendar.articlePlaceholder', 'Article #{{id}}', { id: article.id })}
+                            {article.article_title || article.title || t('calendar.articlePlaceholder', 'Untitled Article')}
                           </Typography>
                           <Chip
                             label={t(`common.statuses.${article.status}`, article.status)}

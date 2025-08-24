@@ -368,7 +368,7 @@
       "unschedule": "Déplanifier",
       "unscheduling": "Déplanification...",
       "articleDetails": "Détails de l'Article",
-      "scheduleArticles": "Planifier des Articles pour le {{date}}",
+      "scheduleArticles": "Planifier des Articles",
       "selectArticles": "Sélectionnez les articles à planifier :",
       "noArticles": "Aucun article disponible pour la planification",
       "scheduledDate": "Date Programmée",

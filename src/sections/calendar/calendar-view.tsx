@@ -1,4 +1,6 @@
 
+import type { Article } from 'src/types/article';
+
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +20,10 @@ import {
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
+import {
+  useScheduleArticleMutation,
+  useGetScheduledArticlesQuery
+} from 'src/services/apis/calendarApis';
 
 import { LoadingSpinner } from 'src/components/loading';
 import {
@@ -26,6 +31,8 @@ import {
   CalendarDayCell,
   ArticleDetailsModal
 } from 'src/components/calendar';
+
+
 
 export default function CalendarPage() {
   const theme = useTheme();
@@ -35,26 +42,49 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
 
-  const [selectedArticleDetails, setSelectedArticleDetails] = useState<any>(null);
+  const [selectedArticleDetails, setSelectedArticleDetails] = useState<Article | null>(null);
   const [isArticleDetailsModalOpen, setIsArticleDetailsModalOpen] = useState(false);
 
-  const [scheduleArticle] = useScheduleArticleMutation();
+  const [scheduleArticle,  { isLoading }] = useScheduleArticleMutation();
 
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
+
+  // Get articles data
   const {
     data: articlesData,
     isLoading: isLoadingArticles,
     refetch: refetchArticles
   } = useGetArticlesQuery({ store_id: storeId });
 
-  // Memoize articles to prevent unnecessary re-renders
-  const articles = useMemo(() => articlesData?.articles || [], [articlesData]);
+  // Get calendar/scheduled data
+  const {
+    data: calendarData,
+    refetch: refetchCalendar
+  } = useGetScheduledArticlesQuery();
+
+  // Memoize articles and calendar data to prevent unnecessary re-renders
+  const articles = useMemo(() => articlesData?.articles.filter(
+    article => article.status === "scheduled"
+  ) || [], [articlesData]);
+  const calendarItems = useMemo(() => calendarData?.calendars || [], [calendarData]);
+
+  const getCalendarInfoForArticle = useCallback((articleId: number) => calendarItems.find(item => item.article_id === articleId), [calendarItems]);
   // Handle showing article details
-  const handleArticleClick = useCallback((article: any) => {
-    setSelectedArticleDetails(article);
+  const handleArticleClick = useCallback((article: Article) => {
+    // Get calendar info for this article
+    const calendarInfo = getCalendarInfoForArticle(article.id);
+
+    // Add calendar info as dynamic properties
+    const articleWithCalendarInfo = { ...article };
+    if (calendarInfo) {
+      (articleWithCalendarInfo as any).calendarId = calendarInfo.id;
+      (articleWithCalendarInfo as any).scheduledDate = calendarInfo.scheduled_date;
+    }
+
+    setSelectedArticleDetails(articleWithCalendarInfo);
     setIsArticleDetailsModalOpen(true);
-  }, []);
+  }, [getCalendarInfoForArticle]);
 
   // Close article details modal
   const handleCloseArticleDetails = useCallback(() => {
@@ -96,50 +126,163 @@ export default function CalendarPage() {
     );
   };
 
-  // Submit scheduled articles
-  const handleScheduleSubmit = useCallback(async () => {
+  // Submit scheduled articles with parallel API calls and enhanced individual data
+  const handleScheduleSubmit = useCallback(async (scheduleData?: {
+    schedulingData: Array<{
+      articleId: number;
+      storeId: number;
+      scheduledDateTime: string;
+    }>;
+  }) => {
     if (!selectedDay || selectedArticles.length === 0) return;
 
     try {
-      const scheduledDate = format(selectedDay, 'yyyy-MM-dd');
+      // Execute all API calls in parallel with individual settings
+      const schedulingPromises = scheduleData?.schedulingData
+        ? scheduleData.schedulingData.map(({ articleId, storeId: articleStoreId, scheduledDateTime }) =>
+            scheduleArticle({
+              store_id: articleStoreId,
+              article_id: articleId.toString(),
+              scheduled_date: scheduledDateTime
+            }).unwrap()
+          )
+        : selectedArticles.map(articleId =>
+            scheduleArticle({
+              store_id: storeId,
+              article_id: articleId.toString(),
+              scheduled_date: format(selectedDay, 'yyyy-MM-dd')
+            }).unwrap()
+          );
 
-      // Log the scheduling attempt
-      console.log(`Scheduling articles for ${scheduledDate}:`, selectedArticles);
+      // Wait for all scheduling operations to complete
+      const results = await Promise.allSettled(schedulingPromises);
 
-      await Promise.all(selectedArticles.map(articleId =>
-        scheduleArticle({
-          store_id: storeId,
-          article_id: articleId.toString(),
-          scheduled_date: scheduledDate
-        })
-      ));
+      // Check results and provide detailed feedback
+      const successful = results.filter(result => result.status === 'fulfilled').length;
+      const failed = results.filter(result => result.status === 'rejected').length;
 
-      toast.success(t('calendar.scheduledSuccessfully', 'Articles scheduled successfully!'));
+      if (failed === 0) {
+        toast.success(
+          t('calendar.scheduledSuccessfully', `🎉 All ${successful} articles scheduled successfully!`),
+          {
+            duration: 4000,
+            style: {
+              background: '#10B981',
+              color: 'white',
+              fontWeight: '600',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              boxShadow: '0 10px 25px rgba(16, 185, 129, 0.3)',
+            },
+            iconTheme: {
+              primary: 'white',
+              secondary: '#10B981',
+            },
+          }
+        );
+
+        // Trigger confetti animation
+        setTimeout(() => {
+          if ((window as any).confetti) {
+            (window as any).confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#10B981', '#34D399', '#6EE7B7', '#A7F3D0']
+            });
+
+            // Second burst
+            setTimeout(() => {
+              (window as any).confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE']
+              });
+            }, 250);
+
+            // Third burst
+            setTimeout(() => {
+              (window as any).confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#8B5CF6', '#A78BFA', '#C4B5FD', '#E9D5FF']
+              });
+            }, 400);
+          }
+        }, 500);
+
+      } else if (successful > 0) {
+        toast.success(
+          t('calendar.partiallyScheduled', `⚠️ ${successful} articles scheduled, ${failed} failed.`),
+          {
+            duration: 5000,
+            style: {
+              background: '#F59E0B',
+              color: 'white',
+              fontWeight: '600',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              boxShadow: '0 10px 25px rgba(245, 158, 11, 0.3)',
+            },
+          }
+        );
+      } else {
+        toast.error(
+          t('calendar.schedulingFailed', '❌ Failed to schedule articles. Please try again.'),
+          {
+            duration: 4000,
+            style: {
+              background: '#EF4444',
+              color: 'white',
+              fontWeight: '600',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)',
+            },
+          }
+        );
+      }
+
       setIsModalOpen(false);
       setSelectedArticles([]);
 
-      // Refresh articles data after scheduling
+      // Refresh both articles and calendar data after scheduling
       refetchArticles();
+      refetchCalendar();
 
     } catch (error) {
+      console.error('Scheduling error:', error);
       toast.error(t('calendar.schedulingFailed', 'Failed to schedule articles. Please try again.'));
     }
-  }, [selectedDay, selectedArticles, storeId, scheduleArticle, refetchArticles, t]);
+  }, [selectedDay, selectedArticles, storeId, scheduleArticle, refetchArticles, refetchCalendar, t]);
 
-  // Memoize the scheduled articles for each day to avoid recalculating on every render
-  const getScheduledArticlesForDay = useCallback((day: Date) => {
+  // Memoize the scheduled articles for each day using calendar API data
+  const getScheduledArticlesForDay = useCallback((day: Date): Article[] => {
     const formattedDay = format(day, 'yyyy-MM-dd');
-    return articles.filter(article => {
-      if (article.status !== 'scheduled') return false;
 
-      // For now, just use created_at as the scheduled date since scheduledAt doesn't exist in API
-      const scheduledDate = article.created_at;
-      if (!scheduledDate) return false;
-
-      const articleDate = format(new Date(scheduledDate), 'yyyy-MM-dd');
-      return articleDate === formattedDay;
+    // Get calendar items for this day
+    const dayCalendarItems = calendarItems.filter((calendarItem: { scheduled_date: string | number | Date; }) => {
+      if (!calendarItem.scheduled_date) return false;
+      const calendarDate = format(new Date(calendarItem.scheduled_date), 'yyyy-MM-dd');
+      return calendarDate === formattedDay;
     });
-  }, [articles]);
+
+    // Map calendar items to articles
+    return dayCalendarItems.map((calendarItem: { article_id: any; id: any; scheduled_date: any; }) => {
+      const article = articles.find((a: { id: any; }) => a.id === calendarItem.article_id);
+      if (!article) return null;
+
+      // Return article with scheduled status
+      return {
+        ...article,
+        status: 'scheduled' as const // Override status since it's scheduled
+      };
+    }).filter((item): item is NonNullable<typeof item> => item !== null); // Remove any null articles with proper type guard
+  }, [articles, calendarItems]);
 
   // Get status for a day (for styling) - memoized to prevent recalculation
   const getDayStatus = useCallback((day: Date) => {
@@ -159,10 +302,9 @@ export default function CalendarPage() {
   // Determine if a day is interactive
   const isDayInteractive = (day: Date) => !isBefore(day, new Date()) || isToday(day);
 
-  // Get available articles (not yet scheduled) - memoized to prevent recalculation
-  const getAvailableArticles = useCallback(() =>
-    articles.filter(article => article.status !== 'scheduled'),
-  [articles]);
+  const getAvailableArticles = useMemo(() => articlesData?.articles.filter(
+    article => article.status === "draft"
+  ) || [], [articlesData]);
 
   if (isLoadingArticles) {
     return (
@@ -233,10 +375,11 @@ export default function CalendarPage() {
         open={isModalOpen}
         onClose={handleCloseModal}
         selectedDay={selectedDay}
-        availableArticles={getAvailableArticles()}
+        availableArticles={getAvailableArticles}
         selectedArticles={selectedArticles}
         onArticleToggle={handleArticleToggle}
         onScheduleSubmit={handleScheduleSubmit}
+        isLoading={isLoading}
       />
 
       {/* Article Details Modal */}
@@ -244,7 +387,10 @@ export default function CalendarPage() {
         open={isArticleDetailsModalOpen}
         onClose={handleCloseArticleDetails}
         article={selectedArticleDetails}
-        onRefresh={refetchArticles}
+        onRefresh={() => {
+          refetchArticles();
+          refetchCalendar();
+        }}
       />
     </DashboardContent>
   );

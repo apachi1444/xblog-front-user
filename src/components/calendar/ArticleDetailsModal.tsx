@@ -22,7 +22,7 @@ import {
 
 import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
-import { calendarApi, useDeleteCalendarMutation } from 'src/services/apis/calendarApis';
+import { useDeleteCalendarMutation } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -45,33 +45,23 @@ export function ArticleDetailsModal({
 
   // API hooks for unscheduling
   const [deleteCalendar, { isLoading: isUnscheduling }] = useDeleteCalendarMutation();
-  const { data: calendarData, refetch: refetchCalendarData } = calendarApi.endpoints.getScheduledArticles.useQuery(undefined, {
-    skip: true, // Skip initial fetch
-  });
 
   if (!article) return null;
 
-  // Handle unscheduling with the same logic as ArticleActionsMenu
+  // Handle unscheduling using the calendar ID from the article object
   const handleUnschedule = async () => {
     try {
-      // Fetch fresh calendar data when unschedule button is clicked
-      toast.loading('Fetching calendar data...', { id: 'unschedule-article' });
-      const { data: freshCalendarData } = await refetchCalendarData();
-
-      // Find the calendar entry for this article
-      const calendarEntry = freshCalendarData?.calendars?.find(
-        (entry) => entry.article_id === article.id
-      );
-
-      if (!calendarEntry) {
-        toast.error('Calendar entry not found. Please try again.', { id: 'unschedule-article' });
+      // Check if we have the calendar ID from the article object (added as dynamic property)
+      const calendarId = (article as any)?.calendarId;
+      if (!calendarId) {
+        toast.error('Calendar entry not found. Please try again.');
         return;
       }
 
       toast.loading('Unscheduling article...', { id: 'unschedule-article' });
 
       // Delete the calendar entry using the calendar_id
-      await deleteCalendar(calendarEntry.id).unwrap();
+      await deleteCalendar(calendarId).unwrap();
 
       toast.success('Article unscheduled successfully!', { id: 'unschedule-article' });
 
@@ -146,7 +136,6 @@ export function ArticleDetailsModal({
                   </Typography>
                   <Chip
                     label={t(`common.statuses.${article.status}`, article.status)}
-                    size="small"
                     color={article.status === 'publish' ? 'success' : article.status === 'scheduled' ? 'warning' : 'default'}
                     sx={{ fontWeight: 600 }}
                   />
@@ -428,7 +417,7 @@ export function ArticleDetailsModal({
                   </Stack>
 
                   {/* Scheduled Date - Only show for scheduled articles */}
-                  {article.status === 'scheduled' && article.scheduled_publish_date && (
+                  {article.status === 'scheduled' && ((article as any).scheduledDate || article.scheduled_publish_date) && (
                     <Stack direction="row" alignItems="center" spacing={2}>
                       <Box
                         sx={{
@@ -445,7 +434,7 @@ export function ArticleDetailsModal({
                           {t('calendar.scheduledDate', 'Scheduled Date')}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {formatDate(article.scheduled_publish_date, 'MMMM d, yyyy • h:mm a')}
+                          {formatDate((article as any).scheduledDate || article.scheduled_publish_date, 'MMMM d, yyyy • h:mm a')}
                         </Typography>
                       </Box>
                     </Stack>
