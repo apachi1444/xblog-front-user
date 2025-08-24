@@ -14,6 +14,7 @@ import {
   CircularProgress
 } from '@mui/material';
 
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
 import { formatMetrics, calculateArticleMetrics } from 'src/utils/articleMetrics';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -137,6 +138,23 @@ function RecentArticlesSection() {
                 return (
                   <Grid key={article.id} xs={12} sm={6} md={4}>
                     <Card
+                      onClick={(event) => {
+                        // Check if the click is coming from the actions menu or any modal
+                        const target = event.target as Element;
+                        const isClickInsideMenu = target.closest('[data-testid="article-actions-menu"]') ||
+                                                  target.closest('.MuiMenu-root') ||
+                                                  target.closest('.MuiPopover-root');
+
+                        // Check if any modal is open
+                        const hasOpenModal = document.querySelector('[role="dialog"]') ||
+                                            document.querySelector('.MuiModal-root') ||
+                                            document.querySelector('.MuiDialog-root');
+
+                        // Only navigate if the click is not from the actions menu and no modal is open
+                        if (!isClickInsideMenu && !hasOpenModal) {
+                          navigateToArticle(navigate, article.id);
+                        }
+                      }}
                       sx={{
                         height: '100%',
                         cursor: 'pointer',
@@ -160,6 +178,7 @@ function RecentArticlesSection() {
                               size="large"
                               variant="prominent"
                               scheduledDate={article.status === 'scheduled' ? article.scheduled_publish_date : undefined}
+                              platform={article.status === 'publish' ? article.platform : undefined}
                             />
                             <ArticleActionsMenu
                               article={article}

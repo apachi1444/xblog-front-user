@@ -72,7 +72,7 @@ export function ArticleActionsMenu({
   const [createArticle, { isLoading: isDuplicating }] = useCreateArticleMutation();
 
   // Get calendar entries to find calendar_id for unscheduling - use lazy query to fetch when needed
-  const { data: calendarData, refetch: refetchCalendarData } = useGetScheduledArticlesQuery()
+  const { refetch: refetchCalendarData } = useGetScheduledArticlesQuery()
 
   // Auto-close menu when modals open
   useEffect(() => {
@@ -149,8 +149,7 @@ export function ArticleActionsMenu({
     try {
       toast.loading('Duplicating article...', { id: 'duplicate-article' });
 
-      // Create new article directly with all the previous article information
-      const newArticle = await createArticle({
+      await createArticle({
         title: `${article.article_title || article.title || 'Untitled Article'} (Copy)`,
         content: article.content || '',
         meta_description: article.meta_description || '',
@@ -341,7 +340,7 @@ export function ArticleActionsMenu({
   return (
     <>
       {/* Backdrop to prevent navigation when modals are open */}
-      {(deleteDialogOpen || publishModalOpen) && (
+      {(deleteDialogOpen || publishModalOpen || scheduleModalOpen) && (
         <Box
           sx={{
             position: 'fixed',

@@ -59,7 +59,7 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   // API hooks
   const [scheduleArticle, { isLoading }] = useScheduleArticleMutation();
   const { data: articlesData } = useGetArticlesQuery({ store_id: storeId });
-  const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
+  const { data: storesData, isLoading: isLoadingStores, refetch: refetchStores } = useGetStoresQuery();
 
   // State management
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -135,14 +135,15 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
     }
   };
 
-  // Reset state when modal opens
+  // Reset state when modal opens and refetch stores
   useEffect(() => {
     if (open) {
       setSelectedDate(null);
-      setSelectedStore(null); // Reset store selection to force user to choose
+      setSelectedStore(null);
       setError(null);
+      refetchStores();
     }
-  }, [open]);
+  }, [open, refetchStores, storesData, stores, isLoadingStores]);
 
   const formatTime = (dateString: string) => dayjs(dateString).format('h:mm A');
 
@@ -153,6 +154,9 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
         onClose={onClose}
         maxWidth="md"
         fullWidth
+        sx={{
+          zIndex: 1300, // Ensure dialog is above other elements
+        }}
         PaperProps={{
           sx: {
             borderRadius: 2,
@@ -200,13 +204,25 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
               ) : stores.length > 0 ? (
                 <RadioGroup
                   value={selectedStore?.toString() || ''}
-                  onChange={(e) => setSelectedStore(Number(e.target.value))}
+                  onChange={(e) => {
+                    setSelectedStore(Number(e.target.value));
+                  }}
                 >
                   {stores.map((store: Store) => (
                     <FormControlLabel
                       key={store.id}
                       value={store.id.toString()}
                       control={<Radio />}
+                      sx={{
+                        width: '100%',
+                        margin: 0,
+                        padding: 1,
+                        borderRadius: 1,
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        },
+                        cursor: 'pointer',
+                      }}
                       label={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {store.logo ? (

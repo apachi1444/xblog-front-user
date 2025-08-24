@@ -54,7 +54,6 @@ export function BlogView() {
   useEffect(() => {
     // If we have a valid storeId and no articles data yet, trigger refetch
     if (storeId && !articlesData && !isLoadingArticles) {
-      console.log('🔄 Triggering articles fetch for store:', storeId);
       refetchArticles();
     }
   }, [storeId, articlesData, isLoadingArticles, refetchArticles]);

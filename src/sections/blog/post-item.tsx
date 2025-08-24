@@ -146,7 +146,17 @@ export function PostItem({
     </Link>
   );
 
-  // Render status badge with enhanced scheduled display
+  // Get platform info for display
+  const getPlatformInfo = () => {
+    if (!post.platform) return null;
+
+    const platformKey = post.platform.toLowerCase();
+    return PLATFORM_ICONS[platformKey as keyof typeof PLATFORM_ICONS] || PLATFORM_ICONS.default;
+  };
+
+  const platformInfo = getPlatformInfo();
+
+  // Render status badge with platform info for published articles
   const renderStatus = post.status === 'scheduled' && post.scheduled_publish_date ? (
     <Box
       sx={{
@@ -160,23 +170,44 @@ export function PostItem({
         gap: 0.5,
       }}
     >
-      <Chip
-        size="small"
-        icon={<Iconify icon={statusConfig.icon} />}
-        label={statusConfig.label}
-        color={statusConfig.color as any}
-        sx={{
-          height: 24,
-          fontSize: '0.75rem',
-          fontWeight: 'bold',
-          '& .MuiChip-icon': { animation: 'pulse 2s infinite' },
-          '@keyframes pulse': {
-            '0%': { opacity: 0.6 },
-            '50%': { opacity: 1 },
-            '100%': { opacity: 0.6 }
-          }
-        }}
-      />
+      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+        <Chip
+          size="small"
+          icon={<Iconify icon={statusConfig.icon} />}
+          label={statusConfig.label}
+          color={statusConfig.color as any}
+          sx={{
+            height: 24,
+            fontSize: '0.75rem',
+            fontWeight: 'bold',
+            '& .MuiChip-icon': { animation: 'pulse 2s infinite' },
+            '@keyframes pulse': {
+              '0%': { opacity: 0.6 },
+              '50%': { opacity: 1 },
+              '100%': { opacity: 0.6 }
+            }
+          }}
+        />
+        {/* Platform chip for scheduled articles */}
+        {platformInfo && (
+          <Chip
+            size="small"
+            icon={<Iconify icon={platformInfo.icon} />}
+            label={platformInfo.name}
+            sx={{
+              height: 24,
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              bgcolor: alpha(platformInfo.color, 0.1),
+              color: platformInfo.color,
+              border: `1px solid ${alpha(platformInfo.color, 0.2)}`,
+              '& .MuiChip-icon': {
+                color: platformInfo.color,
+              },
+            }}
+          />
+        )}
+      </Box>
       <Box
         sx={{
           bgcolor: alpha(theme.palette.info.main, 0.9),
@@ -206,21 +237,48 @@ export function PostItem({
       </Box>
     </Box>
   ) : (
-    <Chip
-      size="small"
-      icon={<Iconify icon={statusConfig.icon} />}
-      label={statusConfig.label}
-      color={statusConfig.color as any}
+    <Box
       sx={{
-        height: 24,
-        fontSize: '0.75rem',
-        fontWeight: 'bold',
         position: 'absolute',
         top: 16,
         right: 16,
         zIndex: 10,
+        display: 'flex',
+        gap: 0.5,
+        alignItems: 'center',
       }}
-    />
+    >
+      <Chip
+        size="small"
+        icon={<Iconify icon={statusConfig.icon} />}
+        label={statusConfig.label}
+        color={statusConfig.color as any}
+        sx={{
+          height: 24,
+          fontSize: '0.75rem',
+          fontWeight: 'bold',
+        }}
+      />
+      {/* Platform chip for published articles */}
+      {post.status === 'publish' && platformInfo && (
+        <Chip
+          size="small"
+          icon={<Iconify icon={platformInfo.icon} />}
+          label={platformInfo.name}
+          sx={{
+            height: 24,
+            fontSize: '0.7rem',
+            fontWeight: 'bold',
+            bgcolor: alpha(platformInfo.color, 0.1),
+            color: platformInfo.color,
+            border: `1px solid ${alpha(platformInfo.color, 0.2)}`,
+            '& .MuiChip-icon': {
+              color: platformInfo.color,
+            },
+          }}
+        />
+      )}
+    </Box>
   );
 
   // Render platform icons for published posts
@@ -484,16 +542,27 @@ export function PostItem({
 
 
   const handleCardClick = (event: React.MouseEvent) => {
+    // Check if the click is coming from within a modal
+    const target = event.target as Element;
+    const isClickInsideModal = target.closest('[role="dialog"]') ||
+                              target.closest('.MuiModal-root') ||
+                              target.closest('.MuiDialog-root');
+
     // Check if any modal is open by looking for modal elements
     const hasOpenModal = document.querySelector('[role="dialog"]') ||
                         document.querySelector('.MuiModal-root') ||
                         document.querySelector('.MuiDialog-root');
 
-    // Only navigate if menu is not open, not hovering three dots, and no modals are open
+    // If click is inside a modal, don't interfere with modal interactions
+    if (isClickInsideModal) {
+      return;
+    }
+
+    // Only navigate if no modals are open
     if (!hasOpenModal) {
       navigateToArticle(navigate, post.id);
-    } else if (hasOpenModal) {
-      // Prevent navigation when modals are open
+    } else {
+      // Prevent navigation when modals are open, but only for clicks outside the modal
       event.stopPropagation();
       event.preventDefault();
     }
@@ -504,6 +573,7 @@ export function PostItem({
       onClick={handleCardClick}
       sx={{
         position: 'relative',
+        cursor: 'pointer',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
         ...(post.status === 'draft' && {
           border: `2px solid ${alpha(theme.palette.warning.main, 0.3)}`,
@@ -549,7 +619,6 @@ export function PostItem({
         {renderShape}
         {renderCover}
         {renderStatus}
-        {platforms.length > 0 && renderPlatforms}
         {renderScheduledInfo}
         {renderDraftCreative}
 
