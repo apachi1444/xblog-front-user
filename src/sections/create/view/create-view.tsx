@@ -1,4 +1,3 @@
-
 import { toast } from 'react-hot-toast';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -7,9 +6,11 @@ import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Fade from '@mui/material/Fade';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Backdrop from '@mui/material/Backdrop';
 import Grid from '@mui/material/Unstable_Grid2';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -20,10 +21,11 @@ import DialogContent from '@mui/material/DialogContent';
 import CardActionArea from '@mui/material/CardActionArea';
 import CircularProgress from '@mui/material/CircularProgress';
 
+import { navigateToArticle } from 'src/utils/articleIdEncoder';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useGetArticlesQuery, useCreateArticleMutation, useDeleteArticleMutation } from 'src/services/apis/articlesApi';
-import { navigateToArticle } from 'src/utils/articleIdEncoder';
 
 import { Iconify } from 'src/components/iconify';
 import { SubscriptionLimitModal } from 'src/components/modals/SubscriptionLimitModal';
@@ -103,8 +105,8 @@ export function CreateView() {
     // Navigate to the appropriate page based on selection
     if (optionId === 'generate') {
       try {
-        console.log('🚀 Creating new article...');
-        const result = await createArticle({
+        console.log('🚀 Starting article creation, isCreatingArticle:', isCreatingArticle);
+        await createArticle({
           title: 'Untitled Article',
           content: '',
           meta_description: '',
@@ -112,8 +114,6 @@ export function CreateView() {
           status: 'draft',
           website_id: storeId.toString(), // Use actual store ID instead of undefined
         }).unwrap();
-
-        console.log('✅ Article creation response:', result);
 
         // Mark as new article creation (generate view will fetch the latest article)
         localStorage.setItem('isNewArticle', 'true');
@@ -123,18 +123,12 @@ export function CreateView() {
 
         toast.success('New article created! Start editing...');
       } catch (error: any) {
-        console.error('❌ Failed to create article:', error);
-
         // Check if it's a subscription limit error (403)
         if (error?.status === 403) {
-          console.error('❌ Article limit reached:', error.data);
           setSubscriptionLimitModalOpen(true);
         } else if (error?.status) {
-          console.error('❌ HTTP Status:', error.status);
-          console.error('❌ Response Data:', error.data);
           toast.error(`Failed to create article: ${error.data?.message || error.status}`);
         } else if (error?.message) {
-          console.error('❌ Error Message:', error.message);
           toast.error(`Failed to create article: ${error.message}`);
         } else {
           toast.error('Failed to create article. Please try again.');
@@ -178,15 +172,16 @@ export function CreateView() {
   };
 
   return (
-    <DashboardContent>
-      <Box sx={{ textAlign: 'center', mb: 5 }}>
-        <Typography variant="h3" sx={{ mb: 2 }}>
-          {t('create.heading', 'Create with AI')}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {t('create.subheading', 'How would you like to get started?')}
-        </Typography>
-      </Box>
+    <>
+      <DashboardContent>
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
+          <Typography variant="h3" sx={{ mb: 2 }}>
+            {t('create.heading', 'Create with AI')}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {t('create.subheading', 'How would you like to get started?')}
+          </Typography>
+        </Box>
 
       <Grid container spacing={3} justifyContent="center" sx={{ mb: 8 }}>
         {createOptions.map((option) => (
@@ -292,19 +287,30 @@ export function CreateView() {
                       justifyContent: 'center',
                       transition: 'all 0.3s ease',
                       filter: option.locked ? 'grayscale(0.8)' : 'none',
+                      position: 'relative',
                     }}
                   >
-                    <Iconify
-                      icon={option.icon}
-                      width={80}
-                      height={80}
-                      className="option-icon"
-                      sx={{
-                        color: option.color,
-                        transition: 'transform 0.3s ease',
-                        opacity: option.locked ? 0.7 : 1
-                      }}
-                    />
+                    {option.id === 'generate' && isCreatingArticle ? (
+                      <CircularProgress
+                        size={60}
+                        thickness={4}
+                        sx={{
+                          color: option.color,
+                        }}
+                      />
+                    ) : (
+                      <Iconify
+                        icon={option.icon}
+                        width={80}
+                        height={80}
+                        className="option-icon"
+                        sx={{
+                          color: option.color,
+                          transition: 'transform 0.3s ease',
+                          opacity: option.locked ? 0.7 : 1
+                        }}
+                      />
+                    )}
                   </Box>
                   <Typography variant="h6" gutterBottom sx={{ opacity: option.locked ? 0.7 : 1 }}>
                     {option.title}
@@ -483,13 +489,66 @@ export function CreateView() {
         </DialogActions>
       </Dialog>
 
-      {/* Subscription Limit Modal */}
-      <SubscriptionLimitModal
-        open={subscriptionLimitModalOpen}
-        onClose={() => setSubscriptionLimitModalOpen(false)}
-        onUpgrade={handleUpgrade}
-        limitType="articles"
-      />
-    </DashboardContent>
+        {/* Subscription Limit Modal */}
+        <SubscriptionLimitModal
+          open={subscriptionLimitModalOpen}
+          onClose={() => setSubscriptionLimitModalOpen(false)}
+          onUpgrade={handleUpgrade}
+          limitType="articles"
+        />
+      </DashboardContent>
+
+      {/* Loading Backdrop for Article Creation */}
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        }}
+        open={isCreatingArticle}
+      >
+        <Fade in={isCreatingArticle}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              p: 4,
+            }}
+          >
+            <CircularProgress
+              size={60}
+              thickness={4}
+              sx={{
+                color: 'primary.main',
+                mb: 3,
+              }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'white',
+                fontWeight: 600,
+                mb: 1,
+              }}
+            >
+              {t('create.loading.title', 'Creating Your Article...')}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                maxWidth: 400,
+                lineHeight: 1.6,
+              }}
+            >
+              {t('create.loading.description', 'Please wait while we set up your new article. This will only take a moment.')}
+            </Typography>
+          </Box>
+        </Fade>
+      </Backdrop>
+    </>
   );
 }

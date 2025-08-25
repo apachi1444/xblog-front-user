@@ -419,7 +419,7 @@ export function SectionGenerationAnimation({ show, onComplete, onError, onClose,
               faq: newFormData.faq || null,
               featured_media: newFormData.step1?.featuredMedia || undefined,
               template_name: newFormData.template_name || 'template1',
-              status: 'draft' as const,
+              status: newFormData.status,
             };
             await articleDraft.updateArticle(articleId, requestBody);
           } catch (error) {

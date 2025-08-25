@@ -177,8 +177,7 @@ export function Step4Publish({ setActiveStep, articleId }: Step4PublishProps = {
 
             // Template information
             template_name: templateId,
-
-            status: 'draft' as const,
+            status: updatedFormData.status,
           };
 
           await articleDraft.updateArticle(articleId, requestBody);

@@ -4,6 +4,7 @@
 import type { Store } from 'src/types/store';
 import type { PublishRequest} from 'src/services/apis/integrations/publishApi';
 
+import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useMemo, useState, useEffect } from 'react';
 
@@ -13,10 +14,12 @@ import {
   Modal,
   Alert,
   Radio,
+  Stack,
   Button,
   Select,
   Divider,
   MenuItem,
+  TextField,
   Typography,
   IconButton,
   InputLabel,
@@ -29,11 +32,11 @@ import { useRouter } from 'src/routes/hooks';
 
 // API hooks
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
+import { useUpdateArticleMutation } from 'src/services/apis/articlesApi';
+import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 import { usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
 
 import { Iconify } from 'src/components/iconify';
-
-import type { ArticleSection } from '../../schemas';
 
 interface PublishModalProps {
   open: boolean;
@@ -48,21 +51,34 @@ interface PublishModalProps {
     language: string;
     targetCountry: string;
     createdAt: string;
+    status: string;
   };
-  sections: ArticleSection[];
 }
 
-export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }: PublishModalProps) => {
+export const PublishModal = ({ open, onClose, articleId, articleInfo }: PublishModalProps) => {
   // Hooks
   const router = useRouter();
 
+  const articleStatus = articleInfo.status
+
   // API hooks
   const { data: storesData, isLoading: isLoadingStores } = useGetStoresQuery();
+  const [updateArticle] = useUpdateArticleMutation();
   const [publishWordPress] = usePublishWordPressMutation();
+  const [scheduleArticle] = useScheduleArticleMutation();
 
   // State
   const [selectedStore, setSelectedStore] = useState<number | null>(null);
-  const [publishingSchedule, setPublishingSchedule] = useState('now');
+  const [publishingSchedule, setPublishingSchedule] = useState(
+    articleStatus === 'draft' ? 'now' : 'draft' // Default to 'draft' if article is already published/scheduled
+  );
+  const [schedulingSettings, setSchedulingSettings] = useState<{
+    date: string;
+    time: string;
+  }>({
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: format(new Date(), 'HH:mm')
+  });
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishingStep, setPublishingStep] = useState<'selection' | 'publishing' | 'success'>('selection');
   const [successMessage, setSuccessMessage] = useState('');
@@ -82,19 +98,86 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
 
   const isStoreSelected = (storeId: number) => selectedStore === storeId;
 
+  // Get current date and time for validation
+  const now = new Date();
+  const currentDate = format(now, 'yyyy-MM-dd');
+  const currentTime = format(now, 'HH:mm');
+
+  // Get minimum date (today)
+  const minDate = currentDate;
+
+  // Get minimum time (current time if date is today, otherwise 00:00)
+  const getMinTime = (selectedDate: string) => selectedDate === currentDate ? currentTime : '00:00';
+
+  // Update scheduling settings with validation
+  const updateSchedulingSettings = (updates: Partial<typeof schedulingSettings>) => {
+    const validatedUpdates = { ...updates };
+
+    // Validate date and time to prevent scheduling in the past
+    if (updates.date || updates.time) {
+      const finalDate = updates.date || schedulingSettings.date;
+      const finalTime = updates.time || schedulingSettings.time;
+
+      // If selecting today, ensure time is not in the past
+      if (finalDate === currentDate && finalTime < currentTime) {
+        validatedUpdates.time = currentTime;
+
+        // Show warning toast
+        toast.error('Cannot schedule in the past. Time updated to current time.', {
+          duration: 3000,
+          style: {
+            background: '#F59E0B',
+            color: 'white',
+            fontWeight: '600',
+            borderRadius: '8px',
+          },
+        });
+      }
+    }
+
+    setSchedulingSettings(prev => ({
+      ...prev,
+      ...validatedUpdates
+    }));
+  };
+
   useEffect(() => {
     if (open) {
-      console.log('📝 PublishModal opened with articleId:', articleId);
       setPublishingStep('selection');
       setIsPublishing(false);
       setSuccessMessage('');
       setSelectedStore(null); // Reset store selection to force user to choose
+      // Reset scheduling settings
+      setSchedulingSettings({
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: format(new Date(), 'HH:mm')
+      });
+      setPublishingSchedule(articleStatus === 'draft' ? 'now' : 'draft');
       setRedirectCountdown(3);
     }
-  }, [open, articleId]);
+  }, [open, articleId, articleStatus]);
 
-  // Handle publish action
   const handlePublish = async () => {
+    if (publishingSchedule === 'draft') {
+      try {
+        // Only update status if it's not already draft
+        if (articleStatus !== 'draft' && articleId) {
+          await updateArticle({
+            id: articleId,
+            data: { status: 'draft' }
+          }).unwrap();
+          toast.success('Article saved as draft successfully!');
+        }
+        router.push('/blog');
+        onClose();
+        return;
+      } catch (error) {
+        toast.error('Failed to save as draft. Please try again.');
+        return;
+      }
+    }
+
+    // Validate store selection for publish/schedule
     if (!selectedStore) {
       toast.error('Please select a store before publishing');
       return;
@@ -103,6 +186,22 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
     if (!articleId) {
       toast.error('Article ID is missing. Please save your article as a draft first.');
       return;
+    }
+
+    // Validate date for scheduling
+    if (publishingSchedule === 'schedule') {
+      if (!schedulingSettings.date || !schedulingSettings.time) {
+        toast.error('Please select a date and time for scheduling');
+        return;
+      }
+
+      // Check if scheduling in the past
+      const scheduledDateTime = `${schedulingSettings.date}T${schedulingSettings.time}:00.000Z`;
+      const scheduledDate = new Date(scheduledDateTime);
+      if (scheduledDate <= new Date()) {
+        toast.error('Please select a future date and time');
+        return;
+      }
     }
 
     setIsPublishing(true);
@@ -116,20 +215,18 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
         throw new Error('Store not found');
       }
 
-      const publishData: PublishRequest = {
-        store_id: selectedStore,
-        article_id: Number(articleId) || 0,
-        scheduled_date: new Date().toISOString(),
-      };
+      if (publishingSchedule === 'schedule') {
+        // Handle scheduling
+        const scheduledDateTime = `${schedulingSettings.date}T${schedulingSettings.time}:00.000Z`;
+        const scheduleData = {
+          store_id: selectedStore,
+          article_id: articleId,
+          scheduled_date: scheduledDateTime,
+        };
 
-      console.log('🚀 Publishing article with data:', publishData);
-
-      const platform = store.category?.toLowerCase();
-
-      if (platform === 'wordpress') {
-        // Use WordPress API
-        await publishWordPress(publishData).unwrap();
-        setSuccessMessage('Content published successfully!');
+        console.log('📅 Scheduling article with data:', scheduleData);
+        await scheduleArticle(scheduleData).unwrap();
+        setSuccessMessage('Article scheduled successfully!');
         setPublishingStep('success');
 
         // Start countdown for auto-redirect
@@ -146,8 +243,40 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
           });
         }, 1000);
       } else {
-        // For non-WordPress platforms, show not supported message
-        throw new Error(`Publishing to ${store.platform || 'this platform'} is not supported yet. Only WordPress is currently available.`);
+        // Handle immediate publishing
+        const publishData: PublishRequest = {
+          store_id: selectedStore,
+          article_id: Number(articleId) || 0,
+          scheduled_date: new Date().toISOString(),
+        };
+
+        console.log('🚀 Publishing article with data:', publishData);
+
+        const platform = store.category?.toLowerCase();
+
+        if (platform === 'wordpress') {
+          // Use WordPress API
+          await publishWordPress(publishData).unwrap();
+          setSuccessMessage('Content published successfully!');
+          setPublishingStep('success');
+
+          // Start countdown for auto-redirect
+          setRedirectCountdown(3);
+          const countdownInterval = setInterval(() => {
+            setRedirectCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                router.push('/blog');
+                onClose();
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        } else {
+          // For non-WordPress platforms, show not supported message
+          throw new Error(`Publishing to ${store.platform || 'this platform'} is not supported yet. Only WordPress is currently available.`);
+        }
       }
 
     } catch (error: any) {
@@ -166,7 +295,7 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
       } else if (error?.data?.message) {
         toast.error(error.data.message);
       } else {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to publish content. Please try again.';
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process request. Please try again.';
         toast.error(errorMessage);
       }
     } finally {
@@ -411,6 +540,18 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
               )}
             </Box>
 
+            {/* Status Info Alert */}
+            {articleStatus !== 'draft' && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="body2">
+                  {articleStatus === 'published'
+                    ? 'This article is already published. You can only save changes as a draft.'
+                    : 'This article is scheduled for publishing. You can only save changes as a draft.'
+                  }
+                </Typography>
+              </Alert>
+            )}
+
             {/* Publishing Schedule */}
             <Box sx={{ mb: 3 }}>
               <FormControl fullWidth>
@@ -420,12 +561,91 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                   label="Publishing Schedule"
                   onChange={(e) => setPublishingSchedule(e.target.value as string)}
                 >
-                  <MenuItem value="now">Publish Now</MenuItem>
-                  <MenuItem value="schedule">Schedule for Later</MenuItem>
+                  {/* Show "Publish Now" only for draft articles */}
+                  {articleStatus === 'draft' && (
+                    <MenuItem value="now">Publish Now</MenuItem>
+                  )}
+
+                  {/* Show "Schedule for Later" only for draft articles */}
+                  {articleStatus === 'draft' && (
+                    <MenuItem value="schedule">Schedule for Later</MenuItem>
+                  )}
+
+                  {/* Always show "Save as Draft" */}
                   <MenuItem value="draft">Save as Draft</MenuItem>
                 </Select>
               </FormControl>
             </Box>
+
+            {/* Date and Time Selection - Show only when scheduling */}
+            {publishingSchedule === 'schedule' && (
+              <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                <TextField
+                  type="date"
+                  label="Select Date"
+                  value={schedulingSettings.date}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    // If selecting today and current time is in the past, update time to current
+                    if (newDate === currentDate && schedulingSettings.time < currentTime) {
+                      updateSchedulingSettings({
+                        date: newDate,
+                        time: currentTime
+                      });
+                    } else {
+                      updateSchedulingSettings({ date: newDate });
+                    }
+                  }}
+                  size="small"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: minDate, // Prevent selecting past dates
+                  }}
+                  sx={{
+                    '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      opacity: 0.7,
+                      '&:hover': {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+                <TextField
+                  type="time"
+                  label="Select Time"
+                  value={schedulingSettings.time}
+                  onChange={(e) => updateSchedulingSettings({ time: e.target.value })}
+                  size="small"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: getMinTime(schedulingSettings.date), // Prevent selecting past times for today
+                  }}
+                  sx={{
+                    '& input[type="time"]::-webkit-calendar-picker-indicator': {
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      opacity: 0.7,
+                      '&:hover': {
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              </Stack>
+            )}
+
+            {/* Draft Info - Show when Save as Draft is selected */}
+            {publishingSchedule === 'draft' && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="body2">
+                  Your article will be saved and you&apos;ll be redirected to the blog page. You can publish it later from there.
+                </Typography>
+              </Alert>
+            )}
 
             {/* Action Buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
@@ -457,11 +677,17 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo, sections }
                   onClick={handlePublish}
                   disabled={
                     isPublishing ||
+                    // For draft, no validation needed
+                    (publishingSchedule === 'draft' ? false :
+                    // For publish/schedule, need store selection
                     !selectedStore ||
+                    // For schedule, also need date and time selection
+                    (publishingSchedule === 'schedule' && (!schedulingSettings.date || !schedulingSettings.time)) ||
+                    // Check if store supports WordPress
                     (() => {
                       const store = stores.find(s => s.id === selectedStore);
-                      return store?.category?.toLowerCase() !== 'wordpress';
-                    })()
+                      return publishingSchedule !== 'draft' && store?.category?.toLowerCase() !== 'wordpress';
+                    })())
                   }
                   startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
                   sx={{

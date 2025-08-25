@@ -273,6 +273,7 @@ export function ArticleActionsMenu({
   // Get form data for final step actions
   const getArticleData = () => ({
       articleInfo: {
+        status: article.status,
         title: article.title || article.article_title || '',
         urlSlug: article.url_slug || '',
         metaTitle: article.meta_title || '',
@@ -542,7 +543,6 @@ export function ArticleActionsMenu({
         onClose={() => setPublishModalOpen(false)}
         articleId={article.id.toString()}
         articleInfo={getArticleData().articleInfo}
-        sections={sections}
       />
 
       {/* Schedule Modal */}

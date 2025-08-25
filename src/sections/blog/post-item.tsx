@@ -10,7 +10,6 @@ import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -136,6 +135,9 @@ export function PostItem({
         WebkitLineClamp: 2,
         display: '-webkit-box',
         WebkitBoxOrient: 'vertical',
+        wordBreak: 'break-word',
+        hyphens: 'auto',
+        maxWidth: '100%',
         ...(latestPostLarge && { typography: 'h5', height: 60 }),
         ...((latestPostLarge || latestPost) && {
           color: 'common.white',
@@ -279,48 +281,7 @@ export function PostItem({
         />
       )}
     </Box>
-  );
-
-  // Render platform icons for published posts
-  const renderPlatforms = (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        zIndex: 10,
-        display: 'flex',
-        gap: 0.5,
-      }}
-    >
-      {platforms.map((platform) => {
-        const { icon, color, name } = PLATFORM_ICONS[platform as keyof typeof PLATFORM_ICONS] || PLATFORM_ICONS.default;
-        return (
-          <Tooltip key={platform} title={name} arrow>
-            <Box
-              sx={{
-                width: 28,
-                height: 28,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                backgroundColor: alpha(color, 0.9),
-                color: '#fff',
-                boxShadow: `0 2px 4px ${alpha(color, 0.4)}`,
-                transition: 'transform 0.2s ease-in-out',
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                }
-              }}
-            >
-              <Iconify icon={icon} width={16} height={16} />
-            </Box>
-          </Tooltip>
-        );
-      })}
-    </Box>
-  );
+  )
 
   // Render scheduled info for scheduled articles (now more subtle since date is in status)
   const renderScheduledInfo = post.status === 'scheduled' && post.scheduled_publish_date && (

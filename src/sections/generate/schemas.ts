@@ -119,6 +119,7 @@ export const generateArticleSchema = z.object({
   template_name: z.string().default('template1'),
   template_id: z.string().default('template1'),
   use_single_template: z.boolean().default(false),
+  status: z.enum(["draft", "published", "scheduled"])
 });
 
 // Export types for link management

@@ -30,6 +30,21 @@ import { StepNavigation } from './components/StepNavigation';
 // Types and constants
 import { generateArticleSchema, type GenerateArticleFormData } from './schemas';
 
+// Status mapper utility function to handle DTO vs Form schema mismatch
+// Article DTO uses: 'draft' | 'publish' | 'scheduled'
+// Form schema uses: 'draft' | 'published' | 'scheduled'
+const mapDtoStatusToFormStatus = (dtoStatus: 'draft' | 'publish' | 'scheduled'): 'draft' | 'published' | 'scheduled' => {
+  switch (dtoStatus) {
+    case 'publish':
+      return 'published';
+    case 'draft':
+      return 'draft';
+    case 'scheduled':
+      return 'scheduled';
+    default:
+      return 'draft';
+  }
+};
 
 export function GeneratingView() {
   const [activeStep, setActiveStep] = useState(0);
@@ -212,6 +227,7 @@ export function GeneratingView() {
       step3: {
         sections: [],
       },
+      status: 'draft',
       images: '',
       faq: '',
       toc: '',
@@ -266,6 +282,7 @@ export function GeneratingView() {
         template_name: selectedArticle.template_name || baseDefaults.template_name,
         template_id: selectedArticle.template_name || templateId || 'template1',
         use_single_template: Boolean(selectedArticle.template_name || templateId),
+        status: mapDtoStatusToFormStatus(selectedArticle.status)
       };
     }
 

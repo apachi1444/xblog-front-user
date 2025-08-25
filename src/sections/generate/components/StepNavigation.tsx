@@ -174,7 +174,7 @@ export const StepNavigation = ({
               images: values.images?.length ? JSON.stringify(values.images) : null,
               faq: values.faq?.length ? JSON.stringify(values.faq) : null,
 
-              status: 'draft' as const,
+              status: values.status,
             };
 
             await articleDraft.updateArticle(articleId, requestBody);
@@ -233,6 +233,7 @@ export const StepNavigation = ({
         targetCountry: values.step1?.targetCountry || 'us',
         contentDescription: values.step1?.contentDescription || '',
         createdAt: new Date().toISOString(),
+        status: values.status
       },
       sections: values.step3?.sections || [],
       generatedHtml: values.generatedHtml || ''
@@ -399,7 +400,6 @@ export const StepNavigation = ({
             onClose={() => setPublishModalOpen(false)}
             articleId={articleId} // Pass the article ID to PublishModal
             articleInfo={getArticleData().articleInfo}
-            sections={getArticleData().sections}
           />
         </>
       )}

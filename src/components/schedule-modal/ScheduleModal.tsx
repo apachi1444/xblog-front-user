@@ -1,45 +1,33 @@
-import type { Store } from 'src/types/store';
 
+import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-import dayjs, { type Dayjs } from 'dayjs';
 import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMemo, useState, useEffect } from 'react';
 
-import { alpha, useTheme } from '@mui/material/styles';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import {
   Box,
-  Chip,
-  Card,
-  Alert,
+  Fade,
+  Modal,
   Stack,
-  Radio,
-  Dialog,
+  alpha,
   Button,
-  Divider,
+  Select,
+  useTheme,
+  MenuItem,
+  TextField,
   Typography,
-  RadioGroup,
-  DialogTitle,
-  CardContent,
-  DialogContent,
-  DialogActions,
+  IconButton,
+  InputLabel,
+  FormControl,
   CircularProgress,
-  FormControlLabel,
 } from '@mui/material';
 
-import { useRouter } from 'src/routes/hooks';
-
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
-import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
-
-
 
 interface ScheduleModalProps {
   open: boolean;
@@ -51,72 +39,97 @@ interface ScheduleModalProps {
 export function ScheduleModal({ open, onClose, articleId, articleTitle }: ScheduleModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const router = useRouter();
 
+  // Get current store and all stores
   const currentStore = useSelector(selectCurrentStore);
-  const storeId = currentStore?.id || 1;
+  const { data: storesData } = useGetStoresQuery();
+  const stores = storesData?.stores || [];
 
   // API hooks
   const [scheduleArticle, { isLoading }] = useScheduleArticleMutation();
-  const { data: articlesData } = useGetArticlesQuery({ store_id: storeId });
-  const { data: storesData, isLoading: isLoadingStores, refetch: refetchStores } = useGetStoresQuery();
 
-  // State management
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
-  const [selectedStore, setSelectedStore] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // Get stores from API with useMemo to prevent unnecessary re-renders
-  const stores = useMemo(() => storesData?.stores || [], [storesData?.stores]);
-
-  // Get scheduled articles from API data
-  const scheduledArticles = articlesData?.articles?.filter(article => article.status === 'scheduled') || [];
-
-  // Filter articles for selected date
-  const articlesOnSelectedDate = scheduledArticles.filter(article => {
-    if (!selectedDate || !article.scheduled_publish_date) return false;
-    const articleDate = dayjs(article.scheduled_publish_date);
-    return articleDate.isSame(selectedDate, 'day');
+  // Enhanced scheduling state - similar to SchedulingModal
+  const [articleSchedulingSettings, setArticleSchedulingSettings] = useState<{
+    storeId: number;
+    date: string;
+    time: string;
+  }>({
+    storeId: currentStore?.id || 1,
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: format(new Date(), 'HH:mm')
   });
 
-  // Check for time conflicts (within 30 minutes)
-  const hasTimeConflict = (newDate: Dayjs) => articlesOnSelectedDate.some(article => {
-      if (!article.scheduled_publish_date) return false;
-      const existingDate = dayjs(article.scheduled_publish_date);
-      const timeDiff = Math.abs(newDate.diff(existingDate, 'minute'));
-      return timeDiff < 30; // 30 minutes
-    });
+  // Get current date and time for validation
+  const now = new Date();
+  const currentDate = format(now, 'yyyy-MM-dd');
+  const currentTime = format(now, 'HH:mm');
 
-  const timeConflict = selectedDate ? hasTimeConflict(selectedDate) : false;
+  // Get minimum date (today)
+  const minDate = currentDate;
+
+  // Get minimum time (current time if date is today, otherwise 00:00)
+  const getMinTime = (selectedDate: string) => selectedDate === currentDate ? currentTime : '00:00';
+
+  // Update scheduling settings with validation
+  const updateSchedulingSettings = (updates: Partial<typeof articleSchedulingSettings>) => {
+    const validatedUpdates = { ...updates };
+
+    // Validate date and time to prevent scheduling in the past
+    if (updates.date || updates.time) {
+      const finalDate = updates.date || articleSchedulingSettings.date;
+      const finalTime = updates.time || articleSchedulingSettings.time;
+
+      // If selecting today, ensure time is not in the past
+      if (finalDate === currentDate && finalTime < currentTime) {
+        validatedUpdates.time = currentTime;
+
+        // Show warning toast
+        toast.error(t('calendar.pastTimeWarning', 'Cannot schedule in the past. Time updated to current time.'), {
+          duration: 3000,
+          style: {
+            background: '#F59E0B',
+            color: 'white',
+            fontWeight: '600',
+            borderRadius: '8px',
+          },
+        });
+      }
+    }
+
+    setArticleSchedulingSettings(prev => ({
+      ...prev,
+      ...validatedUpdates
+    }));
+  };
 
   // Handle scheduling
   const handleSchedule = async () => {
     if (isLoading) return; // Prevent double-clicking
 
-    if (!selectedStore) {
-      setError('Please select a store before scheduling');
+    // Validate inputs
+    if (!articleSchedulingSettings.storeId) {
       toast.error('Please select a store before scheduling');
       return;
     }
 
-    if (!selectedDate) {
-      setError('Please select a date and time');
+    if (!articleSchedulingSettings.date || !articleSchedulingSettings.time) {
+      toast.error('Please select a date and time');
       return;
     }
 
-    if (selectedDate.isBefore(dayjs())) {
-      setError('Please select a future date and time');
+    // Check if scheduling in the past
+    const scheduledDateTime = `${articleSchedulingSettings.date}T${articleSchedulingSettings.time}:00.000Z`;
+    const scheduledDate = new Date(scheduledDateTime);
+    if (scheduledDate <= new Date()) {
+      toast.error('Please select a future date and time');
       return;
     }
-
-    setError(null);
 
     try {
-      // Call the schedule article API
       await scheduleArticle({
-        store_id: selectedStore,
+        store_id: articleSchedulingSettings.storeId,
         article_id: articleId,
-        scheduled_date: selectedDate.toISOString(),
+        scheduled_date: scheduledDateTime,
       }).unwrap();
 
       // Success - close modal and show success message
@@ -125,113 +138,134 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
         icon: '📅',
       });
 
-      // Close modal after a short delay to let user see the success message
-      setTimeout(() => {
-        onClose();
-      }, 500);
-    } catch (err: any) {
-      setError(err?.data?.message || 'Failed to schedule article. Please try again.');
-      toast.error('Failed to schedule article. Please try again.');
+      onClose();
+    } catch (error: any) {
+      console.error('❌ Failed to schedule article:', error);
+      const errorMessage = error?.data?.message || 'Failed to schedule article. Please try again.';
+      toast.error(errorMessage);
     }
   };
 
-  // Reset state when modal opens and refetch stores
+  // Reset state when modal opens
   useEffect(() => {
     if (open) {
-      setSelectedDate(null);
-      setSelectedStore(null);
-      setError(null);
-      refetchStores();
+      setArticleSchedulingSettings({
+        storeId: currentStore?.id || 1,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: format(new Date(), 'HH:mm')
+      });
     }
-  }, [open, refetchStores, storesData, stores, isLoadingStores]);
-
-  const formatTime = (dateString: string) => dayjs(dateString).format('h:mm A');
+  }, [open, currentStore]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="md"
-        fullWidth
-        sx={{
-          zIndex: 1300, // Ensure dialog is above other elements
-        }}
-        PaperProps={{
-          sx: {
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="schedule-modal-title"
+      closeAfterTransition
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Fade in={open}>
+        <Box
+          sx={{
+            width: { xs: '90%', sm: 500 },
+            maxHeight: '90vh',
+            bgcolor: 'background.paper',
             borderRadius: 2,
-            minHeight: 500,
-          }
-        }}
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Iconify icon="mdi:calendar-clock" width={20} height={20} sx={{ color: theme.palette.primary.main }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {t('schedule.title', 'Schedule Article')}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {articleTitle}
-              </Typography>
-            </Box>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent sx={{ pt: 2 }}>
-          <Stack spacing={3}>
-            {/* Store Selection */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
-                {t('schedule.selectStore', 'Select Store')}
-              </Typography>
-              {isLoadingStores ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : stores.length > 0 ? (
-                <RadioGroup
-                  value={selectedStore?.toString() || ''}
-                  onChange={(e) => {
-                    setSelectedStore(Number(e.target.value));
+            boxShadow: 24,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              p: 3,
+              borderBottom: `1px solid ${alpha(theme.palette.grey[500], 0.12)}`,
+              bgcolor: alpha(theme.palette.primary.main, 0.04),
+            }}
+          >
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  {stores.map((store: Store) => (
-                    <FormControlLabel
-                      key={store.id}
-                      value={store.id.toString()}
-                      control={<Radio />}
-                      sx={{
-                        width: '100%',
-                        margin: 0,
-                        padding: 1,
-                        borderRadius: 1,
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
-                        cursor: 'pointer',
-                      }}
-                      label={
+                  <Iconify icon="eva:calendar-fill" width={24} height={24} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    {t('calendar.scheduleArticle', 'Schedule Article')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ 
+                    maxWidth: 300,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {articleTitle}
+                  </Typography>
+                </Box>
+              </Stack>
+              <IconButton
+                onClick={onClose}
+                sx={{
+                  bgcolor: alpha(theme.palette.grey[500], 0.08),
+                  '&:hover': { 
+                    bgcolor: alpha(theme.palette.grey[500], 0.16),
+                    transform: 'scale(1.05)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Iconify icon="eva:close-fill" width={20} height={20} />
+              </IconButton>
+            </Stack>
+          </Box>
+
+          {/* Content */}
+          <Box
+            sx={{
+              flex: 1,
+              overflow: 'auto',
+              p: 3,
+            }}
+          >
+            <Stack spacing={3}>
+              {/* Store Selection */}
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                  {t('calendar.selectStore', 'Select Store')}
+                </Typography>
+                <FormControl fullWidth size="small">
+                  <InputLabel>{t('calendar.store', 'Store')}</InputLabel>
+                  <Select
+                    value={articleSchedulingSettings.storeId}
+                    label={t('calendar.store', 'Store')}
+                    onChange={(e) => updateSchedulingSettings({ storeId: Number(e.target.value) })}
+                  >
+                    {stores.map((store) => (
+                      <MenuItem key={store.id} value={store.id}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {store.logo ? (
                             <img
                               src={store.logo}
                               alt={store.name}
                               style={{
-                                width: 24,
-                                height: 24,
+                                width: 20,
+                                height: 20,
                                 borderRadius: '50%',
                                 objectFit: 'cover',
                               }}
@@ -242,194 +276,132 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
                           ) : (
                             <Box
                               sx={{
-                                width: 24,
-                                height: 24,
+                                width: 20,
+                                height: 20,
                                 borderRadius: '50%',
                                 bgcolor: 'primary.main',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 color: 'white',
-                                fontSize: '12px',
+                                fontSize: '10px',
                                 fontWeight: 'bold',
                               }}
                             >
                               {store.name.charAt(0).toUpperCase()}
                             </Box>
                           )}
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {store.name}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {store.category || 'Website'}
-                            </Typography>
-                          </Box>
+                          <Typography variant="body2">{store.name}</Typography>
                         </Box>
-                      }
-                    />
-                  ))}
-                </RadioGroup>
-              ) : (
-                <Alert
-                  severity="warning"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        router.push('/stores/add');
-                        onClose();
-                      }}
-                      startIcon={<Iconify icon="eva:plus-fill" />}
-                      sx={{
-                        borderColor: 'warning.main',
-                        color: 'warning.main',
-                        '&:hover': {
-                          borderColor: 'warning.dark',
-                          backgroundColor: 'warning.light',
-                        }
-                      }}
-                    >
-                      {t('schedule.addWebsite', 'Add Website')}
-                    </Button>
-                  }
-                >
-                  {t('schedule.noStores', 'No stores available. Please connect a store first.')}
-                </Alert>
-              )}
-            </Box>
-
-            {/* Date Time Picker */}
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
-                {t('schedule.selectDateTime', 'Select Date & Time')}
-              </Typography>
-              <DateTimePicker
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                minDateTime={dayjs()}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!error && !selectedDate,
-                    helperText: !selectedDate ? 'Please select a date and time' : '',
-                  }
-                }}
-              />
-            </Box>
-
-            {/* Time Conflict Warning */}
-            {timeConflict && (
-              <Alert severity="warning" icon={<Iconify icon="mdi:clock-alert" />}>
-                <Typography variant="body2">
-                  {t('schedule.timeConflict', 'Another article is scheduled within 30 minutes of this time. Consider choosing a different time to avoid conflicts.')}
-                </Typography>
-              </Alert>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <Alert severity="error" icon={<Iconify icon="mdi:alert-circle" />}>
-                <Typography variant="body2">{error}</Typography>
-              </Alert>
-            )}
-
-            {/* Scheduled Articles for Selected Date */}
-            {selectedDate && articlesOnSelectedDate.length > 0 && (
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
-                  {t('schedule.scheduledArticles', 'Articles Scheduled for')} {selectedDate.format('MMMM D, YYYY')}
-                </Typography>
-                <Stack spacing={1}>
-                  {articlesOnSelectedDate.map((article) => (
-                    <Card key={article.id} variant="outlined" sx={{ bgcolor: alpha(theme.palette.info.main, 0.04) }}>
-                      <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {article.article_title || article.title || 'Untitled Article'}
-                          </Typography>
-                          <Chip
-                            label={article.scheduled_publish_date ? formatTime(article.scheduled_publish_date) : 'No time set'}
-                            size="small"
-                            color="info"
-                            variant="outlined"
-                          />
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
-            )}
 
-            {/* Scheduling Tips */}
-            <Box sx={{ p: 2, bgcolor: alpha(theme.palette.primary.main, 0.04), borderRadius: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.primary.main }}>
-                <Iconify icon="mdi:lightbulb" width={16} height={16} sx={{ mr: 0.5 }} />
-                {t('schedule.tips', 'Scheduling Tips')}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                • {t('schedule.tip1', 'Schedule during peak audience hours for better engagement')}<br />
-                • {t('schedule.tip2', 'Allow at least 30 minutes between articles')}<br />
-                • {t('schedule.tip3', 'You can reschedule or cancel anytime from the calendar')}
-              </Typography>
-            </Box>
-          </Stack>
-        </DialogContent>
+              {/* Date and Time Selection */}
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  type="date"
+                  label={t('calendar.selectDate', 'Select Date')}
+                  value={articleSchedulingSettings.date}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    // If selecting today and current time is in the past, update time to current
+                    if (newDate === currentDate && articleSchedulingSettings.time < currentTime) {
+                      updateSchedulingSettings({
+                        date: newDate,
+                        time: currentTime
+                      });
+                    } else {
+                      updateSchedulingSettings({ date: newDate });
+                    }
+                  }}
+                  size="small"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: minDate, // Prevent selecting past dates
+                  }}
+                />
+                <TextField
+                  type="time"
+                  label={t('calendar.selectTime', 'Select Time')}
+                  value={articleSchedulingSettings.time}
+                  onChange={(e) => updateSchedulingSettings({ time: e.target.value })}
+                  size="small"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{
+                    min: getMinTime(articleSchedulingSettings.date), // Prevent selecting past times for today
+                  }}
+                />
+              </Stack>
+            </Stack>
+          </Box>
 
-        <Divider />
-
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          {/* Show "Add Website" button when no stores available */}
-          {stores.length === 0 ? (
-            <Button
-              variant="contained"
-              onClick={() => {
-                router.push('/stores/add');
-                onClose();
-              }}
-              startIcon={<Iconify icon="eva:plus-fill" />}
-              sx={{
-                bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                }
-              }}
-            >
-              {t('schedule.addWebsite', 'Add Website')}
-            </Button>
-          ) : (
-            <>
-              <Button onClick={onClose} variant="outlined" disabled={isLoading}>
+          {/* Footer */}
+          <Box
+            sx={{
+              p: 3,
+              borderTop: `1px solid ${alpha(theme.palette.grey[500], 0.12)}`,
+              bgcolor: 'background.paper',
+            }}
+          >
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                onClick={onClose}
+                disabled={isLoading}
+                sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
                 {t('common.cancel', 'Cancel')}
               </Button>
               <Button
-                onClick={handleSchedule}
                 variant="contained"
-                disabled={
-                  isLoading ||
-                  !selectedStore ||
-                  !selectedDate ||
-                  selectedDate.isBefore(dayjs()) ||
-                  stores.length === 0
-                }
-                startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="mdi:calendar-check" />}
+                onClick={handleSchedule}
+                disabled={isLoading || !articleSchedulingSettings.storeId || !articleSchedulingSettings.date || !articleSchedulingSettings.time}
                 sx={{
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontWeight: 600,
                   minWidth: 140,
-                  '&:disabled': {
-                    bgcolor: 'action.disabledBackground',
-                    color: 'action.disabled',
-                  }
+                  bgcolor: 'primary.main',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
                 }}
               >
-                {isLoading ? t('schedule.scheduling', 'Scheduling...') : t('schedule.scheduleNow', 'Schedule Article')}
+                {isLoading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress
+                      size={16}
+                      sx={{
+                        color: 'inherit',
+                        animation: 'spin 1s linear infinite',
+                        '@keyframes spin': {
+                          '0%': { transform: 'rotate(0deg)' },
+                          '100%': { transform: 'rotate(360deg)' },
+                        },
+                      }}
+                    />
+                    {t('calendar.scheduling', 'Scheduling...')}
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Iconify icon="eva:calendar-fill" width={16} height={16} />
+                    {t('calendar.schedule', 'Schedule')}
+                  </Box>
+                )}
               </Button>
-            </>
-          )}
-        </DialogActions>
-      </Dialog>
-    </LocalizationProvider>
+            </Stack>
+          </Box>
+        </Box>
+      </Fade>
+    </Modal>
   );
 }
