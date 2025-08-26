@@ -25,7 +25,7 @@ import {
 
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
-import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
+import { useDeleteCalendarMutation, useScheduleArticleMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -34,9 +34,10 @@ interface ScheduleModalProps {
   onClose: () => void;
   articleId: string;
   articleTitle: string;
+  isReschedule?: boolean; // Flag to indicate this is a reschedule operation
 }
 
-export function ScheduleModal({ open, onClose, articleId, articleTitle }: ScheduleModalProps) {
+export function ScheduleModal({ open, onClose, articleId, articleTitle, isReschedule = false }: ScheduleModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -47,6 +48,8 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
 
   // API hooks
   const [scheduleArticle, { isLoading }] = useScheduleArticleMutation();
+  const [deleteCalendar] = useDeleteCalendarMutation();
+  const { data: calendarData } = useGetScheduledArticlesQuery();
 
   // Enhanced scheduling state - similar to SchedulingModal
   const [articleSchedulingSettings, setArticleSchedulingSettings] = useState<{
@@ -126,14 +129,65 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
     }
 
     try {
+      // If this is a reschedule operation, first delete the existing schedule
+      if (isReschedule) {
+        console.log('🔄 Starting reschedule process for article:', articleId);
+        console.log('📊 Available calendar data:', calendarData);
+
+        // Find the existing calendar entry for this article
+        const existingEntry = calendarData?.calendars?.find(
+          (entry) => entry.article_id === parseInt(articleId, 10)
+        );
+
+        console.log('🔍 Found existing entry:', existingEntry);
+
+        if (existingEntry) {
+          console.log('🗑️ Deleting existing schedule with ID:', existingEntry.id);
+
+          // Show loading toast for unscheduling
+          toast.loading('Unscheduling existing appointment...', { id: 'unschedule' });
+
+          try {
+            await deleteCalendar(existingEntry.id).unwrap();
+            console.log('✅ Successfully deleted existing schedule');
+            toast.success('Existing schedule removed', { id: 'unschedule' });
+          } catch (deleteError) {
+            console.error('❌ Failed to delete existing schedule:', deleteError);
+            toast.error('Failed to remove existing schedule', { id: 'unschedule' });
+            throw deleteError; // Stop the process if unscheduling fails
+          }
+        } else {
+          console.warn('⚠️ No existing calendar entry found for article:', articleId);
+          console.log('Available calendar entries:', calendarData?.calendars?.map(entry => ({
+            id: entry.id,
+            article_id: entry.article_id,
+            scheduled_date: entry.scheduled_date
+          })));
+        }
+      }
+
+      // Show loading toast for scheduling
+      toast.loading('Creating new schedule...', { id: 'schedule' });
+
+      // Create the new schedule
       await scheduleArticle({
         store_id: articleSchedulingSettings.storeId,
         article_id: articleId,
         scheduled_date: scheduledDateTime,
       }).unwrap();
 
+      console.log('✅ Successfully created new schedule');
+
       // Success - close modal and show success message
-      toast.success(t('schedule.success', 'Article scheduled successfully!'), {
+      const successMessage = isReschedule
+        ? t('schedule.rescheduleSuccess', 'Article rescheduled successfully!')
+        : t('schedule.success', 'Article scheduled successfully!');
+
+      // Clear any loading toasts and show success
+      toast.dismiss('unschedule');
+      toast.dismiss('schedule');
+
+      toast.success(successMessage, {
         duration: 3000,
         icon: '📅',
       });
@@ -141,6 +195,11 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
       onClose();
     } catch (error: any) {
       console.error('❌ Failed to schedule article:', error);
+
+      // Clear any loading toasts
+      toast.dismiss('unschedule');
+      toast.dismiss('schedule');
+
       const errorMessage = error?.data?.message || 'Failed to schedule article. Please try again.';
       toast.error(errorMessage);
     }
@@ -149,13 +208,37 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
-      setArticleSchedulingSettings({
-        storeId: currentStore?.id || 1,
-        date: format(new Date(), 'yyyy-MM-dd'),
-        time: format(new Date(), 'HH:mm')
-      });
+      if (isReschedule) {
+        // For reschedule, find and pre-populate with existing schedule
+        const existingEntry = calendarData?.calendars?.find(
+          (entry) => entry.article_id === parseInt(articleId, 10)
+        );
+
+        if (existingEntry && existingEntry.scheduled_date) {
+          const existingDate = new Date(existingEntry.scheduled_date);
+          setArticleSchedulingSettings({
+            storeId: existingEntry.store_id || currentStore?.id || 1,
+            date: format(existingDate, 'yyyy-MM-dd'),
+            time: format(existingDate, 'HH:mm')
+          });
+        } else {
+          // Fallback to current date/time if no existing schedule found
+          setArticleSchedulingSettings({
+            storeId: currentStore?.id || 1,
+            date: format(new Date(), 'yyyy-MM-dd'),
+            time: format(new Date(), 'HH:mm')
+          });
+        }
+      } else {
+        // For new schedule, use current date/time
+        setArticleSchedulingSettings({
+          storeId: currentStore?.id || 1,
+          date: format(new Date(), 'yyyy-MM-dd'),
+          time: format(new Date(), 'HH:mm')
+        });
+      }
     }
-  }, [open, currentStore]);
+  }, [open, currentStore, isReschedule, calendarData, articleId]);
 
   return (
     <Modal
@@ -207,7 +290,10 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle }: Schedu
                 </Box>
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                    {t('calendar.scheduleArticle', 'Schedule Article')}
+                    {isReschedule
+                      ? t('calendar.rescheduleArticle', 'Reschedule Article')
+                      : t('calendar.scheduleArticle', 'Schedule Article')
+                    }
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ 
                     maxWidth: 300,

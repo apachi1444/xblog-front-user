@@ -32,6 +32,22 @@ import { ScheduleModal } from 'src/components/schedule-modal';
 
 import { PublishModal } from 'src/sections/generate/generate-steps/modals/PublishModal';
 
+// Status mapper utility function to handle DTO vs Form schema mismatch
+// Article DTO uses: 'draft' | 'publish' | 'scheduled'
+// Form schema uses: 'draft' | 'published' | 'scheduled'
+const mapDtoStatusToFormStatus = (dtoStatus: 'draft' | 'publish' | 'scheduled'): 'draft' | 'published' | 'scheduled' => {
+  switch (dtoStatus) {
+    case 'publish':
+      return 'published';
+    case 'draft':
+      return 'draft';
+    case 'scheduled':
+      return 'scheduled';
+    default:
+      return 'draft';
+  }
+};
+
 interface ArticleActionsMenuProps {
   article: Article;
   sections?: any[];
@@ -60,9 +76,11 @@ export function ArticleActionsMenu({
   // State management
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [unscheduleDialogOpen, setUnscheduleDialogOpen] = useState(false);
+  const [editWarningDialogOpen, setEditWarningDialogOpen] = useState(false);
 
   const menuOpen = Boolean(anchorEl);
 
@@ -76,16 +94,16 @@ export function ArticleActionsMenu({
 
   // Auto-close menu when modals open
   useEffect(() => {
-    if (deleteDialogOpen || publishModalOpen || scheduleModalOpen || unscheduleDialogOpen) {
+    if (deleteDialogOpen || duplicateDialogOpen || publishModalOpen || scheduleModalOpen || unscheduleDialogOpen || editWarningDialogOpen) {
       setAnchorEl(null);
     }
-  }, [deleteDialogOpen, publishModalOpen, scheduleModalOpen, unscheduleDialogOpen]);
+  }, [deleteDialogOpen, duplicateDialogOpen, publishModalOpen, scheduleModalOpen, unscheduleDialogOpen, editWarningDialogOpen]);
 
   // Prevent navigation when modals are open
   // eslint-disable-next-line consistent-return
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
-      if (deleteDialogOpen || publishModalOpen) {
+      if (deleteDialogOpen || duplicateDialogOpen || publishModalOpen) {
         // Check if click is outside modal content
         const target = event.target as Element;
         const isModalClick = target.closest('[role="dialog"]') ||
@@ -99,13 +117,13 @@ export function ArticleActionsMenu({
       }
     };
 
-    if (deleteDialogOpen || publishModalOpen) {
+    if (deleteDialogOpen || duplicateDialogOpen || publishModalOpen) {
       document.addEventListener('click', handleGlobalClick, true);
       return () => {
         document.removeEventListener('click', handleGlobalClick, true);
       };
     }
-  }, [deleteDialogOpen, publishModalOpen]);
+  }, [deleteDialogOpen, duplicateDialogOpen, publishModalOpen]);
 
   // Menu handlers
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -119,6 +137,16 @@ export function ArticleActionsMenu({
 
   const handleEdit = (event?: React.MouseEvent) => {
     event?.stopPropagation(); // Prevent event bubbling
+
+    // Check if article is published and show warning modal
+    const mappedStatus = mapDtoStatusToFormStatus(article.status);
+    if (mappedStatus === 'published') {
+      setEditWarningDialogOpen(true);
+      handleMenuClose();
+      return;
+    }
+
+    // For draft and scheduled articles, proceed with normal edit
     if (onEdit) {
       onEdit();
     } else {
@@ -132,6 +160,11 @@ export function ArticleActionsMenu({
     handleMenuClose();
   };
 
+  const handleDuplicateClick = () => {
+    setDuplicateDialogOpen(true);
+    handleMenuClose();
+  };
+
   const handleScheduleClick = () => {
     setScheduleModalOpen(true);
     handleMenuClose();
@@ -142,9 +175,9 @@ export function ArticleActionsMenu({
     handleMenuClose();
   };
 
-  // Handle duplicate article
-  const handleDuplicateClick = async () => {
-    handleMenuClose();
+  // Handle duplicate article confirmation
+  const handleDuplicateConfirm = async (event?: React.MouseEvent) => {
+    event?.stopPropagation(); // Prevent event bubbling
 
     try {
       toast.loading('Duplicating article...', { id: 'duplicate-article' });
@@ -186,6 +219,7 @@ export function ArticleActionsMenu({
     } catch (error: any) {
       toast.error('Failed to duplicate article. Please try again.', { id: 'duplicate-article' });
     }
+    setDuplicateDialogOpen(false);
   };
 
   const handleDeleteConfirm = async (event?: React.MouseEvent) => {
@@ -242,6 +276,56 @@ export function ArticleActionsMenu({
       setPublishModalOpen(true);
     }
     handleMenuClose();
+  };
+
+  // Handle creating draft copy for published articles
+  const handleCreateDraftCopy = async () => {
+    try {
+      toast.loading(t('common.creatingDraft', 'Creating draft copy...'), { id: 'create-draft' });
+
+      // Use the existing duplicate functionality
+      const duplicateData = {
+        title: article.article_title || article.title || 'Untitled Article',
+        target_country: article.target_country || 'US',
+        language: article.language || 'en',
+        primary_keyword: article.primary_keyword || '',
+        secondary_keywords: article.secondary_keywords || '',
+        content_description: article.content_description || '',
+        article_title: article.article_title || article.title || '',
+        meta_title: article.meta_title || '',
+        meta_description: article.meta_description || '',
+        url_slug: article.url_slug || '',
+        article_type: article.article_type || 'blog',
+        article_size: article.article_size || 'small',
+        tone_of_voice: article.tone_of_voice || 'friendly',
+        point_of_view: article.point_of_view || 'first-person',
+        plagiat_removal: article.plagiat_removal || false,
+        include_cta: article.include_cta || false,
+        include_images: article.include_images || true,
+        include_videos: article.include_videos || false,
+        internal_links: article.internal_links || '',
+        external_links: article.external_links || '',
+        content: article.content || '',
+        sections: article.sections || '',
+        toc: article.toc || '',
+        images: article.images || '',
+        faq: article.faq || '',
+        featured_media: article.featured_media || '',
+        template_name: article.template_name || 'template1',
+        status: 'draft' as const, // Always create as draft
+      };
+
+      await createArticle(duplicateData).unwrap();
+
+      toast.success(t('common.draftCreated', 'Draft copy created successfully!'), { id: 'create-draft' });
+
+      // navigateToArticle(navigate, article.id);
+
+    } catch (error) {
+      console.error('Failed to create draft copy:', error);
+      toast.error(t('common.draftError', 'Failed to create draft copy. Please try again.'), { id: 'create-draft' });
+    }
+    setEditWarningDialogOpen(false);
   };
 
   // Button size configurations
@@ -341,7 +425,7 @@ export function ArticleActionsMenu({
   return (
     <>
       {/* Backdrop to prevent navigation when modals are open */}
-      {(deleteDialogOpen || publishModalOpen || scheduleModalOpen) && (
+      {(deleteDialogOpen || duplicateDialogOpen || publishModalOpen || scheduleModalOpen) && (
         <Box
           sx={{
             position: 'fixed',
@@ -500,6 +584,43 @@ export function ArticleActionsMenu({
         </DialogActions>
       </Dialog>
 
+      {/* Duplicate Confirmation Dialog */}
+      <Dialog
+        open={duplicateDialogOpen}
+        onClose={() => setDuplicateDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Iconify icon="mdi:content-copy" sx={{ color: 'primary.main' }} />
+            {t('common.confirmDuplicate', 'Confirm Duplicate')}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {t('common.duplicateConfirmMessage', 'Are you sure you want to duplicate this article? A copy will be created as a draft.')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {article.title || article.article_title || t('common.untitledArticle', 'Untitled Article')}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setDuplicateDialogOpen(false)} variant="outlined">
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button
+            onClick={handleDuplicateConfirm}
+            variant="contained"
+            color="primary"
+            disabled={isDuplicating}
+            startIcon={isDuplicating ? <CircularProgress size={16} /> : <Iconify icon="mdi:content-copy" />}
+          >
+            {isDuplicating ? t('common.duplicating', 'Duplicating...') : t('common.duplicate', 'Duplicate')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Unschedule Confirmation Dialog */}
       <Dialog
         open={unscheduleDialogOpen}
@@ -533,6 +654,43 @@ export function ArticleActionsMenu({
             startIcon={isUnscheduling ? <CircularProgress size={16} /> : <Iconify icon="mdi:calendar-remove" />}
           >
             {isUnscheduling ? t('common.unscheduling', 'Unscheduling...') : t('common.unschedule', 'Unschedule')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Warning Dialog for Published Articles */}
+      <Dialog
+        open={editWarningDialogOpen}
+        onClose={() => setEditWarningDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Iconify icon="mdi:alert-circle" sx={{ color: 'warning.main' }} />
+            {t('common.editPublishedArticle', 'Edit Published Article')}
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {t('common.editPublishedWarning', 'Published articles cannot be edited directly. Would you like to create a new draft copy to make changes?')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {article.title || article.article_title || t('common.untitledArticle', 'Untitled Article')}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditWarningDialogOpen(false)} variant="outlined">
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button
+            onClick={handleCreateDraftCopy}
+            variant="contained"
+            color="primary"
+            disabled={isDuplicating}
+            startIcon={isDuplicating ? <CircularProgress size={16} /> : <Iconify icon="mdi:content-copy" />}
+          >
+            {isDuplicating ? t('common.creatingDraft', 'Creating Draft...') : t('common.createDraftCopy', 'Create Draft Copy')}
           </Button>
         </DialogActions>
       </Dialog>

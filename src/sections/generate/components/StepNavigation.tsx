@@ -9,7 +9,12 @@ import { Box, Stack, Button, Dialog, useTheme, Typography, DialogTitle, DialogCo
 
 import { useArticleDraft } from 'src/hooks/useArticleDraft';
 
+import { createArticleUpdateRequest } from 'src/utils/articleUpdateUtils';
+
+import { useUpdateArticleMutation } from 'src/services/apis/articlesApi';
+
 import { Iconify } from 'src/components/iconify';
+import { ScheduleModal } from 'src/components/schedule-modal';
 
 // Import modals for final step actions
 import { CopyModal } from '../generate-steps/modals/CopyModal';
@@ -48,6 +53,7 @@ export const StepNavigation = ({
   const theme = useTheme();
   const methods = useFormContext();
   const articleDraft = useArticleDraft();
+  const [updateArticle] = useUpdateArticleMutation();
 
   const { control } = methods;
 
@@ -55,12 +61,18 @@ export const StepNavigation = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
+  const [draftConfirmModalOpen, setDraftConfirmModalOpen] = useState(false);
 
   // State for generation confirmation modal (Step 2 → Step 3)
   const [showGenerationModal, setShowGenerationModal] = useState(false);
 
   // State for loading (prevent multiple clicks)
   const [isNextLoading, setIsNextLoading] = useState(false);
+
+  // Get article status from form data
+  const formData = methods.watch();
+  const articleStatus = formData?.status || 'draft';
 
   // Helper function to get the field names for a specific step
   const getFieldsForStep = (step: number): string[] => {
@@ -244,6 +256,48 @@ export const StepNavigation = ({
   const handleCopyAction = () => setCopyModalOpen(true);
   const handleExportAction = () => setExportModalOpen(true);
   const handlePublishAction = () => setPublishModalOpen(true);
+  const handleRescheduleAction = () => setRescheduleModalOpen(true);
+
+  // Handle save as draft action
+  const handleSaveAsDraftClick = () => {
+    if (articleStatus === 'scheduled') {
+      // Show confirmation modal for scheduled articles
+      setDraftConfirmModalOpen(true);
+    } else {
+      // For other statuses, save directly
+      handleSaveAsDraft();
+    }
+  };
+
+  const handleSaveAsDraft = async () => {
+    if (!articleId) {
+      toast.error('Article ID is missing. Please save your article first.');
+      return;
+    }
+
+    try {
+      toast.loading('Saving as draft...', { id: 'save-draft' });
+
+      // Get current form data and create complete update request
+      const currentFormData = methods.getValues() as GenerateArticleFormData;
+      const updateRequest = createArticleUpdateRequest(currentFormData, 'draft');
+
+      await updateArticle({
+        id: articleId,
+        data: updateRequest
+      }).unwrap();
+
+      toast.success('Article saved as draft successfully!', { id: 'save-draft' });
+
+      // Update form status to reflect the change
+      methods.setValue('status', 'draft');
+
+    } catch (error) {
+      toast.error('Failed to save as draft. Please try again.', { id: 'save-draft' });
+    }
+
+    setDraftConfirmModalOpen(false);
+  };
 
   return (
     <>
@@ -348,21 +402,60 @@ export const StepNavigation = ({
               >
                 Export
               </Button>
+
+              {/* Save as Draft button - show for all statuses */}
               <Button
-                variant="contained"
-                startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-                onClick={handlePublishAction}
+                variant="outlined"
+                startIcon={<Iconify icon="eva:file-text-fill" />}
+                onClick={handleSaveAsDraftClick}
                 sx={{
                   borderRadius: '24px',
-                  bgcolor: 'success.main',
                   px: 3,
+                  borderColor: 'text.secondary',
+                  color: 'text.secondary',
                   '&:hover': {
-                    bgcolor: 'success.dark',
+                    borderColor: 'text.primary',
+                    color: 'text.primary',
                   }
                 }}
               >
-                Publish
+                {t('common.saveAsDraft', 'Save as Draft')}
               </Button>
+
+              {/* Conditional button based on article status */}
+              {articleStatus === 'scheduled' ? (
+                <Button
+                  variant="contained"
+                  startIcon={<Iconify icon="mdi:calendar-clock" />}
+                  onClick={handleRescheduleAction}
+                  sx={{
+                    borderRadius: '24px',
+                    bgcolor: 'warning.main',
+                    px: 3,
+                    '&:hover': {
+                      bgcolor: 'warning.dark',
+                    }
+                  }}
+                >
+                  {t('common.reschedule', 'Reschedule')}
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  startIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
+                  onClick={handlePublishAction}
+                  sx={{
+                    borderRadius: '24px',
+                    bgcolor: 'success.main',
+                    px: 3,
+                    '&:hover': {
+                      bgcolor: 'success.dark',
+                    }
+                  }}
+                >
+                  {t('common.publish', 'Publish')}
+                </Button>
+              )}
             </Stack>
           ) : (
             // Other steps - show next button
@@ -400,6 +493,13 @@ export const StepNavigation = ({
             onClose={() => setPublishModalOpen(false)}
             articleId={articleId} // Pass the article ID to PublishModal
             articleInfo={getArticleData().articleInfo}
+          />
+          <ScheduleModal
+            open={rescheduleModalOpen}
+            onClose={() => setRescheduleModalOpen(false)}
+            articleId={articleId || ''}
+            articleTitle={getArticleData().articleInfo.title}
+            isReschedule
           />
         </>
       )}
@@ -463,6 +563,66 @@ export const StepNavigation = ({
               startIcon={<Iconify icon="mdi:lightning-bolt" />}
             >
               {t('generate.modal.confirm', 'Generate Article')}
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
+
+      {/* Save as Draft Confirmation Modal */}
+      <Dialog
+        open={draftConfirmModalOpen}
+        onClose={() => setDraftConfirmModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            {t('draft.modal.title', 'Save as Draft?')}
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: 'center', px: 3, py: 2 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, mb: 2 }}>
+            {t('draft.modal.message', 'This will change the article status from scheduled to draft. The scheduled publication will be cancelled.')}
+          </Typography>
+
+          {/* Warning */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              p: 2,
+              bgcolor: 'warning.lighter',
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'warning.main',
+            }}
+          >
+            <Iconify icon="mdi:alert-circle" sx={{ color: 'warning.main', flexShrink: 0 }} />
+            <Typography variant="body2" color="warning.dark" sx={{ fontWeight: 500 }}>
+              {t('draft.modal.warning', 'Are you sure you want to proceed?')}
+            </Typography>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+            <Button
+              onClick={() => setDraftConfirmModalOpen(false)}
+              variant="outlined"
+              sx={{ flex: 1 }}
+            >
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              onClick={handleSaveAsDraft}
+              variant="contained"
+              color="warning"
+              sx={{ flex: 1 }}
+              startIcon={<Iconify icon="eva:file-text-fill" />}
+            >
+              {t('draft.modal.confirm', 'Save as Draft')}
             </Button>
           </Stack>
         </DialogActions>

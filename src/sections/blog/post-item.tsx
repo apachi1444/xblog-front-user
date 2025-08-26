@@ -63,18 +63,6 @@ const PLATFORM_ICONS = {
   default: { icon: 'mdi:web', color: '#6e7681', name: 'Website' }
 };
 
-const getPlatformIcons = (post: Article) => {
-  if (post.status !== 'publish') return [];
-
-  // Use the platform from the API response
-  if (post.platform && post.platform !== 'string') {
-    return [post.platform];
-  }
-
-  // Fallback to default if no platform specified
-  return ['default'];
-};
-
 export function PostItem({
   sx,
   post,
@@ -89,8 +77,6 @@ export function PostItem({
   const theme = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  // Get platform icons for this post
-  const platforms = getPlatformIcons(post);
 
   // Determine status color and icon
   const getStatusConfig = () => {
