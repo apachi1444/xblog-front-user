@@ -35,7 +35,6 @@ export const CalendarPage = lazy(() => import('src/pages/calendar'));
 export const TemplatePage = lazy(() => import('src/pages/templates'));
 export const AddStorePage = lazy(() => import('src/pages/add-store'));
 export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
-export const ErrorTestPage = lazy(() => import('src/pages/error-test'));
 export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-preview-demo'));
 export const TestDraftEditingPage = lazy(() => import('src/pages/test-draft-editing'));
 export const TemplatePreviewPage = lazy(() => import('src/pages/template-preview'));
@@ -206,14 +205,6 @@ export function Router() {
               element: (
                 <ErrorBoundary FallbackComponent={ErrorFallback}>
                   <AIChatPage />
-                </ErrorBoundary>
-              )
-            },
-            {
-              path: 'error-test',
-              element: (
-                <ErrorBoundary FallbackComponent={ErrorFallback}>
-                  <ErrorTestPage />
                 </ErrorBoundary>
               )
             },
