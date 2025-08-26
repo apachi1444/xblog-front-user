@@ -1,5 +1,5 @@
-import type { GenerateArticleFormData } from 'src/sections/generate/schemas';
 import type { UpdateArticleRequest } from 'src/services/apis/articlesApi';
+import type { GenerateArticleFormData } from 'src/sections/generate/schemas';
 
 /**
  * Convert form data to API request format for article updates

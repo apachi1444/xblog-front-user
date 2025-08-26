@@ -2,11 +2,14 @@ import type {} from '@mui/lab/themeAugmentation';
 import type {} from '@mui/material/themeCssVarsAugmentation';
 
 import { useMemo } from 'react';
+
 import { ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { useThemeMode } from 'src/hooks/useThemeMode';
+
 import { ThemeContextProvider } from 'src/contexts/ThemeContext';
+
 import { theme } from './create-theme';
 
 // ----------------------------------------------------------------------

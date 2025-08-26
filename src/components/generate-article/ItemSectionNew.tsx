@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from "@mui/material/styles";
-import SettingsIcon from '@mui/icons-material/Settings';
 // MUI icons
 // MUI components
 import {
@@ -11,7 +10,6 @@ import {
   Button,
   Tooltip,
   Typography,
-  IconButton,
 } from "@mui/material";
 
 import {useCriteriaEvaluation} from "src/sections/generate/hooks/useCriteriaEvaluation";

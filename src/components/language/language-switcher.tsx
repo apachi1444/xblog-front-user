@@ -1,9 +1,7 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useTranslation } from 'react-i18next';
 import { useState, useCallback } from 'react';
 
-import Box from '@mui/material/Box';
 import Popover from '@mui/material/Popover';
 import { alpha } from '@mui/material/styles';
 import MenuList from '@mui/material/MenuList';
@@ -11,6 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { useLanguage } from 'src/hooks/useLanguage';
+
 import { Iconify } from 'src/components/iconify';
 
 
@@ -59,7 +58,6 @@ export type LanguagePopoverProps = IconButtonProps & {
 };
 
 export function LanguageSwitcher({ data = DEFAULT_LANGUAGES, sx, ...other }: LanguagePopoverProps) {
-  const { i18n } = useTranslation();
   const { language, setLanguage } = useLanguage();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);

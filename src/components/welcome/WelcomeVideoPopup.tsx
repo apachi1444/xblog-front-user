@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
-import { HelpCircle } from 'lucide-react';
 
 import {
   Box,
+  alpha,
   Dialog,
   Button,
   Checkbox,
@@ -12,10 +11,9 @@ import {
   Typography,
   IconButton,
   DialogTitle,
-  FormControlLabel,
   DialogContent,
   DialogActions,
-  alpha,
+  FormControlLabel,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
