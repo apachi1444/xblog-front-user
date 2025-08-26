@@ -183,17 +183,17 @@ export function ArticleActionsMenu({
       toast.loading('Duplicating article...', { id: 'duplicate-article' });
 
       await createArticle({
-        title: `${article.article_title || article.title || 'Untitled Article'} (Copy)`,
+        title: `${article.article_title || article.title || 'Untitled Article'}`,
         content: article.content || '',
         meta_description: article.meta_description || '',
         keywords: article.secondary_keywords ? JSON.parse(article.secondary_keywords) : [],
         status: 'draft',
         website_id: '1', // Default website ID
         // Add all the additional fields from the original article
-        article_title: `${article.article_title || article.title || 'Untitled Article'} (Copy)`,
+        article_title: `${article.article_title || article.title || 'Untitled Article'}`,
         content__description: article.content_description || '',
-        meta_title: article.meta_title ? `${article.meta_title} (Copy)` : '',
-        url_slug: article.url_slug ? `${article.url_slug}-copy` : '',
+        meta_title: article.meta_title ? `${article.meta_title}` : '',
+        url_slug: article.url_slug ? `${article.url_slug}` : '',
         primary_keyword: article.primary_keyword || '',
         secondary_keywords: article.secondary_keywords || '',
         target_country: article.target_country || '',
@@ -278,7 +278,6 @@ export function ArticleActionsMenu({
     handleMenuClose();
   };
 
-  // Handle creating draft copy for published articles
   const handleCreateDraftCopy = async () => {
     try {
       toast.loading(t('common.creatingDraft', 'Creating draft copy...'), { id: 'create-draft' });
@@ -322,7 +321,6 @@ export function ArticleActionsMenu({
       // navigateToArticle(navigate, article.id);
 
     } catch (error) {
-      console.error('Failed to create draft copy:', error);
       toast.error(t('common.draftError', 'Failed to create draft copy. Please try again.'), { id: 'create-draft' });
     }
     setEditWarningDialogOpen(false);
