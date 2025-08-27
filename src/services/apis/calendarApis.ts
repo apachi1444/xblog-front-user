@@ -20,7 +20,7 @@ interface CalendarResponse {
 
 interface ScheduleArticleRequest {
   store_id: number;
-  article_id: string;
+  article_id: number;
   scheduled_date: string;
 }
 

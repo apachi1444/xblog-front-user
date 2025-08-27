@@ -142,14 +142,14 @@ export default function CalendarPage() {
         ? scheduleData.schedulingData.map(({ articleId, storeId: articleStoreId, scheduledDateTime }) =>
             scheduleArticle({
               store_id: articleStoreId,
-              article_id: articleId.toString(),
+              article_id: Number(articleId),
               scheduled_date: scheduledDateTime
             }).unwrap()
           )
         : selectedArticles.map(articleId =>
             scheduleArticle({
               store_id: storeId,
-              article_id: articleId.toString(),
+              article_id: Number(articleId),
               scheduled_date: format(selectedDay, 'yyyy-MM-dd')
             }).unwrap()
           );

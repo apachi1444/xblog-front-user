@@ -220,11 +220,9 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo }: PublishM
         const scheduledDateTime = `${schedulingSettings.date}T${schedulingSettings.time}:00.000Z`;
         const scheduleData = {
           store_id: selectedStore,
-          article_id: articleId,
+          article_id: Number(articleId),
           scheduled_date: scheduledDateTime,
         };
-
-        console.log('📅 Scheduling article with data:', scheduleData);
         await scheduleArticle(scheduleData).unwrap();
         setSuccessMessage('Article scheduled successfully!');
         setPublishingStep('success');

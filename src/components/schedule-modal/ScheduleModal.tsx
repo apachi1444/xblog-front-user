@@ -107,8 +107,7 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
 
   // Handle scheduling
   const handleSchedule = async () => {
-    if (isLoading) return; // Prevent double-clicking
-
+    if (isLoading) return;
     // Validate inputs
     if (!articleSchedulingSettings.storeId) {
       toast.error('Please select a store before scheduling');
@@ -131,52 +130,34 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
     try {
       // If this is a reschedule operation, first delete the existing schedule
       if (isReschedule) {
-        console.log('🔄 Starting reschedule process for article:', articleId);
-        console.log('📊 Available calendar data:', calendarData);
-
         // Find the existing calendar entry for this article
         const existingEntry = calendarData?.calendars?.find(
           (entry) => entry.article_id === parseInt(articleId, 10)
         );
 
-        console.log('🔍 Found existing entry:', existingEntry);
-
         if (existingEntry) {
-          console.log('🗑️ Deleting existing schedule with ID:', existingEntry.id);
-
           // Show loading toast for unscheduling
           toast.loading('Unscheduling existing appointment...', { id: 'unschedule' });
 
           try {
             await deleteCalendar(existingEntry.id).unwrap();
-            console.log('✅ Successfully deleted existing schedule');
             toast.success('Existing schedule removed', { id: 'unschedule' });
           } catch (deleteError) {
-            console.error('❌ Failed to delete existing schedule:', deleteError);
             toast.error('Failed to remove existing schedule', { id: 'unschedule' });
             throw deleteError; // Stop the process if unscheduling fails
           }
         } else {
-          console.warn('⚠️ No existing calendar entry found for article:', articleId);
-          console.log('Available calendar entries:', calendarData?.calendars?.map(entry => ({
-            id: entry.id,
-            article_id: entry.article_id,
-            scheduled_date: entry.scheduled_date
-          })));
+          console.warn('No existing schedule found for rescheduling');
         }
       }
-
-      // Show loading toast for scheduling
       toast.loading('Creating new schedule...', { id: 'schedule' });
 
       // Create the new schedule
       await scheduleArticle({
         store_id: articleSchedulingSettings.storeId,
-        article_id: articleId,
+        article_id: Number(articleId),
         scheduled_date: scheduledDateTime,
-      }).unwrap();
-
-      console.log('✅ Successfully created new schedule');
+      }).unwrap()
 
       // Success - close modal and show success message
       const successMessage = isReschedule
@@ -194,13 +175,11 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
 
       onClose();
     } catch (error: any) {
-      console.error('❌ Failed to schedule article:', error);
-
       // Clear any loading toasts
       toast.dismiss('unschedule');
       toast.dismiss('schedule');
 
-      const errorMessage = error?.data?.message || 'Failed to schedule article. Please try again.';
+      const errorMessage = error?.data?.message || 'Failed to schedule. Please try again.';
       toast.error(errorMessage);
     }
   };
