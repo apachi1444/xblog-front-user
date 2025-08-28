@@ -189,7 +189,6 @@ export function ArticleActionsMenu({
         keywords: article.secondary_keywords ? JSON.parse(article.secondary_keywords) : [],
         status: 'draft',
         website_id: '1', // Default website ID
-        // Add all the additional fields from the original article
         article_title: `${article.article_title || article.title || 'Untitled Article'}`,
         content__description: article.content_description || '',
         meta_title: article.meta_title ? `${article.meta_title}` : '',
@@ -212,6 +211,7 @@ export function ArticleActionsMenu({
         toc: article.toc || '',
         images: article.images || '',
         faq: article.faq || '',
+        featured_media: article.featured_media || '',
         template_name: article.template_name || '',
       }).unwrap();
 

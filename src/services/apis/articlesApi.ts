@@ -49,6 +49,7 @@ export interface CreateArticleRequest {
   toc?: string;
   images?: string;
   faq?: string;
+  featured_media?: string;
   template_name?: string;
 }
 

@@ -6,9 +6,9 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { type AxiosError, type AxiosRequestConfig } from 'axios';
 
 import { generateInvoiceTemplate } from 'src/utils/invoiceTemplate';
+import { logMockApiStatus, validateMockApiConfig } from 'src/utils/mockApiConfig';
 
 import { CONFIG } from 'src/config-global';
-import { logMockApiStatus, validateMockApiConfig } from 'src/utils/mockApiConfig';
 import { _fakeStores } from 'src/_mock/stores';
 import { _posts, _calendars } from 'src/_mock/_data';
 
@@ -1022,7 +1022,6 @@ const setupMocks = () => {
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://example.com/articles/best-free-mobile-games-2025">
   <title>Top Free Mobile Games 2025: Reviews, Tips & Trends</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <style>
         body {

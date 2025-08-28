@@ -67,6 +67,9 @@ export const StepNavigation = ({
   // State for generation confirmation modal (Step 2 → Step 3)
   const [showGenerationModal, setShowGenerationModal] = useState(false);
 
+  // State for step 2 changes warning modal
+  const [showStep2ChangesModal, setShowStep2ChangesModal] = useState(false);
+
   // State for loading (prevent multiple clicks)
   const [isNextLoading, setIsNextLoading] = useState(false);
 
@@ -148,11 +151,16 @@ export const StepNavigation = ({
           // Show modal asking if user wants to generate full article
           setShowGenerationModal(true);
           shouldProceed = false;
+        } else if (isEditMode && articleId) {
+          // For existing articles with content, check if step 2 parameters changed
+          // Show warning about potential need for regeneration
+          setShowStep2ChangesModal(true);
+          shouldProceed = false;
         }
       }
 
       if (shouldProceed) {
-        if (articleId && (activeStep === 0)) {
+        if (articleId && (activeStep === 0 || activeStep === 1)) {
           try {
             // 🎯 Prepare request body with ALL form data
             const requestBody: UpdateArticleRequest = {
@@ -223,6 +231,75 @@ export const StepNavigation = ({
   const handleGenerateCancel = () => {
     setShowGenerationModal(false);
     // Stay on current step
+  };
+
+  // Handle step 2 changes modal
+  const handleStep2ChangesConfirm = async () => {
+    setShowStep2ChangesModal(false);
+
+    // Update the article with Step 2 changes before proceeding
+    if (articleId) {
+      try {
+        const values = methods.getValues();
+        const requestBody: UpdateArticleRequest = {
+          // Step 1 fields (preserve existing values)
+          article_title: values.step1?.title || null,
+          content__description: values.step1?.contentDescription || null,
+          meta_title: values.step1?.metaTitle || null,
+          meta_description: values.step1?.metaDescription || null,
+          url_slug: values.step1?.urlSlug || null,
+          primary_keyword: values.step1?.primaryKeyword || null,
+          secondary_keywords: values.step1?.secondaryKeywords?.length ? JSON.stringify(values.step1.secondaryKeywords) : undefined,
+          target_country: values.step1?.targetCountry || 'global',
+          language: values.step1?.language || 'english',
+          featured_media: values.step1?.featuredMedia || null,
+
+          // Step 2 fields (updated values)
+          article_type: values.step2?.articleType || null,
+          article_size: values.step2?.articleSize || null,
+          tone_of_voice: values.step2?.toneOfVoice || null,
+          point_of_view: values.step2?.pointOfView || null,
+          plagiat_removal: values.step2?.plagiaRemoval || false,
+          include_cta: values.step2?.includeCta || undefined,
+          include_images: values.step2?.includeImages || false,
+          include_videos: values.step2?.includeVideos || false,
+          internal_links: values.step2?.internalLinks?.length ? JSON.stringify(values.step2.internalLinks) : null,
+          external_links: values.step2?.externalLinks?.length ? JSON.stringify(values.step2.externalLinks) : null,
+
+          // Content fields (preserve existing values)
+          content: values.generatedHtml || '',
+          toc: values.toc?.length ? JSON.stringify(values.toc) : null,
+          images: values.images?.length ? JSON.stringify(values.images) : null,
+          faq: values.faq?.length ? JSON.stringify(values.faq) : null,
+
+          status: values.status,
+        };
+
+        await articleDraft.updateArticle(articleId, requestBody);
+      } catch (error) {
+        toast.error('Failed to save changes. Please try again.');
+        return;
+      }
+    }
+
+    // Proceed to next step without regeneration
+    onNextStep();
+  };
+
+  const handleStep2ChangesCancel = () => {
+    setShowStep2ChangesModal(false);
+    // Stay on current step
+  };
+
+  const handleStep2ChangesRegenerate = () => {
+    setShowStep2ChangesModal(false);
+    // Trigger regeneration process
+    if (onTriggerGeneration) {
+      onTriggerGeneration();
+    } else {
+      // Fallback: just proceed to next step
+      onNextStep();
+    }
   };
 
   // Handle back button click
@@ -623,6 +700,82 @@ export const StepNavigation = ({
               startIcon={<Iconify icon="eva:file-text-fill" />}
             >
               {t('draft.modal.confirm', 'Save as Draft')}
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
+
+      {/* Step 2 Changes Warning Modal */}
+      <Dialog
+        open={showStep2ChangesModal}
+        onClose={handleStep2ChangesCancel}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            bgcolor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            {t('step2Changes.modal.title', 'Step 2 Parameters Changed')}
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: 'center', px: 3, py: 2 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, mb: 2 }}>
+            {t('step2Changes.modal.message', 'You have made changes to the article generation parameters in Step 2. These changes may affect the generated content.')}
+          </Typography>
+
+          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6, mb: 2 }}>
+            {t('step2Changes.modal.question', 'Would you like to regenerate the content with the new parameters, or proceed with the existing content?')}
+          </Typography>
+
+          {/* Warning about regeneration */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              bgcolor: theme.palette.mode === 'dark' ? 'warning.dark' : 'warning.light',
+              border: `1px solid ${theme.palette.warning.main}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <Iconify icon="mdi:alert-circle" sx={{ color: 'warning.main', flexShrink: 0 }} />
+            <Typography variant="body2" color="warning.dark" sx={{ fontWeight: 500 }}>
+              {t('step2Changes.modal.creditWarning', 'Regenerating will consume 5 regeneration credits from your account.')}
+            </Typography>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+            <Button
+              onClick={handleStep2ChangesCancel}
+              variant="outlined"
+              sx={{ flex: 1 }}
+            >
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              onClick={handleStep2ChangesConfirm}
+              variant="outlined"
+              color="secondary"
+              sx={{ flex: 1 }}
+            >
+              {t('step2Changes.modal.proceed', 'Proceed as is')}
+            </Button>
+            <Button
+              onClick={handleStep2ChangesRegenerate}
+              variant="contained"
+              sx={{ flex: 1 }}
+              startIcon={<Iconify icon="mdi:lightning-bolt" />}
+            >
+              {t('step2Changes.modal.regenerate', 'Regenerate')}
             </Button>
           </Stack>
         </DialogActions>
