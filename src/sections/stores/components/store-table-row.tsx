@@ -113,6 +113,8 @@ export function StoreTableRow({
     setOpenConnectionDialog(false);
   };
 
+
+
   const handleDeleteClick = () => {
     setOpenDeleteDialog(true);
   };
@@ -163,13 +165,22 @@ export function StoreTableRow({
         <TableCell align="center">{articlesCount}</TableCell>
 
         <TableCell align="center">
-          <Label
-            variant="soft"
-            color={isConnected ? 'success' : 'error'}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {isConnected ? 'Connected' : 'Disconnected'}
-          </Label>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, alignItems: 'center' }}>
+            <Label
+              variant="soft"
+              color={isConnected ? 'success' : 'error'}
+              sx={{ textTransform: 'capitalize', fontSize: '0.75rem' }}
+            >
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </Label>
+            <Label
+              variant="soft"
+              color={isConnected ? 'info' : 'warning'}
+              sx={{ textTransform: 'capitalize', fontSize: '0.75rem' }}
+            >
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </Label>
+          </Box>
         </TableCell>
 
         <TableCell align="right" sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
@@ -243,6 +254,8 @@ export function StoreTableRow({
           </Button>
         </DialogActions>
       </Dialog>
+
+
     </>
   );
 }

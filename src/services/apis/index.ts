@@ -1712,7 +1712,7 @@ export const CACHE_DURATION = {
 
 export const api = createApi({
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Articles', 'Stores', 'User', 'Subscription', 'Plans', 'Drafts'],
+  tagTypes: ['Articles', 'Stores', 'User', 'Subscription', 'Plans', 'Drafts', 'SocialConnections'],
   endpoints: () => ({}),
   // Global configuration for all queries
   keepUnusedDataFor: CACHE_DURATION.SUBSCRIPTIONS, // Default cache duration

@@ -7,6 +7,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useConnectWordPressMutation } from 'src/services/apis/integrations/wordpressApi';
+import { useLazyGetLinkedInOAuthUrlQuery } from 'src/services/apis/integrations/linkedinApi';
 
 import { FormStepper } from 'src/components/stepper/FormStepper';
 
@@ -65,9 +66,9 @@ export const platformCategories = {
       id: 'linkedin',
       name: 'LinkedIn',
       icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/512px-LinkedIn_logo_initials.png',
-      description: 'Coming soon - Share content on LinkedIn',
+      description: 'Connect your LinkedIn account to share content',
       category: 'socialMedia',
-      enabled: false
+      enabled: true
     },
     {
       id: 'reddit',
@@ -148,11 +149,13 @@ export default function AddStoreFlow() {
   const [integrationSuccess, setIntegrationSuccess] = useState(false);
   const [integrationError, setIntegrationError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+  const [isLinkedInLoading, setIsLinkedInLoading] = useState(false);
+
   // API mutation hooks
   const [connectWordPress , {isLoading : isWordPressLoading}] = useConnectWordPressMutation();
+  const [getLinkedInOAuthUrl] = useLazyGetLinkedInOAuthUrlQuery();
 
-  const isLoading = isWordPressLoading
+  const isLoading = isWordPressLoading || isLinkedInLoading
 
   const methods = useForm<StoreFormData>({
     resolver: zodResolver(storeFormSchema),
@@ -176,8 +179,14 @@ export default function AddStoreFlow() {
     if (activeStep === 0) {
       const isValid = await trigger('platform');
       if (!isValid) return;
+
+      // If LinkedIn is selected, trigger OAuth flow instead of going to next step
+      if (selectedPlatform === 'linkedin') {
+        handleLinkedInConnection({} as StoreFormData);
+        return;
+      }
     }
-    
+
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -201,6 +210,9 @@ export default function AddStoreFlow() {
           break;
         case 'wix':
           await handleWixConnection(data);
+          break;
+        case 'linkedin':
+          await handleLinkedInConnection(data);
           break;
         case 'other':
         default:
@@ -292,6 +304,7 @@ export default function AddStoreFlow() {
               newErrorMessage = error?.message || 'Failed to connect to WordPress. Please try again.';
           }
         } else if (error?.message) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           newErrorMessage = error.message;
         }
 
@@ -305,12 +318,81 @@ export default function AddStoreFlow() {
 
   const handleWixConnection = async (data: StoreFormData) => {};
 
+  const handleLinkedInConnection = async (data: StoreFormData) => {
+    // For LinkedIn, we need to trigger OAuth flow instead of form submission
+    // This will be handled differently than other platforms
+    try {
+      setIsLinkedInLoading(true);
+      setIntegrationError(false);
+      setErrorMessage('');
+
+      const redirectUri = `${window.location.origin}/auth/callback`;
+
+      // Get OAuth URL
+      const { data: oauthData } = await getLinkedInOAuthUrl({
+        redirect_uri: redirectUri,
+        state: 'linkedin_oauth'
+      });
+
+      if (oauthData?.auth_url) {
+        // Open LinkedIn OAuth in popup
+        const popup = window.open(
+          oauthData.auth_url,
+          'linkedin-oauth',
+          'width=600,height=700,scrollbars=yes,resizable=yes'
+        );
+
+        // Listen for OAuth completion
+        const messageHandler = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+
+          if (event.data.type === 'LINKEDIN_CONNECTED') {
+            setIsLinkedInLoading(false);
+            setIntegrationSuccess(true);
+            toast.success('LinkedIn account connected successfully!');
+            window.removeEventListener('message', messageHandler);
+
+            // Navigate back to stores after success
+            setTimeout(() => {
+              navigate('/stores');
+            }, 2000);
+          } else if (event.data.type === 'LINKEDIN_ERROR') {
+            setIsLinkedInLoading(false);
+            setIntegrationError(true);
+            setErrorMessage(event.data.error || 'LinkedIn connection failed');
+            window.removeEventListener('message', messageHandler);
+          }
+        };
+
+        window.addEventListener('message', messageHandler);
+
+        // Monitor popup closure
+        const checkClosed = setInterval(() => {
+          if (popup?.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', messageHandler);
+            setIsLinkedInLoading(false);
+            // Don't show error here as user might have just closed the popup
+          }
+        }, 1000);
+      } else {
+        throw new Error('Failed to get LinkedIn authorization URL');
+      }
+    } catch (error: any) {
+      console.error('LinkedIn connection failed:', error);
+      setIsLinkedInLoading(false);
+      setIntegrationError(true);
+      setErrorMessage(error.message || 'LinkedIn connection failed');
+    }
+  };
+
   // Handle platform selection
   const handlePlatformSelect = (platform: string) => {
     // Find the platform and check if it's enabled
     const selectedPlatformData = platforms.find(p => p.id === platform);
     if (selectedPlatformData?.enabled) {
       setValue('platform', platform);
+      // Don't trigger OAuth immediately - wait for Next button
     } else {
       toast.error('This platform is not available yet. Only WordPress is currently supported.');
     }

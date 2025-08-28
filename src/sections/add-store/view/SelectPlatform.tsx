@@ -293,7 +293,7 @@ export default function SelectPlatform({
               fontSize: '0.875rem'
             }}
           >
-            🚀 Currently Available: WordPress
+            🚀 Currently Available: WordPress, LinkedIn
           </Typography>
           <Typography
             variant="caption"
@@ -301,7 +301,7 @@ export default function SelectPlatform({
             color="text.secondary"
             sx={{ fontSize: '0.75rem' }}
           >
-            More platforms coming soon! We&apos;re working hard to bring you Shopify, Wix, and social media integrations.
+            More platforms coming soon! We&apos;re working hard to bring you Shopify, Wix, and more social media integrations.
           </Typography>
         </Box>
 

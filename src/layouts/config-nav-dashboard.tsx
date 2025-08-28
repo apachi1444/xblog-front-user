@@ -26,6 +26,11 @@ export const navData = [
     icon: icon('mdi:blog'),
   },
   {
+    title: 'Websites',
+    path: '/stores',
+    icon: icon('material-symbols:storefront-outline-sharp'),
+  },
+  {
     title: 'Calendar',
     path: '/calendar',
     icon: icon('mdi:calendar'),

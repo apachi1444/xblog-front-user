@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -43,13 +43,13 @@ import { StoreSelectionDialog } from "../components/store-selection-dialog";
 import type { StoreProps} from "../components/store-table-row";
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Website', sort: true, width: { xs: '25%', md: '20%' } },
-  { id: 'platform', label: 'Platform', sort: true, width: { xs: '15%', md: '12%' } },
-  { id: 'business', label: 'Business', sort: true, width: { xs: '15%', md: '12%' } },
-  { id: 'creationDate', label: 'Creation Date', sort: true, width: { xs: '15%', md: '15%' } },
-  { id: 'articlesCount', label: 'Articles', align: 'center', sort: true, width: { xs: '10%', md: '10%' } },
-  { id: 'isConnected', label: 'Status', sort: true, align: 'center', width: { xs: '10%', md: '15%' } },
-  { id: 'actions', label: 'Actions', width: { xs: '10%', md: '16%' } },
+  { id: 'name', label: 'Website', sort: true, width: { xs: '20%', md: '18%' } },
+  { id: 'platform', label: 'Platform', sort: true, width: { xs: '12%', md: '10%' } },
+  { id: 'business', label: 'Business', sort: true, width: { xs: '12%', md: '10%' } },
+  { id: 'creationDate', label: 'Creation Date', sort: true, width: { xs: '12%', md: '12%' } },
+  { id: 'articlesCount', label: 'Articles', align: 'center', sort: true, width: { xs: '8%', md: '8%' } },
+  { id: 'isConnected', label: 'Connection', sort: true, align: 'center', width: { xs: '10%', md: '12%' } },
+  { id: 'actions', label: 'Actions', width: { xs: '26%', md: '30%' } },
 ];
 
 export function StoresView() {
@@ -79,16 +79,38 @@ export function StoresView() {
   // Get stores directly from the query result
   const stores = useMemo(() => data?.stores || [], [data]);
 
-  // Store selection is now handled in the dashboard layout
-  // No need for fallback logic here
+  // Separate stores by type
+  const socialMediaPlatforms = useMemo(() =>
+    ['linkedin', 'reddit', 'quora', 'x', 'instagram', 'facebook', 'twitter'],
+    []
+  );
 
-  const dataFiltered = useMemo(() =>
+  const websiteStores = useMemo(() =>
+    stores.filter(store => !socialMediaPlatforms.includes(store.category?.toLowerCase())),
+    [socialMediaPlatforms, stores]
+  );
+
+  const socialMediaStores = useMemo(() =>
+    stores.filter(store => socialMediaPlatforms.includes(store.category?.toLowerCase())),
+    [socialMediaPlatforms, stores]
+  );
+
+  const websiteDataFiltered = useMemo(() =>
     applyFilter({
-      inputData: stores as StoreProps[],
+      inputData: websiteStores as StoreProps[],
       comparator: getComparator(table.order, table.orderBy),
       filterName,
     }),
-    [stores, table.order, table.orderBy, filterName]
+    [websiteStores, table.order, table.orderBy, filterName]
+  );
+
+  const socialMediaDataFiltered = useMemo(() =>
+    applyFilter({
+      inputData: socialMediaStores as StoreProps[],
+      comparator: getComparator(table.order, table.orderBy),
+      filterName,
+    }),
+    [socialMediaStores, table.order, table.orderBy, filterName]
   );
 
   const handleFilterChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,6 +179,8 @@ export function StoresView() {
     [reconnectStore, ]
   );
 
+
+
   const handleAddStoreSuccess = useCallback(() => {
     setIsAddStoreModalOpen(false);
   }, []);
@@ -166,16 +190,16 @@ export function StoresView() {
   }, [navigate]);
 
   // UI state derived from data
-  const notFound = !dataFiltered.length && !!filterName;
+  const notFound = !websiteDataFiltered.length && !!filterName;
   const isDataEmpty = stores.length === 0;
 
   // Paginated data for the current page
-  const paginatedData = useMemo(() =>
-    dataFiltered.slice(
+  const websitePaginatedData = useMemo(() =>
+    websiteDataFiltered.slice(
       table.page * table.rowsPerPage,
       table.page * table.rowsPerPage + table.rowsPerPage
     ),
-    [dataFiltered, table.page, table.rowsPerPage]
+    [websiteDataFiltered, table.page, table.rowsPerPage]
   );
 
   return (
@@ -198,7 +222,7 @@ export function StoresView() {
             }
           }}
         >
-          New website
+          Add New Website
         </Button>
       </Box>
 
@@ -208,72 +232,148 @@ export function StoresView() {
           fullHeight
         />
       ) : (
-        <Card>
-          <StoreTableToolbar
-            numSelected={table.selected.length}
-            filterName={filterName}
-            onFilterName={handleFilterChange}
-          />
+        <>
+          {/* Websites Section */}
+          {websiteStores.length > 0 && (
+            <Card sx={{ mb: 4 }}>
+              <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  🌐 Connected Websites
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage your connected websites and their publishing settings
+                </Typography>
+              </Box>
 
-          <Scrollbar>
-            <TableContainer sx={{ overflow: 'unset' }}>
-              <Table sx={{
-                minWidth: { xs: 650, sm: 800 },
-                tableLayout: 'fixed'
-              }}>
-                <StoreTableHead
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  rowCount={stores.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked: boolean) =>
-                    table.onSelectAllRows(
-                      checked,
-                      stores.map((store: { id: any; }) => store.id)
-                    )
-                  }
-                  headLabel={TABLE_HEAD}
-                />
-                <TableBody>
-                  {paginatedData.map((row) => (
-                    <StoreTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id.toString())}
-                      onSelectRow={() => table.onSelectRow(row.id.toString())}
-                      onDelete={handleDelete}
-                      onDisconnect={handleDisconnect}
-                      onReconnect={handleReconnect}
-                      isDeleting={isDeleting}
-                      isDisconnecting={isDisconnecting}
-                      isReconnecting={isReconnecting}
+              <StoreTableToolbar
+                numSelected={table.selected.length}
+                filterName={filterName}
+                onFilterName={handleFilterChange}
+              />
+
+              <Scrollbar>
+                <TableContainer sx={{ overflow: 'unset' }}>
+                  <Table sx={{
+                    minWidth: { xs: 650, sm: 800 },
+                    tableLayout: 'fixed'
+                  }}>
+                    <StoreTableHead
+                      order={table.order}
+                      orderBy={table.orderBy}
+                      rowCount={websiteStores.length}
+                      numSelected={table.selected.length}
+                      onSort={table.onSort}
+                      onSelectAllRows={(checked: boolean) =>
+                        table.onSelectAllRows(
+                          checked,
+                          websiteStores.map((store: { id: any; }) => store.id)
+                        )
+                      }
+                      headLabel={TABLE_HEAD}
                     />
-                  ))}
+                    <TableBody>
+                      {websitePaginatedData.map((row) => (
+                        <StoreTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id.toString())}
+                          onDelete={handleDelete}
+                          onDisconnect={handleDisconnect}
+                          onReconnect={handleReconnect}
+                          isDeleting={isDeleting}
+                          isDisconnecting={isDisconnecting}
+                          isReconnecting={isReconnecting}
+                        />
+                      ))}
 
-                  <TableEmptyRows
-                    height={68}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, stores.length)}
-                  />
+                      <TableEmptyRows
+                        height={68}
+                        emptyRows={emptyRows(table.page, table.rowsPerPage, websiteStores.length)}
+                      />
 
-                  {!isLoading && (notFound || isDataEmpty) && !isFetching && (
-                    <TableNoData searchQuery={filterName} />
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Scrollbar>
+                      {!isLoading && (notFound || isDataEmpty) && !isFetching && (
+                        <TableNoData searchQuery={filterName} />
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Scrollbar>
 
-          <TablePagination
-            component="div"
-            page={table.page}
-            count={dataFiltered.length}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            rowsPerPageOptions={[5, 10, 25]}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
-        </Card>
+              <TablePagination
+                component="div"
+                page={table.page}
+                count={websiteDataFiltered.length}
+                rowsPerPage={table.rowsPerPage}
+                onPageChange={table.onChangePage}
+                rowsPerPageOptions={[5, 10, 25]}
+                onRowsPerPageChange={table.onChangeRowsPerPage}
+              />
+            </Card>
+          )}
+
+          {/* Social Media Section */}
+          {socialMediaStores.length > 0 && (
+            <Card sx={{ mb: 4 }}>
+              <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  📱 Social Media Platforms
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage your connected social media accounts for content sharing
+                </Typography>
+              </Box>
+
+              <Scrollbar>
+                <TableContainer sx={{ overflow: 'unset' }}>
+                  <Table sx={{ minWidth: 800 }}>
+                    <StoreTableHead
+                      order={table.order}
+                      orderBy={table.orderBy}
+                      rowCount={socialMediaStores.length}
+                      numSelected={table.selected.length}
+                      onSort={table.onSort}
+                      onSelectAllRows={(checked: boolean) =>
+                        table.onSelectAllRows(
+                          checked,
+                          socialMediaStores.map((store: { id: any; }) => store.id)
+                        )
+                      }
+                      headLabel={TABLE_HEAD}
+                    />
+
+                    <TableBody>
+                      {socialMediaDataFiltered.map((row) => (
+                        <StoreTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id.toString())}
+                          onDelete={handleDelete}
+                          onDisconnect={handleDisconnect}
+                          onReconnect={handleReconnect}
+                          isDeleting={isDeleting}
+                          isDisconnecting={isDisconnecting}
+                          isReconnecting={isReconnecting}
+                        />
+                      ))}
+
+                      <TableEmptyRows
+                        height={68}
+                        emptyRows={emptyRows(table.page, table.rowsPerPage, socialMediaStores.length)}
+                      />
+
+                      {!isLoading && socialMediaStores.length === 0 && !isFetching && (
+                        <TableNoData title="No social media platforms connected" searchQuery="" />
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Scrollbar>
+            </Card>
+          )}
+
+        </>
       )}
 
       <AddStoreModal

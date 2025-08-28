@@ -1,23 +1,35 @@
 import type { Store } from 'src/types/store';
 import type { ButtonBaseProps } from '@mui/material/ButtonBase';
 
+import toast from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import Dialog from '@mui/material/Dialog';
 import { Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import Popover from '@mui/material/Popover';
 import MenuList from '@mui/material/MenuList';
 import ButtonBase from '@mui/material/ButtonBase';
+import DialogTitle from '@mui/material/DialogTitle';
 import { alpha, useTheme } from '@mui/material/styles';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import CircularProgress from '@mui/material/CircularProgress';
+import DialogContentText from '@mui/material/DialogContentText';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
-import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { setCurrentStore } from 'src/services/slices/stores/storeSlice';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import {
+  useGetStoresQuery,
+  useReconnectStoreMutation,
+  useDisconnectStoreMutation
+} from 'src/services/apis/storesApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -48,8 +60,15 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   const currentStore = useSelector(selectCurrentStore);
   const theme = useTheme();
   const location = useLocation();
-
+  const [reconnectStore, { isLoading: isReconnecting }] = useReconnectStoreMutation();
+  const [disconnectStore, { isLoading: isDisconnecting }] = useDisconnectStoreMutation();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    action: 'reconnect' | 'disconnect';
+    store: Store | null;
+  }>({ open: false, action: 'reconnect', store: null });
+
   const open = Boolean(anchorEl);
 
   // Force close popover on component unmount or route change
@@ -94,6 +113,30 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
       window.location.href = '/stores/add';
     }, 10);
   }, [location.pathname]);
+
+
+
+  const handleConfirmAction = useCallback(async () => {
+    if (!confirmDialog.store) return;
+
+    try {
+      if (confirmDialog.action === 'reconnect') {
+        await reconnectStore(confirmDialog.store.id).unwrap();
+        toast.success(`${confirmDialog.store.name} reconnected successfully`);
+      } else {
+        await disconnectStore(confirmDialog.store.id).unwrap();
+        toast.success(`${confirmDialog.store.name} disconnected successfully`);
+      }
+    } catch (error) {
+      toast.error(`Failed to ${confirmDialog.action} store. Please try again.`);
+    }
+
+    setConfirmDialog({ open: false, action: 'reconnect', store: null });
+  }, [confirmDialog, reconnectStore, disconnectStore]);
+
+  const handleCancelAction = useCallback(() => {
+    setConfirmDialog({ open: false, action: 'reconnect', store: null });
+  }, []);
 
   // Helper function to get platform image
   const getPlatformImage = (platform: string): string => {
@@ -265,20 +308,122 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
             },
           }}
         >
-          {stores?.stores.map((store) => (
-            <MenuItem
-              key={store.id}
-              selected={store.id === currentStore.id}
-              onClick={() => handleChangeWorkspace(store)}
-            >
-              {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
-              <Box component="span" sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" noWrap>
-                  {store.name}
+          {/* Websites Section */}
+          {/* Filter out social media platforms: LinkedIn, Reddit, Quora, X (Twitter), Instagram, Facebook */}
+          {(stores?.stores?.filter(store => !['linkedin', 'reddit', 'quora', 'x', 'instagram', 'facebook', 'twitter'].includes(store.category?.toLowerCase() || '')) || []).length > 0 && (
+            <>
+              <Box sx={{ px: 2, py: 1, bgcolor: 'grey.50' }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  🌐 WEBSITES
                 </Typography>
               </Box>
-            </MenuItem>
-          ))}
+              {stores?.stores
+                ?.filter(store => !['linkedin', 'reddit', 'quora', 'x', 'instagram', 'facebook', 'twitter'].includes(store.category?.toLowerCase() || ''))
+                .map((store) => (
+                <MenuItem
+                  key={store.id}
+                  selected={store.id === currentStore.id}
+                  onClick={() => handleChangeWorkspace(store)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                    {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
+                    <Box component="span" sx={{ flexGrow: 1 }}>
+                      <Typography variant="body2" noWrap>
+                        {store.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Direct disconnect switch */}
+                  <Switch
+                    size="small"
+                    checked={store.is_active}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      if (store.is_active) {
+                        setConfirmDialog({
+                          open: true,
+                          action: 'disconnect',
+                          store
+                        });
+                      } else {
+                        setConfirmDialog({
+                          open: true,
+                          action: 'reconnect',
+                          store
+                        });
+                      }
+                    }}
+                    color="success"
+                    disabled={isReconnecting || isDisconnecting}
+                  />
+                </MenuItem>
+              ))}
+            </>
+          )}
+
+          {/* Social Media Section */}
+          {(stores?.stores?.filter(store => ['linkedin', 'reddit', 'quora', 'x', 'instagram', 'facebook', 'twitter'].includes(store.category?.toLowerCase() || '')) || []).length > 0 && (
+            <>
+              <Box sx={{ px: 2, py: 1, bgcolor: 'grey.50', mt: 1 }}>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  📱 SOCIAL MEDIA
+                </Typography>
+              </Box>
+              {stores?.stores
+                ?.filter(store => ['linkedin', 'reddit', 'quora', 'x', 'instagram', 'facebook', 'twitter'].includes(store.category?.toLowerCase() || ''))
+                .map((store) => (
+                <MenuItem
+                  key={store.id}
+                  selected={store.id === currentStore.id}
+                  onClick={() => handleChangeWorkspace(store)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                    {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
+                    <Box component="span" sx={{ flexGrow: 1 }}>
+                      <Typography variant="body2" noWrap>
+                        {store.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Direct disconnect switch */}
+                  <Switch
+                    size="small"
+                    checked={store.is_active}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      if (store.is_active) {
+                        setConfirmDialog({
+                          open: true,
+                          action: 'disconnect',
+                          store
+                        });
+                      } else {
+                        setConfirmDialog({
+                          open: true,
+                          action: 'reconnect',
+                          store
+                        });
+                      }
+                    }}
+                    color="success"
+                    disabled={isReconnecting || isDisconnecting}
+                  />
+                </MenuItem>
+              ))}
+            </>
+          )}
 
           <Divider sx={{ my: 0.5 }} />
 
@@ -307,6 +452,45 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
           </Box>
         </MenuList>
       </Popover>
+
+
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={handleCancelAction}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {confirmDialog.action === 'reconnect' ? 'Reconnect Website' : 'Disconnect Website'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {confirmDialog.action === 'reconnect'
+              ? `Are you sure you want to reconnect "${confirmDialog.store?.name}"? This will enable all publishing features for this website.`
+              : `Are you sure you want to disconnect "${confirmDialog.store?.name}"? This will disable publishing features but keep the connection intact.`
+            }
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelAction}>Cancel</Button>
+          <Button
+            onClick={handleConfirmAction}
+            variant="contained"
+            color={confirmDialog.action === 'reconnect' ? 'success' : 'warning'}
+            disabled={isReconnecting || isDisconnecting}
+            startIcon={
+              (isReconnecting || isDisconnecting) ? <CircularProgress size={16} /> : null
+            }
+          >
+            {(isReconnecting || isDisconnecting)
+              ? (confirmDialog.action === 'reconnect' ? 'Reconnecting...' : 'Disconnecting...')
+              : (confirmDialog.action === 'reconnect' ? 'Reconnect' : 'Disconnect')
+            }
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

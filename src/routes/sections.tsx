@@ -38,6 +38,7 @@ export const AIChatPage = lazy(() => import('src/pages/ai-chat'));
 export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-preview-demo'));
 export const TestDraftEditingPage = lazy(() => import('src/pages/test-draft-editing'));
 export const TemplatePreviewPage = lazy(() => import('src/pages/template-preview'));
+export const OAuthCallbackPage = lazy(() => import('src/pages/oauth-callback'));
 
 // ----------------------------------------------------------------------
 
@@ -286,6 +287,16 @@ export function Router() {
         <Suspense fallback={renderFallback}>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <TemplatePreviewPage />
+          </ErrorBoundary>
+        </Suspense>
+      ),
+    },
+    {
+      path: 'auth/callback',
+      element: (
+        <Suspense fallback={renderFallback}>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <OAuthCallbackPage />
           </ErrorBoundary>
         </Suspense>
       ),

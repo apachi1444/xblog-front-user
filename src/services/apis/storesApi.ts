@@ -65,5 +65,5 @@ export const {
   useDeleteStoreMutation,
   useDisconnectStoreMutation,
   useReconnectStoreMutation,
-  useAddStoreMutation
+  useAddStoreMutation,
 } = storesApi;
