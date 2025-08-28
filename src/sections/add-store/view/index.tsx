@@ -68,7 +68,7 @@ export const platformCategories = {
       icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/512px-LinkedIn_logo_initials.png',
       description: 'Connect your LinkedIn account to share content',
       category: 'socialMedia',
-      enabled: true
+      enabled: false
     },
     {
       id: 'reddit',

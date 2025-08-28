@@ -38,17 +38,6 @@ const getMockSubscriptionDetails = () => ({
   plan_id: '1' // Matches the Free plan ID in the plans list
 });
 
-// Mock data for calendar
-const mockCalendarEvents = [...Array(10)].map((_, index) => ({
-  id: `event-${index}`,
-  title: `Scheduled Article ${index + 1}`,
-  start: new Date(Date.now() + (index * 24 * 60 * 60 * 1000)).toISOString(),
-  end: new Date(Date.now() + ((index + 1) * 24 * 60 * 60 * 1000)).toISOString(),
-  articleId: `article-${index}`,
-  status: ['draft', 'scheduled', 'published'][index % 3],
-  storeId: `store-${index % 3}`,
-}));
-
 
 // Make sure BASE_URL is defined
 const ARTICLES_BASE_URL = '/articles';

@@ -25,7 +25,7 @@ export const _fakeStores: Store[] = [...Array(5)].map((__, index) => {
     name: storeName,
     url: storeUrl,
     avatar: platform.avatar,
-    is_active: _boolean(index),
+    is_active: isLinkedIn ? false : _boolean(index), // Deactivate LinkedIn platform
     category: platform.name,
     created_at: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString(),
     articlesCount: isLinkedIn ? Math.floor(Math.random() * 20) + 5 : Math.floor(Math.random() * 100),
