@@ -1,6 +1,6 @@
 import 'src/global.css';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { I18nextProvider } from 'react-i18next';
@@ -21,7 +21,7 @@ import { AnalyticsProvider } from 'src/contexts/analytics-context';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
 import { WelcomePopupContextProvider } from 'src/contexts/WelcomePopupContext';
 import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
-import { useSessionExpired, SessionExpiredProvider } from 'src/contexts/SessionExpiredContext';
+import { SessionExpiredProvider } from 'src/contexts/SessionExpiredContext';
 
 import i18n from './locales/i18n';
 import { CrispChat } from './components/crisp-chat';
@@ -30,7 +30,7 @@ import { ErrorFallback } from './components/error-boundary';
 import { AuthPersistence } from './components/auth/auth-persistence';
 import { SubscriptionSuccessAnimation } from './components/subscription';
 import { PageViewTracker } from './components/analytics/page-view-tracker';
-import { SessionExpiredModal } from './components/auth/session-expired-modal';
+
 import { SessionVerificationAnimation } from './components/session/SessionVerificationAnimation';
 
 export default function App() {
@@ -75,13 +75,15 @@ export default function App() {
           <LanguageContextProvider>
             <CustomThemeProvider>
               <AnalyticsProvider>
-                <SessionExpiredProvider onSessionExpired={handleSessionExpired}>
-                  <SessionExpiredContent
-                    successData={successData}
-                    showSuccessAnimation={showSuccessAnimation}
-                    hideSuccessAnimation={hideSuccessAnimation}
-                  />
-                </SessionExpiredProvider>
+                <ToastProvider>
+                  <SessionExpiredProvider onSessionExpired={handleSessionExpired}>
+                    <SessionExpiredContent
+                      successData={successData}
+                      showSuccessAnimation={showSuccessAnimation}
+                      hideSuccessAnimation={hideSuccessAnimation}
+                    />
+                  </SessionExpiredProvider>
+                </ToastProvider>
               </AnalyticsProvider>
             </CustomThemeProvider>
           </LanguageContextProvider>
@@ -115,18 +117,13 @@ function SessionExpiredContent({
     hideErrorAnimation: sessionHideError,
   } = useSessionVerification();
 
-  const { isModalOpen, countdown } = useSessionExpired();
-
   return (
     <>
       <ToasterWithTheme />
       <AuthPersistence />
       <PageViewTracker />
-      <ToastProvider>
-        <WelcomePopupContextProvider>
-          <Router />
-          {/* Session Expired Modal */}
-          <SessionExpiredModal open={isModalOpen} countdown={countdown} />
+      <WelcomePopupContextProvider>
+        <Router />
           {/* Subscription Success Animation */}
           <SubscriptionSuccessAnimation
             open={showSuccessAnimation}
@@ -155,8 +152,7 @@ function SessionExpiredContent({
             visibleRoutes={['/']}
             position={{ bottom: '20px', right: '20px' }}
           />
-        </WelcomePopupContextProvider>
-      </ToastProvider>
+      </WelcomePopupContextProvider>
     </>
   );
 }
