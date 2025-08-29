@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, Chip, alpha, useTheme, Typography } from '@mui/material';
 
+import { convertUTCToLocalDate } from 'src/utils/constants';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -218,7 +220,7 @@ export function StatusBadge({ status, size = 'medium', variant = 'default', sche
               lineHeight: 1.2,
             }}
           >
-            {formatDate(new Date(scheduledDate), 'MMM d • h:mm a')}
+            {formatDate(convertUTCToLocalDate(scheduledDate), 'MMM d • h:mm a')}
           </Typography>
         </Box>
       )}

@@ -17,6 +17,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { convertLocalDateTimeToUTC } from 'src/utils/constants';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useGetArticlesQuery } from 'src/services/apis/articlesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
@@ -146,13 +148,18 @@ export default function CalendarPage() {
               scheduled_date: scheduledDateTime
             }).unwrap()
           )
-        : selectedArticles.map(articleId =>
-            scheduleArticle({
+        : selectedArticles.map(articleId => {
+            // For fallback, use the selected day at current time, converted to UTC
+            const currentTime = format(new Date(), 'HH:mm');
+            const selectedDate = format(selectedDay, 'yyyy-MM-dd');
+            const utcDateTime = convertLocalDateTimeToUTC(selectedDate, currentTime);
+
+            return scheduleArticle({
               store_id: storeId,
               article_id: Number(articleId),
-              scheduled_date: format(selectedDay, 'yyyy-MM-dd')
-            }).unwrap()
-          );
+              scheduled_date: utcDateTime
+            }).unwrap();
+          });
 
       // Wait for all scheduling operations to complete
       const results = await Promise.allSettled(schedulingPromises);

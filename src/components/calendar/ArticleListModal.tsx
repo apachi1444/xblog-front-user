@@ -3,6 +3,8 @@ import type { Article } from 'src/types/article';
 import { format, formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 
+import { convertUTCToLocalDate } from 'src/utils/constants';
+
 import {
   Box,
   List,
@@ -165,7 +167,7 @@ export function ArticleListModal({
                           />
                           <Typography variant="caption" color="text.secondary">
                             {article.status === 'scheduled' && article.scheduled_publish_date
-                              ? `${t('calendar.scheduledFor', 'Scheduled for')} ${formatDate(article.scheduled_publish_date, 'h:mm a')}`
+                              ? `${t('calendar.scheduledFor', 'Scheduled for')} ${formatDate(convertUTCToLocalDate(article.scheduled_publish_date), 'h:mm a')}`
                               : formatDate(article.created_at, 'h:mm a')
                             }
                           </Typography>

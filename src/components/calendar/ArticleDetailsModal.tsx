@@ -5,6 +5,8 @@ import { formatDate } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { convertUTCToLocalDate } from 'src/utils/constants';
+
 import {
   Box,
   Chip,
@@ -434,7 +436,7 @@ export function ArticleDetailsModal({
                           {t('calendar.scheduledDate', 'Scheduled Date')}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {formatDate((article as any).scheduledDate || article.scheduled_publish_date, 'MMMM d, yyyy • h:mm a')}
+                          {formatDate(convertUTCToLocalDate((article as any).scheduledDate || article.scheduled_publish_date), 'MMMM d, yyyy • h:mm a')}
                         </Typography>
                       </Box>
                     </Stack>

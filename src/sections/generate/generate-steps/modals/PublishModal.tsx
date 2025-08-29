@@ -35,6 +35,7 @@ import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { useUpdateArticleMutation } from 'src/services/apis/articlesApi';
 import { useScheduleArticleMutation } from 'src/services/apis/calendarApis';
 import { usePublishWordPressMutation } from 'src/services/apis/integrations/publishApi';
+import { convertLocalDateTimeToUTC } from 'src/utils/constants';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -217,11 +218,14 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo }: PublishM
 
       if (publishingSchedule === 'schedule') {
         // Handle scheduling
-        const scheduledDateTime = `${schedulingSettings.date}T${schedulingSettings.time}:00.000Z`;
+        const scheduledDateTimeUTC = convertLocalDateTimeToUTC(
+          schedulingSettings.date,
+          schedulingSettings.time
+        );
         const scheduleData = {
           store_id: selectedStore,
           article_id: Number(articleId),
-          scheduled_date: scheduledDateTime,
+          scheduled_date: scheduledDateTimeUTC,
         };
         await scheduleArticle(scheduleData).unwrap();
         setSuccessMessage('Article scheduled successfully!');

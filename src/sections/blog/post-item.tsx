@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { navigateToArticle } from 'src/utils/articleIdEncoder';
+import { convertUTCToLocalDate } from 'src/utils/constants';
 
 import { varAlpha } from 'src/theme/styles';
 
@@ -220,7 +221,7 @@ export function PostItem({
           }}
         >
           <Iconify icon="mdi:calendar-clock" width={16} height={16} />
-          {formatDate(new Date(post.scheduled_publish_date), 'MMM d • h:mm a')}
+          {formatDate(convertUTCToLocalDate(post.scheduled_publish_date), 'MMM d • h:mm a')}
         </Typography>
       </Box>
     </Box>
@@ -304,7 +305,7 @@ export function PostItem({
         }}
       >
         {t('blog.scheduledFor', 'Scheduled for {{date}}', {
-          date: formatDate(new Date(post.scheduled_publish_date), 'MMM d, yyyy • h:mm a')
+          date: formatDate(convertUTCToLocalDate(post.scheduled_publish_date), 'MMM d, yyyy • h:mm a')
         })}
       </Typography>
     </Box>

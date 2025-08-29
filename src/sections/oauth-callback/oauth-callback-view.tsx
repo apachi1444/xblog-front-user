@@ -13,7 +13,6 @@ import { Iconify } from 'src/components/iconify';
 
 export function OAuthCallbackView() {
   const { t } = useTranslation();
-  const { accessToken } = useAuth();
   const [connectLinkedInOAuth] = useConnectLinkedInOAuthMutation();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export function OAuthCallbackView() {
         if (window.opener) {
           window.opener.postMessage({ 
             type: 'LINKEDIN_ERROR', 
-            error: error 
+            error 
           }, window.location.origin);
         }
         window.close();
@@ -42,7 +41,7 @@ export function OAuthCallbackView() {
           const result = await connectLinkedInOAuth({
             authorization_code: code,
             redirect_uri: `${window.location.origin}/auth/callback`,
-            state: state,
+            state,
             profile_type: 'personal'
           }).unwrap();
           

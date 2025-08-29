@@ -388,3 +388,33 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'za', name: 'Zhuang' },
   { code: 'zu', name: 'Zulu' }
 ];
+
+/**
+ * Converts local date and time inputs to UTC ISO string
+ * @param date - Date string in YYYY-MM-DD format (local date)
+ * @param time - Time string in HH:MM format (local time)
+ * @returns UTC ISO string (e.g., "2025-08-29T10:25:43.196Z")
+ */
+export function convertLocalDateTimeToUTC(date: string, time: string): string {
+  // Create a Date object using local timezone
+  const localDateTime = new Date(`${date}T${time}:00`);
+
+  // Convert to UTC ISO string
+  return localDateTime.toISOString();
+}
+
+/**
+ * Converts UTC datetime string to local Date object for display
+ * @param utcDateString - UTC ISO string (e.g., "2025-08-29T13:54:00.000Z" or "2025-08-29T13:54:00")
+ * @returns Date object in user's local timezone
+ */
+export function convertUTCToLocalDate(utcDateString: string): Date {
+  // If the string doesn't end with 'Z', it's a naive datetime from backend
+  // We need to treat it as UTC and add the 'Z' suffix
+  const normalizedUTCString = utcDateString.endsWith('Z')
+    ? utcDateString
+    : `${utcDateString}Z`;
+
+  // Create Date object from UTC string - this automatically converts to local timezone
+  return new Date(normalizedUTCString);
+}

@@ -23,6 +23,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { convertLocalDateTimeToUTC } from 'src/utils/constants';
+
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
 import { useDeleteCalendarMutation, useScheduleArticleMutation, useGetScheduledArticlesQuery } from 'src/services/apis/calendarApis';
@@ -119,9 +121,12 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
       return;
     }
 
-    // Check if scheduling in the past
-    const scheduledDateTime = `${articleSchedulingSettings.date}T${articleSchedulingSettings.time}:00.000Z`;
-    const scheduledDate = new Date(scheduledDateTime);
+    // Check if scheduling in the past - convert local time to UTC for comparison
+    const scheduledDateTimeUTC = convertLocalDateTimeToUTC(
+      articleSchedulingSettings.date,
+      articleSchedulingSettings.time
+    );
+    const scheduledDate = new Date(scheduledDateTimeUTC);
     if (scheduledDate <= new Date()) {
       toast.error('Please select a future date and time');
       return;
@@ -152,11 +157,11 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
       }
       toast.loading('Creating new schedule...', { id: 'schedule' });
 
-      // Create the new schedule
+      // Create the new schedule - send UTC datetime to backend
       await scheduleArticle({
         store_id: articleSchedulingSettings.storeId,
         article_id: Number(articleId),
-        scheduled_date: scheduledDateTime,
+        scheduled_date: scheduledDateTimeUTC,
       }).unwrap()
 
       // Success - close modal and show success message

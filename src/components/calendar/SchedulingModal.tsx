@@ -34,6 +34,7 @@ import {
 
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 import { selectCurrentStore } from 'src/services/slices/stores/selectors';
+import { convertLocalDateTimeToUTC } from 'src/utils/constants';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -143,7 +144,7 @@ export function SchedulingModal({
       return {
         articleId,
         storeId: settings.storeId,
-        scheduledDateTime: `${settings.date}T${settings.time}:00.000Z`
+        scheduledDateTime: convertLocalDateTimeToUTC(settings.date, settings.time)
       };
     });
 
