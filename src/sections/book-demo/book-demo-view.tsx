@@ -28,6 +28,7 @@ import {
 } from "@mui/material"
 
 import { DashboardContent } from "src/layouts/dashboard"
+import { useSubmitContactRequestMutation } from "src/services/apis/contactApi"
 
 import { EmailSentAnimation } from "src/components/animations/EmailSentAnimation"
 
@@ -52,6 +53,9 @@ export function BookDemoView() {
   const [videoDialogOpen, setVideoDialogOpen] = useState(false)
   const [showEmailAnimation, setShowEmailAnimation] = useState(false)
   const [demoScheduled, setDemoScheduled] = useState(false)
+
+  // API hook for submitting contact request
+  const [submitContactRequest] = useSubmitContactRequestMutation()
 
   // Create schema with translations
   const bookDemoSchema = createBookDemoSchema(t)
@@ -129,8 +133,20 @@ export function BookDemoView() {
       // Log form data for debugging
       console.log("Demo booking form submitted:", data)
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Prepare API request body according to the specification
+      const requestBody = {
+        full_name: data.fullName,
+        email: data.email,
+        company: data.company,
+        team_size: data.teamSize,
+        message: data.message || "",
+        available_on_date: data.dateTime,
+      }
+
+      // Submit contact request
+      const response = await submitContactRequest(requestBody).unwrap()
+
+      console.log("Contact request submitted successfully:", response)
 
       // Show email animation
       setShowEmailAnimation(true)
@@ -144,6 +160,7 @@ export function BookDemoView() {
       setDemoScheduled(true)
     } catch (error) {
       console.error("Error submitting form:", error)
+      // You might want to show an error toast here
     } finally {
       setIsSubmitting(false)
     }
@@ -208,6 +225,9 @@ export function BookDemoView() {
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 startAdornment: <Calendar size={18} style={{ marginRight: 8, opacity: 0.7 }} />,
+                inputProps: {
+                  min: new Date().toISOString().slice(0, 16), // Only allow future dates
+                }
               }}
             />
             <TextFieldElement
