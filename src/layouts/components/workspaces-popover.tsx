@@ -163,6 +163,42 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     return platform.charAt(0).toUpperCase() + platform.slice(1);
   };
 
+  // Helper function to get a proper display name for the store
+  const getStoreDisplayName = (store: Store) => {
+    // If name looks like an email, try to use URL or create a better display name
+    if (store.name && store.name.includes('@')) {
+      if (store.url) {
+        // Extract domain from URL
+        try {
+          const domain = new URL(store.url.startsWith('http') ? store.url : `https://${store.url}`).hostname;
+          return domain.replace('www.', '');
+        } catch {
+          // If URL parsing fails, use the URL as is
+          return store.url.replace(/^https?:\/\//, '').replace('www.', '');
+        }
+      }
+      // If no URL, create a name from email domain
+      const emailDomain = store.name.split('@')[1];
+      return emailDomain || store.name;
+    }
+    // If name doesn't look like email, use it as is
+    return store.name;
+  };
+
+  // Helper function to get subtitle for the store
+  const getStoreSubtitle = (store: Store) => {
+    // If name is an email and we have URL, show the email as subtitle
+    if (store.name && store.name.includes('@') && store.url) {
+      return store.name;
+    }
+    // If we have URL and it's different from name, show URL
+    if (store.url && store.url !== store.name) {
+      return store.url.replace(/^https?:\/\//, '').replace('www.', '');
+    }
+    // Otherwise, show platform info
+    return getPlatformDisplayName(store.category);
+  };
+
   if (isLoading || !currentStore) {
     return null;
   }
@@ -195,7 +231,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         {...other}
       >
         {/* Left: Store name + Platform + Status */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, overflow: 'hidden', maxWidth: '80%', minWidth: 0 }}>
           {/* Store Name */}
           <Typography
             variant="subtitle2"
@@ -205,28 +241,23 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               color: theme.palette.text.primary,
             }}
           >
-            {currentStore.name}
+            {getStoreDisplayName(currentStore)}
           </Typography>
 
-          {/* Second row with Platform Badge and Connection Status */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Platform Badge */}
-            {currentStore.category && (
-              <Typography
-                component="span"
-                variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                  backgroundColor: 'action.selected',
-                  px: 1,
-                  py: 0.25,
-                  borderRadius: 1,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {getPlatformDisplayName(currentStore.category)}
-              </Typography>
-            )}
+          {/* Second row with Subtitle and Connection Status */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+            {/* Subtitle (URL or Email) */}
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{
+                color: 'text.secondary',
+                flex: 1,
+                fontSize: '0.75rem',
+              }}
+            >
+              {getStoreSubtitle(currentStore)}
+            </Typography>
 
             {/* Connection Status */}
             <Typography
@@ -237,6 +268,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
                   ? theme.palette.success.main
                   : theme.palette.error.main,
                 fontWeight: 600,
+                fontSize: '0.75rem',
               }}
             >
               {currentStore.is_active ? 'Connected' : 'Disconnected'}
@@ -330,11 +362,11 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
                     justifyContent: 'space-between',
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                    {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
-                    <Box component="span" sx={{ flexGrow: 1 }}>
-                      <Typography variant="body2" noWrap>
-                        {store.name}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, maxWidth: '75%' }}>
+                    {renderAvatar(getStoreDisplayName(store), store.avatar || store.logo || '', store.category)}
+                    <Box component="span" sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                        {getStoreDisplayName(store)}
                       </Typography>
                     </Box>
                   </Box>
@@ -388,11 +420,11 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
                     justifyContent: 'space-between',
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                    {renderAvatar(store.name, store.avatar || store.logo || '', store.category)}
-                    <Box component="span" sx={{ flexGrow: 1 }}>
-                      <Typography variant="body2" noWrap>
-                        {store.name}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, maxWidth: '75%' }}>
+                    {renderAvatar(getStoreDisplayName(store), store.avatar || store.logo || '', store.category)}
+                    <Box component="span" sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                        {getStoreDisplayName(store)}
                       </Typography>
                     </Box>
                   </Box>

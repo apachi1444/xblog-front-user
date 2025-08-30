@@ -203,7 +203,82 @@ export default function WebsiteDetails({
               <Typography variant="body2" color="text.secondary">
                 {t('store.guide.description', { platform: getPlatformDisplayName() })}
               </Typography>
-              
+
+              {/* CSS Code Snippet for WordPress */}
+              {formData.platform === 'wordpress' && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                    Insert this code in WordPress to keep article styling consistent:
+                  </Typography>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      bgcolor: alpha(theme.palette.grey[900], 0.04),
+                      border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                      borderRadius: 1,
+                      fontFamily: 'monospace',
+                      fontSize: '0.875rem',
+                      overflow: 'auto',
+                      position: 'relative',
+                    }}
+                  >
+                    <Box
+                      component="pre"
+                      sx={{
+                        margin: 0,
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-all',
+                        color: theme.palette.text.primary,
+                        lineHeight: 1.5,
+                      }}
+                    >
+{`// Load CSS on posts in wordpress
+function xblog_custom_styles() {
+    if ( is_single() ) {
+        wp_enqueue_style(
+            'xblog-external-css',
+            'https://xblog.ai/cloud/style.css',
+            array(),
+            null
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'xblog_custom_styles', 99);`}
+                    </Box>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        minWidth: 'auto',
+                        px: 1,
+                        py: 0.5,
+                        fontSize: '0.75rem',
+                      }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`// Load CSS on posts in wordpress
+function xblog_custom_styles() {
+    if ( is_single() ) {
+        wp_enqueue_style(
+            'xblog-external-css',
+            'https://xblog.ai/cloud/style.css',
+            array(),
+            null
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'xblog_custom_styles', 99);`);
+                        toast.success('Code copied to clipboard!');
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </Paper>
+                </Box>
+              )}
+
               {/* Mobile-only button to open full-screen video */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', mt: 2 }}>
                 <Button
