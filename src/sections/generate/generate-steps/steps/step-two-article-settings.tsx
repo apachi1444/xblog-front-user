@@ -238,7 +238,8 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                 </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
+              {/* CTA Button - Temporarily Disabled */}
+              {/* <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
                     {t('article.settings.includeCta', "Include CTA Button")}
@@ -266,7 +267,7 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                     )}
                   />
                 </Box>
-              </Grid>
+              </Grid> */}
             </Grid>
           </Box>
 
@@ -318,7 +319,8 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                 </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              {/* Include Videos - Temporarily Disabled */}
+              {/* <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <Controller
                     name="step2.includeVideos"
@@ -343,7 +345,7 @@ export function Step2ArticleSettings({ isGenerated, isGenerating, onGenerate, on
                     )}
                   />
                 </Box>
-              </Grid>
+              </Grid> */}
             </Grid>
           </Box>
         
