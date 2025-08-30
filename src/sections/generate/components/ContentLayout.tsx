@@ -122,6 +122,7 @@ export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenera
               onGenerateMeta={onGenerateMeta}
               onCollapseChange={handleSEODashboardCollapseChange}
               isCollapsed={isSEODashboardCollapsed}
+              activeStep={activeStep}
             />
           </Box>
         )}

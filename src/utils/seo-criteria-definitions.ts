@@ -87,6 +87,42 @@ const SEO_CORE_ESSENTIALS: Criterion[] = [
  * SEO Boosters criteria
  */
 const SEO_BOOSTERS: Criterion[] = [
+    {
+    id: 204,
+    description: "seo.criteria.boosters.external_links.description",
+    weight: 3,
+    statusType: "binary" as CriteriaStatusType,
+    evaluationStatus: {
+      success: "seo.criteria.boosters.external_links.success",
+      error: "seo.criteria.boosters.external_links.error"
+    },
+    inputKeys: ["externalLinks"],
+    optimizable: false
+  },
+  {
+    id: 205,
+    description: "seo.criteria.boosters.dofollow_links.description",
+    weight: 4,
+    statusType: "binary" as CriteriaStatusType,
+    evaluationStatus: {
+      success: "seo.criteria.boosters.dofollow_links.success",
+      error: "seo.criteria.boosters.dofollow_links.error"
+    },
+    inputKeys: ["externalLinks"],
+    optimizable: false
+  },
+  {
+    id: 206,
+    description: "seo.criteria.boosters.internal_links.description",
+    weight: 3,
+    statusType: "binary" as CriteriaStatusType,
+    evaluationStatus: {
+      success: "seo.criteria.boosters.internal_links.success",
+      error: "seo.criteria.boosters.internal_links.error"
+    },
+    inputKeys: ["internalLinks"],
+    optimizable: false
+  },
   // this one !
   {
     id: 201,
@@ -129,42 +165,6 @@ const SEO_BOOSTERS: Criterion[] = [
     optimizable: false, // Cannot be automatically optimized - user must edit manually
     warningScore: 3 // 75% of the weight
   },
-  {
-    id: 204,
-    description: "seo.criteria.boosters.external_links.description",
-    weight: 3,
-    statusType: "binary" as CriteriaStatusType,
-    evaluationStatus: {
-      success: "seo.criteria.boosters.external_links.success",
-      error: "seo.criteria.boosters.external_links.error"
-    },
-    inputKeys: ["externalLinks"],
-    optimizable: false
-  },
-  {
-    id: 205,
-    description: "seo.criteria.boosters.dofollow_links.description",
-    weight: 4,
-    statusType: "binary" as CriteriaStatusType,
-    evaluationStatus: {
-      success: "seo.criteria.boosters.dofollow_links.success",
-      error: "seo.criteria.boosters.dofollow_links.error"
-    },
-    inputKeys: ["externalLinks"],
-    optimizable: false
-  },
-  {
-    id: 206,
-    description: "seo.criteria.boosters.internal_links.description",
-    weight: 3,
-    statusType: "binary" as CriteriaStatusType,
-    evaluationStatus: {
-      success: "seo.criteria.boosters.internal_links.success",
-      error: "seo.criteria.boosters.internal_links.error"
-    },
-    inputKeys: ["internalLinks"],
-    optimizable: false
-  }
 ];
 
 /**

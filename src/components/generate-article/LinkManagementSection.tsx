@@ -56,6 +56,7 @@ export function LinkManagementSection({
   const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [areLinksVisible, setAreLinksVisible] = useState(true); // State for showing/hiding links list
 
   const { control, formState: { errors }, watch } = useFormContext<GenerateArticleFormData>();
   
@@ -132,6 +133,10 @@ export function LinkManagementSection({
     }
   };
 
+  const handleToggleLinksVisibility = () => {
+    setAreLinksVisible(!areLinksVisible);
+  };
+
   const getFieldError = (index: number, field: 'url' | 'anchorText') => {
     const fieldErrors = errors.step2?.[type === 'internal' ? 'internalLinks' : 'externalLinks'];
     return fieldErrors?.[index]?.[field]?.message;
@@ -192,7 +197,7 @@ export function LinkManagementSection({
             </Box>
           )}
         </Box>
-        
+
         <IconButton size="small">
           <Iconify
             icon={isExpanded ? 'eva:chevron-up-fill' : 'eva:chevron-down-fill'}
@@ -265,6 +270,27 @@ export function LinkManagementSection({
             >
               {t('links.addManual', 'Add Manual Link')}
             </Button>
+
+            {/* Eye Icon for Links Visibility - Only show if there are links */}
+            {fields.length > 0 && (
+              <IconButton
+                size="small"
+                onClick={handleToggleLinksVisibility}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  '&:hover': {
+                    color: theme.palette.primary.main,
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  }
+                }}
+              >
+                <Iconify
+                  icon={areLinksVisible ? 'eva:eye-off-fill' : 'eva:eye-fill'}
+                  width={18}
+                  height={18}
+                />
+              </IconButton>
+            )}
           </Box>
 
           {/* New Link Form (when adding) */}
@@ -280,7 +306,7 @@ export function LinkManagementSection({
           {fields.length === 0 && !isAddingLink ? (
             <EmptyLinksAlert type={type} />
           ) : (
-            fields.length > 0 && (
+            fields.length > 0 && areLinksVisible && (
               <LinksList
                 fields={fields}
                 links={links}

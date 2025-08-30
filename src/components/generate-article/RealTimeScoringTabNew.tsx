@@ -38,9 +38,10 @@ const getColors = (theme: any) => ({
 interface RealTimeScoringTabNewProps {
   totalMaxScore?: number;
   onCriteriaHighlighted?: (hasHighlighted: boolean) => void;
+  activeStep?: number;
 }
 
-export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlighted }: RealTimeScoringTabNewProps) {
+export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlighted, activeStep = 0 }: RealTimeScoringTabNewProps) {
   const theme = useTheme();
   const { t } = useTranslation();
   const COLORS = getColors(theme);
@@ -184,6 +185,44 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
     if (scorePercentage < 66) return COLORS.warning;
     return COLORS.success;
   };
+
+  // Function to reorder criteria sections based on active step
+  const getOrderedCriteriaSections = useMemo(() => {
+    const sections = [...SEO_CRITERIA];
+
+    switch (activeStep) {
+      case 0: // Step 1: Content Setup
+        // Put SEO Core Essentials and Title Optimization first
+        return sections.sort((a, b) => {
+          const priorityOrder = [1, 3, 2, 4]; // core_essentials, title_optimization, boosters, content_clarity
+          const aIndex = priorityOrder.indexOf(a.id);
+          const bIndex = priorityOrder.indexOf(b.id);
+          return aIndex - bIndex;
+        });
+
+      case 1: // Step 2: Article Settings
+        // Put SEO Boosters first (contains internal/external links)
+        return sections.sort((a, b) => {
+          const priorityOrder = [2, 1, 3, 4]; // boosters, core_essentials, title_optimization, content_clarity
+          const aIndex = priorityOrder.indexOf(a.id);
+          const bIndex = priorityOrder.indexOf(b.id);
+          return aIndex - bIndex;
+        });
+
+      case 2: // Step 3: Publish
+        // Put Content Clarity and SEO Boosters first
+        return sections.sort((a, b) => {
+          const priorityOrder = [4, 2, 1, 3]; // content_clarity, boosters, core_essentials, title_optimization
+          const aIndex = priorityOrder.indexOf(a.id);
+          const bIndex = priorityOrder.indexOf(b.id);
+          return aIndex - bIndex;
+        });
+
+      default:
+        // Default order for any other step
+        return sections;
+    }
+  }, [activeStep]);
 
   // Helper function to get field path and current value for a criterion
   const getCriterionFieldInfo = useCallback((criterionId: number) => {
@@ -367,7 +406,7 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
       </Box>
 
       {/* Criteria Sections */}
-      {Object.values(SEO_CRITERIA).map((group) => (
+      {getOrderedCriteriaSections.map((group) => (
         <Box key={group.id} sx={{ mb: 3 }}>
           <Box
             sx={{

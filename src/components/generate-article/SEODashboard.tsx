@@ -31,6 +31,7 @@ interface SEODashboardProps {
   onGenerateMeta?: () => Promise<{ metaTitle: string; metaDescription: string; urlSlug: string }>;
   onCollapseChange?: (collapsed: boolean) => void;
   isCollapsed?: boolean;
+  activeStep?: number;
 }
 
 // Constants - using theme-aware colors
@@ -50,6 +51,7 @@ export function SEODashboard({
   isCollapsed,
   isGeneratingMeta,
   onGenerateMeta,
+  activeStep = 0,
 }: SEODashboardProps) {
 
   const form = useFormContext<GenerateArticleFormData>()
@@ -132,6 +134,7 @@ export function SEODashboard({
             <RealTimeScoringTabNew
               totalMaxScore={totalScore}
               onCriteriaHighlighted={handleCriteriaHighlighted}
+              activeStep={activeStep}
             />
           </FormProvider>
           
@@ -153,7 +156,7 @@ export function SEODashboard({
       default:
         return null;
     }
-  }, [tabValue, formValues.title, formValues.metaTitle, formValues.metaDescription, formValues.urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled, form, totalScore, handleCriteriaHighlighted]);
+  }, [tabValue, form, totalScore, handleCriteriaHighlighted, activeStep, formValues.title, formValues.metaTitle, formValues.metaDescription, formValues.urlSlug, onGenerateMeta, isGeneratingMeta, isGenerateDisabled]);
 
   return (
     <Box sx={{
