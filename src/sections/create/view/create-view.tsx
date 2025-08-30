@@ -5,12 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
+import { Fade } from '@mui/material';
 import Card from '@mui/material/Card';
-import Fade from '@mui/material/Fade';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Backdrop from '@mui/material/Backdrop';
+import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Unstable_Grid2';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -39,6 +40,9 @@ export function CreateView() {
   const [articleToDelete, setArticleToDelete] = useState<number | null>(null);
   const [subscriptionLimitModalOpen, setSubscriptionLimitModalOpen] = useState(false);
 
+  // Bulk selection state
+  const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   // Fetch articles and filter drafts
   const currentStore = useSelector(selectCurrentStore);
   const storeId = currentStore?.id || 1;
@@ -71,7 +75,7 @@ export function CreateView() {
     {
       id: 'generate',
       title: t('create.options.generate.title', 'Generate'),
-      description: t('create.options.generate.description', 'Create from a one-line prompt in a few seconds'),
+      description: t('create.options.generate.description', 'Create your article in a few seconds'),
       icon: 'mdi:lightning-bolt',
       color: '#BBDEFB',
       popular: true
@@ -79,7 +83,7 @@ export function CreateView() {
     {
       id: 'template',
       title: t('create.options.template.title', 'Use Built In Template'),
-      description: t('create.options.template.description', 'Create an article from an existing template'),
+      description: t('create.options.template.description', 'Create your article from an existing template'),
       icon: 'mdi:content-paste',
       color: '#F8BBD0',
       locked: false,
@@ -87,8 +91,8 @@ export function CreateView() {
     },
     {
       id: 'bulk',
-      title: t('create.options.bulk.title', 'Bulk Generate'),
-      description: t('create.options.bulk.description', 'Generate multiple articles in a single batch'),
+      title: t('create.options.bulk.title', 'Custom AI Agent'),
+      description: t('create.options.bulk.description', 'Communicate our custom ai agent to accelerate your work'),
       icon: 'mdi:file-multiple-outline',
       color: '#C8E6C9',
       locked: true,
@@ -105,7 +109,6 @@ export function CreateView() {
     // Navigate to the appropriate page based on selection
     if (optionId === 'generate') {
       try {
-        console.log('🚀 Starting article creation, isCreatingArticle:', isCreatingArticle);
         await createArticle({
           title: 'Untitled Article',
           content: '',
@@ -163,6 +166,41 @@ export function CreateView() {
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setArticleToDelete(null);
+  };
+
+  const handleSelectArticle = (articleId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const newSelected = new Set(selectedArticles);
+    if (newSelected.has(articleId)) {
+      newSelected.delete(articleId);
+    } else {
+      newSelected.add(articleId);
+    }
+    setSelectedArticles(newSelected);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedArticles.size > 0) {
+      setBulkDeleteDialogOpen(true);
+    }
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    try {
+      const deletePromises = Array.from(selectedArticles).map(id =>
+        deleteArticle(id.toString()).unwrap()
+      );
+      await Promise.all(deletePromises);
+      toast.success(t('create.bulkDeleteSuccess', `${selectedArticles.size} articles deleted successfully`));
+      setSelectedArticles(new Set());
+      setBulkDeleteDialogOpen(false);
+    } catch (error) {
+      toast.error(t('create.bulkDeleteError', 'Failed to delete some articles. Please try again.'));
+    }
+  };
+
+  const handleBulkDeleteCancel = () => {
+    setBulkDeleteDialogOpen(false);
   };
 
   const handleUpgrade = () => {
@@ -265,9 +303,7 @@ export function CreateView() {
                           px: 2
                         }}
                       >
-                        {option.id === 'template'
-                          ? t('create.comingSoonTemplate', 'Built-in Templates Coming Soon')
-                          : t('create.comingSoonBulk', 'Bulk Generation Coming Soon')}
+                        {t('create.comingSoonBulk', 'Coming Soon')}
                       </Typography>
                     </Box>
                   </Box>
@@ -290,16 +326,7 @@ export function CreateView() {
                       position: 'relative',
                     }}
                   >
-                    {option.id === 'generate' && isCreatingArticle ? (
-                      <CircularProgress
-                        size={60}
-                        thickness={4}
-                        sx={{
-                          color: option.color,
-                        }}
-                      />
-                    ) : (
-                      <Iconify
+                    <Iconify
                         icon={option.icon}
                         width={80}
                         height={80}
@@ -309,8 +336,7 @@ export function CreateView() {
                           transition: 'transform 0.3s ease',
                           opacity: option.locked ? 0.7 : 1
                         }}
-                      />
-                    )}
+                    />
                   </Box>
                   <Typography variant="h6" gutterBottom sx={{ opacity: option.locked ? 0.7 : 1 }}>
                     {option.title}
@@ -329,6 +355,36 @@ export function CreateView() {
         <Typography variant="h5" sx={{ mb: 3 }}>
           {t('create.draftArticlesHeading', 'Draft Articles')}
         </Typography>
+
+        {/* Selection Header - Only show when articles are selected */}
+        {selectedArticles.size > 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+              p: 2,
+              bgcolor: 'primary.lighter',
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'primary.main'
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {selectedArticles.size} selected
+            </Typography>
+            <Button
+              size="small"
+              variant="contained"
+              color="error"
+              onClick={handleBulkDelete}
+              startIcon={<Iconify icon="mdi:delete" />}
+            >
+              Delete
+            </Button>
+          </Box>
+        )}
 
         {isLoading ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -377,6 +433,13 @@ export function CreateView() {
                     }
                   }
                 }}>
+                  {/* Checkbox */}
+                  <Checkbox
+                    checked={selectedArticles.has(article.id)}
+                    onClick={(e) => handleSelectArticle(article.id, e)}
+                    sx={{ mr: 1 }}
+                  />
+
                   <Box sx={{ flex: 1, mr: 2 }}>
                     <Typography
                       variant="subtitle1"
@@ -484,6 +547,43 @@ export function CreateView() {
             {isDeletingArticle
               ? t('common.deleting', 'Deleting...')
               : t('common.delete', 'Delete')
+            }
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog
+        open={bulkDeleteDialogOpen}
+        onClose={handleBulkDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Delete Selected Articles
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete {selectedArticles.size} selected article{selectedArticles.size > 1 ? 's' : ''}? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleBulkDeleteCancel}
+            disabled={isDeletingArticle}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleBulkDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={isDeletingArticle}
+            startIcon={isDeletingArticle ? <CircularProgress size={16} /> : undefined}
+          >
+            {isDeletingArticle
+              ? 'Deleting...'
+              : `Delete ${selectedArticles.size} Article${selectedArticles.size > 1 ? 's' : ''}`
             }
           </Button>
         </DialogActions>

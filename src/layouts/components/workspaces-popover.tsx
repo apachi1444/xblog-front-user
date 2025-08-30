@@ -164,33 +164,13 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   };
 
   // Helper function to get a proper display name for the store
-  const getStoreDisplayName = (store: Store) => {
-    // If name looks like an email, try to use URL or create a better display name
-    if (store.name && store.name.includes('@')) {
-      if (store.url) {
-        // Extract domain from URL
-        try {
-          const domain = new URL(store.url.startsWith('http') ? store.url : `https://${store.url}`).hostname;
-          return domain.replace('www.', '');
-        } catch {
-          // If URL parsing fails, use the URL as is
-          return store.url.replace(/^https?:\/\//, '').replace('www.', '');
-        }
-      }
-      // If no URL, create a name from email domain
-      const emailDomain = store.name.split('@')[1];
-      return emailDomain || store.name;
-    }
-    // If name doesn't look like email, use it as is
-    return store.name;
-  };
+  const getStoreDisplayName = (store: Store) => 
+    // Always use the store name as is - whether it's email, URL, or regular name
+     store.name
+  ;
 
   // Helper function to get subtitle for the store
   const getStoreSubtitle = (store: Store) => {
-    // If name is an email and we have URL, show the email as subtitle
-    if (store.name && store.name.includes('@') && store.url) {
-      return store.name;
-    }
     // If we have URL and it's different from name, show URL
     if (store.url && store.url !== store.name) {
       return store.url.replace(/^https?:\/\//, '').replace('www.', '');

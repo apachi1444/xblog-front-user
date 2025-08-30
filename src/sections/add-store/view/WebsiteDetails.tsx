@@ -24,7 +24,7 @@ import WordPressForm from './platform-forms/WordPressForm';
 
 // Video mapping for each platform
 const PLATFORM_VIDEOS = {
-  wordpress: 'https://www.youtube.com/embed/example-wordpress',
+  wordpress: 'https://www.youtube.com/embed/5ILQiCwj9w4',
   shopify: 'https://www.youtube.com/embed/example-shopify',
   wix: 'https://www.youtube.com/embed/example-wix',
 };
