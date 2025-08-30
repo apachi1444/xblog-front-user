@@ -28,28 +28,23 @@ export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenera
   const dashboardRef = useRef<HTMLDivElement>(null);
   const initialTopOffset = useRef<number>(0);
 
-  // Determine if SEO Dashboard should be visible based on the active step
-  const isSEODashboardVisible = activeStep !== 1 && activeStep !== 3; // Hide in Article Settings and Publish steps
+  const isSEODashboardVisible = activeStep !== 3;
 
-  // Handler for SEO dashboard collapse state change
   const handleSEODashboardCollapseChange = (collapsed: boolean) => {
     setIsSEODashboardCollapsed(collapsed);
   };
 
-  // Set up scroll event listener to fix the SEO dashboard when scrolling
   useEffect(() => {
     if (!isSEODashboardVisible) return;
 
     const handleScroll = () => {
       if (!dashboardRef.current) return;
 
-      // If we haven't stored the initial offset yet, do it now
       if (initialTopOffset.current === 0) {
         const rect = dashboardRef.current.getBoundingClientRect();
         initialTopOffset.current = rect.top;
       }
 
-      // Check if we've scrolled at all
       const shouldBeFixed = window.scrollY > 0;
 
       if (shouldBeFixed !== isFixed) {
@@ -59,7 +54,6 @@ export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenera
 
     window.addEventListener('scroll', handleScroll);
 
-    // Initial check
     handleScroll();
 
     // eslint-disable-next-line consistent-return
@@ -74,12 +68,11 @@ export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenera
         display: 'flex',
         width: '100%',
         position: 'relative',
-        minHeight: 'calc(100vh - 200px)', // Adjust based on your layout
-        mb: 10, // Add bottom margin to prevent content from being hidden by the bottom navigation
-        mt: 2, // Add top margin for better spacing from the stepper
+        minHeight: 'calc(100vh - 200px)',
+        mb: 10,
+        mt: 2,
       }}
     >
-      {/* Main content container - always takes full width */}
       <Box
         sx={{
           display: 'flex',
@@ -127,7 +120,6 @@ export const ContentLayout = ({ children, activeStep, isGeneratingMeta, onGenera
             <SEODashboard
               isGeneratingMeta={isGeneratingMeta}
               onGenerateMeta={onGenerateMeta}
-              defaultTab={activeStep === 0 ? 0 : 1} // Preview SEO for Step 1, Real-time Scoring for Step 3
               onCollapseChange={handleSEODashboardCollapseChange}
               isCollapsed={isSEODashboardCollapsed}
             />

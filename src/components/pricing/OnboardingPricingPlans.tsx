@@ -191,7 +191,7 @@ export function OnboardingPricingPlans({
             >
               {t('onboarding.yearly', 'Yearly')}
               <Chip
-                label="-25%"
+                label="-20%"
                 size="small"
                 sx={{
                   ml: 1,
@@ -265,7 +265,7 @@ export function OnboardingPricingPlans({
                             fontSize: '0.75rem'
                           }}
                         >
-                          Save 25%
+                          Save 20%
                         </Typography>
                       )}
                     </Box>

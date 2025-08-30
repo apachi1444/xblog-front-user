@@ -53,17 +53,12 @@ export const ExportModal = ({ open, onClose, formData }: ExportModalProps) => {
           filename = `${(formData.step1?.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
           mimeType = 'text/markdown';
           break;
-        case 1: // PDF (placeholder - would need PDF generation library)
-          toast.error('PDF export is not yet implemented');
-          setIsExporting(false);
-          return;
-        case 2: // HTML
-          // For HTML export, get the HTML content directly
+        case 1: // PDF (placeholder - would need PDF generation library)          // For HTML export, get the HTML content directly
           content = getHtmlContent(formData);
           filename = `${(formData.step1?.title || 'untitled').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
           mimeType = 'text/html';
           break;
-        case 3: // JSON
+        case 2: // JSON
           // Export complete form data with proper schema structure
           content = JSON.stringify({
             formData,

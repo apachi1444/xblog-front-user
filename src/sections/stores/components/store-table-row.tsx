@@ -173,13 +173,6 @@ export function StoreTableRow({
             >
               {isConnected ? 'Connected' : 'Disconnected'}
             </Label>
-            <Label
-              variant="soft"
-              color={isConnected ? 'info' : 'warning'}
-              sx={{ textTransform: 'capitalize', fontSize: '0.75rem' }}
-            >
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </Label>
           </Box>
         </TableCell>
 

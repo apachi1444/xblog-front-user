@@ -26,7 +26,7 @@ import { RealTimeScoringTabNew } from "./RealTimeScoringTabNew";
 
 // Types
 interface SEODashboardProps {
-  defaultTab?: number; // 0 for Preview SEO, 1 for Real-time Scoring
+  defaultTab?: number;
   isGeneratingMeta?: boolean;
   onGenerateMeta?: () => Promise<{ metaTitle: string; metaDescription: string; urlSlug: string }>;
   onCollapseChange?: (collapsed: boolean) => void;
@@ -82,17 +82,14 @@ export function SEODashboard({
   const [tabValue, setTabValue] = useState(defaultTab);
   const [shouldAutoSwitchToScoring, setShouldAutoSwitchToScoring] = useState(false);
 
-  // Use the isCollapsed prop if provided, otherwise use internal state
   const [internalShowContent, setInternalShowContent] = useState(true);
 
-  // Compute showContent based on props or internal state
   const showContent = isCollapsed !== undefined ? !isCollapsed : internalShowContent;
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
 
-    // If switching to the Real-time Scoring tab, re-evaluate all criteria
-    if (newValue === 1) {
+    if (newValue === 0) {
       evaluateAllCriteria();
     }
   }, [evaluateAllCriteria]);
@@ -110,8 +107,7 @@ export function SEODashboard({
   // Handle criteria highlighting callback
   const handleCriteriaHighlighted = useCallback((hasHighlighted: boolean) => {
     if (hasHighlighted) {
-      // Auto-switch to Real-time Scoring tab when criteria are highlighted
-      setTabValue(1);
+      setTabValue(0);
       setShouldAutoSwitchToScoring(true);
 
       // Also expand the dashboard if it's collapsed
@@ -132,6 +128,17 @@ export function SEODashboard({
     switch (tabValue) {
       case 0:
         return (
+          <FormProvider {...form}>
+            <RealTimeScoringTabNew
+              totalMaxScore={totalScore}
+              onCriteriaHighlighted={handleCriteriaHighlighted}
+            />
+          </FormProvider>
+          
+        );
+
+      case 1:
+        return (
           <PreviewSEOTab
             title={formValues.title}
             metaTitle={formValues.metaTitle}
@@ -141,16 +148,6 @@ export function SEODashboard({
             isGeneratingMeta={isGeneratingMeta}
             isGenerateDisabled={isGenerateDisabled}
           />
-        );
-
-      case 1:
-        return (
-          <FormProvider {...form}>
-            <RealTimeScoringTabNew
-              totalMaxScore={totalScore}
-              onCriteriaHighlighted={handleCriteriaHighlighted}
-            />
-          </FormProvider>
         );
 
       default:
@@ -271,9 +268,9 @@ export function SEODashboard({
                 },
               }}
             >
-              <Tab label="Preview SEO" />
+              <Tab label={`Real-time Scoring (${formattedScore})`} />
               <Tab
-                label={`Real-time Scoring (${formattedScore})`}
+                label="Preview SEO" 
                 sx={shouldAutoSwitchToScoring ? {
                   animation: 'tabHighlight 1.5s ease-in-out',
                   '@keyframes tabHighlight': {

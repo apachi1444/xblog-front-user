@@ -9,7 +9,6 @@ import Box from '@mui/material/Box';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
 import { useMediaQuery } from '@mui/material';
 import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
@@ -249,34 +248,6 @@ export function TopHeader() {
             }}>
               {/* Use the extracted ResourceDisplays component */}
               <ResourceDisplays />
-
-              {/* Add Website Plus Button */}
-              <Tooltip title={t('websites.addNew', 'Add New Website')} placement="bottom">
-                <IconButton
-                  onClick={() => { window.location.href = '/stores/add'; }}
-                  sx={{
-                    p: 1,
-                    bgcolor: alpha(theme.palette.primary.main, 0.1),
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.15),
-                      borderColor: alpha(theme.palette.primary.main, 0.3),
-                      transform: 'scale(1.05)',
-                    },
-                  }}
-                >
-                  <Iconify
-                    icon="solar:add-circle-bold"
-                    width={20}
-                    height={20}
-                    sx={{
-                      color: theme.palette.primary.main,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
 
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />

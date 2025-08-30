@@ -70,7 +70,7 @@ export const FormDropdown = forwardRef<HTMLInputElement, FormDropdownProps>(({
         error={error}
         inputRef={ref}
         sx={{
-          height: theme.spacing(6.25),
+          minHeight: theme.spacing(6.25),
           bgcolor: theme.palette.background.paper,
           borderRadius: theme.shape.borderRadius / 6,
           border: `0.5px solid ${error ? theme.palette.error.main : theme.palette.primary.main}`,
@@ -79,7 +79,16 @@ export const FormDropdown = forwardRef<HTMLInputElement, FormDropdownProps>(({
             display: 'flex',
             alignItems: 'center',
             gap: theme.spacing(1),
-            py: 0.5
+            py: 1,
+            px: 1.5,
+            minHeight: 'auto',
+            lineHeight: 1.4,
+            whiteSpace: 'normal',
+            wordWrap: 'break-word'
+          },
+          '& .MuiSelect-icon': {
+            top: '50%',
+            transform: 'translateY(-50%)'
           }
         }}
         onChange={(e) => {
@@ -138,14 +147,39 @@ export const FormDropdown = forwardRef<HTMLInputElement, FormDropdownProps>(({
         {...selectProps}
       >
         {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <MenuItem
+            key={option.value}
+            value={option.value}
+            sx={{
+              whiteSpace: 'normal',
+              wordWrap: 'break-word',
+              minHeight: 'auto',
+              py: 1.5,
+              px: 2
+            }}
+          >
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 1,
+              width: '100%'
+            }}>
               {option.icon && (
-                <Box component="span" sx={{ fontSize: '1.2em' }}>
+                <Box component="span" sx={{
+                  fontSize: '1.2em',
+                  mt: 0.25,
+                  flexShrink: 0
+                }}>
                   {option.icon}
                 </Box>
               )}
-              {option.label}
+              <Box sx={{
+                flex: 1,
+                lineHeight: 1.4,
+                fontSize: theme.typography.body2.fontSize
+              }}>
+                {option.label}
+              </Box>
             </Box>
           </MenuItem>
         ))}

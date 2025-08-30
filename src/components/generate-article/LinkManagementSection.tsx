@@ -53,7 +53,7 @@ export function LinkManagementSection({
 }: LinkManagementSectionProps) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const [isExpanded, setIsExpanded] = useState(true); // Collapsed by default
+  const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
 

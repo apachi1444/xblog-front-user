@@ -839,17 +839,18 @@
       "features": {
         "templates": {
           "title": "Built-in Templates",
-          "description": "Create articles from pre-designed templates for various content types"
+          "description": "Quickly start writing with ready-made templates tailored for different types of content."
         },
-        "bulk": {
-          "title": "Bulk Generation",
-          "description": "Generate multiple articles in a single batch to save time"
+        "aiAgent": {
+          "title": "AI Agent",
+          "description": "Let our AI create multiple high-quality articles at once, saving you valuable time and effort."
         },
-        "analytics": {
-          "title": "Advanced Analytics",
-          "description": "Get detailed insights into your content performance"
+        "customModel": {
+          "title": "Our powerful custom model",
+          "description": "Unlock advanced insights and analytics powered by our proprietary AI model."
         }
       }
+    }
     },
     "calendar": {
       "schedule": "Schedule",
@@ -892,4 +893,3 @@
       }
     }
   }
-}

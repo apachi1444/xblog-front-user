@@ -41,15 +41,15 @@ export function ComingSoonPopover() {
     },
     {
       icon: 'mdi:file-multiple-outline',
-      title: t('comingSoon.features.bulk.title', 'Bulk Generation'),
-      description: t('comingSoon.features.bulk.description', 'Generate multiple articles in a single batch to save time'),
+      title: t('comingSoon.features.aiAgent.title', 'Bulk Generation'),
+      description: t('comingSoon.features.aiAgent.description', 'Generate multiple articles in a single batch to save time'),
       eta: t('comingSoon.eta.soon', 'Coming soon')
     },
     // Add a third feature for the popover
     {
       icon: 'mdi:chart-timeline-variant',
-      title: t('comingSoon.features.analytics.title', 'Advanced Analytics'),
-      description: t('comingSoon.features.analytics.description', 'Get detailed insights into your content performance'),
+      title: t('comingSoon.features.customModel.title', 'Advanced Analytics'),
+      description: t('comingSoon.features.customModel.description', 'Get detailed insights into your content performance'),
       eta: t('comingSoon.eta.soon', 'Coming soon')
     }
   ];

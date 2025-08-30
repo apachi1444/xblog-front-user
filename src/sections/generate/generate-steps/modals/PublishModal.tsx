@@ -660,7 +660,7 @@ export const PublishModal = ({ open, onClose, articleId, articleInfo }: PublishM
                 <Button
                   variant="contained"
                   onClick={() => {
-                    router.push('/websites/add');
+                    router.push('/stores/add');
                     onClose();
                   }}
                   startIcon={<Iconify icon="eva:plus-fill" />}

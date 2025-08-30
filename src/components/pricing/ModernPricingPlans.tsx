@@ -186,7 +186,7 @@ export function ModernPricingPlans({
           >
             {t('pricing.yearly', 'Yearly')}
             <Chip
-              label="-25%"
+              label="-20%"
               size="small"
               sx={{
                 ml: 1,
