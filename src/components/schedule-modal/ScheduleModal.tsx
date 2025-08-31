@@ -11,6 +11,7 @@ import {
   Modal,
   Stack,
   alpha,
+  Alert,
   Button,
   Select,
   useTheme,
@@ -22,6 +23,8 @@ import {
   FormControl,
   CircularProgress,
 } from '@mui/material';
+
+import { useRouter } from 'src/routes/hooks';
 
 import { convertLocalDateTimeToUTC } from 'src/utils/constants';
 
@@ -42,6 +45,7 @@ interface ScheduleModalProps {
 export function ScheduleModal({ open, onClose, articleId, articleTitle, isReschedule = false }: ScheduleModalProps) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const router = useRouter();
 
   // Get current store and all stores
   const currentStore = useSelector(selectCurrentStore);
@@ -319,54 +323,84 @@ export function ScheduleModal({ open, onClose, articleId, articleTitle, isResche
                 <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
                   {t('calendar.selectStore', 'Select Store')}
                 </Typography>
-                <FormControl fullWidth size="small">
-                  <InputLabel>{t('calendar.store', 'Store')}</InputLabel>
-                  <Select
-                    value={articleSchedulingSettings.storeId}
-                    label={t('calendar.store', 'Store')}
-                    onChange={(e) => updateSchedulingSettings({ storeId: Number(e.target.value) })}
+                {stores.length > 0 ? (
+                  <FormControl fullWidth size="small">
+                    <InputLabel>{t('calendar.store', 'Store')}</InputLabel>
+                    <Select
+                      value={articleSchedulingSettings.storeId}
+                      label={t('calendar.store', 'Store')}
+                      onChange={(e) => updateSchedulingSettings({ storeId: Number(e.target.value) })}
+                    >
+                      {stores.map((store) => (
+                        <MenuItem key={store.id} value={store.id}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {store.logo ? (
+                              <img
+                                src={store.logo}
+                                alt={store.name}
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  borderRadius: '50%',
+                                  objectFit: 'cover',
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                sx={{
+                                  width: 20,
+                                  height: 20,
+                                  borderRadius: '50%',
+                                  bgcolor: 'primary.main',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: 'white',
+                                  fontSize: '10px',
+                                  fontWeight: 'bold',
+                                }}
+                              >
+                                {store.name.charAt(0).toUpperCase()}
+                              </Box>
+                            )}
+                            <Typography variant="body2">{store.name}</Typography>
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <Alert
+                    severity="warning"
+                    action={
+                      <Button
+                        color="inherit"
+                        size="small"
+                        variant="outlined"
+                        onClick={() => {
+                          router.push('/stores/add');
+                          onClose();
+                        }}
+                        startIcon={<Iconify icon="eva:plus-fill" />}
+                        sx={{
+                          borderColor: 'warning.main',
+                          color: 'warning.main',
+                          '&:hover': {
+                            borderColor: 'warning.dark',
+                            backgroundColor: 'warning.light',
+                          }
+                        }}
+                      >
+                        {t('stores.addWebsite', 'Add Website')}
+                      </Button>
+                    }
                   >
-                    {stores.map((store) => (
-                      <MenuItem key={store.id} value={store.id}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {store.logo ? (
-                            <img
-                              src={store.logo}
-                              alt={store.name}
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                              }}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <Box
-                              sx={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: '50%',
-                                bgcolor: 'primary.main',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '10px',
-                                fontWeight: 'bold',
-                              }}
-                            >
-                              {store.name.charAt(0).toUpperCase()}
-                            </Box>
-                          )}
-                          <Typography variant="body2">{store.name}</Typography>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    {t('stores.noStoresAvailable', 'No stores available. Please connect a store first.')}
+                  </Alert>
+                )}
               </Box>
 
               {/* Date and Time Selection */}
