@@ -7,15 +7,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { alpha, useTheme } from '@mui/material/styles';
 import {
   Box,
-  Chip,
-  Grid,
   Stack,
   Button,
   Dialog,
   Typography,
   IconButton,
   DialogContent,
-  LinearProgress,
 } from '@mui/material';
 
 import { EVALUATION_FUNCTIONS } from 'src/utils/seo-criteria-evaluators';
@@ -436,47 +433,6 @@ export function CriterionDetailsModal({
         };
     }
   }, [formatTocForDisplay]);
-
-  // Get remaining status descriptions based on current status
-  const getRemainingStatusDescriptions = useCallback((criterione: any, currentStatus: string) => {
-    const remainingStatuses = [];
-
-    if (criterione.statusType === 'ternary') {
-      if (currentStatus === 'error') {
-        // Show warning and success
-        if (criterione.evaluationStatus.warning) {
-          remainingStatuses.push({
-            status: 'warning',
-            description: t(criterione.evaluationStatus.warning),
-            points: criterione.warningScore || Math.floor(criterione.weight * 0.75)
-          });
-        }
-        remainingStatuses.push({
-          status: 'success',
-          description: t(criterione.evaluationStatus.success),
-          points: criterione.weight
-        });
-      } else if (currentStatus === 'warning') {
-        // Show success only
-        remainingStatuses.push({
-          status: 'success',
-          description: t(criterione.evaluationStatus.success),
-          points: criterione.weight
-        });
-      }
-    } else if (criterione.statusType === 'binary') {
-      if (currentStatus === 'error') {
-        // Show success only
-        remainingStatuses.push({
-          status: 'success',
-          description: t(criterione.evaluationStatus.success),
-          points: criterione.weight
-        });
-      }
-    }
-
-    return remainingStatuses;
-  }, [t]);
 
   // Simple evaluation function
   const evaluateCriterion = useCallback((criterionIdToEvaluate: number, value: string) => {

@@ -15,22 +15,20 @@ import { FormContainer, PasswordElement, TextFieldElement } from 'react-hook-for
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-  import LoadingButton from '@mui/lab/LoadingButton';
-import { Switch, Tooltip, CircularProgress, FormControlLabel } from "@mui/material";
+import { CircularProgress } from "@mui/material";
+  import Typography from '@mui/material/Typography';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import { useRouter } from 'src/routes/hooks';
 
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 import { useEnhancedAnalytics } from 'src/hooks/useEnhancedAnalytics';
 
-import { trackTestModeToggle } from 'src/utils/analytics';
-
 import { signInSchema } from 'src/validation/auth-schemas';
+import { selectIsTestMode } from 'src/services/slices/globalSlice';
 import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useLazyGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectIsAuthenticated } from 'src/services/slices/auth/selectors';
-import { setTestMode, selectIsTestMode } from 'src/services/slices/globalSlice';
 import { useLoginMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
 
 import { Logo } from 'src/components/logo/logo';
@@ -227,14 +225,6 @@ export function SignInView() {
     }
   }, [googleAuth, handleAuthSuccess, testMode, handleTestModeLogin, analytics]);
 
-  const handleToggleTestMode = useCallback(() => {
-    const newTestMode = !testMode;
-    dispatch(setTestMode(newTestMode));
-
-    // Track test mode toggle with proper analytics
-    trackTestModeToggle(newTestMode);
-  }, [dispatch, testMode]);
-
   const handleNavigateToSignUp = useCallback(() => {
     router.push('/sign-up');
   }, [router]);
@@ -266,25 +256,6 @@ export function SignInView() {
         right: 12,
         zIndex: 9
       }}>
-        {/* Test Mode Toggle */}
-        <Tooltip title={testMode ? "Authentication will be bypassed" : "Use real authentication"}>
-          <FormControlLabel
-            control={
-              <Switch
-                size="small"
-                checked={testMode}
-                onChange={handleToggleTestMode}
-                color="warning"
-              />
-            }
-            label={
-              <Typography variant="caption" color={testMode ? 'warning.main' : 'text.secondary'}>
-                Test Mode
-              </Typography>
-            }
-          />
-        </Tooltip>
-
         <LanguageSwitcher sx={{ position: 'relative', top: 0, right: 0 }} />
       </Box>
 
@@ -378,31 +349,66 @@ export function SignInView() {
             </Typography>
           </Divider>
 
-          {isGoogleAuthLoading ? (
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: 48,
-              width: '100%'
-            }}>
-              <CircularProgress size={24} color="primary" />
-            </Box>
-          ) : (
-            <Box sx={{ width: '100%' }} id="google-login-container">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                text="signin_with"
-                theme="filled_black"
-                onError={() => toast.error("Google Login Failed")}
-                useOneTap={false}
-                context="signin"
-                width="100%"
-                auto_select={false}
-                prompt_parent_id="google-login-container"
-              />
-            </Box>
-          )}
+          <Box sx={{
+            width: '100%',
+            '& > div': {
+              width: '100% !important',
+            },
+            '& iframe': {
+              width: '100% !important',
+              minHeight: '48px !important',
+            },
+            '& [data-testid="google-login-button"]': {
+              width: '100% !important',
+            },
+            // Override Google's cached user styling
+            '& .google-login-container': {
+              width: '100% !important',
+            },
+            '& .google-login-button': {
+              width: '100% !important',
+              minWidth: '100% !important',
+            }
+          }}>
+            {isGoogleAuthLoading ? (
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 48,
+                width: '100%'
+              }}>
+                <CircularProgress size={24} color="primary" />
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  width: '100%',
+                  '& > div': {
+                    width: '100% !important',
+                  },
+                  '& iframe': {
+                    width: '100% !important',
+                    minHeight: '48px !important',
+                  },
+                }}
+                id="google-login-container"
+              >
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  text="signin_with"
+                  theme="filled_black"
+                  size="large"
+                  onError={() => toast.error("Google Login Failed")}
+                  useOneTap={false}
+                  context="signin"
+                  width="100%"
+                  auto_select={false}
+                  prompt_parent_id="google-login-container"
+                />
+              </Box>
+            )}
+          </Box>
         </>
       )}
 

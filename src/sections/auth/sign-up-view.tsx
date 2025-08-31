@@ -2,9 +2,9 @@ import type { CredentialResponse } from '@react-oauth/google';
 import type { SignUpFormData } from 'src/validation/auth-schemas';
 
 import toast from 'react-hot-toast';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +26,6 @@ import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useSignUpMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
 
 import { Logo } from 'src/components/logo';
-import { Iconify } from 'src/components/iconify';
 
 export function SignUpView() {
   const { t } = useTranslation();
@@ -206,7 +205,27 @@ export function SignUpView() {
         </Divider>
 
         {/* Google Sign Up Button */}
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{
+          width: '100%',
+          '& > div': {
+            width: '100% !important',
+          },
+          '& iframe': {
+            width: '100% !important',
+            minHeight: '48px !important',
+          },
+          '& [data-testid="google-login-button"]': {
+            width: '100% !important',
+          },
+          // Override Google's cached user styling
+          '& .google-login-container': {
+            width: '100% !important',
+          },
+          '& .google-login-button': {
+            width: '100% !important',
+            minWidth: '100% !important',
+          }
+        }}>
           {isGoogleLoading ? (
             <Box sx={{
               display: 'flex',
@@ -218,12 +237,25 @@ export function SignUpView() {
               <CircularProgress size={24} color="primary" />
             </Box>
           ) : (
-            <Box sx={{ width: '100%' }} id="google-signup-container">
+            <Box
+              sx={{
+                width: '100%',
+                '& > div': {
+                  width: '100% !important',
+                },
+                '& iframe': {
+                  width: '100% !important',
+                  minHeight: '48px !important',
+                },
+              }}
+              id="google-signup-container"
+            >
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 text="signup_with"
                 theme="filled_black"
                 width="100%"
+                size="large"
                 onError={() => {
                   toast.error('Google sign up failed. Please try again.');
                 }}

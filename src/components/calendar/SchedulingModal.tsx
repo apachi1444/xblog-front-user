@@ -332,7 +332,21 @@ export function SchedulingModal({
                           <Checkbox
                             edge="end"
                             checked={selectedArticles.includes(article.id)}
-                            onChange={() => onArticleToggle(article.id)}
+                            onChange={() => {
+                              onArticleToggle(article.id);
+
+                              // Auto-expand dropdown when checkbox is checked
+                              if (!selectedArticles.includes(article.id)) {
+                                // Article is being selected - automatically show its details
+                                setExpandedArticle(article.id);
+                              } else {
+                                // Article is being deselected - hide its details
+                                // eslint-disable-next-line no-lonely-if
+                                if (expandedArticle === article.id) {
+                                  setExpandedArticle(null);
+                                }
+                              }
+                            }}
                             onClick={(e) => e.stopPropagation()}
                             sx={{
                               color: theme.palette.primary.main,
@@ -359,10 +373,9 @@ export function SchedulingModal({
                       onClick={() => {
                         onArticleToggle(article.id);
 
-                        // New flow: When selecting an article, show its details
-                        // When selecting another article, hide previous details and show new ones
+                        // Auto-expand dropdown when checkbox is selected
                         if (!selectedArticles.includes(article.id)) {
-                          // Article is being selected - show its details
+                          // Article is being selected - automatically show its details
                           setExpandedArticle(article.id);
                         } else {
                           // Article is being deselected - hide its details
