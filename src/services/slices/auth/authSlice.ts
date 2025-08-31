@@ -33,11 +33,13 @@ const authSlice = createSlice({
       state.user = action.payload.user || null;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = !!action.payload.accessToken;
+      state.onboardingCompleted = action.payload.user?.is_completed_onboarding || false;
 
       localStorage.setItem('xblog_auth_session_v2', JSON.stringify({
         accessToken: state.accessToken,
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        onboardingCompleted: state.onboardingCompleted,
         avatar: state.user?.avatar,
       }));
     },
@@ -52,6 +54,7 @@ const authSlice = createSlice({
           state.user = parsedAuth.user;
           state.accessToken = parsedAuth.accessToken;
           state.isAuthenticated = parsedAuth.isAuthenticated;
+          state.onboardingCompleted = parsedAuth.onboardingCompleted || parsedAuth.user?.is_completed_onboarding || false;
         } catch (error) {
           localStorage.removeItem('xblog_auth_session_v2');
         }

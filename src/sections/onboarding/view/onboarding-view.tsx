@@ -21,7 +21,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import { logout } from 'src/services/slices/auth/authSlice';
+import { logout, setCredentials } from 'src/services/slices/auth/authSlice';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
 import {
   useGetSubscriptionPlansQuery,
@@ -152,11 +152,25 @@ export function OnBoardingView() {
       toast.loading('Processing your payment...', { id: 'payment-processing' });
 
       // Save user preferences first
-      await updateUser({
+      const updatedUserData = await updateUser({
         interests: selectedInterests.join(","),
         heard_about_us: referralSource,
         is_completed_onboarding: true,
       }).unwrap();
+
+      // Update Redux state with the updated user data
+      const currentAuth = localStorage.getItem('xblog_auth_session_v2');
+      if (currentAuth) {
+        try {
+          const parsedAuth = JSON.parse(currentAuth);
+          dispatch(setCredentials({
+            user: updatedUserData,
+            accessToken: parsedAuth.accessToken
+          }));
+        } catch (error) {
+          console.error('Error updating auth state:', error);
+        }
+      }
 
       // Create Stripe checkout session
       toast.loading('Creating checkout session...', { id: 'payment-processing' });
@@ -234,12 +248,26 @@ export function OnBoardingView() {
     // For free plan, complete onboarding normally
     try {
       // Save user preferences to the API
-      await updateUser({
+      const updatedUserData = await updateUser({
         is_active: true,
         interests: selectedInterests.join(","),
         heard_about_us: referralSource,
         is_completed_onboarding: true,
       }).unwrap();
+
+      // Update Redux state with the updated user data
+      const currentAuth = localStorage.getItem('xblog_auth_session_v2');
+      if (currentAuth) {
+        try {
+          const parsedAuth = JSON.parse(currentAuth);
+          dispatch(setCredentials({
+            user: updatedUserData,
+            accessToken: parsedAuth.accessToken
+          }));
+        } catch (error) {
+          console.error('Error updating auth state:', error);
+        }
+      }
 
       toast.success(t('onboarding.freeSelected', 'Welcome! You\'re all set with the free plan.'));
 

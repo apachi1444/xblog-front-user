@@ -983,6 +983,37 @@ const setupMocks = () => {
       }
     });
 
+    // Mock contact/demo request endpoint
+    mock.onPost('/company/contact').reply((config) => {
+      try {
+        const requestData = JSON.parse(config.data);
+        console.log('📧 Mock contact endpoint called with:', requestData);
+
+        // Validate required fields
+        const { full_name, email, company, team_size, message, available_on_date } = requestData;
+
+        if (!full_name || !email || !company || !team_size || !message || !available_on_date) {
+          return [400, {
+            success: false,
+            message: 'All fields are required'
+          }];
+        }
+
+        // Simulate successful contact form submission
+        return [200, {
+          success: true,
+          message: 'Thank you for your interest! We will contact you soon.',
+          id: `contact_${Date.now()}`
+        }];
+      } catch (error) {
+        console.error('Error in contact mock:', error);
+        return [500, {
+          success: false,
+          message: 'Internal server error in contact submission'
+        }];
+      }
+    });
+
     // Mock generate-full-article endpoint
     mock.onPost('/generate-full-article').reply((config) => {
       try {
