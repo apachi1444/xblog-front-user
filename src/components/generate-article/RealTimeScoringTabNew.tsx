@@ -192,9 +192,9 @@ export function RealTimeScoringTabNew({ totalMaxScore = 100, onCriteriaHighlight
 
     switch (activeStep) {
       case 0: // Step 1: Content Setup
-        // Put SEO Core Essentials and Title Optimization first
+        // Put Title Optimization and SEO Core Essentials first
         return sections.sort((a, b) => {
-          const priorityOrder = [1, 3, 2, 4]; // core_essentials, title_optimization, boosters, content_clarity
+          const priorityOrder = [3, 1, 2, 4]; // title_optimization, core_essentials, boosters, content_clarity
           const aIndex = priorityOrder.indexOf(a.id);
           const bIndex = priorityOrder.indexOf(b.id);
           return aIndex - bIndex;

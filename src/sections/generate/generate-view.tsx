@@ -205,7 +205,7 @@ export function GeneratingView() {
         primaryKeyword: '',
         secondaryKeywords: [],
         language: 'en', // Default to English for new articles
-        targetCountry: 'us', // Default to United States for new articles
+        targetCountry: 'global', // Default to United States for new articles
         title: '',
         metaTitle: '',
         metaDescription: '',

@@ -536,100 +536,32 @@ export function CriterionDetailsModal({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 4,
-          overflow: 'hidden',
-          maxHeight: '90vh',
-          background: theme.palette.mode === 'dark'
-            ? `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
-            : `linear-gradient(135deg, ${alpha('#fff', 0.98)} 0%, ${alpha(theme.palette.grey[50], 0.9)} 100%)`,
-          backdropFilter: 'blur(20px)',
-          boxShadow: theme.palette.mode === 'dark'
-            ? `0 25px 50px ${alpha('#000', 0.5)}`
-            : `0 25px 50px ${alpha('#000', 0.15)}`,
-        }
-      }}
-      BackdropProps={{
-        sx: {
-          backdropFilter: 'blur(8px)',
-          backgroundColor: alpha('#000', 0.3),
+          borderRadius: 2,
+          maxHeight: '80vh',
         }
       }}
     >
-      {/* Header */}
+      {/* Simple Header */}
       <Box
         sx={{
-          background: state.currentStatus === 'success'
-            ? `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
-            : state.currentStatus === 'warning'
-            ? `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`
-            : `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
-          color: 'white',
           p: 3,
-          position: 'relative',
-          overflow: 'hidden',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        {/* Background Pattern */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.1,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          {t(criterion.description)}
+        </Typography>
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ position: 'relative', zIndex: 1 }}>
-          <Stack spacing={2}>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box
-                sx={{
-                  p: 1.5,
-                  borderRadius: 2,
-                  background: alpha('#fff', 0.2),
-                  backdropFilter: 'blur(10px)',
-                }}
-              >
-                <Iconify
-                  icon={state.currentStatus === 'success' ? "eva:checkmark-circle-2-fill" :
-                        state.currentStatus === 'warning' ? "eva:alert-triangle-fill" :
-                        "eva:close-circle-fill"}
-                  width={24}
-                  height={24}
-                />
-              </Box>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  {t(criterion.description)}
-                </Typography>
-              </Box>
-            </Stack>
-          </Stack>
-
-          <IconButton
-            onClick={onClose}
-            size="large"
-            sx={{
-              color: 'white',
-              bgcolor: alpha('#fff', 0.15),
-              backdropFilter: 'blur(10px)',
-              '&:hover': {
-                bgcolor: alpha('#fff', 0.25),
-                transform: 'scale(1.05)',
-              },
-              transition: 'all 0.2s ease-in-out',
-            }}
-          >
-            <Iconify icon="eva:close-fill" width={20} height={20} />
-          </IconButton>
-        </Stack>
+        <IconButton onClick={onClose} size="small">
+          <Iconify icon="eva:close-fill" width={20} height={20} />
+        </IconButton>
       </Box>
 
       <DialogContent
@@ -653,396 +585,91 @@ export function CriterionDetailsModal({
           },
         }}
       >
-        <Stack spacing={2.5}>
-          {/* Compact Score Header */}
+        <Stack spacing={3}>
+          {/* Simple Score Display */}
           <Box
             sx={{
               p: 2,
-              borderRadius: 2,
-              background: `linear-gradient(135deg, ${alpha(
-                state.currentStatus === 'success' ? theme.palette.success.main :
-                state.currentStatus === 'warning' ? theme.palette.warning.main :
-                theme.palette.error.main, 0.08
-              )} 0%, ${alpha(
-                state.currentStatus === 'success' ? theme.palette.success.main :
-                state.currentStatus === 'warning' ? theme.palette.warning.main :
-                theme.palette.error.main, 0.03
-              )} 100%)`,
-              border: `1px solid ${alpha(
-                state.currentStatus === 'success' ? theme.palette.success.main :
-                state.currentStatus === 'warning' ? theme.palette.warning.main :
-                theme.palette.error.main, 0.2
-              )}`,
+              borderRadius: 1,
+              bgcolor: theme.palette.grey[50],
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
             <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {state.currentScore} / {criterion.weight} points
+              </Typography>
               <Box
                 sx={{
-                  p: 1.5,
-                  borderRadius: 2,
-                  bgcolor: alpha(
-                    state.currentStatus === 'success' ? theme.palette.success.main :
-                    state.currentStatus === 'warning' ? theme.palette.warning.main :
-                    theme.palette.error.main, 0.1
-                  ),
-                  minWidth: 60,
-                  textAlign: 'center',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 1,
+                  bgcolor: state.currentStatus === 'success' ? theme.palette.success.light :
+                           state.currentStatus === 'warning' ? theme.palette.warning.light :
+                           theme.palette.error.light,
                 }}
               >
-                <Typography variant="h5" sx={{ fontWeight: 800, color:
-                  state.currentStatus === 'success' ? theme.palette.success.main :
-                  state.currentStatus === 'warning' ? theme.palette.warning.main :
-                  theme.palette.error.main, lineHeight: 1
-                }}>
-                  {Math.round((state.currentScore / criterion.weight) * 100)}%
-                </Typography>
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {state.currentScore} / {criterion.weight} points
-                  </Typography>
-                  <Chip
-                    label={state.currentStatus.toUpperCase()}
-                    size="small"
-                    sx={{
-                      bgcolor: state.currentStatus === 'success' ? theme.palette.success.main :
-                               state.currentStatus === 'warning' ? theme.palette.warning.main :
-                               theme.palette.error.main,
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.7rem',
-                      height: 24,
-                    }}
-                  />
-                </Stack>
-
-                {/* Compact Progress Bar */}
-                <LinearProgress
-                  variant="determinate"
-                  value={(state.currentScore / criterion.weight) * 100}
+                <Typography
+                  variant="caption"
                   sx={{
-                    height: 6,
-                    borderRadius: 3,
-                    bgcolor: alpha(theme.palette.grey[300], 0.3),
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 3,
-                      bgcolor: state.currentStatus === 'success' ? theme.palette.success.main :
-                               state.currentStatus === 'warning' ? theme.palette.warning.main :
-                               theme.palette.error.main,
-                    },
+                    fontWeight: 600,
+                    color: state.currentStatus === 'success' ? theme.palette.success.dark :
+                           state.currentStatus === 'warning' ? theme.palette.warning.dark :
+                           theme.palette.error.dark,
                   }}
-                />
+                >
+                  {state.currentStatus === 'success' ? 'GOOD' :
+                   state.currentStatus === 'warning' ? 'NEEDS WORK' :
+                   'NEEDS WORK'}
+                </Typography>
               </Box>
             </Stack>
           </Box>
 
-          {/* Compact Evaluation Details */}
-          <Box
-            sx={{
-              p: 2.5,
-              borderRadius: 2,
-              background: theme.palette.mode === 'dark'
-                ? alpha(theme.palette.background.paper, 0.6)
-                : alpha('#fff', 0.8),
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
-            }}
-          >
-            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Iconify
-                icon="eva:settings-2-fill"
-                width={18}
-                height={18}
-                sx={{ color: theme.palette.primary.main }}
-              />
-              Evaluation Details
-            </Typography>
-
-            <Grid container spacing={2}>
-              {/* Current Input Value */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify
-                    icon="eva:edit-2-fill"
-                    width={16}
-                    height={16}
-                    sx={{ color: theme.palette.info.main }}
-                  />
-                  Current Input Value
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    background: alpha(theme.palette.info.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
-                    borderLeft: `3px solid ${theme.palette.info.main}`,
-                    maxHeight: 100,
-                    overflow: 'auto',
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      fontSize: '0.9rem',
-                      whiteSpace: 'pre-line', // Preserve line breaks for TOC formatting
-                      fontFamily: state.evaluationDetails.inputValue?.includes('\n') ? 'monospace' : 'inherit', // Use monospace for structured content
-                    }}
-                  >
-                    {state.evaluationDetails.inputValue || 'Not provided'}
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Success Criteria */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify
-                    icon="eva:checkmark-circle-2-fill"
-                    width={16}
-                    height={16}
-                    sx={{ color: theme.palette.success.main }}
-                  />
-                  Success Criteria
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    background: alpha(theme.palette.success.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-                    borderLeft: `3px solid ${theme.palette.success.main}`,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      fontSize: '0.9rem',
-                    }}
-                  >
-                    {state.evaluationDetails.threshold || 'Criterion-specific requirements'}
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* How It Works */}
-              <Grid item xs={12}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Iconify
-                    icon="eva:bulb-fill"
-                    width={16}
-                    height={16}
-                    sx={{ color: theme.palette.grey[600] }}
-                  />
-                  How It Works
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    background: alpha(theme.palette.grey[600], 0.05),
-                    border: `1px solid ${alpha(theme.palette.grey[600], 0.2)}`,
-                    borderLeft: `3px solid ${theme.palette.grey[600]}`,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                      color: theme.palette.text.primary,
-                      fontSize: '0.9rem',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {state.evaluationDetails.explanation || 'Evaluation details not available'}
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-
-          {/* Compact Improvement Suggestions */}
-          {(state.evaluationDetails.suggestion || state.evaluationDetails.improvementTips) && (
+          {/* Simple What to Fix */}
+          {state.evaluationDetails.suggestion && (
             <Box
               sx={{
-                p: 2.5,
-                borderRadius: 2,
-                background: alpha(theme.palette.secondary.main, 0.05),
-                border: `1px solid ${alpha(theme.palette.secondary.main, 0.15)}`,
+                p: 2,
+                borderRadius: 1,
+                bgcolor: theme.palette.grey[50],
+                border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Iconify
-                  icon="eva:lightbulb-fill"
-                  width={18}
-                  height={18}
-                  sx={{ color: theme.palette.secondary.main }}
-                />
-                Improvement Suggestions
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                What to fix:
               </Typography>
-
-              <Grid container spacing={2}>
-                {/* Error Field and Suggestion */}
-                {state.evaluationDetails.errorField && state.evaluationDetails.suggestion && (
-                  <>
-                    <Grid item xs={12} sm={4}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                        📍 Focus on:
-                      </Typography>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: 1.5,
-                          background: alpha(theme.palette.error.main, 0.1),
-                          border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.error.main }}>
-                          {state.evaluationDetails.errorField}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={8}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                        💡 Expand your content to meet the minimum word count
-                      </Typography>
-                      <Box
-                        sx={{
-                          p: 1.5,
-                          borderRadius: 1.5,
-                          background: alpha(theme.palette.secondary.main, 0.05),
-                          border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
-                          borderLeft: `3px solid ${theme.palette.secondary.main}`,
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
-                          {state.evaluationDetails.suggestion}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </>
-                )}
-              </Grid>
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                {state.evaluationDetails.suggestion}
+              </Typography>
             </Box>
           )}
 
-          {/* Compact Score Improvement */}
-          {state.currentStatus !== 'success' && (
-            <Box
-              sx={{
-                p: 2.5,
-                borderRadius: 2,
-                background: alpha(theme.palette.success.main, 0.05),
-                border: `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Iconify
-                  icon="eva:arrow-up-fill"
-                  width={18}
-                  height={18}
-                  sx={{ color: theme.palette.success.main }}
-                />
-                How to Improve Your Score
-              </Typography>
 
-              <Stack spacing={1.5}>
-                {getRemainingStatusDescriptions(criterion, state.currentStatus).map((statusInfo, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      background: alpha(
-                        statusInfo.status === 'success' ? theme.palette.success.main : theme.palette.warning.main, 0.05
-                      ),
-                      border: `1px solid ${alpha(
-                        statusInfo.status === 'success' ? theme.palette.success.main : theme.palette.warning.main, 0.2
-                      )}`,
-                      borderLeft: `3px solid ${statusInfo.status === 'success' ? theme.palette.success.main : theme.palette.warning.main}`,
-                    }}
-                  >
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                      <Chip
-                        label={statusInfo.status.toUpperCase()}
-                        size="small"
-                        sx={{
-                          bgcolor: statusInfo.status === 'success' ? theme.palette.success.main : theme.palette.warning.main,
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.7rem',
-                          height: 24,
-                        }}
-                      />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: statusInfo.status === 'success' ? theme.palette.success.main : theme.palette.warning.main }}>
-                        +{statusInfo.points} points
-                      </Typography>
-                    </Stack>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500,
-                        fontSize: '0.9rem',
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {statusInfo.description}
-                    </Typography>
-                  </Box>
-                ))}
-              </Stack>
-            </Box>
-          )}
+
+
         </Stack>
       </DialogContent>
 
       {/* Enhanced Footer */}
       <Box
         sx={{
-          p: 3,
-          background: theme.palette.mode === 'dark'
-            ? `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`
-            : `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 0.9)} 0%, ${alpha('#fff', 0.8)} 100%)`,
-          borderTop: `2px solid ${alpha(theme.palette.divider, 0.1)}`,
-          backdropFilter: 'blur(10px)',
+          p: 2,
+          borderTop: `1px solid ${theme.palette.divider}`,
+          display: 'flex',
+          justifyContent: 'flex-end',
         }}
       >
-        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-          {/* Quick tip */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.7 }}>
-            <Iconify icon="eva:lightbulb-fill" width={16} height={16} />
-            <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
-              Tip: Improve your score by following the success criteria above
-            </Typography>
-          </Box>
-
-          <Button
-            onClick={onClose}
-            variant="contained"
-            size="large"
-            sx={{
-              borderRadius: 3,
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-              boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-                transform: 'translateY(-1px)',
-                boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
-              },
-              transition: 'all 0.2s ease-in-out',
-            }}
-          >
-            Got it!
-          </Button>
-        </Stack>
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            borderRadius: 1,
+            px: 3,
+          }}
+        >
+          Got it
+        </Button>
       </Box>
     </Dialog>
   );

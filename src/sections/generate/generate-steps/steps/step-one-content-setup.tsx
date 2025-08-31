@@ -183,7 +183,7 @@ export function Step1ContentSetup({
     }
   };
 
-  const isGenerateDisabled = !primaryKeyword;
+  const isGenerateDisabled = !primaryKeyword || !hasGeneratedTitle;
 
   const handleGenerateTitle = async () => {
     // Only set local state if external state is not provided
