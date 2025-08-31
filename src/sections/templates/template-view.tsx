@@ -9,6 +9,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
@@ -30,6 +31,9 @@ import { ParentTemplateCard } from './components/parent-template-card-new';
 
 // ----------------------------------------------------------------------
 
+// Feature flag to control whether templates are locked or available
+const IS_FEATURE_LOCKED = true;
+
 export function TemplateView() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -40,9 +44,16 @@ export function TemplateView() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [notifyRequested, setNotifyRequested] = useState(false);
 
   // API hooks
   const [createArticle] = useCreateArticleMutation();
+
+  // Handle notification request
+  const handleNotifyMe = () => {
+    setNotifyRequested(true);
+    // Here you could add actual notification logic (e.g., API call to save user preference)
+  };
 
   // Filter parent templates based on search query and selected category
   const filteredTemplates = PARENT_TEMPLATES.filter((template) => {
@@ -112,10 +123,60 @@ export function TemplateView() {
     }
   };
 
+  // Render the locked state UI
+  const renderLockedState = () => (
+    <Card sx={{ p: 5, height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ textAlign: 'center', maxWidth: 600, mx: 'auto' }}>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+          <Iconify
+            icon="mdi:file-document-multiple-outline"
+            width={80}
+            height={80}
+            sx={{
+              color: 'primary.main',
+              opacity: 0.6,
+            }}
+          />
+        </Box>
+
+        <Typography variant="h4" gutterBottom>
+          {t('templates.coming_soon', 'Coming Soon!')}
+        </Typography>
+
+        <Typography variant="body1" color="text.secondary" paragraph>
+          {t('templates.locked_message', 'Our template library is currently in development and will be available soon. Stay tuned for updates!')}
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 4 }}>
+          {t('templates.unlock_message', 'Templates will be available in the next update. Thank you for your patience!')}
+        </Typography>
+
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Iconify icon={notifyRequested ? "mdi:check" : "mdi:bell"} />}
+          onClick={handleNotifyMe}
+          disabled={notifyRequested}
+          sx={{ px: 3, py: 1 }}
+        >
+          {notifyRequested
+            ? t('common.success', 'Success!')
+            : t('templates.notify_me', 'Notify Me When Available')}
+        </Button>
+      </Box>
+    </Card>
+  );
+
   return (
     <DashboardContent>
       <Container maxWidth={false}>
-        {/* Header */}
+        <Typography variant="h4" sx={{ mb: 3 }}>
+          {t('templates.title', 'Article Templates')}
+        </Typography>
+
+        {IS_FEATURE_LOCKED ? renderLockedState() : (
+          <>
+            {/* Header */}
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           justifyContent="space-between"
@@ -224,6 +285,8 @@ export function TemplateView() {
               setCurrentTab('all');
             }}
           />
+        )}
+          </>
         )}
       </Container>
 
