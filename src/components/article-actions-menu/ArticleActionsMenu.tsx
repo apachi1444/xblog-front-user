@@ -2,9 +2,9 @@ import type { Article } from 'src/types/article';
 import type { Theme, SxProps } from '@mui/material/styles';
 
 import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
 
 import { alpha, useTheme } from '@mui/material/styles';
 import {
@@ -32,9 +32,23 @@ import { ScheduleModal } from 'src/components/schedule-modal';
 
 import { PublishModal } from 'src/sections/generate/generate-steps/modals/PublishModal';
 
-// Status mapper utility function to handle DTO vs Form schema mismatch
-// Article DTO uses: 'draft' | 'publish' | 'scheduled'
-// Form schema uses: 'draft' | 'published' | 'scheduled'
+  const parseSecondaryKeywords = (keywordsString: string) => {
+      if (!keywordsString || keywordsString.trim() === '') return [];
+  
+      try {
+        // Try to parse as JSON array first
+        const parsed = JSON.parse(keywordsString);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        // If JSON parsing fails, treat as comma-separated string
+        return keywordsString.split(',').map(k => k.trim()).filter(Boolean);
+      }
+  
+      return [];
+  };
+
 const mapDtoStatusToFormStatus = (dtoStatus: 'draft' | 'publish' | 'scheduled'): 'draft' | 'published' | 'scheduled' => {
   switch (dtoStatus) {
     case 'publish':
@@ -186,7 +200,7 @@ export function ArticleActionsMenu({
         title: `${article.article_title || article.title || 'Untitled Article'}`,
         content: article.content || '',
         meta_description: article.meta_description || '',
-        keywords: article.secondary_keywords ? JSON.parse(article.secondary_keywords) : [],
+        keywords: article.secondary_keywords ? parseSecondaryKeywords(article.secondary_keywords) : [],
         status: 'draft',
         website_id: '1', // Default website ID
         article_title: `${article.article_title || article.title || 'Untitled Article'}`,
@@ -217,7 +231,22 @@ export function ArticleActionsMenu({
 
       toast.success('Article duplicated successfully!', { id: 'duplicate-article' });
     } catch (error: any) {
-      toast.error('Failed to duplicate article. Please try again.', { id: 'duplicate-article' });
+      console.error('Duplication error:', error, 'Secondary keywords:', article.secondary_keywords);
+
+      // Extract error message from API response
+      let errorMessage = 'Failed to duplicate article. Please try again.';
+
+      if (error?.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      toast.error(errorMessage, { id: 'duplicate-article' });
     }
     setDuplicateDialogOpen(false);
   };
@@ -334,23 +363,6 @@ export function ArticleActionsMenu({
   };
 
   const currentSize = buttonSizes[buttonSize];
-
-  const parseSecondaryKeywords = useCallback((keywordsString: string) => {
-      if (!keywordsString || keywordsString.trim() === '') return [];
-  
-      try {
-        // Try to parse as JSON array first
-        const parsed = JSON.parse(keywordsString);
-        if (Array.isArray(parsed)) {
-          return parsed.filter(Boolean);
-        }
-      } catch {
-        // If JSON parsing fails, treat as comma-separated string
-        return keywordsString.split(',').map(k => k.trim()).filter(Boolean);
-      }
-  
-      return [];
-  }, []);
 
   // Get form data for final step actions
   const getArticleData = () => ({
