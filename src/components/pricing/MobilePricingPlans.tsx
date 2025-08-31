@@ -302,20 +302,41 @@ export function MobilePricingPlans({
                 </Box>
               </>
             ) : (
-              // Show actual features from the backend if available
-              currentPlan.features.map((feature, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify
-                    icon="mdi:check-circle"
-                    sx={{
-                      color: 'success.main',
-                      mr: 1.5,
-                      fontSize: 18,
-                    }}
-                  />
-                  <Typography variant="body2">{feature}</Typography>
-                </Box>
-              ))
+              // Show actual features from the backend if available (only first 5)
+              <>
+                {currentPlan.features.slice(0, 5).map((feature, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify
+                      icon="mdi:check-circle"
+                      sx={{
+                        color: 'success.main',
+                        mr: 1.5,
+                        fontSize: 18,
+                      }}
+                    />
+                    <Typography variant="body2">{feature}</Typography>
+                  </Box>
+                ))}
+                {currentPlan.features.length > 0 && (
+                  <Box sx={{ textAlign: 'center', mt: 1 }}>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open('https://xblog.ai/#pricing', '_blank');
+                      }}
+                      sx={{
+                        fontSize: '0.75rem',
+                        textTransform: 'none',
+                        color: 'primary.main'
+                      }}
+                    >
+                      {t('pricing.discoverMore', 'Discover more')}
+                    </Button>
+                  </Box>
+                )}
+              </>
             )}
           </Stack>
 

@@ -277,20 +277,87 @@ export function PricingPlans({
                 </Box>
               </>
             ) : (
-              // Show actual features from the backend if available
-              plan.features.map((feature, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Iconify
-                    icon="mdi:check-circle"
-                    sx={{
-                      color: 'success.main',
-                      mr: 1.5,
-                      fontSize: 20,
-                    }}
-                  />
-                  <Typography variant="body2">{feature}</Typography>
-                </Box>
-              ))
+              // Show actual features from the backend if available (only first 5)
+              <>
+                {plan.features.slice(0, 5).map((feature, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Iconify
+                      icon="mdi:check-circle"
+                      sx={{
+                        color: 'success.main',
+                        mr: 1.5,
+                        fontSize: 20,
+                      }}
+                    />
+                    <Typography variant="body2">{feature}</Typography>
+                  </Box>
+                ))}
+                {plan.features.length > 0 && (
+                  <Box sx={{ textAlign: 'center', mt: 2 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open('https://xblog.ai/#pricing', '_blank');
+                      }}
+                      sx={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        px: 3,
+                        py: 0.8,
+                        background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%)',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        color: 'primary.main',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&:before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: '-100%',
+                          width: '100%',
+                          height: '100%',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                          transition: 'left 0.5s',
+                        },
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%)',
+                          borderColor: 'primary.dark',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)',
+                          '&:before': {
+                            left: '100%',
+                          },
+                        },
+                        '&:active': {
+                          transform: 'translateY(0px)',
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                      endIcon={
+                        <Box
+                          component="span"
+                          sx={{
+                            display: 'inline-flex',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateX(2px)',
+                            },
+                          }}
+                        >
+                          ✨
+                        </Box>
+                      }
+                    >
+                      {t('pricing.discoverMore', 'Discover more')}
+                    </Button>
+                  </Box>
+                )}
+              </>
             )}
           </Stack>
 

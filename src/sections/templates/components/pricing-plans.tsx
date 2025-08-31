@@ -144,19 +144,38 @@ export function PricingPlans({ onSelectPlan }: PricingPlansProps) {
               <Divider sx={{ my: 2 }} />
               
               <Stack spacing={1} sx={{ mb: 3 }}>
-                {plan.features.map((feature, index) => (
+                {plan.features.slice(0, 5).map((feature, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Iconify 
-                      icon="mdi:check-circle" 
-                      sx={{ 
-                        color: 'success.main', 
+                    <Iconify
+                      icon="mdi:check-circle"
+                      sx={{
+                        color: 'success.main',
                         mr: 1,
                         fontSize: 20,
-                      }} 
+                      }}
                     />
                     <Typography variant="body2">{feature}</Typography>
                   </Box>
                 ))}
+                {plan.features.length > 0 && (
+                  <Box sx={{ textAlign: 'center', mt: 1 }}>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open('https://xblog.ai/#pricing', '_blank');
+                      }}
+                      sx={{
+                        fontSize: '0.75rem',
+                        textTransform: 'none',
+                        color: 'primary.main'
+                      }}
+                    >
+                      {t('pricing.discoverMore', 'Discover more')}
+                    </Button>
+                  </Box>
+                )}
               </Stack>
               
               <Button

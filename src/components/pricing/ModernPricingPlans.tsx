@@ -16,6 +16,52 @@ import {
 
 import { useGetSubscriptionPlansQuery } from 'src/services/apis/subscriptionApi';
 
+// Plan-specific features mapping
+const PLAN_FEATURES = {
+  starter: [
+    'Content Generation: 10',
+    'Websites Integration: 2',
+    'Max Regenerate: 100',
+    'Content Scoring System',
+    'Multi Platform Integrations'
+  ],
+  pro: [
+    'Content Generation: 40',
+    'Websites Integration: 5',
+    'Max Regenerate: 400',
+    'Content Scoring System',
+    'Multi Platform Integrations',
+    'Automated Content Scheduling',
+    'Real Time Content Feedback',
+    'Internal Linking Suggestions',
+    'Full Content Audits',
+    'Content Performance Metrics'
+  ],
+  enterprise: [
+    'Content Generation: 85',
+    'Websites Integration: 10',
+    'Max Regenerate: 850',
+    'Content Scoring System',
+    'Multi Platform Integrations',
+    'Automated Content Scheduling',
+    'Real Time Content Feedback',
+    'Internal Linking Suggestions',
+    'Full Content Audits',
+    'Content Performance Metrics',
+    'Automated Content Generation'
+  ]
+};
+
+// Helper function to get features for a plan
+const getPlanFeatures = (planName: string): string[] => {
+  const normalizedName = planName.toLowerCase();
+  if (normalizedName.includes('starter')) return PLAN_FEATURES.starter;
+  if (normalizedName.includes('pro')) return PLAN_FEATURES.pro;
+  if (normalizedName.includes('enterprise')) return PLAN_FEATURES.enterprise;
+
+  // Default fallback
+  return PLAN_FEATURES.starter;
+};
 
 // ----------------------------------------------------------------------
 
@@ -289,13 +335,7 @@ export function ModernPricingPlans({
                       {t('pricing.features', 'Features')}
                     </Typography>
                     <Stack spacing={1.5}>
-                      {(plan.features || [
-                        'Unlimited articles',
-                        'AI content generation',
-                        'SEO optimization',
-                        'Analytics dashboard',
-                        'Priority support'
-                      ]).slice(0, 5).map((feature, idx) => (
+                      {getPlanFeatures(plan.name).slice(0, 5).map((feature, idx) => (
                         <Box key={idx} sx={{ display: 'flex', alignItems: 'center' }}>
                           <CheckCircleOutlineIcon
                             sx={{
@@ -309,6 +349,70 @@ export function ModernPricingPlans({
                           </Typography>
                         </Box>
                       ))}
+                      {/* Attractive discover more button */}
+                      <Box sx={{ textAlign: 'center', mt: 2 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open('https://xblog.ai/#pricing', '_blank');
+                          }}
+                          sx={{
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            px: 3,
+                            py: 0.8,
+                            background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%)',
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&:before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: '-100%',
+                              width: '100%',
+                              height: '100%',
+                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                              transition: 'left 0.5s',
+                            },
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%)',
+                              borderColor: 'primary.dark',
+                              transform: 'translateY(-1px)',
+                              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)',
+                              '&:before': {
+                                left: '100%',
+                              },
+                            },
+                            '&:active': {
+                              transform: 'translateY(0px)',
+                            },
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          }}
+                          endIcon={
+                            <Box
+                              component="span"
+                              sx={{
+                                display: 'inline-flex',
+                                transition: 'transform 0.3s ease',
+                                '&:hover': {
+                                  transform: 'translateX(2px)',
+                                },
+                              }}
+                            >
+                              ✨
+                            </Box>
+                          }
+                        >
+                          {t('pricing.discoverMore', 'Discover more')}
+                        </Button>
+                      </Box>
                     </Stack>
                   </Box>
                 </CardContent>

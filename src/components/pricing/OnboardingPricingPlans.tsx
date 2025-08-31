@@ -325,6 +325,25 @@ export function OnboardingPricingPlans({
                             </Typography>
                           </Box>
                         ))}
+                        {(plan.features && plan.features.length > 0) && (
+                          <Box sx={{ textAlign: 'center', mt: 1 }}>
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open('https://xblog.ai/#pricing', '_blank');
+                              }}
+                              sx={{
+                                fontSize: '0.75rem',
+                                textTransform: 'none',
+                                color: 'primary.main'
+                              }}
+                            >
+                              {t('pricing.discoverMore', 'Discover more')}
+                            </Button>
+                          </Box>
+                        )}
                       </Stack>
                     </Box>
                   </CardContent>
