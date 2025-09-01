@@ -232,15 +232,17 @@ export function OnBoardingView() {
   };
 
   // Handle complete onboarding
-  const handleComplete = async () => {
-    if (!selectedPlan) {
+  const handleComplete = async (planId?: string) => {
+    const planToUse = planId || selectedPlan;
+
+    if (!planToUse) {
       toast.error(t('onboarding.selectPlan', 'Please select a plan to continue.'));
       return;
     }
 
     // If it's a paid plan, redirect to payment
-    if (selectedPlan !== 'free' && !isFreeplan(selectedPlan)) {
-      await handlePaidPlanSelection(selectedPlan);
+    if (planToUse !== 'free' && !isFreeplan(planToUse)) {
+      await handlePaidPlanSelection(planToUse);
       return;
     }
 
@@ -536,7 +538,9 @@ export function OnBoardingView() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => handlePlanSelect('free')}
+                  onClick={() => {
+                    handleComplete('free')
+                  }}
                   sx={{
                     borderRadius: 3,
                     px: 4,
@@ -794,7 +798,7 @@ export function OnBoardingView() {
               <LoadingButton
                 variant="contained"
                 size="large"
-                onClick={handleComplete}
+                onClick={() => handleComplete()}
                 loading={isUpdatingUser || isProcessingPayment}
                 disabled={!selectedPlan}
                 sx={{
