@@ -484,7 +484,7 @@ export function Step1ContentSetup({
               variant="contained"
               color="primary"
               onClick={handleGenerateTitle}
-              disabled={isGeneratingTitle || isGenerateDisabled}
+              disabled={isGeneratingTitle}
               startIcon={
                 isGeneratingTitle ? <CircularProgress size={20} color="inherit" /> : <Iconify icon="eva:flash-fill" />
               }

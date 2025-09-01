@@ -19,10 +19,11 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useThemeMode } from 'src/hooks/useThemeMode';
 
 import { getStatusColors } from 'src/utils/subscriptionStatusUtils';
-import { getStoredUser, getStoredUserAvatarWithFallback } from 'src/utils/userStorage';
+import { getStoredUserAvatarWithFallback } from 'src/utils/userStorage';
 
 import { _myAccount } from 'src/_mock';
 import { logout } from 'src/services/slices/auth/authSlice';
+import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { selectSubscriptionDetails } from 'src/services/slices/subscription/subscriptionSlice';
 import { useGetSubscriptionPlansQuery, useGetSubscriptionDetailsQuery } from 'src/services/apis/subscriptionApi';
 
@@ -51,7 +52,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
 
   // Get user data directly from localStorage instead of Redux selectors
-  const user = getStoredUser();
+  const { data: user } = useGetCurrentUserQuery();
+  
   const userAvatar = getStoredUserAvatarWithFallback();
   const { data: subscriptionData } = useGetSubscriptionDetailsQuery();
   const { data: availablePlans = [] } = useGetSubscriptionPlansQuery();
@@ -83,13 +85,6 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     // Set the anchor element to the current target (the avatar button)
     setAnchorEl(event.currentTarget);
   };
-
-  console.log('🔍 Subscription Data Debug:', {
-    subscriptionData,
-    status: subscriptionData?.status,
-    hasStatus: !!subscriptionData?.status,
-    statusType: typeof subscriptionData?.status
-  });
   
   // Close handler is now directly using setAnchorEl(null) where needed
 
@@ -152,7 +147,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       >
         <Avatar
           src={user?.avatar?.includes('http') ? user?.avatar : userAvatar}
-          alt={user?.name || _myAccount.displayName}
+          alt={user?.name || ""}
           sx={{
             width: 40,
             height: 40,
@@ -198,12 +193,12 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Avatar
               src={user?.avatar?.includes('http') ? user?.avatar : userAvatar}
-              alt={user?.name || _myAccount.displayName}
+              alt={user?.name || ""}
               sx={{ width: 36, height: 36, mr: 1.5 }}
             />
             <Box>
               <Typography variant="subtitle2" noWrap>
-                {user?.name || _myAccount?.displayName}
+                {user?.name || ""}
               </Typography>
               <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
                 {user?.email || _myAccount?.email}

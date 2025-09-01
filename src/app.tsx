@@ -19,9 +19,9 @@ import { logout } from 'src/services/slices/auth/authSlice';
 import { CustomThemeProvider } from 'src/theme/theme-provider';
 import { AnalyticsProvider } from 'src/contexts/analytics-context';
 import { LanguageContextProvider } from 'src/contexts/LanguageContext';
+import { SessionExpiredProvider } from 'src/contexts/SessionExpiredContext';
 import { WelcomePopupContextProvider } from 'src/contexts/WelcomePopupContext';
 import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
-import { SessionExpiredProvider } from 'src/contexts/SessionExpiredContext';
 
 import i18n from './locales/i18n';
 import { CrispChat } from './components/crisp-chat';
@@ -30,7 +30,6 @@ import { ErrorFallback } from './components/error-boundary';
 import { AuthPersistence } from './components/auth/auth-persistence';
 import { SubscriptionSuccessAnimation } from './components/subscription';
 import { PageViewTracker } from './components/analytics/page-view-tracker';
-
 import { SessionVerificationAnimation } from './components/session/SessionVerificationAnimation';
 
 export default function App() {
