@@ -21,8 +21,8 @@ import CardActionArea from '@mui/material/CardActionArea';
 import LinearProgress from '@mui/material/LinearProgress';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
-import { logout, setCredentials } from 'src/services/slices/auth/authSlice';
 import { useUpdateUserMutation } from 'src/services/apis/userApi';
+import { logout, setCredentials } from 'src/services/slices/auth/authSlice';
 import {
   useGetSubscriptionPlansQuery,
   useCreateCheckoutSessionMutation
@@ -192,7 +192,6 @@ export function OnBoardingView() {
         setIsProcessingPayment(false);
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
       toast.dismiss('payment-processing');
       toast.error('Failed to create checkout session. Please try again.');
       setIsProcessingPayment(false);
@@ -274,7 +273,6 @@ export function OnBoardingView() {
       navigate('/');
     } catch (error) {
       toast.error(t('onboarding.error', 'Failed to save preferences, but we\'ll continue anyway.'));
-      navigate('/');
     }
   };
 

@@ -24,6 +24,7 @@ import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 import { signUpSchema } from 'src/validation/auth-schemas';
 import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useSignUpMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
+import { initializeOnboardingStatus } from 'src/utils/onboarding';
 
 import { Logo } from 'src/components/logo';
 
@@ -54,6 +55,9 @@ export function SignUpView() {
 
   const handleSignUp = useCallback(async (data: SignUpFormData) => {
     try {
+      // Initialize onboarding status for new users
+      initializeOnboardingStatus();
+
       // Add default avatar to form data
       const formData = {
         ...data,
@@ -96,6 +100,9 @@ export function SignUpView() {
       if (!result?.token_access) {
         throw new Error('Invalid authentication response');
       }
+
+      // Initialize onboarding status for new users
+      initializeOnboardingStatus();
 
       // Set tokens
       const credentials = { accessToken: result.token_access };

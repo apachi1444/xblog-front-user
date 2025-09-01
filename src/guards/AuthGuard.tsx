@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, type ReactNode } from 'react';
 
+import { getOnboardingStatus, syncOnboardingStatusWithAPI } from 'src/utils/onboarding';
+
 import { useGetCurrentUserQuery } from 'src/services/apis/userApi';
 import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useLazyVerifyCheckoutSessionQuery } from 'src/services/apis/subscriptionApi';
@@ -23,7 +25,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   const { data: userData, refetch } = useGetCurrentUserQuery();
   const [verifySession] = useLazyVerifyCheckoutSessionQuery();
-  
+
   // Skip verification if no token exists
   const skipVerification = !accessToken;
 
@@ -37,6 +39,11 @@ export function AuthGuard({ children }: AuthGuardProps) {
       setIsVerifying(false);
     }
   }, [skipVerification]);
+
+  // Sync localStorage with API when API data becomes available
+  useEffect(() => {
+    syncOnboardingStatusWithAPI(userData);
+  }, [userData]);
 
   // Check for Stripe success and update auth state
   useEffect(() => {
@@ -87,8 +94,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
       // Force refetch user data
       refetch().then((result) => {
         if (result.data && result.data.is_completed_onboarding) {
-          console.log('✅ User onboarding completed, updating Redux state');
-
           // Get current access token
           const authData = localStorage.getItem('xblog_auth_session_v2');
           if (authData) {
@@ -128,33 +133,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     return <Navigate to="/sign-in" replace />;
   }
 
-  // Check if user has completed onboarding
-  const hasCompletedOnboarding = userData?.is_completed_onboarding;
-
-  // Check for Stripe success parameters
-  const urlParams = new URLSearchParams(location.search);
-  const hasStripeSuccess = urlParams.has('subscriptionId') &&
-                           urlParams.has('subscriptionCustomer') &&
-                           urlParams.get('redirect_status') === 'succeeded';
-
-  // Check for session_id (Stripe checkout success)
-  const hasSessionId = urlParams.has('session_id');
-
-  // Only redirect to onboarding if:
-  // 1. User data is loaded AND
-  // 2. User hasn't completed onboarding AND
-  // 3. Not currently on onboarding page AND
-  // 4. Not returning from Stripe payment AND
-  // 5. Trying to access dashboard/home (not specific pages like profile)
-  const shouldRedirectToOnboarding = userData && // Wait for user data to load
-                                     !hasCompletedOnboarding &&
+  // Check onboarding status with fallback strategy
+  const hasCompletedOnboarding = getOnboardingStatus(userData);
+  const shouldRedirectToOnboarding = !hasCompletedOnboarding &&
                                      location.pathname !== '/onboarding' &&
-                                     !hasStripeSuccess &&
-                                     !hasSessionId &&
-                                     (location.pathname === '/');
+                                     location.pathname !== '/';
 
   if (shouldRedirectToOnboarding) {
-    console.log('🔄 Redirecting to onboarding - user has not completed onboarding');
     return <Navigate to="/onboarding" replace />;
   }
 

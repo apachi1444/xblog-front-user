@@ -24,6 +24,8 @@ import { useRouter } from 'src/routes/hooks';
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 import { useEnhancedAnalytics } from 'src/hooks/useEnhancedAnalytics';
 
+import { initializeOnboardingStatus } from 'src/utils/onboarding';
+
 import { signInSchema } from 'src/validation/auth-schemas';
 import { selectIsTestMode } from 'src/services/slices/globalSlice';
 import { setCredentials } from 'src/services/slices/auth/authSlice';
@@ -111,6 +113,9 @@ export function SignInView() {
     }
 
     try {
+      // Initialize onboarding status for first-time users
+      initializeOnboardingStatus();
+
       // First set the credentials to ensure the token is available for the next API call
       dispatch(setCredentials({accessToken, user: null}));
 
