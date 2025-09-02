@@ -2,10 +2,11 @@ import type { CredentialResponse } from '@react-oauth/google';
 import type { SignUpFormData } from 'src/validation/auth-schemas';
 
 import toast from 'react-hot-toast';
-import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
+import { useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormContainer, PasswordElement, TextFieldElement } from 'react-hook-form-mui';
@@ -21,10 +22,12 @@ import { useRouter } from 'src/routes/hooks';
 
 import { useFormErrorHandler } from 'src/hooks/useFormErrorHandler';
 
+import { initializeOnboardingStatus } from 'src/utils/onboarding';
+import { cleanUrlParams, extractEmailFromUrl, hasValidRedirectParams } from 'src/utils/redirect';
+
 import { signUpSchema } from 'src/validation/auth-schemas';
 import { setCredentials } from 'src/services/slices/auth/authSlice';
 import { useSignUpMutation, useGoogleAuthMutation } from 'src/services/apis/authApi';
-import { initializeOnboardingStatus } from 'src/utils/onboarding';
 
 import { Logo } from 'src/components/logo';
 
@@ -32,19 +35,21 @@ export function SignUpView() {
   const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
-
-
+  const location = useLocation();
 
   // RTK Query hooks
   const [signUp, { isLoading }] = useSignUpMutation();
   const [googleAuth, { isLoading: isGoogleLoading }] = useGoogleAuthMutation();
+
+  // Extract email from URL parameters for pre-filling
+  const prefilledEmail = extractEmailFromUrl(location.search);
 
   // Setup form with react-hook-form and zod validation
   const formMethods = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: '',
-      email: '',
+      email: prefilledEmail,
       password: '',
     },
     mode: 'onChange', // Validate on blur for better UX
@@ -52,6 +57,28 @@ export function SignUpView() {
 
   // Use the form error handler hook
   useFormErrorHandler(formMethods.formState.errors);
+
+  // Handle URL parameters and clean up URL after extracting email
+  useEffect(() => {
+    if (hasValidRedirectParams(location.search)) {
+      const email = extractEmailFromUrl(location.search);
+      
+      if (email) {
+        // Always set the email value to ensure it's populated
+        formMethods.setValue('email', email, {
+          shouldValidate: true,
+          shouldDirty: true
+        });
+
+        console.log('Debug - Email set in form:', email);
+
+        // Clean up URL parameters for cleaner URLs after a short delay
+        setTimeout(() => {
+          cleanUrlParams(['email', 'redirect_from']);
+        }, 100);
+      }
+    }
+  }, [location.search, formMethods]);
 
   const handleSignUp = useCallback(async (data: SignUpFormData) => {
     try {
