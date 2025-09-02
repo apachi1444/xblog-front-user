@@ -89,44 +89,62 @@ function RecentArticlesSection() {
         </Box>
 
         {displayedArticles.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                bgcolor: alpha(theme.palette.grey[500], 0.1),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto',
-                mb: 2,
-              }}
-            >
-              <Iconify
-                icon="mdi:file-document-outline"
-                width={40}
-                height={40}
-                sx={{ color: theme.palette.text.secondary }}
-              />
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            {/* Main CTA Section */}
+            <Box sx={{ mb: 6 }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => navigate('/create')}
+                startIcon={<Iconify icon="mdi:plus" />}
+                sx={{
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  px: 6,
+                  py: 2,
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  mb: 3,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  boxShadow: theme.customShadows?.primary,
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  },
+                }}
+              >
+                {t('dashboard.cta.createFirst', 'Create Your First Article')}
+              </Button>
+
+              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+                {t('dashboard.simple.title', 'Start creating amazing content with AI')}
+              </Typography>
+
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto', lineHeight: 1.6 }}>
+                {t('dashboard.simple.description', 'Generate SEO-optimized articles, blog posts, and content that ranks on Google. No experience needed.')}
+              </Typography>
             </Box>
-            <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-              {t('dashboard.noDocs', 'No docs yet!')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {t('dashboard.createArticles', 'Create Articles That Are SEO-Optimized & Ready To Hit The Top of Google Searches.')}
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={() => navigate('/create')}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
-                px: 3,
-              }}
-            >
-              {t('dashboard.newDocument', 'New Document')}
-            </Button>
+
+            {/* Simple Features */}
+            <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {[
+                { icon: 'mdi:clock-fast', text: t('dashboard.features.fast', '2-min setup') },
+                { icon: 'mdi:search-web', text: t('dashboard.features.seo', 'SEO optimized') },
+                { icon: 'mdi:publish', text: t('dashboard.features.ready', 'Publish ready') },
+              ].map((feature, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Iconify
+                    icon={feature.icon}
+                    width={20}
+                    height={20}
+                    sx={{ color: theme.palette.primary.main }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    {feature.text}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </Box>
         ) : (
           <>
