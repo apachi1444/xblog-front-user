@@ -9,12 +9,18 @@
     "navigation": {
       "dashboard": "لوحة التحكم",
       "generate": "إنشاء",
-      "blogs": "المدونات",
+      "blog": "المدونة",
       "calendar": "التقويم",
+      "websites": "المواقع",
+      "profile": "الملف الشخصي",
+      "support": "الدعم",
+      "logout": "تسجيل الخروج",
+      "settings": "الإعدادات",
+      "blogs": "المدونات",
       "templates": "القوالب",
       "upgrade_license": "ترقية الترخيص",
       "book_demo": "حجز عرض توضيحي",
-      "ai_assistance_chat": "محادثة المساعدة الذكية"
+      "ai_assistance_chat": "دردشة المساعدة بالذكاء الاصطناعي"
     },
     "auth": {
       "signup": {
@@ -55,6 +61,23 @@
         "backToSignIn": "العودة إلى تسجيل الدخول",
         "checkEmail": "تحقق من بريدك الإلكتروني",
         "emailSent": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد واتباع التعليمات."
+      },
+      "resetPassword": {
+        "title": "Réinitialiser le Mot de Passe",
+        "subtitle": "Veuillez définir votre nouveau mot de passe",
+        "newPassword": "Nouveau Mot de Passe",
+        "confirmPassword": "Confirmer le Mot de Passe",
+        "submit": "Soumettre",
+        "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
+        "success": "Mot de passe réinitialisé avec succès!",
+        "error": "Échec de la réinitialisation du mot de passe. Veuillez réessayer.",
+        "backToSignIn": "العودة إلى تسجيل الدخول"
+      },
+      "common": {
+        "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
+        "emailInvalid": "Veuillez entrer une adresse email valide",
+        "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+        "fieldRequired": "هذا الحقل مطلوب"
       }
     },
     "store": {
@@ -153,7 +176,8 @@
           "2": "دعم قياسي",
           "3": "5 مقالات شهرياً",
           "4": "1 جيجابايت تخزين"
-        }
+        },
+        "title": "Abonnement"
       },
       "billing": {
         "history": "سجل الفواتير",
@@ -169,127 +193,34 @@
       },
       "errors": {
         "refreshInvoices": "فشل في تحديث الفواتير"
+      },
+      "stats": {
+        "title": "Statistiques du Compte",
+        "articlesCreated": "Articles Créés",
+        "currentPlan": "Plan Actuel",
+        "memberSince": "Membre Depuis",
+        "notAvailable": "N/D"
       }
     },
     "common": {
       "save": "حفظ",
       "cancel": "إلغاء",
       "select": "اختيار",
-      "selected": "تم الاختيار"
-    },
-    "calendar": {
-      "schedule": "جدولة",
-      "unschedule": "إلغاء الجدولة",
-      "unscheduling": "جاري إلغاء الجدولة...",
-      "articleDetails": "تفاصيل المقال",
-      "scheduleArticles": "جدولة المقالات ليوم {{date}}",
-      "selectArticles": "اختر المقالات للجدولة:",
-      "noArticles": "لا توجد مقالات متاحة للجدولة",
-      "scheduledSuccessfully": "تمت جدولة المقالات بنجاح",
-      "unscheduledSuccessfully": "تم إلغاء جدولة المقال بنجاح",
-      "schedulingFailed": "فشل في جدولة المقالات. يرجى المحاولة مرة أخرى.",
-      "unschedulingFailed": "فشل في إلغاء جدولة المقال. يرجى المحاولة مرة أخرى."
-    },
-    "generate": {
-      "step1": {
-        "titles": {
-          "languageRegion": "اللغة والمنطقة",
-          "keywords": "الكلمات المفتاحية",
-          "contentDescription": "وصف المحتوى",
-          "generatedTitle": "العنوان المُنشأ",
-          "seoMeta": "معلومات تحسين محركات البحث"
-        }
-      }
-    },
-    "upgrade": {
-      "unlockFeatures": "هل تريد فتح المزيد من الميزات؟",
-      "upgradeToPro": "الترقية إلى الاحترافي 🚀"
-    },
-    "navigation": {
+      "selected": "تم الاختيار",
+      "success": "Succès !",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "Optimize": "Optimiser",
+      "Waiting": "En Attente",
+      "waiting": "en attente d'entrée",
+      "close": "Fermer",
+      "status": "Statut",
+      "description": "Description",
+      "created": "Créé",
       "dashboard": "لوحة التحكم",
-      "generate": "إنشاء",
-      "blog": "المدونة",
-      "calendar": "التقويم",
-      "websites": "المواقع",
       "profile": "الملف الشخصي",
-      "support": "الدعم",
-      "logout": "تسجيل الخروج",
-      "settings": "الإعدادات"
-    },
-    "dashboard": {
-      "title": "لوحة التحكم",
-      "subtitle": "إدارة المحتوى ومراقبة الأداء",
-      "quickActions": "الإجراءات السريعة",
-      "generateArticle": "إنشاء مقال",
-      "viewBlog": "عرض المدونة",
-      "manageWebsites": "إدارة المواقع",
-      "stats": {
-        "totalArticles": "إجمالي المقالات",
-        "publishedArticles": "المقالات المنشورة",
-        "draftArticles": "المسودات",
-        "scheduledArticles": "المجدولة"
-      },
-      "recentActivity": "النشاط الأخير",
-      "noActivity": "لا يوجد نشاط حديث",
-      "welcomeBack": "مرحباً بعودتك!",
-      "getStarted": "البدء",
-      "createFirst": "إنشاء مقالك الأول"
-    },
-    "generate": {
-      "title": "إنشاء مقال جديد",
-      "subtitle": "إنشاء محتوى محسن لمحركات البحث بالذكاء الاصطناعي",
-      "steps": {
-        "keywords": "الكلمات المفتاحية",
-        "content": "المحتوى",
-        "seo": "تحسين محركات البحث",
-        "publish": "النشر"
-      },
-      "keywords": {
-        "primary": "الكلمة المفتاحية الرئيسية",
-        "secondary": "الكلمات المفتاحية الثانوية",
-        "add": "إضافة كلمة مفتاحية",
-        "placeholder": "أدخل كلمة مفتاحية"
-      },
-      "content": {
-        "title": "عنوان المقال",
-        "sections": "أقسام المقال",
-        "generate": "إنشاء المحتوى",
-        "regenerate": "إعادة الإنشاء",
-        "edit": "تحرير"
-      },
-      "seo": {
-        "title": "تحسين محركات البحث",
-        "metaTitle": "العنوان الوصفي",
-        "metaDescription": "الوصف الوصفي",
-        "urlSlug": "رابط URL",
-        "score": "نقاط SEO"
-      },
-      "publish": {
-        "title": "نشر المقال",
-        "selectWebsite": "اختيار الموقع",
-        "publishNow": "النشر الآن",
-        "saveDraft": "حفظ كمسودة",
-        "schedule": "جدولة"
-      }
-    },
-    "blog": {
-      "title": "مقالاتي",
-      "subtitle": "إدارة جميع مقالات المدونة",
-      "filters": {
-        "all": "الكل",
-        "published": "منشورة",
-        "draft": "مسودات",
-        "scheduled": "مجدولة"
-      },
-      "search": "البحث في المقالات...",
-      "noArticles": "لم يتم العثور على مقالات",
-      "createFirst": "إنشاء مقالك الأول",
-      "actions": {
-        "edit": "تحرير",
-        "delete": "حذف",
-        "publish": "نشر",
-        "schedule": "جدولة"
-      }
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
     },
     "calendar": {
       "title": "تقويم المحتوى",
@@ -325,7 +256,141 @@
         "thursday": "الخميس",
         "friday": "الجمعة",
         "saturday": "السبت"
+      },
+      "scheduling": "Programmation...",
+      "scheduledArticles": "Articles Programmés",
+      "createNewArticle": "Créer un Nouvel Article",
+      "scheduledFor": "Programmé pour",
+      "noTime": "Aucune heure spécifique",
+      "clickToViewDetails": "Cliquez sur n'importe quel article pour voir les détails"
+    },
+    "generate": {
+      "title": "إنشاء مقال جديد",
+      "subtitle": "إنشاء محتوى محسن لمحركات البحث بالذكاء الاصطناعي",
+      "steps": {
+        "keywords": "الكلمات المفتاحية",
+        "content": "المحتوى",
+        "seo": "تحسين محركات البحث",
+        "publish": "النشر",
+        "contentSetup": "Configuration du Contenu",
+        "articleSettings": "Paramètres de l'Article",
+        "contentStructuring": "Structuration du Contenu"
+      },
+      "keywords": {
+        "primary": "الكلمة المفتاحية الرئيسية",
+        "secondary": "الكلمات المفتاحية الثانوية",
+        "add": "إضافة كلمة مفتاحية",
+        "placeholder": "أدخل كلمة مفتاحية"
+      },
+      "content": {
+        "title": "عنوان المقال",
+        "sections": "أقسام المقال",
+        "generate": "إنشاء المحتوى",
+        "regenerate": "إعادة الإنشاء",
+        "edit": "تحرير"
+      },
+      "seo": {
+        "title": "تحسين محركات البحث",
+        "metaTitle": "العنوان الوصفي",
+        "metaDescription": "الوصف الوصفي",
+        "urlSlug": "رابط URL",
+        "score": "نقاط SEO"
+      },
+      "publish": {
+        "title": "نشر المقال",
+        "selectWebsite": "اختيار الموقع",
+        "publishNow": "النشر الآن",
+        "saveDraft": "حفظ كمسودة",
+        "schedule": "جدولة"
+      },
+      "step1": {
+        "titles": {
+          "languageRegion": "Langue et Région",
+          "keywords": "Mots-clés",
+          "contentDescription": "Description du Contenu",
+          "generatedTitle": "Titre Généré",
+          "seoMeta": "Informations Méta SEO"
+        }
+      },
+      "unsavedChanges": "Vous avez des modifications non sauvegardées",
+      "saveChangesPrompt": "Sauvegardez votre progression pour éviter de perdre votre travail",
+      "discardChanges": "Abandonner",
+      "saving": "Sauvegarde en cours...",
+      "saveDraft": "Sauvegarder le Brouillon",
+      "startCreating": "Boostez Votre Création de Contenu",
+      "description": "Notre plateforme alimentée par l'IA vous aide à créer du contenu de haute qualité et engageant en quelques minutes. Parfait pour les blogs, sites web et réseaux sociaux.",
+      "createNow": "Commencer à Créer Maintenant",
+      "benefits": {
+        "seo": "Optimisé SEO",
+        "seoDesc": "Contenu qui se classe bien dans les moteurs de recherche",
+        "fast": "Gagner du Temps",
+        "fastDesc": "Créer des articles en minutes, pas en heures"
+      },
+      "modal": {
+        "title": "Générer l'Article Complet ?",
+        "message": "Aucun contenu n'a encore été généré. Souhaitez-vous générer l'article complet maintenant avant de passer à l'étape suivante ?",
+        "confirm": "Générer l'Article"
       }
+    },
+    "upgrade": {
+      "unlockFeatures": "هل تريد فتح المزيد من الميزات؟",
+      "upgradeToPro": "الترقية إلى الاحترافي 🚀",
+      "invoicesRefreshed": "Factures actualisées avec succès",
+      "invoicesRefreshError": "Échec de l'actualisation des factures",
+      "downloadInvoice": "Télécharger la Facture PDF"
+    },
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "subtitle": "إدارة المحتوى ومراقبة الأداء",
+      "quickActions": "الإجراءات السريعة",
+      "generateArticle": "إنشاء مقال",
+      "viewBlog": "عرض المدونة",
+      "manageWebsites": "إدارة المواقع",
+      "stats": {
+        "totalArticles": "إجمالي المقالات",
+        "publishedArticles": "المقالات المنشورة",
+        "draftArticles": "المسودات",
+        "scheduledArticles": "المجدولة"
+      },
+      "recentActivity": "النشاط الأخير",
+      "noActivity": "لا يوجد نشاط حديث",
+      "welcomeBack": "مرحباً بعودتك!",
+      "getStarted": "البدء",
+      "createFirst": "إنشاء مقالك الأول",
+      "nextScheduledArticle": "Prochain Article Programmé",
+      "articleScheduledFor": "\"{{title}}\" programmé pour {{date}}",
+      "timeRemaining": "Temps restant : {{days}}j {{hours}}h {{minutes}}m",
+      "noScheduledArticles": "Aucun Article Programmé",
+      "scheduleArticlePrompt": "Programmez votre prochain article pour maintenir une publication de contenu cohérente",
+      "viewCalendar": "Voir le Calendrier",
+      "createArticle": "Créer un Article"
+    },
+    "blog": {
+      "title": "مقالاتي",
+      "subtitle": "إدارة جميع مقالات المدونة",
+      "filters": {
+        "all": "الكل",
+        "published": "منشورة",
+        "draft": "مسودات",
+        "scheduled": "مجدولة"
+      },
+      "search": "البحث في المقالات...",
+      "noArticles": "لم يتم العثور على مقالات",
+      "createFirst": "إنشاء مقالك الأول",
+      "actions": {
+        "edit": "تحرير",
+        "delete": "حذف",
+        "publish": "نشر",
+        "schedule": "جدولة"
+      },
+      "published": "Publié",
+      "draft": "Brouillon",
+      "scheduled": "Programmé",
+      "scheduledFor": "Programmé pour {{date}}",
+      "unknown": "Inconnu",
+      "inProgress": "EN COURS",
+      "imageNotSet": "Image non définie",
+      "editDraft": "Modifier le Brouillon"
     },
     "demo": {
       "title": "حجز عرض توضيحي",
@@ -394,7 +459,43 @@
       },
       "onboarding": {
         "title": "الإعداد الموجه",
-        "description": "سيقوم فريقنا بإرشادك خطوة بخطوة لإعداد حسابك والبدء في استخدام منصتنا بفعالية."
+        "description": "سيقوم فريقنا بإرشادك خطوة بخطوة لإعداد حسابك والبدء في استخدام منصتنا بفعالية.",
+        "loading": "Préparation de votre expérience...",
+        "welcome": "Bienvenue sur XBlog !",
+        "choosePlan": "Choisissez Votre Plan",
+        "welcomeSubtitle": "Apprenons à mieux vous connaître pour personnaliser votre expérience.",
+        "choosePlanSubtitle": "Sélectionnez un plan qui convient le mieux à vos besoins de création de contenu.",
+        "progress": {
+          "preferences": "Vos Préférences",
+          "plan": "Plan d'Abonnement"
+        },
+        "interests": {
+          "title": "Qu'est-ce qui vous intéresse ?",
+          "subtitle": "Sélectionnez tout ce qui s'applique. Cela nous aide à personnaliser votre tableau de bord.",
+          "blogging": "Blogging",
+          "marketing": "Marketing de Contenu",
+          "seo": "Optimisation SEO",
+          "social": "Médias Sociaux",
+          "analytics": "Analytiques",
+          "ecommerce": "E-commerce"
+        },
+        "referralSources": {
+          "title": "Comment avez-vous entendu parler de nous ?",
+          "search": "Moteur de Recherche",
+          "social": "Médias Sociaux",
+          "friend": "Ami/Collègue",
+          "ad": "Publicité",
+          "blog": "Blog/Article",
+          "other": "Autre"
+        },
+        "continue": "Continuer",
+        "back": "Retour",
+        "getStarted": "Commencer",
+        "continueWithFree": "Continuer avec le Plan Gratuit",
+        "success": "Intégration terminée avec succès !",
+        "redirecting": "Redirection vers la page d'abonnement...",
+        "planUrlNotFound": "URL du plan introuvable. Veuillez sélectionner un plan depuis le tableau de bord.",
+        "error": "Échec de la sauvegarde des préférences, mais nous continuerons quand même."
       }
     },
     "welcome": {
@@ -449,8 +550,594 @@
         "analytics": {
           "title": "التحليلات المتقدمة",
           "description": "احصل على رؤى مفصلة حول أداء المحتوى الخاص بك"
+        },
+        "aiAgent": {
+          "title": "Agent IA",
+          "description": "Laissez notre IA créer plusieurs articles de haute qualité à la fois, vous faisant gagner du temps et des efforts précieux."
+        },
+        "customModel": {
+          "title": "Notre puissant modèle personnalisé",
+          "description": "Débloquez des insights et analyses avancés alimentés par notre modèle IA propriétaire."
         }
       }
+    },
+    "analytics": {
+      "welcome": "Bonjour, Bon retour xBlogger",
+      "welcomeSubtext": "Prêt à créer du contenu incroyable ? Commencez à générer des articles de haute qualité et optimisés pour le SEO en quelques minutes !",
+      "articlesGenerated": "Articles Générés",
+      "totalWebsites": "Total des Sites Web",
+      "purchaseOrders": "Commandes d'achat",
+      "messages": "Messages",
+      "currentVisits": "Visites actuelles",
+      "websiteVisits": "Visites du site web",
+      "websiteVisitsSubheader": "(+43%) par rapport à l'année dernière",
+      "conversionRates": "Taux de conversion",
+      "conversionRatesSubheader": "(+43%) par rapport à l'année dernière",
+      "orderTimeline": "Chronologie des commandes",
+      "trafficBySite": "Trafic par site",
+      "tasks": "Tâches",
+      "teamA": "Équipe A",
+      "teamB": "Équipe B",
+      "scheduledArticles": "Articles Programmés",
+      "regenerationsAvailable": "Régénérations Disponibles",
+      "websiteIntegrations": "Intégrations de Sites Web",
+      "websiteIntegrationsSubheader": "Distribution par plateforme",
+      "noWebsiteIntegrations": "Aucune intégration de site web pour le moment. Connectez votre premier site web pour voir la distribution par plateforme.",
+      "purchaseHistory": "Historique des Achats",
+      "purchaseHistorySubheader": "Activité d'abonnement récente",
+      "noPurchaseHistory": "Aucun historique de facturation disponible pour le moment. Vos enregistrements d'achat apparaîtront ici."
+    },
+    "regenerate": {
+      "label": "Régénérations",
+      "remaining": "{{count}} régénérations restantes",
+      "info": "Les régénérations vous permettent de recréer du contenu. Chaque régénération diminue votre nombre disponible.",
+      "notEnough": "Aucune régénération disponible. Mettez à niveau votre plan pour obtenir plus de régénérations.",
+      "noCredits": "لا توجد عمليات إعادة توليد متاحة",
+      "upgradeMessage": "Mettez à niveau votre plan pour obtenir plus de régénérations.",
+      "error": "Échec de l'utilisation de la régénération. Veuillez réessayer.",
+      "loading": "Régénération de {{type}}...",
+      "success": "{{type}} régénéré avec succès !",
+      "available": "Régénérer ({{count}} restantes)",
+      "button": "Régénérer",
+      "confirm": "Régénérer",
+      "insufficientCreditsButton": "Crédits Insuffisants",
+      "upgradeButton": "Mettre à Niveau",
+      "confirmTitle": "Confirmer la Régénération",
+      "confirmMessage": "Cela remplacera vos sections actuelles et consommera <strong>5 régénérations</strong>.",
+      "insufficientCredits": "Vous avez besoin de <strong>{{required}} régénérations</strong> mais n'en avez que <strong>{{available}}</strong> disponibles.",
+      "availableCredits": "Vous avez {{count}} crédits de régénération disponibles.",
+      "example": {
+        "title": "Exemple de Système de Régénération",
+        "description": "Ceci est un exemple de comment utiliser le système de régénération. Vous avez {{count}} régénérations disponibles.",
+        "content": "Contenu d'Exemple",
+        "contentDescription": "Ceci est du contenu d'exemple qui peut être régénéré."
+      }
+    },
+    "publishing": {
+      "message": "Publication de votre contenu..."
+    },
+    "points": {
+      "label": "Points",
+      "remaining": "{{count}} points restants",
+      "info": "Les points sont utilisés lors de la génération de contenu avec l'IA. Chaque génération coûte des points selon le type de contenu.",
+      "notEnough": "Pas assez de points pour cette opération",
+      "notEnoughTitle": "Pas Assez de Points",
+      "insufficientPoints": "Points Insuffisants pour Cette Opération",
+      "generationRequires": "La génération de {{type}} nécessite {{points}} points. Il vous reste {{remaining}} points.",
+      "youHave": "Vous avez",
+      "required": "Requis",
+      "needed": "Nécessaire",
+      "upgradeMessage": "Mettez à niveau votre plan pour obtenir plus de points ou attendez que vos points se rechargent.",
+      "upgradePlan": "Mettre à Niveau le Plan",
+      "deducted": "{{cost}} points utilisés. {{remaining}} restants",
+      "generationTypes": {
+        "title": "titre",
+        "metaTitle": "méta titre",
+        "metaDescription": "méta description",
+        "keywords": "mots-clés",
+        "sections": "sections",
+        "sectionContent": "contenu de section",
+        "fullArticle": "article complet"
+      },
+      "reasons": {
+        "title": "Générer le titre",
+        "metaTitle": "Générer le méta titre",
+        "metaDescription": "Générer la méta description",
+        "keywords": "Générer les mots-clés",
+        "sections": "Générer les sections",
+        "sectionContent": "Générer le contenu de section",
+        "fullArticle": "Générer l'article complet"
+      }
+    },
+    "months": {
+      "jan": "يناير",
+      "feb": "فبراير",
+      "mar": "مارس",
+      "apr": "أبريل",
+      "may": "مايو",
+      "jun": "يونيو",
+      "jul": "يوليو",
+      "aug": "أغسطس",
+      "sep": "سبتمبر"
+    },
+    "regions": {
+      "america": "Amérique",
+      "asia": "Asie",
+      "europe": "Europe",
+      "africa": "Afrique"
+    },
+    "countries": {
+      "italy": "Italie",
+      "japan": "Japon",
+      "china": "Chine",
+      "canada": "Canada",
+      "france": "France"
+    },
+    "create": {
+      "heading": "Créer avec l'IA",
+      "subheading": "Comment souhaitez-vous commencer?",
+      "popular": "Populaire",
+      "recentPromptsHeading": "Vos invites récentes",
+      "generateLabel": "Générer",
+      "draftLabel": "BROUILLON",
+      "options": {
+        "generate": {
+          "title": "Générer",
+          "description": "Créer à partir d'une invite en une ligne en quelques secondes"
+        },
+        "template": {
+          "title": "Utiliser un modèle intégré",
+          "description": "Créer un article à partir d'un modèle existant"
+        }
+      },
+      "recentPrompts": {
+        "prompt1": "Présentation de React Native et différence entre React et React Native",
+        "prompt2": "Conseils d'optimisation SEO pour les sites e-commerce",
+        "prompt3": "Comment implémenter l'authentification dans les applications Next.js"
+      },
+      "timeAgo": {
+        "minute": "il y a 1 minute",
+        "days": "il y a 2 jours",
+        "week": "il y a 1 semaine"
+      }
+    },
+    "rewards": {
+      "title": "اكسب المكافآت",
+      "earnRewards": "اكسب المكافآت",
+      "referAndEarn": "ادعُ واكسب",
+      "referAndEarnTooltip": "ادعُ الأصدقاء لكسب رصيد إضافي",
+      "referAndEarnDescription": "ادعُ الأصدقاء واكسب رصيد لكل إحالة ناجحة",
+      "inviteFriends": "ادعُ الأصدقاء للحصول على مكافأة",
+      "seeWhosJoined": "شاهد من انضم >",
+      "dailyRewards": "المكافآت اليومية",
+      "dailyRewardsTooltip": "أكمل المهام اليومية لكسب الرصيد",
+      "dailyRewardsDescription": "أكمل المهام اليومية لكسب الرصيد وزيادة كفاءتك",
+      "oneTimeRewards": "مكافآت لمرة واحدة",
+      "oneTimeRewardsTooltip": "أكمل هذه المهام مرة واحدة لكسب الرصيد",
+      "oneTimeRewardsDescription": "أكمل هذه المهام مرة واحدة لكسب رصيد دائم وإلغاء قفل الميزات الجديدة",
+      "totalEarnings": "إجمالي الأرباح",
+      "friendsJoined": "الأصدقاء المنضمون",
+      "pendingRewards": "المكافآت المعلقة",
+      "yourReferralCode": "رمز الإحالة الخاص بك",
+      "progress": "التقدم",
+      "friends": "أصدقاء",
+      "rewardTiers": "مستويات المكافآت",
+      "referralHistory": "تاريخ الإحالات",
+      "todayEarnings": "الرصيد المكتسب اليوم",
+      "tasksCompleted": "المهام المكتملة",
+      "lastClaimed": "آخر مطالبة",
+      "claimed": "مطالب",
+      "completed": "مكتمل",
+      "available": "متاح",
+      "claiming": "جاري المطالبة...",
+      "claim": "مطالبة",
+      "dailyStreak": "السلسلة اليومية",
+      "streakDescription": "استمر في تسجيل الدخول يومياً للحفاظ على سلسلتك واكسب مكافآت إضافية!",
+      "days": "أيام",
+      "totalCreditsEarned": "إجمالي الرصيد المكتسب",
+      "completionRate": "معدل الإكمال",
+      "categories": "الفئات",
+      "category": {
+        "all": "الكل",
+        "app": "التطبيق",
+        "profile": "الملف الشخصي",
+        "social": "اجتماعي",
+        "referral": "الإحالة"
+      },
+      "requirements": "المتطلبات",
+      "expirationTime": "وقت الانتهاء",
+      "difficulty": {
+        "easy": "سهل",
+        "medium": "متوسط",
+        "hard": "صعب"
+      },
+      "achievement": "إنجاز مفتوح!",
+      "achievementDescription": "لقد أكملت عدة مهام وحصلت على شارة \"سيد المهام\"!",
+      "taskMaster": "سيد المهام",
+      "status": {
+        "pending": "في الانتظار",
+        "joined": "منضم",
+        "completed": "مكتمل"
+      }
+    },
+    "websites": {
+      "addNew": "Ajouter un nouveau site web",
+      "title": "Mis Sitios Web",
+      "subtitle": "Gestiona tus sitios web conectados",
+      "noWebsites": "No hay sitios web conectados",
+      "connectFirst": "Conecta tu primer sitio web"
+    },
+    "seo": {
+      "sections": {
+        "core_essentials": "Fondamentaux SEO",
+        "boosters": "Boosters SEO",
+        "title_optimization": "Optimisation du Titre",
+        "content_clarity": "Clarté du Contenu"
+      },
+      "status": {
+        "pending": "Cette vérification attend que vous remplissiez les champs requis",
+        "error": "Cet élément nécessite une attention pour améliorer votre score SEO",
+        "warning": "Cet élément pourrait être amélioré pour un meilleur SEO",
+        "success": "Cet élément est optimisé pour le SEO"
+      },
+      "performance_score": "Score de Performance SEO",
+      "points": "points",
+      "tooltip": {
+        "score": "{{score}} sur {{total}} points possibles",
+        "progress": "{{progress}}% complété"
+      },
+      "rating": {
+        "needs_improvement": "À Améliorer",
+        "good": "Bon",
+        "excellent": "Excellent"
+      },
+      "toast": {
+        "already_optimized": "Cet élément est déjà optimisé !",
+        "optimization_not_available": "L'optimisation n'est pas encore disponible pour cet élément.",
+        "not_ready": "Cet élément n'est pas encore prêt pour l'optimisation.",
+        "optimizing": "Optimisation de {{field}}...",
+        "optimized_success": "{{field}} optimisé avec succès !",
+        "optimization_failed": "Échec de l'optimisation de {{field}}. Veuillez réessayer."
+      },
+      "criteria": {
+        "core": {
+          "keyword_in_title": {
+            "description": "Mot-clé principal utilisé dans le titre SEO",
+            "success": "Le mot-clé principal est utilisé dans le titre SEO.",
+            "error": "Le mot-clé principal n'est pas présent dans le titre SEO.",
+            "warning": "Focus keyword is partially present in the SEO title."
+          },
+          "keyword_in_meta": {
+            "description": "Mot-clé principal utilisé dans la méta description",
+            "success": "Le mot-clé principal est présent dans la méta description.",
+            "error": "Le mot-clé principal n'est pas présent dans la méta description."
+          },
+          "keyword_in_url": {
+            "description": "Mot-clé principal utilisé dans l'URL",
+            "success": "Le mot-clé principal est utilisé dans l'URL.",
+            "warning": "Certains mots du mot-clé principal manquent dans l'URL.",
+            "error": "Le mot-clé principal n'est pas utilisé dans l'URL."
+          },
+          "keyword_in_first_10": {
+            "description": "Mot-clé principal apparaît dans les 10% premiers du contenu",
+            "success": "Le mot-clé principal apparaît dans les 10% premiers du contenu.",
+            "error": "Le mot-clé principal n'apparaît pas dans les 10% premiers du contenu."
+          },
+          "keyword_in_content": {
+            "description": "Mot-clé principal trouvé dans le contenu",
+            "success": "Le mot-clé principal est présent dans tout le contenu.",
+            "error": "Le mot-clé principal n'est pas trouvé dans le contenu."
+          },
+          "content_length": {
+            "description": "Longueur globale du contenu",
+            "success": "Le contenu fait 2500 mots ou plus.",
+            "warning": "Le contenu fait entre 1000 et 2499 mots.",
+            "error": "Le contenu fait moins de 1000 mots."
+          }
+        },
+        "boosters": {
+          "keyword_in_subheadings": {
+            "description": "Mot-clé principal utilisé dans les sous-titres",
+            "success": "Le mot-clé principal apparaît dans au moins un sous-titre.",
+            "error": "Le mot-clé principal n'est pas trouvé dans les sous-titres."
+          },
+          "keyword_density": {
+            "description": "Fréquence d'apparition du mot-clé principal",
+            "success": "La densité du mot-clé principal est entre 1% et 1,5%.",
+            "warning": "La densité du mot-clé principal est légèrement faible ou légèrement élevée (entre 0,5%–0,99% ou 1,51%–2,5%).",
+            "error": "La densité du mot-clé principal est très faible (moins de 0,5%) ou trop élevée (plus de 2,5%)."
+          },
+          "url_slug_length": {
+            "description": "Le slug d'URL contient un nombre raisonnable de mots descriptifs",
+            "success": "Le slug d'URL contient 3 à 5 mots.",
+            "warning": "Le slug d'URL contient 2 ou 6 mots.",
+            "error": "Le slug d'URL contient moins de 2 mots ou plus de 6 mots."
+          },
+          "external_links": {
+            "description": "Des liens externes sont inclus",
+            "success": "Au moins un lien externe est inclus.",
+            "error": "Aucun lien externe trouvé."
+          },
+          "dofollow_links": {
+            "description": "Au moins un lien externe avec DoFollow trouvé dans votre contenu",
+            "success": "Un lien externe DoFollow est présent.",
+            "error": "Aucun lien externe DoFollow trouvé."
+          },
+          "internal_links": {
+            "description": "Des liens internes sont inclus",
+            "success": "Au moins un lien interne est inclus.",
+            "error": "Aucun lien interne trouvé."
+          }
+        },
+        "title": {
+          "keyword_at_start": {
+            "description": "Mot-clé principal au début du titre SEO",
+            "success": "Le titre SEO commence par le mot-clé principal.",
+            "error": "Le mot-clé principal n'est pas au début du titre SEO.",
+            "warning": "SEO title starts with part of the focus keyword."
+          },
+          "sentiment": {
+            "description": "Le titre a un sentiment positif ou négatif",
+            "success": "Le titre SEO inclut un sentiment émotionnel.",
+            "error": "Le titre SEO manque de sentiment émotionnel."
+          },
+          "power_words": {
+            "description": "Le titre contient 2 mots puissants",
+            "success": "Le titre contient 2 mots puissants ou plus.",
+            "warning": "Le titre contient 1 mot puissant.",
+            "error": "Aucun mot puissant dans le titre."
+          }
+        },
+        "clarity": {
+          "table_of_contents": {
+            "description": "Une table des matières est incluse",
+            "success": "Une table des matières est présente.",
+            "error": "Aucune table des matières trouvée."
+          },
+          "short_paragraphs": {
+            "description": "Des paragraphes courts sont utilisés",
+            "success": "Les paragraphes sont concis (≤5 lignes).",
+            "warning": "Certains paragraphes dépassent 6-7 lignes.",
+            "error": "La plupart des paragraphes sont longs et difficiles à parcourir."
+          },
+          "media_content": {
+            "description": "Le contenu contient des images et/ou des vidéos",
+            "success": "Le contenu inclut au moins une image ou une vidéo.",
+            "error": "Aucune image ou vidéo incluse dans le contenu."
+          }
+        }
+      },
+      "optimization": {
+        "title": "Optimize SEO Criterion",
+        "current_value": "Current Value",
+        "optimized_value": "Optimized Value",
+        "current_score": "Current Score",
+        "potential_score": "Potential Score",
+        "success": "Optimization applied successfully!",
+        "optimizing": "Optimizing...",
+        "generate": "Generate Optimization",
+        "apply": "Apply Optimization"
+      }
+    },
+    "subscription": {
+      "success": {
+        "title": "Abonnement Activé !",
+        "planMessage": "Vous avez activé avec succès le plan {{planName}} !",
+        "genericMessage": "Votre abonnement a été activé avec succès !",
+        "description": "Vous pouvez maintenant profiter de toutes les fonctionnalités de votre nouveau plan. Commencez à créer du contenu incroyable !",
+        "planDescription": "Votre plan {{planName}} est maintenant actif ! Débloquez tout le potentiel de la création de contenu alimentée par l'IA.",
+        "subscriptionId": "ID d'abonnement : {{id}}",
+        "getStarted": "Commencer",
+        "startCreating": "Commencer à Créer du Contenu Incroyable"
+      },
+      "limit": {
+        "articles": {
+          "title": "Limite d'Articles Atteinte",
+          "message": "Vous avez atteint votre limite d'articles. Mettez à niveau votre plan pour créer plus d'articles et débloquer des fonctionnalités avancées."
+        },
+        "regenerations": {
+          "title": "Limite de Régénérations Atteinte",
+          "message": "Vous avez utilisé toutes vos régénérations. Mettez à niveau pour obtenir plus de régénérations et continuer à améliorer votre contenu."
+        },
+        "websites": {
+          "title": "Limite de Sites Web Atteinte",
+          "message": "Vous avez atteint votre limite de sites web. Mettez à niveau pour gérer plus de sites web et étendre votre création de contenu."
+        },
+        "generic": {
+          "title": "Limite Atteinte",
+          "message": "Vous avez atteint la limite de votre plan. Mettez à niveau pour continuer à utiliser toutes les fonctionnalités."
+        },
+        "usage": "Utilisation actuelle :",
+        "benefits": {
+          "title": "Avantages de la mise à niveau :",
+          "unlimited": "Articles et contenu illimités",
+          "regenerations": "Plus de régénérations IA",
+          "features": "Fonctionnalités avancées et support prioritaire"
+        },
+        "upgrade": "Mettre à Niveau le Plan"
+      }
+    },
+    "account": {
+      "freePlan": "Gratuit",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "myWebsites": "Mes sites web",
+      "signOut": "Se déconnecter",
+      "preferences": "Préférences",
+      "theme": "Thème",
+      "upgradePlan": "Mettre à Niveau le Plan"
+    },
+    "support": {
+      "title": "Contacter le Support",
+      "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",
+      "status": "En Ligne",
+      "openChat": "Ouvrir le chat de support",
+      "inputPlaceholder": "Tapez un message...",
+      "welcomeMessage": "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
+      "sendMessage": "Envoyer le message",
+      "button": {
+        "tooltip": "Contacter le Support"
+      },
+      "form": {
+        "email": "Adresse Email",
+        "emailPlaceholder": "Entrez votre adresse email",
+        "subject": "Sujet",
+        "subjectPlaceholder": "Brève description de votre problème",
+        "category": "Catégorie",
+        "categoryPlaceholder": "Sélectionnez une catégorie",
+        "message": "Message",
+        "messagePlaceholder": "Veuillez décrire votre problème en détail...",
+        "submit": "Envoyer la Demande de Support",
+        "submitting": "Envoi en cours..."
+      },
+      "categories": {
+        "technical": "Problème Technique",
+        "billing": "Facturation et Abonnement",
+        "feature": "Demande de Fonctionnalité",
+        "bug": "Rapport de Bug",
+        "account": "Gestion de Compte",
+        "integration": "Intégration de Plateforme",
+        "other": "Autre"
+      },
+      "success": {
+        "title": "Demande Envoyée avec Succès !",
+        "message": "Nous avons reçu votre question et notre équipe de support vous répondra bientôt !",
+        "note": "Vous recevrez un email de confirmation sous peu."
+      }
+    },
+    "article": {
+      "placeholders": {
+        "select": "Sélectionner une option",
+        "selectOrType": "Sélectionner ou taper une option"
+      },
+      "settings": {
+        "title": "Paramètres de l'Article",
+        "mainSettings": "Paramètres Principaux",
+        "articleType": "Type d'Article",
+        "articleSize": "Taille de l'Article",
+        "toneOfVoice": "Ton de Voix",
+        "pointOfView": "Point de Vue",
+        "aiContentCleaning": "Nettoyage IA du Contenu",
+        "mediaSettings": "Paramètres Médias",
+        "imageQuality": "Qualité d'Image",
+        "imagePlacement": "Placement d'Image",
+        "imageStyle": "Style d'Image",
+        "numberOfImages": "Nombre d'Images",
+        "includeVideos": "Inclure des Vidéos",
+        "numberOfVideos": "Nombre de Vidéos",
+        "linkingSettings": "Paramètres de Liens",
+        "internalLinking": "Liens Internes",
+        "externalLinking": "Liens Externes"
+      },
+      "tooltips": {
+        "articleType": "Choisissez le type d'article qui correspond le mieux à vos objectifs de contenu",
+        "articleSize": "Détermine la longueur et la profondeur de votre article",
+        "toneOfVoice": "Définit le ton général et le style d'écriture de votre article",
+        "pointOfView": "Détermine la perspective depuis laquelle votre article est écrit",
+        "aiContentCleaning": "Contrôle comment le texte généré par l'IA est traité pour paraître plus naturel",
+        "imageQuality": "Définit la résolution et la qualité des images générées",
+        "imagePlacement": "Détermine où les images seront placées dans votre article",
+        "imageStyle": "Définit le style visuel des images générées",
+        "numberOfImages": "Nombre total d'images à inclure dans votre article",
+        "numberOfVideos": "Spécifiez combien de vidéos doivent être intégrées dans votre article",
+        "internalLinking": "Sélectionnez quels sites web lier dans l'article",
+        "externalLinking": "Choisissez quelles sources externes référencer dans votre article ou tapez les vôtres"
+      },
+      "buttons": {
+        "generating": "Génération...",
+        "generateTableOfContents": "Générer l'Article Complet",
+        "regenerateTableOfContents": "Régénérer l'Article Complet",
+        "tableOfContentsGenerated": "Article Complet Généré"
+      },
+      "generation": {
+        "modal": {
+          "title": "Génération de Votre Contenu",
+          "subtitle": "Veuillez patienter pendant que nous créons les composants de votre article",
+          "steps": {
+            "tableOfContents": "Génération de la table des matières",
+            "images": "Génération de suggestions d'images",
+            "faq": "Création de questions fréquemment posées",
+            "sections": "Rédaction des sections de l'article",
+            "finalizing": "Finalisation de votre contenu"
+          },
+          "progress": {
+            "tableOfContents": "Nous créons un plan structuré pour votre article...",
+            "images": "Recherche des images parfaites pour compléter votre contenu...",
+            "faq": "Préparation de questions et réponses utiles pour vos lecteurs...",
+            "sections": "Création d'un contenu engageant pour chaque section...",
+            "finalizing": "Assemblage de tout pour créer l'article parfait..."
+          },
+          "completed": "Contenu Généré avec Succès !",
+          "completedMessage": "Les composants de votre article sont prêts. Vous pouvez maintenant les examiner et les personnaliser."
+        }
+      }
+    },
+    "error": {
+      "title": "Quelque chose s'est mal passé",
+      "message": "Nous avons rencontré une erreur inattendue. Veuillez réessayer ou contacter le support si le problème persiste.",
+      "retry": "Réessayer",
+      "showDetails": "Afficher les Détails",
+      "hideDetails": "Masquer les Détails",
+      "reportIssue": "Si ce problème persiste, veuillez le signaler à notre équipe de support.",
+      "copyToClipboard": "Copier dans le presse-papiers"
+    },
+    "errors": {
+      "subscription": {
+        "fetch": "Échec de la récupération des détails de l'abonnement"
+      },
+      "stores": {
+        "fetch": "Échec de la récupération des données des boutiques"
+      }
+    },
+    "templates": {
+      "title": "Article Templates",
+      "subtitle": "Choisissez parmi nos modèles optimisés SEO pour créer du contenu de haute qualité",
+      "createFromScratch": "Créer à Partir de Zéro",
+      "searchPlaceholder": "Rechercher des modèles...",
+      "tabs": {
+        "all": "Tous",
+        "popular": "Populaires",
+        "new": "Nouveaux"
+      },
+      "premiumOnly": "Premium Uniquement",
+      "preview": "Aperçu",
+      "benefits": "Avantages",
+      "viewPreview": "Voir l'Aperçu",
+      "continueToPurchase": "Continuer vers l'Achat",
+      "coming_soon": "Bientôt Disponible !",
+      "locked_message": "Templates feature is currently in development and will be available soon. Stay tuned for updates!",
+      "unlock_message": "Cette fonctionnalité sera disponible dans la prochaine mise à jour. Merci pour votre patience !",
+      "notify_me": "Me Notifier Quand Disponible"
+    },
+    "pricing": {
+      "title": "Tarification",
+      "subtitle": "Choisissez un plan qui vous convient",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "savePercent": "Économisez {{percent}}%",
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "mostPopular": "Le Plus Populaire",
+      "getStarted": "Commencer",
+      "currentPlanLabel": "Votre Plan Actuel",
+      "currentPlan": "Plan Actuel",
+      "choosePlan": "Choisir le Plan",
+      "upgradePlan": "Mettre à Niveau le Plan",
+      "contactSales": "Contacter les Ventes",
+      "comparePlans": "Comparer les Plans",
+      "faq": "Questions Fréquemment Posées",
+      "faqSubtitle": "Vous avez des questions ? Nous sommes là pour vous aider."
+    },
+    "ai_chat": {
+      "title": "Chat d'Assistance IA",
+      "welcome_message": "Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?",
+      "sample_response": "Je suis actuellement en développement. Bientôt, je pourrai vous aider avec la création de contenu, l'optimisation SEO et plus encore !",
+      "message_placeholder": "Tapez votre message ici...",
+      "typing": "L'IA tape...",
+      "coming_soon": "Bientôt Disponible !",
+      "locked_message": "Cette fonctionnalité est actuellement en développement et sera bientôt disponible. Restez à l'écoute pour les mises à jour !",
+      "unlock_message": "Cette fonctionnalité sera disponible dans la prochaine mise à jour. Merci pour votre patience !",
+      "notify_me": "Me Notifier Quand Disponible"
     }
   }
 }

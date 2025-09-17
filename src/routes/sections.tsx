@@ -39,6 +39,9 @@ export const ArticlePreviewDemoPage = lazy(() => import('src/pages/article-previ
 export const TestDraftEditingPage = lazy(() => import('src/pages/test-draft-editing'));
 export const TemplatePreviewPage = lazy(() => import('src/pages/template-preview'));
 export const OAuthCallbackPage = lazy(() => import('src/pages/oauth-callback'));
+export const ReferEarnPage = lazy(() => import('src/pages/rewards/ReferEarnPage'));
+export const DailyRewardsPage = lazy(() => import('src/pages/rewards/DailyRewardsPage'));
+export const OneTimeRewardsPage = lazy(() => import('src/pages/rewards/OneTimeRewardsPage'));
 
 // ----------------------------------------------------------------------
 
@@ -222,6 +225,30 @@ export function Router() {
               element: (
                 <ErrorBoundary FallbackComponent={ErrorFallback}>
                   <TestDraftEditingPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'rewards/refer-earn',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <ReferEarnPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'rewards/daily',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <DailyRewardsPage />
+                </ErrorBoundary>
+              )
+            },
+            {
+              path: 'rewards/one-time',
+              element: (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <OneTimeRewardsPage />
                 </ErrorBoundary>
               )
             },

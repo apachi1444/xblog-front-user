@@ -5,7 +5,10 @@
         "contentSetup": "Content Setup",
         "articleSettings": "Article Settings",
         "contentStructuring": "Content Structuring",
-        "publish": "Publish"
+        "publish": "Publish",
+        "keywords": "Palabras Clave",
+        "content": "Contenido",
+        "seo": "SEO"
       },
       "step1": {
         "titles": {
@@ -34,6 +37,35 @@
         "title": "Generate Full Article?",
         "message": "No content has been generated yet. Would you like to generate the full article now before proceeding to the next step?",
         "confirm": "Generate Article"
+      },
+      "title": "Generar Nuevo Artículo",
+      "subtitle": "Crea contenido optimizado para SEO con IA",
+      "keywords": {
+        "primary": "Palabra Clave Principal",
+        "secondary": "Palabras Clave Secundarias",
+        "add": "Agregar palabra clave",
+        "placeholder": "Ingresa una palabra clave"
+      },
+      "content": {
+        "title": "Título del Artículo",
+        "sections": "Secciones del Artículo",
+        "generate": "Generar Contenido",
+        "regenerate": "Regenerar",
+        "edit": "Editar"
+      },
+      "seo": {
+        "title": "Optimización SEO",
+        "metaTitle": "Título Meta",
+        "metaDescription": "Meta Descripción",
+        "urlSlug": "URL Slug",
+        "score": "Puntuación SEO"
+      },
+      "publish": {
+        "title": "Publicar Artículo",
+        "selectWebsite": "Seleccionar Sitio Web",
+        "publishNow": "Publicar Ahora",
+        "saveDraft": "Guardar como Borrador",
+        "schedule": "Programar"
       }
     },
     "navigation": {
@@ -44,7 +76,13 @@
       "templates": "Templates",
       "upgrade_license": "Upgrade license",
       "book_demo": "Book Demo",
-      "ai_assistance_chat": "AI Assistance chat"
+      "ai_assistance_chat": "AI Assistance chat",
+      "blog": "Blog",
+      "websites": "Sitios Web",
+      "profile": "Perfil",
+      "support": "Soporte",
+      "logout": "Cerrar Sesión",
+      "settings": "Configuración"
     },
     "blog": {
       "published": "Published",
@@ -54,7 +92,24 @@
       "unknown": "Unknown",
       "inProgress": "IN PROGRESS",
       "imageNotSet": "Image not set",
-      "editDraft": "Edit Draft"
+      "editDraft": "Edit Draft",
+      "title": "Mis Artículos",
+      "subtitle": "Gestiona todos tus artículos de blog",
+      "filters": {
+        "all": "Todos",
+        "published": "Publicados",
+        "draft": "Borradores",
+        "scheduled": "Programados"
+      },
+      "search": "Buscar artículos...",
+      "noArticles": "No se encontraron artículos",
+      "createFirst": "Crear tu primer artículo",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "publish": "Publicar",
+        "schedule": "Programar"
+      }
     },
     "upgrade": {
       "unlockFeatures": "Want to unlock more features?",
@@ -69,8 +124,71 @@
       "websitesRemaining": "{{count}} websites remaining",
       "articlesRemaining": "{{count}} articles remaining"
     },
+    "rewards": {
+      "title": "Earn Rewards",
+      "earnRewards": "Earn Rewards",
+      "referAndEarn": "Refer & Earn",
+      "referAndEarnTooltip": "Invite friends to earn bonus credits",
+      "referAndEarnDescription": "Invite friends and earn credits for each successful referral",
+      "inviteFriends": "Invite Friends to Get Bonus",
+      "seeWhosJoined": "See who's joined >",
+      "dailyRewards": "Daily Rewards",
+      "dailyRewardsTooltip": "Complete daily tasks to earn credits",
+      "dailyRewardsDescription": "Complete daily tasks to earn credits and boost your account",
+      "oneTimeRewards": "One-Time Rewards",
+      "oneTimeRewardsTooltip": "Complete these tasks once to earn credits",
+      "oneTimeRewardsDescription": "Complete these tasks once to earn permanent credits and unlock achievements",
+      "totalEarnings": "Total Earnings",
+      "friendsJoined": "Friends Joined",
+      "pendingRewards": "Pending Rewards",
+      "yourReferralCode": "Your Referral Code",
+      "progress": "Progress",
+      "friends": "friends",
+      "rewardTiers": "Reward Tiers",
+      "referralHistory": "Referral History",
+      "todayEarnings": "Credits Earned Today",
+      "tasksCompleted": "Tasks Completed",
+      "lastClaimed": "Last claimed",
+      "claimed": "Claimed",
+      "completed": "Completed",
+      "available": "Available",
+      "claiming": "Claiming...",
+      "claim": "Claim",
+      "dailyStreak": "Daily Streak",
+      "streakDescription": "Keep logging in daily to maintain your streak and earn bonus rewards!",
+      "days": "Days",
+      "totalCreditsEarned": "Total Credits Earned",
+      "completionRate": "Completion Rate",
+      "categories": "Categories",
+      "category": {
+        "all": "All",
+        "app": "App",
+        "profile": "Profile",
+        "social": "Social",
+        "referral": "Referral"
+      },
+      "requirements": "Requirements",
+      "expirationTime": "Expiration Time",
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "achievement": "Achievement Unlocked!",
+      "achievementDescription": "You've completed multiple tasks and earned the \"Task Master\" badge!",
+      "taskMaster": "Task Master",
+      "status": {
+        "pending": "Pending",
+        "joined": "Joined",
+        "completed": "Completed"
+      }
+    },
     "websites": {
-      "addNew": "Add New Website"
+      "addNew": "Add New Website",
+      "title": "Mis Sitios Web",
+      "subtitle": "Gestiona tus sitios web conectados",
+      "noWebsites": "No hay sitios web conectados",
+      "connectFirst": "Conecta tu primer sitio web"
     },
     "auth": {
       "resetPassword": {
@@ -81,7 +199,8 @@
         "submit": "Reset Password",
         "rememberPassword": "Remember your password?",
         "success": "Password reset successfully! Please sign in with your new password.",
-        "error": "Failed to reset password. Please try again."
+        "error": "Failed to reset password. Please try again.",
+        "backToSignIn": "Retour à la Connexion"
       },
       "signup": {
         "title": "Join Our Creative Community",
@@ -100,7 +219,7 @@
         "privacyPolicy": "Privacy Policy",
         "orContinueWith": "OR CONTINUE WITH",
         "signupWithGoogle": "Sign up with Google",
-        "or":"OR"
+        "or": "OR"
       },
       "signin": {
         "title": "Sign In",
@@ -124,7 +243,9 @@
       },
       "common": {
         "passwordRequirements": "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number",
-        "emailInvalid": "Please enter a valid email address"
+        "emailInvalid": "Please enter a valid email address",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "fieldRequired": "Ce champ est requis"
       }
     },
     "store": {
@@ -203,7 +324,11 @@
       "close": "Close",
       "status": "Status",
       "description": "Description",
-      "created": "Created"
+      "created": "Created",
+      "dashboard": "Tableau de Bord",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
     },
     "dashboard": {
       "nextScheduledArticle": "Next Scheduled Article",
@@ -212,7 +337,24 @@
       "noScheduledArticles": "No Scheduled Articles",
       "scheduleArticlePrompt": "Schedule your next article to maintain consistent content publishing",
       "viewCalendar": "View Calendar",
-      "createArticle": "Create Article"
+      "createArticle": "Create Article",
+      "title": "Panel de Control",
+      "subtitle": "Gestiona tu contenido y supervisa el rendimiento",
+      "quickActions": "Acciones Rápidas",
+      "generateArticle": "Generar Artículo",
+      "viewBlog": "Ver Blog",
+      "manageWebsites": "Gestionar Sitios Web",
+      "stats": {
+        "totalArticles": "Total de Artículos",
+        "publishedArticles": "Artículos Publicados",
+        "draftArticles": "Borradores",
+        "scheduledArticles": "Programados"
+      },
+      "recentActivity": "Actividad Reciente",
+      "noActivity": "No hay actividad reciente",
+      "welcomeBack": "¡Bienvenido de vuelta!",
+      "getStarted": "Empezar",
+      "createFirst": "Crear tu primer artículo"
     },
     "analytics": {
       "welcome": "Hi, Welcome back xBlogger",
@@ -263,7 +405,8 @@
         "description": "This is an example of how to use the regeneration system. You have {{count}} regenerations available.",
         "content": "Example Content",
         "contentDescription": "This is some example content that can be regenerated."
-      }
+      },
+      "noCredits": "Aucune régénération disponible. Mettez à niveau votre plan pour obtenir plus de régénérations."
     },
     "publishing": {
       "message": "Publishing your content..."
@@ -440,7 +583,6 @@
         "generate": "Generate Optimization",
         "apply": "Apply Optimization"
       },
-
       "toast": {
         "already_optimized": "This item is already optimized!",
         "optimization_not_available": "Optimization not available for this item yet.",
@@ -559,23 +701,23 @@
       }
     },
     "pricing": {
-    "title": "Pricing",
-    "subtitle": "Choose a plan that works for you",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "savePercent": "Save {{percent}}%",
-    "perMonth": "/month",
-    "perYear": "/year",
-    "mostPopular": "Most Popular",
-    "getStarted": "Get Started",
-    "currentPlanLabel": "Your Current Plan",
-    "currentPlan": "Current Plan",
-    "choosePlan": "Choose Plan",
-    "upgradePlan": "Upgrade Plan",
-    "contactSales": "Contact Sales",
-    "comparePlans": "Compare Plans",
-    "faq": "Frequently Asked Questions",
-    "faqSubtitle": "Have questions? We're here to help."
+      "title": "Pricing",
+      "subtitle": "Choose a plan that works for you",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "savePercent": "Save {{percent}}%",
+      "perMonth": "/month",
+      "perYear": "/year",
+      "mostPopular": "Most Popular",
+      "getStarted": "Get Started",
+      "currentPlanLabel": "Your Current Plan",
+      "currentPlan": "Current Plan",
+      "choosePlan": "Choose Plan",
+      "upgradePlan": "Upgrade Plan",
+      "contactSales": "Contact Sales",
+      "comparePlans": "Compare Plans",
+      "faq": "Frequently Asked Questions",
+      "faqSubtitle": "Have questions? We're here to help."
     },
     "subscription": {
       "success": {
@@ -628,7 +770,51 @@
       "subscription": {
         "title": "Subscription",
         "upgrade": "Upgrade License",
-        "manage": "Manage Subscription"
+        "manage": "Manage Subscription",
+        "current": "Suscripción Actual",
+        "viewDetails": "Ver Detalles",
+        "hideDetails": "Ocultar Detalles",
+        "plans": "Planes de Suscripción",
+        "choosePlan": "Elige el plan que mejor se adapte a tus necesidades",
+        "currentPlan": "Plan Actual",
+        "perMonth": "por mes",
+        "planNames": {
+          "free": "Gratuito",
+          "basic": "Básico",
+          "professional": "Profesional"
+        },
+        "planFeatures": {
+          "0": "Generación Básica de Artículos",
+          "1": "Análisis Limitados",
+          "2": "Soporte Estándar",
+          "3": "5 Artículos por mes",
+          "4": "1GB de Almacenamiento"
+        }
+      },
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nombre",
+        "lastName": "Apellido"
+      },
+      "tabs": {
+        "account": "Cuenta",
+        "subscription": "Suscripción",
+        "security": "Seguridad"
+      },
+      "billing": {
+        "history": "Historial de Facturación",
+        "loading": "Cargando facturas...",
+        "noHistory": "No hay historial de facturación disponible",
+        "date": "Fecha",
+        "invoiceNumber": "Número de Factura",
+        "plan": "Plan",
+        "amount": "Cantidad",
+        "status": "Estado",
+        "planMonthly": "Plan {{plan}} - Mensual",
+        "refreshSuccess": "Facturas actualizadas exitosamente"
+      },
+      "errors": {
+        "refreshInvoices": "Error al actualizar facturas"
       }
     },
     "account": {
@@ -848,48 +1034,150 @@
         "customModel": {
           "title": "Our powerful custom model",
           "description": "Unlock advanced insights and analytics powered by our proprietary AI model."
+        },
+        "bulk": {
+          "title": "Generación Masiva",
+          "description": "Genera múltiples artículos de una vez para ahorrar tiempo"
+        },
+        "analytics": {
+          "title": "Análisis Avanzados",
+          "description": "Obtén información detallada sobre el rendimiento de tu contenido"
         }
       }
-    }
+    },
+    "months": {
+      "jan": "Jan",
+      "feb": "Fév",
+      "mar": "Mar",
+      "apr": "Avr",
+      "may": "Mai",
+      "jun": "Juin",
+      "jul": "Juil",
+      "aug": "Août",
+      "sep": "Sep"
+    },
+    "regions": {
+      "america": "Amérique",
+      "asia": "Asie",
+      "europe": "Europe",
+      "africa": "Afrique"
+    },
+    "countries": {
+      "italy": "Italie",
+      "japan": "Japon",
+      "china": "Chine",
+      "canada": "Canada",
+      "france": "France"
+    },
+    "create": {
+      "heading": "Créer avec l'IA",
+      "subheading": "Comment souhaitez-vous commencer?",
+      "popular": "Populaire",
+      "recentPromptsHeading": "Vos invites récentes",
+      "generateLabel": "Générer",
+      "draftLabel": "BROUILLON",
+      "options": {
+        "generate": {
+          "title": "Générer",
+          "description": "Créer à partir d'une invite en une ligne en quelques secondes"
+        },
+        "template": {
+          "title": "Utiliser un modèle intégré",
+          "description": "Créer un article à partir d'un modèle existant"
+        }
+      },
+      "recentPrompts": {
+        "prompt1": "Présentation de React Native et différence entre React et React Native",
+        "prompt2": "Conseils d'optimisation SEO pour les sites e-commerce",
+        "prompt3": "Comment implémenter l'authentification dans les applications Next.js"
+      },
+      "timeAgo": {
+        "minute": "il y a 1 minute",
+        "days": "il y a 2 jours",
+        "week": "il y a 1 semaine"
+      }
     },
     "calendar": {
-      "schedule": "Schedule",
-      "scheduling": "Scheduling...",
-      "unschedule": "Unschedule",
-      "unscheduling": "Unscheduling...",
-      "articleDetails": "Article Details",
-      "scheduleArticles": "Schedule Articles",
-      "scheduledArticles": "Scheduled Articles",
-      "selectArticles": "Select articles to schedule:",
-      "noArticles": "No articles available for scheduling",
-      "createNewArticle": "Create New Article",
-      "scheduledDate": "Scheduled Date",
-      "scheduledFor": "Scheduled for",
-      "noTime": "No specific time",
-      "clickToViewDetails": "Click on any article to view details",
-      "scheduledSuccessfully": "Articles scheduled successfully",
-      "unscheduledSuccessfully": "Article unscheduled successfully",
-      "schedulingFailed": "Failed to schedule articles. Please try again.",
-      "unschedulingFailed": "Failed to unschedule article. Please try again.",
-      "loading": "Loading your calendar...",
-      "previousMonth": "Previous month",
-      "nextMonth": "Next month",
-      "addArticle": "Add article",
-      "articlePlaceholder": "Untitled Article",
-      "scheduleInfo": "Schedule Information",
-      "notScheduled": "Not scheduled",
-      "publishedDate": "Published Date",
-      "noArticlesTitle": "No Articles Available",
-      "noArticlesDescription": "You don't have any articles ready for scheduling. Generate new content first.",
-      "generateArticleButton": "Generate New Article",
+      "schedule": "Programmer",
+      "scheduling": "Programmation...",
+      "unschedule": "Déprogrammer",
+      "unscheduling": "Déprogrammation...",
+      "articleDetails": "Détails de l'Article",
+      "scheduleArticles": "Programmer des Articles",
+      "scheduledArticles": "Articles Programmés",
+      "selectArticles": "Sélectionnez les articles à programmer :",
+      "noArticles": "Aucun article disponible pour la programmation",
+      "createNewArticle": "Créer un Nouvel Article",
+      "scheduledDate": "Date Programmée",
+      "scheduledFor": "Programmé pour",
+      "noTime": "Aucune heure spécifique",
+      "clickToViewDetails": "Cliquez sur n'importe quel article pour voir les détails",
+      "scheduledSuccessfully": "Articles programmés avec succès",
+      "unscheduledSuccessfully": "Article déprogrammé avec succès",
+      "schedulingFailed": "Échec de la programmation des articles. Veuillez réessayer.",
+      "unschedulingFailed": "Échec de la déprogrammation de l'article. Veuillez réessayer.",
+      "loading": "Chargement de votre calendrier...",
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "addArticle": "Ajouter un article",
+      "articlePlaceholder": "Article sans titre",
+      "scheduleInfo": "Informations de Programmation",
+      "notScheduled": "Non programmé",
+      "publishedDate": "Date de Publication",
+      "noArticlesTitle": "Aucun Article Disponible",
+      "noArticlesDescription": "Vous n'avez aucun article prêt pour la programmation. Générez d'abord du nouveau contenu.",
+      "generateArticleButton": "Générer un Nouvel Article",
       "days": {
-        "sunday": "Sun",
-        "monday": "Mon",
-        "tuesday": "Tue",
-        "wednesday": "Wed",
-        "thursday": "Thu",
-        "friday": "Fri",
-        "saturday": "Sat"
-      }
+        "sunday": "Dim",
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mer",
+        "thursday": "Jeu",
+        "friday": "Ven",
+        "saturday": "Sam"
+      },
+      "title": "Calendario de Contenido",
+      "subtitle": "Programa y gestiona tu calendario de publicaciones"
+    }
+  },
+  "calendar": {
+    "schedule": "Schedule",
+    "scheduling": "Scheduling...",
+    "unschedule": "Unschedule",
+    "unscheduling": "Unscheduling...",
+    "articleDetails": "Article Details",
+    "scheduleArticles": "Schedule Articles",
+    "scheduledArticles": "Scheduled Articles",
+    "selectArticles": "Select articles to schedule:",
+    "noArticles": "No articles available for scheduling",
+    "createNewArticle": "Create New Article",
+    "scheduledDate": "Scheduled Date",
+    "scheduledFor": "Scheduled for",
+    "noTime": "No specific time",
+    "clickToViewDetails": "Click on any article to view details",
+    "scheduledSuccessfully": "Articles scheduled successfully",
+    "unscheduledSuccessfully": "Article unscheduled successfully",
+    "schedulingFailed": "Failed to schedule articles. Please try again.",
+    "unschedulingFailed": "Failed to unschedule article. Please try again.",
+    "loading": "Loading your calendar...",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "addArticle": "Add article",
+    "articlePlaceholder": "Untitled Article",
+    "scheduleInfo": "Schedule Information",
+    "notScheduled": "Not scheduled",
+    "publishedDate": "Published Date",
+    "noArticlesTitle": "No Articles Available",
+    "noArticlesDescription": "You don't have any articles ready for scheduling. Generate new content first.",
+    "generateArticleButton": "Generate New Article",
+    "days": {
+      "sunday": "Sun",
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat"
     }
   }
+}

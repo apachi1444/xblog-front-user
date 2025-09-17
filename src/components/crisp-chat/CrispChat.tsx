@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useRewards } from 'src/contexts/RewardsContext';
 
 // ----------------------------------------------------------------------
 
@@ -38,11 +39,12 @@ export function CrispChat({
   position = { bottom: '20px', right: '20px' }
 }: CrispChatProps) {
   const location = useLocation();
+  const { isRewardsSidebarOpen } = useRewards();
   const scriptLoadedRef = useRef(false);
   const crispInitializedRef = useRef(false);
 
-  // Check if current route should show Crisp chat
-  const shouldShowCrisp = visibleRoutes.includes(location.pathname);
+  // Check if current route should show Crisp chat and rewards sidebar is not open
+  const shouldShowCrisp = visibleRoutes.includes(location.pathname) && !isRewardsSidebarOpen;
 
   // Load Crisp script
   useEffect(() => {
@@ -81,7 +83,7 @@ export function CrispChat({
     }
   }, [shouldShowCrisp, websiteId, position]);
 
-  // Show/hide Crisp based on route
+  // Show/hide Crisp based on route and rewards sidebar state
   useEffect(() => {
     if (scriptLoadedRef.current && window.$crisp) {
       if (shouldShowCrisp) {
@@ -92,7 +94,7 @@ export function CrispChat({
         window.$crisp.push(['do', 'chat:hide']);
       }
     }
-  }, [shouldShowCrisp]);
+  }, [shouldShowCrisp, isRewardsSidebarOpen]);
 
   // Cleanup on unmount
   useEffect(() => () => {

@@ -5,7 +5,10 @@
         "contentSetup": "Configuration du Contenu",
         "articleSettings": "Paramètres de l'Article",
         "contentStructuring": "Structuration du Contenu",
-        "publish": "Publier"
+        "publish": "Publier",
+        "keywords": "Palabras Clave",
+        "content": "Contenido",
+        "seo": "SEO"
       },
       "step1": {
         "titles": {
@@ -16,6 +19,11 @@
           "seoMeta": "Informations Méta SEO"
         }
       },
+      "unsavedChanges": "Vous avez des modifications non sauvegardées",
+      "saveChangesPrompt": "Sauvegardez votre progression pour éviter de perdre votre travail",
+      "discardChanges": "Abandonner",
+      "saving": "Sauvegarde en cours...",
+      "saveDraft": "Sauvegarder le Brouillon",
       "startCreating": "Boostez Votre Création de Contenu",
       "description": "Notre plateforme alimentée par l'IA vous aide à créer du contenu de haute qualité et engageant en quelques minutes. Parfait pour les blogs, sites web et réseaux sociaux.",
       "createNow": "Commencer à Créer Maintenant",
@@ -29,6 +37,35 @@
         "title": "Générer l'Article Complet ?",
         "message": "Aucun contenu n'a encore été généré. Souhaitez-vous générer l'article complet maintenant avant de passer à l'étape suivante ?",
         "confirm": "Générer l'Article"
+      },
+      "title": "Generar Nuevo Artículo",
+      "subtitle": "Crea contenido optimizado para SEO con IA",
+      "keywords": {
+        "primary": "Palabra Clave Principal",
+        "secondary": "Palabras Clave Secundarias",
+        "add": "Agregar palabra clave",
+        "placeholder": "Ingresa una palabra clave"
+      },
+      "content": {
+        "title": "Título del Artículo",
+        "sections": "Secciones del Artículo",
+        "generate": "Generar Contenido",
+        "regenerate": "Regenerar",
+        "edit": "Editar"
+      },
+      "seo": {
+        "title": "Optimización SEO",
+        "metaTitle": "Título Meta",
+        "metaDescription": "Meta Descripción",
+        "urlSlug": "URL Slug",
+        "score": "Puntuación SEO"
+      },
+      "publish": {
+        "title": "Publicar Artículo",
+        "selectWebsite": "Seleccionar Sitio Web",
+        "publishNow": "Publicar Ahora",
+        "saveDraft": "Guardar como Borrador",
+        "schedule": "Programar"
       }
     },
     "navigation": {
@@ -39,7 +76,13 @@
       "templates": "Modèles",
       "upgrade_license": "Mettre à niveau la licence",
       "book_demo": "Réserver une démo",
-      "ai_assistance_chat": "Chat d'assistance IA"
+      "ai_assistance_chat": "Chat d'assistance IA",
+      "blog": "Blog",
+      "websites": "Sitios Web",
+      "profile": "Perfil",
+      "support": "Soporte",
+      "logout": "Cerrar Sesión",
+      "settings": "Configuración"
     },
     "blog": {
       "published": "Publié",
@@ -47,7 +90,26 @@
       "scheduled": "Programmé",
       "scheduledFor": "Programmé pour {{date}}",
       "unknown": "Inconnu",
-      "inProgress": "EN COURS"
+      "inProgress": "EN COURS",
+      "imageNotSet": "Image non définie",
+      "editDraft": "Modifier le Brouillon",
+      "title": "Mis Artículos",
+      "subtitle": "Gestiona todos tus artículos de blog",
+      "filters": {
+        "all": "Todos",
+        "published": "Publicados",
+        "draft": "Borradores",
+        "scheduled": "Programados"
+      },
+      "search": "Buscar artículos...",
+      "noArticles": "No se encontraron artículos",
+      "createFirst": "Crear tu primer artículo",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "publish": "Publicar",
+        "schedule": "Programar"
+      }
     },
     "auth": {
       "signup": {
@@ -66,7 +128,8 @@
         "and": "et",
         "privacyPolicy": "Politique de Confidentialité",
         "orContinueWith": "OU CONTINUER AVEC",
-        "signupWithGoogle": "S'inscrire avec Google"
+        "signupWithGoogle": "S'inscrire avec Google",
+        "or": "O"
       },
       "signin": {
         "title": "Se Connecter",
@@ -94,7 +157,9 @@
         "newPassword": "Nouveau Mot de Passe",
         "confirmPassword": "Confirmer le Mot de Passe",
         "submit": "Soumettre",
+        "rememberPassword": "Vous vous souvenez de votre mot de passe ?",
         "success": "Mot de passe réinitialisé avec succès!",
+        "error": "Échec de la réinitialisation du mot de passe. Veuillez réessayer.",
         "backToSignIn": "Retour à la Connexion"
       },
       "common": {
@@ -105,10 +170,50 @@
       }
     },
     "common": {
+      "save": "Sauvegarder",
+      "cancel": "Annuler",
+      "select": "Sélectionner",
+      "selected": "Sélectionné",
+      "success": "Succès !",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "Optimize": "Optimiser",
+      "Waiting": "En Attente",
+      "waiting": "en attente d'entrée",
+      "close": "Fermer",
+      "status": "Statut",
+      "description": "Description",
+      "created": "Créé",
       "dashboard": "Tableau de Bord",
       "profile": "Profil",
       "settings": "Paramètres",
       "logout": "Déconnexion"
+    },
+    "dashboard": {
+      "nextScheduledArticle": "Prochain Article Programmé",
+      "articleScheduledFor": "\"{{title}}\" programmé pour {{date}}",
+      "timeRemaining": "Temps restant : {{days}}j {{hours}}h {{minutes}}m",
+      "noScheduledArticles": "Aucun Article Programmé",
+      "scheduleArticlePrompt": "Programmez votre prochain article pour maintenir une publication de contenu cohérente",
+      "viewCalendar": "Voir le Calendrier",
+      "createArticle": "Créer un Article",
+      "title": "Panel de Control",
+      "subtitle": "Gestiona tu contenido y supervisa el rendimiento",
+      "quickActions": "Acciones Rápidas",
+      "generateArticle": "Generar Artículo",
+      "viewBlog": "Ver Blog",
+      "manageWebsites": "Gestionar Sitios Web",
+      "stats": {
+        "totalArticles": "Total de Artículos",
+        "publishedArticles": "Artículos Publicados",
+        "draftArticles": "Borradores",
+        "scheduledArticles": "Programados"
+      },
+      "recentActivity": "Actividad Reciente",
+      "noActivity": "No hay actividad reciente",
+      "welcomeBack": "¡Bienvenido de vuelta!",
+      "getStarted": "Empezar",
+      "createFirst": "Crear tu primer artículo"
     },
     "analytics": {
       "welcome": "Bonjour, Bon retour xBlogger",
@@ -140,6 +245,7 @@
       "label": "Régénérations",
       "remaining": "{{count}} régénérations restantes",
       "info": "Les régénérations vous permettent de recréer du contenu. Chaque régénération diminue votre nombre disponible.",
+      "notEnough": "Aucune régénération disponible. Mettez à niveau votre plan pour obtenir plus de régénérations.",
       "noCredits": "Aucune régénération disponible. Mettez à niveau votre plan pour obtenir plus de régénérations.",
       "upgradeMessage": "Mettez à niveau votre plan pour obtenir plus de régénérations.",
       "error": "Échec de l'utilisation de la régénération. Veuillez réessayer.",
@@ -159,6 +265,42 @@
         "description": "Ceci est un exemple de comment utiliser le système de régénération. Vous avez {{count}} régénérations disponibles.",
         "content": "Contenu d'Exemple",
         "contentDescription": "Ceci est du contenu d'exemple qui peut être régénéré."
+      }
+    },
+    "publishing": {
+      "message": "Publication de votre contenu..."
+    },
+    "points": {
+      "label": "Points",
+      "remaining": "{{count}} points restants",
+      "info": "Les points sont utilisés lors de la génération de contenu avec l'IA. Chaque génération coûte des points selon le type de contenu.",
+      "notEnough": "Pas assez de points pour cette opération",
+      "notEnoughTitle": "Pas Assez de Points",
+      "insufficientPoints": "Points Insuffisants pour Cette Opération",
+      "generationRequires": "La génération de {{type}} nécessite {{points}} points. Il vous reste {{remaining}} points.",
+      "youHave": "Vous avez",
+      "required": "Requis",
+      "needed": "Nécessaire",
+      "upgradeMessage": "Mettez à niveau votre plan pour obtenir plus de points ou attendez que vos points se rechargent.",
+      "upgradePlan": "Mettre à Niveau le Plan",
+      "deducted": "{{cost}} points utilisés. {{remaining}} restants",
+      "generationTypes": {
+        "title": "titre",
+        "metaTitle": "méta titre",
+        "metaDescription": "méta description",
+        "keywords": "mots-clés",
+        "sections": "sections",
+        "sectionContent": "contenu de section",
+        "fullArticle": "article complet"
+      },
+      "reasons": {
+        "title": "Générer le titre",
+        "metaTitle": "Générer le méta titre",
+        "metaDescription": "Générer la méta description",
+        "keywords": "Générer les mots-clés",
+        "sections": "Générer les sections",
+        "sectionContent": "Générer le contenu de section",
+        "fullArticle": "Générer l'article complet"
       }
     },
     "months": {
@@ -215,7 +357,10 @@
     },
     "upgrade": {
       "unlockFeatures": "Vous voulez débloquer plus de fonctionnalités ?",
-      "upgradeToPro": "Passer à Pro 🚀"
+      "upgradeToPro": "Passer à Pro 🚀",
+      "invoicesRefreshed": "Factures actualisées avec succès",
+      "invoicesRefreshError": "Échec de l'actualisation des factures",
+      "downloadInvoice": "Télécharger la Facture PDF"
     },
     "premium": {
       "label": "Plan Pro",
@@ -242,13 +387,21 @@
           "title": "Modèles Intégrés",
           "description": "Créez des articles à partir de modèles préconçus pour différents types de contenu"
         },
+        "aiAgent": {
+          "title": "Agent IA",
+          "description": "Laissez notre IA créer plusieurs articles de haute qualité à la fois, vous faisant gagner du temps et des efforts précieux."
+        },
+        "customModel": {
+          "title": "Notre puissant modèle personnalisé",
+          "description": "Débloquez des insights et analyses avancés alimentés par notre modèle IA propriétaire."
+        },
         "bulk": {
-          "title": "Génération en Masse",
-          "description": "Générez plusieurs articles en une seule fois pour gagner du temps"
+          "title": "Generación Masiva",
+          "description": "Genera múltiples artículos de una vez para ahorrar tiempo"
         },
         "analytics": {
-          "title": "Analyses Avancées",
-          "description": "Obtenez des informations détaillées sur les performances de votre contenu"
+          "title": "Análisis Avanzados",
+          "description": "Obtén información detallada sobre el rendimiento de tu contenido"
         }
       }
     },
@@ -258,8 +411,71 @@
       "websitesRemaining": "{{count}} sites web restants",
       "articlesRemaining": "{{count}} articles restants"
     },
+    "rewards": {
+      "title": "Gagner des Récompenses",
+      "earnRewards": "Gagner des Récompenses",
+      "referAndEarn": "Parrainer et Gagner",
+      "referAndEarnTooltip": "Invitez des amis pour gagner des crédits bonus",
+      "referAndEarnDescription": "Invitez des amis et gagnez des crédits pour chaque parrainage réussi",
+      "inviteFriends": "Inviter des Amis pour Obtenir un Bonus",
+      "seeWhosJoined": "Voir qui a rejoint >",
+      "dailyRewards": "Récompenses Quotidiennes",
+      "dailyRewardsTooltip": "Complétez les tâches quotidiennes pour gagner des crédits",
+      "dailyRewardsDescription": "Complétez les tâches quotidiennes pour gagner des crédits et booster votre compte",
+      "oneTimeRewards": "Récompenses Uniques",
+      "oneTimeRewardsTooltip": "Complétez ces tâches une fois pour gagner des crédits",
+      "oneTimeRewardsDescription": "Complétez ces tâches une fois pour gagner des crédits permanents et débloquer des succès",
+      "totalEarnings": "Gains Totaux",
+      "friendsJoined": "Amis Rejoints",
+      "pendingRewards": "Récompenses en Attente",
+      "yourReferralCode": "Votre Code de Parrainage",
+      "progress": "Progrès",
+      "friends": "amis",
+      "rewardTiers": "Niveaux de Récompense",
+      "referralHistory": "Historique des Parrainages",
+      "todayEarnings": "Crédits Gagnés Aujourd'hui",
+      "tasksCompleted": "Tâches Complétées",
+      "lastClaimed": "Dernière réclamation",
+      "claimed": "Réclamé",
+      "completed": "Terminé",
+      "available": "Disponible",
+      "claiming": "Réclamation...",
+      "claim": "Réclamer",
+      "dailyStreak": "Série Quotidienne",
+      "streakDescription": "Continuez à vous connecter quotidiennement pour maintenir votre série et gagner des récompenses bonus !",
+      "days": "Jours",
+      "totalCreditsEarned": "Total des Crédits Gagnés",
+      "completionRate": "Taux de Complétion",
+      "categories": "Catégories",
+      "category": {
+        "all": "Tout",
+        "app": "App",
+        "profile": "Profil",
+        "social": "Social",
+        "referral": "Parrainage"
+      },
+      "requirements": "Exigences",
+      "expirationTime": "Temps d'Expiration",
+      "difficulty": {
+        "easy": "Facile",
+        "medium": "Moyen",
+        "hard": "Difficile"
+      },
+      "achievement": "Succès Débloqué !",
+      "achievementDescription": "Vous avez complété plusieurs tâches et gagné le badge \"Maître des Tâches\" !",
+      "taskMaster": "Maître des Tâches",
+      "status": {
+        "pending": "En Attente",
+        "joined": "Rejoint",
+        "completed": "Terminé"
+      }
+    },
     "websites": {
-      "addNew": "Ajouter un nouveau site web"
+      "addNew": "Ajouter un nouveau site web",
+      "title": "Mis Sitios Web",
+      "subtitle": "Gestiona tus sitios web conectados",
+      "noWebsites": "No hay sitios web conectados",
+      "connectFirst": "Conecta tu primer sitio web"
     },
     "store": {
       "title": "Connecter Votre Boutique",
@@ -309,74 +525,121 @@
         "consumerSecret": "Secret Consommateur",
         "consumerSecretPlaceholder": "Entrez votre secret consommateur",
         "description": "Connectez votre boutique Wix"
+      },
+      "terms": {
+        "accept": "J'accepte les termes et conditions et autorise XBlog à accéder à ma boutique"
+      },
+      "guide": {
+        "title": "Guide d'Intégration",
+        "description": "Cette vidéo montre comment trouver et configurer les identifiants requis pour l'intégration de votre boutique {{platform}}.",
+        "dialogDescription": "Suivez ce guide pour trouver et configurer les identifiants requis pour l'intégration de votre boutique {{platform}}.",
+        "watchButton": "Regarder le Guide d'Intégration",
+        "watchTooltip": "Regarder le guide d'intégration",
+        "videoTitle": "Guide d'Intégration {{platform}}",
+        "dialogTitle": "Comment Connecter Votre Boutique {{platform}}"
       }
     },
     "profile": {
-      "title": "Profil",
-      "subtitle": "Gérez vos paramètres de compte et votre abonnement",
-      "editProfile": "Modifier le Profil",
-      "form": {
-        "firstName": "Prénom",
-        "lastName": "Nom"
-      },
-      "tabs": {
-        "account": "Compte",
-        "subscription": "Abonnement",
-        "security": "Sécurité"
+      "title": "Mon Profil",
+      "subtitle": "Gérez les paramètres et préférences de votre compte",
+      "stats": {
+        "title": "Statistiques du Compte",
+        "articlesCreated": "Articles Créés",
+        "currentPlan": "Plan Actuel",
+        "memberSince": "Membre Depuis",
+        "notAvailable": "N/D"
       },
       "subscription": {
-        "current": "Abonnement Actuel",
-        "viewDetails": "Voir les Détails",
-        "hideDetails": "Masquer les Détails",
+        "title": "Abonnement",
+        "upgrade": "Mettre à Niveau la Licence",
         "manage": "Gérer l'Abonnement",
-        "upgrade": "Mettre à Niveau",
-        "plans": "Plans d'Abonnement",
-        "choosePlan": "Choisissez le plan qui vous convient le mieux",
-        "currentPlan": "Plan Actuel",
-        "perMonth": "par mois",
+        "current": "Suscripción Actual",
+        "viewDetails": "Ver Detalles",
+        "hideDetails": "Ocultar Detalles",
+        "plans": "Planes de Suscripción",
+        "choosePlan": "Elige el plan que mejor se adapte a tus necesidades",
+        "currentPlan": "Plan Actual",
+        "perMonth": "por mes",
         "planNames": {
-          "free": "Gratuit",
-          "basic": "Basique",
-          "professional": "Professionnel"
+          "free": "Gratuito",
+          "basic": "Básico",
+          "professional": "Profesional"
         },
         "planFeatures": {
-          "0": "Génération d'Articles Basique",
-          "1": "Analyses Limitées",
-          "2": "Support Standard",
-          "3": "5 Articles par mois",
-          "4": "1Go de Stockage"
+          "0": "Generación Básica de Artículos",
+          "1": "Análisis Limitados",
+          "2": "Soporte Estándar",
+          "3": "5 Artículos por mes",
+          "4": "1GB de Almacenamiento"
         }
       },
+      "editProfile": "Editar Perfil",
+      "form": {
+        "firstName": "Nombre",
+        "lastName": "Apellido"
+      },
+      "tabs": {
+        "account": "Cuenta",
+        "subscription": "Suscripción",
+        "security": "Seguridad"
+      },
       "billing": {
-        "history": "Historique de Facturation",
-        "loading": "Chargement des factures...",
-        "noHistory": "Aucun historique de facturation disponible",
-        "date": "Date",
-        "invoiceNumber": "Numéro de Facture",
+        "history": "Historial de Facturación",
+        "loading": "Cargando facturas...",
+        "noHistory": "No hay historial de facturación disponible",
+        "date": "Fecha",
+        "invoiceNumber": "Número de Factura",
         "plan": "Plan",
-        "amount": "Montant",
-        "status": "Statut",
-        "planMonthly": "Plan {{plan}} - Mensuel",
-        "refreshSuccess": "Factures mises à jour avec succès"
+        "amount": "Cantidad",
+        "status": "Estado",
+        "planMonthly": "Plan {{plan}} - Mensual",
+        "refreshSuccess": "Facturas actualizadas exitosamente"
       },
       "errors": {
-        "refreshInvoices": "Échec de la mise à jour des factures"
+        "refreshInvoices": "Error al actualizar facturas"
       }
     },
     "calendar": {
-      "schedule": "Planifier",
-      "unschedule": "Déplanifier",
-      "unscheduling": "Déplanification...",
+      "schedule": "Programmer",
+      "scheduling": "Programmation...",
+      "unschedule": "Déprogrammer",
+      "unscheduling": "Déprogrammation...",
       "articleDetails": "Détails de l'Article",
-      "scheduleArticles": "Planifier des Articles",
-      "selectArticles": "Sélectionnez les articles à planifier :",
-      "noArticles": "Aucun article disponible pour la planification",
+      "scheduleArticles": "Programmer des Articles",
+      "scheduledArticles": "Articles Programmés",
+      "selectArticles": "Sélectionnez les articles à programmer :",
+      "noArticles": "Aucun article disponible pour la programmation",
+      "createNewArticle": "Créer un Nouvel Article",
       "scheduledDate": "Date Programmée",
       "scheduledFor": "Programmé pour",
-      "scheduledSuccessfully": "Articles planifiés avec succès",
-      "unscheduledSuccessfully": "Article déplanifié avec succès",
-      "schedulingFailed": "Échec de la planification des articles. Veuillez réessayer.",
-      "unschedulingFailed": "Échec de la déplanification de l'article. Veuillez réessayer."
+      "noTime": "Aucune heure spécifique",
+      "clickToViewDetails": "Cliquez sur n'importe quel article pour voir les détails",
+      "scheduledSuccessfully": "Articles programmés avec succès",
+      "unscheduledSuccessfully": "Article déprogrammé avec succès",
+      "schedulingFailed": "Échec de la programmation des articles. Veuillez réessayer.",
+      "unschedulingFailed": "Échec de la déprogrammation de l'article. Veuillez réessayer.",
+      "loading": "Chargement de votre calendrier...",
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "addArticle": "Ajouter un article",
+      "articlePlaceholder": "Article sans titre",
+      "scheduleInfo": "Informations de Programmation",
+      "notScheduled": "Non programmé",
+      "publishedDate": "Date de Publication",
+      "noArticlesTitle": "Aucun Article Disponible",
+      "noArticlesDescription": "Vous n'avez aucun article prêt pour la programmation. Générez d'abord du nouveau contenu.",
+      "generateArticleButton": "Générer un Nouvel Article",
+      "days": {
+        "sunday": "Dim",
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mer",
+        "thursday": "Jeu",
+        "friday": "Ven",
+        "saturday": "Sam"
+      },
+      "title": "Calendario de Contenido",
+      "subtitle": "Programa y gestiona tu calendario de publicaciones"
     },
     "seo": {
       "sections": {
@@ -415,7 +678,8 @@
           "keyword_in_title": {
             "description": "Mot-clé principal utilisé dans le titre SEO",
             "success": "Le mot-clé principal est utilisé dans le titre SEO.",
-            "error": "Le mot-clé principal n'est pas présent dans le titre SEO."
+            "error": "Le mot-clé principal n'est pas présent dans le titre SEO.",
+            "warning": "Focus keyword is partially present in the SEO title."
           },
           "keyword_in_meta": {
             "description": "Mot-clé principal utilisé dans la méta description",
@@ -483,7 +747,8 @@
           "keyword_at_start": {
             "description": "Mot-clé principal au début du titre SEO",
             "success": "Le titre SEO commence par le mot-clé principal.",
-            "error": "Le mot-clé principal n'est pas au début du titre SEO."
+            "error": "Le mot-clé principal n'est pas au début du titre SEO.",
+            "warning": "SEO title starts with part of the focus keyword."
           },
           "sentiment": {
             "description": "Le titre a un sentiment positif ou négatif",
@@ -515,6 +780,17 @@
             "error": "Aucune image ou vidéo incluse dans le contenu."
           }
         }
+      },
+      "optimization": {
+        "title": "Optimize SEO Criterion",
+        "current_value": "Current Value",
+        "optimized_value": "Optimized Value",
+        "current_score": "Current Score",
+        "potential_score": "Potential Score",
+        "success": "Optimization applied successfully!",
+        "optimizing": "Optimizing...",
+        "generate": "Generate Optimization",
+        "apply": "Apply Optimization"
       }
     },
     "subscription": {
@@ -555,22 +831,6 @@
         "upgrade": "Mettre à Niveau le Plan"
       }
     },
-    "profile": {
-      "title": "Mon Profil",
-      "subtitle": "Gérez les paramètres et préférences de votre compte",
-      "stats": {
-        "title": "Statistiques du Compte",
-        "articlesCreated": "Articles Créés",
-        "currentPlan": "Plan Actuel",
-        "memberSince": "Membre Depuis",
-        "notAvailable": "N/D"
-      },
-      "subscription": {
-        "title": "Abonnement",
-        "upgrade": "Mettre à Niveau la Licence",
-        "manage": "Gérer l'Abonnement"
-      }
-    },
     "account": {
       "freePlan": "Gratuit",
       "profile": "Profil",
@@ -584,6 +844,11 @@
     "support": {
       "title": "Contacter le Support",
       "subtitle": "Remplissez le formulaire ci-dessous pour créer un ticket et notre équipe de support vous répondra dès que possible.",
+      "status": "En Ligne",
+      "openChat": "Ouvrir le chat de support",
+      "inputPlaceholder": "Tapez un message...",
+      "welcomeMessage": "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
+      "sendMessage": "Envoyer le message",
       "button": {
         "tooltip": "Contacter le Support"
       },
@@ -721,11 +986,48 @@
       }
     },
     "article": {
+      "placeholders": {
+        "select": "Sélectionner une option",
+        "selectOrType": "Sélectionner ou taper une option"
+      },
+      "settings": {
+        "title": "Paramètres de l'Article",
+        "mainSettings": "Paramètres Principaux",
+        "articleType": "Type d'Article",
+        "articleSize": "Taille de l'Article",
+        "toneOfVoice": "Ton de Voix",
+        "pointOfView": "Point de Vue",
+        "aiContentCleaning": "Nettoyage IA du Contenu",
+        "mediaSettings": "Paramètres Médias",
+        "imageQuality": "Qualité d'Image",
+        "imagePlacement": "Placement d'Image",
+        "imageStyle": "Style d'Image",
+        "numberOfImages": "Nombre d'Images",
+        "includeVideos": "Inclure des Vidéos",
+        "numberOfVideos": "Nombre de Vidéos",
+        "linkingSettings": "Paramètres de Liens",
+        "internalLinking": "Liens Internes",
+        "externalLinking": "Liens Externes"
+      },
+      "tooltips": {
+        "articleType": "Choisissez le type d'article qui correspond le mieux à vos objectifs de contenu",
+        "articleSize": "Détermine la longueur et la profondeur de votre article",
+        "toneOfVoice": "Définit le ton général et le style d'écriture de votre article",
+        "pointOfView": "Détermine la perspective depuis laquelle votre article est écrit",
+        "aiContentCleaning": "Contrôle comment le texte généré par l'IA est traité pour paraître plus naturel",
+        "imageQuality": "Définit la résolution et la qualité des images générées",
+        "imagePlacement": "Détermine où les images seront placées dans votre article",
+        "imageStyle": "Définit le style visuel des images générées",
+        "numberOfImages": "Nombre total d'images à inclure dans votre article",
+        "numberOfVideos": "Spécifiez combien de vidéos doivent être intégrées dans votre article",
+        "internalLinking": "Sélectionnez quels sites web lier dans l'article",
+        "externalLinking": "Choisissez quelles sources externes référencer dans votre article ou tapez les vôtres"
+      },
       "buttons": {
         "generating": "Génération...",
-        "generateTableOfContents": "Générer la Table des Matières",
-        "regenerateTableOfContents": "Régénérer la Table des Matières",
-        "tableOfContentsGenerated": "Table des Matières Générée"
+        "generateTableOfContents": "Générer l'Article Complet",
+        "regenerateTableOfContents": "Régénérer l'Article Complet",
+        "tableOfContentsGenerated": "Article Complet Généré"
       },
       "generation": {
         "modal": {
@@ -748,6 +1050,93 @@
           "completed": "Contenu Généré avec Succès !",
           "completedMessage": "Les composants de votre article sont prêts. Vous pouvez maintenant les examiner et les personnaliser."
         }
+      }
+    },
+    "error": {
+      "title": "Quelque chose s'est mal passé",
+      "message": "Nous avons rencontré une erreur inattendue. Veuillez réessayer ou contacter le support si le problème persiste.",
+      "retry": "Réessayer",
+      "showDetails": "Afficher les Détails",
+      "hideDetails": "Masquer les Détails",
+      "reportIssue": "Si ce problème persiste, veuillez le signaler à notre équipe de support.",
+      "copyToClipboard": "Copier dans le presse-papiers"
+    },
+    "errors": {
+      "subscription": {
+        "fetch": "Échec de la récupération des détails de l'abonnement"
+      },
+      "stores": {
+        "fetch": "Échec de la récupération des données des boutiques"
+      }
+    },
+    "templates": {
+      "title": "Modèles d'Articles",
+      "subtitle": "Choisissez parmi nos modèles optimisés SEO pour créer du contenu de haute qualité",
+      "createFromScratch": "Créer à Partir de Zéro",
+      "searchPlaceholder": "Rechercher des modèles...",
+      "tabs": {
+        "all": "Tous",
+        "popular": "Populaires",
+        "new": "Nouveaux"
+      },
+      "premiumOnly": "Premium Uniquement",
+      "preview": "Aperçu",
+      "benefits": "Avantages",
+      "viewPreview": "Voir l'Aperçu",
+      "continueToPurchase": "Continuer vers l'Achat",
+      "coming_soon": "Bientôt Disponible !",
+      "locked_message": "La fonctionnalité Modèles est actuellement en développement et sera bientôt disponible. Restez à l'écoute pour les mises à jour !",
+      "unlock_message": "Cette fonctionnalité sera disponible dans la prochaine mise à jour. Merci pour votre patience !",
+      "notify_me": "Me Notifier Quand Disponible"
+    },
+    "pricing": {
+      "title": "Tarification",
+      "subtitle": "Choisissez un plan qui vous convient",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "savePercent": "Économisez {{percent}}%",
+      "perMonth": "/mois",
+      "perYear": "/an",
+      "mostPopular": "Le Plus Populaire",
+      "getStarted": "Commencer",
+      "currentPlanLabel": "Votre Plan Actuel",
+      "currentPlan": "Plan Actuel",
+      "choosePlan": "Choisir le Plan",
+      "upgradePlan": "Mettre à Niveau le Plan",
+      "contactSales": "Contacter les Ventes",
+      "comparePlans": "Comparer les Plans",
+      "faq": "Questions Fréquemment Posées",
+      "faqSubtitle": "Vous avez des questions ? Nous sommes là pour vous aider."
+    },
+    "ai_chat": {
+      "title": "Chat d'Assistance IA",
+      "welcome_message": "Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?",
+      "sample_response": "Je suis actuellement en développement. Bientôt, je pourrai vous aider avec la création de contenu, l'optimisation SEO et plus encore !",
+      "message_placeholder": "Tapez votre message ici...",
+      "typing": "L'IA tape...",
+      "coming_soon": "Bientôt Disponible !",
+      "locked_message": "Cette fonctionnalité est actuellement en développement et sera bientôt disponible. Restez à l'écoute pour les mises à jour !",
+      "unlock_message": "Cette fonctionnalité sera disponible dans la prochaine mise à jour. Merci pour votre patience !",
+      "notify_me": "Me Notifier Quand Disponible"
+    },
+    "welcome": {
+      "title": "Bienvenue sur XBlog !",
+      "videoTitle": "Comment utiliser XBlog",
+      "learnTitle": "Apprenez à utiliser XBlog en quelques minutes",
+      "description": "Ce tutoriel rapide vous montrera comment générer du contenu de haute qualité, publier sur votre site web et programmer des articles pour un impact maximum.",
+      "dontShowAgain": "Ne plus afficher",
+      "getStarted": "Commencer",
+      "feature1": {
+        "title": "Générer du Contenu",
+        "description": "Créer des articles optimisés SEO avec l'IA"
+      },
+      "feature2": {
+        "title": "Publier",
+        "description": "Publier directement sur votre site web"
+      },
+      "feature3": {
+        "title": "Programmer",
+        "description": "Planifier votre calendrier de contenu"
       }
     }
   }

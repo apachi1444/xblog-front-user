@@ -25,6 +25,7 @@ import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
 import { CompactResourceDisplay } from 'src/components/resource-usage';
 import { RegenerateCountDisplay } from 'src/components/regenerate/RegenerateCountDisplay';
+import { RewardsButton } from 'src/components/rewards';
 
 // Local components
 import { NavMobile } from './nav';
@@ -248,6 +249,9 @@ export function TopHeader() {
             }}>
               {/* Use the extracted ResourceDisplays component */}
               <ResourceDisplays />
+
+              {/* Rewards Button */}
+              <RewardsButton />
 
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />

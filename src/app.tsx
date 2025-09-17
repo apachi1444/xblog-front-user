@@ -25,6 +25,7 @@ import { resetBannerDismissals } from 'src/services/slices/banners/bannerSlice';
 
 import i18n from './locales/i18n';
 import { CrispChat } from './components/crisp-chat';
+import { RewardsProvider } from './contexts/RewardsContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ErrorFallback } from './components/error-boundary';
 import { AuthPersistence } from './components/auth/auth-persistence';
@@ -122,35 +123,37 @@ function SessionExpiredContent({
       <AuthPersistence />
       <PageViewTracker />
       <WelcomePopupContextProvider>
-        <Router />
-          {/* Subscription Success Animation */}
-          <SubscriptionSuccessAnimation
-            open={showSuccessAnimation}
-            onClose={hideSuccessAnimation}
-            plan={successData?.plan}
-            subscriptionId={successData?.subscriptionId || ''}
-          />
+        <RewardsProvider>
+          <Router />
+            {/* Subscription Success Animation */}
+            <SubscriptionSuccessAnimation
+              open={showSuccessAnimation}
+              onClose={hideSuccessAnimation}
+              plan={successData?.plan}
+              subscriptionId={successData?.subscriptionId || ''}
+            />
 
-          {/* Session Verification Animation */}
-          <SessionVerificationAnimation
-            open={sessionShowSuccess || sessionShowError || sessionIsVerifying}
-            onClose={() => {
-              if (sessionShowSuccess) {
-                sessionHideSuccess();
-              } else if (sessionShowError) {
-                sessionHideError();
-              }
-            }}
-            isVerifying={sessionIsVerifying}
-            isValid={sessionIsValid}
-            error={sessionError}
-            sessionId={sessionId}
-          />
+            {/* Session Verification Animation */}
+            <SessionVerificationAnimation
+              open={sessionShowSuccess || sessionShowError || sessionIsVerifying}
+              onClose={() => {
+                if (sessionShowSuccess) {
+                  sessionHideSuccess();
+                } else if (sessionShowError) {
+                  sessionHideError();
+                }
+              }}
+              isVerifying={sessionIsVerifying}
+              isValid={sessionIsValid}
+              error={sessionError}
+              sessionId={sessionId}
+            />
 
-          <CrispChat
-            visibleRoutes={['/']}
-            position={{ bottom: '20px', right: '20px' }}
-          />
+            <CrispChat
+              visibleRoutes={['/']}
+              position={{ bottom: '20px', right: '20px' }}
+            />
+        </RewardsProvider>
       </WelcomePopupContextProvider>
     </>
   );
