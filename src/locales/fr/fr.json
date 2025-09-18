@@ -472,10 +472,15 @@
     },
     "websites": {
       "addNew": "Ajouter un nouveau site web",
-      "title": "Mis Sitios Web",
-      "subtitle": "Gestiona tus sitios web conectados",
-      "noWebsites": "No hay sitios web conectados",
-      "connectFirst": "Conecta tu primer sitio web"
+      "title": "Mes Sites Web",
+      "subtitle": "Gérez vos sites web connectés",
+      "noWebsites": "Aucun site web connecté",
+      "connectFirst": "Connectez votre premier site web",
+      "empty": {
+        "title": "Aucun site web connecté",
+        "description": "Connectez votre premier site web pour commencer à publier du contenu",
+        "addFirst": "Ajouter Votre Premier Site Web"
+      }
     },
     "store": {
       "title": "Connecter Votre Boutique",

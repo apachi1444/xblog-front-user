@@ -20,6 +20,9 @@ import { useThemeMode } from 'src/hooks/useThemeMode';
 // Redux and API
 import { useGetStoresQuery } from 'src/services/apis/storesApi';
 
+// Config
+import { CONFIG } from 'src/config-global';
+
 // Components
 import { Logo } from 'src/components/logo';
 import { Iconify } from 'src/components/iconify';
@@ -250,8 +253,8 @@ export function TopHeader() {
               {/* Use the extracted ResourceDisplays component */}
               <ResourceDisplays />
 
-              {/* Rewards Button */}
-              <RewardsButton />
+              {/* Rewards Button - Only show if feature flag is enabled */}
+              {CONFIG.showRewards && <RewardsButton />}
 
               {/* Coming Soon Features Popover */}
               <ComingSoonPopover />

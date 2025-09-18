@@ -188,7 +188,12 @@
       "title": "Mis Sitios Web",
       "subtitle": "Gestiona tus sitios web conectados",
       "noWebsites": "No hay sitios web conectados",
-      "connectFirst": "Conecta tu primer sitio web"
+      "connectFirst": "Conecta tu primer sitio web",
+      "empty": {
+        "title": "No websites connected",
+        "description": "Connect your first website to start publishing content",
+        "addFirst": "Add Your First Website"
+      }
     },
     "auth": {
       "resetPassword": {

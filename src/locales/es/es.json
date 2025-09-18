@@ -486,7 +486,12 @@
       "subtitle": "Gestiona tus sitios web conectados",
       "addNew": "Agregar nuevo sitio web",
       "noWebsites": "No hay sitios web conectados",
-      "connectFirst": "Conecta tu primer sitio web"
+      "connectFirst": "Conecta tu primer sitio web",
+      "empty": {
+        "title": "No hay sitios web conectados",
+        "description": "Conecta tu primer sitio web para comenzar a publicar contenido",
+        "addFirst": "Agregar Tu Primer Sitio Web"
+      }
     },
     "seo": {
       "sections": {

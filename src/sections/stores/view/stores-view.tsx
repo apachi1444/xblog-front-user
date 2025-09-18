@@ -233,6 +233,25 @@ export function StoresView() {
         />
       ) : (
         <>
+          {/* Empty State - No Websites */}
+          {websiteStores.length === 0 && socialMediaStores.length === 0 && (
+            <Box textAlign="center" py={5}>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('websites.empty.title', 'No websites connected')}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {t('websites.empty.description', 'Connect your first website to start publishing content')}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handleAddNewStore}
+                startIcon={<Iconify icon="solar:add-circle-bold" />}
+              >
+                {t('websites.empty.addFirst', 'Add Your First Website')}
+              </Button>
+            </Box>
+          )}
+
           {/* Websites Section */}
           {websiteStores.length > 0 && (
             <Card sx={{ mb: 4 }}>

@@ -761,11 +761,16 @@
       }
     },
     "websites": {
-      "addNew": "Ajouter un nouveau site web",
-      "title": "Mis Sitios Web",
-      "subtitle": "Gestiona tus sitios web conectados",
-      "noWebsites": "No hay sitios web conectados",
-      "connectFirst": "Conecta tu primer sitio web"
+      "addNew": "إضافة موقع جديد",
+      "title": "مواقعي",
+      "subtitle": "إدارة المواقع المتصلة",
+      "noWebsites": "لا توجد مواقع متصلة",
+      "connectFirst": "اتصل بموقعك الأول",
+      "empty": {
+        "title": "لا توجد مواقع متصلة",
+        "description": "اتصل بموقعك الأول لبدء نشر المحتوى",
+        "addFirst": "إضافة موقعك الأول"
+      }
     },
     "seo": {
       "sections": {

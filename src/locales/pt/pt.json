@@ -190,7 +190,12 @@
       "subtitle": "Gerencie seus sites conectados",
       "addNew": "Adicionar novo site",
       "noWebsites": "Nenhum site conectado",
-      "connectFirst": "Conecte seu primeiro site"
+      "connectFirst": "Conecte seu primeiro site",
+      "empty": {
+        "title": "Nenhum site conectado",
+        "description": "Conecte seu primeiro site para começar a publicar conteúdo",
+        "addFirst": "Adicionar Seu Primeiro Site"
+      }
     },
     "store": {
       "title": "Conectar Sua Loja",
